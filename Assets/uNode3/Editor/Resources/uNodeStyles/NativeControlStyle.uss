@@ -1,0 +1,138 @@
+ControlView {
+    /*min-height: 24px;*/
+    align-items: center;
+    padding-left: 2px;
+    padding-right: 2px;
+    flex-direction: row;
+}
+
+ControlView.input {
+    flex-direction: row;
+}
+
+ControlView.output {
+    flex-direction: row-reverse;
+}
+
+ControlView.output_port {
+    flex-direction: row;
+	height: auto;
+    padding-left: 0px;
+	padding-right: 0px;
+}
+
+Button.MiniDropDown {
+    background-image: resource("Builtin Skins/DarkSkin/Images/mini pulldown.png");
+}
+
+Button.MiniDropDown:hover {
+    background-image: resource("Builtin Skins/DarkSkin/Images/mini pulldown focus.png");
+}
+
+Button.MiniDropDown:hover:active {
+    background-image: resource("Builtin Skins/DarkSkin/Images/mini pulldown act.png");
+}
+
+Toggle > #Checkmark.RadioButton {
+    background-image: resource("Builtin Skins/DarkSkin/Images/radio.png");
+}
+
+Toggle:hover:active > #Checkmark.RadioButton {
+    background-image: resource("Builtin Skins/DarkSkin/Images/radio act.png");
+}
+
+Toggle:checked > #Checkmark.RadioButton {
+    background-image: resource("Builtin Skins/DarkSkin/Images/radio on.png");
+}
+
+Toggle:checked:hover:active > #Checkmark.RadioButton {
+    background-image: resource("Builtin Skins/DarkSkin/Images/radio on act.png");
+}
+Toggle:focus:checked > #Checkmark.RadioButton {
+    background-image: resource("Builtin Skins/DarkSkin/Images/radio on.png");
+}
+
+Toggle:hover:active:checked > #Checkmark.RadioButton {
+    background-image: resource("Builtin Skins/DarkSkin/Images/radio on act.png");
+}
+
+ColorField {
+    min-width: 80px;
+    align-content: center;
+}
+
+ColorField > IMGUIContainer {
+    width: 0px;
+}
+
+MemberControl {
+    flex-direction: row;
+    align-items: center;
+}
+
+ObjectField {
+    min-width: 80px;
+}
+
+GradientField {
+    min-width: 80px;
+}
+
+CurveField {
+    min-width: 80px;
+}
+
+RectField > VisualElement {
+    flex-direction: row;
+}
+
+RectIntField > VisualElement {
+    flex-direction: row;
+}
+
+BoundsField > VisualElement {
+    flex-direction: row;
+}
+
+.port-control > EnumControl {
+    flex-grow:1;
+}
+
+.port-control > PopupElement {
+    margin-bottom:0px;
+}
+
+.unity-composite-field__field {
+    flex-basis: auto;
+}
+
+/* .PopupButton {
+    -unity-text-align: middle-left;
+    height: 16px;
+    margin-left: 2px;
+    margin-top: 3px;
+    margin-right: 2px;
+    margin-bottom: 3px;
+    -unity-slice-left: 6;
+    -unity-slice-top: 4;
+    -unity-slice-right: 14;
+    -unity-slice-bottom: 4;
+    padding-right: 14px;
+    padding-left: 4px;
+    overflow: hidden;
+    background-image: resource("Builtin Skins/DarkSkin/Images/mini popup.png");
+} */
+
+/* RichLabel.PopupButton {
+    padding-right:5px;
+}
+
+.PopupButton:hover:active
+{
+    background-image: resource("Builtin Skins/DarkSkin/Images/mini popup act.png");
+}
+
+.PopupButton:hover
+{
+    background-image: resource("Builtin Skins/DarkSkin/Images/mini popup focus.png");
+} */

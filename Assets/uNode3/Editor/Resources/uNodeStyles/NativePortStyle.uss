@@ -1,0 +1,346 @@
+.hidden {
+    opacity: 0;
+}
+
+/*Flow Port*/
+.flow-vertical {
+    height: 20px;
+    align-items: center;
+    padding-left: 4px;
+    padding-right: 4px;
+    --port-color: rgb(4, 161, 85);
+    --disabled-port-color: rgb(0, 70, 70);
+}
+
+.flow-vertical.input {
+    flex-direction: row-reverse;
+}
+
+.flow-vertical.output {
+    flex-direction: column-reverse;
+    height: 20px;
+}
+
+.flow-vertical.transition > #flow-outputs > .port.output {
+    height: 25px;
+}
+
+.flow-vertical.port.input > #type {
+    height: 12px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.flow-vertical.output > #type {
+    font-size: 10px;
+    height: 10px;
+    margin-bottom: 0px;
+}
+
+.flow-vertical > #container > #slotContainer {
+    border-top-width: 2px;
+    border-bottom-width: 1px;
+    border-left-width: 0.5px;
+    border-right-width: 1px;
+    border-radius: 6px;
+}
+
+.flow-vertical > #container {
+    background-color: rgba(63, 63, 63, 0.8);
+    flex-direction: row;
+    align-items: center;
+    padding-left: 1px;
+    border-left-width: 1px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-color: rgba(25, 25, 25, 0.8);
+    border-radius: 5px;
+}
+
+.flow-vertical > #container.proxy {
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
+    border-top-width: 0;
+    top: 40px;
+    position: absolute;
+}
+
+.flow-vertical.input > #container.proxy {
+    top: -15px;
+    left: 1px;
+}
+
+.flow-vertical.input > #connector {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 14px;
+}
+
+.flow-vertical > #connector {
+    width: 12px;
+    height: 12px;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    margin-right: 4px;
+    border-left-width: 1px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.port > #connector > #cap {
+    border-color: #212121;
+    width: 6px;
+    height: 6px;
+    border-radius: 4px;
+    border-width: 1px;
+}
+
+.flow-vertical > #connector > #cap {
+    width: 8px;
+    height: 8px;
+}
+
+#connector {
+    flex-shrink: 0;
+}
+
+/* Value Port */
+
+#input > .port {
+    flex-direction: row;
+
+}
+
+.port.connected > .autohide {
+    width: 0px;
+    height: 0px;
+    visibility: hidden;
+    display: none;
+    position: absolute;
+}
+
+#input > .port > #type {
+    margin-top: 2px;
+    margin-left: 2px;
+    margin-right: 0;
+    flex-shrink: 1;
+}
+
+.value-port.output {
+    flex-direction: row-reverse;
+}
+
+.value-port.output > #type {
+    margin-left: 0;
+    margin-right: 2px;
+}
+
+.flow-horizontal.input > #connector {
+    margin-left: 0px;
+}
+
+.flow-horizontal > #connector {
+    width: 8px;
+    height: 8px;
+    margin-right: 4px;
+    margin-left: 4px;
+    border-radius: 0px;
+    border-width: 1px;
+    align-items: center;
+    justify-content: center;
+}
+
+.flow-horizontal > #connector > #cap {
+    border-radius: 0px;
+}
+
+.value-port.input > #connector {
+    margin-right: 4px;
+    margin-left: 0px;
+}
+
+.value-port > #connector {
+    border-color: rgb(255, 255, 0);
+    background-color: #212121;
+    width: 8px;
+    height: 8px;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+    margin-right: 4px;
+    border-left-width: 1px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+}
+
+.port-byref.value-port > #connector {
+    border-radius: 0px;
+}
+
+.flow-horizontal > #connector > #cap:hover,
+.value-port.input > #connector > #cap:hover {
+    background-color: #f0f0f0;
+}
+
+.flow-horizontal.input.control > .connectorText,
+.value-port.input.control > .connectorText {
+    width: 64px;
+    overflow: hidden;
+}
+
+.flow-horizontal.input.port-control > #type.connectorText,
+.value-port.input.port-control > #type.connectorText {
+    height: auto;
+    padding-right: 5px;
+    border-right-width: 0px;
+    border-color: #202020;
+    align-items: flex-start;
+}
+
+/*Port Input View */
+PortInputView {
+    width: 412px;
+    height: 22px;
+	margin-top: 1px;
+	margin-bottom: 1px;
+    padding-top: 0;
+    flex-direction: row;
+    justify-content: flex-end;
+    position: absolute;
+    overflow: hidden;
+}
+
+PortInputView > #container {
+    background-color: rgba(63, 63, 63, 0.8);
+    flex-direction: row;
+    align-items: center;
+    padding-left: 1px;
+    margin-right: 12px;
+    border-left-width: 0px;
+    border-top-width: 1px;
+    border-right-width: 4px;
+    border-bottom-width: 1px;
+    border-color: rgba(25, 25, 25, 0.8);
+    border-radius: 5px;
+}
+
+PortInputView > #container.proxy {
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(0, 0, 0, 0);
+    border-top-width: 0;
+}
+
+PortInputView > #container.proxy > #slotContainer > #slot {
+    width: 7px;
+    height: 7px;
+}
+
+PortInputView > #container > #slotContainer {
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-radius: 4px;
+    margin-left: 0;
+    margin-right: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+PortInputView > #container > #slotContainer > #slot {
+    width: 8px;
+    height: 8px;
+    background-color: #2B2B2B;
+    border-color: #232323;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-radius: 4px;
+    margin-left: 0;
+    margin-right: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+PortInputView > #edge {
+    position: absolute;
+    right: 0;
+    top: 10.5px;
+    height: 2px;
+    width: 20px;
+    background-color: #ff0000;
+}
+
+PortInputView > #container > #slotContainer > #slot > #dot {
+    width: 4px;
+    height: 4px;
+    background-color: #ff0000;
+    border-radius: 4px;
+}
+
+PortInputView #unity-x-input,
+PortInputView #unity-y-input,
+PortInputView #unity-z-input, 
+PortInputView #unity-w-input {
+	flex: 0 0 auto;
+}
+
+PortInputView AnimationCurveControl,
+PortInputView BooleanControl,
+PortInputView BoundsControl,
+PortInputView ColorControl,
+PortInputView DefaultControl,
+PortInputView FloatControl,
+PortInputView GradientControl,
+PortInputView IntegerControl,
+PortInputView LayerMaskControl,
+PortInputView Vector2Control,
+PortInputView Vector2IntControl,
+PortInputView Vector3Control,
+PortInputView Vector3IntControl,
+PortInputView Vector4Control,
+PortInputView ObjectControl,
+PortInputView QuaternionControl,
+PortInputView MemberControl {
+	align-self: center;
+}
+
+PortInputView StringControl {
+	flex-direction: row;
+	align-self: center;
+}
+
+PortInputView StringControl #unity-text-input {
+	flex-grow: 0;
+}
+
+/*PortInputView StringControl .unity-text-element {
+    margin-left: 5px;
+    margin-right: 5px;
+}*/
+
+PortInputView EnumField {
+	flex-grow: 1;
+	margin-top:2px;
+	margin-bottom:2px;
+	flex-direction: column;
+}
+
+PortInputView ColorField {
+	margin-left:2px;
+	margin-right:2px;
+	max-width:100px;
+}
+
+.compact .value-port #connector.proxy {
+    top: 1px;
+}

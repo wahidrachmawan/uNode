@@ -1,0 +1,21 @@
+{
+    "name": "uNode3.Integration.InputSystem",
+    "rootNamespace": "",
+    "references": [
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:23f89c042fe722143bc304ac73a6ffa8",
+        "GUID:30976a8138310934cb73d24a5b8eea7d",
+        "GUID:f3afcc5703789e14da7c8d74de8d9016"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "ENABLE_INPUT_SYSTEM"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

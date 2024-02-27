@@ -1,0 +1,15 @@
+.graphElement {
+	border-color: rgba(204, 204, 204, 1);
+	background-color: rgba(63, 63, 63, 0.9);
+	position: absolute;
+	margin: 0;
+	border-width: 2px;
+	padding-right: 6px;
+	padding-bottom: 6px;
+	width: 200px;
+	height: 180px;
+	max-width: 300px;
+	max-height: 270px;
+	min-width: 100px;
+	min-height: 90px;
+}

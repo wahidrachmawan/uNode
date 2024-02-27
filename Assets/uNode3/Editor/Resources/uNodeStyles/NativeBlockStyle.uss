@@ -1,0 +1,161 @@
+BlockControl > Label {
+	margin-left: 0;
+	padding-left: 15px;
+	-unity-text-align: middle-left;
+}
+
+.node {
+    flex:1 0 auto;
+    align-items:stretch;
+    border-radius:0;
+    border-color:rgba(0,0,0,0);
+    padding-top:0;
+    padding-left:0;
+    padding-right:0;
+    padding-bottom:0;
+    margin-left:3px;
+    margin-right:3px;
+    margin-top:1px;
+    margin-bottom:1px;
+    flex-direction:row;
+}
+
+.node > #selection-border{
+	border-radius:8px;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    margin-bottom:0;
+}
+
+#controls {
+    background-color: rgba(63, 63, 63, 0.8);
+}
+
+#user-title
+{
+    flex-direction:column;
+    align-items:stretch;
+}
+
+.flow-container
+{
+    flex-direction: row;
+    justify-content: center;
+    position: Relative;
+    height: 0;
+}
+
+#flow-inputs
+{
+	top:-25px;
+}
+
+#flow-outputs
+{
+    bottom: 23px;
+
+}
+
+#node-border
+{
+    flex:1 1 auto;
+    margin-left:0;
+    margin-right:0;
+    margin-top:0;
+    margin-bottom:0;
+	border-radius: 6px;
+}
+
+#contents > #top > #input
+{
+    flex-shrink: 1;
+}
+
+#node-border > #title
+{
+    justify-content:flex-start;
+}
+
+#node-border > #title > #title-label
+{
+    flex:1 0 auto;}
+
+.or-block  > #node-border > #title > #title-label
+{
+	-unity-text-align: middle-center;
+}
+
+
+.or-block > #node-border > #contents
+{
+	position: absolute;
+}
+
+.or-block > #node-border > #title
+{
+    background-color: rgba(0, 91, 140, 0.8);
+	height: 25px;
+}
+
+.or-block > #node-border > #title > #title-label
+{
+    flex:1 0 auto;
+}
+
+#node-border > #title > #title-icon
+{
+	align-self: center;
+	margin-left: 3px;
+	width: 25px;
+	height: 25px;
+}
+
+#node-border > #inside > #contents
+{
+    margin-top : 0;
+}
+
+ #node-border.empty > #inside > #contents
+{
+    margin-top : 0;
+    padding-top : 0;
+    margin-bottom : 0;
+    padding-bottom : 0;
+}
+
+#portInputContainer {
+    position: absolute;
+    width: 412px;
+    left: -400px;
+    top: 46px;
+}
+
+#portInputContainer.flow {
+    top: 51px;
+}
+
+.Layout {
+	flex-basis: auto;
+	flex-grow: 1;
+}
+
+ControlView > .Layout {
+    height: 16px;
+}
+
+TextField {
+    margin-top:0px;
+    margin-bottom:0px;
+}
+
+TextInput {
+    border-top:0px;
+    border-bottom:0px;
+    padding-top:0px;
+    padding-bottom:0px;
+}
+
+PopupElement {
+    align-self:stretch;
+}

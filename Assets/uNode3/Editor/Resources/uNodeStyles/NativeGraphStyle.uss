@@ -1,0 +1,363 @@
+#root-container {
+	flex-grow: 1;
+	flex-direction: row;
+}
+
+#root-content {
+	flex-grow: 1;
+	overflow: hidden;
+}
+
+#graph-content {
+	flex-grow: 1;
+	flex-direction: row;
+}
+
+#inspector-panel {
+	border-left-width: 2px;
+	border-left-color: #191919;
+	border-bottom-width: 1px;
+	border-bottom-color: #191919;
+}
+
+.graphView {
+	background-color: #202020;
+}
+
+#graphRootView {
+	flex-grow: 1;
+}
+
+#graph-panel {
+	border-color: rgb(78 78 78);
+	border-right-width: 3px;
+	border-top-width: 2px;
+}
+
+#status-bar {
+	height: 20px;
+}
+
+#status-error > Image {
+	width: 18px;
+	height: 18px;
+}
+
+ToolbarButton, ToolbarMenu, #status-zoom {
+	flex-shrink: 0;
+	-unity-text-align: middle-center;
+}
+
+#status-search {
+	left: 1px;
+	width: 150px;
+}
+
+.toggle-on {
+	background-color: #505050
+}
+
+/* flow edge */
+.edge.flow {
+	--edge-width: 4;
+}
+
+/* flow edge on hover */
+.edge.flow:hover {
+    --edge-width: 6;
+}
+
+.horizontal-graph .node-view #node-border > #contents .port {
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+.horizontal-graph .node-view #node-border > #contents .port > #connector {
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+.flow-vertical #connector.proxy > #cap {
+    width: 8px;
+    height: 8px;
+    border-color: #232323;
+    border-radius: 4px;
+    margin-right: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+
+#proxy-title {
+	background-color: rgba(29,29,29,0.8);
+	border-color: rgba(23, 171, 106, 0.8);
+	border-width: 1px;
+	border-radius: 6px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	padding-left: 2px;
+	padding-right: 2px;
+	position: absolute;
+	flex-direction: row;
+}
+
+.flow-vertical.input #proxy-title.proxy-flow {
+	background-color: rgba(15, 91, 35, 0.8);
+	border-color: rgba(23, 171, 106, 0.8);
+	border-width: 1px;
+	border-radius: 10px;
+	top: -18px;
+}
+
+.flow-horizontal.input #proxy-title.proxy-flow {
+	background-color: rgba(15, 91, 35, 0.8);
+	border-color: rgba(23, 171, 106, 0.8);
+	border-width: 1px;
+	border-radius: 10px;
+	top: 3px;
+	left: 12px;
+}
+
+.flow-vertical.output #proxy-title.proxy-flow {
+	background-color: rgba(15, 91, 35, 0.8);
+	border-color: rgba(23, 171, 106, 0.8);
+	border-width: 1px;
+	border-radius: 10px;
+	top: 12px;
+}
+
+.flow-horizontal.output #proxy-title.proxy-flow {
+	background-color: rgba(15, 91, 35, 0.8);
+	border-color: rgba(23, 171, 106, 0.8);
+	border-width: 1px;
+	border-radius: 10px;
+	top: -3px;
+	left: 12px;
+}
+
+#proxy-title.proxy-value {
+	top: -5px;
+	margin-left: -2px;
+}
+
+.compact-value #proxy-title.proxy-value {
+	top: -3px;
+}
+
+#proxy-title Image {
+	width: 16px;
+	height: 16px;
+}
+
+#proxy-title > Label {
+	-unity-text-align: middle-center;
+	-unity-font-style: italic;
+	font-size: 10px;
+}
+
+.ui-hidden {
+	width: 0;
+	height: 0;
+	display: none;
+	position: absolute;
+	visibility: hidden;
+}
+
+.hide-image Image {
+	width: 0;
+	height: 0;
+	position: absolute;
+	visibility: hidden;
+	display: none;
+}
+
+.graphView > GridBackground {
+    --spacing: 10;
+    --line-color: rgba(26, 26, 26, 0.84);
+    --thick-lines: 10;
+    --thick-line-color: rgba(10, 10, 10, 0.84);
+}
+
+Toogle,
+TextField {
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+IntegerField .unity-text-element,
+FloatField .unity-text-element,
+TextField .unity-text-element {
+	margin-right: 3px;
+	margin-left: 3px;
+}
+
+PopupElement{
+	flex-shrink: 1;
+	flex-grow: 0;
+	flex-basis: auto;
+	min-height: 15px;
+}
+
+PopupElement > TextElement {
+	flex-shrink: 1;
+	flex-grow: 1;
+	white-space: nowrap;
+}
+
+PopupElement:hover {
+	background-color: rgb(91, 91, 91);
+}
+
+/* proxy */
+#proxy-line {
+	border-width: 0px;
+	position: absolute;
+}
+
+.flow-port #connector.proxy {
+    flex-direction: row;
+}
+
+/* flow output proxy */
+.flow-vertical.flow-port.output #proxy-line {
+    width: 4px;
+    height: 11px;
+    top: -12px;
+}
+
+/* flow input proxy */
+.flow-vertical.flow-port.input #proxy-line {
+	width: 4px;
+	height: 11px;
+	top: 7px;
+}
+
+/* flow proxy margin */
+.flow-vertical.flow-port.input #connector.proxy {
+	top: -20px;
+}
+
+/* flow proxy margin */
+.flow-vertical.flow-port.output #connector.proxy {
+    top: 20px;
+    height: 10px;
+}
+
+.flow-horizontal #connector.proxy {
+    border-radius: 8px;
+    position: absolute;
+    flex-direction: row;
+    align-items: center;
+    border-color: rgba(25, 25, 25, 0.8);
+    overflow: visible;
+}
+
+.flow-horizontal.input #connector.proxy {
+	left: -26px;
+}
+
+.flow-horizontal.output #connector.proxy {
+	left: 26px;
+}
+
+/* value output proxy */
+.value-port.output #proxy-line {
+	width: 21px;
+	height: 2px;
+	top: 2px;
+	left: -22px;
+}
+
+.flow-horizontal.flow-port.output #proxy-line {
+	width: 21px;
+	height: 4px;
+	left: -22px;
+}
+
+.flow-horizontal.flow-port.input #proxy-line {
+	width: 15px;
+	height: 4px;
+	left: 7px;
+}
+
+/* value input proxy */
+.value-port.input #proxy-line {
+	width: 17px;
+	height: 2px;
+	top: 2px;
+	left: 7px;
+}
+
+.compact .value-port #connector.proxy {
+    top: 1px;
+}
+
+.value-port #connector.proxy {
+    flex-direction: row;
+    overflow: visible;
+}
+
+.value-port.input #connector.proxy {
+	left:-26px;
+}
+
+.value-port.output #connector.proxy {
+	left:26px;
+}
+
+/* Proxy */
+#connector.proxy {
+    width: 10px;
+    height: 10px;
+    border-width: 0px;
+    position: absolute;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    border-radius: 8px;
+    border-color: rgba(25, 25, 25, 0.8);
+}
+
+#connector.proxy > #cap {
+    width: 8px;
+    height: 8px;
+    border-color: #232323;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-radius: 4px;
+    margin-right: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+#line {
+    background-color: #9a9a9a;
+    align-self: stretch;
+    width: 1px;
+}
+
+.edgeBubble {
+	font-size: 11px;
+	color: #999999;
+	border-radius: 10px;
+	border-left-width: 1px;
+	border-right-width: 1px;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	background-color: rgba(39, 39, 39, .9);
+	border-color: rgba(21, 21, 21, .75);
+	min-width: 24px;
+	max-width: 150px;
+	align-self: center;
+	min-height: 24px;
+	max-height: 150px;
+	padding: 6px 8px;
+	margin: 0;
+	-unity-text-align: middle-center;
+}
+
+.edgeBubble.candidate {
+	opacity: .5;
+}

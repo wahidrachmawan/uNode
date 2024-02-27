@@ -1,0 +1,92 @@
+#tabbar-container{
+    border-bottom-width: 3px;
+    border-color: #000;
+    background-color: #333333
+}
+
+#pathbar{
+    flex-direction: row;
+    flex-grow: 1;
+    background-color: #111111;
+}
+
+#tabbar {
+    height: 24px;
+    flex-direction: row;
+    flex-grow: 1;
+    border-bottom-width: 2px;
+    border-color:#1B56AB;
+/*     border-top-width: 1px;
+    border-top-color: #303030; */
+}
+
+#tab-element {
+    font-size: 13px;
+    background-color: #111111;
+    margin: 0px;
+    min-width: 20px;
+    justify-content: center;
+}
+
+#tab-element.tab-selected {
+    background-color:#1B56AB;
+	-unity-font-style: bold;
+}
+
+#tab-element {
+    background-color: #111111;
+    margin: 0px;
+    min-width: 20px;
+    justify-content: center;
+    border-right-width: 1px;
+    border-color: #333333;
+	-unity-text-align: middle-center;
+}
+
+#tab-element>#icon {
+    width: 18px;
+    height: 18px;
+    align-self: center;
+}
+
+#tab-element:hover {
+    background-color: #33516d;
+}
+
+#tab-element:hover:active {
+    background-color: #0f3961;
+}
+
+#path-element {
+    /* background-color: #111111; */
+    margin: 0px;
+    margin-bottom: 0px;
+    margin-right: 2px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
+#path-element>#icon {
+    width: 16px;
+    height: 16px;
+}
+
+#path-element>#breadcrumb {
+    width: 12px;
+    background-image: resource("uNodeIcon/breadcrumb");
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #797979;
+}
+
+#path-element:hover {
+    background-color: #33516d;
+}
+
+#path-element:hover:active {
+    background-color: #0f3961;
+}
+
+#path-element.path-graph {
+    margin-right: 0px;
+    /* border-right-width: 2px;
+    border-color: #0059ff; */
+}

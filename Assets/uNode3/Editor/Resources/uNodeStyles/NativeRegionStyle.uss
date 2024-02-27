@@ -1,0 +1,63 @@
+RegionNodeView
+{
+    min-width:150px;
+	min-height: 120px;
+    align-items:stretch;
+    --layer:-1000;
+    border-radius:0;
+    margin: 0;
+    border-width:0;
+    padding:0;
+    border-radius:2px;
+}
+
+#title-label
+{
+    flex:1 0 auto;
+    font-size:25px;
+    margin-top:0;
+    margin-bottom:0;
+    margin-right:6px;
+	color: rgba(229, 229, 229, 1);
+	-unity-font-style: bold-and-italic
+}
+
+#contents > #top > #input
+{
+	padding-top: 0;
+	padding-bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#selection-border
+{
+	margin: 0;
+}
+
+* > #node-border
+{
+    background-color: rgba(0, 0, 0, 0);
+    flex:1 0 auto;
+    flex-direction:column;
+    align-items:stretch;
+    border-left-width:2px;
+    border-top-width:2px;
+    border-bottom-width:2px;
+    border-right-width:2px;
+}
+
+* #contents
+{
+    margin-top:0;
+    margin-bottom:0;
+    padding-top:0;
+    padding-bottom:0;
+    background-color: rgba(150, 150, 150, 0.01);
+}
+
+
+#divider.horizontal
+{
+	height: 2px;
+	border-bottom-width: 0;
+}

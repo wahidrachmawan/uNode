@@ -1,0 +1,17 @@
+{
+    "name": "uNode3.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "GUID:30976a8138310934cb73d24a5b8eea7d",
+        "GUID:f3afcc5703789e14da7c8d74de8d9016"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

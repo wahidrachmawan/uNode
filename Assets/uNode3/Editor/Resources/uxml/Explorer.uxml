@@ -1,0 +1,27 @@
+<UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="node-border" class="exploler-border">
+    <ui:VisualElement name="header" style="flex-direction: row;">
+      
+    </ui:VisualElement>
+    <ui:VisualElement name="title">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" />
+      <!--<ui:VisualElement name="title-button-container">
+        <ui:VisualElement name="collapse-button">
+          <ui:VisualElement name="icon" />
+        </ui:VisualElement>
+      </ui:VisualElement>-->
+    </ui:VisualElement>
+    <ui:VisualElement name="contents">
+      <ui:VisualElement name="divider" class="horizontal" />
+      <ui:VisualElement name="top">
+        <ui:VisualElement name="childs">
+            
+        </ui:VisualElement>
+        <ui:VisualElement name="divider" class="vertical hidden" />
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="controls" />
+  </ui:VisualElement>
+</UXML>

@@ -1,0 +1,537 @@
+#node {
+    background-color: rgba(0, 63, 63, 0.8);
+}
+
+#controls {
+    background-color: rgba(63, 63, 63, 0.8);
+}
+
+#user-title {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+EdgeControl {
+    position: absolute;
+}
+
+PortView > Image {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.flow-container {
+    flex-direction: row;
+    justify-content: center;
+    position: Relative;
+    height: 0;
+}
+
+#flow-inputs {
+    top: -23px;
+}
+
+#flow-outputs {
+    bottom: 18px;
+}
+
+#debug-container {
+    border-width: 2px;
+    border-color: rgba(255, 0, 0, 0.70);
+}
+
+.entry-node > #node-border.flowNodeBorder {
+    border-color: rgba(255, 255, 0, 0.676);
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-top-width: 2px;
+    border-bottom-width: 2px;
+}
+
+#node-border.flowNodeBorder {
+    background-color: rgba(29,29,29,0.8);
+    border-color: rgba(23,171,106,0.8);
+    border-radius: 8px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    padding-top: 5px;
+    padding-bottom: 16px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+#node-border.flowNodeBorder.onlyInput {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#node-border.flowNodeBorder.onlyOutput {
+    padding-top: 5px;
+    padding-bottom: 13px;
+}
+
+.highlighted {
+    position: Absolute;
+    padding: 0;
+    border-width: 4px;
+    border-radius: 6px;
+    border-color: rgba(255,255,0,0.8);
+}
+
+.compact-value > #node-border > #title {
+    position: Absolute;
+    width: 0;
+    height: 0;
+    visibility: hidden;
+    display: none;
+}
+
+.compact-value > #node-border > #contents > #divider {
+    height: 0;
+    position: Absolute;
+}
+
+/* .compact-value > #node-border > #contents {
+    background-color: rgba(0, 0, 0, 0.2);
+} */
+
+.compact-value > #node-border > #contents > #top > #input {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.compact-value > #node-border > #contents > #top > #output {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.compact > #selection-border {
+    border-radius: 17px 8px 17px 8px;
+}
+
+.compact > #node-border {
+    background-color: rgba(63,63,63,0.8);
+    border-color: rgba(147,147,147,0.8);
+    border-radius: 14px 6px 14px 6px;
+}
+
+.compact > #node-border > #title {
+    background-color: rgba(0,0,0,0);
+    margin-right: 20px;
+    padding-bottom: 1px;
+    height: 19px;
+}
+
+.compact > #node-border > #contents {
+    position: Absolute;
+    right: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.compact > #node-border > #contents > #top > #output {
+    justify-content: space-around;
+    background-color: rgba(0,0,0,0);
+    align-items: flex-end;
+    padding-top: 3px;
+}  
+
+.compact > #node-border > #title > #title-icon {
+    margin-left: 5px;
+    margin-top: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.compact > #node-border > #title > #title-label {
+    margin-left: 3px;
+}
+
+.compact > #node-border > #title > #title-label {
+    padding-right: 14px;
+}
+
+.compact > #node-border > #contents > #divider {
+    position: Absolute;
+    visibility: hidden;
+}
+
+#contents > #top > #input {
+    flex-shrink: 1;
+}
+
+.compact-title > #node-border > #title {
+    height: 22px;
+}
+
+#node-border > #title {
+    justify-content: flex-start;
+    height: 30px;
+}
+
+
+NodeRerouteView > #node-border > #title > #title-label {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+#node-border > #title > #title-label {
+    flex: 1 0 auto;
+    margin-right: 3px;
+}
+
+#node-border > #title > #title-button-container > #debug-container {
+    align-self: center;
+    border-radius: 16px;
+    margin: 0 3px 0 0;
+    justify-content: center;
+}
+
+#node-border > #title > #title-button-container > #debug-container > #debug-state {
+    width: 10px;
+    height: 10px;
+    align-self: center;
+    border-radius: 16px;
+    border-width: 1px;
+}
+
+RichLabel#title-label {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+#node-border > #title > #title-icon {
+    align-self: center;
+    margin-left: 3px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+#node-border > #inside > #contents {
+    margin-top: 0;
+}
+
+#node-border.empty > #inside > #contents {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+#portInputContainer {
+    position: absolute;
+    width: 412px;
+    left: -400px;
+}
+
+#portInputContainer.flow {
+    top: 51px;
+}
+
+.Layout {
+    flex-basis: auto;
+    flex-grow: 1;
+}
+
+NodeJumpStatementView > #selection-border {
+    border-radius: 12px;
+}
+
+
+NodeJumpStatementView > #node-border.flowNodeBorder {
+    background-color: rgba(10,55,25,0.8);
+    border-color: rgba(23,171,106,0.8);
+    border-radius: 10px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+NodeJumpStatementView > #node-border > #title {
+    background-color: rgba(29,29,29,0);
+    justify-content: flex-start;
+    height: 18px;
+}
+
+NodeJumpStatementView > #node-border > #title > #title-label {
+    flex: 1 0 auto;
+    margin-top: 3px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-bottom: 3px;
+}
+
+NodeJumpStatementView > #node-border > #contents > #divider {
+    background-color: rgba(29,29,29,0);
+    border-color: rgba(29,29,29,0);
+}
+
+NodeJumpStatementView > #node-border > #inside > #contents {
+    margin-top: 0;
+}
+
+NodeJumpStatementView > #node-border.empty > #inside > #contents {
+    margin-top: 0;
+    padding-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.compact-icon {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+    margin-right: 1px;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+#title > .compact-input {
+    padding-right: 0;
+    padding-left: 2px;
+    align-self: center;
+}
+
+#title > .compact-input > Image {
+    display: none;
+    visibility: hidden;
+}
+
+#title > .compact-input > #type {
+    display: none;
+    visibility: hidden;
+}
+
+#title > .compact-input > #connector {
+    margin-right: 2px;
+}
+
+#title > .compact-output {
+    padding-left: 0;
+    padding-right: 2px;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+#title > .compact-output > Image {
+    width: 24px;
+    height: 24px;
+    display: none;
+    visibility: hidden;
+}
+
+#title > .compact-output > #type {
+    display: none;
+    visibility: hidden;
+}
+
+#title > .compact-output > #connector {
+    margin-left: 2px;
+}
+
+.compact-node > #node-border > #title > #title-icon {
+    margin-left: 0;
+}
+
+.compact-node > #node-border > #title > #title-label {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.compact-node > #node-border > #title > .compact-control {
+    align-self: center;
+}
+
+#title.rich-title > Label {
+    display: none;
+    visibility: hidden;
+}
+
+/* block node */
+
+#node-blocks.compact > #node-border {
+    background-color:rgba(29,29,29,0.8);
+	margin-top: 2px;
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-bottom: 2px;
+}
+
+#node-blocks.compact > #node-border > #block-container
+{
+	margin-bottom: 5px;
+}
+
+#node-blocks.compact > #node-border > #title
+{
+    background-color:rgba(0,0,0,0);
+	border-radius:2px;
+	margin-left: 3px;
+	padding-right: 22px;
+	height: 25px;
+    justify-content:flex-start;
+    flex-direction:row;
+}
+
+#node-blocks.compact > #node-border > #title > #title-icon
+{
+    position:Absolute;
+	visibility: hidden;
+}
+
+#node-blocks > #node-border > #title
+{
+    background-color:rgba(0,0,0,0);
+	border-radius:2px;
+	height: 25px;
+    justify-content:center;
+    align-items:center;
+    flex-direction:row;
+}
+
+#node-blocks > #node-border > #title > #title-label
+{
+    flex-basis:auto;
+    flex-grow: 0;
+	margin-top: 3px;
+	margin-left: 0;
+	margin-right: 3px;
+	margin-bottom: 3px;
+	font-size: 14px;
+}
+
+#node-blocks > #node-border > #title > #title-icon
+{
+	width: 20px;
+	height: 20px;
+}
+
+#node-blocks > #node-border > #contents > #divider
+{
+    background-color:rgba(0,0,0,0);
+    border-color:rgba(0,0,0,0);
+}
+
+#node-blocks > #node-border > #inside > #contents
+{
+    margin-top : 0;
+}
+
+#node-blocks > #node-border.empty > #inside > #contents
+{
+    margin-top : 0;
+    padding-top : 0;
+    margin-bottom : 0;
+    padding-bottom : 0;
+}
+
+#block-container > #hint
+{
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+    border-color: #393939;
+    text-color: #393939;
+    height: 24px;
+    text-alignment: middle-center;
+    border-radius:8px;
+	margin: 2px;
+}
+
+
+#node-blocks.transition > #node-border > #block-container > #hint
+{
+    border-color: #127600;
+    background-color: #074400;
+    text-color: #a2a2a2;
+}
+
+.dragdisplay
+{
+    position:absolute;
+    left:0;
+    right: 0;
+    height:4px;
+    margin-top:-2px;
+    background-color: rgb(210, 152, 0);
+}
+
+/* Transitions */
+.transition #selection-border
+{
+	border-radius: 12px;
+}
+
+.transition > #node-border
+{
+    background-color:rgba(10,55,25,0.8);
+    border-color:rgba(23,171,106,0.8);
+	border-radius: 10px;
+    border-left-width:1px;
+    border-right-width:1px;
+    border-top-width:1px;
+    border-bottom-width:1px;
+    padding-top : 5px;
+    padding-bottom : 5px;
+    margin-top : 2px;
+    margin-bottom : 2px;
+    margin-left:2px;
+    margin-right:2px;
+}
+
+.transition > #node-border > #title
+{
+    background-color:rgba(29,29,29,0);
+    justify-content:flex-start;
+	height: 18px;
+}
+
+.transition > #node-border > #title > #title-label
+{
+    flex:1 0 auto;
+	margin-top: 3px;
+	margin-left: 3px;
+	margin-right: 3px;
+	margin-bottom: 3px;
+}
+
+.transition > #node-border > #contents > #divider
+{
+    background-color:rgba(29,29,29,0);
+    border-color:rgba(29,29,29,0);
+}
+
+.transition > #node-border > #inside > #contents
+{
+    margin-top : 0;
+}
+
+.transition > #node-border.empty > #inside > #contents
+{
+    margin-top : 0;
+    padding-top : 0;
+    margin-bottom : 0;
+    padding-bottom : 0;
+}
+
+.transition #portInputContainer {
+    position: absolute;
+    width: 412px;
+    left: -400px;
+    top: 46px;
+}

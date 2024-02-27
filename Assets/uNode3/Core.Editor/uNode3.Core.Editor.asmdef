@@ -1,0 +1,24 @@
+{
+    "name": "uNode3.Core.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:30976a8138310934cb73d24a5b8eea7d",
+        "GUID:8750affcd063aae4cba3b626a9dc9cea"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "MaxyGames.OdinSerializer.dll",
+        "Microsoft.CodeAnalysis.dll",
+        "Microsoft.CodeAnalysis.CSharp.dll",
+        "System.Collections.Immutable.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,121 @@
+<UXML xmlns:ui="UnityEngine.UIElements">
+  <ui:VisualElement name="class" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Classes" />
+    </ui:VisualElement>
+    
+    <ui:VisualElement name="contents">
+      
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="variable" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Variables" />
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="property" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Properties" />
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="function" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Functions"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="constructor" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Constructors"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="event" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Events"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="localvariable" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Local Variables"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="nestedtypes" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Nested Types"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="interface" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Interfaces"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
+  <ui:VisualElement name="enum" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Enums"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+</UXML>
