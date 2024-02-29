@@ -14,7 +14,7 @@ namespace MaxyGames {
 		public const string KEY_INFORMATION_REFERENCE = "REF:";
 
 		private static string GetDebugOwner() {
-			if(graph is IClassGraph classGraph && classGraph.InheritType == typeof(ValueType)) {
+			if(CG.generationState.isStatic || graph is IClassGraph classGraph && classGraph.InheritType == typeof(ValueType)) {
 				//In case it is a struct then use a type name instead because a struct is a value copy.
 				return $"typeof({generatorData.typeName.Split('.').Last()})";
 			}

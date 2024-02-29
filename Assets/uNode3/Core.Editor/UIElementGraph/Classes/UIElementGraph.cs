@@ -295,6 +295,14 @@ namespace MaxyGames.UNode.Editors {
 						names = uNodeUtility.GetObjectName(debugTarget);
 					}
 				}
+				else if(debugTarget is Type) {
+					if(graphData.debugAnyScript) {
+						names = "Auto: Static";
+					}
+					else {
+						names = "Static";
+					}
+				}
 				else if(graphData.debugAnyScript) {
 					names = "Auto";
 				}
@@ -409,6 +417,18 @@ namespace MaxyGames.UNode.Editors {
 											break;
 										var debugObject = pair.Key;
 										if(debugObject != null && debugObject != graphData.graph) {
+											if(debugObject is Type) {
+												//Static Debugging
+												var type = debugObject as Type;
+												if(type.FullName == graphData.graph.GetFullGraphName()) {
+													menu.AddItem(new GUIContent("Static: " + type.PrettyName()), debugTarget == debugObject, delegate (object reference) {
+														KeyValuePair<object, GraphDebug.DebugData> objPair = (KeyValuePair<object, GraphDebug.DebugData>)reference;
+														debugTarget = objPair.Key;
+														GraphDebug.useDebug = true;
+													}, pair);
+												}
+												continue;
+											}
 											if(debugObject is UnityEngine.Object && (debugObject as UnityEngine.Object) == null)
 												continue;
 											if(debugObject is IInstancedGraph) {
