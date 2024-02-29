@@ -523,8 +523,11 @@ namespace MaxyGames.UNode.Editors {
 							Rect debugRect = args.rowRect;
 							debugRect.width = GetContentIndent(args.item);
 							GUI.DrawTexture(new Rect(debugRect.x + debugRect.width - 10, debugRect.y, 10, debugRect.height), Texture2D.whiteTexture);
-							GUI.color = Color.Lerp(GUI.color, Color.clear, (Time.unscaledTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4);
-							GUI.DrawTexture(new Rect(debugRect.x, debugRect.y, debugRect.width - 10, debugRect.height), Texture2D.whiteTexture);
+							float time = (GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 2;
+							GUI.color = Color.Lerp(GUI.color, Color.clear, time);
+							if(time < 1) {
+								GUI.DrawTexture(new Rect(debugRect.x, debugRect.y, debugRect.width - 10, debugRect.height), Texture2D.whiteTexture);
+							}
 							GUI.color = oldColor;
 						}
 					}
@@ -556,7 +559,7 @@ namespace MaxyGames.UNode.Editors {
 								Rect debugRect = args.rowRect;
 								debugRect.width = GetContentIndent(args.item);
 								GUI.DrawTexture(new Rect(debugRect.x + debugRect.width - 10, debugRect.y, 10, debugRect.height), Texture2D.whiteTexture);
-								GUI.color = Color.Lerp(GUI.color, Color.clear, times * GraphDebug.transitionSpeed * 4);
+								GUI.color = Color.Lerp(GUI.color, Color.clear, times * GraphDebug.transitionSpeed * 2);
 								GUI.DrawTexture(new Rect(debugRect.x, debugRect.y, debugRect.width - 10, debugRect.height), Texture2D.whiteTexture);
 								GUI.color = oldColor;
 							}

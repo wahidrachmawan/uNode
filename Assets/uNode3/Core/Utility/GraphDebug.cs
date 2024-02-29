@@ -214,10 +214,12 @@ namespace MaxyGames.UNode {
 		public static float debugLinesTimer;
 
 		/// <summary>
-		/// The time since startup, same as Time.realtimeSinceStartup the different is that this is thread safe allow us to get time on any threads.
+		/// The debug time, increased every time.
 		/// Note: only work inside unity editor.
 		/// </summary>
-		public static float debugTime;
+		public static float debugTime => (float)debugTimeAsDouble;
+
+		public static double debugTimeAsDouble;
 
 		public static float transitionSpeed = 0.5f;
 

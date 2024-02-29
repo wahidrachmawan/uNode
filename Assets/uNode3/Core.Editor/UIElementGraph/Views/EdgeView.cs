@@ -324,19 +324,19 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static void DrawDebug(Vector2 start, Vector2 end, Color inColor, Color outColor, float time, bool isFlow) {
-			float timer = Mathf.Lerp(1, 0, time * 2f);//The debug timer speed.
+			float timer = Mathf.Lerp(1, 0, time);//The debug timer speed.
 			float dist = Vector2.Distance(start, end);
 			float size = 15 * timer;
 			if(isFlow) {
 				for(float i = -1; i < 1; i += 50f / dist) {
 					float t = i + GraphDebug.debugLinesTimer * (50f / dist);
 					if(!(t < 0f || t > 1)) {
-						GUI.color = new Color(
+						var color = new Color(
 							Mathf.Lerp(outColor.r, inColor.r, t),
 							Mathf.Lerp(outColor.g, inColor.g, t),
 							Mathf.Lerp(outColor.b, inColor.b, t), 1);
 						Vector2 vec = Vector2.Lerp(start, end, t);
-						GUI.DrawTexture(new Rect(vec.x - size / 2, vec.y - size / 2, size, size), uNodeUtility.DebugPoint);
+						GUI.DrawTexture(new Rect(vec.x - size / 2, vec.y - size / 2, size, size), uNodeUtility.DebugPoint, ScaleMode.ScaleToFit, true, 0, color, 0, 0);
 					}
 				}
 			}
@@ -344,16 +344,15 @@ namespace MaxyGames.UNode.Editors {
 				for(float i = -1; i < 1; i += 50f / dist) {
 					float t = i + GraphDebug.debugLinesTimer * (50f / dist);
 					if(!(t < 0f || t > 1)) {
-						GUI.color = new Color(
+						var color = new Color(
 							Mathf.Lerp(inColor.r, outColor.r, t),
 							Mathf.Lerp(inColor.g, outColor.g, t),
 							Mathf.Lerp(inColor.b, outColor.b, t), 1);
 						Vector2 vec = Vector2.Lerp(end, start, t);
-						GUI.DrawTexture(new Rect(vec.x - size / 2, vec.y - size / 2, size, size), uNodeUtility.DebugPoint);
+						GUI.DrawTexture(new Rect(vec.x - size / 2, vec.y - size / 2, size, size), uNodeUtility.DebugPoint, ScaleMode.ScaleToFit, true, 0, color, 0, 0);
 					}
 				}
 			}
-			GUI.color = Color.white;
 		}
 
 		/// <summary>

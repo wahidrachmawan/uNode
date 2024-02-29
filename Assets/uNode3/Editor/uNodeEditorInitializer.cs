@@ -167,16 +167,18 @@ namespace MaxyGames.UNode.Editors {
 					//	uNodeEditor.window.SaveEditorData();
 					//}
 					ResetGraphAssets();
-					//Update the queued until all is completed.
-					int count = 0;
-					while(uNodeThreadUtility.IsNeedUpdate()) {
-						count++;
-						if(count > 1000) {
-							//Force skip the update.
-							break;
-						}
-						uNodeThreadUtility.Update();
-					}
+
+					////Update the queued until all is completed.
+					//int count = 0;
+					//while(uNodeThreadUtility.IsNeedUpdate()) {
+					//	count++;
+					//	if(count > 1000) {
+					//		//Force skip the update.
+					//		break;
+					//	}
+					//	uNodeThreadUtility.Update();
+					//}
+					uNodeThreadUtility.ClearTask();
 					break;
 				}
 				case PlayModeStateChange.EnteredEditMode: {
@@ -203,16 +205,18 @@ namespace MaxyGames.UNode.Editors {
 					//Clean compiled runtime assembly so the runtime type is cannot be loaded again
 					ReflectionUtils.CleanRuntimeAssembly();
 
-					//Update the queued until all is completed.
-					int count = 0;
-					while(uNodeThreadUtility.IsNeedUpdate()) {
-						count++;
-						if(count > 1000) {
-							//Force skip the update.
-							break;
-						}
-						uNodeThreadUtility.Update();
-					}
+					////Update the queued until all is completed.
+					//int count = 0;
+					//while(uNodeThreadUtility.IsNeedUpdate()) {
+					//	count++;
+					//	if(count > 1000) {
+					//		//Force skip the update.
+					//		break;
+					//	}
+					//	uNodeThreadUtility.Update();
+					//}
+					uNodeThreadUtility.ClearTask();
+
 					//Clear all debug data.
 					GraphDebug.debugData.Clear();
 					break;

@@ -127,8 +127,13 @@ namespace MaxyGames.UNode {
 		public static void Update() {
 			lock(lockObject) {
 				deltaTime = UnityEngine.Time.realtimeSinceStartup - time;
+#if UNITY_EDITOR
+				if(deltaTime < 0) {
+					deltaTime = 0.001f;
+				}
+#endif
 				time = UnityEngine.Time.realtimeSinceStartup;
-				GraphDebug.debugTime += Time.unscaledDeltaTime;
+				GraphDebug.debugTimeAsDouble += deltaTime;
 				for(int i = 0; i < actions.Count; i++) {
 					try {
 						if(actions[i] != null) {
@@ -275,20 +280,20 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		//internal static void ClearTask() {
-		//	lock(lockObject) {
-		//		actions.Clear();
-		//		asyncActions.Clear();
-		//		actionFrames.Clear();
-		//		actionAfterFrames.Clear();
-		//		actionAfterDurations.Clear();
-		//		actionWhileDurations.Clear();
-		//		actionWhile.Clear();
-		//		actionAfterCondition.Clear();
-		//		actionExecutedOnce.Clear();
-		//		queueCount = 0;
-		//	}
-		//}
+		internal static void ClearTask() {
+			lock(lockObject) {
+				actions.Clear();
+				asyncActions.Clear();
+				actionFrames.Clear();
+				actionAfterFrames.Clear();
+				actionAfterDurations.Clear();
+				actionWhileDurations.Clear();
+				actionWhile.Clear();
+				actionAfterCondition.Clear();
+				actionExecutedOnce.Clear();
+				queueCount = 0;
+			}
+		}
 
 		/// <summary>
 		/// Execute a IEnumerator.MoveNext in each frame.
