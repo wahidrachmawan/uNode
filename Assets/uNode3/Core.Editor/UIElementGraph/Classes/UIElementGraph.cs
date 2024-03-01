@@ -300,7 +300,7 @@ namespace MaxyGames.UNode.Editors {
 						names = "Auto: Static";
 					}
 					else {
-						names = "Static";
+						names = "Static: " + (debugTarget as Type).PrettyName();
 					}
 				}
 				else if(graphData.debugAnyScript) {
@@ -411,6 +411,7 @@ namespace MaxyGames.UNode.Editors {
 						if(graphData.graph != null) {
 							if(Application.isPlaying) {
 								HashSet<object> instances = new HashSet<object>(32);
+								Action staticAction = null;
 								void FindInstance(System.Runtime.CompilerServices.ConditionalWeakTable<object, GraphDebug.DebugData> debugMap) {
 									foreach(var pair in debugMap) {
 										if(instances.Count > 250)
@@ -421,11 +422,13 @@ namespace MaxyGames.UNode.Editors {
 												//Static Debugging
 												var type = debugObject as Type;
 												if(type.FullName == graphData.graph.GetFullGraphName()) {
-													menu.AddItem(new GUIContent("Static: " + type.PrettyName()), debugTarget == debugObject, delegate (object reference) {
-														KeyValuePair<object, GraphDebug.DebugData> objPair = (KeyValuePair<object, GraphDebug.DebugData>)reference;
-														debugTarget = objPair.Key;
-														GraphDebug.useDebug = true;
-													}, pair);
+													staticAction += () => {
+														menu.AddItem(new GUIContent("Static: " + type.PrettyName()), debugTarget == debugObject, delegate (object reference) {
+															KeyValuePair<object, GraphDebug.DebugData> objPair = (KeyValuePair<object, GraphDebug.DebugData>)reference;
+															debugTarget = objPair.Key;
+															GraphDebug.useDebug = true;
+														}, pair);
+													};
 												}
 												continue;
 											}
@@ -475,7 +478,9 @@ namespace MaxyGames.UNode.Editors {
 										}
 									}
 								}
-								
+								if(staticAction != null) {
+									staticAction();
+								}
 							}
 
 							var objs = GameObject.FindObjectsOfType<MonoBehaviour>();

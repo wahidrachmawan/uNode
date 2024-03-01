@@ -114,7 +114,7 @@ namespace MaxyGames.UNode {
 			member.SetValue(flow, value);
 			//This for boxed value
 			if(target.isDeepTarget == false) {
-				if(instance.type.IsValueType) {
+				if(instance != null && instance.type != null && instance.type.IsValueType) {
 					if(instance.CanSetValue()) {
 						instance.SetValue(flow, target.startTarget);
 					}
