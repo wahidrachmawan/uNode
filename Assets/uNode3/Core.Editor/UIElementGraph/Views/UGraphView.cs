@@ -2314,6 +2314,12 @@ namespace MaxyGames.UNode.Editors {
 				graph.PasteNode(clickedPos, false);
 				graph.Refresh();
 			}
+			else if(e.keyCode == KeyCode.A && e.ctrlKey) {
+				ClearSelection();
+				foreach(var view in nodeViews) {
+					AddToSelection(view);
+				}
+			}
 		}
 
 		//This will ensure after the node removed, the conencted nodes will be refreshed.
