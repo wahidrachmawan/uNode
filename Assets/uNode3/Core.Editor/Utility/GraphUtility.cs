@@ -1694,7 +1694,7 @@ namespace MaxyGames.UNode.Editors {
 					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
 						if(tempName != function.name) {
 							function.name = GetUniqueName(tempName, function.graph);
-							uNodeGUIUtility.GUIChanged(function, UIChangeType.Average);
+							uNodeGUIUtility.GUIChangedMajor(function);
 							onRenamed?.Invoke();
 						}
 						ActionPopupWindow.CloseLast();
@@ -1712,7 +1712,7 @@ namespace MaxyGames.UNode.Editors {
 					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
 						if(tempName != property.name) {
 							property.name = GetUniqueName(tempName, property.graph);
-							uNodeGUIUtility.GUIChanged(property, UIChangeType.Average);
+							uNodeGUIUtility.GUIChangedMajor(property);
 							onRenamed?.Invoke();
 						}
 						ActionPopupWindow.CloseLast();
@@ -1730,7 +1730,7 @@ namespace MaxyGames.UNode.Editors {
 					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
 						if(tempName != variable.name) {
 							variable.name = GetUniqueName(tempName, variable.graph);
-							uNodeGUIUtility.GUIChanged(variable, UIChangeType.Average);
+							uNodeGUIUtility.GUIChangedMajor(variable);
 							onRenamed?.Invoke();
 						}
 						ActionPopupWindow.CloseLast();

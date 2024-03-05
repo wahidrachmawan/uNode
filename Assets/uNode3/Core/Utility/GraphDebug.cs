@@ -129,7 +129,7 @@ namespace MaxyGames.UNode {
 			}
 
 			public void Save() {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNODE_PRO
 				var bytes = SerializerUtility.Serialize(debugMessage);
 				UnityEditor.SessionState.SetString("UNODE_DATA_DEBUG_MESSAGE", Convert.ToBase64String(bytes));
 #endif
@@ -146,7 +146,7 @@ namespace MaxyGames.UNode {
 		internal static DebugMessage debugMessage {
 			get {
 				if(_debugMessage == null) {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNODE_PRO
 					var str = UnityEditor.SessionState.GetString("UNODE_DATA_DEBUG_MESSAGE", string.Empty);
 					if(!string.IsNullOrEmpty(str)) {
 						var bytes = Convert.FromBase64String(str);
@@ -390,9 +390,11 @@ namespace MaxyGames.UNode {
 				data = new DebugData();
 				debugMap.AddOrUpdate(owner, data);
 
+#if UNODE_PRO
 				if(debugMessage.datas.TryGetValue(objectUID, out var messageData)) {
 					data.messageData = messageData;
 				}
+#endif
 			}
 			var id = nodeUID + portID;
 			data.valueConnectionDebug[id] = new DebugValue() {
@@ -400,6 +402,7 @@ namespace MaxyGames.UNode {
 				value = value,
 				isSet = isSet,
 			};
+#if UNODE_PRO
 			if(data.messageData != null) {
 				if(data.messageData.valueMessages.TryGetValue(nodeUID, out var map)) {
 					if(map.TryGetValue(portID, out var message)) {
@@ -414,6 +417,7 @@ namespace MaxyGames.UNode {
 					}
 				}
 			}
+#endif
 			return value;
 		}
 
@@ -432,14 +436,17 @@ namespace MaxyGames.UNode {
 				data = new DebugData();
 				debugMap.AddOrUpdate(owner, data);
 
+#if UNODE_PRO
 				if(debugMessage.datas.TryGetValue(objectUID, out var messageData)) {
 					data.messageData = messageData;
 				}
+#endif
 			}
 			var id = nodeUID + portID;
 			data.flowConnectionDebug[id] = new DebugValue() {
 				time = debugTime,
 			};
+#if UNODE_PRO
 			if(data.messageData != null) {
 				if(data.messageData.flowMessages.TryGetValue(nodeUID, out var map)) {
 					if(map.TryGetValue(portID, out var message)) {
@@ -448,6 +455,7 @@ namespace MaxyGames.UNode {
 					}
 				}
 			}
+#endif
 		}
 
 		/// <summary>

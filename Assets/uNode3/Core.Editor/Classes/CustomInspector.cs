@@ -172,6 +172,9 @@ namespace MaxyGames.UNode.Editors {
 										GraphDebug.debugMessage.SetMessage(connection, message);
 										GraphDebug.debugMessage.Save();
 									}
+#if !UNODE_PRO
+									EditorGUILayout.HelpBox("This feature only work on uNode pro version", MessageType.Warning);
+#endif
 								}
 							}
 						}

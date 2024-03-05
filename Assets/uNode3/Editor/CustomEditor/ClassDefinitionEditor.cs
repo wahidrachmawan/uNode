@@ -22,6 +22,9 @@ namespace MaxyGames.UNode.Editors {
 
 			if(isInspector) {
 				uNodeGUIUtility.ShowField(new GUIContent("Compile to C#", "If true, the graph will be compiled to C# to run using native c# performance on build or in editor using ( Generate C# Scripts ) menu."), nameof(asset.scriptData.compileToScript), asset.scriptData, asset);
+				if(asset.scriptData.compileToScript == false && uNodePreference.preferenceData.generatorData.generationMode != GenerationKind.Compatibility) {
+					EditorGUILayout.HelpBox("You're not using compatibility generation mode, therefore interacting between this graph and compiled runtime graph might cause issue. Please change generation mode to `Compatibility` in preference if you have any issue.", MessageType.Warning);
+				}
 
 				DrawExecutionMode();
 				DrawOpenGraph();
