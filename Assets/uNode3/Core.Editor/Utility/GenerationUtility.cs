@@ -64,13 +64,13 @@ namespace MaxyGames.UNode.Editors {
 				uNodeEditorUtility.SaveEditorData(_data, "GeneratorData");
 		}
 
-		public static void MarkGraphDirty(GameObject graphAsset) {
+		public static void MarkGraphDirty(Object graphAsset) {
 			if(persistenceData.graphs.TryGetValue(uNodeUtility.GetObjectID(graphAsset), out var data)) {
 				data.MarkDirty();
 			}
 		}
 
-		public static void MarkGraphDirty(IEnumerable<GameObject> graphAssets) {
+		public static void MarkGraphDirty(IEnumerable<Object> graphAssets) {
 			foreach(var graph in graphAssets) {
 				if(graph == null)
 					continue;
@@ -82,7 +82,7 @@ namespace MaxyGames.UNode.Editors {
 			var scriptData = persistenceData.GetGraphData(graphAsset);
 			if(scriptData.isValid) {
 				if(uNodePreference.preferenceData.generatorData.compilationMethod == CompilationMethod.Roslyn) {
-					return File.Exists(tempAssemblyPath);
+					return File.Exists(tempAssemblyPath) && File.Exists(scriptData.path);
 				} else {
 					return true;
 				}
@@ -341,10 +341,12 @@ namespace MaxyGames.UNode.Editors {
 						if(EditorUtility.IsPersistent(script.graphOwner)) {
 							var scriptData = persistenceData.GetGraphData(script.graphOwner);
 							scriptData.path = path;
-							scriptData.fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
-							scriptData.lastCompiledID = script.GetSettingUID();
-							if(scriptData.generatedScript != generatedScript) {
+							var fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
+							var lastCompiledID = script.GetSettingUID();
+							if(scriptData.generatedScript != generatedScript || scriptData.fileHash != fileHash || scriptData.lastCompiledID != lastCompiledID) {
 								scriptData.generatedScript = generatedScript;
+								scriptData.fileHash = fileHash;
+								scriptData.lastCompiledID = lastCompiledID;
 							} else {
 								skippedCount++;
 							}
@@ -789,12 +791,26 @@ namespace MaxyGames.UNode.Editors {
 				int count = 0;
 				var scripts = objects.Select(g => {
 					count++;
-					if (g is GraphAsset graph) {
-						var graphSystem = GraphUtility.GetGraphSystem(graph);
+					if (g is GraphAsset graphAsset) {
+						var graphSystem = GraphUtility.GetGraphSystem(graphAsset);
 						if (!graphSystem.allowAutoCompile) {
 							return null;
 						}
-						return GenerateCSharpScript(graph, (progress, text) => {
+						if(graphAsset is ITypeWithScriptData) {
+							ITypeWithScriptData typeWithScriptData = graphAsset as ITypeWithScriptData;
+							if(typeWithScriptData.ScriptData.compileToScript == false) {
+								//Skip if compile to script is false
+								var cachedData = persistenceData.GetGraphData(graphAsset);
+								if(cachedData != null && cachedData.isValid) {
+									cachedData.MarkDirty();
+									if(File.Exists(tempAssemblyPath)) {
+										File.Delete(tempAssemblyPath);
+									}
+								}
+								return null;
+							}
+						}
+						return GenerateCSharpScript(graphAsset, (progress, text) => {
 							EditorUtility.DisplayProgressBar($"{label} {count}-{objects.Length}", text, progress);
 						});
 					} else {
@@ -875,6 +891,21 @@ namespace MaxyGames.UNode.Editors {
 					count++;
 					if(g is GraphAsset graphAsset) {
 						uNodeThreadUtility.QueueAndWait(() => {
+							if(graphAsset is ITypeWithScriptData) {
+								ITypeWithScriptData typeWithScriptData = graphAsset as ITypeWithScriptData;
+								if(typeWithScriptData.ScriptData.compileToScript == false) {
+									//Skip if compile to script is false
+									var cachedData = persistenceData.GetGraphData(graphAsset);
+									if(cachedData != null && cachedData.isValid) {
+										cachedData.MarkDirty();
+										if(File.Exists(tempAssemblyPath)) {
+											File.Delete(tempAssemblyPath);
+										}
+									}
+									graphAsset = null;
+									return;
+								}
+							}
 							if(!force /*&& !GraphUtility.HasTempGraphObject(gameObject)*/ && IsGraphUpToDate(graphAsset)) {
 								var settings = new CG.GeneratorSetting(graphAsset as Object) {
 									fullTypeName = true /*preferenceData.generatorData.fullTypeName*/,

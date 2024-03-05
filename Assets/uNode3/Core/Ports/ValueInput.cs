@@ -130,6 +130,15 @@ namespace MaxyGames.UNode {
 				Connection.CreateAndConnect(this, defaultValue as ValueOutput);
 				this.defaultValue = MemberData.None;
 			}
+			else if(defaultValue is ValueInput) {
+				var port = defaultValue as ValueInput;
+				if(port.GetTargetPort() != null) {
+					AssignToDefault(port.GetTargetPort());
+				}
+				else {
+					AssignToDefault(MemberData.Clone(port.defaultValue));
+				}
+			}
 			else {
 				AssignToDefault(MemberData.CreateFromValue(defaultValue));
 			}

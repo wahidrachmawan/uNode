@@ -2182,6 +2182,15 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <param name="variable"></param>
 		/// <returns></returns>
+		public static MemberData CreateFromValue(UPort port) {
+			return CreateFromValue(new UPortRef(port));
+		}
+
+		/// <summary>
+		/// Use only for editor
+		/// </summary>
+		/// <param name="variable"></param>
+		/// <returns></returns>
 		public static MemberData CreateFromValue(UPortRef port) {
 			return new MemberData() {
 				Items = new ItemData[] { new ItemData(port) },

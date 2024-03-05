@@ -79,11 +79,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(!Application.isPlaying || asset.runtimeInstance == null) {
-					EditorGUILayout.BeginHorizontal();
-					if(GUILayout.Button(new GUIContent("Edit Graph", ""), EditorStyles.toolbarButton)) {
-						uNodeEditor.Open(asset);
-					}
-					EditorGUILayout.EndHorizontal();
+					DrawOpenGraph();
 				}
 			}
 		}

@@ -92,6 +92,10 @@ namespace MaxyGames.UNode.Editors {
 				});
 
 			base.DrawGUI(isInspector);
+
+			if(isInspector) {
+				DrawOpenGraph();
+			}
 		}
 	}
 }

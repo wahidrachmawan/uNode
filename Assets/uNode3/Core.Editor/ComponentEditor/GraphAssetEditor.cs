@@ -17,6 +17,45 @@ namespace MaxyGames.UNode.Editors {
 			DrawGUI(true);
 		}
 
+		public virtual void DrawOpenGraph() {
+			EditorGUILayout.BeginHorizontal();
+			if(GUILayout.Button(new GUIContent("Edit Graph", ""))) {
+				uNodeEditor.Open(target as GraphAsset);
+			}
+			EditorGUILayout.EndHorizontal();
+		}
+
+		public virtual void DrawExecutionMode() {
+			GraphAsset asset = target as GraphAsset;
+			if(uNodePreference.preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
+				var type = asset.GetFullGraphName().ToType(false);
+				if(type != null) {
+					EditorGUILayout.HelpBox("This graph is Run using Native C#", MessageType.Info);
+				}
+				else {
+					EditorGUILayout.HelpBox("This graph is Run using Reflection", MessageType.Info);
+				}
+			}
+			else {
+				if(!GenerationUtility.IsGraphCompiled(asset)) {
+					EditorGUILayout.HelpBox("This graph is Run using Reflection.", MessageType.Info);
+				}
+				else if(GenerationUtility.IsGraphUpToDate(asset)) {
+					EditorGUILayout.HelpBox("This graph is Run using Native C#", MessageType.Info);
+				}
+				else {
+					var boxRect = EditorGUILayout.BeginVertical();
+					EditorGUILayout.HelpBox("This graph is Run using Native C# but script is outdated.\n[Click To Recompile]", MessageType.Warning);
+					EditorGUILayout.EndVertical();
+					if(Event.current.clickCount == 1 && Event.current.button == 0 && boxRect.Contains(Event.current.mousePosition)) {
+						GraphUtility.SaveAllGraph();
+						GenerationUtility.GenerateCSharpScript();
+						Event.current.Use();
+					}
+				}
+			}
+		}
+
 		public virtual void DrawGUI(bool isInspector) {
 			if(target is IAttributeSystem attributeSystem) {
 				var att = AttributeTargets.Class;

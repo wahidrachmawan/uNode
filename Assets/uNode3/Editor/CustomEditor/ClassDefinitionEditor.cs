@@ -9,6 +9,7 @@ namespace MaxyGames.UNode.Editors {
     class ClassDefinitionEditor : GraphAssetEditor {
 		public override void DrawGUI(bool isInspector) {
 			var asset = target as ClassDefinition;
+			//EditorGUI.BeginDisabledGroup(isInspector);
 			uNodeGUIUtility.ShowField(nameof(asset.icon), asset, asset);
 			uNodeGUI.DrawClassDefinitionModel(asset.GetModel(), model => asset.model = model);
 			uNodeGUIUtility.ShowField(nameof(asset.@namespace), asset, asset);
@@ -17,6 +18,14 @@ namespace MaxyGames.UNode.Editors {
 				uNodeEditorUtility.MarkDirty(asset);
 			});
 			base.DrawGUI(isInspector);
+			//EditorGUI.EndDisabledGroup();
+
+			if(isInspector) {
+				uNodeGUIUtility.ShowField(new GUIContent("Compile to C#", "If true, the graph will be compiled to C# to run using native c# performance on build or in editor using ( Generate C# Scripts ) menu."), nameof(asset.scriptData.compileToScript), asset.scriptData, asset);
+
+				DrawExecutionMode();
+				DrawOpenGraph();
+			}
 		}
 	}
 }
