@@ -34,7 +34,7 @@ namespace MaxyGames.UNode {
 		public override CG.MData GenerateMethodCode(out string[] parameterNames, out string actionCode) {
 			var evt = this as IGlobalEvent;
 			var count = evt.ParameterCount;
-			var mData = CG.generatorData.AddNewGeneratedMethod(CG.GenerateNewName(EventName), typeof(void).CGType(), new[] { typeof(object[]).CGType() });
+			var mData = CG.generatorData.AddNewGeneratedMethod(CG.GenerateNewName(EventName), typeof(void), new CG.TData[] { typeof(object[]) });
 			var names = new string[count];
 			var declaredParameters = new string[count];
 			for(int i = 0; i < count; i++) {

@@ -231,14 +231,14 @@ namespace MaxyGames {
 
 		#region Get Functions
 		public static MData GetOrRegisterFunction(string name, Type returnType, params Type[] parameterTypes) {
-			var param = new string[parameterTypes.Length];
+			var param = new System.Type[parameterTypes.Length];
 			for(int i=0;i<parameterTypes.Length;i++) {
-				param[i] = Type(parameterTypes[i]);
+				param[i] = parameterTypes[i];
 			}
-			return GetOrRegisterFunction(name, Type(returnType), param);
+			return GetOrRegisterFunction(name, returnType, param);
 		}
 
-		public static MData GetOrRegisterFunction(string name, string returnType, IList<string> parameterTypes) {
+		public static MData GetOrRegisterFunction(string name, TData returnType, IList<TData> parameterTypes) {
 			var mData = generatorData.GetMethodData(name, parameterTypes);
 			if(mData == null) {
 				mData = generatorData.AddMethod(name, returnType, parameterTypes);

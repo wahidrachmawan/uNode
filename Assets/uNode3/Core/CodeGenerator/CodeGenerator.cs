@@ -187,10 +187,10 @@ namespace MaxyGames {
 									{
 										var method = generatorData.AddMethod(
 											nameof(IRuntimeClass.SetVariable),
-											Type(typeof(void)),
+											typeof(void),
 											new[] {
-										new MPData("Name", Type(typeof(string))),
-										new MPData("value", Type(typeof(object))),
+										new MPData("Name", typeof(string)),
+										new MPData("value", typeof(object)),
 											}
 										);
 										method.modifier = new FunctionModifier() {
@@ -204,11 +204,11 @@ namespace MaxyGames {
 									{
 										var method = generatorData.AddMethod(
 											nameof(IRuntimeClass.SetVariable),
-											Type(typeof(void)),
+											typeof(void),
 											new[] {
-										new MPData("Name", Type(typeof(string))),
-										new MPData("value", Type(typeof(object))),
-										new MPData("op", Type(typeof(char))),
+										new MPData("Name", typeof(string)),
+										new MPData("value", typeof(object)),
+										new MPData("op", typeof(char)),
 											}
 										);
 										method.modifier = new FunctionModifier() {
@@ -236,9 +236,9 @@ namespace MaxyGames {
 									{
 										var method = generatorData.AddMethod(
 											nameof(IRuntimeClass.GetVariable),
-											Type(typeof(object)),
+											typeof(object),
 											new[] {
-											new MPData("Name", Type(typeof(string))),
+											new MPData("Name", typeof(string)),
 											}
 										);
 										method.modifier = new FunctionModifier() {
@@ -341,7 +341,7 @@ namespace MaxyGames {
 								foreach(string s in InitData) {
 									code += "\n" + s;
 								}
-								var method = generatorData.AddMethod("Awake", Type(typeof(void)), new string[0]);
+								var method = generatorData.AddMethod("Awake", typeof(void), new TData[0]);
 								method.code = code + method.code.AddLineInFirst();
 							}
 						}
@@ -560,14 +560,14 @@ namespace MaxyGames {
 						}
 						MData mData = generatorData.GetMethodData(
 							function.name,
-							function.parameters.Select(i => Type(i.type)).ToList(),
+							function.parameters.Select(i => new TData(i.type)).ToList(),
 							function.genericParameters.Length
 						);
 						if(mData == null) {
 							mData = new MData(
 								function.name,
-								Type(function.returnType),
-								function.parameters.Select(i => new MPData(i.name, Type(i.type), i.refKind)).ToList(),
+								function.returnType,
+								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind)).ToList(),
 								function.genericParameters.Select(i => new GPData(i.name, i.typeConstraint.type)).ToList()
 							);
 							generatorData.methodData.Add(mData);
@@ -707,7 +707,7 @@ namespace MaxyGames {
 				}
 			}
 			if(CoroutineEventFunc.Count > 0 || generatorData.coroutineEvent.Any(e => e.Value.customExecution == null)) {
-				MData method = generatorData.AddMethod(KEY_coroutineEventCode, Type(typeof(IEnumerable)), new[] { new MPData("uid", Type(typeof(int))) });
+				MData method = generatorData.AddMethod(KEY_coroutineEventCode, typeof(IEnumerable), new[] { new MPData("uid", typeof(int)) });
 				method.code += "\nswitch(uid) {";
 				foreach(string str in CoroutineEventFunc) {
 					method.code += ("\n" + str).AddTabAfterNewLine(1);
@@ -725,7 +725,7 @@ namespace MaxyGames {
 			if(generatorData.customUIDMethods.Count > 0) {
 				foreach(var pair in generatorData.customUIDMethods) {
 					foreach(var pair2 in pair.Value) {
-						MData method = generatorData.AddMethod(pair.Key, Type(pair2.Key), new[] { new MPData("name", Type(typeof(string))) });
+						MData method = generatorData.AddMethod(pair.Key, pair2.Key, new[] { new MPData("name", typeof(string)) });
 						method.code += "\nswitch(name) {";
 						foreach(var pair3 in pair2.Value) {
 							string data = pair3.Value.AddFirst("\n");
@@ -3234,15 +3234,15 @@ namespace MaxyGames {
 		public static void InsertCodeToFunction(string functionName, Type returnType, string code, int priority = 0) {
 			var mData = generatorData.GetMethodData(functionName);
 			if(mData == null) {
-				mData = generatorData.AddMethod(functionName, Type(returnType), new string[0]);
+				mData = generatorData.AddMethod(functionName, returnType);
 			}
 			mData.AddCode(code, priority);
 		}
 
 		public static void InsertCodeToFunction(string functionName, Type returnType, Type[] parameterTypes, string code, int priority = 0) {
-			var mData = generatorData.GetMethodData(functionName, parameterTypes.Select((item) => Type(item)).ToArray());
+			var mData = generatorData.GetMethodData(functionName, parameterTypes.Select((item) => new TData(item)).ToArray());
 			if(mData == null) {
-				mData = generatorData.AddMethod(functionName, Type(returnType), parameterTypes.Select((item) => Type(item)).ToArray());
+				mData = generatorData.AddMethod(functionName, returnType, parameterTypes.Select((item) => new TData(item)).ToArray());
 			}
 			mData.AddCode(code, priority);
 		}

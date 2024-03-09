@@ -346,7 +346,7 @@ namespace MaxyGames.UNode.Nodes {
 				if(method == null) {
 					method = CG.generatorData.AddNewGeneratedMethod(
 						"EventHookDelegate",
-						CG.Type(delegateReturnType),
+						delegateReturnType,
 						types.Select((t, index) => new CG.MPData(parameterNames[index], t)).ToArray());
 					method.AddCode(contents);
 					//Register the newly method to cached

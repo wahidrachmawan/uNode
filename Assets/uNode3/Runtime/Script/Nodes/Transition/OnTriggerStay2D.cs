@@ -27,8 +27,8 @@
 				if(mData == null) {
 					mData = CG.generatorData.AddMethod(
 						"OnTriggerStay2D",
-						CG.Type(typeof(void)),
-						CG.Type(typeof(UnityEngine.Collider2D)));
+						typeof(void),
+						typeof(UnityEngine.Collider2D));
 				}
 				string set = null;
 				if(storeCollider.isAssigned) {

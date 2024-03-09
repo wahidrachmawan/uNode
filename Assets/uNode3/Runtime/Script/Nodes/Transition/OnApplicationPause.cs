@@ -26,8 +26,8 @@
 				if(mData == null) {
 					mData = CG.generatorData.AddMethod(
 						"OnApplicationPause",
-						CG.Type(typeof(void)),
-						CG.Type(typeof(bool)));
+						typeof(void),
+						typeof(bool));
 				}
 				string set = null;
 				if(storeValue.isAssigned) {

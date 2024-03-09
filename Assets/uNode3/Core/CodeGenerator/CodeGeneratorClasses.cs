@@ -233,14 +233,14 @@ namespace MaxyGames {
 
 			private int generatedMethodCount;
 
-			public MData AddNewGeneratedMethod(string uid, string type, MPData[] parameters = null) {
+			public MData AddNewGeneratedMethod(string uid, TData type, MPData[] parameters = null) {
 				if(string.IsNullOrEmpty(uid)) {
 					uid = "Generated" + (++generatedMethodCount);
 				}
 				return AddMethod("M_" + uid, type, parameters);
 			}
 
-			public MData AddNewGeneratedMethod(string uid, string type, string[] parameters) {
+			public MData AddNewGeneratedMethod(string uid, TData type, TData[] parameters) {
 				if(string.IsNullOrEmpty(uid)) {
 					uid = "Generated" + (++generatedMethodCount);
 				}
@@ -376,7 +376,7 @@ namespace MaxyGames {
 						return m;
 					}
 				}
-				return GetMethodData(function.name, function.ParameterTypes.Select(p => CG.Type(p)).ToArray());
+				return GetMethodData(function.name, function.ParameterTypes.Select(p => new TData(p)).ToArray());
 			}
 
 			/// <summary>
@@ -386,7 +386,7 @@ namespace MaxyGames {
 			/// <param name="returnType"></param>
 			/// <param name="parametersType"></param>
 			/// <returns></returns>
-			public MData GetMethodData(string methodName, IList<string> parametersType = null, int genericParameterLength = -1) {
+			public MData GetMethodData(string methodName, IList<TData> parametersType = null, int genericParameterLength = -1) {
 				if(parametersType == null || parametersType.Count == 0) {
 					foreach(MData m in methodData) {
 						if(m.name == methodName && (parametersType == null || (m.parameters == null || m.parameters.Count == 0))) {
@@ -430,11 +430,11 @@ namespace MaxyGames {
 				throw new System.Exception("No Method data found to insert code");
 			}
 
-			public MData AddMethod(string methodName, string returnType, params string[] parametersType) {
-				return AddMethod(methodName, returnType, parametersType as IList<string>);
+			public MData AddMethod(string methodName, TData returnType, params TData[] parametersType) {
+				return AddMethod(methodName, returnType, parametersType as IList<TData>);
 			}
 
-			public MData AddMethod(string methodName, string returnType, IList<string> parametersType) {
+			public MData AddMethod(string methodName, TData returnType, IList<TData> parametersType) {
 				if(string.IsNullOrEmpty(methodName) || returnType == null)
 					throw new System.Exception("Method name or return type can't null");
 				if(parametersType == null || parametersType.Count == 0) {
@@ -464,7 +464,7 @@ namespace MaxyGames {
 				return mData;
 			}
 
-			public MData AddMethod(string methodName, string returnType, MPData[] parametersType) {
+			public MData AddMethod(string methodName, TData returnType, MPData[] parametersType) {
 				if(string.IsNullOrEmpty(methodName) || returnType == null)
 					throw new System.Exception("Method name or return type can't null");
 				if(parametersType == null || parametersType.Length == 0) {
@@ -494,7 +494,7 @@ namespace MaxyGames {
 				return mData;
 			}
 
-			public MData AddMethod(string methodName, string returnType, MPData[] parametersType, GPData[] genericParameters) {
+			public MData AddMethod(string methodName, TData returnType, MPData[] parametersType, GPData[] genericParameters) {
 				if(string.IsNullOrEmpty(methodName) || returnType == null)
 					throw new System.Exception("Method name or return type can't null");
 				if(parametersType == null || parametersType.Length == 0) {
@@ -541,7 +541,7 @@ namespace MaxyGames {
 				map2[ID] = contents;
 			}
 
-			public void InsertMethodCode(string methodName, string returnType, string code, params string[] parametersType) {
+			public void InsertMethodCode(string methodName, TData returnType, string code, params TData[] parametersType) {
 				if(parametersType == null || parametersType.Length == 0) {
 					foreach(MData m in methodData) {
 						if(m.name == methodName && m.type == returnType) {
@@ -570,7 +570,7 @@ namespace MaxyGames {
 				methodData.Add(mData);
 			}
 
-			public void InsertMethodCode(string methodName, string returnType, string code, params MPData[] parameters) {
+			public void InsertMethodCode(string methodName, TData returnType, string code, params MPData[] parameters) {
 				if(parameters == null || parameters.Length == 0) {
 					foreach(MData m in methodData) {
 						if(m.name == methodName && m.type == returnType) {
@@ -1180,8 +1180,8 @@ namespace MaxyGames {
 					if(_type == null) {
 						if(reference is Variable) {
 							_type = (reference as Variable).type;
-						} else if(reference is object[]) {
-							_type = ((reference as object[])[1] as FieldInfo).FieldType;
+						} else if(reference is VariableData) {
+							_type = (reference as VariableData).type;
 						}
 					}
 					return _type;
@@ -1338,7 +1338,7 @@ namespace MaxyGames {
 				string parameters = null;
 				if(obj.parameters != null && obj.parameters.Count > 0) {
 					int index = 0;
-					var parametersData = obj.parameters.Select(i => new MPData(i.name, Type(i.type), i.refKind));
+					var parametersData = obj.parameters.Select(i => new MPData(i.name, i.type, i.refKind));
 					foreach(MPData data in parametersData) {
 						if(index != 0) {
 							parameters += ", ";
@@ -1480,7 +1480,7 @@ namespace MaxyGames {
 		/// </summary>
 		public class MPData {
 			public string name;
-			public string type;
+			public TData type;
 			public RefKind refKind;
 			public List<AData> attributes;
 
@@ -1518,16 +1518,61 @@ namespace MaxyGames {
 				return result;
 			}
 
-			public MPData(string name, string type, RefKind refKind = RefKind.None) {
+			public MPData(string name, TData type, RefKind refKind = RefKind.None) {
 				this.name = name;
 				this.type = type;
 				this.refKind = refKind;
 			}
+		}
 
-			public MPData(string name, Type type, RefKind refKind = RefKind.None) {
-				this.name = name;
-				this.type = CG.Type(type);
-				this.refKind = refKind;
+		/// <summary>
+		/// Used to store type data
+		/// </summary>
+		public struct TData {
+			public readonly string typeCode;
+			public readonly Type type;
+
+			public TData(string type) {
+				typeCode = type;
+				this.type = typeCode.ToType(false);
+			}
+
+			public TData(Type type) {
+				this.type = type;
+
+				if(ReflectionUtils.IsNativeType(type) == false) {
+					if(type is IFakeType) {
+						//If it is a fake type and not native type
+						type = (type as IFakeType).GetNativeType();
+					}
+				}
+				typeCode = Type(type);
+			}
+
+			public string GenerateCode() {
+				return typeCode;
+			}
+
+			public override string ToString() {
+				return typeCode;
+			}
+
+			public static implicit operator TData(Type type) {
+				return new TData(type);
+			}
+
+			public static implicit operator TData(SerializedType type) {
+				return new TData(type);
+			}
+
+			//public static implicit operator TData(string type) {
+			//	return new TData(type);
+			//}
+
+			public static implicit operator string(TData type) {
+				if(object.ReferenceEquals(type, null))
+					return null;
+				return type.typeCode;
 			}
 		}
 
@@ -1561,7 +1606,7 @@ namespace MaxyGames {
 		/// </summary>
 		public class MData {
 			public string name;
-			public string type;
+			public TData type;
 			public IList<MPData> parameters;
 			public IList<GPData> genericParameters;
 			public List<AData> attributes;
@@ -1675,13 +1720,13 @@ namespace MaxyGames {
 			}
 
 			#region Constructors
-			public MData(string name, string returnType) {
+			public MData(string name, TData returnType) {
 				this.code = "";
 				this.name = name;
 				this.type = returnType;
 			}
 
-			public MData(string name, string returnType, IList<string> parametersType) {
+			public MData(string name, TData returnType, IList<TData> parametersType) {
 				this.code = "";
 				this.name = name;
 				this.type = returnType;
@@ -1694,7 +1739,7 @@ namespace MaxyGames {
 				}
 			}
 
-			public MData(string name, string returnType, IList<string> parametersType, IList<string> genericParameters = null) {
+			public MData(string name, TData returnType, IList<TData> parametersType, IList<TData> genericParameters = null) {
 				this.code = "";
 				this.name = name;
 				this.type = returnType;
@@ -1710,7 +1755,7 @@ namespace MaxyGames {
 				}
 			}
 
-			public MData(string name, string returnType, IList<MPData> parameters, IList<GPData> genericParameters = null) {
+			public MData(string name, TData returnType, IList<MPData> parameters, IList<GPData> genericParameters = null) {
 				this.code = "";
 				this.name = name;
 				this.type = returnType;
@@ -1720,7 +1765,7 @@ namespace MaxyGames {
 				}
 			}
 
-			public MData(string name, string returnType, string code, IList<MPData> parameters, IList<GPData> genericParameters = null) {
+			public MData(string name, TData returnType, string code, IList<MPData> parameters, IList<GPData> genericParameters = null) {
 				this.name = name;
 				this.type = returnType;
 				this.code = code;

@@ -26,8 +26,8 @@
 				if(mData == null) {
 					mData = CG.generatorData.AddMethod(
 						"OnTriggerStay",
-						CG.Type(typeof(void)),
-						CG.Type(typeof(UnityEngine.Collider)));
+						typeof(void),
+						typeof(UnityEngine.Collider));
 				}
 				string set = null;
 				if(storeCollider.isAssigned) {

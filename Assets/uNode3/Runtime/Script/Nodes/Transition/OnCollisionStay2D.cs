@@ -26,8 +26,8 @@
 				if(mData == null) {
 					mData = CG.generatorData.AddMethod(
 						"OnCollisionStay2D",
-						CG.Type(typeof(void)),
-						CG.Type(typeof(UnityEngine.Collision2D)));
+						typeof(void),
+						typeof(UnityEngine.Collision2D));
 				}
 				string set = null;
 				if(storeCollision.isAssigned) {

@@ -102,7 +102,7 @@ namespace MaxyGames.UNode.Nodes {
 
 			CG.RegisterPostGeneration((classData) => {
 				var methodName = CG.GenerateName(name, this);
-				var method = new CG.MData(methodName, CG.Type(ReturnType()), inputs.Select(i => new CG.MPData(i.name, i.type)).ToArray());
+				var method = new CG.MData(methodName, ReturnType(), inputs.Select(i => new CG.MPData(i.name, i.type)).ToArray());
 				method.owner = this;
 				method.modifier = new FunctionModifier() {
 					Public = false,

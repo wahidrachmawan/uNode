@@ -76,7 +76,7 @@ namespace MaxyGames.UNode.Nodes {
 				return;
 			var mData = CG.generatorData.AddMethod(
 				CG.GenerateNewName("M_GeneratedEvent"), 
-				typeof(void).CGType(), 
+				typeof(void), 
 				datas.Select(item => new CG.MPData(CG.GetVariableName(item.port), item.port.type)).ToArray());
 			mData.AddCodeForEvent(GenerateRunFlows());
 

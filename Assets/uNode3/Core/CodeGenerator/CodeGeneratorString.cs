@@ -1140,7 +1140,7 @@ namespace MaxyGames {
 				//method.code = string.Join("\n", strs);
 				return Lambda(string.Join("\n", strs));
 			} else {
-				var method = generatorData.AddNewGeneratedMethod(null, CG.Type(typeof(IEnumerable)));
+				var method = generatorData.AddNewGeneratedMethod(null, typeof(IEnumerable));
 				method.code = contents;
 				return method.name + "()";
 			}
