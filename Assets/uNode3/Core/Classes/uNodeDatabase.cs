@@ -89,6 +89,9 @@ namespace MaxyGames.UNode {
 		}
 		[SerializeField]
 		private List<EditorData> editorDatas = new List<EditorData>();
+		[SerializeField]
+		internal List<SerializedType> aotTypes = new List<SerializedType>();
+
 
 		internal void SaveEditorData<T>(string guid, T value) {
 			var data = SerializerUtility.SerializeValue(value);

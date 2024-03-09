@@ -1117,7 +1117,18 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	[System.Serializable]
 	public class ConstructorModifier : AccessModifier {
+		[Hide(nameof(Public), true)]
+		[Hide(nameof(Internal), true)]
+		[Hide(nameof(Protected), true)]
+		public bool Static;
 
+		public override string GenerateCode() {
+			string data = base.GenerateCode();
+			if(Static) {
+				return data += " static ";
+			}
+			return data;
+		}
 	}
 
 	/// <summary>

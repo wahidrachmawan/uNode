@@ -83,27 +83,32 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool CreateNewVariable(Vector2 mousePosition, Action postAction) {
 			ShowTypeMenu(mousePosition, type => {
-				var variable = graphData.graphData.variableContainer.NewVariable("newVariable", type);
-				if(graph is IClassModifier classModifier) {
-					if(classModifier.GetModifier().ReadOnly) {
-						variable.modifier.ReadOnly = true;
+				uNodeEditorUtility.RegisterUndo(graph);
+				NodeEditorUtility.AddNewVariable(graphData.graphData.variableContainer, "newVariable", type, variable => {
+					if(graph is IClassModifier classModifier) {
+						if(classModifier.GetModifier().ReadOnly) {
+							variable.modifier.ReadOnly = true;
+						}
 					}
-				}
-				postAction?.Invoke();
+					postAction?.Invoke();
+				});
 			});
 			return true;
 		}
 
 		public override bool CreateNewProperty(Vector2 mousePosition, Action postAction) {
 			ShowTypeMenu(mousePosition, type => {
-				graphData.graphData.propertyContainer.NewProperty("newProperty", type);
-				postAction?.Invoke();
+				uNodeEditorUtility.RegisterUndo(graph);
+				NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, "newProperty", type, _ => {
+					postAction?.Invoke();
+				});
 			});
 			return true;
 		}
 
 		public override bool CreateNewLocalVariable(Vector2 mousePosition, Action postAction) {
 			ShowTypeMenu(mousePosition, type => {
+				uNodeEditorUtility.RegisterUndo(graph);
 				graphData.selectedRoot.variableContainer.NewVariable("localVariable", type);
 				postAction?.Invoke();
 			});
@@ -114,6 +119,7 @@ namespace MaxyGames.UNode.Editors {
 			GenericMenu menu = new GenericMenu();
 			var functionSystem = graphData.graph;
 			menu.AddItem(new GUIContent("Add new"), false, () => {
+				uNodeEditorUtility.RegisterUndo(graph);
 				NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "NewFunction", typeof(void), f => {
 					if(uNodePreference.preferenceData.newVariableAccessor == uNodePreference.DefaultAccessor.Private) {
 						f.modifier.SetPrivate();
@@ -122,6 +128,7 @@ namespace MaxyGames.UNode.Editors {
 				GraphChanged();
 			});
 			menu.AddItem(new GUIContent("Add new coroutine"), false, () => {
+				uNodeEditorUtility.RegisterUndo(graph);
 				NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "NewFunction", typeof(IEnumerator), f => {
 					if(uNodePreference.preferenceData.newVariableAccessor == uNodePreference.DefaultAccessor.Private) {
 						f.modifier.SetPrivate();
@@ -144,6 +151,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Behavior/Start()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "Start", typeof(void), f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -156,6 +164,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Behavior/Awake()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "Awake", typeof(void), f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -168,6 +177,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Behavior/OnDestroy()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnDestroy", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -180,6 +190,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Behavior/OnDisable()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnDisable", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -192,6 +203,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Behavior/OnEnable()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnEnable", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -204,6 +216,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Gameloop/Update()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "Update", typeof(void), f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -216,6 +229,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Gameloop/FixedUpdate()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "FixedUpdate", typeof(void), f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -228,6 +242,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Gameloop/LateUpdate()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "LateUpdate", typeof(void), f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -240,6 +255,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Gameloop/OnGUI()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnGUI", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -252,6 +268,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Animation/OnAnimatorIK(int)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnAnimatorIK", typeof(void), new string[] { "layerIndex" }, new Type[] { typeof(int) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -264,6 +281,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Animation/OnAnimatorMove()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnAnimatorMove", typeof(void), f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -276,6 +294,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Game Event/OnApplicationFocus(bool)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnApplicationFocus", typeof(void), new string[] { "focusStatus" }, new Type[] { typeof(bool) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -288,6 +307,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Game Event/OnApplicationPause(bool)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnApplicationPause", typeof(void), new string[] { "pauseStatus" }, new Type[] { typeof(bool) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -300,6 +320,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Game Event/OnApplicationQuit()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnApplicationQuit", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -312,6 +333,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnCollisionEnter(Collision)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnCollisionEnter", typeof(void), new string[] { "collisionInfo" }, new Type[] { typeof(Collision) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -324,6 +346,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnCollisionEnter2D(Collision2D)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnCollisionEnter2D", typeof(void), new string[] { "collisionInfo" }, new Type[] { typeof(Collision2D) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -336,6 +359,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnCollisionExit(Collision)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnCollisionExit", typeof(void), new string[] { "collisionInfo" }, new Type[] { typeof(Collision) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -348,6 +372,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnCollisionExit2D(Collision2D)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnCollisionExit2D", typeof(void), new string[] { "collisionInfo" }, new Type[] { typeof(Collision2D) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -360,6 +385,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnCollisionStay(Collision)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnCollisionStay", typeof(void), new string[] { "collisionInfo" }, new Type[] { typeof(Collision) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -372,6 +398,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnCollisionStay2D(Collision2D)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnCollisionStay2D", typeof(void), new string[] { "collisionInfo" }, new Type[] { typeof(Collision2D) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -384,6 +411,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnParticleCollision(GameObject)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnParticleCollision", typeof(void), new string[] { "other" }, new Type[] { typeof(GameObject) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -396,6 +424,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnTriggerEnter(Collider)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTriggerEnter", typeof(void), new string[] { "colliderInfo" }, new Type[] { typeof(Collider) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -408,6 +437,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnTriggerEnter2D(Collider2D)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTriggerEnter2D", typeof(void), new string[] { "colliderInfo" }, new Type[] { typeof(Collider2D) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -420,6 +450,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnTriggerExit(Collider)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTriggerExit", typeof(void), new string[] { "colliderInfo" }, new Type[] { typeof(Collider) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -432,6 +463,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnTriggerExit2D(Collider2D)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTriggerExit2D", typeof(void), new string[] { "colliderInfo" }, new Type[] { typeof(Collider2D) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -444,6 +476,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnTriggerStay(Collider)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTriggerStay", typeof(void), new string[] { "colliderInfo" }, new Type[] { typeof(Collider) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -456,6 +489,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Physics/OnTriggerStay2D(Collider2D)"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTriggerStay2D", typeof(void), new string[] { "colliderInfo" }, new Type[] { typeof(Collider2D) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -468,6 +502,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Transfrom/OnTransformChildrenChanged()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTransformChildrenChanged", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -480,6 +515,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Transfrom/OnTransformParentChanged()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnTransformParentChanged", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -492,6 +528,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseDown()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseDown", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -504,6 +541,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseDrag()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseDrag", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -516,6 +554,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseEnter()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseEnter", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -528,6 +567,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseExit()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseExit", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -540,6 +580,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseOver()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseOver", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -552,6 +593,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseUp()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseUp", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -564,6 +606,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Mouse/OnMouseUpAsButton()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnMouseUpAsButton", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -576,6 +619,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnBecameInvisible()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnBecameInvisible", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -588,6 +632,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnBecameVisible()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnBecameVisible", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -600,6 +645,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnPostRender()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnPostRender", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -612,6 +658,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnPreCull()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnPreCull", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -624,6 +671,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnPreRender()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnPreRender", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -636,6 +684,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnRenderObject()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnRenderObject", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -648,6 +697,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnRenderImage()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnRenderImage", typeof(void), new[] { "src", "dest" }, new[] { typeof(RenderTexture), typeof(RenderTexture) }, action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -660,6 +710,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						menu.AddItem(new GUIContent("UnityEvent/Renderer/OnWillRenderObject()"), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnWillRenderObject", typeof(void), action: f => f.modifier.SetPrivate());
 								GraphChanged();
 							}
@@ -674,6 +725,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 							menu.AddItem(new GUIContent("UnityEvent/Editor/OnDrawGizmos()"), hasFunction, () => {
 								if(!hasFunction) {
+									uNodeEditorUtility.RegisterUndo(graph);
 									NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnDrawGizmos", typeof(void), action: f => f.modifier.SetPrivate());
 									GraphChanged();
 								}
@@ -686,6 +738,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 							menu.AddItem(new GUIContent("UnityEvent/Editor/OnDrawGizmosSelected()"), hasFunction, () => {
 								if(!hasFunction) {
+									uNodeEditorUtility.RegisterUndo(graph);
 									NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnDrawGizmosSelected", typeof(void), action: f => f.modifier.SetPrivate());
 									GraphChanged();
 								}
@@ -698,6 +751,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 							menu.AddItem(new GUIContent("UnityEvent/Editor/OnValidate()"), hasFunction, () => {
 								if(!hasFunction) {
+									uNodeEditorUtility.RegisterUndo(graph);
 									NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "OnValidate", typeof(void), action: f => f.modifier.SetPrivate());
 									GraphChanged();
 								}
@@ -710,6 +764,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 							menu.AddItem(new GUIContent("UnityEvent/Editor/Reset()"), hasFunction, () => {
 								if(!hasFunction) {
+									uNodeEditorUtility.RegisterUndo(graph);
 									NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "Reset", typeof(void), action: f => f.modifier.SetPrivate());
 									GraphChanged();
 								}
@@ -760,6 +815,7 @@ namespace MaxyGames.UNode.Editors {
 						var m = method;
 						menu.AddItem(new GUIContent("Override Function/" + EditorReflectionUtility.GetPrettyMethodName(method)), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, m.Name, m.ReturnType,
 									m.GetParameters().Select(item => item.Name).ToArray(),
 									m.GetParameters().Select(item => item.ParameterType).ToArray(),
@@ -821,6 +877,7 @@ namespace MaxyGames.UNode.Editors {
 						var m = method;
 						menu.AddItem(new GUIContent("Hide Function/" + EditorReflectionUtility.GetPrettyMethodName(method)), hasFunction, () => {
 							if(!hasFunction) {
+								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, m.Name, m.ReturnType,
 									m.GetParameters().Select(item => item.Name).ToArray(),
 									m.GetParameters().Select(item => item.ParameterType).ToArray(),
@@ -869,6 +926,7 @@ namespace MaxyGames.UNode.Editors {
 								var m = method;
 								menu.AddItem(new GUIContent("Interface " + t.Name + "/" + EditorReflectionUtility.GetPrettyMethodName(method)), hasFunction, () => {
 									if(!hasFunction) {
+										uNodeEditorUtility.RegisterUndo(graph);
 										NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, m.Name, m.ReturnType,
 											m.GetParameters().Select(item => item.Name).ToArray(),
 											m.GetParameters().Select(item => item.ParameterType).ToArray(),

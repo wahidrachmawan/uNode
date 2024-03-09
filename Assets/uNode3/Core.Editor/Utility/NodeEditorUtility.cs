@@ -120,9 +120,12 @@ namespace MaxyGames.UNode.Editors {
 			action?.Invoke(variable);
 		}
 
-		public static void AddNewProperty(PropertyContainer container, string name, Action<Property> action = null) {
+		public static void AddNewProperty(PropertyContainer container, string name, Type type, Action<Property> action = null) {
 			if(string.IsNullOrEmpty(name)) {
 				name = "newProperty";
+			}
+			if(type.IsByRef) {
+				type = type.GetElementType();
 			}
 			string fName = name;
 			var properties = container.collections;
@@ -147,6 +150,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			AddNewObject<Property>(name, container, property => {
 				property.name = name;
+				property.type = type;
 				if(action != null) {
 					action(property);
 				}

@@ -28,16 +28,17 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNODE_DEBUG || UNITY_WEBGL || ENABLE_IL2CPP
 		[MenuItem("Tools/uNode/Advanced/Scan AOT Type", false, 1000010)]
 		public static void ScanAOTType() {
 			uNodeEditorInitializer.AOTScan(out var types);
+			var db = uNodeUtility.GetDatabase();
+			db.aotTypes.Clear();
 			Debug.Log(types.Count);
 			foreach(var t in types) {
 				Debug.Log(t);
+				db.aotTypes.Add(t);
 			}
 		}
-#endif
 
 		[MenuItem("Tools/uNode/Update Graph Database", false, 2)]
 		private static void UpdateDatabase() {

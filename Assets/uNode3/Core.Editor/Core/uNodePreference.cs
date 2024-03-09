@@ -100,7 +100,7 @@ namespace MaxyGames.UNode.Editors {
 			public bool autoHideNativeType = true;
 			#endregion
 
-			public bool showStatusBar = true, enableErrorCheck = true;
+			public bool enableErrorCheck = true;
 			public string editorTheme;
 
 			public string ilSpyPath;
@@ -445,7 +445,6 @@ Note: Auto Generate on Buld will always using Unity method.")]
 					preferenceData.showGrid = showGrid;
 					uNodeEditor.RefreshEditor(true);
 				}
-				preferenceData.showStatusBar = EditorGUILayout.Toggle(new GUIContent("Show Status Bar"), preferenceData.showStatusBar);
 				preferenceData.maxReloadMilis = EditorGUILayout.IntField(new GUIContent("Max Reload Milis",
 @"The max progress for loading a graph in milliseconds for each frame.
 -Reducing value will make loading graph slower but less lag for Unity.

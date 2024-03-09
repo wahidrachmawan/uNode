@@ -117,6 +117,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 								analyzer.RegisterError(graphData, 
 									$@"The graph does not implement interface method: '{type.PrettyName()}' type: '{EditorReflectionUtility.GetPrettyMethodName(member)}'",
 									() => {
+										uNodeEditorUtility.RegisterUndo(graph);
 										NodeEditorUtility.AddNewFunction(graph.GraphData.functionContainer, member.Name, member.ReturnType,
 										member.GetParameters().Select(item => item.Name).ToArray(),
 										member.GetParameters().Select(item => item.ParameterType).ToArray(),
@@ -132,9 +133,8 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 								analyzer.RegisterError(graphData,
 									$@"The graph does not implement interface property: '{type.PrettyName()}' type: '{member.PropertyType.PrettyName()}'",
 									() => {
-										NodeEditorUtility.AddNewProperty(graph.GraphData.propertyContainer, member.Name, (val) => {
-											val.type = member.PropertyType;
-										});
+										uNodeEditorUtility.RegisterUndo(graph);
+										NodeEditorUtility.AddNewProperty(graph.GraphData.propertyContainer, member.Name, member.PropertyType);
 										uNodeGUIUtility.GUIChanged(graph, UIChangeType.Important);
 									});
 							}

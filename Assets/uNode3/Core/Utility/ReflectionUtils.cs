@@ -1682,7 +1682,7 @@ namespace MaxyGames.UNode {
 				}
 				if(memberData.targetType == MemberData.TargetType.Constructor) {
 					//Constructor
-					ConstructorInfo ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static, null, paramsType, null);
+					var ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static, null, paramsType, null);
 					if(ctor == null && paramsType.Length == 0) {
 						ctor = GetDefaultConstructor(type);
 						if(ctor == null) {

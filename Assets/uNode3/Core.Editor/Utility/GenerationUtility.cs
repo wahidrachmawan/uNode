@@ -296,6 +296,11 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public static void DoCompileGraphsInBackground() {
 			try {
+#if !UNODE_PRO
+				if(uNodeUtility.IsProVersion == false) {
+					throw new Exception("Compile in background is pro only feature");
+				}
+#endif
 				uNodeThreadUtility.WaitOneFrame();
 				var dir = tempRoslynFolder;
 				var dirInfo = Directory.CreateDirectory(dir);
@@ -341,11 +346,10 @@ namespace MaxyGames.UNode.Editors {
 						if(EditorUtility.IsPersistent(script.graphOwner)) {
 							var scriptData = persistenceData.GetGraphData(script.graphOwner);
 							scriptData.path = path;
-							var fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
+							scriptData.fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
 							var lastCompiledID = script.GetSettingUID();
-							if(scriptData.generatedScript != generatedScript || scriptData.fileHash != fileHash || scriptData.lastCompiledID != lastCompiledID) {
+							if(scriptData.generatedScript != generatedScript || scriptData.lastCompiledID != lastCompiledID) {
 								scriptData.generatedScript = generatedScript;
-								scriptData.fileHash = fileHash;
 								scriptData.lastCompiledID = lastCompiledID;
 							} else {
 								skippedCount++;

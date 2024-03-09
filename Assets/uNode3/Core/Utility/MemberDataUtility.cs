@@ -377,7 +377,7 @@ namespace MaxyGames.UNode {
 			string[] PType = Array.Empty<string>();
 			if(item != null) {
 				if(item.reference != null && (item.genericArguments == null || item.genericArguments.Length == 0)) {
-					if(item.reference is IParameterSystem parameterSystem) {
+					if(item.GetReferenceValue() is IParameterSystem parameterSystem) {
 						PType = new string[parameterSystem.Parameters.Count];
 						for(int i = 0; i < parameterSystem.Parameters.Count; i++) {
 							PType[i] = parameterSystem.Parameters[i].type.typeName;
@@ -415,7 +415,7 @@ namespace MaxyGames.UNode {
 			string[] PType = Array.Empty<string>();
 			if(item != null) {
 				if(item.reference != null && (item.genericArguments == null || item.genericArguments.Length == 0)) {
-					if(item.reference is IParameterSystem parameterSystem) {
+					if(item.GetReferenceValue() is IParameterSystem parameterSystem) {
 						PType = new string[parameterSystem.Parameters.Count];
 						for(int i = 0; i < parameterSystem.Parameters.Count; i++) {
 							PType[i] = parameterSystem.Parameters[i].type.GetRichName();
@@ -779,7 +779,7 @@ namespace MaxyGames.UNode {
 			Type[] PType = Type.EmptyTypes;
 			if(item != null) {
 				if(item.reference != null && (item.genericArguments == null || item.genericArguments.Length == 0)) {
-					if(item.reference is IParameterSystem parameterSystem) {
+					if(item.GetReferenceValue() is IParameterSystem parameterSystem) {
 						PType = new Type[parameterSystem.Parameters.Count];
 						for(int i = 0; i < parameterSystem.Parameters.Count; i++) {
 							PType[i] = parameterSystem.Parameters[i].Type;
@@ -816,7 +816,7 @@ namespace MaxyGames.UNode {
 			Type[] PType = Type.EmptyTypes;
 			if(item != null) {
 				if(item.reference != null && (item.genericArguments == null || item.genericArguments.Length == 0)) {
-					if(item.reference is IParameterSystem parameterSystem) {
+					if(item.GetReferenceValue() is IParameterSystem parameterSystem) {
 						PType = new Type[parameterSystem.Parameters.Count];
 						for(int i = 0; i < parameterSystem.Parameters.Count; i++) {
 							PType[i] = parameterSystem.Parameters[i].Type;

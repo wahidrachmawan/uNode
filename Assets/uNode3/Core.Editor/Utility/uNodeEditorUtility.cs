@@ -984,6 +984,17 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		public static void RegisterUndo(UGraphElement graphElement, string name = "") {
+			if(graphElement == null) return;
+			RegisterUndo(graphElement.graphContainer, name);
+		}
+
+		public static void RegisterUndo(IGraph graph, string name = "") {
+			var obj = graph as UnityEngine.Object;
+			if(obj == null) return;
+			RegisterUndo(obj, name);
+		}
+
 		public static void RegisterUndo(UnityEngine.Object obj, string name = "") {
 			if(obj == null) return;
 			Undo.RegisterCompleteObjectUndo(obj, name);
