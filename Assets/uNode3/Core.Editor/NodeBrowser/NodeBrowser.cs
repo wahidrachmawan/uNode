@@ -75,11 +75,11 @@ namespace MaxyGames.UNode.Editors {
 
 		}
 
-		public MemberTreeView(MemberInfo member) : base(member.GetHashCode(), -1, NodeBrowser.GetRichMemberName(member)) {
+		public MemberTreeView(MemberInfo member) : base(member.GetHashCode(), -1, NodeBrowser.GetMemberName(member)) {
 			this.member = member;
 		}
 
-		public MemberTreeView(MemberInfo member, int id, int depth) : base(id, depth, NodeBrowser.GetRichMemberName(member)) {
+		public MemberTreeView(MemberInfo member, int id, int depth) : base(id, depth, NodeBrowser.GetMemberName(member)) {
 			this.member = member;
 		}
 
@@ -255,67 +255,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(Event.current.type == EventType.Repaint) {
 				if(hoverItem != null && lastHoverItem != hoverItem) {
-					List<GUIContent> contents = new List<GUIContent>();
-					if(hoverItem is TypeTreeView) {
-						if(XmlDoc.hasLoadDoc) {
-							TypeTreeView item = hoverItem as TypeTreeView;
-
-							Texture icon = uNodeEditorUtility.GetIcon(item.type);
-							contents.Add(new GUIContent(item.displayName, icon));
-							contents.Add(new GUIContent("Target	: " + item.type.MemberType.ToString()));
-							contents.Add(new GUIContent("Type	: " + item.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.type)));
-							XmlElement documentation = XmlDoc.XMLFromType(item.type);
-							if(documentation != null) {
-								contents.Add(new GUIContent("<b>Documentation</b> ▼ " + documentation["summary"].InnerText.Trim().AddLineInFirst()));
-							}
-						}
-					} else if(hoverItem is MemberTreeView) {
+					List<GUIContent> contents = null;
+					if(hoverItem is MemberTreeView) {
 						var item = hoverItem as MemberTreeView;
-						Texture icon = uNodeEditorUtility.GetIcon(item.member);
-						contents.Add(new GUIContent(item.displayName, icon));
-						contents.Add(new GUIContent("Target	: " + item.member.MemberType.ToString()));
-						contents.Add(new GUIContent("Static	: " + ReflectionUtils.GetMemberIsStatic(item.member)));
-						if(item.member != null) {
-							var mType = ReflectionUtils.GetMemberType(item.member);
-							contents.Add(new GUIContent("Return	: " + mType.PrettyName(true), uNodeEditorUtility.GetTypeIcon(mType)));
-						}
-						if(XmlDoc.hasLoadDoc) {
-							XmlElement documentation = XmlDoc.XMLFromMember(item.member);
-							if(documentation != null) {
-								contents.Add(new GUIContent("<b>Documentation ▼</b> " + documentation["summary"].InnerText.Trim().AddLineInFirst()));
-							}
-							switch(item.member.MemberType) {
-								case MemberTypes.Method:
-								case MemberTypes.Constructor:
-									var parameters = (item.member as MethodBase).GetParameters();
-									if(parameters.Length > 0) {
-										for(int x = 0; x < parameters.Length; x++) {
-											System.Type PType = parameters[x].ParameterType;
-											if(PType != null) {
-												contents.Add(new GUIContent("<b>" + parameters[x].Name + " : " + PType.PrettyName() + "</b>",
-													uNodeEditorUtility.GetTypeIcon(PType)));
-												if(documentation != null && documentation["param"] != null) {
-													XmlNode paramDoc = null;
-													XmlNode doc = documentation["param"];
-													while(doc.NextSibling != null) {
-														if(doc.Attributes["name"] != null && doc.Attributes["name"].Value.Equals(parameters[x].Name)) {
-															paramDoc = doc;
-															break;
-														}
-														doc = doc.NextSibling;
-													}
-													if(paramDoc != null && !string.IsNullOrEmpty(paramDoc.InnerText)) {
-														contents.Add(new GUIContent(paramDoc.InnerText.Trim()));
-													}
-												}
-											}
-										}
-									}
-									break;
-							}
-						}
+						contents = ItemSelector.Utility.GetTooltipContents(item.member);
 					}
-					if(contents.Count > 0) {
+					if(contents != null && contents.Count > 0) {
 						var position = window.position;
 						if(position.x + position.width + 300 <= Screen.currentResolution.width) {
 							tooltipWindow = TooltipWindow.Show(new Vector2(position.x + position.width, position.y), contents, 300, 600);
@@ -330,25 +275,19 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		#region Function GetName
-		public static string GetRichMemberName(MemberInfo member) {
-			if(uNodePreference.GetPreference().coloredItem) {
-				Type type = member as Type;
-				if(type != null){
-					if(type.IsEnum){
-						return uNodeUtility.WrapTextWithColor(type.PrettyName(), uNodePreference.GetPreference().itemEnumColor, false);
-					} else if (type.IsInterface){
-						return uNodeUtility.WrapTextWithColor(type.PrettyName(), uNodePreference.GetPreference().itemInterfaceColor, false);
-					}
-					return uNodeUtility.WrapTextWithColor(type.PrettyName(), uNodePreference.GetPreference().itemTypeColor, false);
-				}
-				switch(member.MemberType) {
-					case MemberTypes.Method:
-						return GetRichMethodName(member as MethodInfo, false);
-					case MemberTypes.Constructor:
-						return GetRichConstructorNames(member as ConstructorInfo);
-				}
+		#region Utility
+		public static string GetMemberName(MemberInfo member) {
+			switch(member.MemberType) {
+				case MemberTypes.Constructor:
+					return member.DeclaringType.PrettyName();
+				case MemberTypes.TypeInfo:
+				case MemberTypes.NestedType:
+					return (member as Type).PrettyName();
 			}
+			return member.Name;
+		}
+
+		public static string GetPrettyMemberName(MemberInfo member) {
 			switch(member.MemberType) {
 				case MemberTypes.Method:
 					return EditorReflectionUtility.GetPrettyMethodName(member as MethodInfo, false);
@@ -357,6 +296,26 @@ namespace MaxyGames.UNode.Editors {
 				case MemberTypes.TypeInfo:
 				case MemberTypes.NestedType:
 					return (member as Type).PrettyName();
+			}
+			return member.Name;
+		}
+
+		public static string GetRichMemberName(MemberInfo member) {
+			Type type = member as Type;
+			if(type != null) {
+				if(type.IsEnum) {
+					return uNodeUtility.WrapTextWithColor(type.PrettyName(), uNodePreference.GetPreference().itemEnumColor, false);
+				}
+				else if(type.IsInterface) {
+					return uNodeUtility.WrapTextWithColor(type.PrettyName(), uNodePreference.GetPreference().itemInterfaceColor, false);
+				}
+				return uNodeUtility.WrapTextWithColor(type.PrettyName(), uNodePreference.GetPreference().itemTypeColor, false);
+			}
+			switch(member.MemberType) {
+				case MemberTypes.Method:
+					return GetRichMethodName(member as MethodInfo, false);
+				case MemberTypes.Constructor:
+					return GetRichConstructorNames(member as ConstructorInfo);
 			}
 			return member.Name;
 		}
@@ -658,10 +617,30 @@ namespace MaxyGames.UNode.Editors {
 						labelRect.x += 16;
 						labelRect.width -= 16;
 					}
+					GUIContent label = null;
+					{
+						var tree = args.item as MemberTreeView;
+						if(tree.member is MethodInfo method) {
+							if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
+								label = new GUIContent(EditorReflectionUtility.GetPrettyExtensionMethodName(method));
+							}
+						}
+						if(label == null) {
+							if(uNodePreference.preferenceData.coloredItem) {
+								label = new GUIContent(NodeBrowser.GetRichMemberName(tree.member));
+							}
+							else {
+								label = new GUIContent(NodeBrowser.GetPrettyMemberName(tree.member));
+							}
+						}
+					}
+					if(label == null) {
+						label = new GUIContent(args.label);
+					}
 					if(ReflectionUtils.GetMemberIsStatic(member.member)) {
-						uNodeGUIStyle.itemStatic.Draw(labelRect, new GUIContent(args.label), false, false, false, false);
+						uNodeGUIStyle.itemStatic.Draw(labelRect, new GUIContent(label), false, false, false, false);
 					} else {
-						uNodeGUIStyle.itemNormal.Draw(labelRect, new GUIContent(args.label), false, false, false, false);
+						uNodeGUIStyle.itemNormal.Draw(labelRect, new GUIContent(label), false, false, false, false);
 					}
 					args.label = "";
 				}
