@@ -62,6 +62,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						});
 						node.Register();
 						node.inputs.Last().port.AssignToDefault(MemberData.Default(type));
+						node.inputs.Last().type = type;
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 					}).ChangePosition(GUIUtility.GUIToScreenPoint(Event.current.mousePosition));
 				},
