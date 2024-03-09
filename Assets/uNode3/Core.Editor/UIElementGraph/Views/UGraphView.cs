@@ -1065,10 +1065,11 @@ namespace MaxyGames.UNode.Editors {
 					graph.Select(new UPortRef(edge.Input?.GetPortValue() ?? edge.Output?.GetPortValue()));
 				}
 			}
-			//else if(selectable is TransitionView) {
-			//	graph.Select((selectable as TransitionView).transition);
-			//	AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
-			//} else if(selectable is BlockView) {
+			else if(selectable is TransitionView) {
+				graph.Select((selectable as TransitionView).transition);
+				AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
+			}
+			//else if(selectable is BlockView) {
 			//	var block = (selectable as BlockView);
 			//	if(block.data != null && block.data.block != null && editorData.selected != editorData.selectedNodes) {
 			//		graph.Select(new uNodeEditor.ValueInspector(block.data.block, block.owner.nodeView.targetNode));

@@ -1,4 +1,6 @@
-﻿namespace MaxyGames.UNode.Transition {
+﻿using System;
+
+namespace MaxyGames.UNode.Transition {
 	[TransitionMenu("Custom", "Custom")]
 	public class CustomTransition : TransitionEvent {
 		public const string KEY_Activate_Transition = "_ActivateTransition";
@@ -14,6 +16,10 @@
 			string contents = CG.If(CG.CompareNodeState(node.enter, null), CG.FlowTransitionFinish(this));
 			CG.generatorData.InsertCustomUIDMethod(KEY_Activate_Transition, typeof(void), name + node.id, contents);
 			return null;
+		}
+
+		public override string GetTitle() {
+			return name;
 		}
 	}
 }

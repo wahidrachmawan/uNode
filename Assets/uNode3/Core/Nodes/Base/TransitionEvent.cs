@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using MaxyGames.UNode.Nodes;
+using System.Reflection;
+using System;
 
 namespace MaxyGames.UNode {
 	/// <summary>
@@ -24,6 +26,19 @@ namespace MaxyGames.UNode {
 
 		protected StateNode GetStateNode() {
 			return node;
+		}
+
+		public override string GetTitle() {
+			var type = GetType();
+			if(type.IsDefined(typeof(TransitionMenu), true)) {
+				return type.GetCustomAttribute<TransitionMenu>().name;
+			}
+			else if(!string.IsNullOrEmpty(name)) {
+				return name;
+			}
+			else {
+				return type.PrettyName();
+			}
 		}
 
 		/// <summary>
@@ -81,7 +96,7 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
-		public virtual System.Type GetIcon() {
+		public override Type GetNodeIcon() {
 			return null;
 		}
 	}

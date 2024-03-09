@@ -34,14 +34,14 @@ namespace MaxyGames.UNode.Transition {
 			CG.SetStateInitialization(enter, () => {
 				if(unscaled) {
 					return CG.Routine(
-						CG.Invoke(typeof(Runtime.Routine), nameof(Runtime.Routine.WaitRealtime), CG.Value(delay)),
+						CG.Invoke(typeof(Runtime.Routine), nameof(Runtime.Routine.WaitRealtime), CG.SimplifiedLambda(CG.Value(delay))),
 						CG.Routine(CG.Lambda(CG.StopEvent(GetStateNode().enter))),
 						CG.Routine(CG.GetEvent(exit))
 					);
 				}
 				else {
 					return CG.Routine(
-						CG.Invoke(typeof(Runtime.Routine), nameof(Runtime.Routine.Wait), CG.Value(delay)),
+						CG.Invoke(typeof(Runtime.Routine), nameof(Runtime.Routine.Wait), CG.SimplifiedLambda(CG.Value(delay))),
 						CG.Routine(CG.Lambda(CG.StopEvent(GetStateNode().enter))),
 						CG.Routine(CG.GetEvent(exit))
 					);

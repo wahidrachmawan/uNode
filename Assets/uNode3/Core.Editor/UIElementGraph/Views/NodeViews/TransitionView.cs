@@ -93,8 +93,9 @@ namespace MaxyGames.UNode.Editors {
 		public override void ReloadView() {
 			base.ReloadView();
 
-			title = transition.name;
-			//titleIcon.image = uNodeEditorUtility.GetTypeIcon(transition.GetIcon());
+			title = transition.GetTitle();
+
+			//titleIcon.image = uNodeEditorUtility.GetTypeIcon(transition.GetNodeIcon());
 
 			UpdatePosition();
 			InitializeView();

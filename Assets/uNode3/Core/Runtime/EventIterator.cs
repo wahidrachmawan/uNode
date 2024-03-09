@@ -65,7 +65,7 @@ namespace MaxyGames.Runtime {
 		/// </summary>
 		/// <param name="waitTime"></param>
 		/// <returns></returns>
-		public static IEventIterator Wait(float waitTime) {
+		public static IEventIterator Wait(Func<float> waitTime) {
 			return new WaitIterator(waitTime);
 		}
 
@@ -74,8 +74,26 @@ namespace MaxyGames.Runtime {
 		/// </summary>
 		/// <param name="waitTime"></param>
 		/// <returns></returns>
-		public static IEventIterator WaitRealtime(float waitTime) {
+		public static IEventIterator WaitRealtime(Func<float> waitTime) {
 			return new WaitRealtimeIterator(waitTime);
+		}
+
+		/// <summary>
+		/// Wait for the given amount of seconds using scaled time
+		/// </summary>
+		/// <param name="waitTime"></param>
+		/// <returns></returns>
+		public static IEventIterator Wait(float waitTime) {
+			return new WaitIterator(() => waitTime);
+		}
+
+		/// <summary>
+		/// Wait for the given amount of seconds using unscaled time
+		/// </summary>
+		/// <param name="waitTime"></param>
+		/// <returns></returns>
+		public static IEventIterator WaitRealtime(float waitTime) {
+			return new WaitRealtimeIterator(() => waitTime);
 		}
 
 		/// <summary>
@@ -115,11 +133,11 @@ namespace MaxyGames.Runtime {
 
 	#region Common Iteration
 	class WaitIterator : IEventIterator {
-		private readonly float waitTime;
+		private readonly Func<float> waitTime;
 		private bool run;
 		private float time;
 
-		public WaitIterator(float waitTime) {
+		public WaitIterator(Func<float> waitTime) {
 			this.waitTime = waitTime;
 		}
 
@@ -128,7 +146,7 @@ namespace MaxyGames.Runtime {
 		public bool MoveNext() {
 			if(!run) {
 				run = true;
-				time = Time.time + waitTime;
+				time = Time.time + waitTime();
 			}
 			return Time.time - time < 0;
 		}
@@ -139,11 +157,11 @@ namespace MaxyGames.Runtime {
 	}
 
 	class WaitRealtimeIterator : IEventIterator {
-		private readonly float waitTime;
+		private readonly Func<float> waitTime;
 		private bool run;
 		private float time;
 
-		public WaitRealtimeIterator(float waitTime) {
+		public WaitRealtimeIterator(Func<float> waitTime) {
 			this.waitTime = waitTime;
 		}
 
@@ -152,7 +170,7 @@ namespace MaxyGames.Runtime {
 		public bool MoveNext() {
 			if(!run) {
 				run = true;
-				time = Time.unscaledTime + waitTime;
+				time = Time.unscaledTime + waitTime();
 			}
 			return Time.unscaledTime - time < 0;
 		}
