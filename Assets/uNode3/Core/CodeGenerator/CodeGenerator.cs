@@ -120,13 +120,6 @@ namespace MaxyGames {
 								setting.updateProgress(p, text);
 						});
 						progress += childFill;
-						//Generate variables
-						string variables = GenerateVariables((prog, text) => {
-							float p = progress + (prog * (childFill));
-							if(setting.updateProgress != null)
-								setting.updateProgress(p, text);
-						});
-						progress += childFill;
 						//Generate properties
 						string properties = GenerateProperties((prog, text) => {
 							float p = progress + (prog * (childFill));
@@ -136,6 +129,13 @@ namespace MaxyGames {
 						progress += childFill;
 						//Generate constructors
 						string constructors = GenerateConstructors((prog, text) => {
+							float p = progress + (prog * (childFill));
+							if(setting.updateProgress != null)
+								setting.updateProgress(p, text);
+						});
+						progress += childFill;
+						//Generate variables
+						string variables = GenerateVariables((prog, text) => {
 							float p = progress + (prog * (childFill));
 							if(setting.updateProgress != null)
 								setting.updateProgress(p, text);
@@ -257,7 +257,7 @@ namespace MaxyGames {
 
 						generationState.state = State.Function;
 						//Generating Event Functions ex: State Machine, Coroutine nodes, etc.
-						GenerateEventFunction();
+						M_GenerateEventFunction();
 
 						//From here this is the finising parts
 						ThreadingUtil.Do(() => {
@@ -577,37 +577,7 @@ namespace MaxyGames {
 						mData.summary = function.comment;
 						mData.owner = function;
 						if(function.LocalVariables.Any()) {
-							string result = null;
-							foreach(var vdata in function.LocalVariables) {
-								if(IsInstanceVariable(vdata)) {
-									continue;
-								}
-								else if(!vdata.resetOnEnter) {
-									M_RegisterVariable(vdata, vdata).modifier.SetPrivate();
-									continue;
-								}
-								//if(vdata.type.isAssigned && vdata.type.targetType == MemberData.TargetType.Type && vdata.value == null && vdata.type.startType != null && vdata.type.startType.IsValueType) {
-								//	result += (ParseType(vdata.type) + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
-								//	continue;
-								//}
-								if((vdata.defaultValue == null || vdata.type != null) && !vdata.isOpenGeneric) {
-									var vType = Type(vdata.type);
-									result += (vType + " " + GetVariableName(vdata) + $" = default({vType});").AddFirst("\n", !string.IsNullOrEmpty(result));
-									continue;
-								}
-								if(vdata.isOpenGeneric) {
-									string vType = Type(vdata.type);
-									if(vdata.defaultValue != null) {
-										result += (vType + " " + GetVariableName(vdata) + $" = default({vType});").AddFirst("\n", !string.IsNullOrEmpty(result));
-									}
-									else {
-										result += (vType + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
-									}
-									continue;
-								}
-								result += (Type(vdata.type) + " " + GetVariableName(vdata) + " = " + Value(vdata.defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
-							}
-							mData.code += result.AddLineInFirst();
+							mData.code += M_GenerateLocalVariable(function.LocalVariables).AddLineInFirst();
 						}
 						if(function.Entry != null && (mData.modifier == null || !mData.modifier.Abstract)) {
 							mData.code += GeneratePort(function.Entry.exit).AddLineInFirst();
@@ -650,7 +620,41 @@ namespace MaxyGames {
 			#endregion
 		}
 
-		private static void GenerateEventFunction() {
+		private static string M_GenerateLocalVariable(IEnumerable<Variable> localVariables) {
+			string result = null;
+			foreach(var vdata in localVariables) {
+				if(IsInstanceVariable(vdata)) {
+					continue;
+				}
+				else if(!vdata.resetOnEnter) {
+					M_RegisterVariable(vdata, vdata).modifier.SetPrivate();
+					continue;
+				}
+				//if(vdata.type.isAssigned && vdata.type.targetType == MemberData.TargetType.Type && vdata.value == null && vdata.type.startType != null && vdata.type.startType.IsValueType) {
+				//	result += (ParseType(vdata.type) + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
+				//	continue;
+				//}
+				if(vdata.isOpenGeneric) {
+					string vType = Type(vdata.type);
+					if(vdata.defaultValue != null) {
+						result += (vType + " " + GetVariableName(vdata) + $" = default({vType});").AddFirst("\n", !string.IsNullOrEmpty(result));
+					}
+					else {
+						result += (vType + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
+					}
+					continue;
+				}
+				else if(vdata.defaultValue == null) {
+					var vType = Type(vdata.type);
+					result += (vType + " " + GetVariableName(vdata) + $" = default({vType});").AddFirst("\n", !string.IsNullOrEmpty(result));
+					continue;
+				}
+				result += (Type(vdata.type) + " " + GetVariableName(vdata) + " = " + Value(vdata.defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
+			}
+			return result;
+		}
+
+		private static void M_GenerateEventFunction() {
 			List<string> CoroutineEventFunc = new List<string>();
 			if(generatorData.stateNodes.Count > 0) {
 				//Creating ActivateEvent for non grouped node

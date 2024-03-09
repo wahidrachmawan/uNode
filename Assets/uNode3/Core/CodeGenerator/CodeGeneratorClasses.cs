@@ -1347,34 +1347,8 @@ namespace MaxyGames {
 						index++;
 					}
 				}
-				string lv = null;
-				foreach(var vdata in obj.LocalVariables) {
-					if(IsInstanceVariable(vdata)) {
-						continue;
-					}
-					if (vdata.isOpenGeneric) {
-						string vType = Type(vdata.type);
-						if (vdata.defaultValue != null) {
-							lv += (vType + " " + GetVariableName(vdata) + " = default(" + vType + ");").AddFirst("\n", !string.IsNullOrEmpty(lv));
-						}
-						else {
-							lv += (vType + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-						}
-						continue;
-					}
-					else if (vdata.type.IsValueType && vdata.defaultValue == null) {
-						lv += (Type(vdata.type) + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-						continue;
-					}
-					else {
-						lv += (Type(vdata.type) + " " + GetVariableName(vdata) +
-							" = " + Value(vdata.defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-					}
-				}
-				if (!string.IsNullOrEmpty(lv)) {
-					lv = lv.AddLineInFirst().AddTabAfterNewLine();
-				}
-				result += (m + name + "(" + parameters + ") {" + lv.Add("\n", string.IsNullOrEmpty(code)) + code.AddTabAfterNewLine().AddLineInEnd() + "}").AddFirst("\n", !string.IsNullOrEmpty(result));
+				string localVar = M_GenerateLocalVariable(obj.LocalVariables).AddLineInFirst().AddTabAfterNewLine();
+				result += (m + name + "(" + parameters + ") {" + localVar.Add("\n", string.IsNullOrEmpty(code)) + code.AddTabAfterNewLine().AddLineInEnd() + "}").AddFirst("\n", !string.IsNullOrEmpty(result));
 				if(!string.IsNullOrEmpty(summary)) {
 					result = "/// <summary>".AddLineInEnd() +
 						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
@@ -1462,18 +1436,7 @@ namespace MaxyGames {
 							str = str.Insert(0, obj.getterModifier.GenerateCode());
 						}
 						if(obj.getRoot.LocalVariables.Any()) {
-							string lv = null;
-							foreach(var vdata in obj.getRoot.LocalVariables) {
-								if(IsInstanceVariable(vdata)) {
-									continue;
-								}
-								if(vdata.type.IsValueType && vdata.defaultValue == null) {
-									lv += (Type(vdata.type) + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-									continue;
-								}
-								lv += (Type(vdata.type) + " " + GetVariableName(vdata) +
-									" = " + Value(vdata.defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-							}
+							string lv = M_GenerateLocalVariable(obj.getRoot.LocalVariables);
 							str += lv.AddLineInFirst().AddTabAfterNewLine();
 						}
 						str += GeneratePort(obj.getRoot.Entry.nodeObject.primaryFlowOutput).AddTabAfterNewLine();
@@ -1489,27 +1452,7 @@ namespace MaxyGames {
 							str = str.Insert(0, obj.setterModifier.GenerateCode());
 						}
 						if(obj.setRoot.LocalVariables.Any()) {
-							string lv = null;
-							foreach(var vdata in obj.setRoot.LocalVariables) {
-								if(IsInstanceVariable(vdata)) {
-									continue;
-								}
-								if (vdata.isOpenGeneric) {
-									string vType = Type(vdata.type);
-									if (vdata.defaultValue != null) {
-										lv += (vType + " " + GetVariableName(vdata) + " = default(" + vType + ");").AddFirst("\n", !string.IsNullOrEmpty(lv));
-									}
-									else {
-										lv += (vType + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-									}
-									continue;
-								} else  if (vdata.type.IsValueType && vdata.defaultValue == null) {
-									lv += (Type(vdata.type) + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-									continue;
-								}
-								lv += (Type(vdata.type) + " " + GetVariableName(vdata) +
-									" = " + Value(vdata.defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(lv));
-							}
+							string lv = M_GenerateLocalVariable(obj.setRoot.LocalVariables);
 							str += lv.AddLineInFirst().AddTabAfterNewLine();
 						}
 						str += GeneratePort(obj.setRoot.Entry.nodeObject.primaryFlowOutput).AddTabAfterNewLine();
