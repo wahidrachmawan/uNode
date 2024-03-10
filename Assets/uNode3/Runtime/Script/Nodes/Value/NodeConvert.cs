@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Data", "AS-Convert", typeof(object), inputs = new[] { typeof(object) })]
+    [NodeMenu("Data", "Convert", typeof(object), inputs = new[] { typeof(object) })]
 	public class NodeConvert : ValueNode {
 		[Filter(AllowInterface = true, OnlyGetType = true, ArrayManipulator = true, DisplayRuntimeType = true)]
 		public SerializedType type = typeof(object);

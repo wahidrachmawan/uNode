@@ -209,11 +209,14 @@ namespace MaxyGames {
 			/// <param name="node"></param>
 			/// <returns></returns>
 			public static bool IsStackOverflow(NodeObject node) {
-				if(!generatorData.stackOverflowMap.TryGetValue(node, out var result)) {
-					result = IsRecusive(node);
-					generatorData.stackOverflowMap[node] = result;
+				if(isGenerating) {
+					if(!generatorData.stackOverflowMap.TryGetValue(node, out var result)) {
+						result = IsRecusive(node);
+						generatorData.stackOverflowMap[node] = result;
+					}
+					return result;
 				}
-				return result;
+				return IsRecusive(node);
 			}
 
 			public static HashSet<NodeObject> FindAllConnections(NodeObject node,
@@ -291,9 +294,9 @@ namespace MaxyGames {
 					return false;
 				}
 				prevs.Add(current);
-				for(int i = 0; i < original.FlowOutputs.Count; i++) {
-					if (original.FlowOutputs[i].isConnected) {
-						var flow = original.FlowOutputs[i].GetTargetNode();
+				for(int i = 0; i < current.FlowOutputs.Count; i++) {
+					if (current.FlowOutputs[i].isConnected) {
+						var flow = current.FlowOutputs[i].GetTargetNode();
 						if (flow == original || IsRecusive(original, flow, prevs)) {
 							return true;
 						}

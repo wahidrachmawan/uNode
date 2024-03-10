@@ -27,6 +27,19 @@ namespace MaxyGames.UNode {
 			return false;
 		}
 
+		public bool IsSelfCoroutine() {
+			if(connections.Count > 0) {
+				if(connections.Count > 1) {
+					return false;
+				}
+				var c = connections[0];
+				if(c.isValid) {
+					return c.input.IsSelfCoroutine();
+				}
+			}
+			return false;
+		}
+
 		public FlowInput GetTargetFlow() {
 			var con = GetConnection();
 			if(con != null && con.isValid) {

@@ -148,7 +148,40 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 			if(element is IErrorCheck errorCheck) {
 				errorCheck.CheckError(analizer);
 			}
+			if(element is NodeContainer container) {
+				var nodes = container.GetObjectsInChildren<NodeObject>(true);
+				foreach(var node in nodes) {
+					if(node.FlowInputs.Any(item => item.isConnected) && node.FlowOutputs.Any(item => item.isConnected)) {
+						if(CG.Nodes.IsStackOverflow(node)) {
+							analizer.RegisterError(node, "This node has circular reference flows which is not valid in current context");
+						}
+					}
+				}
+			}
 		}
+
+		//private static bool IsRecusive(NodeObject original, bool skipCoroutine, NodeObject current = null, HashSet<NodeObject> prevs = null) {
+		//	if(current == null)
+		//		current = original;
+		//	if(prevs == null)
+		//		prevs = new HashSet<NodeObject>();
+		//	if(prevs.Contains(current)) {
+		//		return false;
+		//	}
+		//	prevs.Add(current);
+		//	for(int i = 0; i < current.FlowOutputs.Count; i++) {
+		//		if(current.FlowOutputs[i].isConnected) {
+		//			if(skipCoroutine && current.FlowOutputs[i].IsSelfCoroutine() == true) {
+		//				continue;
+		//			}
+		//			var flow = current.FlowOutputs[i].GetTargetNode();
+		//			if(flow == original || IsRecusive(original, skipCoroutine, flow, prevs)) {
+		//				return true;
+		//			}
+		//		}
+		//	}
+		//	return false;
+		//}
 
 		public override void CheckNodeErrors(ErrorAnalyzer analizer, Node node) {
 			node.CheckError(analizer);
