@@ -34,7 +34,7 @@ namespace MaxyGames.UNode {
 		public virtual CG.MData GenerateMethodCode(out string[] parameterNames, out string actionCode) {
 			var evt = this as IGlobalEvent;
 			var count = evt.ParameterCount;
-			var parameters = new CG.TData[count];
+			var parameters = new Type[count];
 			for(int i = 0; i < count; i++) {
 				parameters[i] = evt.GetParameterType(i);
 			}
@@ -44,7 +44,7 @@ namespace MaxyGames.UNode {
 				names[i] = mData.parameters[i].name;
 			}
 			parameterNames = names;
-			actionCode = CG.NewGeneric(typeof(Action), parameters.Select(item => item.typeCode), new string[] { mData.name }, null);
+			actionCode = CG.NewGeneric(typeof(Action), parameters.Select(item => CG.Type(item)), new string[] { mData.name }, null);
 			return mData;
 		}
 

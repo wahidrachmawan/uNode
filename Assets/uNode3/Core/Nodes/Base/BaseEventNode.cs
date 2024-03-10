@@ -182,9 +182,9 @@ namespace MaxyGames.UNode {
 	/// This is the base class for all graph event.
 	/// </summary>
 	public abstract class BaseGraphEvent : BaseEventNode {
-		protected CG.MData GetMethodData(string name, params CG.TData[] parameterTypes) {
+		protected CG.MData GetMethodData(string name, params Type[] parameterTypes) {
 			if(parameterTypes == null) {
-				parameterTypes = Array.Empty<CG.TData>();
+				parameterTypes = Array.Empty<Type>();
 			}
 			var mData = CG.generatorData.GetMethodData(name, parameterTypes);
 			if(mData == null) {
@@ -199,7 +199,7 @@ namespace MaxyGames.UNode {
 		}
 
 		protected CG.MData DoGenerateCode(string name, ValueOutput[] outputs) {
-			var parameterTypes = new CG.TData[outputs.Length];
+			var parameterTypes = new Type[outputs.Length];
 			for(int i=0;i<outputs.Length;i++) {
 				parameterTypes[i] = outputs[i].type;
 			}
@@ -221,7 +221,7 @@ namespace MaxyGames.UNode {
 			return mdata;
 		}
 
-		protected CG.MData DoGenerateCode(string name, CG.TData[] parameterTypes = null) {
+		protected CG.MData DoGenerateCode(string name, Type[] parameterTypes = null) {
 			var mdata = GetMethodData(name, parameterTypes);
 			CG.RegisterUserObject(mdata, this);
 			mdata.AddCodeForEvent(GenerateRunFlows());

@@ -341,7 +341,7 @@ namespace MaxyGames {
 								foreach(string s in InitData) {
 									code += "\n" + s;
 								}
-								var method = generatorData.AddMethod("Awake", typeof(void), new TData[0]);
+								var method = generatorData.AddMethod("Awake", typeof(void), new Type[0]);
 								method.code = code + method.code.AddLineInFirst();
 							}
 						}
@@ -560,15 +560,15 @@ namespace MaxyGames {
 						}
 						MData mData = generatorData.GetMethodData(
 							function.name,
-							function.parameters.Select(i => new TData(i.type)).ToList(),
+							function.parameters.Select(i => i.type.type).ToArray(),
 							function.genericParameters.Length
 						);
 						if(mData == null) {
 							mData = new MData(
 								function.name,
 								function.returnType,
-								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind)).ToList(),
-								function.genericParameters.Select(i => new GPData(i.name, i.typeConstraint.type)).ToList()
+								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind)).ToArray(),
+								function.genericParameters.Select(i => new GPData(i.name, i.typeConstraint.type)).ToArray()
 							);
 							generatorData.methodData.Add(mData);
 						}
@@ -1472,6 +1472,16 @@ namespace MaxyGames {
 			string str = DoParseType(type);
 			generatorData.typesMap.Add(type, str);
 			return str;
+		}
+
+		private static string DeclareType(Type type) {
+			if(ReflectionUtils.IsNativeType(type) == false) {
+				if(type is IFakeType) {
+					//If it is a fake type and not native type
+					type = (type as IFakeType).GetNativeType();
+				}
+			}
+			return Type(type);
 		}
 
 		private static string DoParseGenericType(Type type, IEnumerable<string> parameters) {
@@ -3240,9 +3250,9 @@ namespace MaxyGames {
 		}
 
 		public static void InsertCodeToFunction(string functionName, Type returnType, Type[] parameterTypes, string code, int priority = 0) {
-			var mData = generatorData.GetMethodData(functionName, parameterTypes.Select((item) => new TData(item)).ToArray());
+			var mData = generatorData.GetMethodData(functionName, parameterTypes.Select((item) => item).ToArray());
 			if(mData == null) {
-				mData = generatorData.AddMethod(functionName, returnType, parameterTypes.Select((item) => new TData(item)).ToArray());
+				mData = generatorData.AddMethod(functionName, returnType, parameterTypes.Select((item) => item).ToArray());
 			}
 			mData.AddCode(code, priority);
 		}

@@ -235,10 +235,10 @@ namespace MaxyGames {
 			for(int i=0;i<parameterTypes.Length;i++) {
 				param[i] = parameterTypes[i];
 			}
-			return GetOrRegisterFunction(name, returnType, param);
+			return GetOrRegisterFunction(name, returnType, param as IList<Type>);
 		}
 
-		public static MData GetOrRegisterFunction(string name, TData returnType, IList<TData> parameterTypes) {
+		public static MData GetOrRegisterFunction(string name, Type returnType, IList<Type> parameterTypes) {
 			var mData = generatorData.GetMethodData(name, parameterTypes);
 			if(mData == null) {
 				mData = generatorData.AddMethod(name, returnType, parameterTypes);
