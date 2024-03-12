@@ -19,7 +19,12 @@ namespace MaxyGames.UNode.Editors.Control {
 				UnityEditorInternal.InternalEditorUtility.layers
 			);
 			if(EditorGUI.EndChangeCheck()) {
-				onChanged(UnityEditorInternal.InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(newValue));
+				if((int)newValue == -1) {
+					onChanged(newValue);
+				}
+				else {
+					onChanged(UnityEditorInternal.InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(newValue));
+				}
 			}
 		}
 	}

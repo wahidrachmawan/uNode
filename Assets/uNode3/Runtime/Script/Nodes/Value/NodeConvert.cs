@@ -6,7 +6,7 @@ namespace MaxyGames.UNode.Nodes {
 		[Filter(AllowInterface = true, OnlyGetType = true, ArrayManipulator = true, DisplayRuntimeType = true)]
 		public SerializedType type = typeof(object);
 		public bool useASWhenPossible = true;
-		public bool compactDisplay;
+		public bool compactDisplay = true;
 
 		public ValueInput target { get; set; }
 

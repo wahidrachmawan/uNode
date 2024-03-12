@@ -24,6 +24,8 @@ namespace MaxyGames.UNode.Editors {
 		public const string ussClassEntryNode = "entry-node";
 
 		public const string ussClassAutoHideControl = "autohide";
+
+		public const string ussClassHidePortIcon = "hide-image";
 		#endregion
 
 		public PortView primaryInputFlow { get; protected set; }

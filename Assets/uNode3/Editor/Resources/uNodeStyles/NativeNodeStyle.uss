@@ -294,10 +294,15 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 .compact-icon {
     width: 30px;
     height: 30px;
-    margin-bottom: 5px;
     margin-right: 1px;
     flex-shrink: 0;
     align-self: center;
+    /*margin-bottom: 5px;*/
+}
+
+.compact-icon-minimalize {
+    width: 24px;
+    height: 24px;
 }
 
 #title > .compact-input {
@@ -356,9 +361,37 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
     align-self: center;
 }
 
+.compact-node-minimalize > #node-border > #title {
+    height: 24px;
+}
+
 #title.rich-title > Label {
     display: none;
     visibility: hidden;
+}
+
+.Reroute-flow > #node-border > #title {
+    height: 16px;
+}
+
+.Reroute-flow > #node-border > #title > #title-icon {
+    height: 16px;
+    width: 16px;
+}
+
+.Reroute-flow .compact-icon {
+    height: 16px;
+    width: 16px;
+}
+
+.Reroute-flow #input > .port {
+    height: 16px;
+    width: 16px;
+}
+
+.Reroute-flow #output > .port {
+    height: 16px;
+    width: 16px;
 }
 
 /* block node */

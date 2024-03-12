@@ -217,7 +217,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Initialize default compact node style
 		/// </summary>
-		protected void ConstructCompactStyle(bool displayIcon = true, bool compactInput = true, bool compactOutput = true) {
+		protected void ConstructCompactStyle(bool displayIcon = true, bool compactInput = true, bool compactOutput = true, bool minimalize = false, bool hidePortIcon = false) {
 			if(isBlock) return;
 			compactIcon?.RemoveFromHierarchy();
 			EnableInClassList("compact-value", true);
@@ -228,16 +228,25 @@ namespace MaxyGames.UNode.Editors {
 						image = uNodeEditorUtility.GetTypeIcon(nodeObject.GetNodeIcon())
 					};
 					compactIcon.AddToClassList("compact-icon");
+					if(minimalize) {
+						compactIcon.AddToClassList("compact-icon-minimalize");
+					}
 					element.Insert(2, compactIcon);
 				}
 				if(compactOutput) {
 					foreach(var p in outputPorts) {
 						p.portName = "";
+						if(hidePortIcon) {
+							p.AddToClassList(ussClassHidePortIcon);
+						}
 					}
 				}
 				if(compactInput) {
 					foreach(var p in inputPorts) {
 						p.portName = "";
+						if(hidePortIcon) {
+							p.AddToClassList(ussClassHidePortIcon);
+						}
 					}
 				}
 			}
@@ -248,9 +257,9 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="inputValuePort"></param>
 		/// <param name="outputValuePort"></param>
-		protected void ConstructCompactTitle(ValueInput inputPort, ControlView control = null) {
+		protected void ConstructCompactTitle(ValueInput inputPort, ControlView control = null, bool minimalize = false) {
 			var firstPort = inputPorts.FirstOrDefault(p => p != null && p.GetPortID() == inputPort?.id);
-			ConstructCompactTitle(firstPort, control);
+			ConstructCompactTitle(firstPort, control, minimalize);
 		}
 
 
@@ -259,9 +268,9 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="inputValuePort"></param>
 		/// <param name="outputValuePort"></param>
-		protected void ConstructCompactTitle(string inputValuePortID, ControlView control = null) {
+		protected void ConstructCompactTitle(string inputValuePortID, ControlView control = null, bool minimalize = false) {
 			var firstPort = inputPorts.FirstOrDefault(p => p != null && p.GetPortID() == inputValuePortID);
-			ConstructCompactTitle(firstPort, control);
+			ConstructCompactTitle(firstPort, control, minimalize);
 		}
 
 		/// <summary>
@@ -269,24 +278,33 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="inputPort"></param>
 		/// <param name="control"></param>
-		protected void ConstructCompactTitle(PortView inputPort, ControlView control = null) {
+		protected void ConstructCompactTitle(PortView inputPort, ControlView control = null, bool minimalize = false) {
 			if(inputPort != null) {
 				inputPort.RemoveFromHierarchy();
 				inputPort.AddToClassList("compact-input");
 				titleContainer.Insert(0, inputPort);
 				EnableInClassList("compact-node", true);
+				if(minimalize) {
+					EnableInClassList("compact-node-minimalize", true);
+				}
 			}
 			if(control != null) {
 				control.RemoveFromHierarchy();
 				control.AddToClassList("compact-control");
 				titleContainer.Add(control);
 				EnableInClassList("compact-node", true);
+				if(minimalize) {
+					EnableInClassList("compact-node-minimalize", true);
+				}
 			}
 			if(primaryOutputValue != null) {
 				primaryOutputValue.RemoveFromHierarchy();
 				primaryOutputValue.AddToClassList("compact-output");
 				titleContainer.Add(primaryOutputValue);
 				EnableInClassList("compact-node", true);
+				if(minimalize) {
+					EnableInClassList("compact-node-minimalize", true);
+				}
 			}
 		}
 		#endregion

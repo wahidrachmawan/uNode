@@ -21,8 +21,8 @@ namespace MaxyGames.UNode.Nodes {
 			Int = 4,
 			Vector2 = 2,
 			Vector3 = 3,
-			Object = int.MinValue,
-			Custom = int.MaxValue,
+			Object = 99,
+			Custom = 100,
 		}
 		public enum UpdateEvent {
 			Update,
@@ -84,10 +84,10 @@ namespace MaxyGames.UNode.Nodes {
 					output = ValueOutput(nameof(output), typeof(Vector3));
 					output.AssignGetCallback(flow => m_Action.ReadValue<Vector3>());
 					break;
-				case OutputType.Button:
-					output = ValueOutput(nameof(output), typeof(bool));
-					output.AssignGetCallback(flow => m_Action.ReadValue<bool>());
-					break;
+				//case OutputType.Button:
+				//	output = ValueOutput(nameof(output), typeof(bool));
+				//	output.AssignGetCallback(flow => m_Action.ReadValue<bool>());
+				//	break;
 			}
 		}
 
@@ -168,8 +168,8 @@ namespace MaxyGames.UNode.Nodes {
 							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(float) });
 						case OutputType.Int:
 							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(int) });
-						case OutputType.Button:
-							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(bool) });
+						//case OutputType.Button:
+						//	return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(bool) });
 						case OutputType.Vector2:
 							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(Vector2) });
 						case OutputType.Vector3:

@@ -11,10 +11,15 @@ namespace MaxyGames.UNode.Editors {
 			InitializePrimaryPort();
 			if(node.IsFlowNode()) {
 				title = "";
+				this.AddToClassList("Reroute-flow");
+				if(graphData.graphLayout == GraphLayout.Horizontal) {
+					ConstructCompactStyle(minimalize: true, hidePortIcon: true);
+				}
 			} else {
+				this.AddToClassList("Reroute-value");
 				ConstructCompactStyle(false);
 				var inPort = AddInputValuePort(new ValueInputData(node.input));
-				inPort.AddToClassList("hide-image");
+				inPort.AddToClassList(ussClassHidePortIcon);
 				inPort.SetName("");
 				if(UIElementUtility.Theme.coloredNodeBorder) {
 					//Set border color

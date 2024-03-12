@@ -13,8 +13,10 @@ namespace MaxyGames.UNode.Editors {
 				return;
 			}
 			InitializePrimaryPort();
-			ConstructCompactStyle(false);
-			AddInputValuePort(new ValueInputData(node.target)).AddToClassList("hide-image");
+			//ConstructCompactStyle(false);
+			titleIcon.RemoveFromHierarchy();
+			ConstructCompactTitle(AddInputValuePort(new ValueInputData(node.target)), minimalize: true);
+			title = "To: " + uNodeUtility.WrapTextWithTypeColor(node.type.prettyName);
 			if (UIElementUtility.Theme.coloredNodeBorder) {
 				//Set border color
 				Color c = uNodePreference.GetColorForType(primaryOutputValue.GetPortType());

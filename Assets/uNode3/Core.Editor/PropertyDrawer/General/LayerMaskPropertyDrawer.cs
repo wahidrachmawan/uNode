@@ -18,7 +18,12 @@ namespace MaxyGames.UNode.Editors.Drawer {
                 UnityEditorInternal.InternalEditorUtility.layers
             );
             if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				if((int)fieldValue == -1) {
+					option.property.value = fieldValue;
+				}
+				else {
+					option.property.value = UnityEditorInternal.InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(fieldValue);
+				}
 			}
 		}
 	}
