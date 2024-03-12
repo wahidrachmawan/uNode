@@ -1464,7 +1464,7 @@ namespace MaxyGames {
 					}
 					p += "}";
 				}
-				result += (m + Type(obj.ReturnType()) + " " + name + " " + p).AddFirst("\n", !string.IsNullOrEmpty(result));
+				result += (m + DeclareType(obj.ReturnType()) + " " + name + " " + p).AddFirst("\n", !string.IsNullOrEmpty(result));
 				if(!string.IsNullOrEmpty(summary)) {
 					result = "/// <summary>".AddLineInEnd() +
 						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +

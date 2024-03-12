@@ -16,9 +16,13 @@ namespace MaxyGames.UNode.Nodes {
 			public string assetGuid;
 		}
 		public enum OutputType {
-			Button,
-			Float,
-			Vector2
+			Button = 0,
+			Float = 1,
+			Int = 4,
+			Vector2 = 2,
+			Vector3 = 3,
+			Object = int.MinValue,
+			Custom = int.MaxValue,
 		}
 		public enum UpdateEvent {
 			Update,
@@ -34,6 +38,10 @@ namespace MaxyGames.UNode.Nodes {
 		public UpdateEvent updateEvent;
 		public InputActionOption inputActionChangeType;
 		public OutputType outputType;
+		[Hide(nameof(outputType), OutputType.Custom, hideOnSame = false)]
+		[Filter(DisplayReferenceType = false)]
+		public SerializedType customOutputType = typeof(int);
+
 		[HideInInspector]
 		public Data data = new Data();
 
@@ -50,13 +58,31 @@ namespace MaxyGames.UNode.Nodes {
 			target = ValueInput(nameof(target), typeof(UnityEngine.Object));
 			target.filter = new FilterAttribute(typeof(PlayerInput), typeof(Component), typeof(GameObject));
 			switch(outputType) {
+				case OutputType.Custom: {
+					output = ValueOutput(nameof(output), () => customOutputType);
+					output.AssignGetCallback(flow => Operator.Convert(m_Action.ReadValueAsObject(), customOutputType));
+					break;
+				}
+				case OutputType.Object: {
+					output = ValueOutput(nameof(output), typeof(object));
+					output.AssignGetCallback(flow => m_Action.ReadValueAsObject());
+					break;
+				}
 				case OutputType.Float:
 					output = ValueOutput(nameof(output), typeof(float));
 					output.AssignGetCallback(flow => m_Action.ReadValue<float>());
 					break;
+				case OutputType.Int:
+					output = ValueOutput(nameof(output), typeof(int));
+					output.AssignGetCallback(flow => m_Action.ReadValue<int>());
+					break;
 				case OutputType.Vector2:
 					output = ValueOutput(nameof(output), typeof(Vector2));
 					output.AssignGetCallback(flow => m_Action.ReadValue<Vector2>());
+					break;
+				case OutputType.Vector3:
+					output = ValueOutput(nameof(output), typeof(Vector3));
+					output.AssignGetCallback(flow => m_Action.ReadValue<Vector3>());
 					break;
 				case OutputType.Button:
 					output = ValueOutput(nameof(output), typeof(bool));
@@ -134,12 +160,20 @@ namespace MaxyGames.UNode.Nodes {
 			if(output != null && output.hasValidConnections) {
 				CG.RegisterPort(output, () => {
 					switch(outputType) {
+						case OutputType.Custom:
+							return actionName.CGInvoke(nameof(m_Action.ReadValueAsObject)).CGConvert(customOutputType);
+						case OutputType.Object:
+							return actionName.CGInvoke(nameof(m_Action.ReadValueAsObject));
 						case OutputType.Float:
 							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(float) });
-						case OutputType.Vector2:
-							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(Vector2) });
+						case OutputType.Int:
+							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(int) });
 						case OutputType.Button:
 							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(bool) });
+						case OutputType.Vector2:
+							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(Vector2) });
+						case OutputType.Vector3:
+							return actionName.CGInvoke(nameof(m_Action.ReadValue), new[] { typeof(Vector3) });
 					}
 					return null;
 				});
@@ -251,12 +285,20 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override string GetTitle() {
 			switch(outputType) {
+				case OutputType.Custom:
+					return "On Input System: " + customOutputType.prettyName;
+				case OutputType.Object:
+					return "On Input System: Object";
 				case OutputType.Button:
-					return "On Input System Button";
+					return "On Input System: Button";
 				case OutputType.Float:
-					return "On Input System Float";
+					return "On Input System: Float";
+				case OutputType.Int:
+					return "On Input System: Int";
 				case OutputType.Vector2:
-					return "On Input System Vector2";
+					return "On Input System: Vector2";
+				case OutputType.Vector3:
+					return "On Input System: Vector3";
 				default:
 					throw new InvalidOperationException();
 			}
