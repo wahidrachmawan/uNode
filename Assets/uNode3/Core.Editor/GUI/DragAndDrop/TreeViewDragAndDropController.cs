@@ -251,7 +251,7 @@ namespace MaxyGames.UNode.Editors.UI {
 							selectedElement.PlaceBehind(droppedElement);
 							//selectedElement.SetSiblingIndex(childIndex);
 						} else {
-							var rootID = m_TreeView.GetItemDataForId<UGraphElement>(m_TreeView.GetRootIds().First()).parent.id;
+							var rootID = m_TreeView.GetItemDataForId<UGraphElement>(insertAtId).parent.id;
 							selectedElement.ForeachInParents(p => {
 								if(p.id == rootID) {
 									var droppedElement = m_TreeView.GetItemDataForId<UGraphElement>(insertAtId);

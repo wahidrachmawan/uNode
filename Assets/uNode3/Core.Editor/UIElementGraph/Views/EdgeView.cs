@@ -271,12 +271,15 @@ namespace MaxyGames.UNode.Editors {
 			for(int i = 0; i + 1 < vectors.Length; i++) {
 				distance += Vector2.Distance(vectors[i], vectors[i + 1]);
 			}
+			float quantity = 100f / distance;
+
 			float size = 15 * timer;
 			float pointDist = 0;
 			int currentSegment = 0;
+
 			if(isFlow) {
-				for(float i = -1; i < 1; i += 50f / distance) {
-					float t = i + GraphDebug.debugLinesTimer * (50f / distance);
+				for(float i = -1; i < 1; i += quantity) {
+					float t = i + GraphDebug.debugLinesTimer * (quantity);
 					if(!(t < 0f || t > 1)) {
 						if(currentSegment + 1 >= vectors.Length) break;
 						float seqmentDistance = Vector2.Distance(vectors[currentSegment], vectors[currentSegment + 1]);
@@ -298,8 +301,8 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			else {
-				for(float i = -1; i < 1; i += 50f / distance) {
-					float t = i + GraphDebug.debugLinesTimer * (50f / distance);
+				for(float i = -1; i < 1; i += quantity) {
+					float t = i + GraphDebug.debugLinesTimer * (quantity);
 					if(!(t < 0f || t > 1)) {
 						if(currentSegment + 1 >= vectors.Length) break;
 						float seqmentDistance = Vector2.Distance(vectors[currentSegment], vectors[currentSegment + 1]);
@@ -327,9 +330,10 @@ namespace MaxyGames.UNode.Editors {
 			float timer = Mathf.Lerp(1, 0, time);//The debug timer speed.
 			float dist = Vector2.Distance(start, end);
 			float size = 15 * timer;
+			float quantity = 100f / dist;
 			if(isFlow) {
-				for(float i = -1; i < 1; i += 50f / dist) {
-					float t = i + GraphDebug.debugLinesTimer * (50f / dist);
+				for(float i = -1; i < 1; i += quantity) {
+					float t = i + GraphDebug.debugLinesTimer * (quantity);
 					if(!(t < 0f || t > 1)) {
 						var color = new Color(
 							Mathf.Lerp(outColor.r, inColor.r, t),
@@ -341,8 +345,8 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			else {
-				for(float i = -1; i < 1; i += 50f / dist) {
-					float t = i + GraphDebug.debugLinesTimer * (50f / dist);
+				for(float i = -1; i < 1; i += quantity) {
+					float t = i + GraphDebug.debugLinesTimer * (quantity);
 					if(!(t < 0f || t > 1)) {
 						var color = new Color(
 							Mathf.Lerp(inColor.r, outColor.r, t),

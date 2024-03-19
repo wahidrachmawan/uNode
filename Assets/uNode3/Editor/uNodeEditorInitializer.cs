@@ -1015,7 +1015,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeThreadUtility.Update();
 
 			if(!EditorApplication.isPaused) {
-				GraphDebug.debugLinesTimer = Mathf.Repeat(GraphDebug.debugLinesTimer += 0.03f, 1f);
+				GraphDebug.debugLinesTimer = Mathf.Repeat(GraphDebug.debugLinesTimer += 1.5f * uNodeThreadUtility.deltaTime, 1f);
 			}
 
 		}
