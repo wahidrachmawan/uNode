@@ -318,6 +318,7 @@ namespace MaxyGames.UNode.Nodes {
 								for(int i = 0; i < datas.Length; i++) {
 									if(datas[i].flowOutputs != null) {
 										foreach(var data in datas[i].flowOutputs) {
+											if(data == null) continue;
 											if(object.Equals(data.value, values[i])) {
 												flow.Next(data.port);
 												break;
@@ -369,6 +370,48 @@ namespace MaxyGames.UNode.Nodes {
 									values[i] = datas[i].valueInput.GetValue(flow);
 							}
 							return method.InvokeOptimized(instanceData, values);
+						});
+
+						if(string.IsNullOrEmpty(att.description) == false) {
+							port.SetTooltip(att.description);
+						}
+						if(att.primary) {
+							if(nodeObject.primaryValueOutput != null)
+								throw Exception_MultiplePrimaryValueOutput;
+							nodeObject.primaryValueOutput = port;
+						}
+
+						ports.Add(new PortData() {
+							name = member.Name,
+							memberInfo = member,
+							valueOutput = port,
+							attribute = att,
+						});
+					}
+				}
+			}
+			else if(member is PropertyInfo property) {
+				if(property.CanRead) {
+					var getMethod = property.GetMethod;
+					if(att is OutputAttribute) {
+						var port = ValueOutput(att.id ?? "member:" + property.Name, att.type ?? getMethod.ReturnType).SetName(att.name ?? member.Name);
+
+						PortData[] datas = null;
+						port.AssignGetCallback(flow => {
+							if(datas == null) {
+								var parameters = getMethod.GetParameters();
+								datas = new PortData[parameters.Length];
+								for(int i = 0; i < parameters.Length; i++) {
+									datas[i] = GetFieldData(parameters[i].Name);
+								}
+							}
+							var instanceData = flow.GetElementData(this);
+							var values = new object[datas.Length];
+							for(int i = 0; i < datas.Length; i++) {
+								if(datas[i].valueInput != null)
+									values[i] = datas[i].valueInput.GetValue(flow);
+							}
+							return getMethod.InvokeOptimized(instanceData, values);
 						});
 
 						if(string.IsNullOrEmpty(att.description) == false) {
@@ -460,6 +503,7 @@ namespace MaxyGames.UNode.Nodes {
 									else {
 										List<(string, string)> cases = new List<(string, string)>(data.flowOutputs.Length);
 										foreach(var item in data.flowOutputs) {
+											if(item == null) continue;
 											if(item.port.hasValidConnections) {
 												cases.Add((item.value.CGValue(), CG.GeneratePort(item.port)));
 											}

@@ -122,6 +122,7 @@ namespace MaxyGames.UNode.Editors.PortConverter {
 		}
 
 		public override bool IsValid() {
+			if(rightType == null || leftType == null) return false;
 			return rightType.IsArray && leftType.IsCastableTo(rightType.GetElementType());
 		}
 

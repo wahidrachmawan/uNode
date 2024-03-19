@@ -817,8 +817,7 @@ namespace MaxyGames.UNode.Editors {
 							if(!hasFunction) {
 								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, m.Name, m.ReturnType,
-									m.GetParameters().Select(item => item.Name).ToArray(),
-									m.GetParameters().Select(item => item.ParameterType).ToArray(),
+									m.GetParameters().Select(item => new ParameterData(item)).ToArray(),
 									m.GetGenericArguments().Select(item => item.Name).ToArray(),
 									(function) => {
 										function.modifier.Override = true;
@@ -879,8 +878,7 @@ namespace MaxyGames.UNode.Editors {
 							if(!hasFunction) {
 								uNodeEditorUtility.RegisterUndo(graph);
 								NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, m.Name, m.ReturnType,
-									m.GetParameters().Select(item => item.Name).ToArray(),
-									m.GetParameters().Select(item => item.ParameterType).ToArray(),
+									m.GetParameters().Select(item => new ParameterData(item)).ToArray(),
 									m.GetGenericArguments().Select(item => item.Name).ToArray(),
 									(function) => {
 										function.modifier.New = true;
@@ -928,8 +926,7 @@ namespace MaxyGames.UNode.Editors {
 									if(!hasFunction) {
 										uNodeEditorUtility.RegisterUndo(graph);
 										NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, m.Name, m.ReturnType,
-											m.GetParameters().Select(item => item.Name).ToArray(),
-											m.GetParameters().Select(item => item.ParameterType).ToArray(),
+											m.GetParameters().Select(item => new ParameterData(item)).ToArray(),
 											m.GetGenericArguments().Select(item => item.Name).ToArray());
 										GraphChanged();
 									}

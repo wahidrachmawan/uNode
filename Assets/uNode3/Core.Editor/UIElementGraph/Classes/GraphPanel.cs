@@ -1169,6 +1169,7 @@ namespace MaxyGames.UNode.Editors {
 												clone.name = unityObject.name + "_clone";
 												scriptGraph.TypeList.AddType(clone as IScriptGraphType, scriptGraph);
 												AssetDatabase.AddObjectToAsset(clone, scriptGraph as UnityEngine.Object);
+												AssetDatabase.SaveAssetIfDirty(scriptGraph as UnityEngine.Object);
 												ReloadView();
 											});
 											evt.menu.AppendAction("Remove", act => {

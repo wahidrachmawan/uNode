@@ -707,7 +707,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Method)]
 	public class OutputAttribute : NodePortAttribute {
 		public OutputAttribute() {
 

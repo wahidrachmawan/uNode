@@ -119,8 +119,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 									() => {
 										uNodeEditorUtility.RegisterUndo(graph);
 										NodeEditorUtility.AddNewFunction(graph.GraphData.functionContainer, member.Name, member.ReturnType,
-										member.GetParameters().Select(item => item.Name).ToArray(),
-										member.GetParameters().Select(item => item.ParameterType).ToArray(),
+										member.GetParameters().Select(item => new ParameterData(item)).ToArray(),
 										member.GetGenericArguments().Select(item => item.Name).ToArray());
 										uNodeGUIUtility.GUIChanged(graph, UIChangeType.Important);
 									});

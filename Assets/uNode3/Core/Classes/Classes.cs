@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Reflection;
 
 namespace MaxyGames.UNode {
 	public static class DefaultInstance<T> where T : new() {
@@ -500,11 +501,11 @@ namespace MaxyGames.UNode {
 			return base.ToString();
 		}
 
-        object IGetValue.Get() {
+		object IGetValue.Get() {
 			return type;
-        }
+		}
 
-        public static implicit operator SerializedType(Type type) {
+		public static implicit operator SerializedType(Type type) {
 			return new SerializedType(type);
 		}
 
@@ -778,7 +779,28 @@ namespace MaxyGames.UNode {
 
 		public ParameterData(string name, System.Type type) {
 			this.name = name;
+			if(type.IsByRef) {
+				refKind = RefKind.Ref;
+				type = type.ElementType();
+			}
 			this.type = type;
+		}
+
+		public ParameterData(ParameterInfo info) {
+			this.name = info.Name;
+			this.type = info.ParameterType;
+			if(info.ParameterType.IsByRef) {
+				this.type = info.ParameterType.ElementType();
+				if(info.IsOut) {
+					refKind = RefKind.Out;
+				}
+				else if(info.IsIn) {
+					refKind = RefKind.In;
+				}
+				else {
+					refKind = RefKind.Ref;
+				}
+			}
 		}
 	}
 
@@ -818,7 +840,7 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	[System.Serializable]
 	public class AttributeData {
-		[Filter(typeof(Attribute), ArrayManipulator =false, AllowInterface =false)]
+		[Filter(typeof(Attribute), ArrayManipulator = false, AllowInterface = false)]
 		public SerializedType attributeType = typeof(object);
 		public ConstructorValueData constructor;
 

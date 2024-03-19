@@ -83,6 +83,10 @@ PortView > Image {
     border-color: rgba(255,255,0,0.8);
 }
 
+.compact-value .port {
+    height: 18px;
+}
+
 .compact-value > #node-border > #title {
     position: Absolute;
     width: 0;
@@ -301,8 +305,8 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 }
 
 .compact-icon-minimalize {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
 }
 
 #title > .compact-input {
@@ -362,7 +366,7 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 }
 
 .compact-node-minimalize > #node-border > #title {
-    height: 24px;
+    height: 18px;
 }
 
 #title.rich-title > Label {
@@ -380,18 +384,18 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 }
 
 .Reroute-flow .compact-icon {
-    height: 16px;
-    width: 16px;
+    height: 12px;
+    width: 12px;
 }
 
-.Reroute-flow #input > .port {
-    height: 16px;
-    width: 16px;
+.horizontal-graph .Reroute-flow #node-border {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin: 1px;
 }
 
-.Reroute-flow #output > .port {
-    height: 16px;
-    width: 16px;
+NodeRerouteView .port {
+    height: 18px;
 }
 
 /* block node */

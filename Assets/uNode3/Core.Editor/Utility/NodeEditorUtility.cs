@@ -36,6 +36,30 @@ namespace MaxyGames.UNode.Editors {
 			});
 		}
 
+		public static void AddNewFunction(FunctionContainer container, string name, Type returnType, IList<ParameterData> parameters, string[] genericParameter = null, Action<Function> action = null) {
+			AddNewObject<Function>(name, container, func => {
+				func.name = name;
+				func.returnType = returnType;
+				{//Init start node
+
+				}
+				if(parameters.Count > 0) {
+					for(int i = 0; i < parameters.Count; i++) {
+						func.parameters.Add(parameters[i]);
+					}
+				}
+				if(genericParameter != null && genericParameter.Length > 0) {
+					for(int i = 0; i < genericParameter.Length; i++) {
+						ArrayUtility.Add(ref func.genericParameters, new GenericParameterData(genericParameter[i]));
+					}
+				}
+				if(action != null) {
+					action(func);
+				}
+				Undo.SetCurrentGroupName("New Function : " + name);
+			});
+		}
+
 		public static void AddNewFunction(FunctionContainer container, string name, Type returnType, Action<Function> action = null) {
 			string fName = name;
 			var functions = container.collections;

@@ -5,7 +5,7 @@ using UnityEditor.Experimental.GraphView;
 using NodeView = UnityEditor.Experimental.GraphView.Node;
 
 namespace MaxyGames.UNode.Editors {
-	public class MinimapView : UnityEditor.Experimental.GraphView.GraphElement, IElementResizable {
+	public class MinimapView : GraphElement, IElementResizable {
 		//public Label label;
 		private Dragger m_Dragger;
 		private ResizableElement m_Resizer;
@@ -34,12 +34,11 @@ namespace MaxyGames.UNode.Editors {
 						capabilities &= ~Capabilities.Movable;
 						//ResetPositionProperties();
 						AddToClassList("anchored");
-						m_Resizer.SetEnabled(false);
 					} else {
 						capabilities |= Capabilities.Movable;
 						RemoveFromClassList("anchored");
-						m_Resizer.SetEnabled(true);
 					}
+					m_Resizer.SetEnabled(true);
 					Resize();
 				}
 			}
@@ -84,12 +83,14 @@ namespace MaxyGames.UNode.Editors {
 					minimapType = UIElementEditorTheme.MinimapType.Anchored;
 					UIElementUtility.Theme.minimapType = minimapType;
 					EditorUtility.SetDirty(UIElementUtility.Theme);
+					evt.StopPropagation();
 				}, DropdownMenuAction.AlwaysEnabled);
 			} else {
 				evt.menu.AppendAction("Make floating", (act) => {
 					minimapType = UIElementEditorTheme.MinimapType.Floating;
 					UIElementUtility.Theme.minimapType = minimapType;
 					EditorUtility.SetDirty(UIElementUtility.Theme);
+					evt.StopPropagation();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			evt.menu.AppendSeparator();
@@ -98,6 +99,7 @@ namespace MaxyGames.UNode.Editors {
 					minimapType = UIElementEditorTheme.MinimapType.UpperLeft;
 					UIElementUtility.Theme.minimapType = minimapType;
 					EditorUtility.SetDirty(UIElementUtility.Theme);
+					evt.StopPropagation();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			if(minimapType != UIElementEditorTheme.MinimapType.UpperRight) {
@@ -105,6 +107,7 @@ namespace MaxyGames.UNode.Editors {
 					minimapType = UIElementEditorTheme.MinimapType.UpperRight;
 					UIElementUtility.Theme.minimapType = minimapType;
 					EditorUtility.SetDirty(UIElementUtility.Theme);
+					evt.StopPropagation();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			if(minimapType != UIElementEditorTheme.MinimapType.BottomLeft) {
@@ -112,6 +115,7 @@ namespace MaxyGames.UNode.Editors {
 					minimapType = UIElementEditorTheme.MinimapType.BottomLeft;
 					UIElementUtility.Theme.minimapType = minimapType;
 					EditorUtility.SetDirty(UIElementUtility.Theme);
+					evt.StopPropagation();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			if(minimapType != UIElementEditorTheme.MinimapType.BottomRight) {
@@ -119,6 +123,7 @@ namespace MaxyGames.UNode.Editors {
 					minimapType = UIElementEditorTheme.MinimapType.BottomRight;
 					UIElementUtility.Theme.minimapType = minimapType;
 					EditorUtility.SetDirty(UIElementUtility.Theme);
+					evt.StopPropagation();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			evt.menu.AppendSeparator("");
@@ -334,18 +339,49 @@ namespace MaxyGames.UNode.Editors {
 			GraphView gView = graphView;
 			CalculateRects(gView.contentViewContainer);
 			Vector2 mousePosition = e.localMousePosition;
-			foreach(var child in graphView.nodeViews) {
-				if(child != null) {
-					ISelectable firstOfType = child.GetFirstOfType<ISelectable>();
-					if(firstOfType != null && firstOfType.IsSelectable() && CalculateElementRect(child).Contains(mousePosition)) {
-						gView.ClearSelection();
-						gView.AddToSelection(firstOfType);
-						gView.FrameSelection();
-						e.StopPropagation();
-					}
+
+			UNodeView closestNode = null;
+			foreach(var elem in graphView.nodeViews) {
+				if(elem == null || elem.isBlock || elem.IsSelectable() == false)
+					continue;
+				if(CalculateElementRect(elem).Contains(mousePosition)) {
+					closestNode = elem;
+					break;
 				}
 			}
+
+			if(closestNode == null) {
+				float closestDistance = int.MaxValue;
+				foreach(var elem in graphView.nodeViews) {
+					if(elem == null || elem.isBlock || elem.IsSelectable() == false)
+						continue;
+					var distance = GetDistanceToRect(CalculateElementRect(elem), mousePosition);
+					if(distance < closestDistance) {
+						closestDistance = distance;
+						closestNode = elem;
+					}
+				}
+				if(closestDistance > 5) {
+					closestNode = null;
+				}
+			}
+			if(closestNode != null) {
+				gView.ClearSelection();
+				gView.AddToSelection(closestNode);
+				gView.FrameSelection();
+				e.StopPropagation();
+			}
+
 			EatMouseDown(e);
+		}
+
+		private float GetDistanceToRect(Rect rect, Vector2 point) {
+			Vector2 halfSize = rect.size / 2f;
+			point -= rect.center;
+			Vector2 cwed = new Vector2(Mathf.Abs(point.x), Mathf.Abs(point.y)) - halfSize;
+			float outsideDistance = new Vector2(Mathf.Max(cwed.x, 0f), Mathf.Max(cwed.y, 0f)).magnitude;
+			float insideDistance = Mathf.Min(0f, Mathf.Max(cwed.x, cwed.y));
+			return outsideDistance + insideDistance;
 		}
 
 		public void OnStartResize() {

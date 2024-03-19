@@ -383,7 +383,7 @@ SOFTWARE.");
 #if UNODE_PRO
 			installedVersion += " Pro";
 #else
-			installedVersion += " Community";
+			installedVersion += " Free";
 #endif
 			EditorGUILayout.LabelField(new GUIContent("uNode v" + installedVersion), CenteredVersionLabel);
 			EditorGUILayout.Space();
