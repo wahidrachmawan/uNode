@@ -36,6 +36,7 @@
     border-bottom-width: 1px;
     align-self: flex-start;
     border-color: #242424;
+    width: 100%;
 }
 
 #unity-tree-view__item.active {

@@ -10,6 +10,7 @@ namespace MaxyGames.UNode {
 		public class Enumerator {
 			public string id = uNodeUtility.GenerateUID();
 			public string name;
+			//public string value;
 		}
 		public Texture2D icon;
 		public string summary;
