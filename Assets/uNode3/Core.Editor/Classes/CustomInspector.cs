@@ -164,6 +164,8 @@ namespace MaxyGames.UNode.Editors {
 									flag = flag2;
 									GraphDebug.debugMessage.SetMessage(connection, flag ? "" : null);
 									GraphDebug.debugMessage.Save();
+									uNodeGUIUtility.GUIChanged(connection.Input.node, UIChangeType.Average);
+									uNodeGUIUtility.GUIChanged(connection.Output.node, UIChangeType.Average);
 								}
 								if(flag) {
 									var text = GraphDebug.debugMessage.GetMessage(connection);

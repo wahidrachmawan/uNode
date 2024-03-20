@@ -107,6 +107,12 @@ namespace MaxyGames.UNode.Editors {
 				edgeControl.SetEnabled(false);
 			}
 			#region Debug
+			if(GraphDebug.debugMessage.HasMessage(connection)) {
+				if(m_EdgeBubble == null && isFlow) {
+					SetEdgeLabel("");
+				}
+				this.AddToClassList("edge-debug");
+			}
 			if(Application.isPlaying && GraphDebug.useDebug) {
 				//if(graphView != null) {
 				//	graphView.RegisterIMGUI(this, DebugGUI);

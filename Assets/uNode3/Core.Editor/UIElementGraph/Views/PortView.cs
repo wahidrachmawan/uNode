@@ -239,7 +239,10 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool ContainsPoint(Vector2 localPoint) {
 			if(isFlow && orientation == Orientation.Vertical) {
-				return new Rect(0.0f, 0.0f, layout.width, layout.height).Contains(localPoint);
+				Rect layout = m_ConnectorBox.layout;
+
+				return layout.Contains(localPoint);
+				//return new Rect(0.0f, 0.0f, layout.width, layout.height).Contains(localPoint);
 			}
 			else {
 				Rect layout = m_ConnectorBox.layout;

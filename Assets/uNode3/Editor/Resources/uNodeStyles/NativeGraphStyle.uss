@@ -353,11 +353,23 @@ PopupElement:hover {
 	align-self: center;
 	min-height: 24px;
 	max-height: 150px;
-	padding: 6px 8px;
+	padding: 4px 4px;
 	margin: 0;
 	-unity-text-align: middle-center;
 }
 
 .edgeBubble.candidate {
 	opacity: .5;
+}
+
+.edge.edge-debug {
+	--edge-width: 4;
+}
+
+.edge-debug.value:hover {
+	--edge-width: 6;
+}
+
+.edge-debug > .edgeBubble {
+	border-color: #d00000;
 }
