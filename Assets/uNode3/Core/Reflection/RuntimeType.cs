@@ -410,7 +410,13 @@ namespace MaxyGames.UNode {
 			}
 			else if(this is IFakeType fakeType) {
 				//If this is a FakeType then try compare the actual native type
-				return fakeType.GetNativeType().IsAssignableFrom(c);
+				var nativeType = fakeType.GetNativeType();
+				if(nativeType != null) {
+					return nativeType.IsAssignableFrom(c);
+				}
+				else {
+					return false;
+				}
 			}
 			else {
 				return BaseType != null && BaseType.IsAssignableFrom(c);

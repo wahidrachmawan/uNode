@@ -127,25 +127,22 @@ namespace MaxyGames.UNode.Editors {
 							var layout = new Rect(5, -8, 8, 8);
 							switch(nodeDebug.nodeState) {
 								case StateType.Success:
-									GUI.DrawTexture(layout, uNodeEditorUtility.MakeTexture(1, 1,
+									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0, 
 										Color.Lerp(
 											UIElementUtility.Theme.nodeRunningColor,
 											UIElementUtility.Theme.nodeSuccessColor,
-											(GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4)
-										)
-									);
+											(GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Failure:
-									GUI.DrawTexture(layout, uNodeEditorUtility.MakeTexture(1, 1,
+									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
 										Color.Lerp(
 											UIElementUtility.Theme.nodeRunningColor,
 											UIElementUtility.Theme.nodeFailureColor,
-											(GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4)
-										)
-									);
+											(GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Running:
-									GUI.DrawTexture(layout, uNodeEditorUtility.MakeTexture(1, 1, UIElementUtility.Theme.nodeRunningColor));
+									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
+										UIElementUtility.Theme.nodeRunningColor, 0, 0);
 									break;
 							}
 						}

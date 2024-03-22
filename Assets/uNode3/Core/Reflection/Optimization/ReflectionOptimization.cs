@@ -683,7 +683,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	internal class StaticActionInvoker<T> : ExpressonInvoker {
+	internal class StaticActionInvoker<T> : MethodInvoker {
 		private Action<T> invoker;
 
 		public StaticActionInvoker(MethodInfo methodInfo) : base(methodInfo) { }
@@ -692,16 +692,17 @@ namespace MaxyGames.UNode {
 		[UnityEngine.HideInCallstack]
 #endif
 		public override object Invoke(object target, params object[] parameters) {
-			invoker(parameters[0].ConvertTo<T>());
+			try {
+				invoker(parameters[0].ConvertTo<T>());
+			}
+			catch(Exception ex) {
+				throw new Exception("Error invoking: " + methodInfo, ex);
+			}
 			return null;
 		}
 
-		protected override void CompileExpression(MethodCallExpression callExpression, ParameterExpression[] parameterExpressions) {
-			invoker = Expression.Lambda<Action<T>>(callExpression, parameterExpressions).Compile();
-		}
-
-		protected override Type[] GetParameterTypes() {
-			return new[] { typeof(T) };
+		protected override void Initialize() {
+			invoker = (Action<T>)Delegate.CreateDelegate(typeof(Action<T>), methodInfo);
 		}
 	}
 

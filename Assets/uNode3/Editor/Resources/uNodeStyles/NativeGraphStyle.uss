@@ -362,7 +362,7 @@ PopupElement:hover {
 	opacity: .5;
 }
 
-.edge.edge-debug {
+.edge-debug.value {
 	--edge-width: 4;
 }
 

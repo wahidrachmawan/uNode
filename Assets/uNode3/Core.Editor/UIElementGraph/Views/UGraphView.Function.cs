@@ -231,6 +231,9 @@ namespace MaxyGames.UNode.Editors {
 						maxMilis = uNodePreference.preferenceData.maxReloadMilis,
 						displayProgressCallback = DisplayProgressBar,
 					};
+					if(uNodeUtility.isPlaying) {
+						data.maxMilis = Mathf.Max(data.maxMilis, 150);
+					}
 					var taskProgress = uNodeThreadUtility.Task(ReloadView(data), 
 						onFinished: () => {
 							isLoading = true;
