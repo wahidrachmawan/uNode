@@ -384,6 +384,7 @@ namespace MaxyGames.UNode.Editors {
 			//content.RemoveFromClassList(ussClassNameActive);
 			//content.RemoveFromClassList(ussClassNameSelected);
 			content.removeAction = null;
+			content.RemoveFromClassList("private-modifier");
 
 			var data = new PanelData();
 			content.userData = data;
@@ -400,9 +401,9 @@ namespace MaxyGames.UNode.Editors {
 			if(graphElement is Variable variable) {
 				Texture icon = uNodeEditorUtility.GetTypeIcon(variable.type);
 				content.ShowIcon(icon);
-				//if(!variable.modifier.isPublic) {
-				//	content.AddToClassList("private-modifier");
-				//}
+				if(!variable.modifier.isPublic) {
+					content.AddToClassList("private-modifier");
+				}
 				content.GetDragGenericData = () => {
 					var result = new Dictionary<string, object>();
 					result["uNode"] = variable;
@@ -510,9 +511,9 @@ namespace MaxyGames.UNode.Editors {
 			else if(graphElement is Property property) {
 				Texture icon = uNodeEditorUtility.GetTypeIcon(property.ReturnType());
 				content.ShowIcon(icon);
-				//if(!property.modifier.isPublic) {
-				//	content.AddToClassList("private-modifier");
-				//}
+				if(!property.modifier.isPublic) {
+					content.AddToClassList("private-modifier");
+				}
 				content.GetDragGenericData = () => {
 					var result = new Dictionary<string, object>();
 					result["uNode"] = property;
@@ -688,9 +689,9 @@ namespace MaxyGames.UNode.Editors {
 						graphEditor.Refresh();
 					}
 				};
-				//if(!function.modifier.isPublic) {
-				//	content.AddToClassList("private-modifier");
-				//}
+				if(!function.modifier.isPublic) {
+					content.AddToClassList("private-modifier");
+				}
 				content.GetDragGenericData = () => {
 					var result = new Dictionary<string, object>();
 					result["uNode"] = function;

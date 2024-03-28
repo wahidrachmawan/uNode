@@ -103,6 +103,14 @@ namespace MaxyGames.UNode {
 			//		method.Trigger();
 			//	}
 			//}
+			var outPort = Entry.exit;
+			if (outPort.GetTargetFlow() == null) {
+				if(returnType != typeof(void)) {
+					throw new Exception("The output port of the Entry is not assigned.");
+				}
+				return null;
+			}
+			//Init local variable to initial value
 			if(LocalVariables != null) {
 				foreach(var data in LocalVariables) {
 					if(data.resetOnEnter) {
@@ -117,27 +125,20 @@ namespace MaxyGames.UNode {
 				}
 				//Debug.Log($"Invoking function: {Name} with parameters:{string.Join(", ", parameter)}");
 			}
-			var outPort = Entry.exit;
-			if(outPort == null)
-				throw new Exception("The start node doesn't have primary flow input.");
-			//Init local variable to initial value
-			var targetPort = outPort.GetTargetFlow();
-			if (targetPort == null) {
-				if(returnType != typeof(void)) {
-					throw new Exception("The output port of the Entry is not assigned.");
-				}
-				return null;
-			}
 			Type rType = returnType;
-			if(targetPort.IsCoroutine()) {
-				var flow = new CoroutineGraphRunner(instance, targetPort);
-				var iterator = flow.GetIterator();
+			if(outPort.IsCoroutine()) {
 				if(rType.HasImplementInterface(typeof(IEnumerator<>))) {
+					var flow = new CoroutineGraphRunner(instance, Entry.enter);
+					var iterator = flow.GetIterator();
+
 					var method = typeof(IteratorUtilities).GetMemberCached(nameof(IteratorUtilities.WrapEnumerator)) as System.Reflection.MethodInfo;
 					method = method.MakeGenericMethod(rType.GenericTypeArguments[0]);
 					return method.InvokeOptimized(null, iterator);
 				}
 				else if(rType.HasImplementInterface(typeof(IEnumerable<>))) {
+					var flow = new CoroutineGraphRunner(instance, Entry.enter);
+					var iterator = flow.GetIterator();
+
 					var method = typeof(IteratorUtilities).GetMemberCached(nameof(IteratorUtilities.WrapEnumerable)) as System.Reflection.MethodInfo;
 					method = method.MakeGenericMethod(rType.GenericTypeArguments[0]);
 					return method.InvokeOptimized(null, iterator);
@@ -145,19 +146,22 @@ namespace MaxyGames.UNode {
 				else if(rType == typeof(IEnumerable)) {
 					return new IteratorUtilities.IEnumarableWrapper() {
 						instance = instance,
-						port = targetPort,
+						port = Entry.enter,
 					};
 				}
 				else if(rType == typeof(IEnumerator)) {
+					var flow = new CoroutineGraphRunner(instance, Entry.enter);
+					var iterator = flow.GetIterator();
+
 					return iterator;
 				}
 				throw new NotSupportedException(rType.FullName);
 			}
 			else {
 				var flow = instance.stateRunner;
-				flow.Run(targetPort);
+				flow.Run(Entry.enter);
 				if(rType != null && rType != typeof(void)) {
-					var js = flow.GetStateData(targetPort).jumpStatement;
+					var js = flow.GetStateData(Entry.enter).jumpStatement;
 					if(js == null || js.jumpType != JumpStatementType.Return) {
 						throw new Exception("No return value in function:" + name);
 					}

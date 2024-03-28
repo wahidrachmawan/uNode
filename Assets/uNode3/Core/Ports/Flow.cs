@@ -674,9 +674,6 @@ namespace MaxyGames.UNode {
 		}
 
 		protected override void OnTrigger(FlowOutput output, out JumpStatement jump) {
-			if(output.GetTargetNode() != null && output.GetTargetNode().GetTitle() == "Action") {
-				Debug.Log("A");
-			}
 			var flow = instance.RunState(output);
 			if(flow != null) {
 				if(!flow.IsFinished()) {

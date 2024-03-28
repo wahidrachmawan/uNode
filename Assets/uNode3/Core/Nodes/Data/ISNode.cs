@@ -26,6 +26,11 @@ namespace MaxyGames.UNode.Nodes {
 			return Operator.TypeIs(target.GetValue(flow), type.type);
 		}
 
+		public override void OnGeneratorInitialize() {
+			base.OnGeneratorInitialize();
+			CG.RegisterPort(value, () => CG.GeneratePort(target).CGConvert(value.type));
+		}
+
 		protected override string GenerateValueCode() {
 			if(target.isAssigned && type.isAssigned) {
 				return CG.Is(target, type.type);

@@ -136,6 +136,7 @@ namespace MaxyGames.UNode {
 		}
 
 		void IEventListener.Unregister(Delegate handler) {
+			if(handler == null) return;
 			if(handler is T del || handler.GetType().IsCastableTo(typeof(T)) && (del = (T)handler) != null) {
 				Unregister(del);
 			} else {

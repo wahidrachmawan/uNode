@@ -92,6 +92,62 @@ namespace MaxyGames.UNode.Editors {
 			}
 			#endregion
 
+			#region uNodeUtils Init
+			uNodeUtility.isInEditor = true;
+			//if(uNodeUtility.guiChanged == null) {
+			//	uNodeUtility.guiChanged += uNodeEditor.GUIChanged;
+			//}
+			if(uNodeUtility.richTextColor == null) {
+				uNodeUtility.richTextColor = () => {
+					if(uNodePreference.editorTheme != null) {
+						return uNodePreference.editorTheme.textSettings;
+					}
+					else {
+						return new EditorTextSetting();
+					}
+				};
+			}
+			if(uNodeUtility.getColorForType == null) {
+				uNodeUtility.getColorForType = (t) => {
+					return uNodePreference.GetColorForType(t);
+				};
+			}
+			if(uNodeUtility.getObjectID == null) {
+				Dictionary<Object, int> keys = new Dictionary<Object, int>();
+				uNodeUtility.getObjectID = delegate (UnityEngine.Object obj) {
+					if(obj == null)
+						return 0;
+					if(uNodeThreadUtility.IsInMainThread == false) {
+						//In case this is not main thread.
+						if(keys.TryGetValue(obj, out var rezult)) {
+							return rezult;
+						}
+						return obj.GetHashCode();
+					}
+					if(!EditorUtility.IsPersistent(obj)) {
+						return obj.GetHashCode();
+					}
+					if(uNodeEditorUtility.IsPrefabInstance(obj)) {
+						var o = PrefabUtility.GetCorrespondingObjectFromSource(obj);
+						if(o == null)
+							return obj.GetHashCode();
+						return uNodeUtility.GetObjectID(o);
+					}
+					if(keys.TryGetValue(obj, out var result) == false) {
+						if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guid, out long localID)) {
+							var id = uNodeUtility.GetHashCode(uNodeUtility.GetHashCode(guid), localID);
+							result = (int)id;
+						}
+						else {
+							result = obj.GetHashCode();
+						}
+						keys[obj] = result;
+					}
+					return result;
+				};
+			}
+			#endregion
+
 			var path = uNodeEditorUtility.GetUNodePath() + "/Pro.Editor";
 			if(Directory.Exists(path)) {
 #if !UNODE_PRO
@@ -256,62 +312,6 @@ namespace MaxyGames.UNode.Editors {
 		static void Setup() {
 			uNodeIcon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.UNodeIcon));
 			UpdateMarkedObject();
-
-			#region uNodeUtils Init
-			uNodeUtility.isInEditor = true;
-			//if(uNodeUtility.guiChanged == null) {
-			//	uNodeUtility.guiChanged += uNodeEditor.GUIChanged;
-			//}
-			if(uNodeUtility.richTextColor == null) {
-				uNodeUtility.richTextColor = () => {
-					if(uNodePreference.editorTheme != null) {
-						return uNodePreference.editorTheme.textSettings;
-					}
-					else {
-						return new EditorTextSetting();
-					}
-				};
-			}
-			if(uNodeUtility.getColorForType == null) {
-				uNodeUtility.getColorForType = (t) => {
-					return uNodePreference.GetColorForType(t);
-				};
-			}
-			if(uNodeUtility.getObjectID == null) {
-				Dictionary<Object, int> keys = new Dictionary<Object, int>();
-				uNodeUtility.getObjectID = delegate (UnityEngine.Object obj) {
-					if(obj == null)
-						return 0;
-					if(uNodeThreadUtility.IsInMainThread == false) {
-						//In case this is not main thread.
-						if(keys.TryGetValue(obj, out var rezult)) {
-							return rezult;
-						}
-						return obj.GetHashCode();
-					}
-					if(!EditorUtility.IsPersistent(obj)) {
-						return obj.GetHashCode();
-					}
-					if(uNodeEditorUtility.IsPrefabInstance(obj)) {
-						var o = PrefabUtility.GetCorrespondingObjectFromSource(obj);
-						if(o == null)
-							return obj.GetHashCode();
-						return uNodeUtility.GetObjectID(o);
-					}
-					if(keys.TryGetValue(obj, out var result) == false) {
-						if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guid, out long localID)) {
-							var id = uNodeUtility.GetHashCode(uNodeUtility.GetHashCode(guid), localID);
-							result = (int)id;
-						}
-						else {
-							result = obj.GetHashCode();
-						}
-						keys[obj] = result;
-					}
-					return result;
-				};
-			}
-			#endregion
 
 			#region Debug Init
 			{
