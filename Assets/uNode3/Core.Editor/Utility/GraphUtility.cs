@@ -33,7 +33,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public static void Duplicate(UGraphElement element) {
 				var data = DoCopy(element);
-				Paste(element.parent, data, new PasteOption() { removeOtherConnections = true });
+				Paste(element.parent, data, new PasteOption() { removeOtherConnections = false });
 			}
 
 			public static void Clear() => data = null;
@@ -42,7 +42,7 @@ namespace MaxyGames.UNode.Editors {
 				data = DoCopy(elements);
 			}
 
-			public static UGraphElement[] Paste(UGraphElement parent, bool removeOtherConnections = true) {
+			public static UGraphElement[] Paste(UGraphElement parent, bool removeOtherConnections = false) {
 				return Paste(parent, data, new PasteOption() {
 					removeOtherConnections = removeOtherConnections,
 				});

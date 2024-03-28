@@ -2312,7 +2312,7 @@ namespace MaxyGames.UNode.Editors {
 			else if(e.keyCode == KeyCode.V && e.ctrlKey && e.shiftKey) {
 				uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
 				var clickedPos = GetMousePosition(graph.topMousePos);
-				graph.PasteNode(clickedPos, false);
+				graph.PasteNode(clickedPos, true);
 				graph.Refresh();
 			}
 			else if(e.keyCode == KeyCode.A && e.ctrlKey) {

@@ -738,7 +738,7 @@ namespace MaxyGames.UNode.Editors {
 			graphData.position = position;
 		}
 
-		public void PasteNode(Vector2 position, bool removeOtherConnections = true) {
+		public void PasteNode(Vector2 position, bool removeOtherConnections = false) {
 			if(graphData.currentCanvas != null && GraphUtility.CopyPaste.IsCopiedNodes) {
 				var nodes = GraphUtility.CopyPaste.Paste(graphData.currentCanvas, removeOtherConnections: removeOtherConnections).Select(n => n as NodeObject).ToArray();
 
