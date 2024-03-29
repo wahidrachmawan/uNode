@@ -11,7 +11,7 @@ namespace MaxyGames.UNode.Editors {
 			InitializePrimaryPort();
 			AddInputValuePort(new ValueInputData(node.target));
 			AddInputValuePort(new ValueInputData(node.value));
-			if(uNodeUtility.preferredDisplay != DisplayKind.Full) {
+			if(uNodeUtility.preferredDisplay != DisplayKind.Full && owner.graphLayout == GraphLayout.Vertical) {
 				ConstructCompactStyle();
 			}
 		}

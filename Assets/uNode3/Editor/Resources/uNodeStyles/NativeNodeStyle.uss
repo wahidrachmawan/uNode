@@ -83,8 +83,12 @@ PortView > Image {
     border-color: rgba(255,255,0,0.8);
 }
 
-.compact-value .port {
+.compact-value-minimalize .port {
     height: 18px;
+}
+
+.compact-value #contents > #top > #input {
+    justify-content: space-around;
 }
 
 .compact-value > #node-border > #title {
@@ -374,21 +378,21 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
     visibility: hidden;
 }
 
-.Reroute-flow > #node-border > #title {
+.reroute-flow > #node-border > #title {
     height: 16px;
 }
 
-.Reroute-flow > #node-border > #title > #title-icon {
+.reroute-flow > #node-border > #title > #title-icon {
     height: 16px;
     width: 16px;
 }
 
-.Reroute-flow .compact-icon {
+.reroute-flow .compact-icon {
     height: 12px;
     width: 12px;
 }
 
-.horizontal-graph .Reroute-flow #node-border {
+.horizontal-graph .reroute-flow #node-border {
     padding-top: 1px;
     padding-bottom: 1px;
     margin: 1px;

@@ -11,12 +11,12 @@ namespace MaxyGames.UNode.Editors {
 			InitializePrimaryPort();
 			if(node.IsFlowNode()) {
 				title = "";
-				this.AddToClassList("Reroute-flow");
+				this.AddToClassList("reroute-flow");
 				if(graphData.graphLayout == GraphLayout.Horizontal) {
 					ConstructCompactStyle(minimalize: true, hidePortIcon: true);
 				}
 			} else {
-				this.AddToClassList("Reroute-value");
+				this.AddToClassList("reroute-value");
 				ConstructCompactStyle(false);
 				var inPort = AddInputValuePort(new ValueInputData(node.input));
 				inPort.AddToClassList(ussClassHidePortIcon);

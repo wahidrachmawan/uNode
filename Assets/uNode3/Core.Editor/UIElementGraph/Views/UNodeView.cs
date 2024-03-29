@@ -26,6 +26,17 @@ namespace MaxyGames.UNode.Editors {
 		public const string ussClassAutoHideControl = "autohide";
 
 		public const string ussClassHidePortIcon = "hide-image";
+
+
+		public const string ussClassCompact = "compact";
+		public const string ussClassCompactValue = "compact-value";
+		public const string ussClassCompactValueMinimalize = "compact-value-minimalize";
+		public const string ussClassCompactTitle = "compact-title";
+		public const string ussClassCompactNode = "compact-node";
+		public const string ussClassCompactNodeMinimalize = "compact-node-minimalize";
+		public const string ussClassCompactOutput = "compact-output";
+		public const string ussClassCompactInput = "compact-input";
+		public const string ussClassCompactControl = "compact-control";
 		#endregion
 
 		public PortView primaryInputFlow { get; protected set; }

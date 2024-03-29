@@ -29,19 +29,21 @@ namespace MaxyGames.UNode.Editors {
 				}
 			});
 			{//Initialize ports
-				foreach(var port in nodeObject.FlowInputs) {
-					if(port == nodeObject.primaryFlowInput) {
-						AddPrimaryInputFlow();
-						continue;
+				if(node.target.targetType != MemberData.TargetType.Constructor) {
+					foreach(var port in nodeObject.FlowInputs) {
+						if(port == nodeObject.primaryFlowInput) {
+							AddPrimaryInputFlow();
+							continue;
+						}
+						AddInputFlowPort(new FlowInputData(port));
 					}
-					AddInputFlowPort(new FlowInputData(port));
-				}
-				foreach(var port in nodeObject.FlowOutputs) {
-					if(port == nodeObject.primaryFlowOutput) {
-						AddPrimaryOutputFlow();
-						continue;
+					foreach(var port in nodeObject.FlowOutputs) {
+						if(port == nodeObject.primaryFlowOutput) {
+							AddPrimaryOutputFlow();
+							continue;
+						}
+						AddOutputFlowPort(new FlowOutputData(port));
 					}
-					AddOutputFlowPort(new FlowOutputData(port));
 				}
 				foreach(var port in nodeObject.ValueOutputs) {
 					if(port == nodeObject.primaryValueOutput) {
@@ -71,8 +73,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			isCompact = false;
-			EnableInClassList("compact", false);
-			EnableInClassList("compact-value", false);
+			EnableInClassList(ussClassCompact, false);
+			EnableInClassList(ussClassCompactValue, false);
+			EnableInClassList(ussClassCompactValueMinimalize, false);
 			if(primaryOutputFlow != null || outputControls.Count != 0) {
 				if(uNodeUtility.preferredDisplay == DisplayKind.Partial) {
 					ConstructCompactTitle(node.instance);
@@ -103,7 +106,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					control.UpdateControl();
 					if(inputControls.Count == 1) {
-						EnableInClassList("compact-value", true);
+						EnableInClassList(ussClassCompactValue, true);
 						if(primaryOutputValue != null) {
 							primaryOutputValue.SetName("");
 						}
@@ -114,13 +117,14 @@ namespace MaxyGames.UNode.Editors {
 				int valueInputCount = inputPorts.Count(x => x.orientation == Orientation.Horizontal);
 				if(valueOutputCount == 1 && valueInputCount == 0) {
 					isCompact = true;
-					EnableInClassList("compact", true);
+					EnableInClassList(ussClassCompact, true);
 					if(primaryOutputValue != null) {
 						primaryOutputValue.SetName("");
 					}
 				}
 			}
 			if(isCompact && primaryOutputValue != null) {
+				EnableInClassList(ussClassCompactValueMinimalize, true);
 				Color c = uNodePreference.GetColorForType(primaryOutputValue.GetPortType());
 				c.a = 0.8f;
 				elementTypeColor = c;
@@ -130,7 +134,7 @@ namespace MaxyGames.UNode.Editors {
 			} else if(uNodeUtility.preferredDisplay == DisplayKind.Partial) {
 				ConstructCompactTitle(node.instance);
 				if(primaryOutputValue != null) {
-					EnableInClassList("compact-title", true);
+					EnableInClassList(ussClassCompactTitle, true);
 					Color c = uNodePreference.GetColorForType(primaryOutputValue.GetPortType());
 					c.a = 0.8f;
 					elementTypeColor = c;

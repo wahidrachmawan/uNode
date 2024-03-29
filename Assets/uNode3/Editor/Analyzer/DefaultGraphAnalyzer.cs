@@ -155,8 +155,33 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							analizer.RegisterError(node, "This node has circular reference flows which is not valid in current context");
 						}
 					}
+					if(node.ValueInputs.Any(item => item.isConnected) && node.ValueInputs.Any(item => item.isConnected)) {
+						if(IsValueRecusive(node)) {
+							analizer.RegisterError(node, "This node has circular reference values which will cause stack overflow");
+						}
+					}
 				}
 			}
+		}
+
+		private static bool IsValueRecusive(NodeObject original, NodeObject current = null, HashSet<NodeObject> prevs = null) {
+			if(current == null)
+				current = original;
+			if(prevs == null)
+				prevs = new HashSet<NodeObject>();
+			if(prevs.Contains(current)) {
+				return false;
+			}
+			prevs.Add(current);
+			for(int i = 0; i < current.ValueInputs.Count; i++) {
+				if(current.ValueInputs[i].isConnected) {
+					var tNode = current.ValueInputs[i].GetTargetNode();
+					if(tNode == original || IsValueRecusive(original, tNode, prevs)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		//private static bool IsRecusive(NodeObject original, bool skipCoroutine, NodeObject current = null, HashSet<NodeObject> prevs = null) {

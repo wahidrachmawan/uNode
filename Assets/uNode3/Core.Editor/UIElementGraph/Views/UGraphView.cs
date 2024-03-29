@@ -1522,12 +1522,12 @@ namespace MaxyGames.UNode.Editors {
 					if(node == null)
 						return;
 
-					evt.menu.AppendAction("Inspect...", (e) => {
-						ActionPopupWindow.ShowWindow(screenRect, () => {
-							graph.Select(node.nodeObject);
-							CustomInspector.ShowInspector(graphData);
-						}, 300, 400);
-					}, DropdownMenuAction.AlwaysEnabled);
+					//evt.menu.AppendAction("Inspect...", (e) => {
+					//	ActionPopupWindow.ShowWindow(screenRect, () => {
+					//		graph.Select(node.nodeObject);
+					//		CustomInspector.ShowInspector(graphData);
+					//	}, 300, 400);
+					//}, DropdownMenuAction.AlwaysEnabled);
 
 					//if(nodeView is INodeBlock) {
 					//	INodeBlock blockView = nodeView as INodeBlock;
@@ -2475,24 +2475,29 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				var nodeView = nodeViews.Where(view => !(view is RegionNodeView)).FirstOrDefault(view => view != null && view.GetPosition().Contains(point));
 				if(nodeView == null && graphData.canAddNode) {
-					IEnumerable<string> namespaces = null;
-					if(graphData.graph != null) {
-						namespaces = graphData.graph.GetUsingNamespaces();
-					}
-					AutoCompleteWindow.CreateWindow(Vector2.zero, (items) => {
-						var nodes = CompletionEvaluator.CompletionsToGraphs(CompletionEvaluator.SimplifyCompletions(items), graphData, point);
-						if(nodes != null && nodes.Count > 0) {
-							graph.Refresh();
-							return true;
+					if(Event.current != null && (Event.current.shift || Event.current.command || Event.current.control)) {
+						IEnumerable<string> namespaces = null;
+						if(graphData.graph != null) {
+							namespaces = graphData.graph.GetUsingNamespaces();
 						}
-						return false;
-					}, new CompletionEvaluator.CompletionSetting() {
-						owner = graphData.currentCanvas,
-						namespaces = namespaces,
-						allowExpression = true,
-						allowStatement = true,
-						allowSymbolKeyword = true,
-					}).ChangePosition(ctx.screenMousePosition);
+						AutoCompleteWindow.CreateWindow(Vector2.zero, (items) => {
+							var nodes = CompletionEvaluator.CompletionsToGraphs(CompletionEvaluator.SimplifyCompletions(items), graphData, point);
+							if(nodes != null && nodes.Count > 0) {
+								graph.Refresh();
+								return true;
+							}
+							return false;
+						}, new CompletionEvaluator.CompletionSetting() {
+							owner = graphData.currentCanvas,
+							namespaces = namespaces,
+							allowExpression = true,
+							allowStatement = true,
+							allowSymbolKeyword = true,
+						}).ChangePosition(ctx.screenMousePosition);
+					}
+					else {
+						graph.ShowNodeMenu(point);
+					}
 				}
 			}
 		}

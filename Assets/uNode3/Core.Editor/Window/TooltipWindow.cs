@@ -23,6 +23,28 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		private static System.Reflection.MethodInfo _showTooltipWithModeMethod;
+		private static System.Reflection.MethodInfo showTooltipWithModeMethod {
+			get {
+				if(_showTooltipWithModeMethod == null) {
+					_showTooltipWithModeMethod = typeof(EditorWindow).GetMethod("ShowPopupWithMode",
+						System.Reflection.BindingFlags.NonPublic |
+						System.Reflection.BindingFlags.Instance);
+				}
+				return _showTooltipWithModeMethod;
+			}
+		}
+
+		private static void DoShow() {
+			if(uNodeUtility.isOSXPlatform || showTooltipMethod == null) {
+				showTooltipWithModeMethod.Invoke(window, new object[] { 1, false });
+			}
+			else if(showTooltipMethod != null) {
+				//Hack internal method so other window will not lose focus like an build in tooltip.
+				showTooltipMethod.Invoke(window, null);
+			}
+		}
+
 		public static TooltipWindow Show(Vector2 pos, IList<GUIContent> contents, float width = 300, float height = 300) {
 			if(window == null)
 				window = CreateInstance(typeof(TooltipWindow)) as TooltipWindow;
@@ -31,13 +53,9 @@ namespace MaxyGames.UNode.Editors {
 			window.contents = contents;
 			window.isInitailzed = false;
 			window.isOver = false;
-			window.position = new Rect(pos.x, pos.y, width, height);
 			window.Repaint();
-			if(showTooltipMethod != null) {//Hack internal method so other window will not lose focus like an build in tooltip.
-				showTooltipMethod.Invoke(window, null);
-			} else {
-				window.ShowPopup();
-			}
+			DoShow();
+			window.position = new Rect(pos.x, pos.y, width, height);
 			//window.ShowAsDropDown(WindowUtility.MousePosToRect(pos, Vector2.zero), new Vector2(width, height));
 			return window;
 		}
@@ -71,18 +89,10 @@ namespace MaxyGames.UNode.Editors {
 					if(rect.height > height) {
 						isOver = true;
 						window.position = new Rect(window.position.x, window.position.y, position.width, height);
-						if(showTooltipMethod != null) {//Hack internal method so other window will not lose focus like an build in tooltip.
-							showTooltipMethod.Invoke(window, null);
-						} else {
-							window.ShowPopup();
-						}
+						DoShow();
 					} else {
 						window.position = new Rect(window.position.x, window.position.y, position.width, rect.height);
-						if(showTooltipMethod != null) {//Hack internal method so other window will not lose focus like an build in tooltip.
-							showTooltipMethod.Invoke(window, null);
-						} else {
-							window.ShowPopup();
-						}
+						DoShow();
 					}
 				}
 			} else if(Event.current.type == EventType.Repaint) {

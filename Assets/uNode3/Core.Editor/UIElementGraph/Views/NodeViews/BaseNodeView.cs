@@ -217,7 +217,7 @@ namespace MaxyGames.UNode.Editors {
 		protected void ConstructCompactStyle(bool displayIcon = true, bool compactInput = true, bool compactOutput = true, bool minimalize = false, bool hidePortIcon = false) {
 			if(isBlock) return;
 			compactIcon?.RemoveFromHierarchy();
-			EnableInClassList("compact-value", true);
+			EnableInClassList(ussClassCompactValue, true);
 			var element = this.Q("top");
 			if(element != null) {
 				if(displayIcon) {
@@ -278,29 +278,29 @@ namespace MaxyGames.UNode.Editors {
 		protected void ConstructCompactTitle(PortView inputPort, ControlView control = null, bool minimalize = false) {
 			if(inputPort != null) {
 				inputPort.RemoveFromHierarchy();
-				inputPort.AddToClassList("compact-input");
+				inputPort.AddToClassList(ussClassCompactInput);
 				titleContainer.Insert(0, inputPort);
-				EnableInClassList("compact-node", true);
+				EnableInClassList(ussClassCompactNode, true);
 				if(minimalize) {
-					EnableInClassList("compact-node-minimalize", true);
+					EnableInClassList(ussClassCompactNodeMinimalize, true);
 				}
 			}
 			if(control != null) {
 				control.RemoveFromHierarchy();
-				control.AddToClassList("compact-control");
+				control.AddToClassList(ussClassCompactControl);
 				titleContainer.Add(control);
-				EnableInClassList("compact-node", true);
+				EnableInClassList(ussClassCompactNode, true);
 				if(minimalize) {
-					EnableInClassList("compact-node-minimalize", true);
+					EnableInClassList(ussClassCompactNodeMinimalize, true);
 				}
 			}
 			if(primaryOutputValue != null) {
 				primaryOutputValue.RemoveFromHierarchy();
-				primaryOutputValue.AddToClassList("compact-output");
+				primaryOutputValue.AddToClassList(ussClassCompactOutput);
 				titleContainer.Add(primaryOutputValue);
-				EnableInClassList("compact-node", true);
+				EnableInClassList(ussClassCompactNode, true);
 				if(minimalize) {
-					EnableInClassList("compact-node-minimalize", true);
+					EnableInClassList(ussClassCompactNodeMinimalize, true);
 				}
 			}
 		}

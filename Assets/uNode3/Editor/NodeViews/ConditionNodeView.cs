@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Editors {
 			base.InitializeView();
 			Nodes.ConditionNode node = targetNode as Nodes.ConditionNode;
 			InitializeBlocks(node.data.container, BlockType.Condition);
-			EnableInClassList("compact", true);
+			EnableInClassList(ussClassCompact, true);
 			if(primaryOutputValue != null) {
 				primaryOutputValue.SetName("");
 				if (UIElementUtility.Theme.coloredNodeBorder) {

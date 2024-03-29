@@ -238,7 +238,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override bool ContainsPoint(Vector2 localPoint) {
-			if(isFlow && orientation == Orientation.Vertical) {
+			if(isFlow && orientation == Orientation.Vertical && owner.ClassListContains("reroute-flow")) {
 				Rect layout = m_ConnectorBox.layout;
 
 				return layout.Contains(localPoint);
