@@ -133,13 +133,18 @@ namespace MaxyGames.UNode.Editors {
 			XmlElement matchedElement = null;
 			if(xmlDocument != null) {
 				try {
-					foreach(XmlElement xmlElement in xmlDocument["doc"]["members"]) {
-						if(xmlElement.Attributes["name"] != null && xmlElement.Attributes["name"].Value.Equals(fullName)) {
-							if(matchedElement != null) {
-								return null;
+					foreach(var member in xmlDocument["doc"]["members"]) {
+						if(member is XmlElement xmlElement) {
+							if(xmlElement.Attributes["name"] != null && xmlElement.Attributes["name"].Value.Equals(fullName)) {
+								if(matchedElement != null) {
+									return null;
+								}
+								matchedElement = xmlElement;
 							}
-							matchedElement = xmlElement;
 						}
+						//else {
+						//	Debug.Log(member.GetType());
+						//}
 					}
 				}
 				catch {
@@ -166,23 +171,43 @@ namespace MaxyGames.UNode.Editors {
 
 		private const string prefix = "file:///";
 		private static XmlDocument XMLFromAssemblyNonCached(Assembly assembly) {
-			string assemblyFilename = assembly.CodeBase;
-			if(assemblyFilename.StartsWith(prefix)) {
+			if(assembly.CodeBase.StartsWith(prefix)) {
 				string xml = null;
-				if(File.Exists(Path.ChangeExtension(assemblyFilename.Substring(prefix.Length), ".xml"))) {
-					xml = File.ReadAllText(Path.ChangeExtension(assemblyFilename.Substring(prefix.Length), ".xml"));
-				} else if(XMLDocPath != null) {
+				if(XMLDocPath != null) {
 					string path;
 					if(XMLDocPath.TryGetValue(assembly.GetName().Name, out path)) {
 						xml = File.ReadAllText(path);
 					}
-				} else {
-					TextAsset[] assets = Resources.LoadAll<TextAsset>("XML_Code_Documentation");
-					foreach(TextAsset asset in assets) {
-						string assetPath = AssetDatabase.GetAssetPath(asset);
-						if(asset.name == assembly.GetName().Name && assetPath.EndsWith(".xml") && File.Exists(assetPath)) {
-							xml = File.ReadAllText(assetPath);
-							break;
+					else {
+						if(File.Exists(Path.ChangeExtension(assembly.Location, ".xml"))) {
+							xml = File.ReadAllText(Path.ChangeExtension(assembly.Location, ".xml"));
+						}
+					}
+				}
+				else {
+					var assemblyName = assembly.GetName().Name;
+					var dir = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}{uNodePreference.preferenceDirectory}{Path.DirectorySeparatorChar}XML_Documentation{Path.DirectorySeparatorChar}";
+					if(Directory.Exists(dir)) {
+						var paths = Directory.GetFiles(dir);
+						foreach(var p in paths) {
+							if(p.EndsWith(".xml") && Path.GetFileNameWithoutExtension(p) == assemblyName) {
+								xml = File.ReadAllText(p);
+							}
+						}
+					}
+					if(string.IsNullOrWhiteSpace(xml)) {
+						TextAsset[] assets = Resources.LoadAll<TextAsset>("XML_Code_Documentation");
+						foreach(TextAsset asset in assets) {
+							string assetPath = AssetDatabase.GetAssetPath(asset);
+							if(asset.name == assemblyName && assetPath.EndsWith(".xml") && File.Exists(assetPath)) {
+								xml = File.ReadAllText(assetPath);
+								break;
+							}
+						}
+					}
+					if(xml == null) {
+						if(File.Exists(Path.ChangeExtension(assembly.Location, ".xml"))) {
+							xml = File.ReadAllText(Path.ChangeExtension(assembly.Location, ".xml"));
 						}
 					}
 				}
@@ -198,12 +223,12 @@ namespace MaxyGames.UNode.Editors {
 		public static Dictionary<string, string> FindXMLDocAsset() {
 			if(XMLDocPath == null) {
 				XMLDocPath = new Dictionary<string, string>();
-				var dir = Directory.GetCurrentDirectory() + "\\Library\\UnityAssemblies\\";
+				var dir = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}Library{Path.DirectorySeparatorChar}UnityAssemblies{Path.DirectorySeparatorChar}";
 				if(Directory.Exists(dir)) {
 					var paths = Directory.GetFiles(dir);
 					foreach(var p in paths) {
 						if(p.EndsWith(".xml")) {
-							XMLDocPath[p.Remove(0, p.LastIndexOf('\\') + 1).RemoveLast(4)] = p;
+							XMLDocPath[Path.GetFileNameWithoutExtension(p)] = p;
 						}
 					}
 				}
@@ -215,12 +240,13 @@ namespace MaxyGames.UNode.Editors {
 						break;
 					}
 				}
-				dir = Directory.GetCurrentDirectory() + $"\\{uNodePreference.preferenceDirectory}\\XML_Documentation\\";
+				
+				dir = Directory.GetCurrentDirectory() + $"{Path.DirectorySeparatorChar}{uNodePreference.preferenceDirectory}{Path.DirectorySeparatorChar}XML_Documentation{Path.DirectorySeparatorChar}";
 				if(Directory.Exists(dir)) {
 					var paths = Directory.GetFiles(dir);
 					foreach(var p in paths) {
 						if(p.EndsWith(".xml")) {
-							XMLDocPath[p.Remove(0, p.LastIndexOf('\\') + 1).RemoveLast(4)] = p;
+							XMLDocPath[Path.GetFileNameWithoutExtension(p)] = p;
 						}
 					}
 				}

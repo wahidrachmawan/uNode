@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
+using UnityEditor.ShortcutManagement;
 
 namespace MaxyGames.UNode.Editors {
 	[Serializable]
@@ -754,6 +755,96 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			Refresh();
+		}
+		#endregion
+
+		#region Shortcut
+		[Shortcut("uNode/Inspect", typeof(uNodeEditor), KeyCode.Mouse0, ShortcutModifiers.Shift)]
+		static void Shortcut_Inspect(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Save", typeof(uNodeEditor), KeyCode.S, ShortcutModifiers.Action)]
+		static void Shortcut_Save(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Panel/Rename", typeof(uNodeEditor), KeyCode.Mouse0, ShortcutModifiers.Alt)]
+		static void Shortcut_Rename(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Canvas/Add Node", typeof(uNodeEditor), KeyCode.Space)]
+		static void Shortcut_AddNode(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Canvas/Frame Graph", typeof(uNodeEditor), KeyCode.F)]
+		static void Shortcut_FrameGraph(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Canvas/Open Command", typeof(uNodeEditor), KeyCode.Space, ShortcutModifiers.Action)]
+		static void Shortcut_OpenCommand(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Canvas/Add - Remove Node from selection", typeof(uNodeEditor), KeyCode.Mouse0, ShortcutModifiers.Control)]
+		static void Shortcut_AddOrRemoveNode(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Canvas/Copy selected node", typeof(uNodeEditor), KeyCode.C, ShortcutModifiers.Control)]
+		static void Shortcut_Copy(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+			}
+			Debug.Log(window);
+		}
+
+		[Shortcut("uNode/Graph Canvas/Duplicate selected node", typeof(uNodeEditor), KeyCode.D, ShortcutModifiers.Control)]
+		static void Shortcut_Duplicate(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+			}
+			Debug.Log(window);
+		}
+
+		[Shortcut("uNode/Graph Canvas/Paste node ( With Link )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Control)]
+		static void Shortcut_PasteWithLink(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
+		}
+
+		[Shortcut("uNode/Graph Canvas/Paste node( Clean )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
+		static void Shortcut_PasteClean(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+
+			}
 		}
 		#endregion
 	}
