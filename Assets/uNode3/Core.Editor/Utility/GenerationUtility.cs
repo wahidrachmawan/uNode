@@ -20,6 +20,15 @@ namespace MaxyGames.UNode.Editors {
 				return GetGraphData(uNodeUtility.GetObjectID(obj));
 			}
 
+			public CachedScriptData GetGraphData(Func<CachedScriptData,bool> validation) {
+				foreach(var (_, data) in graphs) {
+					if(validation(data)) {
+						return data;
+					}
+				}
+				return null;
+			}
+
 			public CachedScriptData GetGraphData(int graphID) {
 				if(!graphs.TryGetValue(graphID, out var scriptData)) {
 					graphs[graphID] = scriptData = new CachedScriptData();
@@ -373,6 +382,7 @@ namespace MaxyGames.UNode.Editors {
 						throw new Exception("Something wrong with compile using Roslyn.");
 					}
 					if(result.errors != null && result.errors.Any()) {
+						string additionalInfo = null;
 						var map = persistenceData.graphs.ToList();
 						foreach(var error in result.errors) {
 							if(!string.IsNullOrEmpty(error.fileName)) {
@@ -381,12 +391,14 @@ namespace MaxyGames.UNode.Editors {
 										//Make sure to reset the hash for graph that has error message.
 										pair.Value.fileHash = default;
 										pair.Value.generatedScript = string.Empty;
+
+										additionalInfo += "\n" + GraphException.GetMessage("", pair.Key, 0, null);
 									}
 								}
 							}
 							//uNodeDebug.LogError(error.errorMessage);
 						}
-						Debug.LogError(result.GetErrorMessage());
+						Debug.LogError(result.GetErrorMessage() + additionalInfo);
 						//Debug.LogError($"Error compiling graphs. {uNodeLogger.uNodeConsoleWindow.KEY_OpenConsole}\n" + result.GetErrorMessage());
 					} else {
 						Debug.Log("Successful generating and compiling project script, project graphs will run with native c#." +

@@ -1147,7 +1147,7 @@ namespace MaxyGames.UNode {
 		public override string GenerateCode() {
 			string data = base.GenerateCode();
 			if(Static) {
-				return data += " static ";
+				return "static ";
 			}
 			return data;
 		}

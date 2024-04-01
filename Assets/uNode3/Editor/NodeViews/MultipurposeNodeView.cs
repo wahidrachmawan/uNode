@@ -32,14 +32,18 @@ namespace MaxyGames.UNode.Editors {
 				if(node.target.targetType != MemberData.TargetType.Constructor) {
 					foreach(var port in nodeObject.FlowInputs) {
 						if(port == nodeObject.primaryFlowInput) {
-							AddPrimaryInputFlow();
+							if(port.isConnected || nodeObject.primaryValueOutput == null || nodeObject.primaryValueOutput.isConnected == false) {
+								AddPrimaryInputFlow();
+							}
 							continue;
 						}
 						AddInputFlowPort(new FlowInputData(port));
 					}
 					foreach(var port in nodeObject.FlowOutputs) {
 						if(port == nodeObject.primaryFlowOutput) {
-							AddPrimaryOutputFlow();
+							if(port.isConnected || nodeObject.primaryValueOutput == null || nodeObject.primaryValueOutput.isConnected == false) {
+								AddPrimaryOutputFlow();
+							}
 							continue;
 						}
 						AddOutputFlowPort(new FlowOutputData(port));

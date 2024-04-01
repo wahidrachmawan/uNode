@@ -815,6 +815,22 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected void HighlightNodes(IList<UNodeView> nodeViews, float duration = 0) {
+			if(nodeViews is not Array) {
+				foreach(var edge in edgeViews) {
+					if(edge is ConversionEdgeView conversionEdge) {
+						if(nodeViewsPerNode.TryGetValue(conversionEdge.node, out var view)) {
+							if(nodeViews.Contains(view)) {
+								if(conversionEdge.Input != null)
+									nodeViews.Add(conversionEdge.Input.owner);
+								if(conversionEdge.Output != null)
+									nodeViews.Add(conversionEdge.Output.owner);
+								nodeViews.Remove(view);
+							}
+						}
+					}
+				}
+			}
+
 			var nodes = nodeViews.ToArray();
 			if(highlightedNodes?.Length > 0) {
 				//Ensure remove previously highligted nodes
@@ -874,6 +890,7 @@ namespace MaxyGames.UNode.Editors {
 			if(nodes == null)
 				return;
 			List<UNodeView> nodeViews = new List<UNodeView>();
+
 			foreach(var node in nodes) {
 				if(node == null)
 					continue;
@@ -881,6 +898,21 @@ namespace MaxyGames.UNode.Editors {
 					nodeViews.Add(view);
 				}
 			}
+
+			foreach(var edge in edgeViews) {
+				if(edge is ConversionEdgeView conversionEdge) {
+					if(nodeViewsPerNode.TryGetValue(conversionEdge.node, out var view)) {
+						if(nodeViews.Contains(view)) {
+							if(conversionEdge.Input != null)
+								nodeViews.Add(conversionEdge.Input.owner);
+							if(conversionEdge.Output != null)
+								nodeViews.Add(conversionEdge.Output.owner);
+							nodeViews.Remove(view);
+						}
+					}
+				}
+			}
+
 			Frame(nodeViews);
 		}
 

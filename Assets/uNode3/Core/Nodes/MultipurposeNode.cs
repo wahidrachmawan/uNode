@@ -129,6 +129,10 @@ namespace MaxyGames.UNode {
 
 		public override void CheckError(ErrorAnalyzer analizer) {
 			member.CheckErrors(this, analizer);
+
+			if(enter != null && enter.isConnected && output != null && output.isConnected) {
+				analizer.RegisterError(this, "Flow and Value is both connected, this causes double-execution");
+			}
 		}
 	}
 }

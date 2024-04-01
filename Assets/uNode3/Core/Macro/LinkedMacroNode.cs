@@ -178,6 +178,9 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override System.Type GetNodeIcon() {
+			if(macroAsset != null) {
+				return macroAsset.GetIcon();
+			}
 			return typeof(TypeIcons.StateIcon);
 		}
 

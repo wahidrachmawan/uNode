@@ -58,6 +58,49 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 					}
 
 				}
+				if(modifier.Static) {
+					//Analize for static graph
+					if(graph is IClassGraph classGraph) {
+						if(classGraph.InheritType != null && classGraph.InheritType != typeof(object)) {
+							analyzer.RegisterError(graphData, "Static modifier cannot use inheritance or must inherit from System.Object");
+						}
+					}
+					if(graph is IGraphWithVariables) {
+						var variables = graph.GetVariables();
+						foreach(var element in variables) {
+							if(element.modifier.Static == false) {
+								analyzer.RegisterError(element, "Static graph cannot have instance variables");
+							}
+						}
+					}
+					if(graph is IGraphWithProperties) {
+						var functions = graph.GetProperties();
+						foreach(var element in functions) {
+							if(element.modifier.Static == false) {
+								analyzer.RegisterError(element, "Static graph cannot have instance properties");
+							}
+						}
+					}
+					if(graph is IGraphWithFunctions) {
+						var functions = graph.GetFunctions();
+						foreach(var element in functions) {
+							if(element.modifier.Static == false) {
+								analyzer.RegisterError(element, "Static graph cannot have instance functions");
+							}
+						}
+					}
+					if(graph is IGraphWithConstructors) {
+						var ctors = graph.GetConstructors();
+						foreach(var element in ctors) {
+							if(element.modifier.Static == false) {
+								analyzer.RegisterError(element, "Static graph cannot have instance constructors");
+							}
+							if(element.parameters.Count > 0) {
+								analyzer.RegisterError(element, "Static constructor cannot have parameters");
+							}
+						}
+					}
+				}
 			}
 			if(graph is IGraphWithFunctions) {
 				var functions = graph.GetFunctions();

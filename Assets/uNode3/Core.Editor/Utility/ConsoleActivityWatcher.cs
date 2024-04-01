@@ -140,6 +140,8 @@ namespace MaxyGames.UNode.Editors {
 			if(string.IsNullOrEmpty(text)) return false;
 			var strs = text.Split('\n');
 			List<MenuData> menus = new List<MenuData>();
+			Action postMenuAction = null;
+
 			foreach(var txt in strs) {
 				var idx = txt.IndexOf(GraphException.KEY_REFERENCE);
 				if(idx >= 0) {
@@ -196,17 +198,28 @@ namespace MaxyGames.UNode.Editors {
 									}
 								});
 							}
+							else if(element != null) {
+								menus.Add(new MenuData() {
+									menu = $"Highlight Element: {element.name} with id: {element.id} from {(reference as IGraph).GetFullGraphName()}",
+									action = () => uNodeEditor.Open(reference as IGraph, element)
+								});
+							}
 							else {
-								//menus.Add(new MenuData() {
-								//	menu = $"Highlight Node: {(reference as Component).gameObject.name} from {(reference as INode<uNodeRoot>).GetOwner().DisplayName}",
-								//	action = () => uNodeEditor.Open(reference as INode<uNodeRoot>)
-								//});
+								postMenuAction += () => {
+									if(menus.Any(menu => menu.menu.Contains((reference as IGraph).GetFullGraphName())) == false) {
+										menus.Add(new MenuData() {
+											menu = $"Highlight Graph: {(reference as IGraph).GetFullGraphName()}",
+											action = () => uNodeEditor.Open(reference as IGraph)
+										});
+									}
+								};
 							}
 							continue;
 						}
 					}
 					continue;
 				}
+				postMenuAction?.Invoke();
 				List<ActivityData> datas = new List<ActivityData>();
 				foreach(var info in uNodeEditor.SavedData.scriptInformations) {
 					string path = info.path.Replace("\\", "/");
@@ -249,7 +262,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(menus.Count > 0) {
-				if(menus.Count == 1) {
+				if(menus.GroupBy(menu => menu.menu).Count() == 1) {
 					menus[0].action();
 				} else {
 					GenericMenu menu = new GenericMenu();

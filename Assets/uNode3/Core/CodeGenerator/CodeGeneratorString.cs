@@ -34,7 +34,7 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string Flow(IEnumerable<string> statements) {
 			string result = null;
-			foreach(var str in statements) { 
+			foreach(var str in statements) {
 				if(string.IsNullOrEmpty(result)) {
 					result += str;
 				}
@@ -49,16 +49,24 @@ namespace MaxyGames {
 		#region Keyword
 		/// <summary>
 		/// Generate this keyword.
-		/// TODO: return the class name on class is static
 		/// </summary>
 		/// <returns></returns>
-		public static string This => "this";
+		public static string This {
+			get {
+				if(generationState.isStatic) {
+					return graph.GetGraphName();
+				}
+				else {
+					return "this";
+				}
+			}
+		}
 
 		/// <summary>
 		/// Generate null keyword.
 		/// </summary>
 		/// <returns></returns>
-		public static string Null => "null";
+		public const string Null = "null";
 
 		public const string KeywordVar = "var";
 		#endregion

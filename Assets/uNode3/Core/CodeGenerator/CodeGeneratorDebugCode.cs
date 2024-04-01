@@ -137,6 +137,17 @@ namespace MaxyGames {
 		/// <param name="isSet"></param>
 		/// <returns></returns>
 		public static string Debug(ValueInput port, string value, bool isSet = false) {
+			if(value.Contains(Null)) {
+				return GenericInvoke(port.type, 
+					typeof(GraphDebug), 
+					nameof(GraphDebug.Value),
+					value,
+					GetDebugOwner(),
+					Value(graph.GetGraphID()),
+					Value(port.node.id),
+					Value(port.id),
+					Value(isSet));
+			}
 			return Invoke(typeof(GraphDebug), nameof(GraphDebug.Value),
 				value,
 				GetDebugOwner(),
