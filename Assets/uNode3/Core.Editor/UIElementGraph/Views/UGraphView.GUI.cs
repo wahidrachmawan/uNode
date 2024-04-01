@@ -1112,6 +1112,38 @@ namespace MaxyGames.UNode.Editors {
 			graph.Refresh();
 		}
 
+		private void SelectionAddRegion(Vector2 position) {
+			var selectedNodes = graphData.selectedNodes.ToArray();
+			Rect rect;
+			if(selectedNodes.Length > 0) {
+				rect = NodeEditorUtility.GetNodeRect(selectedNodes);
+			}
+			else {
+				Vector2 point;
+				if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, position))) {
+					point = graph.window.rootVisualElement.ChangeCoordinatesTo(
+						contentViewContainer,
+						position);
+				}
+				else {
+					point = graph.window.rootVisualElement.ChangeCoordinatesTo(
+						contentViewContainer,
+						new Vector2(300, 200));
+				}
+				rect = new Rect(point.x, point.y, 200, 130);
+			}
+			uNodeEditorUtility.RegisterUndo(graphData.owner, "Create region");
+			NodeEditorUtility.AddNewNode<Nodes.NodeRegion>(graphData, default, (node) => {
+				rect.x -= 30;
+				rect.y -= 50;
+				rect.width += 60;
+				rect.height += 70;
+				node.position = rect;
+				node.nodeColor = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+			});
+			graph.Refresh();
+		}
+
 		private void SelectionToMacro(Vector2 mousePosition) {
 			uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Selection to Macro");
 			NodeEditorUtility.AddNewNode<Nodes.MacroNode>(graph.graphData, "Macro", null, mousePosition, (node) => {

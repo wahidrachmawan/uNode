@@ -245,6 +245,7 @@ namespace MaxyGames.UNode {
 			//This is to prevent lag on big graph when selecting graph asset
 			//The lag causes by unity inspector that's constantly check modified value
 			//and checking tries serializing the whole value
+			//TODO: fix error caused by UnityEditor.Selection.activeObject regarding to domain backup
 			if(graph.graphContainer != null && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
 				if(Event.current == null)
 					return;

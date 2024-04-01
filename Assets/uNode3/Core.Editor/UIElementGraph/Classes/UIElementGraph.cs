@@ -391,8 +391,8 @@ namespace MaxyGames.UNode.Editors {
 							graphData.debugAnyScript = false;
 							GraphDebug.useDebug = true;
 						});
-						menu.AddItem(new GUIContent("Disable"), false, delegate () {
-							GraphDebug.useDebug = false;
+						menu.AddItem(new GUIContent("Disable"), GraphDebug.useDebug == false, delegate () {
+							GraphDebug.useDebug = !GraphDebug.useDebug;
 						});
 						menu.AddItem(new GUIContent("Auto"), graphData.debugAnyScript, delegate () {
 							debugTarget = null;
@@ -1076,6 +1076,15 @@ namespace MaxyGames.UNode.Editors {
 		public override void FrameGraph() {
 			if(graphView != null) {
 				graphView.FrameAll();
+			}
+		}
+
+		public override void HandleShortcut(GraphShortcutType type) {
+			if(graphView.HandleShortcut(type)) {
+
+			}
+			else {
+				base.HandleShortcut(type);
 			}
 		}
 
