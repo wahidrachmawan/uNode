@@ -658,6 +658,21 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Return true if node can be inserted into <paramref name="parent"/>
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <returns></returns>
+		public static bool CanAddNode(UGraphElement parent) {
+			if(parent is NodeContainer) {
+				return true;
+			}
+			else if(parent is NodeObject nodeObject) {
+				return nodeObject.node is ISuperNode;
+			}
+			return parent is ISuperNode;
+		}
+
+		/// <summary>
 		/// Auto assign input value ports.
 		/// </summary>
 		/// <param name="nodeObject"></param>
@@ -672,14 +687,14 @@ namespace MaxyGames.UNode.Editors {
 					return false;
 				if(filter == null)
 					filter = FilterAttribute.DefaultTypeFilter;
-				if(type != typeof(object)) {
+				if(type != typeof(object) && type.IsPrimitive == false) {
 					if(graphType.IsCastableTo(type)) {
 						port.AssignToDefault(MemberData.This(graph));
 						return true;
 					}
 				}
 				if(type.IsSubclassOf(typeof(Delegate))) {
-					if(nodeObject.parent is NodeContainer || nodeObject.parent is ISuperNode) {
+					if(CanAddNode(nodeObject.parent)) {
 						AddNewNode<Nodes.NodeLambda>(nodeObject.parent, "Lambda", null, new Vector2(nodeObject.position.x - 150, nodeObject.position.y), (nod) => {
 							nod.delegateType = type;
 							nod.Register();
@@ -690,6 +705,21 @@ namespace MaxyGames.UNode.Editors {
 				}
 				else if(filter.IsValidTypeForValueConstant(type) && ReflectionUtils.CanCreateInstance(type)) {
 					port.AssignToDefault(MemberData.CreateValueFromType(type));
+					return true;
+				}
+				else if(graphType.IsCastableTo(type)) {
+					port.AssignToDefault(MemberData.This(graph));
+					return true;
+				}
+				else if(CanAutoConvertType(graphType, type)) {
+					AddNewNode<MultipurposeNode>(nodeObject.parent, new Vector2(nodeObject.position.x - 200, nodeObject.position.y), thisNode => {
+						thisNode.target = MemberData.This(graph);
+						thisNode.Register();
+
+						AutoConvertPort(graphType, type, thisNode.output, port, convertNode => {
+							port.ConnectTo(GetPort<ValueOutput>(convertNode));
+						}, nodeObject.parent);
+					});
 					return true;
 				}
 				return false;
