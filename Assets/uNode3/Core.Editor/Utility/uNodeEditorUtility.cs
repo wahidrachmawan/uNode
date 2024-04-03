@@ -429,7 +429,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static Texture GetDefaultIcon(Type type) {
-			if(type == null) return null;
+			if(type == null || type.IsGenericParameter) return null;
 			if(typeof(MonoBehaviour).IsAssignableFrom(type)) {
 				var icon = EditorGUIUtility.ObjectContent(null, type)?.image;
 				if(icon == EditorGUIUtility.FindTexture("DefaultAsset Icon")) {
