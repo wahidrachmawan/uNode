@@ -2491,6 +2491,20 @@ namespace MaxyGames.UNode.Editors {
 				SelectionAddRegion(screenMousePosition);
 				return true;
 			}
+			else if(type == GraphShortcutType.PlaceFitNodes) {
+				if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
+					if(graphData.selectedCount == 1) {
+						var selected = graphData.selecteds.First() as NodeObject;
+						if(selected != null) {
+							if(nodeViewsPerNode.TryGetValue(selected, out var view)) {
+								UIElementUtility.PlaceFitNodes(view);
+							}
+						}
+					}
+					return true;
+				}
+
+			}
 			else if(type == GraphShortcutType.Rename) {
 				if(graphData.selectedCount == 1) {
 					var selected = graphData.selecteds.First();

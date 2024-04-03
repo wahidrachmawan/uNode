@@ -22,6 +22,7 @@ namespace MaxyGames.UNode.Editors {
 		DeleteSelectedNodes,
 		CutSelectedNodes,
 		SelectAllNodes,
+		PlaceFitNodes,
 	}
 
 	internal static class EditorShortcut {
@@ -86,6 +87,14 @@ namespace MaxyGames.UNode.Editors {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
 				window.graphEditor.HandleShortcut(GraphShortcutType.CreateRegion);
+			}
+		}
+
+		[Shortcut("uNode/Place Fit Selections", typeof(uNodeEditor), KeyCode.Q)]
+		static void Shortcut_PlaceFitSelections(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+				window.graphEditor.HandleShortcut(GraphShortcutType.PlaceFitNodes);
 			}
 		}
 
