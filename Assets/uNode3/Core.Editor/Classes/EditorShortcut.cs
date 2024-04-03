@@ -90,7 +90,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Place Fit Selections", typeof(uNodeEditor), KeyCode.Q)]
+		[Shortcut("uNode/Place Fit selected node", typeof(uNodeEditor), KeyCode.Q)]
 		static void Shortcut_PlaceFitSelections(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {

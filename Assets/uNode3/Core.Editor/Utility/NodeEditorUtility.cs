@@ -618,7 +618,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static bool AutoConvertPort(Type leftType, Type rightType,
-			ValueOutput outputNode, ValueInput inputNode,
+			ValueOutput output, ValueInput input,
 			Action<Node> action,
 			UGraphElement canvas,
 			FilterAttribute filter = null,
@@ -642,9 +642,9 @@ namespace MaxyGames.UNode.Editors {
 					c.rightType = rightType;
 					c.filter = filter;
 					c.canvas = canvas;
-					c.input = inputNode;
-					c.output = outputNode;
-					c.position = inputNode.node.position.position;
+					c.input = input;
+					c.output = output;
+					c.position = input.node.position.position;
 					c.force = forceConvert;
 					if(c.IsValid()) {
 						if(c.CreateNode(action)) {
@@ -664,11 +664,20 @@ namespace MaxyGames.UNode.Editors {
 		public static void AutoAssignNodePorts(NodeObject nodeObject) {
 			if(nodeObject == null || nodeObject.node == null) return;
 
+			var graph = nodeObject.graphContainer;
+			var graphType = graph.GetGraphType();
+
 			bool AssignNodePort(ValueInput port, Type type, FilterAttribute filter) {
 				if(port == null || type == null)
 					return false;
 				if(filter == null)
 					filter = FilterAttribute.DefaultTypeFilter;
+				if(type != typeof(object)) {
+					if(graphType.IsCastableTo(type)) {
+						port.AssignToDefault(MemberData.This(graph));
+						return true;
+					}
+				}
 				if(type.IsSubclassOf(typeof(Delegate))) {
 					if(nodeObject.parent is NodeContainer || nodeObject.parent is ISuperNode) {
 						AddNewNode<Nodes.NodeLambda>(nodeObject.parent, "Lambda", null, new Vector2(nodeObject.position.x - 150, nodeObject.position.y), (nod) => {
