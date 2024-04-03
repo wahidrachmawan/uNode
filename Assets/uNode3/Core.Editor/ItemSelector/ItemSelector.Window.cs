@@ -221,6 +221,9 @@ namespace MaxyGames.UNode.Editors {
 			} else {
 				EditorGUI.ProgressBar(uNodeGUIUtility.GetRect(), editorData.setup.progress, "Loading Types");
 			}
+			if(Event.current.keyCode == KeyCode.Escape) {
+				Close();
+			}
 		}
 		#endregion
 
