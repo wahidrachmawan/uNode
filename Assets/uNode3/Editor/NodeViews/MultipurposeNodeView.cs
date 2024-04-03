@@ -32,7 +32,7 @@ namespace MaxyGames.UNode.Editors {
 				if(node.target.targetType != MemberData.TargetType.Constructor) {
 					foreach(var port in nodeObject.FlowInputs) {
 						if(port == nodeObject.primaryFlowInput) {
-							if(port.isConnected || nodeObject.primaryValueOutput == null || nodeObject.primaryValueOutput.isConnected == false) {
+							if(nodeObject.primaryValueOutput == null || nodeObject.primaryValueOutput.isConnected == false || port.isConnected || nodeObject.primaryFlowOutput.isConnected) {
 								AddPrimaryInputFlow();
 							}
 							continue;
@@ -41,7 +41,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					foreach(var port in nodeObject.FlowOutputs) {
 						if(port == nodeObject.primaryFlowOutput) {
-							if(port.isConnected || nodeObject.primaryValueOutput == null || nodeObject.primaryValueOutput.isConnected == false) {
+							if(nodeObject.primaryValueOutput == null || nodeObject.primaryValueOutput.isConnected == false || port.isConnected || nodeObject.primaryFlowInput.isConnected) {
 								AddPrimaryOutputFlow();
 							}
 							continue;

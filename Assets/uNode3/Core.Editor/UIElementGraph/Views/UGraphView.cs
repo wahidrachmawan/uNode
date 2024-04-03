@@ -2491,6 +2491,22 @@ namespace MaxyGames.UNode.Editors {
 				SelectionAddRegion(screenMousePosition);
 				return true;
 			}
+			else if(type == GraphShortcutType.Rename) {
+				if(graphData.selectedCount == 1) {
+					var selected = graphData.selecteds.First();
+					if(selected is NodeObject nodeObject) {
+						ActionPopupWindow.ShowWindow(Vector2.zero, nodeObject.name,
+							(ref object obj) => {
+								object str = EditorGUILayout.TextField(obj as string);
+								if(obj != str) {
+									obj = str;
+									nodeObject.name = obj as string;
+									uNodeGUIUtility.GUIChanged(nodeObject, UIChangeType.Average);
+								}
+							}).ChangePosition(graph.GetMenuPosition()).headerName = "Rename title";
+					}
+				}
+			}
 			return false;
 		}
 

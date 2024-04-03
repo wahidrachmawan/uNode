@@ -3,7 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Editors {
-    [System.Serializable]
+	//public enum EditorSelectionType {
+	//	None,
+	//	Graph,
+	//	GraphElements,
+	//	Other,
+	//}
+
+	[System.Serializable]
 	public class GraphEditorData {
 		#region Fields
 		[SerializeField]

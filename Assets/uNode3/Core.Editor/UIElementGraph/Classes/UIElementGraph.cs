@@ -1083,6 +1083,9 @@ namespace MaxyGames.UNode.Editors {
 			if(graphView.HandleShortcut(type)) {
 
 			}
+			else if(graphPanel != null && graphPanel.HandleShortcut(type)) {
+
+			}
 			else {
 				base.HandleShortcut(type);
 			}

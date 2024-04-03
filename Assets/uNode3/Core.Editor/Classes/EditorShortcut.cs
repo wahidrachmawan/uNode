@@ -7,6 +7,8 @@ using UnityEditor.ShortcutManagement;
 namespace MaxyGames.UNode.Editors {
 	public enum GraphShortcutType {
 		Save,
+		Refresh,
+		Rename,
 		AddNode,
 		CreateRegion,
 		FrameGraph,
@@ -17,7 +19,6 @@ namespace MaxyGames.UNode.Editors {
 		PasteNodesWithLink,
 		PreviewScript,
 		CompileScript,
-		Refresh,
 		DeleteSelectedNodes,
 		CutSelectedNodes,
 		SelectAllNodes,
@@ -64,13 +65,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		//[Shortcut("uNode/Graph Panel/Rename", typeof(uNodeEditor), KeyCode.Mouse0, ShortcutModifiers.Alt)]
-		//static void Shortcut_Rename(ShortcutArguments args) {
-		//	var window = args.context as uNodeEditor;
-		//	if(window != null) {
-
-		//	}
-		//}
+		[Shortcut("uNode/Rename", typeof(uNodeEditor), KeyCode.F2)]
+		static void Shortcut_Rename(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+				window.graphEditor.HandleShortcut(GraphShortcutType.Rename);
+			}
+		}
 
 		[Shortcut("uNode/Add Node", typeof(uNodeEditor), KeyCode.Space)]
 		static void Shortcut_AddNode(ShortcutArguments args) {
@@ -80,7 +81,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Quick Create Region", typeof(uNodeEditor), KeyCode.F, ShortcutModifiers.Control)]
+		[Shortcut("uNode/Quick Create Region", typeof(uNodeEditor), KeyCode.F, ShortcutModifiers.Action)]
 		static void Shortcut_QuickCreateRegion(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
@@ -104,7 +105,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		//[Shortcut("uNode/Graph Canvas/Add - Remove Node from selection", typeof(uNodeEditor), KeyCode.Mouse0, ShortcutModifiers.Control)]
+		//[Shortcut("uNode/Graph Canvas/Add - Remove Node from selection", typeof(uNodeEditor), KeyCode.Mouse0, ShortcutModifiers.Action)]
 		//static void Shortcut_AddOrRemoveNode(ShortcutArguments args) {
 		//	var window = args.context as uNodeEditor;
 		//	if(window != null) {
@@ -112,7 +113,7 @@ namespace MaxyGames.UNode.Editors {
 		//	}
 		//}
 
-		[Shortcut("uNode/Select all nodes", typeof(uNodeEditor), KeyCode.A, ShortcutModifiers.Control)]
+		[Shortcut("uNode/Select all nodes", typeof(uNodeEditor), KeyCode.A, ShortcutModifiers.Action)]
 		static void Shortcut_SelectAll(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
@@ -120,7 +121,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Copy selected node", typeof(uNodeEditor), KeyCode.C, ShortcutModifiers.Control)]
+		[Shortcut("uNode/Copy selected node", typeof(uNodeEditor), KeyCode.C, ShortcutModifiers.Action)]
 		static void Shortcut_Copy(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
@@ -128,7 +129,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Cut selected node", typeof(uNodeEditor), KeyCode.X, ShortcutModifiers.Control)]
+		[Shortcut("uNode/Cut selected node", typeof(uNodeEditor), KeyCode.X, ShortcutModifiers.Action)]
 		static void Shortcut_Cut(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
@@ -144,7 +145,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Duplicate selected node", typeof(uNodeEditor), KeyCode.D, ShortcutModifiers.Control)]
+		[Shortcut("uNode/Duplicate selected node", typeof(uNodeEditor), KeyCode.D, ShortcutModifiers.Action)]
 		static void Shortcut_Duplicate(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
@@ -152,7 +153,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Paste node ( With Link )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Control)]
+		[Shortcut("uNode/Paste node ( With Link )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Action)]
 		static void Shortcut_PasteWithLink(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {

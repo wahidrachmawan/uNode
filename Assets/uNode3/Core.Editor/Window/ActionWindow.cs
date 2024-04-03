@@ -45,14 +45,6 @@ namespace MaxyGames.UNode.Editors {
 			return window;
 		}
 
-		public static ActionWindow ShowWindow(Action onGUI) {
-			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
-			if(onGUI != null)
-				window.onGUI = delegate(ref object obj) { onGUI(); };
-			window.Init();
-			return window;
-		}
-
 		public static ActionWindow ShowWindow(object startValue, ActionRef<object> onGUI) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
 			window.variable = startValue;
@@ -86,7 +78,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static ActionWindow ShowWindow(Action onGUI,
-			Action onGUITop, Action onGUIBottom) {
+			Action onGUITop = null, 
+			Action onGUIBottom = null) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
 			if(onGUI != null)
 				window.onGUI = delegate(ref object obj) { onGUI(); };
@@ -137,6 +130,7 @@ namespace MaxyGames.UNode.Editors {
 			wantsMouseMove = true;
 			this.minSize = new Vector2(300, 200);
 			this.titleContent = new GUIContent("Editor");
+			//this.ShowModal();
 			Show();
 			Focus();
 			Undo.undoRedoPerformed -= UndoRedoCallback;

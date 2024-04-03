@@ -1811,6 +1811,40 @@ namespace MaxyGames.UNode.Editors {
 				ctor.parameters = parameters;
 			});
 		}
+
+		internal bool HandleShortcut(GraphShortcutType type) {
+			if(type == GraphShortcutType.Rename) {
+				if(graphData.selectedCount == 1) {
+					var selected = graphData.selecteds.First();
+					if(selected is Variable) {
+						GraphUtility.RefactorVariableName(Event.current.mousePosition, selected as Variable, () => {
+							graphData.Refresh();
+							ReloadView();
+						});
+						return true;
+					}
+					else if(selected is Property) {
+						GraphUtility.RefactorPropertyName(Event.current.mousePosition, selected as Property, () => {
+							graphData.Refresh();
+							ReloadView();
+						});
+						return true;
+					}
+					else if(selected is Function) {
+						GraphUtility.RefactorFunctionName(Event.current.mousePosition, selected as Function, () => {
+							graphData.Refresh();
+							ReloadView();
+						});
+						return true;
+					}
+					else if(selected is IGraph) {
+						//TODO: add support for renaming graph with shortcut
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 		#endregion
 	}
 
