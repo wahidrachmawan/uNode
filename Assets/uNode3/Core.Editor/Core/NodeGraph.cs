@@ -44,15 +44,12 @@ namespace MaxyGames.UNode.Editors {
 		#region Variables
 		public uNodeEditor window;
 
-		protected Vector2 scrollView = new Vector2(30000, 30000);
-		public Vector2 topMousePos, zoomMousePos;
-		protected bool isSelection, isDragging;
+		public Vector2 topMousePos;
 		#endregion
 
 		#region Static
 		public static NodeGraph openedGraph;
-
-
+		
 		public const string TabDragKEY = "[uNode-Tab]";
 
 		public static HashSet<string> GetOpenedGraphUsingNamespaces() {
