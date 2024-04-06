@@ -135,6 +135,14 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							}
 						}
 					}
+					if(function.modifier.Static) {
+						//Analizer for static function
+						if(function.attributes.Any(a => a.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute))) {
+							if(function.parameters.Count == 0) {
+								analyzer.RegisterError(function, $@"Function: {function.name} need at least one parameter to mark as extension.");
+							}
+						}
+					}
 				}
 			}
 			if(graph is IInterfaceSystem) {

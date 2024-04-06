@@ -868,6 +868,13 @@ namespace MaxyGames.UNode {
 			}
 			return "null";
 		}
+
+		public AttributeData() { }
+
+		public AttributeData(Type attributeType) {
+			this.attributeType = attributeType;
+			constructor = new ConstructorValueData(attributeType);
+		}
 	}
 
 	/// <summary>

@@ -222,7 +222,7 @@ namespace MaxyGames.UNode {
 				var members = target.GetMembers(false);
 				if(members != null) {
 					for(int i = 0; i < members.Length; i++) {
-						if(members[i] is INativeMethod && members[i] is IGenericMethodWithResolver genericMethodWithResolver && ReflectionUtils.IsNativeMember(members[i]) == false) {
+						if(members[i] is IGenericMethodWithResolver genericMethodWithResolver && ReflectionUtils.IsNativeMember(members[i]) == false) {
 							var resolver = genericMethodWithResolver.GetResolver();
 							if(resolver == null || resolver is GenericMethodResolver.Default) {
 								analizer.RegisterWarning(element, $"No resolver for member: {(members[i] as INativeMethod).GetNativeMethod().GetGenericMethodDefinition()}, this can lead to incorrect or different behavior when running between reflection and native c#");

@@ -21,6 +21,19 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				uNodeGUIUtility.GUIChangedMajor(value);
 			}, targetObject: option.unityObject, filter: new FilterAttribute() { OnlyGetType = true, VoidType = true });
 			UInspector.Draw(option.property[nameof(Function.parameters)]);
+			if(value.modifier.Static) {
+				bool isExtension = value.attributes.Any(a => a.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute));
+
+				if(isExtension != EditorGUILayout.Toggle("Extension", isExtension)) {
+					if(isExtension == false) {
+						value.attributes.Add(new AttributeData(typeof(System.Runtime.CompilerServices.ExtensionAttribute)));
+					}
+					else {
+						var att = value.attributes.First(a => a.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute));
+						value.attributes.Remove(att);
+					}
+				}
+			}
 			uNodeGUI.DrawAttribute(value.attributes, option.unityObject, (a) => {
 				value.attributes = a;
 			}, AttributeTargets.Method);

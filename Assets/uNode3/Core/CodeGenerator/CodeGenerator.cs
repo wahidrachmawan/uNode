@@ -1018,9 +1018,11 @@ namespace MaxyGames {
 						}
 
 						//Auto resolve runtime generic method
-						if(generatePureScript == false && graph.IsNativeGraph() == false && method is IGenericMethodWithResolver methodWithResolver) {
+						if(method is IGenericMethodWithResolver methodWithResolver && ReflectionUtils.IsNativeMember(method) == false) {
 							var resolver = methodWithResolver.GetResolver();
-							resolver.GenerateCode(result, parameterDatas);
+							if(resolver != null) {
+								resolver.GenerateCode(result, parameterDatas);
+							}
 							continue;
 						}
 

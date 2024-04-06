@@ -1570,8 +1570,13 @@ namespace MaxyGames {
 
 			public string GenerateCode() {
 				string result = null;
+				bool isExtension = false;
 				if(attributes != null && attributes.Count > 0) {
 					foreach(AData attribute in attributes) {
+						if(attribute.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute)) {
+							isExtension = true;
+							continue;
+						}
 						string a = attribute.GenerateCode();
 						if(!string.IsNullOrEmpty(a)) {
 							result += a.AddLineInEnd();
@@ -1617,6 +1622,9 @@ namespace MaxyGames {
 					foreach(MPData data in parameters) {
 						if(index != 0) {
 							result += ", ";
+						}
+						else if(isExtension) {
+							result += "this ";
 						}
 						result += data.GenerateCode();
 						index++;
