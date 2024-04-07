@@ -341,6 +341,73 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
+					else if(evt.modifiers == EventModifiers.Alt) {
+						var edge = edgeCandidate as EdgeView;
+						if(edge != null) {
+							if(edge.Input != null) {
+								var port = edge.Input;
+
+								if(port.owner.graphData.isInMacro) {
+									var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
+									Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
+										port.owner.graph.window.rootVisualElement.parent,
+										screenRect - port.owner.graph.window.position.position);
+									var position = port.owner.owner.contentViewContainer.WorldToLocal(pos);
+									if(port.isFlow) {
+										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
+											node.kind = PortKind.FlowInput;
+											node.Register();
+											var con = Connection.CreateAndConnect(node.exit, port.GetPortValue());
+											NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
+											port.owner.owner.MarkRepaint();
+										});
+									} else {
+										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
+											if(string.IsNullOrWhiteSpace(port.GetName()) == false) {
+												node.nodeObject.name = port.GetName();
+											}
+											node.kind = PortKind.ValueInput;
+											node.Register();
+											var con = Connection.CreateAndConnect(port.GetPortValue(), node.output);
+											NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
+											port.owner.owner.MarkRepaint();
+										});
+									}
+								}
+							}
+							else if(edge.Output != null) {
+								var port = edge.Output;
+
+								if(port.owner.graphData.isInMacro) {
+									var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
+									Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
+										port.owner.graph.window.rootVisualElement.parent,
+										screenRect - port.owner.graph.window.position.position);
+									var position = port.owner.owner.contentViewContainer.WorldToLocal(pos);
+									if(port.isFlow) {
+										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
+											node.kind = PortKind.FlowOutput;
+											node.Register();
+											var con = Connection.CreateAndConnect(port.GetPortValue(), node.enter);
+											NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
+											port.owner.owner.MarkRepaint();
+										});
+									} else {
+										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
+											if(string.IsNullOrWhiteSpace(port.GetName()) == false) {
+												node.nodeObject.name = port.GetName();
+											}
+											node.kind = PortKind.ValueOutput;
+											node.Register();
+											var con = Connection.CreateAndConnect(node.input, port.GetPortValue());
+											NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
+											port.owner.owner.MarkRepaint();
+										});
+									}
+								}
+							}
+						}
+					}
 					else {
 						m_Listener.OnDropOutsidePort(edgeCandidate, mousePosition);
 					}

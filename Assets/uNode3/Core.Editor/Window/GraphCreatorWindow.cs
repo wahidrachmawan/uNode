@@ -101,6 +101,15 @@ namespace MaxyGames.UNode.Editors {
 						AssetDatabase.SaveAssets();
 						Close();
 						EditorGUIUtility.PingObject(obj);
+						if(asset is IGraph) {
+							uNodeEditor.Open(asset as IGraph);
+						}
+						else if(asset is IScriptGraph) {
+							uNodeEditor.Open(asset as IScriptGraph);
+						}
+						else if(asset is IScriptGraphType) {
+							uNodeEditor.Open(asset as IScriptGraphType);
+						}
 					}
 				} else {
 					throw new InvalidOperationException();

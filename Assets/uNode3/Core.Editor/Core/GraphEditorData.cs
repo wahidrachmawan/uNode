@@ -136,6 +136,17 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// True if the current canvas is macro editing
+		/// </summary>
+		public bool isInMacro {
+			get {
+				if(currentCanvas is NodeContainer && graph is IMacroGraph)
+					return true;
+				return currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro;
+			}
+		}
+
+		/// <summary>
 		/// The all nodes in current canvas
 		/// </summary>
 		public IEnumerable<NodeObject> nodes {
