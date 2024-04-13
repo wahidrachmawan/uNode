@@ -77,6 +77,7 @@ namespace MaxyGames.UNode.Nodes {
 						else {
 							deconstructDatas[index].port.SetName(deconstructDatas[index].originalName);
 						}
+						deconstructDatas[index].port.isVariable = true;
 					}
 				} else {
 					if(type.IsGenericType && type.HasImplementInterface(typeof(System.Runtime.CompilerServices.ITuple))) {
@@ -98,6 +99,7 @@ namespace MaxyGames.UNode.Nodes {
 							else {
 								deconstructDatas[index].port.SetName(deconstructDatas[index].originalName);
 							}
+							deconstructDatas[index].port.isVariable = true;
 						}
 					}
 				}

@@ -75,6 +75,14 @@ namespace MaxyGames.UNode.Nodes {
 									return CG.Value(input).CGAccess(nameof(Component.transform));
 								}
 								else {
+									if(ReflectionUtils.IsNativeType(t) == false) {
+										if(CG.generatePureScript) {
+											return CG.Value(input).CGInvoke(nameof(uNodeHelper.GetGeneratedComponent), new[] { t });
+										}
+										else {
+											return CG.Value(input).CGInvoke(nameof(uNodeHelper.GetGeneratedComponent), new[] { CG.GetUniqueNameForType(t as RuntimeType) });
+										}
+									}
 									return CG.Value(input).CGInvoke(nameof(Component.GetComponent), new System.Type[] { t }, null);
 								}
 							}

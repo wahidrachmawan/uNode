@@ -17,6 +17,7 @@ namespace MaxyGames.UNode.Nodes {
 			body = FlowOutput(nameof(body));
 			target = ValueInput<IDisposable>(nameof(target));
 			output = ValueOutput(nameof(output), target.ValueType);
+			output.isVariable = true;
 			base.OnRegister();
 			exit.SetName("Exit");
 		}

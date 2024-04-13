@@ -8,6 +8,7 @@ namespace MaxyGames.UNode {
 	public class ValueOutput : ValuePort {
 		private Func<Flow, object> get;
 		private Action<Flow, object> set;
+		public bool isVariable;
 
 		public ValueOutput(NodeObject node, string id, Type type, PortAccessibility accessibility) : base(node) {
 			this.id = id;

@@ -33,6 +33,7 @@ namespace MaxyGames.UNode.Nodes {
 				if(!string.IsNullOrEmpty(parameters[i].name)) {
 					parameters[i].port.SetName(parameters[i].name);
 				}
+				parameters[i].port.isVariable = true;
 			}
 		}
 

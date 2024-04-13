@@ -28,6 +28,7 @@ namespace MaxyGames.UNode.Nodes {
 			count = ValueInput(nameof(count), indexType.type, 10);
 			step = ValueInput(nameof(step), indexType.type, 1);
 			index = ValueOutput(nameof(index), indexType.type, PortAccessibility.ReadWrite);
+			index.isVariable = true;
 			base.OnRegister();
 			exit.SetName("Exit");
 		}

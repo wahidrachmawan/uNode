@@ -10,7 +10,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override bool AutoExit => false;
 
-		public IEnumerable<NodeObject> stackedNodes => data.GetFlowNodes();
+		public IEnumerable<NodeObject> stackedNodes => data.GetNodes();
 
 		protected override void OnRegister() {
 			base.OnRegister();

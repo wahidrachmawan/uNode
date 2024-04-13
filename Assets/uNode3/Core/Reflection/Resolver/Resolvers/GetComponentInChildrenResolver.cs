@@ -58,13 +58,25 @@ namespace MaxyGames.UNode.GenericResolver {
 			//Get the component type
 			var compType = RuntimeMethodInfo.GetGenericArguments()[0];
 			//Do generate code and add it to member list
-			if(parameters.Length == 0) {
-				var result = CG.Invoke(string.Empty, nameof(uNodeHelper.GetGeneratedComponentInChildren), new[] { CG.GetUniqueNameForType(compType as RuntimeType) });
-				members.Add(result);
+			if(CG.generatePureScript) {
+				if(parameters.Length == 0) {
+					var result = CG.Invoke(string.Empty, nameof(uNodeHelper.GetGeneratedComponentInChildren), new[] { compType });
+					members.Add(result);
+				}
+				else if(parameters.Length == 1) {
+					var result = CG.Invoke(string.Empty, nameof(uNodeHelper.GetGeneratedComponentInChildren), new[] { compType }, new[] { parameters[0] });
+					members.Add(result);
+				}
 			}
-			else if(parameters.Length == 1) {
-				var result = CG.Invoke(string.Empty, nameof(uNodeHelper.GetGeneratedComponentInChildren), new[] { CG.GetUniqueNameForType(compType as RuntimeType), parameters[0] });
-				members.Add(result);
+			else {
+				if(parameters.Length == 0) {
+					var result = CG.Invoke(string.Empty, nameof(uNodeHelper.GetGeneratedComponentInChildren), new[] { CG.GetUniqueNameForType(compType as RuntimeType) });
+					members.Add(result);
+				}
+				else if(parameters.Length == 1) {
+					var result = CG.Invoke(string.Empty, nameof(uNodeHelper.GetGeneratedComponentInChildren), new[] { CG.GetUniqueNameForType(compType as RuntimeType), parameters[0] });
+					members.Add(result);
+				}
 			}
 		}
 	}

@@ -62,6 +62,7 @@ namespace MaxyGames.UNode.Nodes {
 						types[x].ParameterType, 
 						PortAccessibility.ReadWrite
 					).SetName(types[x].Name);
+					parameters[index].port.isVariable = true;
 				}
 				this.types = types.Select(p => p.ParameterType).ToArray();
 			} else {
@@ -76,6 +77,7 @@ namespace MaxyGames.UNode.Nodes {
 						"parameter" + index,
 						types[x].ParameterType,
 						PortAccessibility.ReadWrite).SetName(types[x].Name);
+					parameters[index].port.isVariable = true;
 				}
 				this.types = types.Select(p => p.ParameterType).Append(methodInfo.ReturnType).ToArray();
 			}

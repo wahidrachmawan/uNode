@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Yield", "WaitWhile", IsCoroutine = true)]
 	[Description("Waits until condition evaluate to false.")]
-	public class NodeWaitWhile : CoroutineNode {
+	public class NodeWaitWhile : CoroutineNode, IStackedNode {
 		public BlockData data = new BlockData();
 
 		protected override bool AutoExit => false;
+
+		public IEnumerable<NodeObject> stackedNodes => data.GetNodes();
 
 		protected override void OnRegister() {
 			base.OnRegister();

@@ -226,9 +226,12 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 			prevs.Add(current);
 			for(int i = 0; i < current.ValueInputs.Count; i++) {
 				if(current.ValueInputs[i].isConnected) {
-					var tNode = current.ValueInputs[i].GetTargetNode();
-					if(tNode == original || IsValueRecusive(original, tNode, prevs)) {
-						return true;
+					var tPort = current.ValueInputs[i].GetTargetPort();
+					if(tPort.isVariable == false) {
+						var tNode = tPort.node;
+						if(tNode == original || IsValueRecusive(original, tNode, prevs)) {
+							return true;
+						}
 					}
 				}
 			}
