@@ -199,9 +199,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 		/// <summary>
-		/// The type to hide from display.
+		/// The list of type to mark as invalid for this filter.
 		/// </summary>
-		public List<Type> HideTypes = new List<Type>();
+		public List<Type> InvalidTypes;
 		/// <summary>
 		/// Hide sub class type from HideTypes.
 		/// </summary>
@@ -325,7 +325,8 @@ namespace MaxyGames.UNode {
 			this.DisplayGenericType = other.DisplayGenericType;
 			this.DisplayInstanceOnStatic = other.DisplayInstanceOnStatic;
 			this.HideSubClassType = other.HideSubClassType;
-			this.HideTypes = new List<Type>(other.HideTypes);
+			if(other.InvalidTypes != null)
+				this.InvalidTypes = new List<Type>(other.InvalidTypes);
 			this.Inherited = other.Inherited;
 			this.Instance = other.Instance;
 			this.MaxMethodParam = other.MaxMethodParam;
@@ -516,9 +517,9 @@ namespace MaxyGames.UNode {
 					return false;
 				}
 			}
-			if(HideTypes != null && HideTypes.Count > 0) {
-				for(int i = 0; i < HideTypes.Count; i++) {
-					Type type = HideTypes[i];
+			if(InvalidTypes != null && InvalidTypes.Count > 0) {
+				for(int i = 0; i < InvalidTypes.Count; i++) {
+					Type type = InvalidTypes[i];
 					if(type == null) continue;
 					if(type.IsByRef) {
 						type = type.GetElementType();
@@ -563,11 +564,11 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
-		/// Is the type is a valid for this filter.
+		/// Is the type is a valid for this filter ( no type filter ).
 		/// </summary>
 		/// <param name="t"></param>
 		/// <returns></returns>
-		public bool IsValidType(Type t) {
+		public bool IsValidTypeSimple(Type t) {
 			if(t == null)
 				return true;
 			if(t.IsByRef) {
@@ -595,9 +596,9 @@ namespace MaxyGames.UNode {
 			}
 			if(OnlyGetType && t.IsAbstract && t.IsSealed)
 				return false;//Ensure the static type is not valid when only get type
-			if(HideTypes != null && HideTypes.Count > 0) {
-				for(int i = 0; i < HideTypes.Count; i++) {
-					Type type = HideTypes[i];
+			if(InvalidTypes != null && InvalidTypes.Count > 0) {
+				for(int i = 0; i < InvalidTypes.Count; i++) {
+					Type type = InvalidTypes[i];
 					if(type == null)
 						continue;
 					if(type.IsByRef) {
@@ -608,6 +609,9 @@ namespace MaxyGames.UNode {
 					}
 				}
 			}
+			if(t == typeof(void) && !VoidType) {
+				return false;
+			}
 			if(attributeTargets != AttributeTargets.All && t.IsCastableTo(typeof(System.Attribute))) {
 				if(t.IsDefined(typeof(AttributeUsageAttribute), true)) {
 					var a = t.GetCustomAttributes(typeof(AttributeUsageAttribute), true)[0] as AttributeUsageAttribute;
@@ -615,9 +619,16 @@ namespace MaxyGames.UNode {
 						return false;
 				}
 			}
-			if(t == typeof(void) && !VoidType) {
-				return false;
-			}
+			return true;
+		}
+
+		/// <summary>
+		/// Is the type is a valid for this filter.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		public bool IsValidType(Type t) {
+			if(IsValidTypeSimple(t) == false) return false;
 			if(ValidateType != null) {
 				return ValidateType(t);
 			}

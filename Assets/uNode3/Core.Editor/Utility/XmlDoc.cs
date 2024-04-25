@@ -280,9 +280,9 @@ namespace MaxyGames.UNode.Editors {
 		public static void ReloadDocInBackground() {
 			if(isLoadDoc || loadDocThread != null) {
 				loadDocThread.Abort();
-				hasLoadDoc = false;
-				isLoadDoc = false;
 			}
+			hasLoadDoc = false;
+			isLoadDoc = false;
 			XMLDocPath = null;
 			FindXMLDocAsset();
 			LoadDocInBackground();

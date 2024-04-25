@@ -1739,6 +1739,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static string GetUniqueName(string name, Graph graph) {
+			name = uNodeUtility.AutoCorrectName(name);
 			var index = 0;
 			var fixName = name;
 			var variables = graph.variableContainer.GetObjects(true);

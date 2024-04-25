@@ -1127,7 +1127,6 @@ namespace MaxyGames.UNode {
 					}
 					break;
 				case TargetType.uNodeGenericParameter:
-				case TargetType.uNodeFunction:
 				case TargetType.Type:
 				case TargetType.uNodeType:
 				case TargetType.None:
@@ -1135,6 +1134,13 @@ namespace MaxyGames.UNode {
 				case TargetType.Self:
 				case TargetType.Values:
 					return null;
+				case TargetType.uNodeFunction: {
+					var function = startItem.GetReferenceValue() as Function;
+					if(function != null) {
+						hasRefOrOut = function.HasRefOrOut;
+					}
+					return null;
+				}
 				default:
 					if(!uNodeUtility.isPlaying) {
 						if(startType != null) {
@@ -1379,16 +1385,16 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// Retrieves the value of the member or call it.
 		/// </summary>
-		public object Get(GraphInstance graph) {
-			return Invoke(graph, null);
+		public object Get(Flow flow) {
+			return Invoke(flow, null);
 		}
 
 		/// <summary>
 		/// Retrieves the value of the member or call it.
 		/// </summary>
-		public object Get(GraphInstance graph, Type convertType) {
+		public object Get(Flow flow, Type convertType) {
 			if(convertType != null) {
-				object resultValue = Get(graph);
+				object resultValue = Get(flow);
 				if(resultValue != null) {
 					if(resultValue.GetType() == convertType)
 						return resultValue;
@@ -1396,7 +1402,7 @@ namespace MaxyGames.UNode {
 				}
 				return resultValue;
 			}
-			return Invoke(graph, null);
+			return Invoke(flow, null);
 		}
 
 		/// <summary>
@@ -1404,7 +1410,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public T Get<T>(GraphInstance graph) {
+		public T Get<T>(Flow graph) {
 			//if(type == null) return null;
 			object resultValue = Get(graph);
 			if(!object.ReferenceEquals(resultValue, null)) {
@@ -1415,13 +1421,13 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Invoke
-		public object Invoke(GraphInstance graph, object[] paramValues) {
+		public object Invoke(Flow flow, object[] paramValues) {
 			EnsureIntialized();
 			AutoConvertParameters(ref paramValues);
-			return DoInvoke(graph, paramValues);
+			return DoInvoke(flow, paramValues);
 		}
 
-		private object DoReflect(GraphInstance graph, object reflectionTarget, object[] paramValues) {
+		private object DoReflect(Flow flow, object reflectionTarget, object[] paramValues) {
 			if(methodInfo != null) {
 				reflectionTarget = AutoConvertValue(reflectionTarget, methodInfo.DeclaringType);//Ensure the value is valid
 				int paramsLength = methodInfo.GetParameters().Length;
@@ -1478,9 +1484,9 @@ namespace MaxyGames.UNode {
 				switch(targetType) {
 					case TargetType.uNodeVariable:
 					case TargetType.uNodeLocalVariable:
-						return (startItem.GetReferenceValue() as Variable).Get(graph);
+						return (startItem.GetReferenceValue() as Variable).Get(flow);
 					case TargetType.Property:
-						return (startItem.GetReferenceValue() as Property).Get(graph);
+						return (startItem.GetReferenceValue() as Property).Get(flow);
 					default:
 						throw new Exception(targetType.ToString());
 				}
@@ -1516,7 +1522,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <param name="paramValues"></param>
 		/// <returns></returns>
-		private object DoInvoke(GraphInstance graph, object[] paramValues) {
+		private object DoInvoke(Flow flow, object[] paramValues) {
 			//object startObj = null;
 			//if(instance == graph.graph) {
 			//	startObj = graph.target;
@@ -1542,14 +1548,14 @@ namespace MaxyGames.UNode {
 				case TargetType.uNodeLocalVariable:
 				case TargetType.uNodeVariable:
 					if(isDeepTarget) {
-						return DoReflect(graph, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).Get(graph), out _, paramValues), paramValues);
+						return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).Get(flow), out _, paramValues), paramValues);
 					}
-					return (startItem.GetReferenceValue() as Variable).Get(graph);
+					return (startItem.GetReferenceValue() as Variable).Get(flow);
 				case TargetType.uNodeProperty:
 					if(isDeepTarget) {
-						return DoReflect(graph, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Property).Get(graph), out _, paramValues), paramValues);
+						return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Property).Get(flow), out _, paramValues), paramValues);
 					}
-					return (startItem.GetReferenceValue() as Property).Get(graph);
+					return (startItem.GetReferenceValue() as Property).Get(flow);
 				case TargetType.Type:
 					return startType;
 				case TargetType.Values: {
@@ -1560,12 +1566,12 @@ namespace MaxyGames.UNode {
 					return SerializerUtility.Duplicate(obj);
 				}
 				case TargetType.Self:
-					return graph?.target ?? startTarget;
+					return flow?.target ?? startTarget;
 				case TargetType.uNodeParameter:
 					if(isDeepTarget) {
-						return DoReflect(graph, ReflectionUtils.GetMemberTargetRef(memberInfo, graph.GetUserData(null, startItem.GetReferenceValue()), out _, paramValues), paramValues);
+						return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, flow.GetLocalData(null, startItem.GetReferenceValue()), out _, paramValues), paramValues);
 					}
-					return graph.GetUserData(null, startItem.GetReferenceValue());
+					return flow.GetLocalData(null, startItem.GetReferenceValue());
 				case TargetType.uNodeGenericParameter:
 					if(Items != null && Items.Length > 0) {
 						ItemData iData = Items[0];
@@ -1613,7 +1619,7 @@ namespace MaxyGames.UNode {
 					}
 					return type;
 				case TargetType.uNodeFunction:
-					return startItem.GetReference<FunctionRef>().reference.Invoke(graph, paramValues);
+					return startItem.GetReference<FunctionRef>().reference.Invoke(flow, paramValues);
 				case TargetType.Event:
 					return new Event(eventInfo, ReflectionUtils.GetMemberTargetRef(memberInfo, startTarget, out _, paramValues));
 				case TargetType.Constructor:
@@ -1624,7 +1630,7 @@ namespace MaxyGames.UNode {
 				case TargetType.NodePort:
 					return startItem?.GetReferenceValue();
 				default:
-					return DoReflect(graph, ReflectionUtils.GetMemberTargetRef(memberInfo, startTarget, out _, paramValues), paramValues);
+					return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, startTarget, out _, paramValues), paramValues);
 			}
 		}
 		#endregion
@@ -1720,8 +1726,8 @@ namespace MaxyGames.UNode {
 		/// Assigns a new value to the variable.
 		/// </summary>
 		/// <param name="value"></param>
-		public void Set(GraphInstance graph, object value) {
-			Set(graph, value, null);
+		public void Set(Flow flow, object value) {
+			Set(flow, value, null);
 		}
 
 		/// <summary>
@@ -1729,7 +1735,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <param name="value">The value to assign</param>
 		/// <param name="paramValues">the parameter list for invoke method.</param>
-		public void Set(GraphInstance graph, object value, object[] paramValues) {
+		public void Set(Flow flow, object value, object[] paramValues) {
 			EnsureIntialized();
 			AutoConvertValue(ref value);
 			switch(targetType) {
@@ -1737,10 +1743,10 @@ namespace MaxyGames.UNode {
 					return;
 				case TargetType.uNodeParameter: {
 					if(isDeepTarget) {
-						DoReflectSet(ReflectionUtils.GetMemberTargetRef(memberInfo, graph.GetUserData(null, startItem.GetReferenceValue()), out var parentTarget, paramValues), value, parentTarget);
+						DoReflectSet(ReflectionUtils.GetMemberTargetRef(memberInfo, flow.GetLocalData(null, startItem.GetReferenceValue()), out var parentTarget, paramValues), value, parentTarget);
 					}
 					else {
-						graph.SetUserData(null, startItem.GetReferenceValue(), value);
+						flow.SetLocalData(null, startItem.GetReferenceValue(), value);
 					}
 					return;
 				}
@@ -1759,16 +1765,16 @@ namespace MaxyGames.UNode {
 						goto default;
 					}
 					else {
-						(startItem.GetReferenceValue() as Property).Set(graph, value);
+						(startItem.GetReferenceValue() as Property).Set(flow, value);
 					}
 					break;
 				case TargetType.uNodeLocalVariable:
 				case TargetType.uNodeVariable: {
 					if(isDeepTarget) {
-						DoReflectSet(ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).Get(graph), out var parentTarget, paramValues), value, parentTarget);
+						DoReflectSet(ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).Get(flow), out var parentTarget, paramValues), value, parentTarget);
 					}
 					else {
-						(startItem.GetReferenceValue() as Variable).Set(graph, value);
+						(startItem.GetReferenceValue() as Variable).Set(flow, value);
 					}
 					return;
 				}

@@ -41,6 +41,29 @@ namespace MaxyGames.UNode.Editors.PortConverter {
 		}
 	}
 
+
+	class EnumToNumberConverter : AutoConvertPort {
+		public override bool CreateNode(System.Action<Node> action) {
+			NodeEditorUtility.AddNewNode<Nodes.NodeValueConverter>(
+				canvas,
+				new Vector2(position.x - 250, position.y),
+				(nod) => {
+					nod.input.ConnectTo(output);
+					nod.type = rightType;
+					action?.Invoke(nod);
+				});
+			return true;
+		}
+
+		public override bool IsValid() {
+			if(rightType == null || leftType == null) return false;
+			if(rightType == typeof(int) || rightType == typeof(byte) || rightType == typeof(sbyte) || rightType == typeof(short) || rightType == typeof(long)) {
+				return leftType.IsEnum;
+			}
+			return false;
+		}
+	}
+
 	class LambdaConverter : AutoConvertPort {
 		public override bool CreateNode(System.Action<Node> action) {
 			var lambda = output.node.node as NodeLambda;

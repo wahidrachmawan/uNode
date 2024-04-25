@@ -192,7 +192,7 @@ namespace MaxyGames.UNode {
 						for(int x = 0; x < variables.Count; x++) {
 							if(var.name.Equals(variables[x].name)) {
 								//Change the default variable value
-								instance.SetElementData(var, variables[x].Get());
+								var.Set(instance, variables[x].Get());
 							}
 						}
 					}

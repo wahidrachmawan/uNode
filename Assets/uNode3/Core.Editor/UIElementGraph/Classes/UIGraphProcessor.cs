@@ -67,8 +67,9 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool Connect(UGraphView graph, PortView input, PortView output) {
 			if(output.isValue) {
+				var port = output.GetPortValue<ValueOutput>();
 				var outputNode = output.GetNode();
-				if(outputNode is MultipurposeNode mNode) {
+				if(outputNode is MultipurposeNode mNode && port.IsPrimaryPort()) {
 					var connecteds = UIElementUtility.Nodes.FindConnectedFlowNodes(output.owner);
 					if(connecteds.Contains(input.owner)) {
 						if(EditorUtility.DisplayDialog("", "Value can be cached for get better performance\nDo you want to cache the value?", "Yes", "No")) {

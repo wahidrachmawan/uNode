@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "OR {||}", typeof(bool))]
+	[NodeMenu("Data", "OR {||}", typeof(bool), inputs = new[] { typeof(bool) })]
 	public class MultiORNode : ValueNode {
 		public class PortData {
 			public string id = uNodeUtility.GenerateUID();

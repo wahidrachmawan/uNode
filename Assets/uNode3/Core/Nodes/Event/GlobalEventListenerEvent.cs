@@ -77,7 +77,7 @@ namespace MaxyGames.UNode.Nodes {
 					@delegate = CustomDelegate.CreateActionDelegate((Action<object[]>)(values => {
 						if(values != null) {
 							for(int i = 0; i < values.Length; i++) {
-								instance.SetPortData((ValueOutput)datas[(int)i].port, (object)values[(int)i]);
+								instance.defaultFlow.SetPortData((ValueOutput)datas[(int)i].port, (object)values[(int)i]);
 							}
 						}
 						base.Trigger(instance);
@@ -87,7 +87,7 @@ namespace MaxyGames.UNode.Nodes {
 					@delegate = new Action<object[]>(values => {
 						if(values != null) {
 							for(int i = 0; i < values.Length; i++) {
-								instance.SetPortData(datas[i].port, values[i]);
+								instance.defaultFlow.SetPortData(datas[i].port, values[i]);
 							}
 						}
 						Trigger(instance);

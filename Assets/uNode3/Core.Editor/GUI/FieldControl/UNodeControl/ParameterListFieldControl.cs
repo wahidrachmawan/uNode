@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					drawElement: (pos, index, parameter) => {
 						var name = EditorGUI.DelayedTextField(new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight), "Name", parameter.name);
 						if(name != parameter.name) {
-							parameter.name = name;
+							parameter.name = uNodeUtility.AutoCorrectName(name);
 							onChanged(fieldValue);
 							uNodeGUIUtility.GUIChangedMajor(settings?.unityObject);
 						}

@@ -115,6 +115,7 @@ namespace MaxyGames.UNode.Editors {
 			Variable variable = new Variable();
 			variable.type = type;
 			variable.name = name;
+			variable.resetOnEnter = container.GetObjectInParent<ILocalVariableSystem>() != null;
 			if(uNodePreference.preferenceData.newVariableAccessor == uNodePreference.DefaultAccessor.Private) {
 				variable.modifier.SetPrivate();
 			}
@@ -546,7 +547,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static bool CanAutoConvertType(Type leftType, Type rightType,
-			ValueOutput outputNode, ValueInput inputNode,
+			ValueOutput outputPort, ValueInput inputPort,
 			UGraphElement canvas,
 			FilterAttribute filter = null,
 			bool forceConvert = false) {
@@ -570,14 +571,51 @@ namespace MaxyGames.UNode.Editors {
 					c.leftType = leftType;
 					c.rightType = rightType;
 					c.canvas = canvas;
-					c.input = inputNode;
-					c.output = outputNode;
-					c.position = inputNode.node.position.position;
+					c.input = inputPort;
+					c.output = outputPort;
+					c.position = inputPort.node.position.position;
 					c.force = forceConvert;
 					if(c.IsValid()) {
 						return true;
 					}
 				}
+			}
+			return false;
+		}
+
+		internal static bool CanAutoConvertInput(Type inputType, FilterAttribute outputFilter) {
+			if(inputType.IsByRef) {
+				inputType = inputType.GetElementType();
+			}
+			if(outputFilter.IsValidTypeSimple(inputType)) {
+				if(outputFilter.Types != null && outputFilter.Types.Count > 0) {
+					foreach(var typeInFilter in outputFilter.Types) {
+						if(CanAutoConvertType(typeInFilter, inputType)) {
+							return true;
+						}
+					}
+					return false;
+				}
+				return true;
+			}
+			return false;
+			
+		}
+
+		internal static bool CanAutoConvertOuput(Type outputType, FilterAttribute inputFilter) {
+			if(outputType.IsByRef) {
+				outputType = outputType.GetElementType();
+			}
+			if(inputFilter.IsValidTypeSimple(outputType)) {
+				if(inputFilter.Types != null && inputFilter.Types.Count > 0) {
+					foreach(var typeInFilter in inputFilter.Types) {
+						if(CanAutoConvertType(outputType, typeInFilter)) {
+							return true;
+						}
+					}
+					return false;
+				}
+				return true;
 			}
 			return false;
 		}
@@ -707,21 +745,21 @@ namespace MaxyGames.UNode.Editors {
 					port.AssignToDefault(MemberData.CreateValueFromType(type));
 					return true;
 				}
-				else if(graphType.IsCastableTo(type)) {
+				else if(graphType != null && (graphType == type || type.IsSubclassOf(graphType))) {
 					port.AssignToDefault(MemberData.This(graph));
 					return true;
 				}
-				else if(CanAutoConvertType(graphType, type)) {
-					AddNewNode<MultipurposeNode>(nodeObject.parent, new Vector2(nodeObject.position.x - 200, nodeObject.position.y), thisNode => {
-						thisNode.target = MemberData.This(graph);
-						thisNode.Register();
+				//else if(CanAutoConvertType(graphType, type)) {
+				//	AddNewNode<MultipurposeNode>(nodeObject.parent, new Vector2(nodeObject.position.x - 200, nodeObject.position.y), thisNode => {
+				//		thisNode.target = MemberData.This(graph);
+				//		thisNode.Register();
 
-						AutoConvertPort(graphType, type, thisNode.output, port, convertNode => {
-							port.ConnectTo(GetPort<ValueOutput>(convertNode));
-						}, nodeObject.parent);
-					});
-					return true;
-				}
+				//		AutoConvertPort(graphType, type, thisNode.output, port, convertNode => {
+				//			port.ConnectTo(GetPort<ValueOutput>(convertNode));
+				//		}, nodeObject.parent);
+				//	});
+				//	return true;
+				//}
 				return false;
 			}
 

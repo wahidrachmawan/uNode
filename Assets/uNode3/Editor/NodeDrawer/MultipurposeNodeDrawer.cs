@@ -23,7 +23,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var member = node.member;
 			if(member.datas?.Length > 0) {
 				foreach(var data in member.datas) {
-					if(data.parameters.Any(p => p.info != null && p.info.IsOut)) {
+					if(data.parameters.Any(p => p.refKind == RefKind.Out)) {
 						EditorGUI.BeginChangeCheck();
 						UInspector.Draw(option.property[nameof(node.useOutputParameters)]);
 						if(EditorGUI.EndChangeCheck()) {

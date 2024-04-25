@@ -27,7 +27,10 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override string GenerateValueCode() {
 			var type = target.ValueType;
-			if(type.IsCastableTo(typeof(ICollection))) {
+			if(type.IsArray) {
+				return CG.Access(target, "Length");
+			} 
+			else if(type.IsCastableTo(typeof(ICollection))) {
 				return CG.Access(target, "Count");
 			}
 			//Because the function is using Linq we need to make sure that System.Linq namespaces is registered.

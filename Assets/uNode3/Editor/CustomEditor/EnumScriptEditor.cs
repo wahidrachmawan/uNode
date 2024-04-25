@@ -23,7 +23,7 @@ namespace MaxyGames.UNode.Editors {
 					var enumName = EditorGUI.DelayedTextField(position, "Element " + index, value.name);
 					if(enumName != value.name) {
 						uNodeEditorUtility.RegisterUndo(asset, "Rename enum element");
-						value.name = enumName;
+						value.name = uNodeUtility.AutoCorrectName(enumName);
 					}
 				},
 				add: (position) => {

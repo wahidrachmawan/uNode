@@ -412,7 +412,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			public GraphItem(IGraph targetRoot) {
-				this.Name = "this";
+				this.Name = "This";
 				this.targetType = MemberData.TargetType.Self;
 				this.type = targetRoot is IReflectionType reflectionType ? reflectionType.ReflectionType : targetRoot is IClassGraph classGraph ? classGraph.InheritType : targetRoot.GetType();
 				this.targetObject = targetRoot as UnityEngine.Object;
@@ -878,11 +878,6 @@ namespace MaxyGames.UNode.Editors {
 								graphItem.AddRange(graph.functionContainer.GetObjects().Where(item => IsCorrectItem(item, filter)).Select(item => new GraphItem(item, graph)));
 							}
 							graphItem.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-							if(!filter.SetMember) {
-								if(filter.IsValidType(ReflectionUtils.GetRuntimeType(graph.graphContainer)) && filter.IsValidTarget(MemberData.TargetType.Self | MemberData.TargetType.NodePort)) {
-									graphItem.Insert(0, new GraphItem(graph.graphContainer));
-								}
-							}
 							RemoveIncorrectGraphItem(graphItem, filter);
 							if(graphItem != null && graphItem.Count > 0) {
 								var categTree = new SelectorCategoryTreeView("Graph (Self)", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-SELF]"), -1);

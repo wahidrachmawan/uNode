@@ -49,17 +49,40 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// Reset the value on executed. ( Only for local variable )
 		/// </summary>
-		public bool resetOnEnter = true;
+		public bool resetOnEnter;
+
+		public object Get(Flow flow) {
+			if(resetOnEnter) {
+				return flow.GetLocalData(this);
+			}
+			return flow.GetElementData(this);
+		}
+
+		public void Set(Flow flow, object value) {
+			if(resetOnEnter) {
+				flow.SetLocalData(this, value);
+				return;
+			}
+			flow.SetElementData(this, value);
+		}
 
 		public object Get(GraphInstance instance) {
+			if(resetOnEnter) {
+				throw new Exception("Unable to get local variable, use Get(Flow) instead.");
+			}
 			return instance.GetElementData(this);
 		}
 
 		public void Set(GraphInstance instance, object value) {
+			if(resetOnEnter) {
+				throw new Exception("Unable to set local variable, use Set(Flow, object) instead.");
+			}
 			instance.SetElementData(this, value);
 		}
 
 		public override void OnRuntimeInitialize(GraphInstance instance) {
+			if(resetOnEnter)
+				return;
 			if(instance.HasElementData(this))
 				return;
 			instance.SetElementData(this, SerializerUtility.Duplicate(defaultValue));
@@ -93,6 +116,15 @@ namespace MaxyGames.UNode {
 
 		public FieldModifier GetModifier() {
 			return modifier;
+		}
+
+		[System.Runtime.Serialization.OnDeserialized]
+		void OnAfterDeserialized() {
+			if(resetOnEnter) {
+				if(GetObjectInParent<ILocalVariableSystem>() == null) {
+					resetOnEnter = false;
+				}
+			}
 		}
 		#endregion
 	}

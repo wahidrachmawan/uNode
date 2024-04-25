@@ -632,9 +632,10 @@ namespace MaxyGames.UNode.Editors {
 			Type type = portView.GetPortType();
 			bool canSetValue = false;
 			bool canGetValue = true;
-			if(portView == portView.owner.primaryOutputValue && portView.GetNodeObject() != null) {
-				canSetValue = (portView.GetNodeObject()).CanSetValue();
-				canGetValue = (portView.GetNodeObject()).CanGetValue();
+			var port = portView.GetPortValue<ValueOutput>();
+			if(port != null) {
+				canSetValue = port.CanSetValue();
+				canGetValue = port.CanGetValue();
 			}
 			bool onlySet = canSetValue && !canGetValue;
 			FilterAttribute FA = new FilterAttribute {
@@ -662,12 +663,12 @@ namespace MaxyGames.UNode.Editors {
 			if(customItems == null) {
 				if(type is RuntimeType) {
 					(type as RuntimeType).Update();
-					customItems = ItemSelector.MakeCustomItems((type as RuntimeType).GetRuntimeMembers(), FA);
+					customItems = ItemSelector.MakeCustomItems((type as RuntimeType).GetRuntimeMembers(), FA, category: "Data Members");
 					if(type.BaseType != null)
-						customItems.AddRange(ItemSelector.MakeCustomItems(type.BaseType, FA, "Inherit Member"));
+						customItems.AddRange(ItemSelector.MakeCustomItems(type.BaseType, FA, "Data Memebrs Member"));
 				}
 				else {
-					customItems = onlySet ? new List<ItemSelector.CustomItem>() : ItemSelector.MakeCustomItems(type, FA, "Data", "Data ( Inherited )");
+					customItems = onlySet ? new List<ItemSelector.CustomItem>() : ItemSelector.MakeCustomItems(type, FA, "Data Members", "Data Members ( Inherited )");
 				}
 				if(type.IsByRefLike == false) {
 					var usingNamespaces = GetNodeObject().graphContainer.GetUsingNamespaces();
@@ -764,7 +765,15 @@ namespace MaxyGames.UNode.Editors {
 				}, customItems: customItems).ChangePosition(owner.owner.graph.GetMenuPosition());
 				w.displayRecentItem = false;
 				w.displayNoneOption = false;
-				w.defaultExpandedItems = new[] { "@", "Data", "Flow" };
+				if(type == typeof(bool)) {
+					w.defaultExpandedItems = new[] { "@", "Operator", "Data", "Flow" };
+				}
+				else if(type == typeof(int) || type == typeof(float) || type == typeof(byte) || type == typeof(sbyte) || type == typeof(double) || type == typeof(long)) {
+					w.defaultExpandedItems = new[] { "@", "Operator", "Flow" };
+				}
+				else {
+					w.defaultExpandedItems = new[] { "@", "Operator", "Data Members", "Flow" };
+				}
 			}
 		}
 

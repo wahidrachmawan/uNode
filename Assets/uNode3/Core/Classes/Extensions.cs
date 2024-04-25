@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace MaxyGames.UNode {
 	public static class Extensions {
@@ -245,6 +246,9 @@ namespace MaxyGames.UNode {
 		public static Type GetGraphType(this IGraph graph) {
 			if(graph is IReflectionType reflectionType) {
 				return reflectionType.ReflectionType;
+			}
+			else if(graph is IClassGraph classGraph) {
+				return classGraph.InheritType;
 			}
 			return null;
 		}

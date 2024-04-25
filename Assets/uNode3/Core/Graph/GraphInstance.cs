@@ -15,7 +15,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	internal class RuntimeLocalValue {
+	public class RuntimeLocalValue {
 		public readonly GraphInstance instance;
 		public readonly UGraphElementRef owner;
 
@@ -201,7 +201,7 @@ namespace MaxyGames.UNode {
         private Dictionary<(RuntimeGraphID, object), object> customDatas2 = new Dictionary<(RuntimeGraphID, object), object>();
 
 		#region Coroutines
-		private Dictionary<object, List<Coroutine>> routineMap = new Dictionary<object, List<Coroutine>>();
+		//private Dictionary<object, List<Coroutine>> routineMap = new Dictionary<object, List<Coroutine>>();
 		/// <summary>
 		/// Start a coroutine.
 		/// </summary>
@@ -231,27 +231,27 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		/// <summary>
-		/// Stop all coroutines running on owner.
-		/// </summary>
-		/// <param name="owner"></param>
-		public void StopAllCoroutines(object owner) {
-			if(target is MonoBehaviour mb) {
-				List<Coroutine> coroutineList;
-				if(routineMap.TryGetValue(owner, out coroutineList)) {
-					foreach(var routine in coroutineList) {
-						if(routine != null) {
-							mb.StopCoroutine(routine);
-						}
-					}
-					//Clear after stoping all coroutine.
-					coroutineList.Clear();
-				}
-			}
-			else {
-				throw new Exception("The target must inherit from MonoBehaviour or it's sub classes");
-			}
-		}
+		///// <summary>
+		///// Stop all coroutines running on owner.
+		///// </summary>
+		///// <param name="owner"></param>
+		//public void StopAllCoroutines(object owner) {
+		//	if(target is MonoBehaviour mb) {
+		//		List<Coroutine> coroutineList;
+		//		if(routineMap.TryGetValue(owner, out coroutineList)) {
+		//			foreach(var routine in coroutineList) {
+		//				if(routine != null) {
+		//					mb.StopCoroutine(routine);
+		//				}
+		//			}
+		//			//Clear after stoping all coroutine.
+		//			coroutineList.Clear();
+		//		}
+		//	}
+		//	else {
+		//		throw new Exception("The target must inherit from MonoBehaviour or it's sub classes");
+		//	}
+		//}
 		#endregion
 
 		#region Custom Data
@@ -479,63 +479,6 @@ namespace MaxyGames.UNode {
 				elementDatas[id] = data;
 			}
 			return data;
-		}
-		#endregion
-
-		#region Port Datas
-		/// <summary>
-		/// Set port cached value
-		/// </summary>
-		/// <param name="port"></param>
-		/// <param name="value"></param>
-		public void SetPortData(ValueOutput port, object value) {
-			GetOrCreateElementDataValue(port.node).SetOutputData(port.id, value);
-		}
-
-		/// <summary>
-		/// Get port cached value
-		/// </summary>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		public object GetPortData(ValueOutput port) {
-			return GetOrCreateElementDataValue(port.node).GetOutputData(port.id).value;
-		}
-
-		/// <summary>
-		/// Get port cached value
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		public T GetPortData<T>(ValueOutput port) {
-			var data = GetOrCreateElementDataValue(port.node).GetOutputData(port.id);
-			if(object.ReferenceEquals(data.value, null))
-				return default;
-			return (T)data.value;
-		}
-
-		/// <summary>
-		/// Get or create port cached value
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		public T GetOrCreatePortData<T>(ValueOutput port) where T : new() {
-			var data = GetOrCreateElementDataValue(port.node).GetOutputData(port.id);
-			if(object.ReferenceEquals(data.value, null)) {
-				data.value = new T();
-			}
-			return (T)data.value;
-		}
-
-		/// <summary>
-		/// Get port value by reference
-		/// </summary>
-		/// <param name="port"></param>
-		/// <returns></returns>
-		public ref object GetPortDataByRef(ValueOutput port) {
-			var data = GetOrCreateElementDataValue(port.node).GetOutputData(port.id);
-			return ref data.value;
 		}
 		#endregion
 

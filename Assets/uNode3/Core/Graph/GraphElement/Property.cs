@@ -56,7 +56,7 @@ namespace MaxyGames.UNode {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			if(AutoProperty) {
 				if(ReturnType().IsValueType) {
-					instance.SetUserData(this, Activator.CreateInstance(ReturnType()));
+					instance.SetElementData(this, Activator.CreateInstance(ReturnType()));
 				}
 			}
 		}
@@ -69,12 +69,12 @@ namespace MaxyGames.UNode {
 					throw new System.Exception("Can't get value of Property because no Getter.");
 				}
 			}
-			return instance.GetUserData(this);
+			return instance.GetElementData(this);
 		}
 
 		public void Set(GraphInstance instance, object value) {
 			if(AutoProperty) {
-				instance.SetUserData(this, value);
+				instance.SetElementData(this, value);
 			} else {
 				if(setRoot != null) {
 					setRoot.Invoke(instance, new object[] { value });
@@ -97,6 +97,14 @@ namespace MaxyGames.UNode {
 
 		public string GetSummary() {
 			return comment;
+		}
+
+		object IGraphValue.Get(Flow flow) {
+			return Get(flow);
+		}
+
+		void IGraphValue.Set(Flow flow, object value) {
+			Set(flow, value);
 		}
 	}
 }

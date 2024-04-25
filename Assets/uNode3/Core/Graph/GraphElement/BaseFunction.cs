@@ -17,6 +17,16 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public bool HasRefOrOut {
+			get {
+				for(int i = 0; i < parameters.Count; i++) {
+					if(parameters[i].isByRef)
+						return true;
+				}
+				return false;
+			}
+		}
+
 		public IList<ParameterData> Parameters {
 			get {
 				return parameters;
@@ -25,19 +35,12 @@ namespace MaxyGames.UNode {
 
 		public abstract Type ReturnType();
 
-		public override void OnRuntimeInitialize(GraphInstance instance) {
-			for(int i = 0; i < parameters.Count; i++) {
-				//Assign the default value
-				instance.SetUserData(null, parameters[i], parameters[i].value);
-			}
-		}
-
 		public override void RegisterEntry(Nodes.FunctionEntryNode node) {
 			for(int i = 0; i < parameters.Count; i++) {
 				var param = parameters[i];
 				var port = Node.Utilities.ValueOutput(node, param.id, () => param.Type, PortAccessibility.ReadWrite).SetName(param.name);
-				port.AssignGetCallback((flow) => flow.GetUserData(null, param));
-				port.AssignSetCallback((flow, value) => flow.SetUserData(null, param, value));
+				port.AssignGetCallback((flow) => flow.GetLocalData(null, param));
+				port.AssignSetCallback((flow, value) => flow.SetLocalData(null, param, value));
 			}
 		}
 

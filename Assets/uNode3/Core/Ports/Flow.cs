@@ -16,6 +16,24 @@ namespace MaxyGames.UNode {
 			this.instance = instance;
 		}
 
+		#region Local Data
+		public abstract void SetLocalData(UGraphElement owner, object value);
+
+		public abstract object GetLocalData(UGraphElement owner);
+
+		public T GetLocalData<T>(UGraphElement owner) {
+			return GetLocalData(owner).ConvertTo<T>();
+		}
+
+		public abstract void SetLocalData(UGraphElement owner, object key, object value);
+
+		public abstract object GetLocalData(UGraphElement owner, object key);
+
+		public T GetLocalData<T>(UGraphElement owner, object key) {
+			return GetLocalData(owner, key).ConvertTo<T>();
+		}
+		#endregion
+
 		#region Custom Data
 		public void SetUserData(UGraphElement owner, object value) {
 			instance.SetUserData(owner, value);
@@ -88,26 +106,64 @@ namespace MaxyGames.UNode {
 		public T GetOrCreateElementData<T>(UGraphElement owner) where T : new() {
 			return instance.GetOrCreateElementData<T>(owner);
 		}
+		#endregion
 
-		public ref object GetPortDataByRef(ValueOutput port) {
-			return ref instance.GetPortDataByRef(port);
-		}
+		#region Port Datas
+		public abstract RuntimeLocalValue GetOrCreateLocalDataValue(NodeObject owner);
 
-
-		public object GetPortData(ValueOutput port) {
-			return instance.GetPortData(port);
-		}
-
-		public T GetPortData<T>(ValueOutput port) {
-			return instance.GetPortData<T>(port);
-		}
-
-		public T GetOrCreatePortData<T>(ValueOutput port) where T : new() {
-			return instance.GetOrCreatePortData<T>(port);
-		}
-
+		/// <summary>
+		/// Set port cached value
+		/// </summary>
+		/// <param name="port"></param>
+		/// <param name="value"></param>
 		public void SetPortData(ValueOutput port, object value) {
-			instance.SetPortData(port, value);
+			GetOrCreateLocalDataValue(port.node).SetOutputData(port.id, value);
+		}
+
+		/// <summary>
+		/// Get port cached value
+		/// </summary>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		public object GetPortData(ValueOutput port) {
+			return GetOrCreateLocalDataValue(port.node).GetOutputData(port.id).value;
+		}
+
+		/// <summary>
+		/// Get port cached value
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		public T GetPortData<T>(ValueOutput port) {
+			var data = GetOrCreateLocalDataValue(port.node).GetOutputData(port.id);
+			if(object.ReferenceEquals(data.value, null))
+				return default;
+			return (T)data.value;
+		}
+
+		/// <summary>
+		/// Get or create port cached value
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		public T GetOrCreatePortData<T>(ValueOutput port) where T : new() {
+			var data = GetOrCreateLocalDataValue(port.node).GetOutputData(port.id);
+			if(object.ReferenceEquals(data.value, null)) {
+				data.value = new T();
+			}
+			return (T)data.value;
+		}
+
+		/// <summary>
+		/// Get port value by reference
+		/// </summary>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		public ref object GetPortDataByRef(ValueOutput port) {
+			var data = GetOrCreateLocalDataValue(port.node).GetOutputData(port.id);
+			return ref data.value;
 		}
 		#endregion
 
@@ -162,6 +218,22 @@ namespace MaxyGames.UNode {
 		public Flow(GraphInstance instance) : base(instance) { }
 
 		public virtual JumpStatement jumpStatement { get; set; }
+
+		#region Local Data
+		public override void SetLocalData(UGraphElement owner, object value) {
+			graphRunner.SetLocalData(owner, value);
+		}
+
+		public override object GetLocalData(UGraphElement owner) => graphRunner.GetLocalData(owner);
+
+		public override void SetLocalData(UGraphElement owner, object key, object value) {
+			graphRunner.SetLocalData(owner, key, value);
+		}
+
+		public override object GetLocalData(UGraphElement owner, object key) => graphRunner.GetLocalData(owner, key);
+
+		public override RuntimeLocalValue GetOrCreateLocalDataValue(NodeObject owner) => graphRunner.GetOrCreateLocalDataValue(owner);
+		#endregion
 
 		public abstract void Next(FlowPort port);
 
@@ -294,6 +366,52 @@ namespace MaxyGames.UNode {
 			public void Reset() {
 
 			}
+		}
+
+		private Dictionary<RuntimeGraphID, object> localDatas = new Dictionary<RuntimeGraphID, object>();
+		private Dictionary<(RuntimeGraphID, object), object> localDatas2 = new Dictionary<(RuntimeGraphID, object), object>();
+
+		public override void SetLocalData(UGraphElement owner, object value) {
+			localDatas[owner.runtimeID] = value;
+		}
+
+		public override object GetLocalData(UGraphElement owner) {
+			if(!localDatas.TryGetValue(owner.runtimeID, out var data)) {
+				localDatas[owner.runtimeID] = data;
+			}
+			return data;
+		}
+
+		public override void SetLocalData(UGraphElement owner, object key, object value) {
+			RuntimeGraphID id;
+			if(object.ReferenceEquals(owner, null) == false)
+				id = owner.runtimeID;
+			else
+				id = default;
+			localDatas2[(id, key)] = value;
+		}
+
+		public override object GetLocalData(UGraphElement owner, object key) {
+			RuntimeGraphID id;
+			if(object.ReferenceEquals(owner, null) == false)
+				id = owner.runtimeID;
+			else
+				id = default;
+			if(!localDatas2.TryGetValue((id, key), out var data)) {
+				localDatas2[(id, key)] = data;
+			}
+			return data;
+		}
+
+		private Dictionary<RuntimeGraphID, RuntimeLocalValue> elementDatas = new Dictionary<RuntimeGraphID, RuntimeLocalValue>();
+
+		public override RuntimeLocalValue GetOrCreateLocalDataValue(NodeObject owner) {
+			var id = owner.runtimeID;
+			if(!elementDatas.TryGetValue(id, out var data)) {
+				data = new RuntimeLocalValue(this, owner);
+				elementDatas[id] = data;
+			}
+			return data;
 		}
 	}
 
@@ -934,6 +1052,6 @@ namespace MaxyGames.UNode {
 			this.port = port;
 		}
 
-		public IEnumerator GetIterator() => new CoroutineFlow(port, this).GetIterator();
+		public CoroutineFlow NewCoroutine() => new CoroutineFlow(port, this);
 	}
 }

@@ -152,6 +152,38 @@ namespace MaxyGames.UNode.Editors {
 							}
 							else if(filter.OnlyGetType || filter.UnityReference && (targetObject is UGraphElement || targetObject is IGraph)) {
 								categories.AddRange(TreeFunction.CreateGraphItem(targetObject, filter));
+
+								if(!filter.SetMember && filter.IsValidTarget(MemberData.TargetType.Self | MemberData.TargetType.NodePort)) {
+									IGraph graph = targetObject as IGraph;
+									if(graph == null && targetObject is UGraphElement graphElement) {
+										graph = graphElement.graphContainer;
+									}
+									if(graph != null) {
+										var graphType = ReflectionUtils.GetRuntimeType(graph);
+										//TODO: implement auto convert for `this`
+										//if(canvasData != null) {
+										//	if(NodeEditorUtility.CanAutoConvertOuput(graphType, filter)) {
+										//		var item = CustomItem.Create("This", () => {
+										//			if(filter.IsValidType(graphType)) {
+										//				Select(MemberData.This(graph));
+										//			}
+										//			else {
+
+										//			}
+										//		}, icon: uNodeEditorUtility.GetTypeIcon(graphType ?? typeof(TypeIcons.KeywordIcon)));
+										//		categoryTree.AddChild(new SelectorCustomTreeView(item, "[THIS]".GetHashCode(), -1));
+										//	}
+										//}
+										//else {
+										//}
+										if(filter.IsValidType(graphType)) {
+											var item = CustomItem.Create("This", () => {
+												Select(MemberData.This(graph));
+											}, icon: uNodeEditorUtility.GetTypeIcon(graphType ?? typeof(TypeIcons.KeywordIcon)));
+											categoryTree.AddChild(new SelectorCustomTreeView(item, "[THIS]".GetHashCode(), -1));
+										}
+									}
+								}
 							}
 							categories.AddRange(TreeFunction.CreateCustomItem(customItems, expanded: m_defaultExpandedItems == null && customItemDefaultExpandState));
 							if(filter.DisplayDefaultStaticType) {

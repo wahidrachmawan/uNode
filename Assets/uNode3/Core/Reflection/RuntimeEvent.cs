@@ -25,7 +25,7 @@ namespace MaxyGames.UNode {
 
 		public override void DoAddMethod(object instance, Delegate evt) {
 			if(evt == null) return;
-			var graphInstance = uNodeHelper.GetGraphInstance(instance);
+			var graphInstance = uNodeHelper.GetGraphInstance(instance).defaultFlow;
 			var val = target.Get(graphInstance);
 			if(val == null) {
 				target.Set(graphInstance, evt);
@@ -49,7 +49,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public override void DoRaiseMethod(object instance) {
-			var graphInstance = uNodeHelper.GetGraphInstance(instance);
+			var graphInstance = uNodeHelper.GetGraphInstance(instance).defaultFlow;
 			var val = target.Get(graphInstance);
 			if(val != null) {
 				if(val is Delegate) {
@@ -73,7 +73,7 @@ namespace MaxyGames.UNode {
 
 		public override void DoRemoveMethod(object instance, Delegate evt) {
 			if(evt == null) return;
-			var graphInstance = uNodeHelper.GetGraphInstance(instance);
+			var graphInstance = uNodeHelper.GetGraphInstance(instance).defaultFlow;
 			var val = target.Get(graphInstance);
 			if(val == null) {
 				val = evt;

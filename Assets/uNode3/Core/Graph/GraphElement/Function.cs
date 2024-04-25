@@ -110,56 +110,79 @@ namespace MaxyGames.UNode {
 				}
 				return null;
 			}
-			//Init local variable to initial value
-			if(LocalVariables != null) {
-				foreach(var data in LocalVariables) {
-					if(data.resetOnEnter) {
-						data.Set(instance, data.defaultValue);
+
+			void InitializeParameterAndLocalVariable(Flow flow) {
+				//Init local variable to initial value
+				if(LocalVariables != null) {
+					foreach(var data in LocalVariables) {
+						if(data.resetOnEnter) {
+							flow.SetLocalData(data, data.defaultValue);
+						}
 					}
 				}
-			}
-			if(parameter != null) {
-				for(int i = 0; i < parameter.Length; i++) {
-					instance.SetUserData(null, parameters[i], parameter[i]);
-					//parameters[i].value = parameter[i];
+				if(parameter != null) {
+					for(int i = 0; i < parameter.Length; i++) {
+						flow.SetLocalData(null, parameters[i], parameter[i]);
+						//parameters[i].value = parameter[i];
+					}
+					//Debug.Log($"Invoking function: {Name} with parameters:{string.Join(", ", parameter)}");
 				}
-				//Debug.Log($"Invoking function: {Name} with parameters:{string.Join(", ", parameter)}");
 			}
+
 			Type rType = returnType;
 			if(outPort.IsCoroutine()) {
 				if(rType.HasImplementInterface(typeof(IEnumerator<>))) {
 					var flow = new CoroutineGraphRunner(instance, Entry.enter);
-					var iterator = flow.GetIterator();
+					var iterator = flow.NewCoroutine();
+
+					InitializeParameterAndLocalVariable(iterator);
 
 					var method = typeof(IteratorUtilities).GetMemberCached(nameof(IteratorUtilities.WrapEnumerator)) as System.Reflection.MethodInfo;
 					method = method.MakeGenericMethod(rType.GenericTypeArguments[0]);
-					return method.InvokeOptimized(null, iterator);
+					return method.InvokeOptimized(null, iterator.GetIterator());
 				}
 				else if(rType.HasImplementInterface(typeof(IEnumerable<>))) {
 					var flow = new CoroutineGraphRunner(instance, Entry.enter);
-					var iterator = flow.GetIterator();
+					var iterator = flow.NewCoroutine();
+
+					InitializeParameterAndLocalVariable(iterator);
 
 					var method = typeof(IteratorUtilities).GetMemberCached(nameof(IteratorUtilities.WrapEnumerable)) as System.Reflection.MethodInfo;
 					method = method.MakeGenericMethod(rType.GenericTypeArguments[0]);
-					return method.InvokeOptimized(null, iterator);
+					return method.InvokeOptimized(null, iterator.GetIterator());
 				}
 				else if(rType == typeof(IEnumerable)) {
 					return new IteratorUtilities.IEnumarableWrapper() {
 						instance = instance,
 						port = Entry.enter,
+						onInitialize = InitializeParameterAndLocalVariable,
 					};
 				}
 				else if(rType == typeof(IEnumerator)) {
 					var flow = new CoroutineGraphRunner(instance, Entry.enter);
-					var iterator = flow.GetIterator();
+					var iterator = flow.NewCoroutine();
 
-					return iterator;
+					InitializeParameterAndLocalVariable(iterator);
+
+					return iterator.GetIterator();
 				}
 				throw new NotSupportedException(rType.FullName);
 			}
 			else {
 				var flow = instance.stateRunner;
+
+				InitializeParameterAndLocalVariable(instance.defaultFlow);
+
 				flow.Run(Entry.enter);
+
+				if(HasRefOrOut) {
+					if(parameter != null) {
+						for(int i = 0; i < parameter.Length; i++) {
+							parameter[i] = flow.GetLocalData(null, parameters[i]);
+						}
+					}
+				}
+
 				if(rType != null && rType != typeof(void)) {
 					var js = flow.GetStateData(Entry.enter).jumpStatement;
 					if(js == null || js.jumpType != JumpStatementType.Return) {
@@ -177,9 +200,12 @@ namespace MaxyGames.UNode {
 			public struct IEnumarableWrapper : IEnumerable {
 				public GraphInstance instance;
 				public FlowInput port;
+				public Action<Flow> onInitialize;
 
 				public IEnumerator GetEnumerator() {
-					return new CoroutineGraphRunner(instance, port).GetIterator();
+					var flow = new CoroutineGraphRunner(instance, port).NewCoroutine();
+					onInitialize(flow);
+					return flow.GetIterator();
 				}
 			}
 

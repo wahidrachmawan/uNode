@@ -443,10 +443,6 @@ namespace MaxyGames.UNode.Nodes {
 			return null;
 		}
 
-
-
-
-
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			instance.SetElementData(this, ReflectionUtils.CreateInstance(type));
 		}

@@ -243,7 +243,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueOutput)
 				return false;
-			return data.port.IsPrimaryPort() && source is Node node && node.CanSetValue();
+			return (data.port as ValueOutput).CanSetValue();
 		}
 	}
 
@@ -258,7 +258,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
 			Type type = data.portType;
 			FilterAttribute filter = new FilterAttribute();
-			filter.HideTypes.Add(typeof(void));
+			filter.VoidType = false;
 			filter.MaxMethodParam = int.MaxValue;
 			filter.SetMember = true;
 			filter.Public = true;
@@ -289,7 +289,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueOutput)
 				return false;
-			return data.port.IsPrimaryPort() || source is Node node && node.CanGetValue();
+			return (data.port as ValueOutput).CanSetValue();
 		}
 	}
 
@@ -793,6 +793,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind == PortKind.ValueOutput) {
+				if(data.portType != null && (data.portType.IsPrimitive || data.portType == typeof(string))) {
+					return false;
+				}
 				return (data.port as ValueOutput).CanGetValue();
 			}
 			return false;

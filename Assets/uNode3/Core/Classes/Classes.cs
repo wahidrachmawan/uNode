@@ -657,7 +657,10 @@ namespace MaxyGames.UNode {
 						_type = type.ReflectionType;
 					}
 					else {
-						_type = _typeName.ToType(false) ?? RuntimeType.FromMissingType(_typeName);
+						_type = _typeName.ToType(false);
+						if(_type == null) {
+							_type = object.ReferenceEquals(unityObject, null) ? RuntimeType.FromMissingType(unityObject, _typeName) : RuntimeType.FromMissingType(_typeName);
+						}
 					}
 				}
 				return _type;
@@ -668,6 +671,14 @@ namespace MaxyGames.UNode {
 
 		public NativeTypeRef(IReflectionType type) : base(type as UnityEngine.Object) {
 			_typeName = type.ReflectionType.FullName;
+		}
+
+		NativeTypeRef(UnityEngine.Object obj, string typeName) : base(obj) {
+			_typeName = typeName;
+		}
+
+		public static NativeTypeRef FromMissingType(MissingGraphType type) {
+			return new NativeTypeRef(type.graph, type.missingType);
 		}
 	}
 

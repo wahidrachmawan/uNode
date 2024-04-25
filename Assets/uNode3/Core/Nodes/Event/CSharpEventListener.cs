@@ -118,10 +118,10 @@ namespace MaxyGames.UNode.Nodes {
 							var @delegate = CustomDelegate.CreateActionDelegate((values) => {
 								if(values != null) {
 									for(int i = 0; i < values.Length; i++) {
-										instance.SetPortData(datas[i].port, values[i]);
+										flow.SetPortData(datas[i].port, values[i]);
 									}
 								}
-								Trigger(instance);
+								Trigger(flow);
 							}, method.GetParameters().Select(i => i.ParameterType).ToArray());
 							UEvent.Register(UEventID.OnEnable, comp, () => {
 								object obj = this.instance.GetValue(instance.defaultFlow);
@@ -143,21 +143,21 @@ namespace MaxyGames.UNode.Nodes {
 						var @delegate = CustomDelegate.CreateActionDelegate((values) => {
 							if(values != null) {
 								for(int i = 0; i < values.Length; i++) {
-									instance.SetPortData(datas[i].port, values[i]);
+									flow.SetPortData(datas[i].port, values[i]);
 								}
 							}
-							Trigger(instance);
+							Trigger(flow);
 						}, types);
 						@delegate = Delegate.CreateDelegate(delegateType, @delegate.Target, @delegate.Method);
 						UEvent.Register(UEventID.OnEnable, comp, () => {
 							object obj = this.instance.GetValue(instance.defaultFlow);
 							target.startTarget = obj;
-							addListener.InvokeOptimized(target.Get(instance), @delegate);
+							addListener.InvokeOptimized(target.Get(instance.defaultFlow), @delegate);
 						});
 						UEvent.Register(UEventID.OnDisable, comp, () => {
 							object obj = this.instance.GetValue(instance.defaultFlow);
 							target.startTarget = obj;
-							removeListener.InvokeOptimized(target.Get(instance), @delegate);
+							removeListener.InvokeOptimized(target.Get(instance.defaultFlow), @delegate);
 						});
 					}
 					

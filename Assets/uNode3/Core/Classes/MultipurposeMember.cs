@@ -128,9 +128,22 @@ namespace MaxyGames.UNode {
 										var p = reference.parameters[i];
 										var pdata = new MParamInfo() {
 											info = null,
-											input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type).SetName(p.name),
 											refKind = p.refKind,
 										};
+										if(preferOutputForParameters && pdata.IsOut) {
+											pdata.output = Node.Utilities.ValueOutput(
+												node,
+												pathID + "-" + i + "-" + 0, p.Type,
+												PortAccessibility.ReadWrite).SetName(p.name);
+										}
+										else {
+											pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type).SetName(p.name);
+											if(pdata.refKind == RefKind.Out) {
+												pdata.input.filter = new FilterAttribute() {
+													SetMember = true,
+												};
+											}
+										}
 										datas[0].parameters.Add(pdata);
 										parameters.Add(pdata);
 									}
@@ -193,6 +206,11 @@ namespace MaxyGames.UNode {
 										node,
 										pathID + "-" + i + "-" + x,
 										p.ParameterType).SetName(p.Name);
+									if(pdata.refKind == RefKind.Out) {
+										pdata.input.filter = new FilterAttribute() {
+											SetMember = true,
+										};
+									}
 								}
 								data.parameters.Add(pdata);
 								parameters.Add(pdata);
@@ -260,7 +278,7 @@ namespace MaxyGames.UNode {
 				if(instance != null) {
 					var targetInstance = instance.GetValue(flow);
 					if(targetInstance == null) {
-						throw new Exception("The value of 'Instance' port is null");
+						throw new GraphException("The value of 'Instance' port is null", instance.node);
 					}
 					target.startTarget = targetInstance;
 				}

@@ -136,7 +136,9 @@ namespace MaxyGames.UNode.Editors {
 
 		public void OnResized() {
 			Resize();
-			UIElementUtility.Theme.minimapPosition = new Rect(resolvedStyle.left, resolvedStyle.top, resolvedStyle.width, resolvedStyle.height);
+			if(m_MinimapType == UIElementEditorTheme.MinimapType.Floating || m_MinimapType == UIElementEditorTheme.MinimapType.Anchored) {
+				UIElementUtility.Theme.minimapPosition = new Rect(resolvedStyle.left, resolvedStyle.top, resolvedStyle.width, resolvedStyle.height);
+			}
 			EditorUtility.SetDirty(UIElementUtility.Theme);
 		}
 

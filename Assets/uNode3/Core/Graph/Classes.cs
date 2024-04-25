@@ -201,12 +201,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public object Get(GraphInstance instance) {
-			return reference.Get(instance);
+		public object Get(Flow flow) {
+			return reference.Get(flow);
 		}
 
-		public void Set(GraphInstance instance, object value) {
-			reference.Set(instance, value);
+		public void Set(Flow flow, object value) {
+			reference.Set(flow, value);
 		}
 
 		public string GetSummary() {
@@ -396,12 +396,12 @@ namespace MaxyGames.UNode {
 			return reference.CanSetValue();
 		}
 
-		public object Get(GraphInstance instance) {
-			return reference.Get(instance);
+		public object Get(Flow flow) {
+			return reference.Get(flow);
 		}
 
-		public void Set(GraphInstance instance, object value) {
-			reference.Set(instance, value);
+		public void Set(Flow flow, object value) {
+			reference.Set(flow, value);
 		}
 	}
 
@@ -482,6 +482,7 @@ namespace MaxyGames.UNode {
 				name = fixName,
 				type = type,
 				defaultValue = value ?? ReflectionUtils.CreateInstance(type),
+				resetOnEnter = GetObjectInParent<ILocalVariableSystem>() != null,
 			});
 		}
 	}

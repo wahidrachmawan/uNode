@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRuntimeInitialize(instance);
 			if(instance.target is Component comp) {
 				UEvent.Register(UEventID.OnTriggerExit, comp, (Collider val) => {
-					instance.SetPortData(value, val);
+					instance.defaultFlow.SetPortData(value, val);
 					Trigger(instance);
 				});
 			} else {

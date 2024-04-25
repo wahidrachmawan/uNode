@@ -26,7 +26,10 @@ namespace MaxyGames.UNode {
 		public override string Name => missingType;
 
 		public override string ToString() {
-			return "MissingType";
+			if(string.IsNullOrEmpty(missingType)) {
+				return "MissingType";
+			}
+			return "MissingType: " + missingType;
 		}
 
 		internal MissingType() {
@@ -62,6 +65,21 @@ namespace MaxyGames.UNode {
 
 		public Texture GetIcon() {
 			return Resources.Load<Texture2D>("Icons/IconMissing");
+		}
+	}
+
+	public class MissingGraphType : MissingType {
+		public UnityEngine.Object graph;
+
+		public MissingGraphType(UnityEngine.Object graph, string nativeType) {
+			if(object.ReferenceEquals(graph, null))
+				throw new ArgumentNullException(nameof(graph));
+			this.graph = graph;
+			this.missingType = nativeType;
+		}
+
+		public BaseReference GetReference() {
+			return BaseReference.FromValue(graph);
 		}
 	}
 
@@ -142,6 +160,7 @@ namespace MaxyGames.UNode {
 
 		#region Missing Type
 		static readonly Dictionary<string, Type> missingTypeMap = new Dictionary<string, Type>();
+		static readonly Dictionary<UnityEngine.Object, Type> missingGraphMap = new Dictionary<UnityEngine.Object, Type>();
 
 		public static Type FromMissingType(string typeName) {
 			if(string.IsNullOrEmpty(typeName))
@@ -149,6 +168,16 @@ namespace MaxyGames.UNode {
 			if(!missingTypeMap.TryGetValue(typeName, out var result)) {
 				result = new MissingType(typeName);
 				missingTypeMap[typeName] = result;
+			}
+			return result;
+		}
+
+		public static Type FromMissingType(UnityEngine.Object graph, string typeName) {
+			if(string.IsNullOrEmpty(typeName) || object.ReferenceEquals(graph, null))
+				return RuntimeType.Default;
+			if(!missingGraphMap.TryGetValue(graph, out var result)) {
+				result = new MissingGraphType(graph, typeName);
+				missingGraphMap[graph] = result;
 			}
 			return result;
 		}

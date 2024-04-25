@@ -196,7 +196,12 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 
 		public override void CheckElementErrors(ErrorAnalyzer analizer, UGraphElement element) {
 			if(element is IErrorCheck errorCheck) {
-				errorCheck.CheckError(analizer);
+				try {
+					errorCheck.CheckError(analizer);
+				}
+				catch(Exception exception) {
+					analizer.RegisterError(element, exception.Message);
+				}
 			}
 			if(element is NodeContainer container) {
 				var nodes = container.GetObjectsInChildren<NodeObject>(true);

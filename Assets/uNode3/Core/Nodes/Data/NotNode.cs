@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Not {!}", typeof(bool))]
+	[NodeMenu("Data", "Not {!}", typeof(bool), inputs = new[] { typeof(bool) })]
 	public class NotNode : ValueNode {
 		public ValueInput target { get; set; }
 

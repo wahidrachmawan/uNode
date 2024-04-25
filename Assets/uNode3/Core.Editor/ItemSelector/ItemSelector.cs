@@ -254,7 +254,10 @@ namespace MaxyGames.UNode.Editors {
 						NodeEditorUtility.AutoAssignNodePorts(node);
 						onAddNode?.Invoke(node);
 					});
-				}, category.Add(".") + m.category, tooltip: new GUIContent(m.GraphData.comment)));
+				}, 
+				category.Add(".") + m.category,
+				icon: uNodeEditorUtility.GetTypeIcon(m.GetIcon()),
+				tooltip: new GUIContent(m.GraphData.comment)));
 			}
 			return customItems;
 		}

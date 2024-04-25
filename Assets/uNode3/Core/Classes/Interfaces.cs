@@ -252,8 +252,8 @@ namespace MaxyGames.UNode {
 	}
 
 	public interface IGraphValue {
-		object Get(GraphInstance instance);
-		void Set(GraphInstance instance, object value);
+		object Get(Flow flow);
+		void Set(Flow flow, object value);
 	}
 
 	internal interface IValueReference { }

@@ -36,7 +36,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		void OnTriggered(GraphInstance instance, int value) {
-			instance.SetPortData(index, value);
+			instance.defaultFlow.SetPortData(index, value);
 			Trigger(instance);
 		}
 

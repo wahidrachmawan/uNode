@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Select", 
-		inputs = new[] { typeof(int), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum) }, 
-		outputs = new[] { typeof(int), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum) })]
+		inputs = new[] { typeof(bool), typeof(int), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum) }, 
+		outputs = new[] { typeof(bool), typeof(int), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum) })]
 	public class SelectNode : ValueNode {
 		[Filter(OnlyGetType = true)]
 		public SerializedType targetType = typeof(object);
@@ -27,7 +27,7 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnRegister() {
 			base.OnRegister();
 			target = ValueInput(nameof(target), typeof(object), MemberData.None);
-			target.filter = new FilterAttribute(typeof(int), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum)) { InvalidTargetType = MemberData.TargetType.Null };
+			target.filter = new FilterAttribute(typeof(bool), typeof(int), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum)) { InvalidTargetType = MemberData.TargetType.Null };
 			defaultTarget = ValueInput(nameof(defaultTarget), ReturnType, MemberData.None).SetName("Default");
 			for(int i = 0; i < datas.Count; i++) {
 				var index = i;

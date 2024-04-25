@@ -197,6 +197,15 @@ namespace MaxyGames.UNode {
 						throw new Exception("Unsupported RuntimeType: " + type);
 					}
 				}
+				else if(type is MissingType) {
+					if(type is MissingGraphType) {
+						name = RUNTIME_ID;
+						data.reference = NativeTypeRef.FromMissingType(type as MissingGraphType);
+					}
+					else {
+						name = type.Name;
+					}
+				}
 				else {
 					throw new Exception("Unsupported RuntimeType: " + type);
 				}
@@ -279,6 +288,15 @@ namespace MaxyGames.UNode {
 					}
 					else {
 						throw new Exception("Unsupported RuntimeType: " + type);
+					}
+				}
+				else if(type is MissingType) {
+					if(type is MissingGraphType) {
+						name = RUNTIME_ID;
+						data.reference = NativeTypeRef.FromMissingType(type as MissingGraphType);
+					}
+					else {
+						name = type.Name;
 					}
 				}
 				else {

@@ -1170,9 +1170,14 @@ namespace MaxyGames.UNode.Editors {
 					List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
 					foreach(var macro in macros) {
 						var m = macro;
-						customItems.Add(ItemSelector.CustomItem.Create(m.GetGraphName(), () => {
-							CreateLinkedMacro(m, clickedPos);
-						}, m.category, tooltip: new GUIContent(m.GraphData.comment)));
+						customItems.Add(ItemSelector.CustomItem.Create(
+							m.GetGraphName(), 
+							() => {
+								CreateLinkedMacro(m, clickedPos);
+							}, 
+							m.category,
+							icon: uNodeEditorUtility.GetTypeIcon(m.GetIcon()),
+							tooltip: new GUIContent(m.GraphData.comment)));
 					}
 					ItemSelector.ShowWindow(null, null, null, customItems).ChangePosition(graph.GetMenuPosition()).displayDefaultItem = false;
 				}, DropdownMenuAction.AlwaysEnabled);
@@ -2038,13 +2043,15 @@ namespace MaxyGames.UNode.Editors {
 			#region Edge
 			if(evt.target is EdgeView) {
 				EdgeView edge = evt.target as EdgeView;
-				evt.menu.AppendAction("Convert to proxy", (e) => {
-					uNodeEditorUtility.RegisterUndo(graphData.owner, "Convert to proxy");
-					edge.connection.isProxy = true;
-					graph.GUIChanged();
-					edge.GetSenderPort()?.owner.MarkRepaint();
-					edge.GetReceiverPort()?.owner.MarkRepaint();
-				}, DropdownMenuAction.AlwaysEnabled);
+				if(edge is not ConversionEdgeView) {
+					evt.menu.AppendAction("Convert to proxy", (e) => {
+						uNodeEditorUtility.RegisterUndo(graphData.owner, "Convert to proxy");
+						edge.connection.isProxy = true;
+						graph.GUIChanged();
+						edge.GetSenderPort()?.owner.MarkRepaint();
+						edge.GetReceiverPort()?.owner.MarkRepaint();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
 				evt.menu.AppendAction("Remove", (e) => {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove port");
 					DeleteSelection(new List<ISelectable>() { edge });
@@ -2086,8 +2093,8 @@ namespace MaxyGames.UNode.Editors {
 							evt.menu.AppendAction("Unproxy", (act) => {
 								Undo.SetCurrentGroupName("Unproxy");
 								port.owner.RegisterUndo();
-								foreach(var edge in port.GetEdges()) {
-									if(edge.isValid && edge.connection.isValid) {
+								foreach(var edge in port.GetValidEdges()) {
+									if(edge.connection.isValid) {
 										edge.connection.isProxy = false;
 									}
 								}
@@ -2111,8 +2118,13 @@ namespace MaxyGames.UNode.Editors {
 							if(val == null) {
 								val = MemberData.None;
 							}
-							p.AssignToDefault(val);
 							MarkRepaint(port.owner);
+							foreach(var edge in port.GetValidEdges()) {
+								if(edge.connection.isValid) {
+									MarkRepaint(edge.connection.Output.node);
+								}
+							}
+							p.AssignToDefault(val);
 						}, DropdownMenuAction.AlwaysEnabled);
 					}
 					else {
@@ -2137,6 +2149,60 @@ namespace MaxyGames.UNode.Editors {
 									}, DropdownMenuAction.AlwaysEnabled);
 								}
 							}
+						}
+						bool hasConnection = false;
+						bool hasProxy = false;
+						bool hasUnproxy = false;
+						foreach(var edge in port.GetValidEdges()) {
+							if(edge.connection != null && edge.connection.isValid) {
+								hasConnection = true;
+								if(edge.connection.isProxy) {
+									hasProxy = true;
+								}
+								else {
+									hasUnproxy = true;
+								}
+							}
+						}
+						if(hasConnection) {
+							evt.menu.AppendSeparator("");
+							if(hasProxy) {
+								evt.menu.AppendAction("Unproxy All", (act) => {
+									Undo.SetCurrentGroupName("Unproxy All");
+									port.owner.RegisterUndo();
+									foreach(var edge in port.GetValidEdges()) {
+										if(edge.connection != null && edge.connection.isValid) {
+											edge.connection.isProxy = false;
+										}
+									}
+									graph.Refresh();
+								}, DropdownMenuAction.AlwaysEnabled);
+							}
+							if(hasUnproxy) {
+								evt.menu.AppendAction("Proxy All", (e) => {
+									Undo.SetCurrentGroupName("Proxy All");
+									port.owner.RegisterUndo();
+									foreach(var edge in port.GetValidEdges()) {
+										if(edge.connection != null && edge.connection.isValid) {
+											edge.connection.isProxy = true;
+											MarkRepaint(edge.connection.Input.node);
+										}
+									}
+									MarkRepaint(port.owner);
+								}, DropdownMenuAction.AlwaysEnabled);
+							}
+							evt.menu.AppendAction("Disconnect All", (e) => {
+								Undo.SetCurrentGroupName("Disconnect All");
+								port.owner.RegisterUndo();
+								foreach(var edge in port.GetValidEdges()) {
+									if(edge.connection != null && edge.connection.isValid) {
+										var input = edge.connection.Input as ValueInput;
+										input.AssignToDefault(MemberData.None);
+										MarkRepaint(input.node);
+									}
+								}
+								MarkRepaint(port.owner);
+							}, DropdownMenuAction.AlwaysEnabled);
 						}
 					}
 				}
@@ -2172,7 +2238,7 @@ namespace MaxyGames.UNode.Editors {
 							evt.menu.AppendAction("Unproxy", (act) => {
 								port.owner.RegisterUndo("Unproxy");
 								foreach(var edge in port.GetEdges()) {
-									if(edge.isValid && edge.connection.isValid) {
+									if(edge.isValid && edge.connection != null && edge.connection.isValid) {
 										edge.connection.isProxy = false;
 									}
 								}
