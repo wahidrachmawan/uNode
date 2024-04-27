@@ -18,7 +18,7 @@ namespace MaxyGames.UNode.Editors {
 				fieldValue = new char();
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

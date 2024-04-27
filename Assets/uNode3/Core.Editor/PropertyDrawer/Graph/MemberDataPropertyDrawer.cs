@@ -52,13 +52,13 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					}
 				}
 				uNodeGUIUtility.RenderVariable(position, fieldValue, option.label, filter, option.unityObject, (m) => {
-					option.property.value = m;
+					option.value = m;
 				});
 				if(fieldValue.targetType == MemberData.TargetType.Values && fieldValue.type != null &&
 					(fieldValue.type.IsArray || fieldValue.type.IsCastableTo(typeof(IList)))) {
 					EditorGUI.indentLevel++;
 					uNodeGUIUtility.DrawMemberValues(new GUIContent("Values"), fieldValue, fieldValue.type, filter, null, (m) => {
-						option.property.value = m;
+						option.value = m;
 					});
 					EditorGUI.indentLevel--;
 				}
@@ -73,11 +73,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			} else {
 				uNodeGUIUtility.DrawNullValue(position, option.label, option.type, delegate (object o) {
 					fieldValue = o as MemberData;
-					option.property.value = fieldValue;
+					option.value = fieldValue;
 				});
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

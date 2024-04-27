@@ -882,22 +882,34 @@ namespace MaxyGames.UNode {
 					else if(current is IEnumerable) {
 						var runner = new GraphRunner.NestedRunners((current as IEnumerable).GetEnumerator());
 						while(runner.MoveNext()) {
+							if(jumpStatement != null) {
+								goto FINISH;
+							}
 							current = runner.Current;
 							yield return current;
 						}
-						continue;
 					}
 					else if(current is IEnumerator) {
 						var runner = new GraphRunner.NestedRunners(current as IEnumerator);
 						while(runner.MoveNext()) {
+							if(jumpStatement != null) {
+								goto FINISH;
+							}
 							current = runner.Current;
 							yield return current;
 						}
-						continue;
 					}
 					else {
 						yield return current;
 					}
+					if(jumpStatement != null) {
+						goto FINISH;
+					}
+				}
+FINISH:
+				if(jumpStatement != null) {
+					AfterRun();
+					yield break;
 				}
 			}
 			else {
@@ -930,6 +942,9 @@ namespace MaxyGames.UNode {
 					else if(current is IEnumerable) {
 						var runner = new GraphRunner.NestedRunners((current as IEnumerable).GetEnumerator());
 						while(runner.MoveNext()) {
+							if(flow.jumpStatement != null) {
+								goto FINISH;
+							}
 							current = runner.Current;
 							yield return current;
 						}
@@ -938,6 +953,9 @@ namespace MaxyGames.UNode {
 					else if(current is IEnumerator) {
 						var runner = new GraphRunner.NestedRunners(current as IEnumerator);
 						while(runner.MoveNext()) {
+							if(flow.jumpStatement != null) {
+								goto FINISH;
+							}
 							current = runner.Current;
 							yield return current;
 						}
@@ -946,9 +964,49 @@ namespace MaxyGames.UNode {
 					else {
 						yield return current;
 					}
+					if(flow.jumpStatement != null) {
+						goto FINISH;
+					}
+				}
+FINISH:
+				if(flow.jumpStatement != null) {
+					jumpStatement = flow.jumpStatement;
+					break;
 				}
 			}
 			AfterRun();
+		}
+
+		private void AfterRun() {
+			port.actionOnExit?.Invoke(this);
+			finished = true;
+			nextFlows.Clear();
+			if(state == StateType.Running) {
+				state = StateType.Success;
+			}
+#if UNITY_EDITOR
+			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
+				var node = port.node;
+				GraphDebug.FlowNode(target, node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
+			}
+#endif
+		}
+
+		private void BeforeRun() {
+			if(hasCalled && !IsFinished())
+				return;
+			jumpStatement = null;
+			if(!hasCalled)
+				hasCalled = true;
+			finished = false;
+			state = StateType.Running;
+			nextFlows.Clear();
+#if UNITY_EDITOR
+			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
+				var node = port.node;
+				GraphDebug.FlowNode(target, port.node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
+			}
+#endif
 		}
 
 		protected override void OnTrigger(FlowOutput output, out JumpStatement jump) {
@@ -1010,38 +1068,6 @@ namespace MaxyGames.UNode {
 
 		public override void Stop() {
 			throw new NotSupportedException();
-		}
-
-		private void BeforeRun() {
-			if(hasCalled && !IsFinished())
-				return;
-			jumpStatement = null;
-			if(!hasCalled)
-				hasCalled = true;
-			finished = false;
-			state = StateType.Running;
-			nextFlows.Clear();
-#if UNITY_EDITOR
-			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
-				var node = port.node;
-				GraphDebug.FlowNode(target, port.node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
-			}
-#endif
-		}
-
-		private void AfterRun() {
-			port.actionOnExit?.Invoke(this);
-			finished = true;
-			nextFlows.Clear();
-			if(state == StateType.Running) {
-				state = StateType.Success;
-			}
-#if UNITY_EDITOR
-			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
-				var node = port.node;
-				GraphDebug.FlowNode(target, node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
-			}
-#endif
 		}
 	}
 

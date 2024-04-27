@@ -78,7 +78,7 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				position = EditorGUI.PrefixLabel(position, option.label);
 				EditorGUI.BeginDisabledGroup(true);
-				var text = (option.property.value as UGraphElement)?.name ?? "null";
+				var text = (option.value as UGraphElement)?.name ?? "null";
 				EditorGUI.DropdownButton(position, new GUIContent(text, uNodeEditorUtility.GetTypeIcon(option.type)), FocusType.Keyboard, EditorStyles.objectField);
 				EditorGUI.EndDisabledGroup();
 			}

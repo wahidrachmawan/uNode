@@ -44,9 +44,14 @@ namespace MaxyGames.UNode.Editors {
 				autoBackupOnSave = true,
 				forceReloadGraph;
 
+			[Tooltip("Auto convert port mode.")]
 			public AutoConvertOption autoConvertPort = AutoConvertOption.Always;
+			[Tooltip("Auto create reroute connection")]
 			public bool autoCreateReroute = true;
+			[Tooltip("Auto proxy connection")]
 			public bool autoProxyConnection = true;
+			[Tooltip("Auto add missing namespace when adding node to the graph.")]
+			public bool autoAddNamespace;
 			public float debugTransitionSpeed = 0.5f;
 
 			[SerializeField]
@@ -455,6 +460,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoConvertPort), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoCreateReroute), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoProxyConnection), preferenceData);
+				uNodeGUIUtility.ShowField(nameof(preferenceData.autoAddNamespace), preferenceData);
 				preferenceData.debugTransitionSpeed = EditorGUILayout.Slider(new GUIContent("Debug Transition Speed"), preferenceData.debugTransitionSpeed, 0.5f, 4);
 
 				EditorGUILayout.LabelField("Snapping", EditorStyles.boldLabel);

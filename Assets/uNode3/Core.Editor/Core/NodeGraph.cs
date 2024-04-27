@@ -327,6 +327,23 @@ namespace MaxyGames.UNode.Editors {
 		#region Menu
 		public static bool CreateNodeProcessor(MemberData member, GraphEditorData editorData, Vector2 position, Action<Node> onCreated) {
 			var members = member.GetMembers(false);
+			void PostAction() {
+				if(uNodePreference.preferenceData.autoAddNamespace) {
+					if(members != null && members.Length > 0 || member.targetType.IsTargetingReflection() || member.targetType == MemberData.TargetType.Values) {
+						var type = member.startType;
+						if(type != null && type.IsPrimitive == false && type != typeof(string) && type != typeof(object)) {
+							var ns = type.Namespace;
+							if(string.IsNullOrWhiteSpace(ns) == false) {
+								if(editorData.owner is IUsingNamespace usingNamespace) {
+									if(usingNamespace.UsingNamespaces.Contains(ns) == false) {
+										usingNamespace.UsingNamespaces.Add(ns);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			if(members != null && members.Length > 0 && members[members.Length - 1] is MethodInfo method && method.Name.StartsWith("op_", StringComparison.Ordinal)) {
 				string name = method.Name;
 				switch(name) {
@@ -357,6 +374,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 							n.nodeObject.Register();
 							onCreated?.Invoke(n);
+							PostAction();
 						});
 						return true;
 				}
@@ -371,6 +389,7 @@ namespace MaxyGames.UNode.Editors {
 					n.target = member;
 					n.EnsureRegistered();
 					onCreated?.Invoke(n);
+					PostAction();
 				});
 				return true;
 			}
@@ -395,6 +414,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
+				PostAction();
 			});
 			return false;
 		}

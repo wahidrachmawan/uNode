@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var fieldValue = GetValue(option.property);
 			fieldValue = EditorGUI.BoundsIntField(position, option.label, fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 
@@ -22,7 +22,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var fieldValue = GetValue(option.property);
 			fieldValue = EditorGUILayout.BoundsIntField(option.label, fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

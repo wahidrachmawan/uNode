@@ -29,11 +29,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					}
 				}
 				uNodeGUIUtility.DrawTypeDrawer(position, fieldValue, option.label, (type) => {
-					option.property.value = new SerializedType(type);
+					option.value = new SerializedType(type);
 				}, filter, option.unityObject);
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

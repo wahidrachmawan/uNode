@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Local Variable", hasFlowInput = true, hasFlowOutput = true)]
+	[NodeMenu("Data", "Cache", hasFlowInput = true, hasFlowOutput = true)]
 	public class CacheNode : FlowAndValueNode {
 		public bool compactView;
 

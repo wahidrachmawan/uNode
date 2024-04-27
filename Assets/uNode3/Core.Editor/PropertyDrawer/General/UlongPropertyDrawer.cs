@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var fieldValue = GetValue(option.property);
 			fieldValue = (ulong)EditorGUI.LongField(position, option.label, (long)fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

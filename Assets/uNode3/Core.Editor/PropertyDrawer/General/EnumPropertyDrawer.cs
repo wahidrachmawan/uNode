@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var fieldValue = GetValue(option.property, option.type) as Enum;
 			fieldValue = EditorGUI.EnumPopup(position, option.label, fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 

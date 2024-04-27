@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var fieldValue = GetValue(option.property);
 			fieldValue = (decimal)EditorGUI.DoubleField(position, option.label, (double)fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

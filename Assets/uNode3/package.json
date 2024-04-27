@@ -1,16 +1,16 @@
 {
-    "name": "com.maxygames.unode",
-    "version": "3.0.0",
-    "displayName": "uNode 3",
-    "description": "Visual Scripting Plugin for Unity.",
-    "keywords": [
-        "tools",
-        "visual scripting",
+	"name": "com.maxygames.unode",
+	"version": "3.0.0",
+	"displayName": "uNode 3",
+	"description": "Visual Scripting Plugin for Unity.",
+	"keywords": [
+		"tools",
+		"visual scripting",
 		"graph",
 		"node",
 		"state machine"
-    ],
-    "author": {
-        "name": "Wahid Rachmawan"
-    }
+	],
+	"author": {
+		"name": "Wahid Rachmawan"
+	}
 }

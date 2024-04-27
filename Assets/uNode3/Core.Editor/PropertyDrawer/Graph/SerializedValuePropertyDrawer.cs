@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				uNodeGUIUtility.EditSerializedValue(fieldValue, option.label, fieldValue.type, option.unityObject);
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

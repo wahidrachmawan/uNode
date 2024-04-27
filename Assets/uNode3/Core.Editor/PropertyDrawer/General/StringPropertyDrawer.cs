@@ -30,7 +30,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						} else {
 							fieldValue = "";
 						}
-						option.property.value = fieldValue;
+						option.value = fieldValue;
 					}, filter, option.unityObject);
 				} else if(filter != null) {
 					filter.ArrayManipulator = false;
@@ -42,7 +42,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						} else {
 							fieldValue = "";
 						}
-						option.property.value = fieldValue;
+						option.value = fieldValue;
 					}, filter, option.unityObject);
 				} else {
 					TextAreaAttribute textAtt = ReflectionUtils.GetAttribute<TextAreaAttribute>(option.attributes);
@@ -63,11 +63,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 			} else {
 				uNodeGUIUtility.DrawNullValue(position, option.label, option.type, delegate (object o) {
-					option.property.value = fieldValue = o as string;
+					option.value = fieldValue = o as string;
 				});
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 
@@ -97,7 +97,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						} else {
 							fieldValue = "";
 						}
-						option.property.value = fieldValue;
+						option.value = fieldValue;
 					}, filter, option.unityObject);
 				} else if(filter != null) {
 					filter.ArrayManipulator = false;
@@ -109,7 +109,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						} else {
 							fieldValue = "";
 						}
-						option.property.value = fieldValue;
+						option.value = fieldValue;
 					}, filter, option.unityObject);
 				} else {
 					TextAreaAttribute textAtt = ReflectionUtils.GetAttribute<TextAreaAttribute>(attributes);
@@ -135,11 +135,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 			} else {
 				uNodeGUIUtility.DrawNullValue(uNodeGUIUtility.GetRect(), option.label, option.type, delegate (object o) {
-					option.property.value = fieldValue = o as string;
+					option.value = fieldValue = o as string;
 				});
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

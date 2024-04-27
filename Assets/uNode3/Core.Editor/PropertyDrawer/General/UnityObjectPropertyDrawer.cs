@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var fieldValue = GetValue(option.property, true);
 			fieldValue = EditorGUI.ObjectField(position, option.label, fieldValue, option.type, !EditorUtility.IsPersistent(option.unityObject));
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 

@@ -30,6 +30,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.modifier)],
 					nullable = false,
+					onChanged = _ => {
+						uNodeGUIUtility.GUIChangedMajor(value);
+					}
 				});
 				uNodeGUI.DrawAttribute(value.attributes, option.unityObject, (a) => {
 					value.attributes = a;

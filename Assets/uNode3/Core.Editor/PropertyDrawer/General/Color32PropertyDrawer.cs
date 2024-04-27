@@ -18,7 +18,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				fieldValue = (Color32)EditorGUI.ColorField(position, option.label, fieldValue);
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

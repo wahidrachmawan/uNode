@@ -11,6 +11,7 @@ namespace MaxyGames.UNode.Editors {
 		public UBind property;
 		public bool nullable;
 		public bool acceptUnityObject;
+		public Action<object> onChanged;
 		private GUIContent _label;
 
 		public GUIContent label {
@@ -26,18 +27,22 @@ namespace MaxyGames.UNode.Editors {
 		public Type type => property.type;
 		public object value {
 			get => property.value;
-			set => property.value = value;
+			set {
+				property.value = value;
+				onChanged?.Invoke(value);
+			}
 		}
 		public Attribute[] attributes => property.GetCustomAttributes();
 		public UnityEngine.Object unityObject => property.root.value as UnityEngine.Object;
 		public void RegisterUndo(string name = "") => property.RegisterUndo(name);
 
 		#region Constructors
-		public DrawerOption(UBind property, bool nullable, bool acceptUnityObject, GUIContent label = null) {
+		public DrawerOption(UBind property, bool nullable, bool acceptUnityObject, GUIContent label = null, Action<object> onChanged = null) {
 			this.property = property;
 			this.nullable = nullable;
 			this.acceptUnityObject = acceptUnityObject;
 			this._label = label;
+			this.onChanged = onChanged;
 		}
 		#endregion
 	}

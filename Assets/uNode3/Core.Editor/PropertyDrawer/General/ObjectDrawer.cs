@@ -15,7 +15,6 @@ namespace MaxyGames.UNode.Editors.Drawer {
 		}
 
 		public override void DrawLayouted(DrawerOption option) {
-			EditorGUI.BeginChangeCheck();
 			object value = GetValue(option.property, option.property.type, option.nullable);
 			
 			if(option.property.type != typeof(object)) {
@@ -23,7 +22,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				if(control != null) {
 					control.DrawLayouted(value, option.label, option.type, (val) => {
 						uNodeEditorUtility.RegisterUndo(option.unityObject, "");
-						option.property.value = val;
+						option.value = val;
 					}, new uNodeUtility.EditValueSettings() {
 						attributes = option.attributes,
 						unityObject = option.unityObject,
@@ -32,6 +31,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					return;
 				}
 			}
+			EditorGUI.BeginChangeCheck();
 			var type = option.property.valueType;
 			if(type.IsArray) {
 				if(type.GetArrayRank() == 1) {
@@ -56,14 +56,14 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							position.width = 16;
 							if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard, EditorStyles.miniButton) && Event.current.button == 0) {
 								array = null;
-								option.property.value = null;
+								option.value = null;
 							}
 						}
 						Array newArray = array;
 						if(newArray != null) {
 							if(num != array.Length) {
 								newArray = uNodeUtility.ResizeArray(array, type.GetElementType(), num);
-								option.property.value = newArray;
+								option.value = newArray;
 							}
 							if(newArray.Length > 0) {
 								//Event currentEvent = Event.current;
@@ -80,7 +80,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							}
 						}
 						if(EditorGUI.EndChangeCheck()) {
-							option.property.value = newArray;
+							option.value = newArray;
 						}
 						return;
 					}
@@ -90,13 +90,13 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			} else if(type.IsGenericType || type.IsInterface) {
 				uNodeGUIUtility.EditValueLayouted(option.label, value, type,
 					onChange: (val) => {
-						option.property.value = value;
+						option.value = value;
 					}, new uNodeUtility.EditValueSettings() { unityObject = option.unityObject });
 			} else {
 				if(value == null && !option.nullable) {
 					if(ReflectionUtils.CanCreateInstance(option.type)) {
 						value = ReflectionUtils.CreateInstance(option.type);
-						option.property.value = value;
+						option.value = value;
 					}
 				}
 				if(value != null) {
@@ -118,13 +118,13 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					EditorGUI.EndChangeCheck();
 				} else {
 					uNodeGUIUtility.DrawNullValue(option.label, option.type, (obj) => {
-						option.property.value = obj;
+						option.value = obj;
 					});
 				}
 				return;
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = value;
+				option.value = value;
 			}
 		}
 	}

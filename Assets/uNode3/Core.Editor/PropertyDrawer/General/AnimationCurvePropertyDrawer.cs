@@ -26,11 +26,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			} else {
 				uNodeGUIUtility.DrawNullValue(position, option.label, option.type, delegate (object o) {
 					fieldValue = o as AnimationCurve;
-					option.property.value = fieldValue;
+					option.value = fieldValue;
 				});
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

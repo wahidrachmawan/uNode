@@ -18,7 +18,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				fieldValue = (uint)EditorGUI.IntField(position, option.label, (int)fieldValue);
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.property.value = fieldValue;
+				option.value = fieldValue;
 			}
 		}
 	}

@@ -130,8 +130,8 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 			}
 			else {
 				var instance = gameObject.AddComponent<RuntimeInstancedGraph>();
-				instance.Initialize(this);
 				m_instance = instance;
+				instance.Initialize(this);
 			}
 		}
 		#endregion
