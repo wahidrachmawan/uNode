@@ -169,11 +169,12 @@ namespace MaxyGames.UNode {
 				throw new NotSupportedException(rType.FullName);
 			}
 			else {
-				var flow = instance.stateRunner;
+				var runner = new RegularGraphRunner(instance, Entry.enter);
+				var flow = runner.New();
 
-				InitializeParameterAndLocalVariable(instance.defaultFlow);
+				InitializeParameterAndLocalVariable(flow);
 
-				flow.Run(Entry.enter);
+				flow.Run();
 
 				if(HasRefOrOut) {
 					if(parameter != null) {
@@ -184,7 +185,7 @@ namespace MaxyGames.UNode {
 				}
 
 				if(rType != null && rType != typeof(void)) {
-					var js = flow.GetStateData(Entry.enter).jumpStatement;
+					var js = flow.jumpStatement;
 					if(js == null || js.jumpType != JumpStatementType.Return) {
 						throw new Exception("No return value in function:" + name);
 					}

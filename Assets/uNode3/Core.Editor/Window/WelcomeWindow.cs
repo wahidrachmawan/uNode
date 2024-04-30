@@ -112,13 +112,21 @@ namespace MaxyGames.UNode.Editors {
 						"C# Parser",
 						"Convert c# script into uNode.",
 						() => {
-							AssetDatabase.ImportPackage(AssetDatabase.GUIDToAssetPath("a823b7cd525c21a46b2d5ba4f6476bc1"), true);
+							uNodeEditorUtility.DisplayMessage("", "C# Parser by default is included in uNode Pro version.");
+							//AssetDatabase.ImportPackage(AssetDatabase.GUIDToAssetPath("a823b7cd525c21a46b2d5ba4f6476bc1"), true);
+						});
+					DrawLink(addOnsAddIcon,
+						"DOTS Support",
+						"uNode support for DOTS Project ( Unity ECS ).",
+						() => {
+							Application.OpenURL("https://github.com/wahidrachmawan/uNode3-DOTS");
 						});
 					DrawLink(addOnsAddIcon,
 						"Unity Visual Scripting Converter",
 						"Convert Unity Visual Scripting flow graph into uNode graph.",
 						() => {
-							AssetDatabase.ImportPackage(AssetDatabase.GUIDToAssetPath("1d7300bd2a8544746bfce671a0be2be3"), true);
+							uNodeEditorUtility.DisplayMessage("", "UVS Converter is still in WIP.");
+							//AssetDatabase.ImportPackage(AssetDatabase.GUIDToAssetPath("1d7300bd2a8544746bfce671a0be2be3"), true);
 						});
 					break;
 			}

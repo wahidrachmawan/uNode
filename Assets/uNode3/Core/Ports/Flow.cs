@@ -1080,4 +1080,166 @@ FINISH:
 
 		public CoroutineFlow NewCoroutine() => new CoroutineFlow(port, this);
 	}
+
+	public class RegularGraphRunner : GraphRunner {
+		public readonly FlowInput port;
+
+		public RegularGraphRunner(GraphInstance instance, FlowInput port) : base(instance) {
+			this.port = port;
+		}
+
+		public RegularFlow New() => new RegularFlow(port, this);
+	}
+
+	public class RegularFlow : Flow {
+		public readonly FlowInput port;
+		public readonly RegularGraphRunner runner;
+
+		public RegularFlow(FlowInput port, RegularGraphRunner runner) : base(runner.instance) {
+			this.port = port;
+			this.runner = runner;
+		}
+
+		public override GraphRunner graphRunner => runner;
+
+		private Queue<FlowPort> nextFlows = new Queue<FlowPort>(4);
+
+		public override void Next(FlowPort port) {
+			nextFlows.Enqueue(port);
+		}
+
+		public void Run() {
+			try {
+				BeforeRun();
+				var targetFlow = port;
+				targetFlow.action?.Invoke(this);
+				if(jumpStatement != null) {
+					AfterRun();
+					return;
+				}
+				while(nextFlows.TryDequeue(out var nextPort)) {
+					FlowInput nextFlow = null;
+					if(nextPort is FlowInput input) {
+						nextFlow = input;
+					}
+					else if(nextPort is FlowOutput output) {
+#if UNITY_EDITOR
+						if(GraphDebug.useDebug && output != null) {
+							var node = output.node;
+							GraphDebug.Flow(instance.target, node.graphContainer.GetGraphID(), node.id, output.id);
+						}
+#endif
+						nextFlow = output.GetTargetFlow();
+					}
+					if(nextFlow == null) {
+						continue;
+					}
+					var flow = new RegularFlow(nextFlow, runner);
+					flow.Run();
+					if(flow.jumpStatement != null) {
+						jumpStatement = flow.jumpStatement;
+						break;
+					}
+				}
+				AfterRun();
+			}
+			catch (Exception ex) {
+				if(ex is not GraphException) {
+					throw new GraphException(ex, this.port.node);
+				}
+				else {
+					throw;
+				}
+			}
+		}
+
+		private void AfterRun() {
+			port.actionOnExit?.Invoke(this);
+			finished = true;
+			nextFlows.Clear();
+			if(state == StateType.Running) {
+				state = StateType.Success;
+			}
+#if UNITY_EDITOR
+			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
+				var node = port.node;
+				GraphDebug.FlowNode(target, node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
+			}
+#endif
+		}
+
+		private void BeforeRun() {
+			if(hasCalled && !IsFinished())
+				return;
+			jumpStatement = null;
+			if(!hasCalled)
+				hasCalled = true;
+			finished = false;
+			state = StateType.Running;
+			nextFlows.Clear();
+#if UNITY_EDITOR
+			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
+				var node = port.node;
+				GraphDebug.FlowNode(target, port.node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
+			}
+#endif
+		}
+
+		protected override void OnTrigger(FlowOutput output, out JumpStatement jump) {
+			var targetFlow = output.GetTargetFlow();
+			if(targetFlow != null) {
+#if UNITY_EDITOR
+				if(GraphDebug.useDebug && output != null) {
+					var node = output.node;
+					GraphDebug.Flow(instance.target, node.graphContainer.GetGraphID(), node.id, output.id);
+				}
+#endif
+				var flow = new RegularFlow(targetFlow, runner);
+				flow.Run();
+				jump = flow.jumpStatement;
+			}
+			else {
+				jump = null;
+			}
+		}
+
+		protected override void OnTriggerCoroutine(FlowOutput output, out IEnumerator waitUntil, out Func<JumpStatement> jumpStatement) {
+			throw new GraphException("Cannot run coroutine on non-coroutine flow at " + port.ToString(), port.node);
+
+//			var targetFlow = output.GetTargetFlow();
+//			if(targetFlow != null) {
+//#if UNITY_EDITOR
+//				if(GraphDebug.useDebug && output != null) {
+//					var node = output.node;
+//					GraphDebug.Flow(instance.target, node.graphContainer.GetGraphID(), node.id, output.id);
+//				}
+//#endif
+//				var flow = new RegularFlow(targetFlow, runner);
+//				waitUntil = null;
+//				jumpStatement = () => flow.jumpStatement;
+//			}
+//			else {
+//				waitUntil = null;
+//				jumpStatement = () => null;
+//			}
+		}
+
+		protected override void OnTriggerParallel(FlowOutput output) {
+			var targetFlow = output.GetTargetFlow();
+			if(targetFlow != null) {
+#if UNITY_EDITOR
+				if(GraphDebug.useDebug && output != null) {
+					var node = output.node;
+					GraphDebug.Flow(instance.target, node.graphContainer.GetGraphID(), node.id, output.id);
+				}
+#endif
+				var flow = new RegularFlow(targetFlow, runner);
+				flow.Run();
+			}
+		}
+
+		public override void Stop() {
+			throw new NotSupportedException();
+		}
+	}
 }

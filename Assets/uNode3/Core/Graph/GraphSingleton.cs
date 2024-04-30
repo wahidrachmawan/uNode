@@ -106,8 +106,10 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 				throw new Exception("Can't initialize graph instance when not playing.");
 			}
 			var gameObject = new GameObject("#Singleton => " + FullGraphName);
-			//gameObject.hideFlags = HideFlags.DontSaveInEditor;
-			DontDestroyOnLoad(gameObject);
+			if(persistence) {
+				//gameObject.hideFlags = HideFlags.DontSaveInEditor;
+				DontDestroyOnLoad(gameObject);
+			}
 
 			var type = GeneratedTypeName.ToType(false);
 			if(type != null) {

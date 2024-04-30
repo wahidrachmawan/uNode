@@ -315,9 +315,11 @@ namespace MaxyGames.UNode.Editors {
 				if(layout.y < 0) {
 					style.top = 0;
 				}
-				if(UIElementUtility.Theme.minimapPosition != layout) {
-					UIElementUtility.Theme.minimapPosition = layout;
-					EditorUtility.SetDirty(UIElementUtility.Theme);
+				if(m_MinimapType == UIElementEditorTheme.MinimapType.Floating || m_MinimapType == UIElementEditorTheme.MinimapType.Anchored) {
+					if(UIElementUtility.Theme.minimapPosition != layout) {
+						UIElementUtility.Theme.minimapPosition = layout;
+						EditorUtility.SetDirty(UIElementUtility.Theme);
+					}
 				}
 			}
 			UnityEngine.Profiling.Profiler.EndSample();

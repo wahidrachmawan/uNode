@@ -116,9 +116,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(Event.current.type == EventType.Repaint) {
 				height = Mathf.Max(textField.layout.height, 20);
-				if(completions?.Length > 0 && treeView != null && treeView.itemsSource != null) {
-					height += treeView.fixedItemHeight * treeView.itemsSource.Count + 20;
+				try {
+					if(completions?.Length > 0 && treeView != null && treeView.itemsSource != null) {
+						height += treeView.fixedItemHeight * treeView.itemsSource.Count + 20;
+					}
 				}
+				catch { }
 				height = Mathf.Min(height, 400);
 				if(currentHeight != height) {
 					currentHeight = height;

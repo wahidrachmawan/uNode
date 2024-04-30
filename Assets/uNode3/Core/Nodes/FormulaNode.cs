@@ -70,6 +70,10 @@ namespace MaxyGames.UNode.Nodes {
 		#region Runtime
 		private MethodInfo method;
 		public override void OnRuntimeInitialize(GraphInstance instance) {
+			Init();
+		}
+
+		void Init() {
 			if(IsCompiled == false) {
 				throw new Exception("Formula is not compiled, compile it first for use.");
 			}
@@ -88,10 +92,14 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override object GetValue(Flow flow) {
+			if(method == null)
+				Init();
 			return method.InvokeOptimized(null, inputs.Select(i => i.port.GetValue(flow)).ToArray());
 		}
 
 		protected override void OnExecuted(Flow flow) {
+			if(method == null)
+				Init();
 			method.InvokeOptimized(null, inputs.Select(i => i.port.GetValue(flow)).ToArray());
 		}
 		#endregion
