@@ -253,7 +253,7 @@ namespace MaxyGames.UNode {
 
 		public Type type {
 			get {
-				return _type.type;
+				return parameter != null ? parameter.type : _type.type;
 			}
 		}
 
@@ -275,7 +275,7 @@ namespace MaxyGames.UNode {
 
 		public Type type {
 			get {
-				return _type.type;
+				return reference != null ? reference.ReturnType() : _type.type;
 			}
 		}
 

@@ -1103,8 +1103,6 @@ namespace MaxyGames.UNode {
 							switch(member.targetType) {
 								case MemberData.TargetType.uNodeVariable:
 								case MemberData.TargetType.uNodeLocalVariable:
-									result += ("$" + member.startName).WrapWithColor(getColorForType(member.startType));
-									break;
 								case MemberData.TargetType.uNodeProperty:
 									result += ("$" + member.startName).WrapWithColor(getColorForType(member.startType));
 									break;

@@ -83,7 +83,7 @@ namespace MaxyGames.UNode {
 					return true;
 				}
 				else {
-					if(member.targetType == MemberData.TargetType.uNodeVariable) {
+					if(member.targetType == MemberData.TargetType.uNodeVariable || member.targetType == MemberData.TargetType.uNodeLocalVariable) {
 						var reference = member.startItem.GetReference<BaseGraphReference>();
 						if(reference != null) {
 							if(reference.ReferenceValue == null) {
@@ -107,6 +107,81 @@ namespace MaxyGames.UNode {
 							if(reference.ReferenceValue == null) {
 								RegisterError(owner, name.Add(" is ") + "missing function reference: " + reference.name + " with id: " + reference.id);
 								return true;
+							}
+						}
+					}
+					else if(member.targetType == MemberData.TargetType.uNodeParameter) {
+						var reference = member.startItem.GetReference<ParameterRef>();
+						if(reference != null) {
+							if(reference.ReferenceValue == null) {
+								RegisterError(owner, name.Add(" is ") + "missing parameter reference: " + reference.name + " with id: " + reference.id);
+								return true;
+							}
+						}
+					}
+					else if(member.IsTargetingReflection) {
+						foreach(var item in member.Items) {
+							if(item.reference != null) {
+								if(item.reference is VariableRef) {
+									var reference = item.reference as VariableRef;
+									if(reference.ReferenceValue == null) {
+										string graphName;
+										if(reference.UnityObject is IGraph) {
+											graphName = (reference.UnityObject as IGraph).GetFullGraphName();
+										} 
+										else if(reference.UnityObject != null) {
+											graphName = reference.UnityObject.name;
+										}
+										else if(object.ReferenceEquals(reference.UnityObject, null) == false) {
+											graphName = reference.UnityObject.GetHashCode().ToString();
+										}
+										else {
+											graphName = "Null";
+										}
+										RegisterError(owner, $"graph: {graphName} is missing variable: " + reference.name + " with id: " + reference.id);
+										return true;
+									}
+								}
+								else if(item.reference is PropertyRef) {
+									var reference = item.reference as PropertyRef;
+									if(reference.ReferenceValue == null) {
+										string graphName;
+										if(reference.UnityObject is IGraph) {
+											graphName = (reference.UnityObject as IGraph).GetFullGraphName();
+										}
+										else if(reference.UnityObject != null) {
+											graphName = reference.UnityObject.name;
+										}
+										else if(object.ReferenceEquals(reference.UnityObject, null) == false) {
+											graphName = reference.UnityObject.GetHashCode().ToString();
+										}
+										else {
+											graphName = "Null";
+										}
+										RegisterError(owner, $"graph: {graphName} is missing property: " + reference.name + " with id: " + reference.id);
+										return true;
+									}
+								}
+								else if(item.reference is FunctionRef) {
+									var reference = item.reference as FunctionRef;
+									if(reference.ReferenceValue == null) {
+										string graphName;
+										if(reference.UnityObject is IGraph) {
+											graphName = (reference.UnityObject as IGraph).GetFullGraphName();
+										}
+										else if(reference.UnityObject != null) {
+											graphName = reference.UnityObject.name;
+										}
+										else if(object.ReferenceEquals(reference.UnityObject, null) == false) {
+											graphName = reference.UnityObject.GetHashCode().ToString();
+										}
+										else {
+											graphName = "Null";
+										}
+										RegisterError(owner, $"graph: {graphName} is missing function: " + reference.name + " with id: " + reference.id);
+										return true;
+									}
+								}
 							}
 						}
 					}

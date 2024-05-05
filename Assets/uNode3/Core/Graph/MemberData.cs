@@ -1924,6 +1924,47 @@ namespace MaxyGames.UNode {
 								else {
 									return instance?.GetType() ?? typeof(object);
 								}
+							case TargetType.uNodeVariable:
+							case TargetType.uNodeLocalVariable: {
+								var result = startItem.GetReference<VariableRef>()?.type;
+								if(result != null) {
+									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+										StartSerializedType.type = null;
+									}
+									return result;
+								}
+								goto default;
+							}
+							case TargetType.uNodeProperty: {
+								var result = startItem.GetReference<PropertyRef>()?.type;
+								if(result != null) {
+									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+										StartSerializedType.type = null;
+									}
+									return result;
+								}
+								goto default;
+							}
+							case TargetType.uNodeFunction: {
+								var result = startItem.GetReference<FunctionRef>()?.type;
+								if(result != null) {
+									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+										StartSerializedType.type = null;
+									}
+									return result;
+								}
+								goto default;
+							}
+							case TargetType.uNodeParameter: {
+								var result = startItem.GetReference<ParameterRef>()?.type;
+								if(result != null) {
+									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+										StartSerializedType.type = null;
+									}
+									return result;
+								}
+								goto default;
+							}
 							default:
 								_startType = StartSerializedType.type;
 								if(_startType != null && _startType.IsGenericTypeDefinition) {
