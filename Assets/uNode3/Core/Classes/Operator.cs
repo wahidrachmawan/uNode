@@ -2003,19 +2003,18 @@ namespace MaxyGames.UNode {
 		#region Unary
 		static System.Func<object, object> negate, not;
 		static Dictionary<Type, System.Func<object, object>> _negate, _not;
-		static Dictionary<int, System.Func<object, object>> convert;
+		static Dictionary<(Type, Type), System.Func<object, object>> convert;
 
 		public static object Convert(object a, Type type) {
 			if(a == null) {
 				throw new NullReferenceException("The target to convert cannot be null.");
 			}
 			if(convert == null) {
-				convert = new Dictionary<int, Func<object, object>>();
+				convert = new Dictionary<(Type, Type), Func<object, object>>();
 			}
 			var fromType = a.GetType();
-			var uid = uNodeUtility.GetHashCode(type.GetHashCode(), fromType.GetHashCode());
 			Func<object, object> func;
-			if(!convert.TryGetValue(uid, out func)) {
+			if(!convert.TryGetValue((type, fromType), out func)) {
 				if(type == typeof(string)) {
 					func = (val) => val.ToString();
 				}
@@ -2024,15 +2023,17 @@ namespace MaxyGames.UNode {
 				}
 				else {
 					if(!fromType.IsPrimitive) {
-						var methods = fromType.FindImplicitOperator(type);
-						foreach(var m in methods) {
-							if(m == null)
-								continue;
-							var param = m.GetParameters();
-							if(param.Length == 1) {
-								fromType = param[0].ParameterType;
+						if(fromType != type && fromType.IsSubclassOf(type) && fromType.IsInterface == false) {
+							var methods = fromType.FindImplicitOperator(type);
+							foreach(var m in methods) {
+								if(m == null)
+									continue;
+								var param = m.GetParameters();
+								if(param.Length == 1) {
+									fromType = param[0].ParameterType;
+								}
+								break;
 							}
-							break;
 						}
 					}
 					else if(type.IsEnum) {
@@ -2052,22 +2053,38 @@ namespace MaxyGames.UNode {
 					//	}
 					//}
 					if(func == null) {
-						ParameterExpression paramA = Expression.Parameter(typeof(object), "a");
-						func = Expression.Lambda<System.Func<object, object>>(
-							Expression.Convert(
-								Expression.Convert(
-									Expression.Convert(paramA, fromType),
-									type),
-								typeof(object)), paramA).Compile();
+						if(fromType == type) {
+							if(type.IsValueType) {
+								ParameterExpression paramA = Expression.Parameter(typeof(object), "a");
+								//For value type, the value will be duplicated
+								func = Expression.Lambda<System.Func<object, object>>(
+										Expression.Convert(
+											Expression.Convert(paramA, type),
+											typeof(object)), paramA).Compile();
+							}
+							else {
+								//For reference type
+								func = (val) => val;
+							}
+						}
+						else {
+							ParameterExpression paramA = Expression.Parameter(typeof(object), "a");
+							func = Expression.Lambda<System.Func<object, object>>(
+									Expression.Convert(
+										Expression.Convert(
+											Expression.Convert(paramA, fromType),
+											type),
+										typeof(object)), paramA).Compile();
+						}
 					}
 				}
-				convert[uid] = func;
+				convert[(type, fromType)] = func;
 			}
 			try {
 				return func(a);
 			}
 			catch(InvalidCastException ex) {
-				throw new InvalidCastException($"Cannot convert '{a.GetType().FullName}' to {type.FullName}", ex);
+				throw new InvalidCastException($"Cannot convert '{a.GetType().FullName}' to {type.FullName}" + "\n" + ex.ToString());
 			}
 			catch(NullReferenceException ex) {
 				throw new NullReferenceException($"Cannot convert to {type.FullName} because the value is null.", ex);

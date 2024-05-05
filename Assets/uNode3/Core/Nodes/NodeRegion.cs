@@ -10,5 +10,9 @@ namespace MaxyGames.UNode.Nodes {
 		public Color nodeColor = Color.cyan;
 
 		protected override void OnRegister() { }
+
+		public override Type GetNodeIcon() {
+			return typeof(TypeIcons.FolderIcon);
+		}
 	}
 }

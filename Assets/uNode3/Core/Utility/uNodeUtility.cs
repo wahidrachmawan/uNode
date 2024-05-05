@@ -1030,6 +1030,7 @@ namespace MaxyGames.UNode {
 							if(member.hasRegister && paramsType.Length > 0) {
 								if(member.parameters != null) {
 									for(int x = 0; x < paramsType.Length; x++) {
+										if(x + skipIndex >= member.parameters.Count) continue;
 										if(member.parameters[x + skipIndex]?.input != null) {
 											paramsType[x] = GetNicelyDisplayName(member.parameters[x + skipIndex].input, richName: richName);
 										}

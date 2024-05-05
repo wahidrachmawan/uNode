@@ -481,8 +481,11 @@ namespace MaxyGames.UNode {
 		public static T Duplicate<T>(T value) {
 			if(value == null) {
 				return default;
-			} else if(value is Object || value.GetType().IsValueType) {
+			} else if(value is Object) {
 				return value;
+			}
+			else if(value.GetType().IsValueType) {
+				return (T)ReflectionUtils.ValuePassing(value);
 			}
 			return Deserialize<T>(Serialize(value, out var references), references);
 		}

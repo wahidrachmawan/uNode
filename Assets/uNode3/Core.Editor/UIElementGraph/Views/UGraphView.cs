@@ -346,10 +346,35 @@ namespace MaxyGames.UNode.Editors {
 				EditorUtility.DisplayDialog("Error", "The graph of the function must same with the current graph", "Ok");
 				return;
 			}
-			NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, position, (n) => {
-				n.target = MemberData.CreateFromValue(function);
-			});
-			graph.Refresh();
+			if(function.ReturnType().IsCastableTo(typeof(System.Collections.IEnumerator)) && graphData.graph.GetGraphInheritType().IsCastableTo(typeof(MonoBehaviour))) {
+				GenericMenu menu = new GenericMenu();
+				menu.AddItem(new GUIContent("Invoke"), false, (() => {
+					NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, position, (n) => {
+						n.target = MemberData.CreateFromValue(function);
+					});
+					graph.Refresh();
+				}));
+				menu.AddItem(new GUIContent("Start Coroutine"), false, (() => {
+					NodeEditorUtility.AddNewNode(graphData, position, delegate (NodeBaseCaller node) {
+						node.target = MemberData.CreateFromMember(typeof(MonoBehaviour).GetMethod(nameof(MonoBehaviour.StartCoroutine), new[] { typeof(System.Collections.IEnumerator) }));
+						node.Register();
+
+						NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, new Vector2(position.x - 200, position.y), (n) => {
+							n.target = MemberData.CreateFromValue(function);
+
+							node.parameters[0].input.ConnectTo(n.output);
+						});
+					});
+					graph.Refresh();
+				}));
+				menu.ShowAsContext();
+			}
+			else {
+				NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, position, (n) => {
+					n.target = MemberData.CreateFromValue(function);
+				});
+				graph.Refresh();
+			}
 			DragAndDrop.SetGenericData("uNode", null);
 		}
 
@@ -2475,35 +2500,39 @@ namespace MaxyGames.UNode.Editors {
 			graph.topMousePos = screenMousePosition;
 
 			if(type == GraphShortcutType.AddNode) {
-				if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
-					OnCreateNode(screenMousePosition);
+				if(graphData.canAddNode) {
+					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
+						OnCreateNode(screenMousePosition);
+					}
 				}
 				return true;
 			}
 			else if(type == GraphShortcutType.OpenCommand) {
-				if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
-					Vector2 point = graph.window.rootVisualElement.ChangeCoordinatesTo(
-						contentViewContainer,
-						screenMousePosition);
+				if(graphData.canAddNode) {
+					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
+						Vector2 point = graph.window.rootVisualElement.ChangeCoordinatesTo(
+							contentViewContainer,
+							screenMousePosition);
 
-					IEnumerable<string> namespaces = null;
-					if(graphData.graph != null) {
-						namespaces = graphData.graph.GetUsingNamespaces();
-					}
-					AutoCompleteWindow.CreateWindow(Vector2.zero, (items) => {
-						var nodes = CompletionEvaluator.CompletionsToGraphs(CompletionEvaluator.SimplifyCompletions(items), graphData, point);
-						if(nodes != null && nodes.Count > 0) {
-							graph.Refresh();
-							return true;
+						IEnumerable<string> namespaces = null;
+						if(graphData.graph != null) {
+							namespaces = graphData.graph.GetUsingNamespaces();
 						}
-						return false;
-					}, new CompletionEvaluator.CompletionSetting() {
-						owner = graphData.currentCanvas,
-						namespaces = namespaces,
-						allowExpression = true,
-						allowStatement = true,
-						allowSymbolKeyword = true,
-					}).ChangePosition(graph.GetMenuPosition());
+						AutoCompleteWindow.CreateWindow(Vector2.zero, (items) => {
+							var nodes = CompletionEvaluator.CompletionsToGraphs(CompletionEvaluator.SimplifyCompletions(items), graphData, point);
+							if(nodes != null && nodes.Count > 0) {
+								graph.Refresh();
+								return true;
+							}
+							return false;
+						}, new CompletionEvaluator.CompletionSetting() {
+							owner = graphData.currentCanvas,
+							namespaces = namespaces,
+							allowExpression = true,
+							allowStatement = true,
+							allowSymbolKeyword = true,
+						}).ChangePosition(graph.GetMenuPosition());
+					}
 				}
 				return true;
 			}
@@ -2520,26 +2549,32 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 			else if(type == GraphShortcutType.PasteNodesClean) {
-				uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
-				var clickedPos = GetMousePosition(graph.topMousePos);
-				graph.PasteNode(clickedPos, true);
-				graph.Refresh();
+				if(graphData.canAddNode) {
+					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
+					var clickedPos = GetMousePosition(graph.topMousePos);
+					graph.PasteNode(clickedPos, true);
+					graph.Refresh();
+				}
 				return true;
 			}
 			else if(type == GraphShortcutType.PasteNodesWithLink) {
-				uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
-				var clickedPos = GetMousePosition(graph.topMousePos);
-				graph.PasteNode(clickedPos, false);
-				graph.Refresh();
+				if(graphData.canAddNode) {
+					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
+					var clickedPos = GetMousePosition(graph.topMousePos);
+					graph.PasteNode(clickedPos, false);
+					graph.Refresh();
+				}
 				return true;
 			}
 			else if(type == GraphShortcutType.DuplicateNodes) {
-				uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate nodes");
-				CopySelectedNodes();
-				graph.Repaint();
-				var clickedPos = GetMousePosition(graph.topMousePos);
-				graph.PasteNode(clickedPos);
-				graph.Refresh();
+				if(graphData.canAddNode) {
+					uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate nodes");
+					CopySelectedNodes();
+					graph.Repaint();
+					var clickedPos = GetMousePosition(graph.topMousePos);
+					graph.PasteNode(clickedPos);
+					graph.Refresh();
+				}
 				return true;
 			}
 			else if(type == GraphShortcutType.DeleteSelectedNodes) {
@@ -2554,7 +2589,9 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 			else if(type == GraphShortcutType.CreateRegion) {
-				SelectionAddRegion(screenMousePosition);
+				if(graphData.canAddNode) {
+					SelectionAddRegion(screenMousePosition);
+				}
 				return true;
 			}
 			else if(type == GraphShortcutType.PlaceFitNodes) {

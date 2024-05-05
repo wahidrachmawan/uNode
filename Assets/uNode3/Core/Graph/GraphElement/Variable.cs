@@ -60,10 +60,10 @@ namespace MaxyGames.UNode {
 
 		public void Set(Flow flow, object value) {
 			if(resetOnEnter) {
-				flow.SetLocalData(this, value);
+				flow.SetLocalData(this, ReflectionUtils.ValuePassing(value));
 				return;
 			}
-			flow.SetElementData(this, value);
+			flow.SetElementData(this, ReflectionUtils.ValuePassing(value));
 		}
 
 		public object Get(GraphInstance instance) {

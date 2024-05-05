@@ -74,7 +74,7 @@ namespace MaxyGames.UNode {
 
 		public void Set(GraphInstance instance, object value) {
 			if(AutoProperty) {
-				instance.SetElementData(this, value);
+				instance.SetElementData(this, ReflectionUtils.ValuePassing(value));
 			} else {
 				if(setRoot != null) {
 					setRoot.Invoke(instance, new object[] { value });

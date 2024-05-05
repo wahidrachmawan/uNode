@@ -122,7 +122,12 @@ namespace MaxyGames.UNode {
 				}
 				if(parameter != null) {
 					for(int i = 0; i < parameter.Length; i++) {
-						flow.SetLocalData(null, parameters[i], parameter[i]);
+						if(parameters[i].Type.IsValueType && parameters[i].isByRef == false) {
+							flow.SetLocalData(null, parameters[i], ReflectionUtils.ValuePassing(parameter[i]));
+						}
+						else {
+							flow.SetLocalData(null, parameters[i], parameter[i]);
+						}
 						//parameters[i].value = parameter[i];
 					}
 					//Debug.Log($"Invoking function: {Name} with parameters:{string.Join(", ", parameter)}");

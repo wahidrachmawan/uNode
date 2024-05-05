@@ -82,6 +82,35 @@ namespace MaxyGames.UNode {
 					RegisterError(owner, "Unassigned value: " + name);
 					return true;
 				}
+				else {
+					if(member.targetType == MemberData.TargetType.uNodeVariable) {
+						var reference = member.startItem.GetReference<BaseGraphReference>();
+						if(reference != null) {
+							if(reference.ReferenceValue == null) {
+								RegisterError(owner, name.Add(" is ") + "missing variable reference: " + reference.name + " with id: " + reference.id);
+								return true;
+							}
+						}
+					}
+					else if(member.targetType == MemberData.TargetType.uNodeProperty) {
+						var reference = member.startItem.GetReference<BaseGraphReference>();
+						if(reference != null) {
+							if(reference.ReferenceValue == null) {
+								RegisterError(owner, name.Add(" is ") + "missing property reference: " + reference.name + " with id: " + reference.id);
+								return true;
+							}
+						}
+					}
+					else if(member.targetType == MemberData.TargetType.uNodeFunction) {
+						var reference = member.startItem.GetReference<BaseGraphReference>();
+						if(reference != null) {
+							if(reference.ReferenceValue == null) {
+								RegisterError(owner, name.Add(" is ") + "missing function reference: " + reference.name + " with id: " + reference.id);
+								return true;
+							}
+						}
+					}
+				}
 			}
 			return false;
 		}
@@ -154,6 +183,9 @@ namespace MaxyGames.UNode {
 						//		return true;
 						//	}
 						//}
+					}
+					if(CheckValue(p.defaultValue, port.GetPrettyName(), port.node)) {
+						return true;
 					}
 				}
 				else if(p.isConnected) {

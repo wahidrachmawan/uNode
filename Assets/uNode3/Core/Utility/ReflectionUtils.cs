@@ -2177,6 +2177,35 @@ namespace MaxyGames.UNode {
 			return true;
 		}
 
+		/// <summary>
+		/// Value passing for passing value to function, etc.
+		/// Note: if the value is value type it will be duplicated.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static object ValuePassing(object value) {
+			if(value == null)
+				return null;
+			if(!_valuePassing.TryGetValue(value.GetType(), out var func)) {
+				var type = value.GetType();
+				if(type.IsValueType) {
+					//For value type, the value will be duplicated
+					System.Linq.Expressions.ParameterExpression paramA = System.Linq.Expressions.Expression.Parameter(typeof(object), "a");
+					func = System.Linq.Expressions.Expression.Lambda<System.Func<object, object>>(
+							System.Linq.Expressions.Expression.Convert(
+								System.Linq.Expressions.Expression.Convert(paramA, type),
+								typeof(object)), paramA).Compile();
+				}
+				else {
+					func = (val) => val;
+				}
+				_valuePassing[type] = func;
+			}
+			return func(value);
+		}
+
+		static Dictionary<Type, Func<object, object>> _valuePassing = new Dictionary<Type, Func<object, object>>();
+
 		internal static bool AreReferenceAssignable(Type dest, Type src) {
 			if(AreEquivalent(dest, src)) {
 				return true;

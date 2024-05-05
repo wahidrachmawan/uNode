@@ -37,7 +37,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override void OnExecuted(Flow flow) {
-			flow.SetPortData(output, target.GetValue(flow));
+			flow.SetPortData(output, ReflectionUtils.ValuePassing(target.GetValue(flow)));
 		}
 
 		public override void OnGeneratorInitialize() {

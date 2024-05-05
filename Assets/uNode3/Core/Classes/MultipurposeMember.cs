@@ -231,6 +231,7 @@ namespace MaxyGames.UNode {
 			if(instance != null) {
 				analizer.CheckPort(instance);
 			}
+			analizer.CheckValue(target, "", element);
 			if(parameters != null) {
 				foreach(var p in parameters) {
 					if(p.input != null) {

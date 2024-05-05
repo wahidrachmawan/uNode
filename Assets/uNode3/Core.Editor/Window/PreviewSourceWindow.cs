@@ -66,7 +66,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		protected bool focus;
+		private string[] oldSelections = Array.Empty<string>();
+		protected bool focus, selectionChanged;
 		protected string[] lines;
 		protected string[] pureLines;
 		protected string script;
@@ -84,11 +85,13 @@ namespace MaxyGames.UNode.Editors {
 				window.compileResult = null;
 			}
 			window.titleContent = new GUIContent("C# Preview");
+			window.autoRepaintOnSceneChange = true;
 			window.Show();
 			return window;
 		}
 
 		protected virtual void OnEnable() {
+			window = this;
 			uNodeEditor.onSelectionChanged -= OnChanged;
 			uNodeEditor.onSelectionChanged += OnChanged;
 		}
@@ -97,11 +100,25 @@ namespace MaxyGames.UNode.Editors {
 			uNodeEditor.onSelectionChanged -= OnChanged;
 		}
 
-		protected void OnChanged(GraphEditorData editorData) {
+		public void OnChanged(GraphEditorData editorData) {
 			if(informations != null) {
 				if(editorData.hasSelection) {
 					var ids = editorData.selectedNodes.Select(n => n.id.ToString());
 					selectedInfos = informations.Where(info => ids.Contains(info.id)).ToArray();
+					var selections = ids.ToArray();
+					if(selections.Length == oldSelections.Length) {
+						for(int i = 0; i < selections.Length; i++) {
+							if(selections[i] != oldSelections[i]) {
+								oldSelections = selections;
+								selectionChanged = true;
+								break;
+							}
+						}
+					}
+					else {
+						oldSelections = selections;
+						selectionChanged = true;
+					}
 				}
 				Repaint();
 			}
@@ -245,6 +262,11 @@ namespace MaxyGames.UNode.Editors {
 #if UNODE_PRO
 					if(selectedInfos == null) continue;
 					CalculatePosition(rect, pureLines[i], i, selectedInfos, (position, info) => {
+						if(window != null && window.selectionChanged) {
+							window.selectionChanged = false;
+							window.scrollPos.y = Mathf.Clamp(rect.y - 200, 0, int.MaxValue);
+							window.Repaint();
+						}
 						GUI.DrawTexture(position, selectionTexture);
 					});
 #endif

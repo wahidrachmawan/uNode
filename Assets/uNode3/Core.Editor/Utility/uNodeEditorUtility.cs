@@ -38,7 +38,7 @@ namespace MaxyGames.UNode.Editors {
 			public static Action<MemberInfo> CallbackFindInNodeBrowser;
 		}
 
-		[MenuItem("Tools/uNode/C# Preview")]
+		[MenuItem("Tools/uNode/Live C# Preview")]
 		private static void ShowCSharpPreview() {
 			if(uNodeEditorUtility.DisplayRequiredProVersion("Realtime C# Preview")) {
 				return;
@@ -1032,6 +1032,9 @@ namespace MaxyGames.UNode.Editors {
 
 		private static System.Text.RegularExpressions.Regex _removeHTMLTagRx = new System.Text.RegularExpressions.Regex("<[^>]*>");
 		public static string RemoveHTMLTag(string str) {
+			if(string.IsNullOrEmpty(str)) {
+				return str;
+			}
 			return _removeHTMLTagRx.Replace(str, "");
 		}
 
