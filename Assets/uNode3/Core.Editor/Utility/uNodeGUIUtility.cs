@@ -21,6 +21,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void GUIChangedMajor(object owner) {
 			uNodeEditor.ClearCache();
+			EditorReflectionUtility.UpdateRuntimeTypes();
 			//GUIChanged(owner, UIChangeType.Important);
 		}
 

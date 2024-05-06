@@ -138,7 +138,7 @@ namespace MaxyGames.UNode {
 				List<PropertyInfo> members = properties;
 				members.AddRange(inheritMembers);
 				foreach(var (_, field) in m_runtimeProperties) {
-					if(field.target.isValid && (field.CanRead || field.CanWrite)) {
+					if(field.target.isValid) {
 						members.Add(field);
 					}
 				}
@@ -171,7 +171,7 @@ namespace MaxyGames.UNode {
 				List<MethodInfo> members = methods;
 				members.AddRange(inheritMembers);
 				foreach(var (_, field) in m_runtimeMethods) {
-					if(field.target.isValid && field.IsPublic) {
+					if(field.target.isValid) {
 						members.Add(field);
 					}
 				}

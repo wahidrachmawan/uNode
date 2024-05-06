@@ -807,12 +807,16 @@ namespace MaxyGames.UNode.Editors {
 					if(filter.Static && !filter.SetMember && filter.ValidMemberType.HasFlags(MemberTypes.Constructor) &&
 						!type.IsCastableTo(typeof(Delegate)) && !type.IsSubclassOf(typeof(Component))) {
 						BindingFlags flag = BindingFlags.Public | BindingFlags.Instance;
-						if(type.IsValueType) {
-							flag |= BindingFlags.Static | BindingFlags.NonPublic;
+						if(type.IsValueType && type.IsPrimitive == false && type != typeof(void)) {
+							//flag |= BindingFlags.Static | BindingFlags.NonPublic;
+							var defaultCtor = ReflectionUtils.GetDefaultConstructor(type);
+							if(validation == null || validation(defaultCtor)) {
+								result.Add(CreateItemFromMember(defaultCtor, filter));
+							}
 						}
 						ConstructorInfo[] ctor = type.GetConstructors(flag);
 						for(int i = ctor.Length - 1; i >= 0; i--) {
-							if((validation == null || validation(ctor[i]))) {
+							if(validation == null || validation(ctor[i])) {
 								var item = CreateItemFromMember(ctor[i], filter);
 								if(item != null) {
 									result.Add(item);

@@ -166,11 +166,9 @@ namespace MaxyGames.UNode {
 			if(fields == null) {
 				List<FieldInfo> members = new List<FieldInfo>(inheritMembers);
 				foreach(var m in target.GetVariables()) {
-					if(m.modifier.isPublic) {
-						var value = new RuntimeNativeField(this, new VariableRef(m, target));
-						m_runtimeFields[m.id] = value;
-						members.Add(value);
-					}
+					var value = new RuntimeNativeField(this, new VariableRef(m, target));
+					m_runtimeFields[m.id] = value;
+					members.Add(value);
 				}
 				fields = members;
 			}
@@ -178,13 +176,13 @@ namespace MaxyGames.UNode {
 				fields.Clear();
 				List<FieldInfo> members = fields;
 				members.AddRange(inheritMembers);
-				foreach(var (_, field) in m_runtimeFields) {
-					if(field.target.isValid && field.IsPublic) {
-						members.Add(field);
+				foreach(var (_, m) in m_runtimeFields) {
+					if(m.target.isValid) {
+						members.Add(m);
 					}
 				}
 				foreach(var m in target.GetVariables()) {
-					if(m.modifier.isPublic && !m_runtimeFields.ContainsKey(m.id)) {
+					if(!m_runtimeFields.ContainsKey(m.id)) {
 						var value = new RuntimeNativeField(this, new VariableRef(m, target));
 						m_runtimeFields[m.id] = value;
 						members.Add(value);
@@ -201,11 +199,9 @@ namespace MaxyGames.UNode {
 			if(properties == null) {
 				List<PropertyInfo> members = new List<PropertyInfo>(inheritMembers);
 				foreach(var m in target.GetProperties()) {
-					if(m.modifier.isPublic) {
-						var value = new RuntimeNativeProperty(this, new PropertyRef(m, target));
-						m_runtimeProperties[m.id] = value;
-						members.Add(value);
-					}
+					var value = new RuntimeNativeProperty(this, new PropertyRef(m, target));
+					m_runtimeProperties[m.id] = value;
+					members.Add(value);
 				}
 				properties = members;
 			}
@@ -213,13 +209,13 @@ namespace MaxyGames.UNode {
 				properties.Clear();
 				List<PropertyInfo> members = properties;
 				members.AddRange(inheritMembers);
-				foreach(var (_, field) in m_runtimeProperties) {
-					if(field.target.isValid && (field.CanRead || field.CanWrite)) {
-						members.Add(field);
+				foreach(var (_, m) in m_runtimeProperties) {
+					if(m.target.isValid) {
+						members.Add(m);
 					}
 				}
 				foreach(var m in target.GetProperties()) {
-					if(m.modifier.isPublic && !m_runtimeProperties.ContainsKey(m.id)) {
+					if(!m_runtimeProperties.ContainsKey(m.id)) {
 						var value = new RuntimeNativeProperty(this, new PropertyRef(m, target));
 						m_runtimeProperties[m.id] = value;
 						members.Add(value);
@@ -236,11 +232,9 @@ namespace MaxyGames.UNode {
 			if(methods == null) {
 				List<MethodInfo> members = new List<MethodInfo>(inheritMembers);
 				foreach(var m in target.GetFunctions()) {
-					if(m.modifier.isPublic) {
-						var value = new RuntimeNativeMethod(this, new FunctionRef(m, target));
-						m_runtimeMethods[m.id] = value;
-						members.Add(value);
-					}
+					var value = new RuntimeNativeMethod(this, new FunctionRef(m, target));
+					m_runtimeMethods[m.id] = value;
+					members.Add(value);
 				}
 				methods = members;
 			}
@@ -248,13 +242,13 @@ namespace MaxyGames.UNode {
 				methods.Clear();
 				List<MethodInfo> members = methods;
 				members.AddRange(inheritMembers);
-				foreach(var (_, field) in m_runtimeMethods) {
-					if(field.target.isValid && field.IsPublic) {
-						members.Add(field);
+				foreach(var (_, m) in m_runtimeMethods) {
+					if(m.target.isValid) {
+						members.Add(m);
 					}
 				}
 				foreach(var m in target.GetFunctions()) {
-					if(m.modifier.isPublic && !m_runtimeMethods.ContainsKey(m.id)) {
+					if(!m_runtimeMethods.ContainsKey(m.id)) {
 						var value = new RuntimeNativeMethod(this, new FunctionRef(m, target));
 						m_runtimeMethods[m.id] = value;
 						members.Add(value);

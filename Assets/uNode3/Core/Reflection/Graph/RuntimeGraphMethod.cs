@@ -23,6 +23,14 @@ namespace MaxyGames.UNode {
 					if(modifier.isPublic) {
 						att = MethodAttributes.Public;
 					}
+					else if(modifier.isProtected) {
+						if(modifier.Internal) {
+							att = MethodAttributes.FamORAssem;
+						}
+						else {
+							att = MethodAttributes.Family;
+						}
+					}
 					else {
 						att = MethodAttributes.Private;
 					}

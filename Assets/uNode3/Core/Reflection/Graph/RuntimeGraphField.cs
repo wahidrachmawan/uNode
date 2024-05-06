@@ -22,6 +22,14 @@ namespace MaxyGames.UNode {
 						}
 						return FieldAttributes.Public;
 					}
+					else if(modifier.isProtected) {
+						if(modifier.Internal) {
+							return FieldAttributes.FamORAssem;
+						}
+						else {
+							return FieldAttributes.Family;
+						}
+					}
 					else {
 						if(modifier.Static || owner.IsAbstract && owner.IsSealed) {
 							return FieldAttributes.Private | FieldAttributes.Static;

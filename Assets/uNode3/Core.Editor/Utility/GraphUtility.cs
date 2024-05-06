@@ -248,6 +248,19 @@ namespace MaxyGames.UNode.Editors {
 												};
 											}
 										}
+										else if(item.reference is ParameterRef parameterRef) {
+											if(ValidateReference(parameterRef.reference, out var validElement)) {
+												postAction += () => {
+													var reference = item.reference;
+													if(reference is UReference) {
+														(reference as UReference).SetGraphElement(validElement);
+													}
+													else {
+														throw new InvalidOperationException();
+													}
+												};
+											}
+										}
 									}
 								}
 							}

@@ -83,6 +83,22 @@ namespace MaxyGames.UNode.Editors {
 			_runtimeTypes = types.Where(t => t.IsValid()).ToArray();
 		}
 
+		public static void UpdateRuntimeType(UGraphElement element) {
+			if(element != null) {
+				UpdateRuntimeType(element.graphContainer);
+			}
+		}
+
+		public static void UpdateRuntimeType(IGraph graph) {
+			if(graph is IReflectionType reflectionType) {
+				UpdateRuntimeType(reflectionType.ReflectionType);
+			}
+		}
+
+		public static void UpdateRuntimeType(RuntimeType type) {
+			type?.Update();
+		}
+
 		/// <summary>
 		/// Update Runtime Types sub members eg: fields, properties, methods.
 		/// </summary>
@@ -1102,8 +1118,9 @@ namespace MaxyGames.UNode.Editors {
 			List<ReflectionItem> Items = new List<ReflectionItem>();
 			if(filter.Static && !filter.SetMember && filter.ValidMemberType.HasFlags(MemberTypes.Constructor) && !type.IsCastableTo(typeof(Delegate))) {
 				BindingFlags flag = BindingFlags.Public | BindingFlags.Instance;
-				if(type.IsValueType) {
-					flag |= BindingFlags.Static | BindingFlags.NonPublic;
+				if(type.IsValueType && type.IsPrimitive == false && type != typeof(void)) {
+					//flag |= BindingFlags.Static | BindingFlags.NonPublic;
+					Items.Add(GetReflectionItems(ReflectionUtils.GetDefaultConstructor(type), filter, validation, memberValidation));
 				}
 				ConstructorInfo[] ctor = type.GetConstructors(flag);
 				for(int i = ctor.Length - 1; i >= 0; i--) {
