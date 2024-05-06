@@ -461,7 +461,7 @@ namespace MaxyGames.UNode {
 			return graphData?.GetElementByID<T>(id);
 		}
 
-		public static Property GetPropertyData(this IGraph graph, string name) {
+		public static Property GetProperty(this IGraph graph, string name) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));
 			foreach(var p in graph.GetProperties()) {
@@ -472,7 +472,7 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
-		public static Variable GetVariableData(this IGraph graph, string name) {
+		public static Variable GetVariable(this IGraph graph, string name) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));
 			foreach(var p in graph.GetVariables()) {

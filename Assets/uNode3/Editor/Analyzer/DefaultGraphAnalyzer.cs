@@ -179,7 +179,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 						var properties = type.GetProperties();
 						for(int i=0;i< properties.Length;i++) {
 							var member = properties[i];
-							if(!graph.GetPropertyData(member.Name)) {
+							if(!graph.GetProperty(member.Name)) {
 								analyzer.RegisterError(graphData,
 									$@"The graph does not implement interface property: '{type.PrettyName()}' type: '{member.PropertyType.PrettyName()}'",
 									() => {

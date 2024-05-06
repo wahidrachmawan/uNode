@@ -80,7 +80,7 @@ namespace MaxyGames.UNode {
 			if(nativeInstance != null) {
 				return nativeInstance.GetProperty(name);
 			}
-			var reference = Instance.graph.GetPropertyData(name);
+			var reference = Instance.graph.GetProperty(name);
 			if(reference == null) {
 				throw new Exception($"Property: {name} was not found on graph: {OriginalGraph}");
 			}
@@ -92,7 +92,7 @@ namespace MaxyGames.UNode {
 			if(nativeInstance != null) {
 				return nativeInstance.GetVariable(name);
 			}
-			var reference = Instance.graph.GetVariableData(name);
+			var reference = Instance.graph.GetVariable(name);
 			if(reference == null) {
 				throw new Exception($"Variable: {name} was not found on graph: {OriginalGraph}");
 			}
@@ -143,7 +143,7 @@ namespace MaxyGames.UNode {
 				nativeInstance.SetProperty(name, value, @operator);
 			}
 			else {
-				var reference = Instance.graph.GetPropertyData(name);
+				var reference = Instance.graph.GetProperty(name);
 				if(reference == null) {
 					throw new Exception($"Property: {name} was not found on graph: {OriginalGraph}");
 				}
@@ -168,7 +168,7 @@ namespace MaxyGames.UNode {
 				nativeInstance.SetProperty(name, value);
 			}
 			else {
-				var reference = Instance.graph.GetPropertyData(name);
+				var reference = Instance.graph.GetProperty(name);
 				if(reference == null) {
 					throw new Exception($"Property: {name} was not found on graph: {OriginalGraph}");
 				}
@@ -182,7 +182,7 @@ namespace MaxyGames.UNode {
 				nativeInstance.SetVariable(name, value, @operator);
 			}
 			else {
-				var reference = Instance.graph.GetVariableData(name);
+				var reference = Instance.graph.GetVariable(name);
 				if(reference == null) {
 					throw new Exception($"Variable: {name} was not found on graph: {OriginalGraph}");
 				}
@@ -207,7 +207,7 @@ namespace MaxyGames.UNode {
 				nativeInstance.SetVariable(name, value);
 			}
 			else {
-				var reference = Instance.graph.GetVariableData(name);
+				var reference = Instance.graph.GetVariable(name);
 				if(reference == null) {
 					throw new Exception($"Variable: {name} was not found on graph: {OriginalGraph}");
 				}

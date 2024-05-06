@@ -62,23 +62,73 @@ namespace MaxyGames.UNode {
 		}
 
 		public object Get(GraphInstance instance) {
+			if(instance.graph != graphContainer) {
+				var graph = instance.graph;
+				Property property = null;
+				while(property == null) {
+					property = graph.GetProperty(name);
+					if(property == null) {
+						var inheritType = graph.GetGraphInheritType();
+						if(inheritType is IRuntimeMemberWithRef runtime) {
+							graph = runtime.GetReferenceValue() as IGraph;
+							if(graph == null)
+								throw null;
+						}
+						else {
+							throw null;
+						}
+					}
+				}
+				return property.DoGet(instance);
+			}
+			return DoGet(instance);
+		}
+
+		public void Set(GraphInstance instance, object value) {
+			if(instance.graph != graphContainer) {
+				var graph = instance.graph;
+				Property property = null;
+				while(property == null) {
+					property = graph.GetProperty(name);
+					if(property == null) {
+						var inheritType = graph.GetGraphInheritType();
+						if(inheritType is IRuntimeMemberWithRef runtime) {
+							graph = runtime.GetReferenceValue() as IGraph;
+							if(graph == null)
+								throw null;
+						}
+						else {
+							throw null;
+						}
+					}
+				}
+				property.DoSet(instance, value);
+				return;
+			}
+			DoSet(instance, value);
+		}
+
+		internal object DoGet(GraphInstance instance) {
 			if(!AutoProperty) {
 				if(getRoot != null) {
-					return getRoot.Invoke(instance);
-				} else {
+					return getRoot.DoInvoke(instance, null);
+				}
+				else {
 					throw new System.Exception("Can't get value of Property because no Getter.");
 				}
 			}
 			return instance.GetElementData(this);
 		}
 
-		public void Set(GraphInstance instance, object value) {
+		internal void DoSet(GraphInstance instance, object value) {
 			if(AutoProperty) {
 				instance.SetElementData(this, ReflectionUtils.ValuePassing(value));
-			} else {
+			}
+			else {
 				if(setRoot != null) {
 					setRoot.Invoke(instance, new object[] { value });
-				} else {
+				}
+				else {
 					throw new System.Exception("Can't set value of Property because no Setter.");
 				}
 			}

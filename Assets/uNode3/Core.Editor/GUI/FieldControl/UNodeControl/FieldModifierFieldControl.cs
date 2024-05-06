@@ -25,11 +25,17 @@ namespace MaxyGames.UNode.Editors.Control {
 							fieldValue.SetPublic();
 						}
 						onChanged(fieldValue);
+						if(settings.unityObject is IGraph) {
+							EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+						}
 					});
 					menu.AddItem(new GUIContent("Private"), fieldValue.isPrivate && !fieldValue.Internal, () => {
 						uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
 						fieldValue.SetPrivate();
 						onChanged(fieldValue);
+						if(settings.unityObject is IGraph) {
+							EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+						}
 					});
 					bool flag = false;
 					bool isScriptGraph = false;
@@ -50,6 +56,9 @@ namespace MaxyGames.UNode.Editors.Control {
 								fieldValue.SetProtected();
 							}
 							onChanged(fieldValue);
+							if(settings.unityObject is IGraph) {
+								EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+							}
 						});
 						menu.AddItem(new GUIContent("Internal"), fieldValue.Internal, () => {
 							uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
@@ -62,6 +71,9 @@ namespace MaxyGames.UNode.Editors.Control {
 								fieldValue.Internal = true;
 							}
 							onChanged(fieldValue);
+							if(settings.unityObject is IGraph) {
+								EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+							}
 						});
 						if(isScriptGraph) {
 							menu.AddSeparator("");
@@ -70,18 +82,27 @@ namespace MaxyGames.UNode.Editors.Control {
 								fieldValue.Static = !fieldValue.Static;
 								fieldValue.Const = false;
 								onChanged(fieldValue);
+								if(settings.unityObject is IGraph) {
+									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+								}
 							});
 							menu.AddItem(new GUIContent("Event"), fieldValue.Event, () => {
 								uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
 								fieldValue.Event = !fieldValue.Event;
 								fieldValue.Const = false;
 								onChanged(fieldValue);
+								if(settings.unityObject is IGraph) {
+									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+								}
 							});
 							menu.AddItem(new GUIContent("ReadOnly"), fieldValue.ReadOnly, () => {
 								uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
 								fieldValue.ReadOnly = !fieldValue.ReadOnly;
 								fieldValue.Const = false;
 								onChanged(fieldValue);
+								if(settings.unityObject is IGraph) {
+									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+								}
 							});
 							menu.AddItem(new GUIContent("Const"), fieldValue.Const, () => {
 								uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
@@ -90,6 +111,9 @@ namespace MaxyGames.UNode.Editors.Control {
 								fieldValue.ReadOnly = false;
 								fieldValue.Event = false;
 								onChanged(fieldValue);
+								if(settings.unityObject is IGraph) {
+									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+								}
 							});
 						}
 					}
@@ -98,6 +122,9 @@ namespace MaxyGames.UNode.Editors.Control {
 			}
 			if(EditorGUI.EndChangeCheck()) {
 				onChanged(fieldValue);
+				if(settings.unityObject is IGraph) {
+					EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+				}
 			}
 		}
 	}

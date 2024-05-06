@@ -339,7 +339,7 @@ namespace MaxyGames.UNode {
 				}
 				if(obj != null && initializers != null) {
 					if(target.targetType == MemberData.TargetType.Values || target.targetType == MemberData.TargetType.Constructor) {
-						var t = obj.GetType();
+						var t = target.type ?? obj.GetType();
 						if(obj is System.Collections.IList) {
 							if(t.IsArray) {
 								System.Array array = obj as System.Array;

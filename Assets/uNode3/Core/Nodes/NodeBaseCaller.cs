@@ -64,7 +64,7 @@ namespace MaxyGames.UNode {
 					if(property is IRuntimeMemberWithRef memberWithRef) {
 						var prop = memberWithRef.GetReference().ReferenceValue as Property;
 						if(prop != null) {
-							prop.Set(flow, value);
+							prop.DoSet(flow, value);
 							return;
 						}
 						else {
@@ -109,7 +109,7 @@ namespace MaxyGames.UNode {
 					if(property is IRuntimeMemberWithRef memberWithRef) {
 						var prop = memberWithRef.GetReference().ReferenceValue as Property;
 						if(prop != null) {
-							return prop.Get(flow);
+							return prop.DoGet(flow);
 						}
 						else {
 							throw null;

@@ -83,18 +83,30 @@ namespace MaxyGames.UNode.Editors {
 			_runtimeTypes = types.Where(t => t.IsValid()).ToArray();
 		}
 
+		/// <summary>
+		/// Update Runtime Type sub members eg: fields, properties, methods.
+		/// </summary>
+		/// <param name="element"></param>
 		public static void UpdateRuntimeType(UGraphElement element) {
 			if(element != null) {
 				UpdateRuntimeType(element.graphContainer);
 			}
 		}
 
+		/// <summary>
+		/// Update Runtime Type sub members eg: fields, properties, methods.
+		/// </summary>
+		/// <param name="graph"></param>
 		public static void UpdateRuntimeType(IGraph graph) {
 			if(graph is IReflectionType reflectionType) {
 				UpdateRuntimeType(reflectionType.ReflectionType);
 			}
 		}
 
+		/// <summary>
+		/// Update Runtime Type sub members eg: fields, properties, methods.
+		/// </summary>
+		/// <param name="type"></param>
 		public static void UpdateRuntimeType(RuntimeType type) {
 			type?.Update();
 		}
