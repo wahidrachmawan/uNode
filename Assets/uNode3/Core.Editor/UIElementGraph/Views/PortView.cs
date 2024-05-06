@@ -663,13 +663,8 @@ namespace MaxyGames.UNode.Editors {
 			if(customItems == null) {
 				if(type is RuntimeType) {
 					(type as RuntimeType).Update();
-					customItems = ItemSelector.MakeCustomItems((type as RuntimeType).GetRuntimeMembers(), FA, category: "Data Members");
-					if(type.BaseType != null)
-						customItems.AddRange(ItemSelector.MakeCustomItems(type.BaseType, FA, "Data Memebrs Member"));
 				}
-				else {
-					customItems = onlySet ? new List<ItemSelector.CustomItem>() : ItemSelector.MakeCustomItems(type, FA, "Data Members", "Data Members ( Inherited )");
-				}
+				customItems = onlySet ? new List<ItemSelector.CustomItem>() : ItemSelector.MakeCustomItems(type, FA, "Data Members", "Data Members ( Inherited )");
 				if(type.IsByRefLike == false) {
 					var usingNamespaces = GetNodeObject().graphContainer.GetUsingNamespaces();
 					customItems.AddRange(ItemSelector.MakeExtensionItems(type, usingNamespaces, FA, "Extensions"));

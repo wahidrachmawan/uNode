@@ -140,12 +140,8 @@ namespace MaxyGames.UNode.Editors.Commands {
 			List<ItemSelector.CustomItem> customItems;
 			if(type is RuntimeType) {
 				(type as RuntimeType).Update();
-				customItems = ItemSelector.MakeCustomItems((type as RuntimeType).GetRuntimeMembers(), filter);
-				if(type.BaseType != null)
-					customItems.AddRange(ItemSelector.MakeCustomItems(type.BaseType, filter, "Inherit Member"));
-			} else {
-				customItems = ItemSelector.MakeCustomItems(type, filter);
 			}
+			customItems = ItemSelector.MakeCustomItems(type, filter, "Data Members", "Data Members ( Inherited )");
 			var usingNamespaces = source.nodeObject.graphContainer.GetUsingNamespaces();
 			if(usingNamespaces != null && usingNamespaces.Count > 0) {
 				customItems.AddRange(ItemSelector.MakeExtensionItems(type, usingNamespaces, filter, "Extensions"));

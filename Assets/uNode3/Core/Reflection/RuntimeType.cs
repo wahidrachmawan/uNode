@@ -519,13 +519,27 @@ namespace MaxyGames.UNode {
 			return GetMethods().Where(p => p is IRuntimeMember);
 		}
 
-		public virtual MemberInfo[] GetRuntimeMembers() {
-			List<MemberInfo> members = new List<MemberInfo>();
-			members.AddRange(GetRuntimeConstructors());
-			members.AddRange(GetRuntimeFields());
-			members.AddRange(GetRuntimeProperties());
-			members.AddRange(GetRuntimeMethods());
-			return members.ToArray();
+		public virtual IEnumerable<MemberInfo> GetRuntimeMembers(BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static) {
+			foreach(var member in GetRuntimeConstructors()) {
+				if(ReflectionUtils.IsValidMember(member, bindingAttr, this)) {
+					yield return member;
+				}
+			}
+			foreach(var member in GetRuntimeFields()) {
+				if(ReflectionUtils.IsValidMember(member, bindingAttr, this)) {
+					yield return member;
+				}
+			}
+			foreach(var member in GetRuntimeProperties()) {
+				if(ReflectionUtils.IsValidMember(member, bindingAttr, this)) {
+					yield return member;
+				}
+			}
+			foreach(var member in GetRuntimeMethods()) {
+				if(ReflectionUtils.IsValidMember(member, bindingAttr, this)) {
+					yield return member;
+				}
+			}
 		}
 
 		public override MemberInfo[] GetMembers(BindingFlags bindingAttr) {

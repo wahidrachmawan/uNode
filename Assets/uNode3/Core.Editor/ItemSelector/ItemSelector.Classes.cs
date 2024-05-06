@@ -771,17 +771,9 @@ namespace MaxyGames.UNode.Editors {
 				if(filter == null)
 					filter = new FilterAttribute();
 				var flags = filter.validBindingFlags;
-				if(declaredOnly)
-					flags |= BindingFlags.DeclaredOnly;
 				if(type is RuntimeType runtimeType) {
 					runtimeType.Update();
-					MemberInfo[] members;
-					if(!declaredOnly /*&& runtimeType is INativeMember*/) {
-						members = runtimeType.GetMembers(flags);
-					}
-					else {
-						members = runtimeType.GetRuntimeMembers();
-					}
+					MemberInfo[] members = runtimeType.GetMembers(flags);
 					for(int i = 0; i < members.Length; i++) {
 						if(validation == null || validation(members[i])) {
 							var item = CreateItemFromMember(members[i], filter);

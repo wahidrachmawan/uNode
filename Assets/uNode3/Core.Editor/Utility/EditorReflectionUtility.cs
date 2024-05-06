@@ -1160,6 +1160,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			List<ReflectionItem> Items = new List<ReflectionItem>();
 			foreach(var member in members) {
+				if(ReflectionUtils.IsValidMember(member, bindingFlags) == false) continue;
 				ReflectionItem item = GetReflectionItems(member, filter, validation, memberValidation);
 				if(item != null && (item.memberInfo == null || item.memberInfo.MemberType != MemberTypes.Constructor)) {
 					Items.Add(item);

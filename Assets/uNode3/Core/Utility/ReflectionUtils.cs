@@ -1255,6 +1255,8 @@ namespace MaxyGames.UNode {
 				return false;
 			if(member.IsStatic && flags.HasFlags(BindingFlags.Static) == false)
 				return false;
+			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy) == false)
+				return false;
 			if(source != null && flags.HasFlags(BindingFlags.DeclaredOnly) && member.DeclaringType != source)
 				return false;
 			return true;
@@ -1275,6 +1277,8 @@ namespace MaxyGames.UNode {
 				return false;
 			if(member.IsStatic && flags.HasFlags(BindingFlags.Static) == false)
 				return false;
+			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy) == false)
+				return false;
 			if(source != null && flags.HasFlags(BindingFlags.DeclaredOnly) && member.DeclaringType != source)
 				return false;
 			return true;
@@ -1287,6 +1291,8 @@ namespace MaxyGames.UNode {
 			if(member.IsPrivate && flags.HasFlags(BindingFlags.NonPublic) == false)
 				return false;
 			if(member.IsStatic && flags.HasFlags(BindingFlags.Static) == false)
+				return false;
+			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy) == false)
 				return false;
 			if(source != null && flags.HasFlags(BindingFlags.DeclaredOnly) && member.DeclaringType != source)
 				return false;

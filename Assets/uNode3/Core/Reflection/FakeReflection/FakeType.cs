@@ -226,8 +226,8 @@ namespace MaxyGames.UNode {
 			return members;
 		}
 
-		public override MemberInfo[] GetRuntimeMembers() {
-			return GetMembers(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+		public override IEnumerable<MemberInfo> GetRuntimeMembers(BindingFlags bindingAttr = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static) {
+			return GetMembers(bindingAttr);
 		}
 
 		protected override TypeAttributes GetAttributeFlagsImpl() {
