@@ -502,7 +502,7 @@ namespace MaxyGames.UNode {
 
 		private void DoStop(FlowInput port) {
 			//Check if this node is still running
-			if(state == StateType.Running) {
+			if(state == StateType.Running || hasCalled && !finished) {
 				//Mark this node to finish
 				finished = true;
 				//Change state to failure.
@@ -516,6 +516,7 @@ namespace MaxyGames.UNode {
 					}
 #endif
 				}
+				nextFlows.Clear();
 				if(finishCoroutine != null) {
 					instance.StopCoroutine(finishCoroutine);
 					finishCoroutine = null;

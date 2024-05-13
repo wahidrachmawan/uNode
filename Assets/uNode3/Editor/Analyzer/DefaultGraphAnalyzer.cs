@@ -41,6 +41,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 					}
 				}
 			}
+			var inheritType = graph.GetGraphInheritType();
 			if(graph is IClassModifier) {
 				var modifier = (graph as IClassModifier).GetModifier();
 				if(modifier.ReadOnly) {
@@ -141,6 +142,38 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							if(function.parameters.Count == 0) {
 								analyzer.RegisterError(function, $@"Function: {function.name} need at least one parameter to mark as extension.");
 							}
+						}
+					}
+					else {
+						var baseMember = inheritType.GetMethod(function.name, MemberData.flags, null, function.ParameterTypes, null);
+						if(function.modifier.Override) {
+							if(baseMember == null) {
+								analyzer.RegisterError(function, $@"Function: {function.name} has no suitable function found to override.");
+							}
+							else if(baseMember.IsVirtual == false) {
+								analyzer.RegisterError(function, $@"Function: {function.name} is unable to overriden because the base function is not virtual/abstract.");
+							}
+						}
+						else {
+							if(baseMember != null && baseMember.IsVirtual) {
+								analyzer.RegisterError(function, $@"Function: {function.name} is virtual/overridable but this function is not use override modifier this lead to incorrect behavior please use override modifier or rename this function.", () => {
+									function.modifier.SetOverride();
+								});
+							}
+						}
+					}
+				}
+			}
+			if(graph is IGraphWithProperties) {
+				var properties = graph.GetProperties();
+				foreach(var property in properties) {
+					if(property.modifier.Override) {
+						var member = inheritType.GetProperty(property.name, MemberData.flags);
+						if(member == null) {
+							analyzer.RegisterError(property, $@"Property: {property.name} has no suitable property found to override.");
+						}
+						else {
+							//TODO: check for property error because of override
 						}
 					}
 				}

@@ -1156,6 +1156,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeThreadUtility.ExecuteAfter(1, () => {
 				Refresh(true);
 			});
+			EditorReflectionUtility.UpdateRuntimeTypes();
 		}
 
 		public void UpdatePosition() {

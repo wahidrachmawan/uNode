@@ -987,6 +987,94 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Show inheritance heirarchy for graphs
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static void ShowGraphInheritanceHeirarchy(IGraph graph) {
+			if(graph is null) {
+				throw new ArgumentNullException(nameof(graph));
+			}
+			if(uNodeEditorUtility.DisplayRequiredProVersion()) {
+				return;
+			}
+			List<object> references = new List<object>();
+			{
+				var type = graph.GetGraphType();
+				if(type != null) {
+					List<Type> list = new List<Type>();
+					Type inheritType = type.BaseType;
+					while(inheritType != null) {
+						list.Insert(0, inheritType);
+						inheritType = inheritType.BaseType;
+					}
+					list.Add(graph.GetGraphType());
+
+					var assets = GraphUtility.FindAllGraphAssets();
+					foreach(var asset in assets) {
+						if(asset is IScriptGraph scriptGraph) {
+							foreach(var scriptType in scriptGraph.TypeList) {
+								if(scriptType is IGraph g) {
+									var graphType = g.GetGraphType();
+									if(graphType != null && graphType.IsSubclassOf(type)) {
+										list.Add(graphType);
+									}
+								}
+							}
+						}
+						else if(asset is IGraph g) {
+							var graphType = g.GetGraphType();
+							if(graphType != null && graphType.IsSubclassOf(type)) {
+								list.Add(graphType);
+							}
+						}
+					}
+					var hierarchy = new ReferenceTree.TypeHierarchy();
+					hierarchy.type = list[0];
+					list.RemoveAt(0);
+
+					bool Recursive(ReferenceTree.TypeHierarchy hierarchy, Type type) {
+						if(hierarchy.type == type.BaseType) {
+							hierarchy.nestedTypes.Add(new ReferenceTree.TypeHierarchy() { type = type });
+							return true;
+						}
+						else {
+							foreach(var nested in hierarchy.nestedTypes) {
+								if(Recursive(nested, type)) {
+									return true;
+								}
+							}
+						}
+						return false;
+					}
+
+					while(list.Count > 0) {
+						for(int i=0;i<list.Count;i++) {
+							if(Recursive(hierarchy, list[i])) {
+								list.RemoveAt(i);
+								i--;
+							}
+						}
+					}
+
+					references.Add(hierarchy);
+				}
+			}
+			if(references.Count > 0) {
+				GUIStyle selectedStyle = new GUIStyle(EditorStyles.label);
+				selectedStyle.normal.textColor = Color.white;
+				var tree = new ReferenceTree(references);
+				var win = ActionWindow.ShowWindow(() => {
+					tree.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
+				});
+				win.titleContent = new GUIContent("Found: " + references.Count + " references");
+			}
+			else {
+				uNodeEditorUtility.DisplayMessage("", "No references found.");
+			}
+		}
+
+		/// <summary>
 		/// Show specific property usage in window
 		/// </summary>
 		/// <param name="graph"></param>
@@ -1125,6 +1213,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+			public class TypeHierarchy {
+				public Type type;
+				public List<TypeHierarchy> nestedTypes = new List<TypeHierarchy>();
+			}
+
 			class ErrorTreeView : TreeViewItem {
 				public uNodeUtility.ErrorMessage error;
 
@@ -1175,12 +1268,45 @@ namespace MaxyGames.UNode.Editors {
 							}
 							list.Add(r);
 						}
+						else {
+							if(r is Object) {
+								var value = r as Object;
+								root.AddChild(new TreeViewItem(value.GetInstanceID(), -1, uNodeUtility.GetObjectName(value)) {
+									icon = uNodeEditorUtility.GetTypeIcon(value) as Texture2D
+								});
+							}
+							else if(r is Type) {
+								var value = r as Type;
+								root.AddChild(new TypeTreeView(value) {
+									displayName = value.FullName,
+									icon = uNodeEditorUtility.GetTypeIcon(value) as Texture2D
+								});
+							}
+							else if(r is TypeHierarchy hierarchy) {
+								void Recursive(TypeHierarchy hierarchy, TreeViewItem tree) {
+									var value = hierarchy.type;
+									var parent = new TypeTreeView(value) {
+										displayName = value.FullName,
+										icon = uNodeEditorUtility.GetTypeIcon(value) as Texture2D
+									};
+									tree.AddChild(parent);
+									SetExpanded(parent.id, true);
+									foreach(var nested in hierarchy.nestedTypes) {
+										Recursive(nested, parent);
+									}
+								}
+								Recursive(hierarchy, root);
+							}
+						}
 					}
 					foreach(var pair in map) {
 						if(pair.Value.Count > 0) {
 							if(pair.Value.Count == 1 && pair.Value.Contains(pair.Key)) {
 								//TODO: fix me
-								//root.AddChild(new ReferenceTreeView(pair.Key));
+								var tree = new TreeViewItem(pair.Key.GetInstanceID(), -1, uNodeUtility.GetObjectName(pair.Key)) {
+									icon = uNodeEditorUtility.GetTypeIcon(pair.Key) as Texture2D
+								};
+								root.AddChild(tree);
 							}
 							else {
 								var tree = new TreeViewItem(pair.Key.GetInstanceID(), -1, uNodeUtility.GetObjectName(pair.Key)) {

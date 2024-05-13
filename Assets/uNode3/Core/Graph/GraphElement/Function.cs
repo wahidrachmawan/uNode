@@ -68,7 +68,7 @@ namespace MaxyGames.UNode {
 
 		public object Invoke(GraphInstance instance, object[] parameter) {
 			//In case it is a virtual/override function
-			if(instance.graph != graphContainer) {
+			if((modifier.Virtual || modifier.Override) && instance.graph != graphContainer) {
 				var pTypes = parameters.Select(p => p.Type).ToArray();
 				var graph = instance.graph;
 				Function function = null;

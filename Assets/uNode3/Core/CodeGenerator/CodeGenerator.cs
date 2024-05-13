@@ -958,7 +958,8 @@ namespace MaxyGames {
 								datas[index] = parameters[accessIndex];
 								accessIndex++;
 							}
-							result.Add(GenerateInvokeRuntimeConstructor(ctor, datas, ref enter, ref exit, autoConvert || generatePureScript == false) + genericData);
+							string ctorInit = ParseConstructorInitializer(ctor.DeclaringType, initializer);
+							result.Add(GenerateInvokeRuntimeConstructor(ctor, datas, ref enter, ref exit, autoConvert || generatePureScript == false) + ctorInit + genericData);
 						}
 						else {
 							throw new InvalidOperationException("Unsupported Runtime Member: " + member);

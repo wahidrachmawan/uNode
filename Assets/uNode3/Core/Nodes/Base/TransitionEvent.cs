@@ -67,6 +67,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		protected void Finish(Flow flow) {
 			if(flow.state == StateType.Running) {
+				flow.instance.GetStateData(GetStateNode().enter).Stop();
 				flow.Stop();
 				flow.TriggerParallel(exit);
 			}

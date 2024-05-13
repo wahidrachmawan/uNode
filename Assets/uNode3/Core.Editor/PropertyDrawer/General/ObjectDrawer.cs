@@ -27,6 +27,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						attributes = option.attributes,
 						unityObject = option.unityObject,
 						nullable = option.nullable,
+						parentValue = option.property.parent.value,
 					});
 					return;
 				}

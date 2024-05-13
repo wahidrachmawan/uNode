@@ -20,8 +20,26 @@ namespace MaxyGames.UNode.Nodes {
 			return transitions.GetFlowNodes<TransitionEvent>();
 		}
 
-		public event System.Action<Flow> onEnter;
-		public event System.Action<Flow> onExit;
+		private event System.Action<Flow> m_onEnter;
+		public event System.Action<Flow> onEnter {
+			add {
+				m_onEnter -= value;
+				m_onEnter += value;
+			}
+			remove {
+				m_onEnter -= value;
+			}
+		}
+		private event System.Action<Flow> m_onExit;
+		public event System.Action<Flow> onExit {
+			add {
+				m_onExit -= value;
+				m_onExit += value;
+			}
+			remove {
+				m_onExit -= value;
+			}
+		}
 
 		protected override void OnRegister() {
 			base.OnRegister();
@@ -32,8 +50,8 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override System.Collections.IEnumerator OnExecutedCoroutine(Flow flow) {
-			if(onEnter != null) {
-				onEnter(flow);
+			if(m_onEnter != null) {
+				m_onEnter(flow);
 			}
 			foreach(var tr in GetTransitions()) {
 				tr.OnEnter(flow);
@@ -50,11 +68,18 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public void OnExit(Flow flow) {
-			if(onExit != null) {
-				onExit(flow);
+			foreach(var element in nodeObject.GetObjectsInChildren(true)) {
+				if(element is NodeObject node && node.node is not BaseEventNode) {
+					foreach(var port in node.FlowInputs) {
+						flow.instance.StopState(port);
+					}
+				}
 			}
 			foreach(BaseEventNode node in nestedFlowNodes) {
 				node.Stop(flow.instance);
+			}
+			if(m_onExit != null) {
+				m_onExit(flow);
 			}
 			foreach(var tr in GetTransitions()) {
 				tr.OnExit(flow);

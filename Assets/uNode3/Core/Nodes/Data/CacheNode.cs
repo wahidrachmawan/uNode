@@ -8,13 +8,14 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Cache", hasFlowInput = true, hasFlowOutput = true)]
 	public class CacheNode : FlowAndValueNode {
+		public SerializedType type = SerializedType.None;
 		public bool compactView;
 
 		public ValueInput target { get; set; }
 
 		protected override void OnRegister() {
 			base.OnRegister();
-			target = ValueInput(nameof(target), () => typeof(object)).SetName("");
+			target = ValueInput(nameof(target), () => type ?? typeof(object)).SetName("");
 			output.isVariable = true;
 		}
 
@@ -44,12 +45,23 @@ namespace MaxyGames.UNode.Nodes {
 			var name = this.name;
 			if(CG.CanDeclareLocal(output, exit)) {
 				name = CG.RegisterLocalVariable(this.name, ReturnType());
-				CG.RegisterPort(enter, () => {
-					return CG.Flow(
-						"var " + name.CGSet(target.CGValue()),
-						CG.FlowFinish(enter, exit)
-					);
-				});
+				if(ReturnType() == target.ValueType) {
+					CG.RegisterPort(enter, () => {
+						return CG.Flow(
+							"var " + name.CGSet(target.CGValue()),
+							CG.FlowFinish(enter, exit)
+						);
+					});
+				}
+				else {
+					var type = CG.Type(ReturnType());
+					CG.RegisterPort(enter, () => {
+						return CG.Flow(
+							type + " " + name.CGSet(target.CGValue()),
+							CG.FlowFinish(enter, exit)
+						);
+					});
+				}
 			}
 			else {
 				name = CG.RegisterPrivateVariable(this.name, ReturnType());

@@ -1255,7 +1255,7 @@ namespace MaxyGames.UNode {
 				return false;
 			if(member.IsStatic && flags.HasFlags(BindingFlags.Static) == false)
 				return false;
-			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy) == false)
+			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy | BindingFlags.NonPublic) == false)
 				return false;
 			if(source != null && flags.HasFlags(BindingFlags.DeclaredOnly) && member.DeclaringType != source)
 				return false;
@@ -1264,8 +1264,23 @@ namespace MaxyGames.UNode {
 
 		public static bool IsValidMember(PropertyInfo member, BindingFlags flags, Type source = null) {
 			if(member == null) return false;
-			if(IsValidMember(member.GetMethod, flags, source) == false)
+			if(member.GetMethod != null) {
+				if(member.SetMethod != null) {
+					if(IsValidMember(member.GetMethod, flags, source) == false && IsValidMember(member.SetMethod, flags, source) == false)
+						return false;
+				}
+				else {
+					if(IsValidMember(member.GetMethod, flags, source) == false)
+						return false;
+				}
+			}
+			else if(member.SetMethod != null) {
+				if(IsValidMember(member.SetMethod, flags, source) == false)
+					return false;
+			}
+			else {
 				return false;
+			}
 			return true;
 		}
 
@@ -1277,7 +1292,7 @@ namespace MaxyGames.UNode {
 				return false;
 			if(member.IsStatic && flags.HasFlags(BindingFlags.Static) == false)
 				return false;
-			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy) == false)
+			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy | BindingFlags.NonPublic) == false)
 				return false;
 			if(source != null && flags.HasFlags(BindingFlags.DeclaredOnly) && member.DeclaringType != source)
 				return false;
@@ -1292,7 +1307,7 @@ namespace MaxyGames.UNode {
 				return false;
 			if(member.IsStatic && flags.HasFlags(BindingFlags.Static) == false)
 				return false;
-			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy) == false)
+			if(member.IsFamily && flags.HasFlags(BindingFlags.FlattenHierarchy | BindingFlags.NonPublic) == false)
 				return false;
 			if(source != null && flags.HasFlags(BindingFlags.DeclaredOnly) && member.DeclaringType != source)
 				return false;

@@ -8,7 +8,9 @@ namespace MaxyGames.UNode.Nodes {
 	public class StateOnEnterEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			if(nodeObject.parent is NodeObject parentNode && parentNode.node is StateNode stateNode) {
-				stateNode.onEnter += (flow) => Trigger(flow);
+				stateNode.onEnter += (flow) => {
+					Trigger(flow);
+				};
 			}
 		}
 

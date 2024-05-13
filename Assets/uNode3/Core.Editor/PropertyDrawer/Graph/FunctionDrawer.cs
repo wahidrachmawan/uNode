@@ -15,7 +15,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 		protected override void DoDraw(DrawerOption option) {
 			var value = option.value as Function;
-			base.DoDraw(option);
+			if(value.parent is not Property) {
+				UInspector.Draw(option.property[nameof(Function.modifier)]);
+			}
 			uNodeGUIUtility.DrawTypeDrawer(value.ReturnType(), new GUIContent("Return Type"), type => {
 				value.returnType = type;
 				uNodeGUIUtility.GUIChangedMajor(value);

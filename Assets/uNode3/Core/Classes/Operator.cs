@@ -20,7 +20,7 @@ namespace MaxyGames.UNode {
 				return true;
 			if(rightType == typeof(object))
 				return true;
-			if(leftType.IsPrimitive && rightType.IsPrimitive) {
+			if(leftType.IsPrimitive && rightType.IsPrimitive || leftType is IRuntimeMember || rightType is IRuntimeMember) {
 				if(rightType.IsCastableTo(leftType)) {
 					return true;
 				}
@@ -41,7 +41,7 @@ namespace MaxyGames.UNode {
 				return true;
 			if(rightType == typeof(object))
 				return true;
-			if(leftType.IsPrimitive && rightType.IsPrimitive) {
+			if(leftType.IsPrimitive && rightType.IsPrimitive || leftType is IRuntimeMember || rightType is IRuntimeMember) {
 				if(rightType.IsCastableTo(leftType)) {
 					return true;
 				}

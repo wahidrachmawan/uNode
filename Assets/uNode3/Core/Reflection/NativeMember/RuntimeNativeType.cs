@@ -199,9 +199,11 @@ namespace MaxyGames.UNode {
 			if(properties == null) {
 				List<PropertyInfo> members = new List<PropertyInfo>(inheritMembers);
 				foreach(var m in target.GetProperties()) {
-					var value = new RuntimeNativeProperty(this, new PropertyRef(m, target));
-					m_runtimeProperties[m.id] = value;
-					members.Add(value);
+					if(m.modifier.Override == false) {
+						var value = new RuntimeNativeProperty(this, new PropertyRef(m, target));
+						m_runtimeProperties[m.id] = value;
+						members.Add(value);
+					}
 				}
 				properties = members;
 			}
@@ -215,7 +217,7 @@ namespace MaxyGames.UNode {
 					}
 				}
 				foreach(var m in target.GetProperties()) {
-					if(!m_runtimeProperties.ContainsKey(m.id)) {
+					if(m.modifier.Override == false && !m_runtimeProperties.ContainsKey(m.id)) {
 						var value = new RuntimeNativeProperty(this, new PropertyRef(m, target));
 						m_runtimeProperties[m.id] = value;
 						members.Add(value);
@@ -232,9 +234,11 @@ namespace MaxyGames.UNode {
 			if(methods == null) {
 				List<MethodInfo> members = new List<MethodInfo>(inheritMembers);
 				foreach(var m in target.GetFunctions()) {
-					var value = new RuntimeNativeMethod(this, new FunctionRef(m, target));
-					m_runtimeMethods[m.id] = value;
-					members.Add(value);
+					if(m.modifier.Override == false) {
+						var value = new RuntimeNativeMethod(this, new FunctionRef(m, target));
+						m_runtimeMethods[m.id] = value;
+						members.Add(value);
+					}
 				}
 				methods = members;
 			}
@@ -248,7 +252,7 @@ namespace MaxyGames.UNode {
 					}
 				}
 				foreach(var m in target.GetFunctions()) {
-					if(!m_runtimeMethods.ContainsKey(m.id)) {
+					if(m.modifier.Override == false && !m_runtimeMethods.ContainsKey(m.id)) {
 						var value = new RuntimeNativeMethod(this, new FunctionRef(m, target));
 						m_runtimeMethods[m.id] = value;
 						members.Add(value);

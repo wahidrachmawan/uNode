@@ -99,6 +99,9 @@ namespace MaxyGames.UNode.Editors.Control {
 									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
 								}
 							});
+						}
+						if(isScriptGraph || settings.unityObject is IClassGraph) {
+							menu.AddSeparator("");
 							menu.AddItem(new GUIContent("Virtual"), fieldValue.Virtual, () => {
 								uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
 								fieldValue.Virtual = !fieldValue.Virtual;
@@ -122,32 +125,6 @@ namespace MaxyGames.UNode.Editors.Control {
 								}
 							});
 						}
-						//TODO: add support for virtual/override properties
-						//else if(settings.unityObject is IClassGraph) {
-						//	menu.AddSeparator("");
-						//	menu.AddItem(new GUIContent("Override"), fieldValue.Override, () => {
-						//		uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
-						//		fieldValue.Virtual = false;
-						//		fieldValue.Override = !fieldValue.Override;
-						//		fieldValue.Static = false;
-						//		fieldValue.Abstract = false;
-						//		onChanged(fieldValue);
-								//if(settings.unityObject is IGraph) {
-								//	EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
-								//}
-						//	});
-						//	menu.AddItem(new GUIContent("Virtual"), fieldValue.Virtual, () => {
-						//		uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
-						//		fieldValue.Virtual = !fieldValue.Virtual;
-						//		fieldValue.Override = false;
-						//		fieldValue.Static = false;
-						//		fieldValue.Abstract = false;
-						//		onChanged(fieldValue);
-						//if(settings.unityObject is IGraph) {
-						//	EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
-						//}
-						//	});
-						//}
 					}
 					menu.ShowAsContext();
 				}

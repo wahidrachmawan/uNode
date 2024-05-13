@@ -44,54 +44,58 @@ namespace MaxyGames.UNode.Editors.Commands {
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Add ({0}, {0})", typeName), () => {
 					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
-						n.inputs[0].port.ConnectTo(source);
 						n.inputs[0].type = type;
-						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
+						n.inputs[0].port.ConnectTo(source);
 						n.inputs[1].type = type;
+						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Add;
+						n.Register();
 						graph.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Subtract ({0}, {0})", typeName), () => {
 					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
-						n.inputs[0].port.ConnectTo(source);
 						n.inputs[0].type = type;
-						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
+						n.inputs[0].port.ConnectTo(source);
 						n.inputs[1].type = type;
+						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Subtract;
+						n.Register();
 						graph.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Divide ({0}, {0})", typeName), () => {
 					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
-						n.inputs[0].port.ConnectTo(source);
 						n.inputs[0].type = type;
-						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
+						n.inputs[0].port.ConnectTo(source);
 						n.inputs[1].type = type;
+						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Divide;
+						n.Register();
 						graph.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Multiply ({0}, {0})", typeName), () => {
 					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
-						n.inputs[0].port.ConnectTo(source);
 						n.inputs[0].type = type;
-						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
+						n.inputs[0].port.ConnectTo(source);
 						n.inputs[1].type = type;
+						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Multiply;
+						n.Register();
 						graph.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Modulo ({0}, {0})", typeName), () => {
 					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
-						n.inputs[0].port.ConnectTo(source);
 						n.inputs[0].type = type;
-						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
+						n.inputs[0].port.ConnectTo(source);
 						n.inputs[1].type = type;
+						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Modulo;
 						graph.Refresh();
 					});
@@ -160,15 +164,15 @@ namespace MaxyGames.UNode.Editors.Commands {
 				NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 					n.EnsureRegistered();
 					if(param1.IsCastableTo(type)) {
+						n.inputs[0].type = param1;
 						n.inputs[0].port.ConnectTo(source);
-						n.inputs[0].type = param1;
+						n.inputs[1].type = param2;
 						n.inputs[1].port.AssignToDefault(MemberData.Default(param2));
-						n.inputs[1].type = param2;
 					} else {
-						n.inputs[0].port.AssignToDefault(MemberData.Default(param1));
 						n.inputs[0].type = param1;
-						n.inputs[1].port.ConnectTo(source);
+						n.inputs[0].port.AssignToDefault(MemberData.Default(param1));
 						n.inputs[1].type = param2;
+						n.inputs[1].port.ConnectTo(source);
 					}
 					n.operatorKind = operatorType;
 					graph.Refresh();
@@ -270,6 +274,10 @@ namespace MaxyGames.UNode.Editors.Commands {
 			return ItemSelector.CustomItem.Create(string.Format(operatorType.ToString() + " ({0}, {1})", param1.PrettyName(), param2.PrettyName()), () => {
 				NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (ComparisonNode n) => {
 					n.EnsureRegistered();
+					n.operatorKind = operatorType;
+					if(param1 == param2) {
+						n.inputType = param1;
+					}
 					if(param1.IsCastableTo(type)) {
 						n.inputA.ConnectTo(source);
 						n.inputB.AssignToDefault(MemberData.Default(param1));
@@ -277,10 +285,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputA.AssignToDefault(MemberData.Default(param2));
 						n.inputB.ConnectTo(source);
 					}
-					n.operatorKind = operatorType;
-					if(param1 == param2) {
-						n.inputType = param1;
-					}
+					n.Register();
 					graph.Refresh();
 				});
 			}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(returnType));

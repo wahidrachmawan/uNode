@@ -66,10 +66,6 @@ namespace MaxyGames.UNode {
 				if(target.reference == null) {
 					throw new Exception($"Property: {target.name} was removed from graph: {owner}");
 				}
-				if(instanced.GraphType != owner) {
-					//TODO: override support
-
-				}
 				return target.reference.Get(instanced.Instance);
 			}
 			else {
@@ -84,10 +80,6 @@ namespace MaxyGames.UNode {
 			if(obj is IInstancedGraph instanced && instanced.Instance != null) {
 				if(target.reference == null) {
 					throw new Exception($"Property: {target.name} was removed from graph: {owner}");
-				}
-				if(instanced.GraphType != owner) {
-					//TODO: override support
-
 				}
 				target.reference.Set(instanced.Instance, value);
 			}
@@ -109,6 +101,57 @@ namespace MaxyGames.UNode {
 		public override string Name => target.Name.AddFirst("get_");
 		public override Type ReturnType => target.PropertyType;
 
+		public override MethodAttributes Attributes {
+			get {
+				if(target is IRuntimeMemberWithRef memberWithRef) {
+					var reference = memberWithRef.GetReferenceValue();
+					if(reference != null) {
+						if(reference is Property property) {
+							MethodAttributes att;
+							 if(property.modifier.isPublic) {
+								if(property.getterModifier.isPublic) {
+									att = MethodAttributes.Public;
+								}
+								else if(property.getterModifier.isProtected) {
+									if(property.getterModifier.Internal) {
+										att = MethodAttributes.FamORAssem;
+									}
+									else {
+										att = MethodAttributes.Family;
+									}
+								}
+								else {
+									att = MethodAttributes.Private;
+								}
+							}
+							else if(property.modifier.isProtected && !property.getterModifier.isPrivate) {
+								if(property.modifier.Internal) {
+									att = MethodAttributes.FamORAssem;
+								}
+								else {
+									att = MethodAttributes.Family;
+								}
+							}
+							else {
+								att = MethodAttributes.Private;
+							}
+							if(property.modifier.Static) {
+								att |= MethodAttributes.Static;
+							}
+							if(property.modifier.Abstract) {
+								att |= MethodAttributes.Abstract;
+							}
+							if(property.modifier.Virtual) {
+								att |= MethodAttributes.Virtual;
+							}
+							return att;
+						}
+					}
+				}
+				return base.Attributes;
+			}
+		}
+
 		public RuntimePropertyGetMethod(RuntimeType owner, RuntimeProperty target) : base(owner, target) { }
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
@@ -123,6 +166,57 @@ namespace MaxyGames.UNode {
 	public class RuntimePropertySetMethod : RuntimeMethod<RuntimeProperty> {
 		public override string Name => target.Name.AddFirst("set_");
 		public override Type ReturnType => target.PropertyType;
+
+		public override MethodAttributes Attributes {
+			get {
+				if(target is IRuntimeMemberWithRef memberWithRef) {
+					var reference = memberWithRef.GetReferenceValue();
+					if(reference != null) {
+						if(reference is Property property) {
+							MethodAttributes att;
+							if(property.modifier.isPublic) {
+								if(property.setterModifier.isPublic) {
+									att = MethodAttributes.Public;
+								}
+								else if(property.setterModifier.isProtected) {
+									if(property.setterModifier.Internal) {
+										att = MethodAttributes.FamORAssem;
+									}
+									else {
+										att = MethodAttributes.Family;
+									}
+								}
+								else {
+									att = MethodAttributes.Private;
+								}
+							}
+							else if(property.modifier.isProtected && !property.setterModifier.isPrivate) {
+								if(property.modifier.Internal) {
+									att = MethodAttributes.FamORAssem;
+								}
+								else {
+									att = MethodAttributes.Family;
+								}
+							}
+							else {
+								att = MethodAttributes.Private;
+							}
+							if(property.modifier.Static) {
+								att |= MethodAttributes.Static;
+							}
+							if(property.modifier.Abstract) {
+								att |= MethodAttributes.Abstract;
+							}
+							if(property.modifier.Virtual) {
+								att |= MethodAttributes.Virtual;
+							}
+							return att;
+						}
+					}
+				}
+				return base.Attributes;
+			}
+		}
 
 		public RuntimePropertySetMethod(RuntimeType owner, RuntimeProperty target) : base(owner, target) { }
 

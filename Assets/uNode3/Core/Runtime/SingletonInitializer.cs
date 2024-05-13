@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
-	[AddComponentMenu("")]
+	[AddComponentMenu("uNode/Singleton Initializer")]
     public class SingletonInitializer : MonoBehaviour {
         public GraphSingleton target;
 

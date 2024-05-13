@@ -9,80 +9,18 @@ using UnityEngine;
 
 namespace MaxyGames {
 	public static partial class CG {
-        #region Generate Node
+		#region Generate Node
 		public static string GeneratePort(ValueInput port, bool setVariable = false, bool autoConvert = false) {
-			if(generatorData.generatorForPorts.TryGetValue(port, out var gen)) {
-				if(debugScript && setting.debugValueNode) {
-					var oldState = generationState.contextState;
-					//Mark the current context state for set a value
-					generationState.contextState = ContextState.Set;
-					//Disable the debug script for fix error for compatibility generation mode
-					setting.debugScript = false;
-
-					var result = gen();
-
-					//Restore the debug script
-					setting.debugScript = true;
-					//Restore the previous context state
-					generationState.contextState = oldState;
-					//Return the result
-					return result;
-				}
-				else {
-					var oldState = generationState.contextState;
-					//Mark the current context state for set a value
-					generationState.contextState = ContextState.Set;
-
-					//Generate the ports
-					var result = gen();
-
-					//Restore the previous context state
-					generationState.contextState = oldState;
-					//Return the result
-					return result;
-				}
-			}
-			if (port.UseDefaultValue) {
-				return Value(port.defaultValue, setVariable: setVariable, autoConvert: autoConvert);
-			}
-			else {
-				if (!port.isConnected) {
-					throw new GraphException($"Unassigned port: {port.name} on node: {port.node.GetTitle()}", port.node);
-				}
-				var tPort = port.GetTargetPort();
-				if (setVariable) {
-					if(tPort.node.node is MultipurposeNode multipurposeNode) {
-						if(generatorData.generatorForPorts.TryGetValue(tPort, out var generator)) {
-							if(debugScript && setting.debugValueNode) {
-								var oldState = generationState.contextState;
-								//Mark the current context state for set a value
-								generationState.contextState = ContextState.Set;
-								//Disable the debug script for fix error for compatibility generation mode
-								setting.debugScript = false;
-
-								var result = generator();
-
-								//Restore the debug script
-								setting.debugScript = true;
-								//Restore the previous context state
-								generationState.contextState = oldState;
-								//Return the result
-								return result;
-							}
-							else {
-								return generator();
-							}
-						}
-					}
-					if (debugScript && setting.debugValueNode) {
+			try {
+				if(generatorData.generatorForPorts.TryGetValue(port, out var gen)) {
+					if(debugScript && setting.debugValueNode) {
 						var oldState = generationState.contextState;
 						//Mark the current context state for set a value
 						generationState.contextState = ContextState.Set;
 						//Disable the debug script for fix error for compatibility generation mode
 						setting.debugScript = false;
 
-						//Generate the ports
-						var result = GeneratePort(tPort);
+						var result = gen();
 
 						//Restore the debug script
 						setting.debugScript = true;
@@ -90,14 +28,14 @@ namespace MaxyGames {
 						generationState.contextState = oldState;
 						//Return the result
 						return result;
-					} 
+					}
 					else {
 						var oldState = generationState.contextState;
 						//Mark the current context state for set a value
 						generationState.contextState = ContextState.Set;
 
 						//Generate the ports
-						var result = GeneratePort(tPort);
+						var result = gen();
 
 						//Restore the previous context state
 						generationState.contextState = oldState;
@@ -105,18 +43,87 @@ namespace MaxyGames {
 						return result;
 					}
 				}
-				if (debugScript && setting.debugValueNode) {
-					return Debug(port, GeneratePort(tPort), setVariable);
-
-					//if (!generatorData.debugMemberMap.ContainsKey(port)) {
-					//	generatorData.debugMemberMap.Add(port, new KeyValuePair<int, string>(generatorData.newDebugMapID,
-					//		Debug(port, "debugValue").AddLineInFirst() +
-					//		("return debugValue;").AddLineInFirst()
-					//	));
-					//}
-					//return KEY_debugGetValueCode + "(" + generatorData.debugMemberMap[port].Key + ", " + GeneratePort(tPort) + ")";
+				if(port.UseDefaultValue) {
+					return Value(port.defaultValue, setVariable: setVariable, autoConvert: autoConvert);
 				}
-				return GeneratePort(tPort);
+				else {
+					if(!port.isConnected) {
+						throw new GraphException($"Unassigned port: {port.name} on node: {port.node.GetTitle()}", port.node);
+					}
+					var tPort = port.GetTargetPort();
+					if(setVariable) {
+						if(tPort.node.node is MultipurposeNode multipurposeNode) {
+							if(generatorData.generatorForPorts.TryGetValue(tPort, out var generator)) {
+								if(debugScript && setting.debugValueNode) {
+									var oldState = generationState.contextState;
+									//Mark the current context state for set a value
+									generationState.contextState = ContextState.Set;
+									//Disable the debug script for fix error for compatibility generation mode
+									setting.debugScript = false;
+
+									var result = generator();
+
+									//Restore the debug script
+									setting.debugScript = true;
+									//Restore the previous context state
+									generationState.contextState = oldState;
+									//Return the result
+									return result;
+								}
+								else {
+									return generator();
+								}
+							}
+						}
+						if(debugScript && setting.debugValueNode) {
+							var oldState = generationState.contextState;
+							//Mark the current context state for set a value
+							generationState.contextState = ContextState.Set;
+							//Disable the debug script for fix error for compatibility generation mode
+							setting.debugScript = false;
+
+							//Generate the ports
+							var result = GeneratePort(tPort);
+
+							//Restore the debug script
+							setting.debugScript = true;
+							//Restore the previous context state
+							generationState.contextState = oldState;
+							//Return the result
+							return result;
+						}
+						else {
+							var oldState = generationState.contextState;
+							//Mark the current context state for set a value
+							generationState.contextState = ContextState.Set;
+
+							//Generate the ports
+							var result = GeneratePort(tPort);
+
+							//Restore the previous context state
+							generationState.contextState = oldState;
+							//Return the result
+							return result;
+						}
+					}
+					if(debugScript && setting.debugValueNode) {
+						return Debug(port, GeneratePort(tPort), setVariable);
+
+						//if (!generatorData.debugMemberMap.ContainsKey(port)) {
+						//	generatorData.debugMemberMap.Add(port, new KeyValuePair<int, string>(generatorData.newDebugMapID,
+						//		Debug(port, "debugValue").AddLineInFirst() +
+						//		("return debugValue;").AddLineInFirst()
+						//	));
+						//}
+						//return KEY_debugGetValueCode + "(" + generatorData.debugMemberMap[port].Key + ", " + GeneratePort(tPort) + ")";
+					}
+					return GeneratePort(tPort);
+				}
+			}
+			catch(Exception ex) {
+				if(ex is GraphException)
+					throw;
+				throw new GraphException(ex, port.node);
 			}
 		}
 
@@ -125,9 +132,9 @@ namespace MaxyGames {
 		}
 
 		public static string GeneratePort(FlowInput port) {
-			if (port == null || !port.isValid)
+			if(port == null || !port.isValid)
 				return null;
-			if (!isInUngrouped && generatorData.generatedData.ContainsKey(port)) {
+			if(!isInUngrouped && generatorData.generatedData.ContainsKey(port)) {
 				return generatorData.generatedData[port];
 			}
 			if(generationState.state == State.Classes) {
@@ -139,24 +146,24 @@ namespace MaxyGames {
 					throw new GraphException($"The node: {port.node.GetTitle()} with id: {port.node.id}, has unregistered port named: {port.name}", port.node);
 				}
 				data = generator();
-				if (setting.fullComment && !string.IsNullOrEmpty(data)) {
+				if(setting.fullComment && !string.IsNullOrEmpty(data)) {
 					data = data.Insert(0, $"//node: {port.node.GetTitle()}| port: {port.name} | Type: {port.node.GetType()}".AddLineInEnd());
 				}
 				data = data.AddLineInFirst();
-				if (port.isPrimaryPort && !string.IsNullOrEmpty(port.node.comment)) {//Generate Commentaries for nodes
+				if(port.isPrimaryPort && !string.IsNullOrEmpty(port.node.comment)) {//Generate Commentaries for nodes
 					string[] str = port.node.comment.Split('\n');
-					for (int i = str.Length - 1; i >= 0; i--) {
+					for(int i = str.Length - 1; i >= 0; i--) {
 						data = data.AddFirst(str[i].AddFirst("//").AddLineInFirst());
 					}
 				}
-				if (includeGraphInformation) {
+				if(includeGraphInformation) {
 					data = WrapWithInformation(data, port.node);
 				}
 			}
-			catch (Exception ex) {
+			catch(Exception ex) {
 				var node = port.node;
-				if (!generatorData.hasError) {
-					if (setting != null && setting.isAsync) {
+				if(!generatorData.hasError) {
+					if(setting != null && setting.isAsync) {
 						generatorData.errors.Add(
 							new GraphException(
 								"Error from node:" + node.name + " |Type:" + node.node.GetType() +
@@ -167,7 +174,7 @@ namespace MaxyGames {
 					}
 					UnityEngine.Debug.LogError(
 						"Error from node:" + node.name + " |Type:" + node.node.GetType() +
-						"\nRef: " + GraphException.GetMessage(node) + 
+						"\nRef: " + GraphException.GetMessage(node) +
 						"\nFrom graph:" + node.graphContainer.GetGraphName() +
 						"\nError:" + ex.ToString(), node.graphContainer as UnityEngine.Object);
 				}
@@ -177,39 +184,39 @@ namespace MaxyGames {
 			//if(string.IsNullOrEmpty(data)) {
 			//	Debug.Log("Node not generated data", target);
 			//}
-			if (!isInUngrouped)
+			if(!isInUngrouped)
 				generatorData.generatedData.Add(port, data);
 			return data;
 		}
 
 		public static string GeneratePort(ValueOutput port) {
-			if (port is null) {
+			if(port is null) {
 				throw new ArgumentNullException(nameof(port));
 			}
-			if (!port.isValid)
+			if(!port.isValid)
 				return null;
 			if(generationState.state == State.Classes) {
 				throw new Exception("Forbidden to generate port code because it's still in Initialization");
 			}
 			string data;
 			try {
-				if (!generatorData.generatorForPorts.TryGetValue(port, out var generator)) {
+				if(!generatorData.generatorForPorts.TryGetValue(port, out var generator)) {
 					throw new GraphException($"The node: {port.node.GetTitle()} with id: {port.node.id}, has unregistered port named: {port.name}", port.node);
 				}
 				data = generator();
-				if (setting.debugScript && setting.debugValueNode) {
-					if (typeof(Delegate).IsAssignableFrom(port.type)) {
+				if(setting.debugScript && setting.debugValueNode) {
+					if(typeof(Delegate).IsAssignableFrom(port.type)) {
 						data = New(port.type, data);
 					}
 				}
-				if (includeGraphInformation) {
+				if(includeGraphInformation) {
 					data = WrapWithInformation(data, port.node);
 				}
 			}
-			catch (Exception ex) {
+			catch(Exception ex) {
 				var node = port.node;
-				if (!generatorData.hasError) {
-					if (setting != null && setting.isAsync) {
+				if(!generatorData.hasError) {
+					if(setting != null && setting.isAsync) {
 						generatorData.errors.Add(
 							new GraphException(
 								"Error from node:" + node.name + " |Type:" + node.node.GetType() +
@@ -232,7 +239,7 @@ namespace MaxyGames {
 		}
 		#endregion
 
-        #region Node Functions
+		#region Node Functions
 		/// <summary>
 		/// Get state code from coroutine event
 		/// </summary>
@@ -321,7 +328,8 @@ namespace MaxyGames {
 				if(!string.IsNullOrEmpty(result)) {
 					result = "yield return " + result;
 				}
-			} else {
+			}
+			else {
 				result = "yield return " + GetCoroutineName(target) + ".coroutine;";
 			}
 			return result;
@@ -343,7 +351,8 @@ namespace MaxyGames {
 				if(!string.IsNullOrEmpty(result)) {
 					result = "yield return " + result;
 				}
-			} else {
+			}
+			else {
 				result = "yield return " + GetCoroutineName(target) + ".coroutine;";
 			}
 			return result;
@@ -361,9 +370,11 @@ namespace MaxyGames {
 			}
 			if(state == null) {
 				return GetCoroutineName(target) + ".Stop();";
-			} else if(state.Value) {
+			}
+			else if(state.Value) {
 				return GetCoroutineName(target) + ".Stop(true);";
-			} else {
+			}
+			else {
 				return GetCoroutineName(target) + ".Stop(false);";
 			}
 		}
@@ -381,14 +392,14 @@ namespace MaxyGames {
 			if(!port.isAssigned)
 				return null;
 			var target = port.GetTargetFlow();
-			if (target == null)
+			if(target == null)
 				return null;
 			string debug = null;
-			if (setting.debugScript) {
+			if(setting.debugScript) {
 				debug = Debug(port).AddLineInEnd();
 			}
-			if (IsStateFlow(target)) {
-				if (debug != null) {
+			if(IsStateFlow(target)) {
+				if(debug != null) {
 					return Invoke(typeof(Runtime.EventCoroutine), nameof(Runtime.EventCoroutine.Create), Value(graph), CG.RoutineEvent(Lambda(debug + Return(GetCoroutineName(target)))));
 				}
 				return GetCoroutineName(target);
@@ -459,14 +470,17 @@ namespace MaxyGames {
 				result = success;
 				if(alwaysHaveReturnValue) {
 					result += GetReturnValue(input, true, breakCoroutine).AddFirst("\n", result);
-				} else {
+				}
+				else {
 					if(breakCoroutine && input.IsSelfCoroutine()) {
 						result = success.Add("\n") + "yield break;";
-					} else {
+					}
+					else {
 						result = success;
 					}
 				}
-			} else {
+			}
+			else {
 				string failure = null;
 				if(setting.debugScript && !input.IsSelfCoroutine()) {
 					failure += Debug(input, StateType.Failure).AddFirst("\n", !string.IsNullOrEmpty(failure));
@@ -474,10 +488,12 @@ namespace MaxyGames {
 				result = failure;
 				if(alwaysHaveReturnValue) {
 					result += GetReturnValue(input, false, breakCoroutine).AddFirst("\n", result);
-				} else {
+				}
+				else {
 					if(breakCoroutine && input.IsSelfCoroutine()) {
 						result = failure.Add("\n") + "yield break;";
-					} else {
+					}
+					else {
 						result = failure;
 					}
 				}
@@ -517,7 +533,7 @@ namespace MaxyGames {
 		}
 		#endregion
 
-        #region GetInvokeNodeCode
+		#region GetInvokeNodeCode
 		/// <summary>
 		/// Get invoke node code.
 		/// </summary>
@@ -537,7 +553,7 @@ namespace MaxyGames {
 		}
 		#endregion
 
-        #region GenerateFlowCode
+		#region GenerateFlowCode
 		/// <summary>
 		/// Function for generating code for flow node.
 		/// </summary>
@@ -579,28 +595,28 @@ namespace MaxyGames {
 			if(setting.debugScript) {
 				debug = Debug(port).AddLineInEnd();
 			}
-			if (!isInUngrouped && !IsInStateGraph(target.node) && !IsStateFlow(target)) {
+			if(!isInUngrouped && !IsInStateGraph(target.node) && !IsStateFlow(target)) {
 				return debug + GeneratePort(target);
 			}
-			if (isInUngrouped || allowYieldStatement && IsStateFlow(target)) {
-				if (!generatorData.stateNodes.Contains(target)) {
+			if(isInUngrouped || allowYieldStatement && IsStateFlow(target)) {
+				if(!generatorData.stateNodes.Contains(target)) {
 					return debug + GeneratePort(target);
 				}
-				if (!allowYieldStatement) {
+				if(!allowYieldStatement) {
 					throw new Exception("The current block doesn't allow coroutines / yield statements");
 				}
-				if (waitTarget) {
+				if(waitTarget) {
 					return debug + "yield return " + RunEvent(target);
 				}
 				else {
 					return debug + RunEvent(target);
 				}
 			}
-			if (!isInUngrouped && generatorData.regularNodes.Contains(target)) {
+			if(!isInUngrouped && generatorData.regularNodes.Contains(target)) {
 				return debug + GeneratePort(target);
 			}
-			if (!generatorData.stateNodes.Contains(target)) {
-				if (!allowYieldStatement && target.IsSelfCoroutine()) {
+			if(!generatorData.stateNodes.Contains(target)) {
+				if(!allowYieldStatement && target.IsSelfCoroutine()) {
 					throw new Exception("The current block doesn't allow coroutines / yield statements");
 				}
 				throw new GraphException($"Forbidden to generate state code for port: {port.name} because it is not registered as State port.\nEnsure to register it using {nameof(CG)}.{nameof(CG.RegisterAsStateFlow)}\nFrom node: {target.node.GetTitle()}", target.node);
@@ -643,7 +659,7 @@ namespace MaxyGames {
 		}
 		#endregion
 
-        #region GetReturnValue
+		#region GetReturnValue
 		/// <summary>
 		/// Get return value code for node.
 		/// </summary>

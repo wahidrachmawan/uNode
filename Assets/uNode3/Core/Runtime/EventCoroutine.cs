@@ -433,7 +433,10 @@ namespace MaxyGames.Runtime {
 			if(rawState == 0) {
 				rawState = state ? 1 : 2;
 				run = false;
-				target.Stop();
+				if(hasRun) {
+					//Ensure to stop only if the event has been run.
+					target.Stop();
+				}
 #if UNITY_EDITOR
 				if(debug) {
 					DebugEvent();

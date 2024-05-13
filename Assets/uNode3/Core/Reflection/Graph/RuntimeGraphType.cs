@@ -127,9 +127,11 @@ namespace MaxyGames.UNode {
 			if(properties == null) {
 				List<PropertyInfo> members = new List<PropertyInfo>(inheritMembers);
 				foreach(var m in target.GetProperties()) {
-					var value = new RuntimeGraphProperty(this, new PropertyRef(m, target));
-					m_runtimeProperties[m.id] = value;
-					members.Add(value);
+					if(m.modifier.Override == false) {
+						var value = new RuntimeGraphProperty(this, new PropertyRef(m, target));
+						m_runtimeProperties[m.id] = value;
+						members.Add(value);
+					}
 				}
 				properties = members;
 			}
@@ -137,13 +139,13 @@ namespace MaxyGames.UNode {
 				properties.Clear();
 				List<PropertyInfo> members = properties;
 				members.AddRange(inheritMembers);
-				foreach(var (_, field) in m_runtimeProperties) {
-					if(field.target.isValid) {
-						members.Add(field);
+				foreach(var (_, member) in m_runtimeProperties) {
+					if(member.target.isValid) {
+						members.Add(member);
 					}
 				}
 				foreach(var m in target.GetProperties()) {
-					if(!m_runtimeProperties.ContainsKey(m.id)) {
+					if(m.modifier.Override == false && !m_runtimeProperties.ContainsKey(m.id)) {
 						var value = new RuntimeGraphProperty(this, new PropertyRef(m, target));
 						m_runtimeProperties[m.id] = value;
 						members.Add(value);
@@ -160,9 +162,11 @@ namespace MaxyGames.UNode {
 			if(methods == null) {
 				List<MethodInfo> members = new List<MethodInfo>(inheritMembers);
 				foreach(var m in target.GetFunctions()) {
-					var value = new RuntimeGraphMethod(this, new FunctionRef(m, target));
-					m_runtimeMethods[m.id] = value;
-					members.Add(value);
+					if(m.modifier.Override == false) {
+						var value = new RuntimeGraphMethod(this, new FunctionRef(m, target));
+						m_runtimeMethods[m.id] = value;
+						members.Add(value);
+					}
 				}
 				methods = members;
 			}
@@ -176,7 +180,7 @@ namespace MaxyGames.UNode {
 					}
 				}
 				foreach(var m in target.GetFunctions()) {
-					if(!m_runtimeMethods.ContainsKey(m.id)) {
+					if(m.modifier.Override == false && !m_runtimeMethods.ContainsKey(m.id)) {
 						var value = new RuntimeGraphMethod(this, new FunctionRef(m, target));
 						m_runtimeMethods[m.id] = value;
 						members.Add(value);
@@ -264,12 +268,15 @@ namespace MaxyGames.UNode {
 			if(c.IsSubclassOf(this)) {
 				return true;
 			}
-			//TODO: fixme
-			//if(target is IClassComponent) {
-			//	if(c == typeof(GameObject) || c.IsSubclassOf(typeof(Component))) {
-			//		return IsSubclassOf(typeof(Component));
-			//	}
-			//}
+			if(c == typeof(IRuntimeClass)) {
+				return true;
+			}
+			if(target is IClassDefinition classDefinition) {
+				var model = classDefinition.GetModel();
+				if(c == model.ProxyScriptType) {
+					return true;
+				}
+			}
 			return false;
 		}
 
