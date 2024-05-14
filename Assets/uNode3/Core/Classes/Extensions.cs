@@ -1504,9 +1504,6 @@ namespace MaxyGames.UNode {
 			if(from.IsEnum && to.IsPrimitive) {
 				return to != typeof(bool);
 			}
-			else if(to.IsEnum && (from == typeof(int) || from == typeof(long) || from == typeof(short) || from == typeof(byte))) {
-				return true;
-			}
 			if(to.IsAssignableFrom(from)) {
 				lock(_lockObject) {
 					if(map == null) {
