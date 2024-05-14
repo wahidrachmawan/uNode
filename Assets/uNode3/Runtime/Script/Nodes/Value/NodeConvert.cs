@@ -125,7 +125,7 @@ namespace MaxyGames.UNode.Nodes {
 		public override void CheckError(ErrorAnalyzer analizer) {
 			analizer.CheckPort(target);
 			analizer.CheckValue(type, nameof(type), this);
-			if(target.hasValidConnections && type.isAssigned) {
+			if(target.isAssigned && type.isAssigned) {
 				var inputType = target.ValueType;
 				var targetType = type.type;
 				if(inputType.IsCastableTo(targetType, true) == false && targetType.IsCastableTo(inputType, true) == false) {

@@ -548,6 +548,8 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public override bool IsEnum => true;
+
 		public RuntimeNativeEnum(EnumScript target) {
 			this.target = target;
 		}
