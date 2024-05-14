@@ -1137,7 +1137,7 @@ namespace MaxyGames.UNode {
 				case TargetType.uNodeFunction: {
 					var function = startItem.GetReferenceValue() as Function;
 					if(function != null) {
-						hasRefOrOut = function.HasRefOrOut;
+						_hasRefOrOut = function.HasRefOrOut;
 					}
 					return null;
 				}
@@ -1436,7 +1436,7 @@ namespace MaxyGames.UNode {
 					for(int x = 0; x < paramsLength; x++) {
 						obj[x] = paramValues[(paramValues.Length - paramsLength) + x];
 					}
-					if(hasRefOrOut) {
+					if(_hasRefOrOut) {
 						object retVal = methodInfo.InvokeOptimized(reflectionTarget, obj);
 						for(int x = 0; x < paramsLength; x++) {
 							paramValues[(paramValues.Length - paramsLength) + x] = obj[x];
@@ -1456,7 +1456,7 @@ namespace MaxyGames.UNode {
 					for(int x = 0; x < paramsLength; x++) {
 						obj[x] = paramValues[(paramValues.Length - paramsLength) + x];
 					}
-					if(hasRefOrOut) {
+					if(_hasRefOrOut) {
 						object retVal = constructorInfo.Invoke(obj);
 						for(int x = 0; x < paramsLength; x++) {
 							paramValues[(paramValues.Length - paramsLength) + x] = obj[x];
@@ -1994,7 +1994,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public void ResetCache() {
 			isReflected = false;
-			hasRefOrOut = false;
+			_hasRefOrOut = false;
 			fieldInfo = null;
 			propertyInfo = null;
 			constructorInfo = null;
@@ -2040,8 +2040,20 @@ namespace MaxyGames.UNode {
 
 		[NonSerialized]
 		private string _name;
+
 		[NonSerialized]
-		public bool hasRefOrOut;
+		private bool _hasRefOrOut;
+		public bool HasRefOrOut {
+			get {
+				if(_hasInitializeMembers == false) {
+					GetMembers(false);
+				}
+				return _hasRefOrOut;
+			}
+			set {
+				_hasRefOrOut = value;
+			}
+		}
 		[NonSerialized]
 		public TypeData genericData;
 		[NonSerialized]

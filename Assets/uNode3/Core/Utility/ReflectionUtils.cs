@@ -1644,7 +1644,7 @@ namespace MaxyGames.UNode {
 					if (backupMethod != null) {
 						infoArray[i - 1] = backupMethod;
 						if (HasRefOrOutParameter(backupMethod)) {
-							memberData.hasRefOrOut = true;
+							memberData.HasRefOrOut = true;
 						}
 						if (i + 1 == path.Length) {
 							flag2 = true;
@@ -1694,7 +1694,7 @@ namespace MaxyGames.UNode {
 					}
 					infoArray[i - 1] = method;
 					if (HasRefOrOutParameter(method)) {
-						memberData.hasRefOrOut = true;
+						memberData.HasRefOrOut = true;
 					}
 					if (i + 1 == path.Length)
 						break;
@@ -1712,7 +1712,7 @@ namespace MaxyGames.UNode {
 					}
 					infoArray[i - 1] = ctor;
 					if(memberData != null && HasRefOrOutParameter(ctor)) {
-						memberData.hasRefOrOut = true;
+						memberData.HasRefOrOut = true;
 					}
 					if(i + 1 == path.Length)
 						break;

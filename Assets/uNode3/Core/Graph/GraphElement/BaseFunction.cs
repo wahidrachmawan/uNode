@@ -13,7 +13,7 @@ namespace MaxyGames.UNode {
 
 		public Type[] ParameterTypes {
 			get {
-				return parameters.Select(p => p.Type).ToArray();
+				return parameters.Select(p => p.isByRef ? p.Type.MakeByRefType() : p.Type).ToArray();
 			}
 		}
 

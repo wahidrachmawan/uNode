@@ -285,7 +285,7 @@ namespace MaxyGames.UNode {
 				}
 				if(parameters?.Count > 0) {
 					object[] paramsValue = null;
-					if(!target.hasRefOrOut) {
+					if(!target.HasRefOrOut) {
 						if(parameters.Count > 0) {
 							paramsValue = new object[parameters.Count];
 							for(int i = 0; i < paramsValue.Length; i++) {
@@ -394,7 +394,7 @@ namespace MaxyGames.UNode {
 			if(parameters != null && parameters.Count > 0) {
 				target.GetMembers();
 				object[] paramsValue = null;
-				if(!target.hasRefOrOut) {
+				if(!target.HasRefOrOut) {
 					if(parameters.Count > 0) {
 						paramsValue = new object[parameters.Count];
 						for(int i = 0; i < paramsValue.Length; i++) {
