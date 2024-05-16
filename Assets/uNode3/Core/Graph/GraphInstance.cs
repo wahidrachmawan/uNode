@@ -294,6 +294,35 @@ namespace MaxyGames.UNode {
 		//}
 		#endregion
 
+		#region Delegates
+		private Dictionary<Function, Delegate> delegate_maps;
+		internal Delegate GetDelegate(Function function) {
+			if(delegate_maps == null)
+				delegate_maps = new();
+			if(delegate_maps.TryGetValue(function, out var result) == false) {
+				var method = function.graphContainer.GetGraphType().GetMethod(function.name, MemberData.flags, null, function.ParameterTypes, null);
+				if(method != null) {
+					if(method.ReturnType == typeof(void)) {
+						result = CustomDelegate.CreateActionDelegate(values => {
+							function.Invoke(this, values);
+						}, function.ParameterTypes);
+					}
+					else {
+						result = CustomDelegate.CreateFuncDelegate(values => {
+							return function.Invoke(this, values);
+						}, function.ParameterTypes.Append(function.ReturnType()).ToArray());
+					}
+					delegate_maps[function] = result;
+				}
+				else {
+					throw new Exception($"Cannot create delegate, the graph: {function.graphContainer.GetType()} is not support for delegate creation.");
+				}
+			}
+			return result;
+		}
+
+		#endregion
+
 		#region Utility
 		public StateFlow RunState(FlowOutput output) {
 #if UNITY_EDITOR

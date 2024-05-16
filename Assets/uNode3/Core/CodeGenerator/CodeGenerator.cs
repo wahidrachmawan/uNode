@@ -2075,7 +2075,6 @@ namespace MaxyGames {
 
 		/// <summary>
 		/// Return full name of the member.
-		/// Note: this function is still unfinished.
 		/// </summary>
 		/// <param name="member"></param>
 		/// <returns></returns>
@@ -2115,15 +2114,30 @@ namespace MaxyGames {
 						return "typeof(" + member.startName + ")";
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeVariable) {
-						var ESV = member.startItem.GetReferenceValue() as Variable;
-						if(ESV != null) {
-							return GetVariableName(ESV);
+						var variable = member.startItem.GetReferenceValue() as Variable;
+						if(variable != null) {
+							return GetVariableName(variable);
+						}
+						else {
+							member.startItem.GetActualName();
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeProperty) {
 						var property = member.startItem.GetReferenceValue() as Property;
 						if(property != null) {
 							return property.name;
+						}
+						else {
+							member.startItem.GetActualName();
+						}
+					}
+					else if(member.targetType == MemberData.TargetType.uNodeFunction) {
+						var function = member.startItem.GetReferenceValue() as Function;
+						if(function != null) {
+							return function.name;
+						}
+						else {
+							member.startItem.GetActualName();
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeLocalVariable) {

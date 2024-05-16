@@ -256,6 +256,12 @@ namespace MaxyGames.UNode {
 		}
 		#endregion
 
+		#region Create Delegates
+		public Delegate GetDelegate(GraphInstance instance) {
+			return instance.GetDelegate(this);
+		}
+		#endregion
+
 		/// <summary>
 		/// Get the generic parameter by name
 		/// </summary>
