@@ -479,7 +479,10 @@ namespace MaxyGames {
 
 		private static Type GetCompatibilityType(Type type) {
 			if(type is RuntimeType && type is not INativeMember) {
-				if(type.IsCastableTo(typeof(MonoBehaviour))) {
+				if(type is IRuntimeType) {
+					return (type as IRuntimeType).GetNativeType();
+				}
+				else if(type.IsCastableTo(typeof(MonoBehaviour))) {
 					return typeof(RuntimeBehaviour);
 				}
 				else if(type.IsCastableTo(typeof(ScriptableObject))) {

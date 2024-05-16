@@ -894,9 +894,7 @@ namespace MaxyGames.UNode.Editors {
 					}).ToArray();
 					foreach(var method in methods) {
 						bool hasFunction = false;
-						if(graph.GetFunction(method.Name, method.GetGenericArguments().Length,
-							method.GetParameters()
-							.Select(item => item.ParameterType).ToArray())) {
+						if(graph.GetFunction(method.Name, method.GetGenericArguments().Length, method.GetParameters().Select(item => item.ParameterType).ToArray())) {
 							hasFunction = true;
 						}
 						var m = method;

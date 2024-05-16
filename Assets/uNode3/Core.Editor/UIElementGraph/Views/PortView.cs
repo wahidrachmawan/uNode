@@ -560,8 +560,7 @@ namespace MaxyGames.UNode.Editors {
 						var ctors = pType.GetConstructors(
 							System.Reflection.BindingFlags.Instance |
 							System.Reflection.BindingFlags.Public |
-							System.Reflection.BindingFlags.Static |
-							System.Reflection.BindingFlags.NonPublic);
+							System.Reflection.BindingFlags.Static);
 						for(int i = ctors.Length - 1; i >= 0; i--) {
 							if(ReflectionUtils.IsValidParameters(ctors[i])) {
 								var item = EditorReflectionUtility.GetReflectionItems(ctors[i], filter);

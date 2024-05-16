@@ -138,7 +138,7 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string Debug(ValueInput port, string value, bool isSet = false) {
 			if(value.Contains(Null)) {
-				return GenericInvoke(port.type, 
+				return GenericInvoke(port.ValueType ?? port.type, 
 					typeof(GraphDebug), 
 					nameof(GraphDebug.Value),
 					value,

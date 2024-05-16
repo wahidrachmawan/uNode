@@ -1370,7 +1370,8 @@ namespace MaxyGames {
 					return Value(value).CGAccess(
 							DoGenerateInvokeCode(
 								nameof(Extensions.ToRuntimeInstance),
-								new string[] { type.FullName.AddFirst(KEY_runtimeInterfaceKey, type.IsInterface).CGValue() }
+								new string[] { type.FullName.AddFirst(KEY_runtimeInterfaceKey, type.IsInterface).CGValue() },
+								new[] { GetCompatibilityType(type) }
 							)
 						);
 				}
@@ -1400,7 +1401,8 @@ namespace MaxyGames {
 					return Value(value).CGAccess(
 							DoGenerateInvokeCode(
 								nameof(Extensions.ToRuntimeInstance),
-								new string[] { type.FullName.AddFirst(KEY_runtimeInterfaceKey, type.IsInterface).CGValue() }
+								new string[] { type.FullName.AddFirst(KEY_runtimeInterfaceKey, type.IsInterface).CGValue() },
+								new[] { GetCompatibilityType(type) }
 							)
 						);
 				}
@@ -1429,7 +1431,8 @@ namespace MaxyGames {
 					return value.CGAccess(
 							DoGenerateInvokeCode(
 								nameof(Extensions.ToRuntimeInstance),
-								new string[] { type.FullName.AddFirst(KEY_runtimeInterfaceKey, type.IsInterface).CGValue() }
+								new string[] { type.FullName.AddFirst(KEY_runtimeInterfaceKey, type.IsInterface).CGValue() },
+								new[] { GetCompatibilityType(type) }
 							)
 						);
 				}
@@ -1453,7 +1456,7 @@ namespace MaxyGames {
 				return value.CGAccess(
 					DoGenerateInvokeCode(
 						nameof(Extensions.ToRuntimeInstance),
-						new string[0],
+						new string[] { GetUniqueNameForType(type as RuntimeType) },
 						new Type[] { GetCompatibilityType(type) }
 					)
 				);
@@ -1506,7 +1509,8 @@ namespace MaxyGames {
 					return Value(value).CGAccess(
 							DoGenerateInvokeCode(
 								nameof(Extensions.ToRuntimeInstance),
-								new string[] { GetUniqueNameForType(type as RuntimeType) }
+								new string[] { GetUniqueNameForType(type as RuntimeType) },
+								new Type[] { GetCompatibilityType(type) }
 							)
 						);
 				}
@@ -1538,7 +1542,8 @@ namespace MaxyGames {
 					return Value(value).CGAccess(
 							DoGenerateInvokeCode(
 								nameof(Extensions.ToRuntimeInstance),
-								new string[] { GetUniqueNameForType(type as RuntimeType) }
+								new string[] { GetUniqueNameForType(type as RuntimeType) },
+								new Type[] { GetCompatibilityType(type) }
 							)
 						);
 				}
@@ -1580,7 +1585,8 @@ namespace MaxyGames {
 					return value.CGAccess(
 							DoGenerateInvokeCode(
 								nameof(Extensions.ToRuntimeInstance),
-								new string[] { GetUniqueNameForType(type as RuntimeType) }
+								new string[] { GetUniqueNameForType(type as RuntimeType) },
+								new Type[] { GetCompatibilityType(type) }
 							)
 						);
 				}

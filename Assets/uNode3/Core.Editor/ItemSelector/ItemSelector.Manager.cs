@@ -659,6 +659,10 @@ namespace MaxyGames.UNode.Editors {
 					if(item is MemberTreeView) {
 						var tree = item as MemberTreeView;
 						var member = tree.member;
+						if(member is ConstructorInfo) {
+							window.Select(MemberData.CreateFromMember(member));
+							return;
+						}
 						if(member is IRuntimeMember) {
 							members.Add(new MemberData(member));
 						}
@@ -682,6 +686,10 @@ namespace MaxyGames.UNode.Editors {
 						}
 						else if(tree.item != null && tree.item is ItemReflection) {
 							var cItem = (tree.item as ItemReflection).item;
+							if(cItem.memberInfo is ConstructorInfo) {
+								window.Select(MemberData.CreateFromMember(cItem.memberInfo));
+								return;
+							}
 							var member = MemberData.CreateFromMember(cItem.memberInfo);
 							if(!cItem.isStatic) {
 								member.instance = cItem.instance;
@@ -716,7 +724,7 @@ namespace MaxyGames.UNode.Editors {
 							mData.startType = member.startType;
 							break;
 						}
-						else if((member.targetType == MemberData.TargetType.Constructor)) {
+						else if(member.targetType == MemberData.TargetType.Constructor) {
 							mData = member;
 							itemDatas.AddRange(member.Items);
 							break;

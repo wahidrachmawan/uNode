@@ -494,15 +494,16 @@ namespace MaxyGames.UNode {
 					bool isValid = true;
 					if(parameterLength != 0) {
 						for(int x = 0; x < parameters.Length; x++) {
+							var pType = parameters[x];
+							if(pType.IsByRef) {
+								pType = pType.GetElementType();
+							}
 							if(genericParameterLength > 0) {
-								if(function.parameters[x].Type != null && 
-									function.parameters[x].Type != parameters[x]) {
+								if(function.parameters[x].Type != null &&  function.parameters[x].Type != pType) {
 									isValid = false;
 									break;
 								}
-							} else if(function.parameters[x].Type != null &&
-								!function.parameters[x].Type.IsGenericTypeDefinition &&
-								 function.parameters[x].Type != parameters[x]) {
+							} else if(function.parameters[x].Type != null && !function.parameters[x].Type.IsGenericTypeDefinition &&  function.parameters[x].Type != pType) {
 								isValid = false;
 								break;
 							}
@@ -785,6 +786,27 @@ namespace MaxyGames.UNode {
 					return comp.GetGeneratedComponent(uniqueID);
 				} else if(obj is UnityEngine.GameObject go) {
 					return go.GetGeneratedComponent(uniqueID);
+				}
+				return null;
+			}
+			catch(InvalidCastException) {
+				throw new InvalidCastException($"Cannot convert: {obj.GetType()} to Runtime Instance with UID : {uniqueID}");
+			}
+		}
+
+		public static T ToRuntimeInstance<T>(this object obj, string uniqueID) where T : class, IRuntimeClass {
+			if(obj == null) {
+				return default;
+			}
+			try {
+				if(obj is IRuntimeClass container && IsTypeOf(container, uniqueID)) {
+					return obj as T;
+				}
+				else if(obj is UnityEngine.Component comp) {
+					return comp.GetGeneratedComponent(uniqueID) as T;
+				}
+				else if(obj is UnityEngine.GameObject go) {
+					return go.GetGeneratedComponent(uniqueID) as T;
 				}
 				return null;
 			}

@@ -1710,6 +1710,16 @@ namespace MaxyGames.UNode {
 							return null;
 						}
 					}
+					if(ctor == null) {
+						if(throwOnFail) {
+							throw new System.Exception("Member not found at path:" + string.Join('.', path.Select(p => p.GetActualName())) +
+								", maybe you have wrong type, member name changed or wrong target.\ntype:" +
+								type.PrettyName(true));
+						}
+						else {
+							return null;
+						}
+					}
 					infoArray[i - 1] = ctor;
 					if(memberData != null && HasRefOrOutParameter(ctor)) {
 						memberData.HasRefOrOut = true;
@@ -1914,6 +1924,8 @@ namespace MaxyGames.UNode {
 		}
 
 		public static Type GetMemberType(MemberInfo member) {
+			if(member == null)
+				throw new ArgumentNullException(nameof(member));
 			switch (member.MemberType) {
 				case MemberTypes.Field:
 					return (member as FieldInfo).FieldType;
