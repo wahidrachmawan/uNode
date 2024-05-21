@@ -139,9 +139,9 @@ namespace MaxyGames.UNode {
 				//}
 				m_runtimeResolver = GenericMethodResolver.GetResolver(method, this);
 			}
-			else {
-				GenericMethodResolver.GetResolver(GetNativeMethod(), this);
-			}
+			//else {
+			//	GenericMethodResolver.GetResolver(GetNativeMethod(), this);
+			//}
 			return m_runtimeResolver;
 		}
 

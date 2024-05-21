@@ -18,14 +18,23 @@ namespace MaxyGames.UNode {
 	/// By using resolver, the generic method will correctly invoked and code gen will correctly generated
 	/// </remarks>
     public abstract class GenericMethodResolver {
+		/// <summary>
+		/// This is the open generic CLR method info
+		/// </summary>
 		public MethodInfo OpenMethodInfo {
 			get;
 			internal set;
 		}
+		/// <summary>
+		/// This is the constructed CLR method info
+		/// </summary>
 		public MethodInfo ConstructedMethodInfo {
 			get;
 			internal set;
 		}
+		/// <summary>
+		/// This is the runtime method info
+		/// </summary>
 		public MethodInfo RuntimeMethodInfo {
 			get;
 			internal set;

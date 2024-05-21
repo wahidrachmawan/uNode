@@ -85,18 +85,18 @@ namespace MaxyGames.UNode.Nodes {
 
 			if(targetType.IsCastableTo(typeof(Delegate))) {
 				enableEvent.AddCodeForEvent(
-					CG.Value(target, instance: instance).CGSet(mData.name, SetType.Add)
+					CG.WrapWithInformation(CG.Value(target, instance: instance).CGSet(mData.name, SetType.Add), this)
 				);
 				disableEvent.AddCodeForEvent(
-					CG.Value(target, instance: instance).CGSet(mData.name, SetType.Subtract)
+					CG.WrapWithInformation(CG.Value(target, instance: instance).CGSet(mData.name, SetType.Subtract), this)
 				);
 			}
 			else if(targetType.IsCastableTo(typeof(UnityEventBase))) {
 				enableEvent.AddCodeForEvent(
-					CG.Value(target, instance: instance).CGFlowInvoke(nameof(UnityEvent.AddListener), mData.name)
+					CG.WrapWithInformation(CG.Value(target, instance: instance).CGFlowInvoke(nameof(UnityEvent.AddListener), mData.name), this)
 				);
 				disableEvent.AddCodeForEvent(
-					CG.Value(target, instance: instance).CGFlowInvoke(nameof(UnityEvent.RemoveListener), mData.name)
+					CG.WrapWithInformation(CG.Value(target, instance: instance).CGFlowInvoke(nameof(UnityEvent.RemoveListener), mData.name), this)
 				);
 			}
 			else {

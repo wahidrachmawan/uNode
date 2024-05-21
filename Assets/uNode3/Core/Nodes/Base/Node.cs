@@ -244,26 +244,46 @@ namespace MaxyGames.UNode {
 			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
 				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
 			}
-			var port = new ValueInput(this, id, type);
-			if(@default != null) {
-				port.defaultValue = @default;
-			} else {
-				port.defaultValue = MemberData.None;
+			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
+			if(isNew) {
+				if(@default != null) {
+					port.defaultValue = @default;
+				}
+				else {
+					port.defaultValue = MemberData.None;
+				}
 			}
-			return nodeObject.RegisterPort(port);
+			return port;
 		}
 
 		protected ValueInput ValueInput(string id, Func<Type> type, MemberData @default = null) {
 			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
 				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
 			}
-			var port = new ValueInput(this, id, type);
-			if(@default != null) {
-				port.defaultValue = @default;
-			} else {
-				port.defaultValue = MemberData.None;
+			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
+			if(isNew) {
+				if(@default != null) {
+					port.defaultValue = @default;
+				}
+				else {
+					port.defaultValue = MemberData.None;
+				}
 			}
-			return nodeObject.RegisterPort(port);
+			return port;
+		}
+
+		protected ValueInput ValueInput(string id, Type type, out bool isNew) {
+			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
+			}
+			return nodeObject.RegisterPort(new ValueInput(this, id, type), out isNew);
+		}
+
+		protected ValueInput ValueInput(string id, Func<Type> type, out bool isNew) {
+			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
+			}
+			return nodeObject.RegisterPort(new ValueInput(this, id, type), out isNew);
 		}
 
 		protected ValueInput ValueInput<T>(string id) {
@@ -393,6 +413,14 @@ namespace MaxyGames.UNode {
 				return node.ValueInput(id, type, @default);
 			}
 
+			public static ValueInput ValueInput(Node node, string id, Type type, out bool isNew) {
+				return node.ValueInput(id, type, out isNew);
+			}
+
+			public static ValueInput ValueInput(Node node, string id, Func<Type> type, out bool isNew) {
+				return node.ValueInput(id, type, out isNew);
+			}
+
 			public static ValueInput ValueInput<T>(Node node, string id) {
 				return node.ValueInput<T>(id);
 			}
@@ -423,6 +451,22 @@ namespace MaxyGames.UNode {
 
 			public static FlowOutput FlowOutput(Node node, string id) {
 				return node.FlowOutput(id);
+			}
+
+			public static bool HasValueInput(Node node, string id) {
+				return node.nodeObject.ValueInputs.Any(p => p.id == id);
+			}
+
+			public static bool HasValueOutput(Node node, string id) {
+				return node.nodeObject.ValueOutputs.Any(p => p.id == id);
+			}
+
+			public static bool HasFlowInput(Node node, string id) {
+				return node.nodeObject.FlowInputs.Any(p => p.id == id);
+			}
+
+			public static bool HasFlowOutput(Node node, string id) {
+				return node.nodeObject.FlowOutputs.Any(p => p.id == id);
 			}
 		}
 		#endregion

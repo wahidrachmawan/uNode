@@ -7,6 +7,13 @@ using MaxyGames.UNode.Nodes;
 namespace MaxyGames.UNode.Editors.PortConverter {
 	class CastConverter : AutoConvertPort {
 		public override bool CreateNode(System.Action<Node> action) {
+			if(leftType == typeof(object) && output != null && output.GetNode() is MultipurposeNode outputNode) {
+				if(outputNode.target.targetType == MemberData.TargetType.Null) {
+					//Skip if the target is null.
+					action?.Invoke(outputNode);
+					return true;
+				}
+			}
 			NodeEditorUtility.AddNewNode<Nodes.NodeValueConverter>(
 				canvas,
 				new Vector2(position.x - 250, position.y),
@@ -89,14 +96,6 @@ namespace MaxyGames.UNode.Editors.PortConverter {
 
 	class StringToPrimitiveConverter : AutoConvertPort {
 		public override bool CreateNode(System.Action<Node> action) {
-			NodeEditorUtility.AddNewNode<Nodes.NodeValueConverter>(
-				canvas,
-				new Vector2(position.x - 250, position.y),
-				(nod) => {
-					nod.input.ConnectTo(output);
-					nod.type = rightType;
-					action?.Invoke(nod);
-				});
 			NodeEditorUtility.AddNewNode<MultipurposeNode>(
 				canvas,
 				new Vector2(position.x - 250, position.y),

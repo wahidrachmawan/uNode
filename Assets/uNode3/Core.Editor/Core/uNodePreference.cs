@@ -145,7 +145,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				public bool useSourceGenerators = true;
 
 				[Header("Compilation ( Script Graphs )")]
-				[Tooltip("Compile script after generating code and check for errors, and prevent save if there's any errors.")]
+				[Tooltip("(Required Pro version)\nCompile script after generating code and check for errors, and prevent save if there's any errors.")]
 				public bool compileBeforeSave = false;
 
 				[Header("Compilation ( Runtime Graphs )")]

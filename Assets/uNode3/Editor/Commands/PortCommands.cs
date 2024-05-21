@@ -350,6 +350,8 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
 			var port = data.port as ValueInput;
+			if(port == null || port.type == null)
+				return false;
 			return filter.IsValidTypeForValueConstant(port.type) && port.type.IsByRef == false && filter.SetMember == false;
 		}
 	}

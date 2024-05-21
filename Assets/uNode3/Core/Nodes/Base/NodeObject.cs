@@ -236,10 +236,32 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public ValueInput RegisterPort(ValueInput port, out bool isNew) {
+			if(preservation != null) {
+				return preservation.RestorePort(port, out isNew);
+			}
+			else {
+				isNew = true;
+				ValueInputs.Add(port);
+				return port;
+			}
+		}
+
 		public ValueOutput RegisterPort(ValueOutput port) {
 			if(preservation != null) {
 				return preservation.RestorePort(port);
 			} else {
+				ValueOutputs.Add(port);
+				return port;
+			}
+		}
+
+		public ValueOutput RegisterPort(ValueOutput port, out bool isNew) {
+			if(preservation != null) {
+				return preservation.RestorePort(port, out isNew);
+			}
+			else {
+				isNew = true;
 				ValueOutputs.Add(port);
 				return port;
 			}
@@ -254,10 +276,32 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public FlowInput RegisterPort(FlowInput port, out bool isNew) {
+			if(preservation != null) {
+				return preservation.RestorePort(port, out isNew);
+			}
+			else {
+				isNew = true;
+				FlowInputs.Add(port);
+				return port;
+			}
+		}
+
 		public FlowOutput RegisterPort(FlowOutput port) {
 			if(preservation != null) {
 				return preservation.RestorePort(port);
 			} else {
+				FlowOutputs.Add(port);
+				return port;
+			}
+		}
+
+		public FlowOutput RegisterPort(FlowOutput port, out bool isNew) {
+			if(preservation != null) {
+				return preservation.RestorePort(port, out isNew);
+			}
+			else {
+				isNew = true;
 				FlowOutputs.Add(port);
 				return port;
 			}
@@ -572,6 +616,21 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public ValueInput RestorePort(ValueInput port, out bool isNew) {
+			if(valueInputs.TryGetValue(port.id, out var val)) {
+				val.Restore(port);
+				node.ValueInputs.Add(val);
+				valueInputs.Remove(port.id);
+				isNew = false;
+				return val;
+			}
+			else {
+				node.ValueInputs.Add(port);
+				isNew = true;
+				return port;
+			}
+		}
+
 		public ValueOutput RestorePort(ValueOutput port) {
 			if(valueOutputs.TryGetValue(port.id, out var val)) {
 				val.Restore(port);
@@ -580,6 +639,21 @@ namespace MaxyGames.UNode {
 				return val;
 			} else {
 				node.ValueOutputs.Add(port);
+				return port;
+			}
+		}
+
+		public ValueOutput RestorePort(ValueOutput port, out bool isNew) {
+			if(valueOutputs.TryGetValue(port.id, out var val)) {
+				val.Restore(port);
+				node.ValueOutputs.Add(val);
+				valueOutputs.Remove(port.id);
+				isNew = false;
+				return val;
+			}
+			else {
+				node.ValueOutputs.Add(port);
+				isNew = true;
 				return port;
 			}
 		}
@@ -596,6 +670,21 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public FlowInput RestorePort(FlowInput port, out bool isNew) {
+			if(flowInputs.TryGetValue(port.id, out var val)) {
+				val.Restore(port);
+				node.FlowInputs.Add(val);
+				flowInputs.Remove(port.id);
+				isNew = false;
+				return val;
+			}
+			else {
+				node.FlowInputs.Add(port);
+				isNew = true;
+				return port;
+			}
+		}
+
 		public FlowOutput RestorePort(FlowOutput port) {
 			if(flowOutputs.TryGetValue(port.id, out var val)) {
 				val.Restore(port);
@@ -604,6 +693,21 @@ namespace MaxyGames.UNode {
 				return val;
 			} else {
 				node.FlowOutputs.Add(port);
+				return port;
+			}
+		}
+
+		public FlowOutput RestorePort(FlowOutput port, out bool isNew) {
+			if(flowOutputs.TryGetValue(port.id, out var val)) {
+				val.Restore(port);
+				node.FlowOutputs.Add(val);
+				flowOutputs.Remove(port.id);
+				isNew = false;
+				return val;
+			}
+			else {
+				node.FlowOutputs.Add(port);
+				isNew = true;
 				return port;
 			}
 		}

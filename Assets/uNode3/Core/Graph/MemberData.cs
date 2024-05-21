@@ -389,7 +389,7 @@ namespace MaxyGames.UNode {
 						if(obj is IGetValue) {
 							obj = (obj as IGetValue).Get();
 						}
-						if(!IsTargetingUNode)
+						if(!IsTargetingUNode && targetType != TargetType.Self)
 							obj = AutoConvertValue(obj, startType);
 					}
 					return obj;

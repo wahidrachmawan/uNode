@@ -11,7 +11,7 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnRegister() {
 			base.OnRegister();
 			target = ValueInput(nameof(target), typeof(IList)).SetName("List");
-			value = ValueInput(nameof(value), () => target.ValueType?.GetElementType());
+			value = ValueInput(nameof(value), () => target.ValueType?.ElementType());
 		}
 
 		public override System.Type ReturnType() {

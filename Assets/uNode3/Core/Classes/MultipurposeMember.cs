@@ -137,7 +137,10 @@ namespace MaxyGames.UNode {
 												PortAccessibility.ReadWrite).SetName(p.name);
 										}
 										else {
-											pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type).SetName(p.name);
+											pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type, out var isNew).SetName(p.name);
+											if(isNew) {
+												pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.Type));
+											}
 											if(pdata.refKind == RefKind.Out) {
 												pdata.input.filter = new FilterAttribute() {
 													SetMember = true,
@@ -205,7 +208,10 @@ namespace MaxyGames.UNode {
 									pdata.input = Node.Utilities.ValueInput(
 										node,
 										pathID + "-" + i + "-" + x,
-										p.ParameterType).SetName(p.Name);
+										p.ParameterType, out var isNew).SetName(p.Name);
+									if(isNew) {
+										pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.ParameterType));
+									}
 									if(pdata.refKind == RefKind.Out) {
 										pdata.input.filter = new FilterAttribute() {
 											SetMember = true,

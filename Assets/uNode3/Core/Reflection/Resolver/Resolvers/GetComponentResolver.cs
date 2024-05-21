@@ -18,18 +18,39 @@ namespace MaxyGames.UNode.GenericResolver {
 		protected override void OnRuntimeInitialize() {
 			var type = OpenMethodInfo.DeclaringType;
 			var compType = RuntimeMethodInfo.GetGenericArguments()[0];
-			if(type == typeof(GameObject)) {
-				func = (obj, parameters) => {
-					return obj.ConvertTo<GameObject>().GetGeneratedComponent(compType);
-				};
-			}
-			else if(type == typeof(Component)) {
-				func = (obj, parameters) => {
-					return obj.ConvertTo<Component>().GetGeneratedComponent(compType);
-				};
+			if(ReflectionUtils.IsNativeType(compType)) {
+				compType = ReflectionUtils.GetNativeType(compType);
+				if(compType == null) {
+					throw new Exception($"The type: {RuntimeMethodInfo.GetGenericArguments()[0]} is still not compiled.");
+				}
+				if(type == typeof(GameObject)) {
+					func = (obj, parameters) => {
+						return obj.ConvertTo<GameObject>().GetComponent(compType);
+					};
+				}
+				else if(type == typeof(Component)) {
+					func = (obj, parameters) => {
+						return obj.ConvertTo<Component>().GetComponent(compType);
+					};
+				}
+				else {
+					throw new InvalidOperationException();
+				}
 			}
 			else {
-				throw new InvalidOperationException();
+				if(type == typeof(GameObject)) {
+					func = (obj, parameters) => {
+						return obj.ConvertTo<GameObject>().GetGeneratedComponent(compType);
+					};
+				}
+				else if(type == typeof(Component)) {
+					func = (obj, parameters) => {
+						return obj.ConvertTo<Component>().GetGeneratedComponent(compType);
+					};
+				}
+				else {
+					throw new InvalidOperationException();
+				}
 			}
 		}
 

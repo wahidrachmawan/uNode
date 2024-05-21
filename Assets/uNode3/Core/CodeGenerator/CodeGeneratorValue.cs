@@ -200,7 +200,9 @@ namespace MaxyGames {
 					break;
 			}
 			if(debugScript && setting.debugValueNode && firstVal is ValueInput) {
-				return Debug(firstVal as ValueInput, result.RemoveLast(), true).AddSemicolon().AddLineInFirst();
+				if(Utility.IsEvent(firstVal as ValueInput) == false) {
+					return Debug(firstVal as ValueInput, result.RemoveLast(), true).AddSemicolon().AddLineInFirst();
+				}
 			}
 			return result;
 		}

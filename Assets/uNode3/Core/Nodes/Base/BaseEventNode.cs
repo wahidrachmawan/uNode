@@ -141,10 +141,10 @@ namespace MaxyGames.UNode {
 
 		protected string GenerateRunFlows() {
 			if(IsHandledByState()) {
-				return CG.If(CG.CompareEventState(nodeObject.GetNodeInParent<Nodes.StateNode>().enter, null), CG.RunEvent(this));
+				return CG.WrapWithInformation(CG.If(CG.CompareEventState(nodeObject.GetNodeInParent<Nodes.StateNode>().enter, null), CG.RunEvent(this)), this);
 			}
 			else {
-				return GenerateFlows();
+				return CG.WrapWithInformation(GenerateFlows(), this);
 			}
 		}
 

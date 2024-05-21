@@ -614,7 +614,7 @@ namespace MaxyGames.UNode.Editors {
 				watch.Stop();
 				if(enableLogging)
 					Debug.LogFormat("Generating C# took {0,8:N3} s.", watch.Elapsed.TotalSeconds);
-				if(preferenceData.generatorData.compileBeforeSave) {
+				if(preferenceData.generatorData.compileBeforeSave && uNodeUtility.IsProVersion) {
 					bool isBecauseOfAccessibility = false;
 					try {
 						watch.Reset();

@@ -21,6 +21,40 @@ namespace MaxyGames.UNode.GenericResolver {
 		protected override void OnRuntimeInitialize() {
 			var type = OpenMethodInfo.DeclaringType;
 			var compType = RuntimeMethodInfo.GetGenericArguments()[0];
+			if(ReflectionUtils.IsNativeType(compType)) {
+				compType = ReflectionUtils.GetNativeType(compType);
+				if(type == typeof(GameObject)) {
+					func = (obj, parameters) => {
+						switch(parameters.Length) {
+							case 0: {
+								return obj.ConvertTo<GameObject>().GetComponentInParent(compType);
+							}
+							case 1: {
+								return obj.ConvertTo<GameObject>().GetComponentInParent(compType, parameters[0].ConvertTo<bool>());
+							}
+						}
+						throw new InvalidOperationException();
+
+					};
+				}
+				else if(type == typeof(Component)) {
+					func = (obj, parameters) => {
+						switch(parameters.Length) {
+							case 0: {
+								return obj.ConvertTo<Component>().GetComponentInParent(compType);
+							}
+							case 1: {
+								return obj.ConvertTo<Component>().GetComponentInParent(compType, parameters[0].ConvertTo<bool>());
+							}
+						}
+						throw new InvalidOperationException();
+					};
+				}
+				else {
+					throw new InvalidOperationException();
+				}
+				return;
+			}
 			if(type == typeof(GameObject)) {
 				func = (obj, parameters) => {
 					switch(parameters.Length) {

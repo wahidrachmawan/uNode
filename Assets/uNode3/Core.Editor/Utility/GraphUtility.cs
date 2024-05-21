@@ -264,6 +264,12 @@ namespace MaxyGames.UNode.Editors {
 									}
 								}
 							}
+							else if(mData.targetType == MemberData.TargetType.Self && parent.graphContainer != null) {
+								var self = mData.Get(null);
+								if(self != parent.graphContainer) {
+									mData.CopyFrom(MemberData.This(parent.graphContainer));
+								}
+							}
 						}
 						return false;
 					});

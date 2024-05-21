@@ -13,7 +13,7 @@ namespace MaxyGames {
 		/// Begin a new block statement ( use this for generating lambda block )
 		/// </summary>
 		/// <param name="allowYield"></param>
-		public static void BeginBlock(bool allowYield) {
+		public static void BeginBlock(bool allowYield = false) {
 			generatorData.blockStacks.Add(new BlockStack() {
 				allowYield = allowYield
 			});
@@ -28,35 +28,71 @@ namespace MaxyGames {
 			}
 		}
 
-		public static bool IsContainOperatorCode(string value) {
-			if(value.Contains("op_")) {
-				switch(value) {
-					case "op_Addition":
-					case "op_Subtraction":
-					case "op_Division":
-					case "op_Multiply":
-					case "op_Modulus":
-					case "op_Equality":
-					case "op_Inequality":
-					case "op_LessThan":
-					case "op_GreaterThan":
-					case "op_LessThanOrEqual":
-					case "op_GreaterThanOrEqual":
-					case "op_BitwiseAnd":
-					case "op_BitwiseOr":
-					case "op_LeftShift":
-					case "op_RightShift":
-					case "op_ExclusiveOr":
-					case "op_UnaryNegation":
-					case "op_UnaryPlus":
-					case "op_LogicalNot":
-					case "op_OnesComplement":
-					case "op_Increment":
-					case "op_Decrement":
-						return true;
+		public class Utility {
+			public static bool IsEvent(ValueInput port) {
+				if(port.UseDefaultValue) {
+					return IsEvent(port.defaultValue);
 				}
+				else if(port.isAssigned) {
+					var tNode = port.GetTargetNode();
+					if(tNode != null && tNode.node is MultipurposeNode mNode) {
+						return IsEvent(mNode.target);
+					}
+				}
+				return false;
 			}
-			return false;
+
+			public static bool IsEvent(MemberData member) {
+				switch(member.targetType) {
+					case MemberData.TargetType.uNodeVariable:
+					case MemberData.TargetType.uNodeLocalVariable:
+						var variable = member.startItem.GetReferenceValue() as Variable;
+						if(variable != null) {
+							return variable.modifier.Event;
+						}
+						break;
+					case MemberData.TargetType.Event:
+						return true;
+					case MemberData.TargetType.NodePort:
+						var port = member.startItem.GetReferenceValue() as UPort;
+						if(port is ValueInput) {
+							return IsEvent(port as ValueInput);
+						}
+						break;
+				}
+				return false;
+			}
+
+			public static bool IsContainOperatorCode(string value) {
+				if(value.Contains("op_")) {
+					switch(value) {
+						case "op_Addition":
+						case "op_Subtraction":
+						case "op_Division":
+						case "op_Multiply":
+						case "op_Modulus":
+						case "op_Equality":
+						case "op_Inequality":
+						case "op_LessThan":
+						case "op_GreaterThan":
+						case "op_LessThanOrEqual":
+						case "op_GreaterThanOrEqual":
+						case "op_BitwiseAnd":
+						case "op_BitwiseOr":
+						case "op_LeftShift":
+						case "op_RightShift":
+						case "op_ExclusiveOr":
+						case "op_UnaryNegation":
+						case "op_UnaryPlus":
+						case "op_LogicalNot":
+						case "op_OnesComplement":
+						case "op_Increment":
+						case "op_Decrement":
+							return true;
+					}
+				}
+				return false;
+			}
 		}
 
 		#region Grouped

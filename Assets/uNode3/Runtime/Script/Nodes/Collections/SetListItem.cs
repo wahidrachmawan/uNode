@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRegister();
 			target = ValueInput(nameof(target), typeof(IList)).SetName("List");
 			index = ValueInput(nameof(index), typeof(int));
-			value = ValueInput(nameof(value), () => target.ValueType?.GetElementType());
+			value = ValueInput(nameof(value), () => target.ValueType?.ElementType());
 		}
 
 		protected override void OnExecuted(Flow flow) {

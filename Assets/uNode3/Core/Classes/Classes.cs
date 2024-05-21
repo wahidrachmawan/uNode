@@ -90,6 +90,10 @@ namespace MaxyGames.UNode {
 								RegisterError(owner, name.Add(" is ") + "missing variable reference: " + reference.name + " with id: " + reference.id);
 								return true;
 							}
+							else if(reference.graph != owner.graph) {
+								RegisterError(owner, name.Add(" is ") + "invalid variable reference: " + reference.name + ", please re-assign it");
+								return true;
+							}
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeProperty) {
@@ -97,6 +101,10 @@ namespace MaxyGames.UNode {
 						if(reference != null) {
 							if(reference.ReferenceValue == null) {
 								RegisterError(owner, name.Add(" is ") + "missing property reference: " + reference.name + " with id: " + reference.id);
+								return true;
+							}
+							else if(reference.graph != owner.graph) {
+								RegisterError(owner, name.Add(" is ") + "invalid property reference: " + reference.name + ", please re-assign it");
 								return true;
 							}
 						}
@@ -108,6 +116,10 @@ namespace MaxyGames.UNode {
 								RegisterError(owner, name.Add(" is ") + "missing function reference: " + reference.name + " with id: " + reference.id);
 								return true;
 							}
+							else if(reference.graph != owner.graph) {
+								RegisterError(owner, name.Add(" is ") + "invalid function reference: " + reference.name + ", please re-assign it");
+								return true;
+							}
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeParameter) {
@@ -115,6 +127,10 @@ namespace MaxyGames.UNode {
 						if(reference != null) {
 							if(reference.ReferenceValue == null) {
 								RegisterError(owner, name.Add(" is ") + "missing parameter reference: " + reference.name + " with id: " + reference.id);
+								return true;
+							}
+							else if(reference.graph != owner.graph) {
+								RegisterError(owner, name.Add(" is ") + "invalid parameter reference: " + reference.name + ", please re-assign it");
 								return true;
 							}
 						}

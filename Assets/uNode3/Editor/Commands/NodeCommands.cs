@@ -41,23 +41,40 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(path.Length != 0) {
 				uNodeEditorUtility.RegisterUndo(source.GetUnityObject());
 				MacroGraph macro = ScriptableObject.CreateInstance<MacroGraph>();
-				//TODO: fix me
-				//macro.Variables.AddRange(tmpMacro.Variables);
 
-				var nodes = node.nodeObject.GetObjectsInChildren().ToArray();
-				//AnalizerUtility.RetargetNodeOwner(tmpMacro.owner, macro, behaviors, (obj) => {
-				//	MemberData member = obj as MemberData;
-				//	if(member != null && member.targetType == MemberData.TargetType.uNodeVariable && member.GetInstance() as Object == tmpMacro) {
-				//		member.RefactorUnityObject(new Object[] { tmpMacro }, new Object[] { macro });
-				//	}
-				//});
+				var oldNodes = node.nodeObject.GetObjectsInChildren().ToArray();
+				GraphUtility.CopyPaste.Copy(oldNodes);
+				var nodes = GraphUtility.CopyPaste.Paste(macro.GraphData.mainGraphContainer);
 				var mapID = new Dictionary<string, string>();
 				for(int i = 0; i < nodes.Length; i++) {
-					var oldID = nodes[i].id;
-					nodes[i].SetParent(macro.GraphData.mainGraphContainer);
+					var oldID = oldNodes[i].id;
+					//nodes[i].SetParent(macro.GraphData.mainGraphContainer);
 					//Because after set parent to another graph, it's ID is changed.
-					mapID[nodes[i].id.ToString()] = oldID.ToString();
+					mapID[nodes[i].id.ToString()] = oldNodes[i].id.ToString();
 				}
+				//for(int i = 0; i < nodes.Length; i++) {
+				//	GraphUtility.Analizer.AnalizeObject(nodes[i], obj => {
+				//		if(obj is MemberData mData) {
+				//			if(mData.IsTargetingUNode) {
+				//				for(int i = 0; i < mData.Items.Length; i++) {
+				//					var item = mData.Items[i];
+				//					if(item != null && item.reference != null) {
+				//						var refVal = item.GetReferenceValue();
+				//						if(refVal is UGraphElement graphElement) {
+				//							if(graphElement is Variable) {
+
+				//							}
+				//						}
+				//						else if(item.reference is ParameterRef parameterRef) {
+											
+				//						}
+				//					}
+				//				}
+				//			}
+				//		}
+				//		return false;
+				//	});
+				//}
 				//macro.Refresh();
 				NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (LinkedMacroNode n) => {
 					n.macroAsset = macro;

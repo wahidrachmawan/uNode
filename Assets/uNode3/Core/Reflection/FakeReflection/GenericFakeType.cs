@@ -129,6 +129,20 @@ namespace MaxyGames.UNode {
 			return target.Name.Split('`')[0] + "<" + string.Join(", ", genericParameters.Select(t => t.ToString())) + ">";
 		}
 
+		private static Type GetActualNativeType(Type type) {
+			if(type is RuntimeType) {
+				if(type is IRuntimeType prType) {
+					return prType.GetNativeType() ?? typeof(IRuntimeClass);
+				}
+				else {
+					return typeof(IRuntimeClass);
+				}
+			}
+			else {
+				return type;
+			}
+		}
+
 		protected override void Initialize() {
 			var gArgs = genericType.GetGenericArguments();
 			var members = genericType.GetMembers(flags);
@@ -186,7 +200,7 @@ namespace MaxyGames.UNode {
 							var pType = parameters[i].ParameterType;
 							if(pType.IsGenericParameter) {
 								parameters[i] = new FakeParameter(parameters[i], genericParameters[IndexOf(gArgs, p => p.Name == pType.Name)]);
-								paramTypes[i] = typeof(IRuntimeClass);
+								paramTypes[i] = GetActualNativeType(parameters[i].ParameterType);
 								flag = true;
 							}
 							else if(pType.ContainsGenericParameters) {
@@ -199,7 +213,7 @@ namespace MaxyGames.UNode {
 												int idx = IndexOf(gArgs, p => p.Name == gTypes[x].Name);
 												if(idx >= 0) {
 													gTypes[x] = genericParameters[idx];
-													nativeTypes[x] = typeof(IRuntimeClass);
+													nativeTypes[x] = GetActualNativeType(genericParameters[idx]);
 												}
 												else {
 													runtimeType = null;
@@ -235,7 +249,7 @@ namespace MaxyGames.UNode {
 												int idx = IndexOf(gArgs, p => p.Name == elementType.Name);
 												if(idx >= 0) {
 													elementType = genericParameters[idx];
-													nElementType = typeof(IRuntimeClass);
+													nElementType = GetActualNativeType(genericParameters[idx]);
 												}
 												else {
 													runtimeType = null;
@@ -324,7 +338,7 @@ namespace MaxyGames.UNode {
 							var pType = parameters[i].ParameterType;
 							if(pType.IsGenericParameter) {
 								parameters[i] = new FakeParameter(parameters[i], genericParameters[IndexOf(gArgs, p => p.Name == pType.Name)]);
-								paramTypes[i] = typeof(IRuntimeClass);
+								paramTypes[i] = GetActualNativeType(parameters[i].ParameterType);
 							}
 							else if(pType.ContainsGenericParameters) {
 								void ValidateParameterType(Type t, out Type runtimeType, out Type nativeType) {
@@ -336,7 +350,7 @@ namespace MaxyGames.UNode {
 												int idx = IndexOf(gArgs, p => p.Name == gTypes[x].Name);
 												if(idx >= 0) {
 													gTypes[x] = genericParameters[idx];
-													nativeTypes[x] = typeof(IRuntimeClass);
+													nativeTypes[x] = GetActualNativeType(genericParameters[idx]);
 												}
 												else {
 													runtimeType = null;
@@ -372,7 +386,7 @@ namespace MaxyGames.UNode {
 												int idx = IndexOf(gArgs, p => p.Name == elementType.Name);
 												if(idx >= 0) {
 													elementType = genericParameters[idx];
-													nElementType = typeof(IRuntimeClass);
+													nElementType = GetActualNativeType(genericParameters[idx]);
 												}
 												else {
 													runtimeType = null;

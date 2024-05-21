@@ -1284,7 +1284,7 @@ namespace MaxyGames {
 					}
 				}
 				string startData;
-				if(IsContainOperatorCode(mData.name)) {
+				if(Utility.IsContainOperatorCode(mData.name)) {
 					throw new System.Exception("unsupported generating operator code in current context");
 				}
 				if(mData.targetType == MemberData.TargetType.Constructor) {
@@ -2264,7 +2264,7 @@ namespace MaxyGames {
 		public static string Value(MultipurposeMember member, Action<string, string> onEnterAndExit = null, bool autoConvert = false, bool setVariable = false) {
 			string resultCode = GetCorrectName(member.target, member.parameters, member.initializers, member.instance, onEnterAndExit, autoConvert, setVariable: setVariable);
 			if(!string.IsNullOrEmpty(resultCode)) {
-				if(IsContainOperatorCode(member.target.name)) {
+				if(Utility.IsContainOperatorCode(member.target.name)) {
 					throw new System.Exception("unsupported generating operator code in the current context");
 				}
 				if((member.target.targetType == MemberData.TargetType.uNodeGenericParameter ||
