@@ -125,9 +125,31 @@ namespace MaxyGames.UNode {
 		public override bool IsGenericMethodDefinition => false;
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
+			if(IsNativeMethod) {
+				return GetNativeMethod().InvokeOptimized(obj, parameters);
+			}
 			var resolver = GetResolver();
 			resolver.EnsureRuntimeInitialized();
 			return resolver.Invoke(obj, invokeAttr, binder, parameters, culture);
+		}
+
+		private bool? m_isNativeMethod;
+		/// <summary>
+		/// True if this method is native method
+		/// </summary>
+		public bool IsNativeMethod {
+			get {
+				if(m_isNativeMethod == null) {
+					m_isNativeMethod = true;
+					for(int i = 0; i < typeArguments.Length; i++) {
+						if(ReflectionUtils.IsNativeType(typeArguments[i]) == false) {
+							m_isNativeMethod = false;
+							break;
+						}
+					}
+				}
+				return m_isNativeMethod.Value;
+			}
 		}
 
 		private GenericMethodResolver m_runtimeResolver;
