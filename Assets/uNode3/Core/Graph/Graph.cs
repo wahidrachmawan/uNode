@@ -246,10 +246,13 @@ namespace MaxyGames.UNode {
 			//The lag causes by unity inspector that's constantly check modified value
 			//and checking tries serializing the whole value
 			//TODO: fix error caused by UnityEditor.Selection.activeObject regarding to domain backup
-			if(graph.graphContainer != null && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
-				if(Event.current == null)
-					return;
+			try {
+				if(graph.graphContainer != null && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
+					if(Event.current == null)
+						return;
+				}
 			}
+			catch { }
 			if(UnityEditor.BuildPipeline.isBuildingPlayer) {
 				var tempGraph = this.graph;
 #if UNODE_TRIM_ON_BUILD && UNODE_PRO

@@ -43,17 +43,38 @@ namespace MaxyGames.UNode.Editors.Drawer {
 								bool hasAddMenu = false;
 								GenericMenu menu = new GenericMenu();
 								if(type.IsArray || type.IsCastableTo(typeof(IList))) {
-									menu.AddItem(new GUIContent("Add Field"), false, () => {
-										uNodeEditorUtility.RegisterUndo(option.unityObject, "Add Field");
-										initializers.Add(new MultipurposeMember.InitializerData() {
+									uNodeEditorUtility.RegisterUndo(option.unityObject, "Add Field");
+									initializers.Add(new MultipurposeMember.InitializerData() {
+										name = "Element",
+										type = type.ElementType(),
+									});
+									for(int i = 0; i < initializers.Count; i++) {
+										initializers[i].name = "Element" + i;
+									}
+									uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+								}
+								else if(type.IsCastableTo(typeof(IDictionary))) {
+									uNodeEditorUtility.RegisterUndo(option.unityObject, "Add Field");
+									var method = type.GetMethod("Add");
+									var parameters = method.GetParameters();
+									if(parameters.Length > 1) {
+										var init = new MultipurposeMember.InitializerData() {
 											name = "Element",
-											type = type.ElementType(),
-										});
+											type = SerializedType.None
+										};
+										init.elementInitializers = new MultipurposeMember.ComplexElementInitializer[parameters.Length];
+										for(int i = 0; i < parameters.Length; i++) {
+											init.elementInitializers[i] = new MultipurposeMember.ComplexElementInitializer() {
+												name = parameters[i].Name,
+												type = parameters[i].ParameterType,
+											};
+										}
+										initializers.Add(init);
 										for(int i = 0; i < initializers.Count; i++) {
 											initializers[i].name = "Element" + i;
 										}
-										uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-									});
+									}
+									uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 								}
 								else {
 									var fields = type.GetMembers(BindingFlags.Public | BindingFlags.Instance);

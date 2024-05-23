@@ -307,6 +307,22 @@ namespace MaxyGames {
 			}
 			return "(" + code + ")";
 		}
+
+		/// <summary>
+		/// Wrap a string value with brackets "{ <paramref name="code"/> }"
+		/// </summary>
+		/// <param name="code"></param>
+		/// <param name="onlyOnContainSpace"></param>
+		/// <returns></returns>
+		public static string WrapBraces(string code, bool onlyOnContainSpace = false) {
+			if(string.IsNullOrEmpty(code)) {
+				return code;
+			}
+			if(onlyOnContainSpace && !code.Contains(' ')) {
+				return code;
+			}
+			return "{ " + code + " }";
+		}
 		#endregion
-    }
+	}
 }

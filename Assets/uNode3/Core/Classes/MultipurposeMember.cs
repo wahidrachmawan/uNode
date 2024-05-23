@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace MaxyGames.UNode {
@@ -22,10 +23,10 @@ namespace MaxyGames.UNode {
 
 			public string name {
 				get {
-					if (info != null) {
+					if(info != null) {
 						return info.Name;
 					}
-					else if (input != null) {
+					else if(input != null) {
 						return input.name;
 					}
 					else {
@@ -48,9 +49,11 @@ namespace MaxyGames.UNode {
 				get {
 					if(info != null) {
 						return info.ParameterType;
-					} else if(input != null) {
+					}
+					else if(input != null) {
 						return input.type;
-					} else {
+					}
+					else {
 						return output.type;
 					}
 				}
@@ -58,6 +61,28 @@ namespace MaxyGames.UNode {
 		}
 		public class InitializerData {
 			public string id = uNodeUtility.GenerateUID();
+			public string name;
+			public SerializedType type;
+
+			public ComplexElementInitializer[] elementInitializers;
+
+			public ValueInput port { get; set; }
+
+			public bool isComplexInitializer => elementInitializers != null;
+
+			public IEnumerable<ValueInput> ports {
+				get {
+					if(elementInitializers != null) {
+						foreach(var element in elementInitializers) {
+							yield return element.port;
+						}
+					}
+					yield return port;
+				}
+			}
+		}
+
+		public class ComplexElementInitializer {
 			public string name;
 			public SerializedType type;
 
@@ -87,7 +112,8 @@ namespace MaxyGames.UNode {
 							if(CG.CanDeclareLocal(p.output, flows)) {
 								string name = CG.RegisterVariable(p.output, isLocal: true);
 								CG.RegisterPort(p.output, () => name);
-							} else {
+							}
+							else {
 								string name = CG.RegisterVariable(p.output, isLocal: false);
 								CG.RegisterPort(p.output, () => name);
 							}
@@ -121,10 +147,10 @@ namespace MaxyGames.UNode {
 								var reference = target.startItem.GetReferenceValue() as Function;
 								if(reference != null) {
 									parameters = new List<MParamInfo>();
-									datas = new MInfo[] { 
-										new MInfo() 
+									datas = new MInfo[] {
+										new MInfo()
 									};
-									for(int i=0;i< reference.parameters.Count;i++) {
+									for(int i = 0; i < reference.parameters.Count; i++) {
 										var p = reference.parameters[i];
 										var pdata = new MParamInfo() {
 											info = null,
@@ -201,10 +227,11 @@ namespace MaxyGames.UNode {
 								}
 								if(preferOutputForParameters && pdata.IsOut) {
 									pdata.output = Node.Utilities.ValueOutput(
-										node, 
-										pathID + "-" + i + "-" + x, p.ParameterType.GetElementType(), 
+										node,
+										pathID + "-" + i + "-" + x, p.ParameterType.GetElementType(),
 										PortAccessibility.ReadWrite).SetName(p.Name);
-								} else {
+								}
+								else {
 									pdata.input = Node.Utilities.ValueInput(
 										node,
 										pathID + "-" + i + "-" + x,
@@ -228,8 +255,17 @@ namespace MaxyGames.UNode {
 			}
 			if(initializers == null)
 				initializers = new List<InitializerData>();
-			foreach(var init in initializers) {
-				init.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id, init.type.type).SetName(init.name);
+			for(int i = 0; i < initializers.Count; i++) {
+				var init = initializers[i];
+				if(init.isComplexInitializer) {
+					for(int x = 0; x < init.elementInitializers.Length; x++) {
+						var element = init.elementInitializers[x];
+						element.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id + "#" + x, element.type.type).SetName(element.name + " " + i);
+					}
+				}
+				else {
+					init.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id, init.type.type).SetName(init.name);
+				}
 			}
 		}
 
@@ -313,13 +349,15 @@ namespace MaxyGames.UNode {
 #endif
 						}
 						obj = target.Invoke(flow, paramsValue);
-					} else {
+					}
+					else {
 						if(parameters.Count > 0) {
 							paramsValue = new object[parameters.Count];
 							for(int i = 0; i < paramsValue.Length; i++) {
 								if(parameters[i].input != null) {
 									paramsValue[i] = parameters[i].input.GetValue(flow);
-								} else {
+								}
+								else {
 									//The parameter is using output, so leave the parameter value to null.
 									paramsValue[i] = null;
 								}
@@ -332,7 +370,8 @@ namespace MaxyGames.UNode {
 									if(parameters[i].input != null) {
 										//Set the input port, if we're using input port.
 										parameters[i].input.SetValue(flow, paramsValue[i]);
-									} else {
+									}
+									else {
 										//In case use output, we set the output value instead.
 										flow.SetPortData(parameters[i].output, paramsValue[i]);
 									}
@@ -340,7 +379,8 @@ namespace MaxyGames.UNode {
 							}
 						}
 					}
-				} else {
+				}
+				else {
 					obj = target.Get(flow);
 				}
 				if(obj != null && initializers != null) {
@@ -349,13 +389,14 @@ namespace MaxyGames.UNode {
 						if(obj is System.Collections.IList) {
 							if(t.IsArray) {
 								System.Array array = obj as System.Array;
-								for(int i=0;i< initializers.Count;i++) {
+								for(int i = 0; i < initializers.Count; i++) {
 									var param = initializers[i];
 									if(param == null)
 										continue;
 									array.SetValue(param.port.GetValue(flow), i);
 								}
-							} else {
+							}
+							else {
 								System.Collections.IList list = obj as System.Collections.IList;
 								foreach(var param in initializers) {
 									if(param == null)
@@ -363,22 +404,32 @@ namespace MaxyGames.UNode {
 									list.Add(param.port.GetValue(flow));
 								}
 							}
-						} else {
+						}
+						else {
 							foreach(var param in initializers) {
 								if(param == null)
 									continue;
-								var members = t.GetMember(param.name);
-								if(members.Length == 0)
-									continue;
-								foreach(var member in members) {
-									if(member is System.Reflection.FieldInfo) {
-										var field = member as System.Reflection.FieldInfo;
-										field.SetValueOptimized(obj, param.port.GetValue(flow));
-										break;
-									} else if(member is System.Reflection.PropertyInfo) {
-										var prop = member as System.Reflection.PropertyInfo;
-										prop.SetValueOptimized(obj, param.port.GetValue(flow));
-										break;
+								if(param.isComplexInitializer) {
+									var method = t.GetMemberCached("Add") as MethodInfo;
+									if(method != null) {
+										method.InvokeOptimized(obj, param.elementInitializers.Select(e => e.port.GetValue(flow)).ToArray());
+									}
+								}
+								else {
+									var members = t.GetMember(param.name);
+									if(members.Length == 0)
+										continue;
+									foreach(var member in members) {
+										if(member is System.Reflection.FieldInfo) {
+											var field = member as System.Reflection.FieldInfo;
+											field.SetValueOptimized(obj, param.port.GetValue(flow));
+											break;
+										}
+										else if(member is System.Reflection.PropertyInfo) {
+											var prop = member as System.Reflection.PropertyInfo;
+											prop.SetValueOptimized(obj, param.port.GetValue(flow));
+											break;
+										}
 									}
 								}
 							}
@@ -408,13 +459,15 @@ namespace MaxyGames.UNode {
 						}
 					}
 					target.Set(flow, value, paramsValue);
-				} else {
+				}
+				else {
 					if(parameters.Count > 0) {
 						paramsValue = new object[parameters.Count];
 						for(int i = 0; i < paramsValue.Length; i++) {
 							if(parameters[i].input != null) {
 								paramsValue[i] = parameters[i].input.GetValue(flow);
-							} else {
+							}
+							else {
 								//The parameter is using output, so leave the parameter value to null.
 								paramsValue[i] = null;
 							}
@@ -427,7 +480,8 @@ namespace MaxyGames.UNode {
 								if(parameters[i].input != null) {
 									//Set the input port, if we're using input port.
 									parameters[i].input.SetValue(flow, paramsValue[i]);
-								} else {
+								}
+								else {
 									//In case use output, we set the output value instead.
 									flow.SetPortData(parameters[i].output, paramsValue[i]);
 								}
@@ -435,7 +489,8 @@ namespace MaxyGames.UNode {
 						}
 					}
 				}
-			} else {
+			}
+			else {
 				target.Set(flow, value);
 			}
 		}

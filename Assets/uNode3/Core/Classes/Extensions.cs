@@ -87,14 +87,6 @@ namespace MaxyGames.UNode {
 			}
 			return result;
 		}
-
-		public static Type MakeRuntimeGenericType(this Type type, params Type[] typeArguments) {
-			return ReflectionUtils.MakeGenericType(type, typeArguments);
-		}
-
-		public static MethodInfo MakeRuntimeGenericMethod(this MethodInfo methodInfo, params Type[] typeArguments) {
-			return ReflectionUtils.MakeGenericMethod(methodInfo, typeArguments);
-		}
 		#endregion
 
 		#region Ports

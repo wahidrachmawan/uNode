@@ -70,9 +70,16 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(node.member.initializers?.Count > 0) {
-					AddControl(Direction.Input, new Label("Initializer"));
+					AddControl(Direction.Input, new Label("Initializers"));
 					foreach(var init in node.member.initializers) {
-						AddInputValuePort(new ValueInputData(init.port));
+						if(init.isComplexInitializer) {
+							for(int i = 0; i < init.elementInitializers.Length; i++) {
+								AddInputValuePort(new ValueInputData(init.elementInitializers[i].port));
+							}
+						}
+						else {
+							AddInputValuePort(new ValueInputData(init.port));
+						}
 					}
 				}
 			}
@@ -116,7 +123,8 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-			} else if(inputControls.Count == 0) {
+			}
+			else if(inputControls.Count == 0) {
 				int valueOutputCount = outputPorts.Count(x => x.orientation == Orientation.Horizontal);
 				int valueInputCount = inputPorts.Count(x => x.orientation == Orientation.Horizontal);
 				if(valueOutputCount == 1 && valueInputCount == 0) {
@@ -135,7 +143,8 @@ namespace MaxyGames.UNode.Editors {
 				if(UIElementUtility.Theme.coloredNodeBorder) {
 					border.style.SetBorderColor(c);
 				}
-			} else if(uNodeUtility.preferredDisplay == DisplayKind.Partial) {
+			}
+			else if(uNodeUtility.preferredDisplay == DisplayKind.Partial) {
 				ConstructCompactTitle(node.instance);
 				if(primaryOutputValue != null) {
 					EnableInClassList(ussClassCompactTitle, true);

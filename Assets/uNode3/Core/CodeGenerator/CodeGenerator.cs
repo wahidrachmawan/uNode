@@ -469,7 +469,10 @@ namespace MaxyGames {
 			}
 			else {
 				foreach(var init in initializers) {
-					if(init.port != null && init.port.isAssigned) {
+					if(init.isComplexInitializer) {
+						data = CG.Flow(data, CG.WrapBraces(string.Join(", ", init.elementInitializers.Select(e => GeneratePort(e.port)))).Add(","));
+					}
+					else if(init.port != null && init.port.isAssigned) {
 						data = CG.Flow(data, GeneratePort(init.port).Add(","));
 					}
 				}
