@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Collections.List", "Insert Item")]
+    [NodeMenu("Collections.List", "Insert Item", icon = typeof(IList))]
 	public class InsertListItem : FlowAndValueNode {
 		public ValueInput target { get; set; }
 		public ValueInput index { get; set; }

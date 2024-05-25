@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Collections.List", "Set Item")]
+    [NodeMenu("Collections.List", "Set Item", icon = typeof(IList))]
 	public class SetListItem : FlowNode {
 		public ValueInput target { get; set; }
 		public ValueInput index { get; set; }
@@ -23,7 +23,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override string GenerateFlowCode() {
 			return CG.Flow(
-				CG.Set(CG.AccessElement(target, CG.Value(index)), CG.Value(value)),
+				CG.Set(CG.AccessElement(target, CG.Value(index), true), CG.Value(value)),
 				CG.FlowFinish(enter, exit)
 			);
 		}

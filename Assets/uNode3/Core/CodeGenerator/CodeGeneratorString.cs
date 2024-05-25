@@ -390,9 +390,22 @@ namespace MaxyGames {
 		/// Generate access code.
 		/// </summary>
 		/// <param name="instance"></param>
-		/// <param name="members"></param>
+		/// <param name="index"></param>
+		/// <param name="set"></param>
 		/// <returns></returns>
-		public static string AccessElement(object instance, string index) {
+		public static string AccessElement(object instance, string index, bool set = false) {
+			if(set == false && graph.IsNativeGraph() == false) {
+				if(instance is ValueInput) {
+					var port = instance as ValueInput;
+					var type = port.ValueType;
+					if(ReflectionUtils.IsNativeType(type) == false) {
+						var elementType = type.ElementType();
+						if(elementType != null) {
+							return Convert(AccessElement(GeneratePort(port, set), index), elementType);
+						}
+					}
+				}
+			}
 			return AccessElement(Value(instance), index);
 		}
 

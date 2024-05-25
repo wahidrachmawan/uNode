@@ -391,6 +391,12 @@ namespace MaxyGames.UNode {
 			return result;
 		}
 
+		/// <summary>
+		/// Get all defined variable
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
 		public static IEnumerable<Variable> GetVariables(this IGraph graph) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));
@@ -418,6 +424,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get all defined property
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
 		public static IEnumerable<Property> GetProperties(this IGraph graph) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));
@@ -425,6 +437,12 @@ namespace MaxyGames.UNode {
 			return graphData.propertyContainer.collections;
 		}
 
+		/// <summary>
+		/// Get all defined function
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
 		public static IEnumerable<Function> GetFunctions(this IGraph graph) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));
@@ -432,6 +450,12 @@ namespace MaxyGames.UNode {
 			return graphData.functionContainer.collections;
 		}
 
+		/// <summary>
+		/// Get all defined constructor
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
 		public static IEnumerable<Constructor> GetConstructors(this IGraph graph) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));

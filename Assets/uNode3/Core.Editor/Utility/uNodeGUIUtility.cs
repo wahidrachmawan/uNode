@@ -1499,6 +1499,7 @@ namespace MaxyGames.UNode.Editors {
 				buttonLabel.tooltip = type.typeName;
 			}
 			position = EditorGUI.PrefixLabel(position, label);
+			position.width -= 20;
 			if(EditorGUI.DropdownButton(position, buttonLabel, FocusType.Keyboard) && Event.current.button == 0) {
 				GUI.changed = false;
 				if(Event.current.shift || Event.current.control || type?.type != null && type.type.IsGenericType) {
@@ -1511,6 +1512,14 @@ namespace MaxyGames.UNode.Editors {
 						onClick(member.startType);
 					}).ChangePosition(position.ToScreenRect());
 				}
+			}
+			position.x += position.width;
+			position.width = 20;
+			if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+				GUI.changed = false;
+				TypeBuilderWindow.Show(position, targetObject, filter, (types) => {
+					onClick(types[0].startType);
+				}, new TypeItem[] { new TypeItem(type, filter) });
 			}
 		}
 
@@ -1530,6 +1539,7 @@ namespace MaxyGames.UNode.Editors {
 				buttonLabel.text = type.PrettyName();
 			}
 			position = EditorGUI.PrefixLabel(position, label);
+			position.width -= 20;
 			if(EditorGUI.DropdownButton(position, buttonLabel, FocusType.Keyboard) && Event.current.button == 0) {
 				GUI.changed = false;
 				if(Event.current.shift || Event.current.control || type != null && type.IsGenericType) {
@@ -1542,6 +1552,14 @@ namespace MaxyGames.UNode.Editors {
 						onClick(member.startType);
 					}).ChangePosition(position.ToScreenRect());
 				}
+			}
+			position.x += position.width;
+			position.width = 20;
+			if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+				GUI.changed = false;
+				TypeBuilderWindow.Show(position, targetObject, filter, (types) => {
+					onClick(types[0].startType);
+				}, new TypeItem[] { new TypeItem(type, filter) });
 			}
 		}
 
@@ -1563,6 +1581,7 @@ namespace MaxyGames.UNode.Editors {
 				buttonLabel.tooltip = type.typeName;
 			}
 			position = EditorGUI.PrefixLabel(position, label);
+			position.width -= 20;
 			if(EditorGUI.DropdownButton(position, buttonLabel, FocusType.Keyboard) && Event.current.button == 0) {
 				GUI.changed = false;
 				if(Event.current.shift || Event.current.control) {
@@ -1575,6 +1594,14 @@ namespace MaxyGames.UNode.Editors {
 						onClick(member.startType);
 					}).ChangePosition(position.ToScreenRect());
 				}
+			}
+			position.x += position.width;
+			position.width = 20;
+			if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+				GUI.changed = false;
+				TypeBuilderWindow.Show(position, targetObject, filter, (types) => {
+					onClick(types[0].startType);
+				}, new TypeItem[] { new TypeItem(type, filter) });
 			}
 			if(type?.type != null && type.type.IsGenericType) {
 				EditorGUI.indentLevel++;
@@ -1600,6 +1627,7 @@ namespace MaxyGames.UNode.Editors {
 				buttonLabel.text = type.PrettyName();
 			}
 			position = EditorGUI.PrefixLabel(position, label);
+			position.width -= 20;
 			if(EditorGUI.DropdownButton(position, buttonLabel, FocusType.Keyboard) && Event.current.button == 0) {
 				GUI.changed = false;
 				if(Event.current.shift || Event.current.control) {
@@ -1612,6 +1640,14 @@ namespace MaxyGames.UNode.Editors {
 						onClick(member.startType);
 					}).ChangePosition(position.ToScreenRect());
 				}
+			}
+			position.x += position.width;
+			position.width = 20;
+			if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+				GUI.changed = false;
+				TypeBuilderWindow.Show(position, targetObject, filter, (types) => {
+					onClick(types[0].startType);
+				}, new TypeItem[] { new TypeItem(type, filter) });
 			}
 			if(type != null && type.IsGenericType) {
 				EditorGUI.indentLevel++;
@@ -1630,10 +1666,11 @@ namespace MaxyGames.UNode.Editors {
 				using(new EditorGUILayout.HorizontalScope()) {
 					EditorGUILayout.PrefixLabel(rawGenericArguments[index].Name);
 					var rect = uNodeGUIUtility.GetRect();
+					rect.width -= 20;
 					if(EditorGUI.DropdownButton(rect, new GUIContent(arg.PrettyName(), arg.FullName), FocusType.Keyboard)) {
 						var filter = new FilterAttribute();
 						filter.ToFilterGenericConstraints(rawGenericArguments[index]);
-						if(Event.current.control) {
+						if(Event.current.shift || Event.current.control) {
 							TypeBuilderWindow.Show(rect, targetObject, filter, (types) => {
 								genericArguments[index] = types[0].startType;
 								var changedType = ReflectionUtils.MakeGenericType(typeDefinition, genericArguments);
@@ -1647,6 +1684,17 @@ namespace MaxyGames.UNode.Editors {
 								onChanged(changedType);
 							}).ChangePosition(rect.ToScreenRect());
 						}
+					}
+					rect.x += rect.width;
+					rect.width = 20;
+					if(EditorGUI.DropdownButton(rect, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+						var filter = new FilterAttribute();
+						filter.ToFilterGenericConstraints(rawGenericArguments[index]);
+						TypeBuilderWindow.Show(rect, targetObject, filter, (types) => {
+							genericArguments[index] = types[0].startType;
+							var changedType = ReflectionUtils.MakeGenericType(typeDefinition, genericArguments);
+							onChanged(changedType);
+						}, new TypeItem[] { new TypeItem(genericArguments[index], filter) });
 					}
 				}
 				if(arg.IsGenericType) {
