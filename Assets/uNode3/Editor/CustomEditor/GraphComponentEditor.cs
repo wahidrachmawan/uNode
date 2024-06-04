@@ -9,6 +9,7 @@ namespace MaxyGames.UNode.Editors {
     public class GraphComponentEditor : GraphAssetEditor {
 		public override void DrawGUI(bool isInspector) {
 			var asset = target as GraphComponent;
+			uNodeGUIUtility.ShowField(new GUIContent("Name"), "graphName", asset);
 			if(isInspector == false) {
 				uNodeGUI.DrawNamespace("Using Namespaces", asset.usingNamespaces, asset, (arr) => {
 					asset.usingNamespaces = arr as List<string> ?? arr.ToList();
@@ -45,32 +46,12 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(!Application.isPlaying) {
-					if(uNodePreference.preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
-						var type = asset.GeneratedTypeName.ToType(false);
-						if(type != null) {
-							EditorGUILayout.HelpBox("Run using Native C#", MessageType.Info);
-						}
-						else {
-							EditorGUILayout.HelpBox("Run using Reflection", MessageType.Info);
-						}
+					var type = asset.GeneratedTypeName.ToType(false);
+					if(type != null) {
+						EditorGUILayout.HelpBox("Run using Native C#", MessageType.Info);
 					}
 					else {
-						if(!GenerationUtility.IsGraphCompiled(asset)) {
-							EditorGUILayout.HelpBox("Run using Reflection.", MessageType.Info);
-						}
-						else if(GenerationUtility.IsGraphUpToDate(asset)) {
-							EditorGUILayout.HelpBox("Run using Native C#", MessageType.Info);
-						}
-						else {
-							var boxRect = EditorGUILayout.BeginVertical();
-							EditorGUILayout.HelpBox("Run using Native C# but script is outdated.\n[Click To Recompile]", MessageType.Warning);
-							EditorGUILayout.EndVertical();
-							if(Event.current.clickCount == 1 && Event.current.button == 0 && boxRect.Contains(Event.current.mousePosition)) {
-								GraphUtility.SaveAllGraph();
-								GenerationUtility.GenerateCSharpScript();
-								Event.current.Use();
-							}
-						}
+						EditorGUILayout.HelpBox("Run using Reflection", MessageType.Info);
 					}
 				}
 				//if(!Application.isPlaying || asset.nativeInstance == null) 

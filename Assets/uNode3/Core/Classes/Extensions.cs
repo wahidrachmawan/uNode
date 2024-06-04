@@ -351,6 +351,19 @@ namespace MaxyGames.UNode {
 			return false;
 		}
 
+		public static bool IsInterface(this IGraph graph) {
+			if(graph is IClassGraph) {
+				return (graph as IClassGraph).IsInterface;
+			}
+			else if(graph is IReflectionType) {
+				var type = ReflectionUtils.GetRuntimeType(graph);
+				if(type != null) {
+					return type.IsInterface;
+				}
+			}
+			return false;
+		}
+
 		public static HashSet<string> GetUsingNamespaces(this IGraph graph) {
 			if(graph is IUsingNamespace system) {
 				var result = new HashSet<string>();

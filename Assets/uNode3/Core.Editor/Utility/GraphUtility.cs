@@ -1007,7 +1007,7 @@ namespace MaxyGames.UNode.Editors {
 			List<object> references = new List<object>();
 			{
 				var type = graph.GetGraphType();
-				if(type != null) {
+				if(type != null && type != graph.GetGraphInheritType()) {
 					List<Type> list = new List<Type>();
 					Type inheritType = type.BaseType;
 					while(inheritType != null) {

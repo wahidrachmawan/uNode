@@ -103,7 +103,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 					}
 				}
 			}
-			if(graph is IGraphWithFunctions) {
+			if(inheritType != null && graph is IGraphWithFunctions) {
 				var functions = graph.GetFunctions();
 				foreach(var function in functions) {
 					var returnType = function.ReturnType();
@@ -164,7 +164,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 					}
 				}
 			}
-			if(graph is IGraphWithProperties) {
+			if(inheritType != null && graph is IGraphWithProperties) {
 				var properties = graph.GetProperties();
 				foreach(var property in properties) {
 					if(property.modifier.Override) {

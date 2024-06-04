@@ -55,6 +55,16 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						});
 					}
 				}
+				else if(debugTarget is ISingletonGraph) {
+					var instance = (debugTarget as ISingletonGraph).Instance;
+					if(instance != null) {
+						var instanceValue = instance.GetVariable(value.name);
+						uNodeGUI.DrawHeader("Debug");
+						uNodeGUIUtility.EditValueLayouted(new GUIContent("Current Value"), instanceValue, value.type, val => {
+							instance.SetVariable(value.name, val);
+						});
+					}
+				}
 			}
 		}
 	}

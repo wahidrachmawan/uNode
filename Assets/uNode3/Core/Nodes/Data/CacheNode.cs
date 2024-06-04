@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override void OnRegister() {
 			base.OnRegister();
-			target = ValueInput(nameof(target), () => type ?? typeof(object)).SetName("");
+			target = ValueInput(nameof(target), () => type?.type ?? typeof(object)).SetName("");
 			output.isVariable = true;
 		}
 

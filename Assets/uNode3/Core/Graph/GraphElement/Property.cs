@@ -62,7 +62,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public object Get(GraphInstance instance) {
-			if((modifier.Virtual || modifier.Override) && instance.graph != graphContainer) {
+			if(instance.graph != graphContainer && (modifier.Virtual || modifier.Override || graphContainer.IsInterface())) {
 				var graph = instance.graph;
 				Property property = null;
 				while(property == null) {
@@ -85,7 +85,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public void Set(GraphInstance instance, object value) {
-			if((modifier.Virtual || modifier.Override) && instance.graph != graphContainer) {
+			if(instance.graph != graphContainer && (modifier.Virtual || modifier.Override || graphContainer.IsInterface())) {
 				var graph = instance.graph;
 				Property property = null;
 				while(property == null) {

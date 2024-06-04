@@ -226,8 +226,15 @@ namespace MaxyGames.UNode.Editors {
 			if(!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
 				return;
 			}
-			CompileProjectGraphs();
-			GenerateCSharpScriptForSceneGraphs();
+			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
+				CompileProjectGraphs();
+			} else {
+				if(Directory.Exists(projectScriptPath)) {
+					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");
+				}
+				CompileProjectGraphs(true, false);
+				GenerateCSharpScriptForSceneGraphs();
+			}
 		}
 
 		public static void GenerateCSharpScriptForSceneGraphs() {
@@ -282,9 +289,9 @@ namespace MaxyGames.UNode.Editors {
 			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
 			Debug.Log("Successful generating scenes script, existing scenes graphs will run with native c#." +
-			"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." + 
-			"\nRemoving generated scripts will makes the graph to run with reflection again." + 
-			"\nGenerated scenes script can be found on: " + dir);
+				"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." + 
+				"\nRemoving generated scripts will makes the graph to run with reflection again." + 
+				"\nGenerated scenes script can be found on: " + dir);
 		}
 
 
@@ -844,15 +851,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 #region GenerateCSharpScript
-		//TODO: fixme
-		//public static CG.GeneratedData GenerateCSharpScript(uNodeInterface ifaceAsset) {
-		//	return CG.Generate(new CG.GeneratorSetting(ifaceAsset) {
-		//		fullTypeName = preferenceData.generatorData.fullTypeName,
-		//		fullComment = preferenceData.generatorData.fullComment,
-		//		generationMode = preferenceData.generatorData.generationMode,
-		//	});
-		//}
-
 		public static CG.GeneratedData GenerateCSharpScript(UnityEngine.Object source, Action<float, string> updateProgress = null) {
 			if(source == null) {
 				return null;

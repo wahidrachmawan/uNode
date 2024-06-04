@@ -227,6 +227,7 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public interface ISingletonGraph : IRuntimeComponent {
 		bool IsPersistence { get; }
+		IRuntimeClass Instance { get; }
 	}
 
 	public interface IInstancedGraph {

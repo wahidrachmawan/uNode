@@ -129,6 +129,9 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
+	/// <summary>
+	/// Class for easy create graph with Graph Creator window
+	/// </summary>
 	public abstract class GraphCreator {
 		public abstract string menuName { get; }
 		public virtual int order => 0;
@@ -531,6 +534,30 @@ namespace MaxyGames.UNode.Editors {
 			base.OnGUI();
 			DrawGraphLayout();
 			DrawUnityEvent();
+			DrawOverrideMembers();
+		}
+	}
+
+	class ScriptableObjectScriptCreator : ClassGraphCreator {
+		public override string menuName => "C# Script/ScriptableObject";
+
+		public ScriptableObjectScriptCreator() {
+			graphInheritFrom = typeof(ScriptableObject);
+			graphInheritFilter.Types.Add(typeof(ScriptableObject));
+		}
+
+		protected override IScriptGraphType CreateScriptGraphType() {
+			var graph = ScriptableObject.CreateInstance<ClassScript>();
+			graph.inheritType = new SerializedType(graphInheritFrom);
+			graph.GraphData.graphLayout = graphLayout;
+			CreateOverrideMembers(graph);
+			return graph;
+		}
+
+		public override void OnGUI() {
+			DrawInheritFrom();
+			base.OnGUI();
+			DrawGraphLayout();
 			DrawOverrideMembers();
 		}
 	}

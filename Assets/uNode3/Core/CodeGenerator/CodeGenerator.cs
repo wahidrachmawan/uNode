@@ -92,7 +92,7 @@ namespace MaxyGames {
 						int propCount = 0;
 						int ctorCount = 0;
 						ThreadingUtil.Do(() => {
-							className = graph.GetGraphName();
+							className = graph.GetFullGraphName().Split('.').LastOrDefault();
 							if(string.IsNullOrEmpty(classes.name) && className == "_" + Mathf.Abs(classes.GetInstanceID())) {
 								className = classes.name;
 							}

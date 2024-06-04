@@ -14,10 +14,12 @@ namespace MaxyGames.UNode {
 		inherithFrom = typeof(RuntimeBehaviour),
 		generationKind = GenerationKind.Compatibility)]
 	[AddComponentMenu("uNode/Graph Component")]
-    public class GraphComponent : BaseRuntimeBehaviour, IInstancedGraph, IClassGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IStateGraph, IIndependentGraph, IRuntimeGraph {
+	public class GraphComponent : BaseRuntimeBehaviour, IInstancedGraph, IClassGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IStateGraph, IIndependentGraph, IRuntimeGraph {
+		[SerializeField]
+		protected string graphName;
 		public List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections", "System.Collections.Generic" };
 
-		[HideInInspector, SerializeField]
+		[SerializeField]
 		public GeneratedScriptData scriptData = new GeneratedScriptData();
 
 		[SerializeField]
@@ -33,32 +35,46 @@ namespace MaxyGames.UNode {
 		}
 
 		public override string uniqueIdentifier => GetHashCode().ToString();
+		private string m_graphName;
 
 		public virtual string GraphName {
 			get {
-				var nm = GraphData.name;
-				if(string.IsNullOrEmpty(nm)) {
-					if(uNodeUtility.IsInMainThread) {
-						try {
-							scriptData.fileName = this.name + "_GC_" + GetHashCode();
+				if(uNodeUtility.IsInMainThread) {
+					try {
+						GraphData.name = name;
+						if(string.IsNullOrEmpty(graphName)) {
+							m_graphName = GraphData.name + "_GC" + GetHashCode();
 						}
-						//Ensure to skip any error regarding `GetName` is not allowed to be called during serialization.
-						catch { }
+						else {
+							m_graphName = graphName + "_GC" + GetHashCode();
+						}
+						scriptData.fileName = m_graphName;
 					}
-					return scriptData.fileName;
+					//Ensure to skip any error regarding `GetName` is not allowed to be called during serialization.
+					catch { }
 				}
-				return nm;
+				if(!string.IsNullOrEmpty(graphName)) {
+					return graphName;
+				}
+				if(!string.IsNullOrEmpty(GraphData.name) || string.IsNullOrEmpty(scriptData.fileName)) {
+					return GraphData.name;
+				}
+				return scriptData.fileName;
 			}
 		}
 
 		public string FullGraphName {
 			get {
+				var name = GraphName;
+				if(string.IsNullOrEmpty(m_graphName) == false) {
+					name = m_graphName;
+				}
 				string ns = Namespace;
 				if(!string.IsNullOrEmpty(ns)) {
-					return ns + "." + GraphName;
+					return ns + "." + name;
 				}
 				else {
-					return GraphName;
+					return name;
 				}
 			}
 		}

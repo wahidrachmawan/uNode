@@ -91,6 +91,7 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 		IEnumerable<Type> IRuntimeInterface.GetInterfaces() {
 			return Type.EmptyTypes;
 		}
+		IRuntimeClass ISingletonGraph.Instance => m_instance;
 		#endregion
 
 		#region Initialization
