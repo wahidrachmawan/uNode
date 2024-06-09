@@ -846,7 +846,7 @@ namespace MaxyGames.UNode.Editors {
 		public static string GetUNodePath() {
 			if(string.IsNullOrEmpty(_uNodePath)) {
 				var path = AssetDatabase.GetAssetPath(uNodeEditorUtility.GetMonoScript(typeof(Graph)));
-				_uNodePath = path.Remove(path.IndexOf("uNode3") + 6);
+				_uNodePath = path.Remove(path.LastIndexOf("Core/Graph") - 1);
 			}
 			return _uNodePath;
 		}
