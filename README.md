@@ -7,7 +7,7 @@ uNode is a powerful visual scripting solution for Unity. It allows you to create
 Download: [latest ](https://github.com/wahidrachmawan/uNode/releases)| [pro version](https://maxygames.com/download/)
 
 <p align="center">
-<a href="https://github.com/wahidrachmawan/uNode/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-Apache 2.0-brightgreen.svg" alt="License: Apache 2.0"></a>
+<a href="https://github.com/wahidrachmawan/uNode/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-Apache 2.0-blue.svg" alt="License: Apache-2.0"></a>
 <a href="https://github.com/wahidrachmawan/uNode/releases/latest"><img src="https://img.shields.io/github/release/wahidrachmawan/uNode.svg" alt="release"></a>
 <a href="https://discord.gg/8ufevvN"><img src="https://img.shields.io/discord/503209099081678860.svg" alt="Discord"></a>
 </p>
@@ -128,4 +128,4 @@ By sponsoring this project or buying pro version, you'll directly support its on
 
 ## License
 
-**uNode 3 Free** is distributed under the MIT License. Please see the About window for details, as well as third party notices for included open-source libraries.
+**uNode 3 Free** is distributed under the Apache-2.0 License. Please see the About window for details, as well as third party notices for included open-source libraries.
