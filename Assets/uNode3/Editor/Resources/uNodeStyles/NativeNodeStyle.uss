@@ -497,9 +497,9 @@ NodeRerouteView .port {
     border-bottom-width: 1px;
     border-top-width: 1px;
     border-color: #393939;
-    text-color: #393939;
+    color: #393939;
     height: 24px;
-    text-alignment: middle-center;
+    -unity-text-align: middle-center;
     border-radius:8px;
 	margin: 2px;
 }
@@ -509,7 +509,7 @@ NodeRerouteView .port {
 {
     border-color: #127600;
     background-color: #074400;
-    text-color: #a2a2a2;
+    color: #a2a2a2;
 }
 
 .dragdisplay
