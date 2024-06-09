@@ -387,7 +387,7 @@ namespace MaxyGames.UNode {
 				else if(c == ' ') {
 					strs[i] = '_';
 				}
-				else if(char.IsSymbol(c) && c != '@') {
+				else if(!char.IsLetterOrDigit(c) && c != '@' && c != '_') {
 					strs.RemoveAt(i);
 					i--;
 				}

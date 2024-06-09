@@ -41,7 +41,14 @@ namespace MaxyGames.UNode.Editors {
 				//if(originalMethod.IsVirtual) {
 				//	continue;
 				//}
-				if(originalMethod.ReturnType.IsCastableTo(typeof(System.Collections.IEnumerable)) || original.ReflectedType.IsCastableTo(typeof(System.Collections.IEnumerator))) {
+				var rType = originalMethod.ReturnType;
+				if(rType == typeof(System.Collections.IEnumerable) || 
+					rType == typeof(System.Collections.IEnumerator) ||
+					rType.HasImplementInterface(typeof(System.Collections.Generic.IEnumerator<>)) || 
+					rType.HasImplementInterface(typeof(System.Collections.Generic.IEnumerable<>))) {
+					continue;
+				}
+				if(originalMethod.GetCustomAttribute(typeof(CompilerGeneratedAttribute), true) != null) {
 					continue;
 				}
 				var targetMethod = targetMethods.FirstOrDefault(m =>

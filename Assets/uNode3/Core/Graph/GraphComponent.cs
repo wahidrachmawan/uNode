@@ -34,7 +34,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public override string uniqueIdentifier => GetHashCode().ToString();
+		public override string uniqueIdentifier => Mathf.Abs(GetHashCode()).ToString();
 		private string m_graphName;
 
 		public virtual string GraphName {
@@ -43,10 +43,10 @@ namespace MaxyGames.UNode {
 					try {
 						GraphData.name = name;
 						if(string.IsNullOrEmpty(graphName)) {
-							m_graphName = GraphData.name + "_GC" + GetHashCode();
+							m_graphName = GraphData.name + "_GC" + Mathf.Abs(GetHashCode());
 						}
 						else {
-							m_graphName = graphName + "_GC" + GetHashCode();
+							m_graphName = graphName + "_GC" + Mathf.Abs(GetHashCode());
 						}
 						scriptData.fileName = m_graphName;
 					}

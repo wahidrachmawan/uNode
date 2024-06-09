@@ -1452,7 +1452,10 @@ namespace MaxyGames {
 					if(runtimeType is RuntimeGraphType graphType) {
 						if(graphType.target is IClassDefinition classDefinition) {
 							return Type(classDefinition.GetModel().ProxyScriptType);
-						} 
+						}
+						else if(graphType.IsInterface) {
+							return Type(typeof(IRuntimeClass));
+						}
 						else {
 							throw new NotImplementedException();
 						}

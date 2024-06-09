@@ -228,6 +228,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
 				CompileProjectGraphs();
+				GenerateCSharpScriptForSceneGraphs();
 			} else {
 				if(Directory.Exists(projectScriptPath)) {
 					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");

@@ -1091,6 +1091,8 @@ namespace MaxyGames.UNode.Editors {
 							bindItem: (ve, index) => {
 								var data = new PanelData();
 								var unityObject = treeView.GetItemDataForIndex<UnityEngine.Object>(index);
+								if(unityObject == null)
+									return;
 								var element = ve as PanelElement;
 								element.index = index;
 								element.value = unityObject;
