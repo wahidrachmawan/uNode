@@ -1102,6 +1102,26 @@ namespace MaxyGames.UNode.Editors {
 		/// Find all asset of type T in project
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
+		/// <param name="searchInFolders"></param>
+		/// <returns></returns>
+		public static IEnumerable<T> FindAssetsByType<T>(string[] searchInFolders) where T : UnityEngine.Object {
+			string[] guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T)), searchInFolders);
+			if(guids.Length == 0) {
+				guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T).Name), searchInFolders);
+			}
+			for(int i = 0; i < guids.Length; i++) {
+				string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+				T asset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+				if(asset != null) {
+					yield return asset;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Find all asset of type T in project
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		public static IEnumerable<T> FindAssetsByType<T>(Func<Type, bool> validation) where T : UnityEngine.Object {
 			string[] guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T)), new[] { "Assets" });

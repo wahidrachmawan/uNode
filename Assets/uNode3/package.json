@@ -1,8 +1,10 @@
 {
 	"name": "com.maxygames.unode",
 	"version": "3.0.0",
+	"unity": "2022.3",
 	"displayName": "uNode 3",
 	"description": "Visual Scripting Plugin for Unity.",
+	"type": "tool",
 	"keywords": [
 		"tools",
 		"visual scripting",

@@ -398,7 +398,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 						SavePreference();
 					});
 					menu.AddSeparator("");
-					var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>();
+					var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
 					foreach(var t in theme) {
 						if(t.ThemeName.ToLower() == "[default]")
 							continue;
@@ -661,7 +661,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			get {
 				if(_editorTheme == null) {
 					if(string.IsNullOrEmpty(preferenceData.editorTheme)) {
-						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>();
+						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
 						if(theme.Any()) {
 							_editorTheme = theme.FirstOrDefault(t => t.ThemeName == "[default]");
 							if(_editorTheme == null)
@@ -669,7 +669,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 						}
 					}
 					else {
-						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>();
+						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
 						foreach(var t in theme) {
 							if(string.IsNullOrEmpty(t.ThemeName))
 								continue;
