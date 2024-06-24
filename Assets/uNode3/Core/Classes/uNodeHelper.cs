@@ -430,7 +430,7 @@ namespace MaxyGames.UNode {
 		/// <param name="gameObject"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponent<T>(this GameObject gameObject) {
-			var uniqueIdentifier = typeof(T).Name;
+			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
 			}
@@ -456,7 +456,7 @@ namespace MaxyGames.UNode {
 		/// <param name="component"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponent<T>(this Component component) {
-			var uniqueIdentifier = typeof(T).Name;
+			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
 			}
@@ -579,7 +579,7 @@ namespace MaxyGames.UNode {
 		/// <param name="gameObject"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponentInChildren<T>(this GameObject gameObject, bool includeInactive = false) {
-			var uniqueIdentifier = typeof(T).Name;
+			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
 			}
@@ -605,7 +605,7 @@ namespace MaxyGames.UNode {
 		/// <param name="gameObject"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponentInChildren<T>(this Component component, bool includeInactive = false) {
-			var uniqueIdentifier = typeof(T).Name;
+			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
 			}
@@ -733,7 +733,7 @@ namespace MaxyGames.UNode {
 		/// <param name="includeInactive"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponentInParent<T>(this GameObject gameObject, bool includeInactive = false) {
-			var uniqueIdentifier = typeof(T).Name;
+			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
 			}
@@ -760,7 +760,7 @@ namespace MaxyGames.UNode {
 		/// <param name="includeInactive"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponentInParent<T>(this Component component, bool includeInactive = false) {
-			var uniqueIdentifier = typeof(T).Name;
+			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
 			}
