@@ -76,6 +76,7 @@ namespace MaxyGames.UNode.Nodes {
 								}
 								else {
 									if(ReflectionUtils.IsNativeType(t) == false) {
+										CG.RegisterUsingNamespace("MaxyGames.UNode");
 										if(CG.generatePureScript) {
 											return CG.Value(input).CGInvoke(nameof(uNodeHelper.GetGeneratedComponent), new[] { t });
 										}
