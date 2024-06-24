@@ -1815,6 +1815,7 @@ namespace MaxyGames {
 				return GenerateGetRuntimeInstance(instance, runtimeType);
 			}
 			if(generatePureScript) {
+				RegisterUsingNamespace("MaxyGames.UNode");
 				if(instance == null) {
 					return DoGenerateInvokeCode(
 						nameof(uNodeHelper.GetGeneratedComponent),
