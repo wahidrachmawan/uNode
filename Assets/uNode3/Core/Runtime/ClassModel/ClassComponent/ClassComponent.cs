@@ -45,6 +45,7 @@ namespace MaxyGames.UNode {
 		IGraph IInstancedGraph.OriginalGraph => target;
 		List<VariableData> IRuntimeGraphWrapper.WrappedVariables => variables;
 
+		[NonSerialized]
 		private GraphInstance m_instance;
 		public GraphInstance Instance => m_instance;
 		#endregion
@@ -88,8 +89,11 @@ namespace MaxyGames.UNode {
 		}
 		#endregion
 
-		void Awake() {
+		public ClassComponent() {
 			m_instance = null;
+		}
+
+		void Awake() {
 			EnsureInitialized();
 		}
 
