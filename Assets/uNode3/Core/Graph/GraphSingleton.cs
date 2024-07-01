@@ -13,7 +13,7 @@ namespace MaxyGames.UNode {
 		isScriptGraph = false,
 		inherithFrom =typeof(RuntimeBehaviour),
 		generationKind = GenerationKind.Performance)]
-	public class GraphSingleton : GraphAsset, IClassGraph, ISingletonGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IIndependentGraph, IClassIdentifier, IReflectionType {
+	public class GraphSingleton : GraphAsset, IClassGraph, IStateGraph, ISingletonGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IIndependentGraph, IClassIdentifier, IReflectionType {
 		public string @namespace;
 		public List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections", "System.Collections.Generic" };
 
@@ -67,6 +67,7 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 		}
 
 		public Type InheritType => typeof(MonoBehaviour);
+		public bool CanCreateStateGraph => true;
 
 		public List<string> UsingNamespaces {
 			get => usingNamespaces;
