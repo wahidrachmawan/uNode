@@ -88,7 +88,6 @@ namespace MaxyGames.UNode.Editors {
 			//}
 			{//Classes
 				VisualElement header = scroll.Q("class");
-				header.SetDisplay(false);
 				classContainer = header.Q("contents");
 				var icon = header.Q("title-icon") as Image;
 				icon.image = uNodeEditorUtility.GetTypeIcon(typeof(MonoScript));
@@ -1062,7 +1061,7 @@ namespace MaxyGames.UNode.Editors {
 			//	}
 			//}
 			{//Classes
-				classContainer.parent.SetDisplay(true);
+				classContainer.SetDisplay(true);
 				for(int i = 0; i < classContainer.childCount; i++) {
 					classContainer[i].RemoveFromHierarchy();
 					i--;
@@ -1309,7 +1308,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				else {
-					classContainer.parent.SetDisplay(false);
+					classContainer.SetDisplay(false);
 				}
 			}
 			var graphSystem = GraphUtility.GetGraphSystem(graphData.graph as UnityEngine.Object);

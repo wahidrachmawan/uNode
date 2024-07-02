@@ -80,14 +80,33 @@ namespace MaxyGames.Runtime {
 						//Wait for next process.
 						return true;
 					}
-				} else if(current is WaitForSeconds) {
-					this.current = new WaitSecond((float)current.GetType().GetFieldCached("m_Seconds").GetValueOptimized(current), false);
-					canMoveNext = false;
-					return true;
-				} else if(current is WaitForEndOfFrame || current is WaitForFixedUpdate) {
-					//Wait for next process.
-					canMoveNext = isNotEnd;
-					return true;
+				}
+				else if(current is YieldInstruction) {
+					if(current is WaitForSeconds) {
+						this.current = new WaitSecond((float)current.GetType().GetFieldCached("m_Seconds").GetValueOptimized(current), false);
+						canMoveNext = false;
+						return true;
+					}
+					else if(current is WaitForEndOfFrame || current is WaitForFixedUpdate) {
+						//Wait for next process.
+						canMoveNext = isNotEnd;
+						return true;
+					}
+					else if(current is AsyncOperation) {
+						var curr = current as AsyncOperation;
+						if(curr.isDone) {
+							this.current = null;
+							canMoveNext = isNotEnd;
+							return Process(ref state);
+						}
+						else {
+							//Wait for next process.
+							return true;
+						}
+					}
+					else {
+						throw new System.NotSupportedException("Unsupported YieldInstruction: " + current.GetType());
+					}
 				}
 				return isNotEnd;
 			}
