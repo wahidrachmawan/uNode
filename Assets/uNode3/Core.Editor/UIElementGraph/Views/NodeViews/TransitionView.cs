@@ -111,6 +111,20 @@ namespace MaxyGames.UNode.Editors {
 			input.SetEnabled(false);
 			output = AddOutputFlowPort(new FlowOutputData(transition.exit));
 			output.DisplayProxyTitle(true);
+
+			foreach(var port in nodeObject.ValueInputs) {
+				AddInputValuePort(new ValueInputData(port));
+			}
+			//foreach(var port in nodeObject.ValueOutputs) {
+			//	if(port == nodeObject.primaryValueOutput) {
+			//		AddPrimaryOutputValue();
+			//		if(flowLayout == Orientation.Horizontal) {
+			//			uNodeThreadUtility.Queue(() => primaryOutputValue?.BringToFront());
+			//		}
+			//		continue;
+			//	}
+			//	AddOutputValuePort(new ValueOutputData(port));
+			//}
 		}
 	}
 
