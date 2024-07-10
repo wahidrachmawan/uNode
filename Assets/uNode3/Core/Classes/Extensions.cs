@@ -1458,6 +1458,9 @@ namespace MaxyGames.UNode {
 			if(from.IsSubclassOf(typeof(Delegate)) && to.IsSubclassOf(typeof(Delegate))) {
 				var a = from.GetMethod("Invoke");
 				var b = to.GetMethod("Invoke");
+
+				if(a == null || b == null) return false;
+				
 				if(a.ReturnType != b.ReturnType) {
 					lock(_lockObject) {
 						if(map == null) {

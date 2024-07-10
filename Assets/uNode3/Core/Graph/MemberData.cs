@@ -1547,10 +1547,18 @@ namespace MaxyGames.UNode {
 					throw new Exception("uNodeConstructor doesn't support in runtime, its only for code generation.");
 				case TargetType.uNodeLocalVariable:
 				case TargetType.uNodeVariable:
-					if(isDeepTarget) {
-						return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).Get(flow), out _, paramValues), paramValues);
+					if(flow == null) {
+						if(isDeepTarget) {
+							return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).defaultValue, out _, paramValues), paramValues);
+						}
+						return (startItem.GetReferenceValue() as Variable).defaultValue;
 					}
-					return (startItem.GetReferenceValue() as Variable).Get(flow);
+					else {
+						if(isDeepTarget) {
+							return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Variable).Get(flow), out _, paramValues), paramValues);
+						}
+						return (startItem.GetReferenceValue() as Variable).Get(flow);
+					}
 				case TargetType.uNodeProperty:
 					if(isDeepTarget) {
 						return DoReflect(flow, ReflectionUtils.GetMemberTargetRef(memberInfo, (startItem.GetReferenceValue() as Property).Get(flow), out _, paramValues), paramValues);
