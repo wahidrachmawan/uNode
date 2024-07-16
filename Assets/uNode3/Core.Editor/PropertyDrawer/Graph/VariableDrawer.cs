@@ -53,6 +53,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						uNodeGUIUtility.EditValueLayouted(new GUIContent("Current Value"), instanceValue, value.type, val => {
 							instance.SetElementData(value, val);
 						});
+						if(GUILayout.Button(new GUIContent("Apply As Default Value"), EditorStyles.miniButton)) {
+							value.defaultValue = SerializerUtility.Duplicate(instanceValue);
+						}
 					}
 				}
 				else if(debugTarget is ISingletonGraph) {
@@ -63,6 +66,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						uNodeGUIUtility.EditValueLayouted(new GUIContent("Current Value"), instanceValue, value.type, val => {
 							instance.SetVariable(value.name, val);
 						});
+						if(GUILayout.Button(new GUIContent("Apply As Default Value"), EditorStyles.miniButton)) {
+							value.defaultValue = SerializerUtility.Duplicate(instanceValue);
+						}
 					}
 				}
 			}

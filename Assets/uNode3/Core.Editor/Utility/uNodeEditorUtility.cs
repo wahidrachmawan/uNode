@@ -29,6 +29,12 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		#region Caches
+		public static class CopiedValue<T> {
+			public static T value;
+		}
+		#endregion
+
 		#region Pro
 		internal static class ProBinding {
 			public static Action CallbackShowCSharpPreview;
