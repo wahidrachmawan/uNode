@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Switch", icon = typeof(TypeIcons.BranchIcon), inputs = new[] { typeof(int), typeof(float), typeof(double), typeof(bool), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum) })]
+	[NodeMenu("Flow", "Switch", icon = typeof(TypeIcons.SwitchIcon), inputs = new[] { typeof(int), typeof(float), typeof(double), typeof(bool), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint), typeof(string), typeof(System.Enum) })]
 	public class NodeSwitch : FlowNode {
 		public class Data {
 			public string flowID = uNodeUtility.GenerateUID();

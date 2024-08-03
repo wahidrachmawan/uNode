@@ -1,0 +1,133 @@
+/*Graph Panel*/
+#root-container > #graph-panel {
+    background-color: #C8C8C8;
+    border-top-color: #C8C8C8;
+    border-top-width: 2px;
+    margin-top: 0px;
+}
+
+#graph-panel #title {
+    background-color: #B6B6B6;
+}
+
+#graph-panel .unity-tree-view {
+    background-color: #C8C8C8;
+}
+
+#graph-panel #unity-tree-view__item.active {
+    background-color: #6487d0;
+}
+
+#graph-panel #unity-tree-view__item.selected {
+    background-color: #1664c4;
+}
+
+#graph-panel #unity-tree-view__item:hover {
+    background-color: #8A8A8A;
+}
+
+#graph-panel #title-button-add,
+#graph-panel #content-button-remove {
+    -unity-background-image-tint-color: #5A5A5A;
+}
+
+#graph-panel #title-button-add:hover {
+    background-color: #797979;
+}
+
+/*Controls*/
+#title > #title-label,
+PortView.port > #type,
+.unity-label,
+.unity-text-element {
+    color: #111111;
+}
+
+.unity-toolbar-menu__arrow {
+    -unity-background-image-tint-color: #5A5A5A;
+}
+
+ControlView .unity-button,
+.unity-enum-field__input,
+.unity-object-field__input,
+.unity-toolbar-button,
+.unity-toolbar-toggle,
+.unity-toolbar-menu {
+    background-color: #C8C8C8;
+}
+
+ControlView .unity-button:hover,
+.unity-toolbar-button:hover,
+.unity-toolbar-toggle:hover,
+.unity-toolbar-menu:hover {
+    background-color: #AEAEAE;
+}
+
+.unity-toolbar-menu.toggle-on,
+.unity-toolbar-toggle:checked {
+    background-color: #EFEFEF;
+}
+
+.unity-toolbar {
+    background-color: #CBCBCB;
+}
+
+.unity-disabled {
+    opacity: 0.8;
+}
+
+.unity-search-field-base,
+.unity-base-text-field__input {
+    background-color: #F0F0F0;
+}
+
+.unity-enum-field__arrow {
+    -unity-background-image-tint-color: #5A5A5A;
+}
+
+.unity-toggle__checkmark {
+    background-image: resource("uipackageresources/images/toggle_bg.png");
+}
+
+.unity-toggle > .unity-toggle__input:checked > .unity-toggle__checkmark {
+    background-image: resource("uipackageresources/images/toggle_on.png");
+}
+
+.unity-foldout__checkmark {
+    background-image: resource("uipackageresources/images/in_foldout.png");
+}
+
+.unity-toggle > .unity-toggle__input:checked > .unity-foldout__checkmark {
+    background-image: resource("uipackageresources/images/in_foldout_on.png");
+}
+
+/*Status Bar*/
+#status-bar {
+    background-color: #C8C8C8;
+}
+
+/*Tabbar*/
+#root-content #tabbar-container {
+    background-color: #C8C8C8;
+    border-color: #8A8A8A;
+}
+
+#root-content #pathbar {
+    background-color: #C8C8C8;
+}
+
+#tabbar #tab-element {
+    background-color: #B6B6B6;
+}
+
+#tabbar #tab-element.tab-selected {
+    background-color: #6487d0;
+}
+
+#tabbar #tab-element:hover {
+    background-color: #989898;
+}
+
+#tabbar #tab-element:hover:active {
+    background-color: #0f3961;
+}

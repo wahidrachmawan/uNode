@@ -81,7 +81,7 @@ namespace MaxyGames.UNode.Nodes {
 		protected override string GenerateFlowCode() {
 			if(target.isAssigned && value.isAssigned) {
 				return CG.Flow(
-					CG.Set(target, value, setType, target.type, value.type),
+					CG.Set(target, value, setType, target.ValueType, value.ValueType),
 					CG.FlowFinish(enter, exit)
 				);
 			}

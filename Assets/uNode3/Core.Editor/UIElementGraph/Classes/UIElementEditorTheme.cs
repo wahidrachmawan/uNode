@@ -56,4 +56,14 @@ namespace MaxyGames.UNode.Editors {
 			return typeof(UIElementGraph);
 		}
 	}
+
+	[CustomEditor(typeof(UIElementEditorTheme), true)]
+	class UIElementEditorThemeEditor : Editor {
+		public override void OnInspectorGUI() {
+			base.OnInspectorGUI();
+			if(GUILayout.Button("Reload Editor")) {
+				uNodePreference.ReloadTheme();
+			}
+		}
+	}
 }

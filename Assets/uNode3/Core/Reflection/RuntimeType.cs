@@ -594,14 +594,11 @@ namespace MaxyGames.UNode {
 		}
 
 		protected override ConstructorInfo GetConstructorImpl(BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers) {
-			if(types == null) {
-				types = Type.EmptyTypes;
-			}
 			var members = GetConstructors(bindingAttr);
 			for(int i = 0; i < members.Length; i++) {
 				var ctor = members[i];
 				var parameters = ctor.GetParameters();
-				if(types.Length == parameters.Length) {
+				if(types != null && types.Length == parameters.Length) {
 					bool flag = true;
 					for(int x = 0; x < parameters.Length; x++) {
 						if(types[x] != parameters[x].ParameterType) {
@@ -618,15 +615,12 @@ namespace MaxyGames.UNode {
 		}
 
 		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers) {
-			if(types == null) {
-				types = Type.EmptyTypes;
-			}
 			var members = GetMethods(bindingAttr);
 			for(int i = 0; i < members.Length; i++) {
 				var method = members[i];
 				if(method.Name == name) {
 					var parameters = method.GetParameters();
-					if(types.Length == parameters.Length) {
+					if(types != null && types.Length == parameters.Length) {
 						bool flag = true;
 						for(int x = 0; x < parameters.Length; x++) {
 							if(types[x] != parameters[x].ParameterType) {

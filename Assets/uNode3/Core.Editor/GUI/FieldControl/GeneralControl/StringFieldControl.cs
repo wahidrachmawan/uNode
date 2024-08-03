@@ -57,7 +57,37 @@ namespace MaxyGames.UNode.Editors.Control {
 						fieldValue = EditorGUI.TextArea(position, fieldValue);
 					}
 					else {
+						position.width -= 16;
 						fieldValue = EditorGUI.TextField(position, label, fieldValue);
+						position.x += position.width;
+						position.width = 16;
+						if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+							GUI.changed = false;
+							ActionWindow.ShowWindow(() => {
+								if(settings.nullable) {
+									EditorGUILayout.BeginHorizontal();
+									EditorGUILayout.BeginVertical();
+								}
+								EditorGUI.BeginChangeCheck();
+								fieldValue = EditorGUILayout.TextArea(fieldValue);
+								if(EditorGUI.EndChangeCheck()) {
+									onChanged(fieldValue);
+								}
+								if(settings.nullable) {
+									EditorGUILayout.EndVertical();
+									if(GUILayout.Button(GUIContent.none, GUILayout.Width(16)) && Event.current.button == 0) {
+										if(fieldValue != null) {
+											fieldValue = null;
+										}
+										else {
+											fieldValue = "";
+										}
+										onChanged(fieldValue);
+									}
+									EditorGUILayout.EndHorizontal();
+								}
+							}).ChangePosition(position);
+						}
 					}
 				}
 				if(settings.nullable) {
@@ -86,10 +116,6 @@ namespace MaxyGames.UNode.Editors.Control {
 			ValidateValue(ref value, settings != null ? settings.nullable : false);
 			var fieldValue = value as string;
 			if(value != null) {
-				if(settings.nullable) {
-					EditorGUILayout.BeginHorizontal();
-					EditorGUILayout.BeginVertical();
-				}
 				ObjectTypeAttribute drawer = ReflectionUtils.GetAttribute<ObjectTypeAttribute>(attributes);
 				FilterAttribute filter = ReflectionUtils.GetAttribute<FilterAttribute>(attributes);
 				if(drawer != null) {
@@ -100,6 +126,9 @@ namespace MaxyGames.UNode.Editors.Control {
 						filter.OnlyGetType = true;
 						filter.UnityReference = false;
 					}
+					if(settings.nullable) {
+						EditorGUILayout.BeginHorizontal();
+					}
 					uNodeGUIUtility.DrawTypeDrawer(TypeSerializer.Deserialize(fieldValue, false), label, delegate (Type t) {
 						if(t != null) {
 							fieldValue = t.FullName;
@@ -109,11 +138,21 @@ namespace MaxyGames.UNode.Editors.Control {
 						}
 						onChanged(fieldValue);
 					}, filter, settings.unityObject);
+					if(settings.nullable) {
+						if(GUILayout.Button(GUIContent.none, GUILayout.Width(16)) && Event.current.button == 0) {
+							fieldValue = null;
+							GUI.changed = true;
+						}
+						EditorGUILayout.EndHorizontal();
+					}
 				}
 				else if(filter != null) {
 					filter.ArrayManipulator = false;
 					filter.OnlyGetType = true;
 					filter.UnityReference = false;
+					if(settings.nullable) {
+						EditorGUILayout.BeginHorizontal();
+					}
 					uNodeGUIUtility.DrawTypeDrawer(TypeSerializer.Deserialize(fieldValue, false), label, delegate (Type t) {
 						if(t != null) {
 							fieldValue = t.FullName;
@@ -123,26 +162,71 @@ namespace MaxyGames.UNode.Editors.Control {
 						}
 						onChanged(fieldValue);
 					}, filter, settings.unityObject);
+					if(settings.nullable) {
+						if(GUILayout.Button(GUIContent.none, GUILayout.Width(16)) && Event.current.button == 0) {
+							fieldValue = null;
+							GUI.changed = true;
+						}
+						EditorGUILayout.EndHorizontal();
+					}
 				}
 				else {
 					TextAreaAttribute textAtt = ReflectionUtils.GetAttribute<TextAreaAttribute>(attributes);
 					if(textAtt != null) {
+						if(settings.nullable) {
+							EditorGUILayout.BeginHorizontal();
+							EditorGUILayout.BeginVertical();
+						}
 						EditorGUILayout.BeginHorizontal();
 						EditorGUILayout.PrefixLabel(label);
 						fieldValue = EditorGUILayout.TextArea(fieldValue);
 						EditorGUILayout.EndHorizontal();
+						if(settings.nullable) {
+							EditorGUILayout.EndVertical();
+							if(GUILayout.Button(GUIContent.none, GUILayout.Width(16)) && Event.current.button == 0) {
+								fieldValue = null;
+								GUI.changed = true;
+							}
+							EditorGUILayout.EndHorizontal();
+						}
 					}
 					else {
+						EditorGUILayout.BeginHorizontal();
 						fieldValue = EditorGUILayout.TextField(label, fieldValue);
+						var pos = uNodeGUIUtility.GetRect(GUILayout.Width(18));
+						if(EditorGUI.DropdownButton(pos, GUIContent.none, FocusType.Keyboard)) {
+							GUI.changed = false;
+							ActionPopupWindow.ShowWindow(pos, () => {
+								if(settings.nullable) {
+									EditorGUILayout.BeginHorizontal();
+									EditorGUILayout.BeginVertical();
+								}
+								EditorGUI.BeginChangeCheck();
+								fieldValue = EditorGUILayout.TextArea(fieldValue);
+								if(EditorGUI.EndChangeCheck()) {
+									onChanged(fieldValue);
+								}
+								if(settings.nullable) {
+									EditorGUILayout.EndVertical();
+									if(GUILayout.Button(GUIContent.none, GUILayout.Width(16)) && Event.current.button == 0) {
+										if(fieldValue != null) {
+											fieldValue = null;
+										}
+										else {
+											fieldValue = "";
+										}
+										onChanged(fieldValue);
+									}
+									EditorGUILayout.EndHorizontal();
+								}
+							});
+						}
+						EditorGUILayout.EndHorizontal();
+						if(EditorGUI.EndChangeCheck()) {
+							onChanged(fieldValue);
+						}
+						return;
 					}
-				}
-				if(settings.nullable) {
-					EditorGUILayout.EndVertical();
-					if(GUILayout.Button(GUIContent.none, GUILayout.Width(16)) && Event.current.button == 0) {
-						fieldValue = null;
-						GUI.changed = true;
-					}
-					EditorGUILayout.EndHorizontal();
 				}
 			}
 			else {

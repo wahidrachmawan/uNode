@@ -1,0 +1,21 @@
+.graphView {
+    background-color: rgb(141, 141, 141);
+}
+
+.graphView > GridBackground {
+    --grid-background-color: rgba(0, 0, 0, 0);
+    --spacing: 20;
+    --line-color: rgba(118, 118, 118, 0.84);
+    --thick-lines: 20;
+    --thick-line-color: rgba(83, 83, 83, 0.84);
+}
+
+RegionNodeView {
+    --region-body-transparent: 0.2;
+    --region-title-transparent: 0.4;
+}
+
+.flow-vertical.output #proxy-title.proxy-flow {
+    background-color: rgba(28, 150, 60, 0.8);
+    border-color: rgba(10, 103, 54, 0.8);
+}

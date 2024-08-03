@@ -1817,6 +1817,101 @@ namespace MaxyGames.UNode {
 		public Color summaryColor = new Color(0, 0.7f, 0);
 	}
 
+	[Serializable]
+	public class EditorThemeTypeSettings {
+		public Color defaultTypeColor = new Color(1, 0.95f, 0.6f);
+		public List<EditorTypeColor> typeColors = new List<EditorTypeColor>() {
+			new EditorTypeColor() {
+				type = typeof(object),
+				color = new Color(0.3f, 1, 0.5f),
+			},
+			new EditorTypeColor() {
+				type = typeof(string),
+				color = new Color(0.3f, 0.5f, 1),
+			},
+			new EditorTypeColor() {
+				type = typeof(float),
+				color = new Color(1, 0.5f, 0.4f),
+			},
+			new EditorTypeColor() {
+				type = typeof(int),
+				color = new Color(0.8f, 1, 0.25f),
+			},
+			new EditorTypeColor() {
+				type = typeof(bool),
+				color = new Color(1, 0.22f, 0.26f),
+			},
+			new EditorTypeColor() {
+				type = typeof(Vector2),
+				color = new Color(1, 0.7f, 0f),
+			},
+			new EditorTypeColor() {
+				type = typeof(Vector3),
+				color = new Color(1, 0.55f, 0f),
+			},
+			new EditorTypeColor() {
+				type = typeof(MonoBehaviour),
+				color = new Color(0.48f, 0.34f, 0.8f),
+				includingSubTypes = true,
+			},
+			new EditorTypeColor() {
+				type = typeof(UnityEngine.Object),
+				color = new Color(0.67f, 0.22f, 1f),
+				includingSubTypes = true,
+			},
+		};
+
+		public List<EditorTypeIcon> typeIcons = new List<EditorTypeIcon>();
+
+		public Color GetColor(Type type) {
+			if(type == null) return defaultTypeColor;
+			foreach(var data in typeColors) {
+				if(type == data.Type) {
+					return data.color;
+				}
+				else if(data.includingSubTypes) {
+					if(type.IsSubclassOf(data.Type)) {
+						return data.color;
+					}
+				}
+			}
+			return defaultTypeColor;
+		}
+
+		public Texture2D GetIcon(Type type) {
+			if(type == null) return null;
+			foreach(var data in typeIcons) {
+				if(type == data.Type) {
+					return data.icon;
+				}
+				else if(data.includingSubTypes) {
+					if(type.IsSubclassOf(data.Type)) {
+						return data.icon;
+					}
+				}
+			}
+			return null;
+		}
+	}
+
+	[Serializable]
+	public class EditorTypeColor {
+		public SerializedType type = new SerializedType(typeof(object));
+		public Color color = Color.black;
+		public bool includingSubTypes;
+
+		public Type Type => type.type;
+	}
+
+	[Serializable]
+	public class EditorTypeIcon {
+		public SerializedType type = new SerializedType(typeof(object));
+		public Texture2D icon;
+		public bool includingSubTypes;
+
+		public Type Type => type.type;
+	}
+
 	/// <summary>
 	/// Provides useful function for string manipulation.
 	/// </summary>

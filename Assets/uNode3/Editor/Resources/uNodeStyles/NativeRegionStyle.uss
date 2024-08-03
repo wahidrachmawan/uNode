@@ -22,6 +22,10 @@ RegionNodeView
 	-unity-font-style: bold-and-italic
 }
 
+#title > #title-label {
+    color: rgba(229, 229, 229, 1);
+}
+
 #contents > #top > #input
 {
 	padding-top: 0;

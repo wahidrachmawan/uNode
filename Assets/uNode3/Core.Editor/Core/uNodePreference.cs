@@ -54,6 +54,7 @@ namespace MaxyGames.UNode.Editors {
 			public bool autoAddNamespace;
 			public float debugTransitionSpeed = 0.5f;
 
+
 			[SerializeField]
 			private int m_maxReloadMilis;
 			public int maxReloadMilis {
@@ -66,7 +67,9 @@ namespace MaxyGames.UNode.Editors {
 					m_maxReloadMilis = value;
 				}
 			}
-			public Color defaultValueColor = new Color(1, 0.95f, 0.6f);
+
+			//Backup
+			public int maxGraphBackup = 100;
 
 			//Browser
 			public bool coloredItem = false;
@@ -98,7 +101,6 @@ namespace MaxyGames.UNode.Editors {
 			public List<string> nodeBrowserNamespaces;
 			public List<string> excludedNamespaces;
 			public List<string> excludedTypes;
-			public Dictionary<Type, Color> typeColors;
 			[Tooltip("If true, will auto hide c# type when there's native graph that generate the type." + 
 				"\n\nIf false, will show all c# type even if there's Runtime Type that referencing the real c# type." +
 				"\n\nNote: if false, you will see duplicated type the first is Runtime Type and second is real c# type it's the best to set this to true")]
@@ -183,19 +185,6 @@ Note: Auto Generate on Buld will always using Unity method.")]
 					//Stuff for upgrades
 
 					#region Initialization
-					if(typeColors == null) {
-						typeColors = new Dictionary<Type, Color>() {
-							{typeof(object), new Color(0.3f, 1, 0.5f) },
-							{typeof(string), new Color(0.3f, 0.5f, 1) },
-							{typeof(float), new Color(1, 0.5f, 0.4f) },
-							{typeof(int), new Color(0.8f, 1, 0.25f) },
-							{typeof(bool), new Color(1, 0.22f, 0.26f) },
-							{typeof(Vector2), new Color(1, 0.7f, 0f) },
-							{typeof(Vector3), new Color(1, 0.55f, 0f) },
-							{typeof(UnityEngine.Object), new Color(0.67f, 0.22f, 1f) },
-							{typeof(MonoBehaviour), new Color(0.48f, 0.34f, 0.8f) },
-						};
-					}
 					if(includedAssemblies == null) {
 						includedAssemblies = new List<string>() {
 							"UnityEngine",
@@ -296,6 +285,9 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				if(debugTransitionSpeed == 0) {
 					debugTransitionSpeed = 0.5f;
 				}
+				if(maxGraphBackup == 0) {
+					maxGraphBackup = 100;
+				}
 			}
 			#endregion
 
@@ -334,47 +326,10 @@ Note: Auto Generate on Buld will always using Unity method.")]
 			}
 		}
 
-		private static NodeGraph _nodeGraph;
-		public static NodeGraph nodeGraph {
-			get {
-				if(_nodeGraph == null) {
-					if(!string.IsNullOrEmpty(preferenceData.editorTheme) && preferenceData.editorTheme.StartsWith("@")) {
-						var customGraphs = uNodeEditorUtility.FindCustomGraph();
-						foreach(var g in customGraphs) {
-							if(string.IsNullOrEmpty(g.name))
-								continue;
-							if(preferenceData.editorTheme == "@" + g.name) {
-								_nodeGraph = ReflectionUtils.CreateInstance(g.type) as NodeGraph;
-								return _nodeGraph;
-							}
-						}
-					}
-					if(editorTheme != null) {
-						var graphType = editorTheme.GetGraphType();
-						if(graphType == null) {
-							var customGraphs = uNodeEditorUtility.FindCustomGraph();
-							if(customGraphs != null && customGraphs.Count > 0) {
-								graphType = customGraphs[0]?.type;
-							}
-							if(graphType == null) {
-								return NoneGraph.instance;
-							}
-						}
-						_nodeGraph = System.Activator.CreateInstance(graphType) as NodeGraph;
-					}
-					else {
-						return NoneGraph.instance;
-					}
-				}
-				return _nodeGraph;
-			}
-		}
-
 		private static PreferenceData _preferenceData;
-		private static bool isInitialized = false, assemblyT, colorT, isDim, isLocked, advanced;
+		private static bool isInitialized = false, assemblyT, isDim, isLocked, advanced;
 		private static Vector2 scrollPos;
 		private static Assembly[] assemblies;
-		private static Dictionary<Type, Color> _cachedColorMap = new Dictionary<Type, Color>();
 
 		private static int selectedMenu = 0;
 
@@ -392,9 +347,9 @@ Note: Auto Generate on Buld will always using Unity method.")]
 					GenericMenu menu = new GenericMenu();
 					menu.AddItem(new GUIContent("Default"), string.IsNullOrEmpty(preferenceData.editorTheme), () => {
 						preferenceData.editorTheme = "";
-						_editorTheme = null;
+						Cached.editorTheme = null;
 						nodeGraph.OnDisable();
-						_nodeGraph = null;
+						Cached.nodeGraph = null;
 						SavePreference();
 					});
 					menu.AddSeparator("");
@@ -404,9 +359,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 							continue;
 						menu.AddItem(new GUIContent(t.ThemeName), preferenceData.editorTheme == t.ThemeName, () => {
 							preferenceData.editorTheme = t.ThemeName;
-							_editorTheme = null;
-							nodeGraph.OnDisable();
-							_nodeGraph = null;
+							ReloadTheme();
 							SavePreference();
 						});
 					}
@@ -418,9 +371,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 								continue;
 							menu.AddItem(new GUIContent(g.name), preferenceData.editorTheme == "@" + g.name, () => {
 								preferenceData.editorTheme = "@" + g.name;
-								_editorTheme = null;
-								nodeGraph.OnDisable();
-								_nodeGraph = null;
+								ReloadTheme();
 								SavePreference();
 							});
 						}
@@ -429,16 +380,19 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				}
 				EditorGUILayout.EndHorizontal();
 				if(!string.IsNullOrEmpty(preferenceData.editorTheme) && editorTheme != null && AssetDatabase.Contains(editorTheme)) {
-					editorTheme.expanded = EditorGUILayout.Foldout(editorTheme.expanded, "Theme Settings");
-					if(editorTheme.expanded) {
-						Editor editor = CustomInspector.GetEditor(editorTheme);
-						EditorGUI.indentLevel++;
-						editor.OnInspectorGUI();
-						EditorGUI.indentLevel--;
-					}
-					if(GUI.changed) {
-						uNodeEditorUtility.MarkDirty(editorTheme);
-					}
+					EditorGUI.BeginDisabledGroup(true);
+					EditorGUILayout.ObjectField(new GUIContent("Theme Asset"), editorTheme, typeof(EditorTheme), false);
+					EditorGUI.EndDisabledGroup();
+					//editorTheme.expanded = EditorGUILayout.Foldout(editorTheme.expanded, "Theme Settings");
+					//if(editorTheme.expanded) {
+					//	Editor editor = CustomInspector.GetEditor(editorTheme);
+					//	EditorGUI.indentLevel++;
+					//	editor.OnInspectorGUI();
+					//	EditorGUI.indentLevel--;
+					//}
+					//if(GUI.changed) {
+					//	uNodeEditorUtility.MarkDirty(editorTheme);
+					//}
 				}
 				#endregion
 
@@ -478,19 +432,10 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			else if(selectedMenu == 1) {
 				preferenceData.inspectorIntegration = EditorGUILayout.Toggle(new GUIContent("Inspector Integration", "If true, graph inspector can be displayed on Unity Inspector"), preferenceData.inspectorIntegration);
 				preferenceData.autoBackupOnSave = EditorGUILayout.Toggle(new GUIContent("Create Backup On Save", "Auto create backup graph on save.\nOnly changed assets are backuped"), preferenceData.autoBackupOnSave);
+				uNodeGUIUtility.ShowField(nameof(preferenceData.maxGraphBackup), preferenceData);
 				// preferenceData.isLocked = EditorGUILayout.Toggle(new GUIContent("Lock Selection"), preferenceData.isLocked);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newVariableAccessor), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newFunctionAccessor), preferenceData);
-
-				colorT = EditorGUILayout.Foldout(colorT, "Type Color");
-				if(colorT) {
-					EditorGUILayout.BeginVertical("Box");
-					preferenceData.defaultValueColor = EditorGUILayout.ColorField(new GUIContent("Default Value Color"), preferenceData.defaultValueColor);
-					uNodeGUIUtility.EditValueLayouted(new GUIContent("Type Colors"), preferenceData.typeColors, preferenceData.typeColors.GetType(), (val) => {
-						preferenceData.typeColors = val as Dictionary<Type, Color>;
-					});
-					EditorGUILayout.EndVertical();
-				}
 
 				using(new EditorGUILayout.HorizontalScope()) {
 					preferenceData.ilSpyPath = EditorGUILayout.TextField("ILSpy Path", preferenceData.ilSpyPath);
@@ -626,15 +571,10 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			EditorGUILayout.EndScrollView();
 		}
 
-		public static void ResetGraph() {
-			_editorTheme = null;
-			nodeGraph.OnDisable();
-			_nodeGraph = null;
-		}
-
 		private static void SetDefault() {
 			_preferenceData = new PreferenceData();
 			_preferenceData.editorTheme = "";
+			ReloadTheme();
 			SavePreference();
 		}
 
@@ -653,39 +593,6 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 					catch { continue; }
 				}
 				assemblies = ass.ToArray();
-			}
-		}
-
-		private static EditorTheme _editorTheme;
-		public static EditorTheme editorTheme {
-			get {
-				if(_editorTheme == null) {
-					if(string.IsNullOrEmpty(preferenceData.editorTheme)) {
-						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
-						if(theme.Any()) {
-							_editorTheme = theme.FirstOrDefault(t => t.ThemeName == "[default]");
-							if(_editorTheme == null)
-								_editorTheme = theme.FirstOrDefault();
-						}
-					}
-					else {
-						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
-						foreach(var t in theme) {
-							if(string.IsNullOrEmpty(t.ThemeName))
-								continue;
-							if(t.ThemeName == preferenceData.editorTheme) {
-								_editorTheme = t;
-								break;
-							}
-						}
-						if(_editorTheme == null && theme.Any()) {
-							_editorTheme = theme.FirstOrDefault(t => t.ThemeName == "[default]");
-							if(_editorTheme == null)
-								_editorTheme = theme.FirstOrDefault();
-						}
-					}
-				}
-				return _editorTheme;
 			}
 		}
 
@@ -813,33 +720,321 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			return false;
 		}
 
-		public static Color GetColorForType(Type type) {
-			if(type == null)
-				return preferenceData.defaultValueColor;
-			if(_cachedColorMap.ContainsKey(type)) {
-				return _cachedColorMap[type];
+		#region Themes
+		public static EditorTheme editorTheme {
+			get {
+				if(Cached.editorTheme == null) {
+					if(string.IsNullOrEmpty(preferenceData.editorTheme)) {
+						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
+						if(theme.Any()) {
+							Cached.editorTheme = theme.FirstOrDefault(t => t.ThemeName == "[default]");
+							if(Cached.editorTheme == null)
+								Cached.editorTheme = theme.FirstOrDefault();
+						}
+					}
+					else {
+						var theme = uNodeEditorUtility.FindAssetsByType<EditorTheme>(new[] { "Assets", uNodeEditorUtility.GetUNodePath() });
+						foreach(var t in theme) {
+							if(string.IsNullOrEmpty(t.ThemeName))
+								continue;
+							if(t.ThemeName == preferenceData.editorTheme) {
+								Cached.editorTheme = t;
+								break;
+							}
+						}
+						if(Cached.editorTheme == null && theme.Any()) {
+							Cached.editorTheme = theme.FirstOrDefault(t => t.ThemeName == "[default]");
+							if(Cached.editorTheme == null)
+								Cached.editorTheme = theme.FirstOrDefault();
+						}
+					}
+				}
+				return Cached.editorTheme;
 			}
-			if(preferenceData.typeColors.ContainsKey(type)) {
-				_cachedColorMap[type] = preferenceData.typeColors[type];
-				return preferenceData.typeColors[type];
+		}
+
+		public static NodeGraph nodeGraph {
+			get {
+				if(Cached.nodeGraph == null) {
+					if(!string.IsNullOrEmpty(preferenceData.editorTheme) && preferenceData.editorTheme.StartsWith("@")) {
+						var customGraphs = uNodeEditorUtility.FindCustomGraph();
+						foreach(var g in customGraphs) {
+							if(string.IsNullOrEmpty(g.name))
+								continue;
+							if(preferenceData.editorTheme == "@" + g.name) {
+								Cached.nodeGraph = ReflectionUtils.CreateInstance(g.type) as NodeGraph;
+								return Cached.nodeGraph;
+							}
+						}
+					}
+					if(editorTheme != null) {
+						var graphType = editorTheme.GetGraphType();
+						if(graphType == null) {
+							var customGraphs = uNodeEditorUtility.FindCustomGraph();
+							if(customGraphs != null && customGraphs.Count > 0) {
+								graphType = customGraphs[0]?.type;
+							}
+							if(graphType == null) {
+								return NoneGraph.instance;
+							}
+						}
+						Cached.nodeGraph = System.Activator.CreateInstance(graphType) as NodeGraph;
+					}
+					else {
+						return NoneGraph.instance;
+					}
+				}
+				return Cached.nodeGraph;
 			}
-			foreach(var pair in preferenceData.typeColors) {
-				if(pair.Key.IsCastableTo(type)) {
-					_cachedColorMap[type] = pair.Value;
-					return pair.Value;
+		}
+
+		private static class Cached {
+			public static NodeGraph nodeGraph;
+			public static EditorTheme editorTheme;
+			public static Dictionary<Type, Color> colorMap = new Dictionary<Type, Color>();
+			public static Dictionary<Type, Texture> iconMap = new Dictionary<Type, Texture>();
+
+			public static EditorThemeTypeSettings _defaultThemeTypeSetting;
+			public static EditorThemeTypeSettings defaultThemeTypeSetting {
+				get {
+					if(_defaultThemeTypeSetting == null) {
+						_defaultThemeTypeSetting = new EditorThemeTypeSettings();
+					}
+					return _defaultThemeTypeSetting;
 				}
 			}
+		}
+
+		public static void ReloadTheme() {
+			OnThemeChanged();
+			Cached.editorTheme = null;
+			nodeGraph.OnDisable();
+			Cached.nodeGraph = null;
+		}
+
+		public static void OnThemeChanged() {
+			Cached.colorMap.Clear();
+			Cached.iconMap.Clear();
+		}
+
+		private static EditorThemeTypeSettings GetTypeSettings() {
+			if(uNodePreference.editorTheme != null) {
+				return uNodePreference.editorTheme.typeSettings;
+			}
+			return Cached.defaultThemeTypeSetting;
+		}
+
+		public static Color GetColorForType(Type type) {
+			if(type == null)
+				return GetTypeSettings().defaultTypeColor;
+			if(Cached.colorMap.ContainsKey(type)) {
+				return Cached.colorMap[type];
+			}
 			if(type.IsEnum) {
-				_cachedColorMap[type] = uNodeUtility.richTextColor().enumColor;
+				Cached.colorMap[type] = uNodeUtility.richTextColor().enumColor;
 				return uNodeUtility.richTextColor().enumColor;
 			}
 			else if(type.IsInterface) {
-				_cachedColorMap[type] = uNodeUtility.richTextColor().interfaceColor;
+				Cached.colorMap[type] = uNodeUtility.richTextColor().interfaceColor;
 				return uNodeUtility.richTextColor().enumColor;
 			}
-			_cachedColorMap[type] = preferenceData.defaultValueColor;
-			return _cachedColorMap[type];
+			Cached.colorMap[type] = GetTypeSettings().GetColor(type);
+			return Cached.colorMap[type];
 		}
+
+		public static Texture GetIconForType(Type type) {
+			if(type == null)
+				return null;
+			if(type.IsByRef) {
+				return GetIconForType(type.GetElementType());
+			}
+			if(Cached.iconMap.TryGetValue(type, out var result)) {
+				return result;
+			}
+			if(type is ICustomIcon) {
+				var icon = (type as ICustomIcon).GetIcon();
+				if(icon != null) {
+					return icon;
+				}
+			}
+			else if(type is IIcon) {
+				var icon = (type as IIcon).GetIcon();
+				if(icon != null) {
+					return GetIconForType(icon);
+				}
+			}
+			//else if(type.IsSubclassOf(typeof(Delegate))) {
+			//	result = GetIconForType(typeof(Delegate));
+			//	_iconsMap[type] = result;
+			//	return result;
+			//}
+			if(type is RuntimeType) {
+				if(type.IsArray || type.IsGenericType) {
+					return uNodeEditorUtility.Icons.listIcon;
+				}
+				var rType = type as RuntimeType;
+				return GetIconForType(typeof(TypeIcons.RuntimeTypeIcon));
+			}
+			result = GetTypeSettings().GetIcon(type) ?? GetDefaultIcon(type);
+			if(result != null) {
+				Cached.iconMap[type] = result;
+				return result;
+			}
+			TypeIcons.IconPathAttribute att = null;
+			if(type.IsDefinedAttribute(typeof(TypeIcons.IconPathAttribute))) {
+				att = type.GetCustomAttributes(typeof(TypeIcons.IconPathAttribute), true)[0] as TypeIcons.IconPathAttribute;
+			}
+			if(att != null) {
+				result = uNodeEditorUtility.Icons.GetIcon(att.path);
+			}
+			else if(type == typeof(TypeIcons.FlowIcon)) {
+				result = uNodeEditorUtility.Icons.flowIcon;
+			}
+			else if(type == typeof(TypeIcons.ValueIcon)) {
+				result = uNodeEditorUtility.Icons.valueIcon;
+			}
+			else if(type == typeof(TypeIcons.BranchIcon)) {
+				result = uNodeEditorUtility.Icons.divideIcon;
+			}
+			else if(type == typeof(TypeIcons.ClockIcon)) {
+				result = uNodeEditorUtility.Icons.clockIcon;
+			}
+			else if(type == typeof(TypeIcons.RepeatIcon)) {
+				result = uNodeEditorUtility.Icons.repeatIcon;
+			}
+			else if(type == typeof(TypeIcons.RepeatOnceIcon)) {
+				result = uNodeEditorUtility.Icons.repeatOnceIcon;
+			}
+			else if(type == typeof(TypeIcons.SwitchIcon)) {
+				result = uNodeEditorUtility.Icons.divideIcon;
+			}
+			else if(type == typeof(TypeIcons.MouseIcon)) {
+				result = uNodeEditorUtility.Icons.mouseIcon;
+			}
+			else if(type == typeof(TypeIcons.EventIcon)) {
+				result = uNodeEditorUtility.Icons.eventIcon;
+			}
+			else if(type == typeof(TypeIcons.RotationIcon) || type == typeof(Quaternion)) {
+				result = uNodeEditorUtility.Icons.rotateIcon;
+			}
+			else if(type == typeof(Color) || type == typeof(Color32)) {
+				result = uNodeEditorUtility.Icons.colorIcon;
+			}
+			else if(type == typeof(int)) {
+				result = GetIconForType(typeof(TypeIcons.IntegerIcon));
+			}
+			else if(type == typeof(float)) {
+				result = GetIconForType(typeof(TypeIcons.FloatIcon));
+			}
+			else if(type == typeof(Vector3)) {
+				result = GetIconForType(typeof(TypeIcons.Vector3Icon));
+			}
+			else if(type == typeof(Vector2)) {
+				result = GetIconForType(typeof(TypeIcons.Vector2Icon));
+			}
+			else if(type == typeof(Vector4)) {
+				result = GetIconForType(typeof(TypeIcons.Vector4Icon));
+			}
+			else if(type.IsCastableTo(typeof(UnityEngine.Object))) {
+				result = uNodeEditorUtility.Icons.objectIcon;
+			}
+			else if(type.IsCastableTo(typeof(System.Collections.IList))) {
+				result = uNodeEditorUtility.Icons.listIcon;
+			}
+			else if(type.IsCastableTo(typeof(System.Collections.IDictionary))) {
+				result = uNodeEditorUtility.Icons.bookIcon;
+			}
+			else if(type == typeof(void)) {
+				result = GetIconForType(typeof(TypeIcons.VoidIcon));
+			}
+			else if(type.IsCastableTo(typeof(KeyValuePair<,>))) {
+				result = uNodeEditorUtility.Icons.keyIcon;
+			}
+			else if(type == typeof(DateTime) || type == typeof(Time)) {
+				result = uNodeEditorUtility.Icons.dateIcon;
+			}
+			else if(type.IsInterface) {
+				result = GetIconForType(typeof(TypeIcons.InterfaceIcon));
+			}
+			else if(type.IsEnum) {
+				result = GetIconForType(typeof(TypeIcons.EnumIcon));
+			}
+			else if(type == typeof(object)) {
+				result = uNodeEditorUtility.Icons.valueBlueIcon;
+			}
+			else if(type == typeof(bool)) {
+				result = uNodeEditorUtility.Icons.valueYellowRed;
+			}
+			else if(type == typeof(string)) {
+				result = GetIconForType(typeof(TypeIcons.StringIcon));
+			}
+			else if(type == typeof(Type)) {
+				result = uNodeEditorUtility.Icons.valueGreenIcon;
+			}
+			else if(type == typeof(UnityEngine.Random) || type == typeof(System.Random)) {
+				result = GetIconForType(typeof(TypeIcons.RandomIcon));
+			}
+			// else if(type == typeof(UnityEngine.Debug)) {
+			// 	result = GetIconForType(typeof(TypeIcons.BugIcon));
+			// } 
+			else {
+				result = uNodeEditorUtility.GetIcon(type);
+			}
+			return Cached.iconMap[type] = result;
+		}
+
+		private static Texture GetScriptTypeIcon(string scriptName) {
+			var scriptObject = (UnityEngine.Object)uNodeEditorUtility.Icons.EditorGUIUtility_GetScriptObjectFromClass.InvokeOptimized(null, new object[] { scriptName });
+			if(scriptObject != null) {
+				var scriptIcon = uNodeEditorUtility.Icons.EditorGUIUtility_GetIconForObject.InvokeOptimized(null, new object[] { scriptObject }) as Texture;
+
+				if(scriptIcon != null) {
+					return scriptIcon;
+				}
+			}
+			var scriptPath = AssetDatabase.GetAssetPath(scriptObject);
+			if(scriptPath != null) {
+				switch(Path.GetExtension(scriptPath)) {
+					case ".js":
+						return EditorGUIUtility.IconContent("js Script Icon").image;
+					case ".cs":
+						return EditorGUIUtility.IconContent("cs Script Icon").image;
+					case ".boo":
+						return EditorGUIUtility.IconContent("boo Script Icon").image;
+				}
+			}
+			return null;
+		}
+
+		private static Texture GetDefaultIcon(Type type) {
+			if(type == null || type.IsGenericParameter) return null;
+			if(typeof(MonoBehaviour).IsAssignableFrom(type)) {
+				var icon = EditorGUIUtility.ObjectContent(null, type)?.image;
+				if(icon == EditorGUIUtility.FindTexture("DefaultAsset Icon")) {
+					icon = null;
+				}
+				if(icon != null) {
+					return icon;
+				}
+				else {
+					icon = GetScriptTypeIcon(type.Name);
+					if(icon != null) {
+						return icon;
+					}
+				}
+			}
+			if(typeof(UnityEngine.Object).IsAssignableFrom(type)) {
+				Texture icon = EditorGUIUtility.ObjectContent(null, type)?.image;
+				if(icon == EditorGUIUtility.FindTexture("DefaultAsset Icon")) {
+					icon = EditorGUIUtility.FindTexture("ScriptableObject Icon");
+				}
+				if(icon != null) {
+					return icon;
+				}
+			}
+			return null;
+		}
+		#endregion
 
 		#region Save & Load
 		internal const string preferenceDirectory = "uNode3Data";
@@ -865,7 +1060,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			_includedAssemblies = null;
 			_browserNamespaces = null;
 			_globalUsingNamespaces = null;
-			_cachedColorMap.Clear();
+			OnThemeChanged();
 
 			Directory.CreateDirectory(preferenceDirectory);
 			char separator = Path.DirectorySeparatorChar;

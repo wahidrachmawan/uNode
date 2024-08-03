@@ -65,5 +65,29 @@ namespace MaxyGames.UNode {
 			}
 			return result;
 		}
+
+		public static FakeType FakeActionDelegate(Type[] typeArguments) {
+			return FakeGenericType(("System.Action`" + typeArguments.Length).ToType(), typeArguments);
+		}
+
+		public static FakeType FakeFuncDelegate(Type returnType, Type[] typeArguments) {
+			if(typeArguments.Length == 0) {
+				return FakeGenericType(typeof(Func<>), new[] { returnType });
+			}
+			var types = new Type[typeArguments.Length + 1];
+			for(int i=0;i<typeArguments.Length;i++) {
+				types[i] = typeArguments[i];
+			}
+			types[types.Length - 1] = returnType;
+			return FakeGenericType(("System.Func`" + typeArguments.Length + 1).ToType(), types);
+		}
+
+		public static FakeType FakeFuncDelegate(Type[] typeArguments) {
+			if(typeArguments.Length == 1) {
+				return FakeGenericType(typeof(Func<>), typeArguments);
+			}
+			return FakeGenericType(("System.Func`" + typeArguments.Length).ToType(), typeArguments);
+		}
+
 	}
 }

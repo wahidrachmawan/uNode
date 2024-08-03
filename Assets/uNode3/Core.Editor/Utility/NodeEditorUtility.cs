@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Editors {
 		public static void AddNewFunction(FunctionContainer container, string name, Type returnType, string[] parameterName, Type[] parameterType, string[] genericParameter = null, Action<Function> action = null) {
 			if(parameterName.Length != parameterType.Length)
 				throw new Exception("Parameter Name & Parameter Type length must same.");
+			name = uNodeUtility.AutoCorrectName(name);
 			AddNewObject<Function>(name, container, func => {
 				func.name = name;
 				func.returnType = returnType;
@@ -37,6 +38,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void AddNewFunction(FunctionContainer container, string name, Type returnType, IList<ParameterData> parameters, string[] genericParameter = null, Action<Function> action = null) {
+			name = uNodeUtility.AutoCorrectName(name);
 			AddNewObject<Function>(name, container, func => {
 				func.name = name;
 				func.returnType = returnType;
@@ -61,6 +63,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void AddNewFunction(FunctionContainer container, string name, Type returnType, Action<Function> action = null) {
+			name = uNodeUtility.AutoCorrectName(name);
 			string fName = name;
 			var functions = container.collections;
 			if(functions.Count > 0) {
@@ -114,7 +117,7 @@ namespace MaxyGames.UNode.Editors {
 			var ListVariable = container.collections;
 			Variable variable = new Variable();
 			variable.type = type;
-			variable.name = name;
+			variable.name = uNodeUtility.AutoCorrectName(name);
 			variable.resetOnEnter = container.GetObjectInParent<ILocalVariableSystem>() != null;
 			if(uNodePreference.preferenceData.newVariableAccessor == uNodePreference.DefaultAccessor.Private) {
 				variable.modifier.SetPrivate();
@@ -152,6 +155,7 @@ namespace MaxyGames.UNode.Editors {
 			if(type.IsByRef) {
 				type = type.GetElementType();
 			}
+			name = uNodeUtility.AutoCorrectName(name);
 			string fName = name;
 			var properties = container.collections;
 			if(properties.Count > 0) {

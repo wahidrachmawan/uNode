@@ -440,7 +440,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			}
 			var port = data.port as ValueOutput;
 			if(type != null) {
-				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, "", type, (variable) => {
+				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, port != null ? port.name : "", type, (variable) => {
 					if(type.IsByRef) {
 						variable.modifier.SetPrivate();
 					}
@@ -485,7 +485,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			}
 			var port = data.port as ValueInput;
 			if(type != null) {
-				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, "", type.IsByRef ? type.GetElementType() : type, (variable) => {
+				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, port != null ? port.name : "", type.IsByRef ? type.GetElementType() : type, (variable) => {
 					var m = port.defaultValue;
 					if(m.isAssigned && !type.IsByRef) {
 						variable.defaultValue = m.Get(null);
@@ -530,7 +530,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			}
 			var port = data.port as ValueInput;
 			if(type != null) {
-				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, "", type.IsByRef ? type.GetElementType() : type, (variable) => {
+				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, port != null ? port.name : "", type.IsByRef ? type.GetElementType() : type, (variable) => {
 					var m = port.defaultValue;
 					if(m.isAssigned && !type.IsByRef) {
 						variable.defaultValue = m.Get(null);

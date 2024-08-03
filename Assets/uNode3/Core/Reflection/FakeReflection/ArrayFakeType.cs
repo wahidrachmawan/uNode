@@ -55,8 +55,6 @@ namespace MaxyGames.UNode {
 		}
 
 		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers) {
-			if(types == null)
-				types = Type.EmptyTypes;
 			EnsureInitialized();
 			if(name == "Get") {
 				return m_getMethod;
@@ -65,7 +63,12 @@ namespace MaxyGames.UNode {
 				return m_setMethod;
 			}
 			else {
-				return typeof(Array).GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
+				if(types == null) {
+					return typeof(Array).GetMethod(name, bindingAttr);
+				}
+				else {
+					return typeof(Array).GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
+				}
 			}
 		}
 
@@ -158,9 +161,11 @@ namespace MaxyGames.UNode {
 		}
 
 		protected override PropertyInfo GetPropertyImpl(string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers) {
-			if(types == null)
-				types = Type.EmptyTypes;
-			return typeof(Array).GetProperty(name, bindingAttr, binder, returnType, types, modifiers);
+			if(types == null) {
+				return typeof(Array).GetProperty(name, bindingAttr);
+			} else {
+				return typeof(Array).GetProperty(name, bindingAttr, binder, returnType, types, modifiers);
+			}
 		}
 
 		public override PropertyInfo[] GetProperties(BindingFlags bindingAttr) {

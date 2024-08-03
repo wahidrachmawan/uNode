@@ -14,6 +14,12 @@ namespace MaxyGames.UNode.Editors {
 		protected List<Vector2> nodePositions;
 		private Vector2 oldNodePosition;
 
+		private float bodyTransparent = 0.05f;
+		private float titleTransparent = 0.3f;
+
+		private static CustomStyleProperty<float> s_BodyProperty = new CustomStyleProperty<float>("--region-body-transparent");
+		private static CustomStyleProperty<float> s_TitleProperty = new CustomStyleProperty<float>("--region-title-transparent");
+
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			this.owner = owner;
 			nodeObject = node;
@@ -96,13 +102,24 @@ namespace MaxyGames.UNode.Editors {
 			elementTypeColor = region.nodeColor;
 			mainContainer.style.SetBorderColor(new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, 0.9f));
 			horizontalDivider.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, 0.9f);
-			mainContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, 0.05f);
-			titleContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, 0.3f);
+			mainContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, bodyTransparent);
+			titleContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, titleTransparent);
 		}
 
 		public override void ReloadView() {
 			UpdateUI();
 			base.ReloadView();
+		}
+
+		protected override void OnCustomStyleResolved(ICustomStyle style) {
+			if(style.TryGetValue(s_BodyProperty, out var body)) {
+				bodyTransparent = body;
+			}
+			if(style.TryGetValue(s_TitleProperty, out var title)) {
+				titleTransparent = title;
+			}
+			UpdateUI();
+			base.OnCustomStyleResolved(style);
 		}
 
 		public override void SetPosition(Rect newPos) {

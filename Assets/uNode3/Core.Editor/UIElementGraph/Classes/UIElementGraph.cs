@@ -339,6 +339,12 @@ namespace MaxyGames.UNode.Editors {
 			var toolbar = new Toolbar() {
 				name = "toolbar",
 			};
+			if(uNodePreference.editorTheme.visual == EditorThemeVisualMode.Dark) {
+				toolbar.AddStyleSheet("uNodeStyles/NativeDarkThemeStyle");
+			}
+			else {
+				toolbar.AddStyleSheet("uNodeStyles/NativeLightThemeStyle");
+			}
 			toolbar.AddStyleSheet("uNodeStyles/NativeGraphStyle");
 			toolbarView = toolbar;
 			window.rootVisualElement.Add(toolbar);
@@ -1187,6 +1193,14 @@ namespace MaxyGames.UNode.Editors {
 				rootContainer = new VisualElement() {
 					name = "root-container",
 				};
+				if(uNodePreference.editorTheme.visual == EditorThemeVisualMode.Dark) {
+					rootContainer.AddToClassList("DarkTheme");
+					rootContainer.AddStyleSheet("uNodeStyles/NativeDarkThemeStyle");
+				}
+				else {
+					rootContainer.AddToClassList("LightTheme");
+					rootContainer.AddStyleSheet("uNodeStyles/NativeLightThemeStyle");
+				}
 				rootContainer.AddStyleSheet("uNodeStyles/NativeGraphStyle");
 				rootContainer.AddStyleSheet("uNodeStyles/NativeControlStyle");
 				rootContainer.AddStyleSheet(UIElementUtility.Theme.graphStyle);
@@ -1405,7 +1419,6 @@ namespace MaxyGames.UNode.Editors {
 					nextStatus.SetEnabled(!string.IsNullOrEmpty(evt.newValue.Trim()));
 				});
 				#endregion
-
 				UIElementUtility.ForceDarkToolbarStyleSheet(statusContainerView);
 			}
 		}

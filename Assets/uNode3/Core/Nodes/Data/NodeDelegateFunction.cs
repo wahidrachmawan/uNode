@@ -81,10 +81,24 @@ namespace MaxyGames.UNode.Nodes {
 						var parameters = function.parameters.Select(p => p.Type);
 						if(parameters.Any(p => p.IsByRef) == false) {
 							if(type == typeof(void)) {
-								return CustomDelegate.GetActionDelegateType(parameters.ToArray());
+								var delType = CustomDelegate.GetActionDelegateType(parameters.ToArray());
+								foreach(var p in output.GetConnectedPorts()) {
+									if(p.type.IsCastableTo(delType)) {
+										delType = p.type;
+										break;
+									}
+								}
+								return delType;
 							}
 							else {
-								return CustomDelegate.GetFuncDelegateType(parameters.Append(type).ToArray());
+								var delType = CustomDelegate.GetFuncDelegateType(parameters.Append(type).ToArray());
+								foreach(var p in output.GetConnectedPorts()) {
+									if(p.type.IsCastableTo(delType)) {
+										delType = p.type;
+										break;
+									}
+								}
+								return delType;
 							}
 						}
 					}
@@ -98,10 +112,24 @@ namespace MaxyGames.UNode.Nodes {
 							var parameters = method.GetParameters().Select(p => p.ParameterType);
 							if(parameters.Any(p => p.IsByRef) == false) {
 								if(type == typeof(void)) {
-									return CustomDelegate.GetActionDelegateType(parameters.ToArray());
+									var delType = CustomDelegate.GetActionDelegateType(parameters.ToArray());
+									foreach(var p in output.GetConnectedPorts()) {
+										if(p.type.IsCastableTo(delType)) {
+											delType = p.type;
+											break;
+										}
+									}
+									return delType;
 								}
 								else {
-									return CustomDelegate.GetFuncDelegateType(parameters.Append(type).ToArray());
+									var delType = CustomDelegate.GetFuncDelegateType(parameters.Append(type).ToArray());
+									foreach(var p in output.GetConnectedPorts()) {
+										if(p.type.IsCastableTo(delType)) {
+											delType = p.type;
+											break;
+										}
+									}
+									return delType;
 								}
 							}
 						}

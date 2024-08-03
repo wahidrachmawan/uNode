@@ -37,7 +37,14 @@ namespace MaxyGames.UNode {
 
 		public override Type ScriptInheritType => InheritType;
 
-		public override Type ProxyScriptType => InheritType;
+		public override Type ProxyScriptType {
+			get {
+				if(InheritType is RuntimeType) {
+					return ReflectionUtils.GetNativeType(InheritType);
+				}
+				return InheritType;
+			}
+		}
 
 		public override object CreateInstance(string graphUID) => inheritFrom?.model?.CreateInstance(graphUID);
 

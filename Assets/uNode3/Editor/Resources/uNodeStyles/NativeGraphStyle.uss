@@ -30,12 +30,13 @@
 
 #graph-panel {
 	border-color: rgb(78 78 78);
-	border-right-width: 3px;
-	border-top-width: 2px;
+	border-right-width: 2px;
+	margin-top: 2px;
 }
 
 #status-bar {
 	height: 20px;
+	border-bottom-width: 0px;
 }
 
 #status-error > Image {
@@ -46,6 +47,9 @@
 ToolbarButton, ToolbarMenu, #status-zoom {
 	flex-shrink: 0;
 	-unity-text-align: middle-center;
+}
+.unity-toolbar-button {
+	margin-left: -1px;
 }
 
 #status-search {

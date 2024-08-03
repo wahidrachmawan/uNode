@@ -528,7 +528,7 @@ namespace MaxyGames.UNode.Editors {
 				var type = portType;
 				customItems.Add(ItemSelector.CustomItem.Create("Promote to variable", () => {
 					uNodeEditorUtility.RegisterUndo(editorData.owner, "Promote to variable");
-					NodeEditorUtility.AddNewVariable(editorData.graphData.variableContainer, "newVariable", type, v => {
+					NodeEditorUtility.AddNewVariable(editorData.graphData.variableContainer, portView.GetName(), type, v => {
 						NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, (node) => {
 							node.target = MemberData.CreateFromValue(v);
 							node.Register();
@@ -543,7 +543,7 @@ namespace MaxyGames.UNode.Editors {
 				var type = portType;
 				customItems.Add(ItemSelector.CustomItem.Create("Promote to local variable", () => {
 					uNodeEditorUtility.RegisterUndo(editorData.owner, "Promote to variable");
-					NodeEditorUtility.AddNewVariable(editorData.selectedRoot.variableContainer, "newVariable", type, v => {
+					NodeEditorUtility.AddNewVariable(editorData.selectedRoot.variableContainer, portView.GetName(), type, v => {
 						NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, (node) => {
 							node.target = MemberData.CreateFromValue(v);
 							node.Register();

@@ -1,0 +1,29 @@
+.flow-vertical {
+	height: 20px;
+	align-items: center;
+	padding-left: 4px;
+	padding-right: 4px;
+	--port-color: rgb(219, 219, 219);
+	--disabled-port-color: rgb(151, 151, 151);
+}
+
+.port > #connector {
+	background-color: #606060;
+}
+
+.port > #connector > #cap {
+	border-color: rgb(219, 219, 219);
+	background-color: #4a4a4a;
+}
+
+.value-port.port > #connector > #cap {
+	background-color: #8d8d8d;
+}
+
+.flow-vertical > #connector > #cap {
+	border-color: rgb(59, 189, 4);
+}
+
+.flow-horizontal > #connector > #cap {
+	border-color: rgb(65, 199, 8);
+}

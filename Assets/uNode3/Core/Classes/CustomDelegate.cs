@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MaxyGames.UNode;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -26,13 +27,21 @@ namespace MaxyGames {
 		}
 
 		public static Type GetActionDelegateType(params Type[] types) {
+			for(int i=0;i< types.Length;i++) {
+				if(types[i] is RuntimeType) {
+					return ReflectionFaker.FakeActionDelegate(types);
+				}
+			}
 			return Expression.GetActionType(types);
-			//return ActionHelper.GetActionType(types);
 		}
 
 		public static Type GetFuncDelegateType(params Type[] types) {
+			for(int i = 0; i < types.Length; i++) {
+				if(types[i] is RuntimeType) {
+					return ReflectionFaker.FakeFuncDelegate(types);
+				}
+			}
 			return Expression.GetFuncType(types);
-			//return FuncHelper.GetFuncType(types);
 		}
 
 		public static Delegate CreateDelegate(MethodInfo methodInfo, object target) {

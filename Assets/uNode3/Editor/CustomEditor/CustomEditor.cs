@@ -23,6 +23,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}
 			uNodeGUIUtility.DrawTypeDrawer(position, variable, label, (t) => {
 				variable.type = t;
+				property.boxedValue = variable;
+				property.serializedObject.ApplyModifiedProperties();
 			}, filter);
 		}
 	}

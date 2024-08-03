@@ -1372,6 +1372,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			//Events
 			if(desiredGraph is IStateGraph stateGraph && stateGraph.CanCreateStateGraph) {
+				eventContainer.SetDisplay(true);
 				eventContainer.parent.SetDisplay(true);
 				if(showEvents && graphData.graphData.mainGraphContainer.GetNodeInChildren<BaseEventNode>() != null && graphData.isInMainGraph) {
 					var events = graphData.graphData.mainGraphContainer.GetNodesInChildren<BaseEventNode>().ToArray();
@@ -1539,7 +1540,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				else {
-					eventContainer.parent.SetDisplay(false);
+					eventContainer.SetDisplay(false);
 				}
 			}
 			else {

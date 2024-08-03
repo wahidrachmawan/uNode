@@ -28,7 +28,17 @@ namespace MaxyGames {
 			}
 		}
 
-		public class Utility {
+		public static class Utility {
+			public static ValueInput GetActualPort(ValueInput port) {
+				if(port == null) return null;
+				if(port.isConnected) {
+					if(port.GetTargetNode().node is UNode.Nodes.NodeReroute) {
+						return GetActualPort(port.GetTargetNode().ValueInputs[0]);
+					}
+				}
+				return port;
+			}
+
 			public static bool IsEvent(ValueInput port) {
 				if(port.UseDefaultValue) {
 					return IsEvent(port.defaultValue);
@@ -602,7 +612,7 @@ namespace MaxyGames {
 						bool flag = true;
 						int x = 0;
 						foreach (var p in node.parameters) {
-							if (p.output != null || !p.input.isConnected || p.input.GetTargetPort() != parameterTypes[x] || p.input.type != parameterTypes[x].type) {
+							if (p.output != null || !p.input.isConnected || Utility.GetActualPort(p.input).GetTargetPort() != parameterTypes[x] || p.input.type != parameterTypes[x].type) {
 								flag = false;
 								break;
 							}
@@ -651,7 +661,7 @@ namespace MaxyGames {
 						bool flag = true;
 						int x = 0;
 						foreach(var p in node.parameters) {
-							if(p.output != null || !p.input.isConnected || p.input.GetTargetPort() != parameterTypes[x]) {
+							if(p.output != null || !p.input.isConnected || Utility.GetActualPort(p.input).GetTargetPort() != parameterTypes[x]) {
 								flag = false;
 								break;
 							}

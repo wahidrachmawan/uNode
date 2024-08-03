@@ -398,6 +398,15 @@ namespace MaxyGames.UNode {
 			return type.IsCastableTo(typeof(UnityEngine.Object)) == false;
 		}
 
+		public static string ObjectToJSON(object value) {
+			if(value == null) {
+				return "null";
+			}
+			else {
+				return System.Text.Encoding.UTF8.GetString(OdinSerializer.SerializationUtility.SerializeValue(value, OdinSerializer.DataFormat.JSON));
+			}
+		}
+
 		public static void DeserializeInstanceGraphVariables(byte[] data, object obj) {
 			var serializedDatas = SerializationUtility.DeserializeValue<List<SerializedInstanceFieldData>>(data, DataFormat.Binary, UnityDeserializationContext);
 			if(serializedDatas != null) {

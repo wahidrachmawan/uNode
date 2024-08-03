@@ -1582,7 +1582,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-				RemoveBackup(directory);
+				RemoveBackup(directory, uNodePreference.preferenceData.maxGraphBackup);
 			}
 			catch(Exception ex) {
 				Debug.LogError("Create backup error: " + ex.ToString());

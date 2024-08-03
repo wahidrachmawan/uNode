@@ -3,7 +3,7 @@
 }*/
 
 #scroll-view {
-    background-color: #383838;
+    background-color: rgba(0, 0, 0, 0.00);
     padding-left: 4px;
     padding-right: 2px;
 }

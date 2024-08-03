@@ -312,8 +312,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		private static Dictionary<Type, Texture> _iconsMap = new Dictionary<Type, Texture>();
-
 		public static Texture GetIcon(MemberInfo member) {
 			switch(member.MemberType) {
 				case MemberTypes.Constructor:
@@ -434,171 +432,13 @@ namespace MaxyGames.UNode.Editors {
 			return GetTypeIcon(obj.GetType());
 		}
 
-		private static Texture GetDefaultIcon(Type type) {
-			if(type == null || type.IsGenericParameter) return null;
-			if(typeof(MonoBehaviour).IsAssignableFrom(type)) {
-				var icon = EditorGUIUtility.ObjectContent(null, type)?.image;
-				if(icon == EditorGUIUtility.FindTexture("DefaultAsset Icon")) {
-					icon = null;
-				}
-				if(icon != null) {
-					return icon;
-				} else {
-					icon = GetScriptTypeIcon(type.Name);
-					if(icon != null) {
-						return icon;
-					}
-				}
-			}
-			if(typeof(UnityEngine.Object).IsAssignableFrom(type)) {
-				Texture icon = EditorGUIUtility.ObjectContent(null, type)?.image;
-				if(icon == EditorGUIUtility.FindTexture("DefaultAsset Icon")) {
-					icon = EditorGUIUtility.FindTexture("ScriptableObject Icon");
-				}
-				if(icon != null) {
-					return icon;
-				}
-			}
-			return null;
-		}
-
-		private static Texture GetScriptTypeIcon(string scriptName) {
-			var scriptObject = (UnityEngine.Object)Icons.EditorGUIUtility_GetScriptObjectFromClass.InvokeOptimized(null, new object[] { scriptName });
-			if(scriptObject != null) {
-				var scriptIcon = Icons.EditorGUIUtility_GetIconForObject.InvokeOptimized(null, new object[] { scriptObject }) as Texture;
-
-				if(scriptIcon != null) {
-					return scriptIcon;
-				}
-			}
-			var scriptPath = AssetDatabase.GetAssetPath(scriptObject);
-			if(scriptPath != null) {
-				switch(Path.GetExtension(scriptPath)) {
-					case ".js":
-						return EditorGUIUtility.IconContent("js Script Icon").image;
-					case ".cs":
-						return EditorGUIUtility.IconContent("cs Script Icon").image;
-					case ".boo":
-						return EditorGUIUtility.IconContent("boo Script Icon").image;
-				}
-			}
-			return null;
-		}
-
 		/// <summary>
 		/// Return a icon for the type.
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
 		public static Texture GetTypeIcon(Type type) {
-			if(type == null)
-				return null;
-			if(type.IsByRef) {
-				return GetTypeIcon(type.GetElementType());
-			}
-			Texture result = null;
-			if(_iconsMap.TryGetValue(type, out result)) {
-				return result;
-			}
-			if(type is ICustomIcon) {
-				var icon = (type as ICustomIcon).GetIcon();
-				if(icon != null) {
-					return icon;
-				}
-			}
-			else if(type is IIcon) {
-				var icon = (type as IIcon).GetIcon();
-				if(icon != null) {
-					return GetTypeIcon(icon);
-				}
-			}
-			if(type is RuntimeType) {
-				if(type.IsArray || type.IsGenericType) {
-					return Icons.listIcon;
-				}
-				var rType = type as RuntimeType;
-				return GetTypeIcon(typeof(TypeIcons.RuntimeTypeIcon));
-			}
-			Texture texture = GetDefaultIcon(type);
-			if(texture != null) {
-				_iconsMap[type] = texture;
-				return texture;
-			}
-			TypeIcons.IconPathAttribute att = null;
-			if(type.IsDefinedAttribute(typeof(TypeIcons.IconPathAttribute))) {
-				att = type.GetCustomAttributes(typeof(TypeIcons.IconPathAttribute), true)[0] as TypeIcons.IconPathAttribute;
-			}
-			if(att != null) {
-				result = Icons.GetIcon(att.path);
-			} else if(type == typeof(TypeIcons.FlowIcon)) {
-				result = Icons.flowIcon;
-			} else if(type == typeof(TypeIcons.ValueIcon)) {
-				result = Icons.valueIcon;
-			} else if(type == typeof(TypeIcons.BranchIcon)) {
-				result = Icons.divideIcon;
-			} else if(type == typeof(TypeIcons.ClockIcon)) {
-				result = Icons.clockIcon;
-			} else if(type == typeof(TypeIcons.RepeatIcon)) {
-				result = Icons.repeatIcon;
-			} else if(type == typeof(TypeIcons.RepeatOnceIcon)) {
-				result = Icons.repeatOnceIcon;
-			} else if(type == typeof(TypeIcons.SwitchIcon)) {
-				result = Icons.switchIcon;
-			} else if(type == typeof(TypeIcons.MouseIcon)) {
-				result = Icons.mouseIcon;
-			} else if(type == typeof(TypeIcons.EventIcon)) {
-				result = Icons.eventIcon;
-			} else if(type == typeof(TypeIcons.RotationIcon) || type == typeof(Quaternion)) {
-				result = Icons.rotateIcon;
-			} else if(type == typeof(Color) || type == typeof(Color32)) {
-				result = Icons.colorIcon;
-			} else if(type == typeof(int)) {
-				result = GetTypeIcon(typeof(TypeIcons.IntegerIcon));
-			} else if(type == typeof(float)) {
-				result = GetTypeIcon(typeof(TypeIcons.FloatIcon));
-			}else if(type == typeof(Vector3)) {
-				result = GetTypeIcon(typeof(TypeIcons.Vector3Icon));
-			} else if(type == typeof(Vector2)) {
-				result = GetTypeIcon(typeof(TypeIcons.Vector2Icon));
-			} else if(type == typeof(Vector4)) {
-				result = GetTypeIcon(typeof(TypeIcons.Vector4Icon));
-			} else if(type.IsCastableTo(typeof(UnityEngine.Object))) {
-				result = Icons.objectIcon;
-			} else if(type.IsCastableTo(typeof(IList))) {
-				result = Icons.listIcon;
-			} else if(type.IsCastableTo(typeof(IDictionary))) {
-				result = Icons.bookIcon;
-			} else if(type == typeof(void)) {
-				result = GetTypeIcon(typeof(TypeIcons.VoidIcon));
-			} else if(type.IsCastableTo(typeof(KeyValuePair<,>))) {
-				result = Icons.keyIcon;
-			} else if(type == typeof(DateTime) || type == typeof(Time)) {
-				result = Icons.dateIcon;
-			} else if(type.IsInterface) {
-				result = GetTypeIcon(typeof(TypeIcons.InterfaceIcon));
-			} else if(type.IsEnum) {
-				result = GetTypeIcon(typeof(TypeIcons.EnumIcon));
-			} else if(type == typeof(object)) {
-				result = Icons.valueBlueIcon;
-			} else if(type == typeof(bool)) {
-				result = Icons.valueYellowRed;
-			} else if(type == typeof(string)) {
-				result = GetTypeIcon(typeof(TypeIcons.StringIcon));
-			} else if(type == typeof(Type)) {
-				result = Icons.valueGreenIcon;
-			} else if(type == typeof(UnityEngine.Random) || type == typeof(System.Random)) {
-				result = GetTypeIcon(typeof(TypeIcons.RandomIcon));
-			} 
-			// else if(type == typeof(UnityEngine.Debug)) {
-			// 	result = GetTypeIcon(typeof(TypeIcons.BugIcon));
-			// } 
-			else {
-				result = GetIcon(type);
-			}
-			if(result != null) {
-				_iconsMap[type] = result;
-			}
-			return result;
+			return uNodePreference.GetIconForType(type);
 		}
 		#endregion
 

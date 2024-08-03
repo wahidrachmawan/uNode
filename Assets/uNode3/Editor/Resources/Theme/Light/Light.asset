@@ -10,55 +10,55 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 910a0076698cbd442aef559c66bf7299, type: 3}
-  m_Name: Dark
+  m_Name: Light
   m_EditorClassIdentifier: 
   Name: 
   textSettings:
     useRichText: 1
-    typeColor: {r: 0, g: 0.8, b: 0.37, a: 1}
-    keywordColor: {r: 0, g: 0.46, b: 0.83, a: 1}
-    interfaceColor: {r: 0.8, g: 0.77, b: 0, a: 1}
-    enumColor: {r: 0.8, g: 0.8, b: 0, a: 1}
+    typeColor: {r: 0.040049832, g: 0.33962262, b: 0.1781138, a: 1}
+    keywordColor: {r: 0.003025995, g: 0.35539672, b: 0.6415094, a: 1}
+    interfaceColor: {r: 0.5754717, g: 0.5555654, b: 0.06786222, a: 1}
+    enumColor: {r: 0.5471698, g: 0.5471698, b: 0.04903879, a: 1}
     otherColor: {r: 0.95, g: 0.33, b: 0.32, a: 1}
     misleadingColor: {r: 0.85, g: 0.85, b: 0.85, a: 1}
-    summaryColor: {r: 0, g: 0.7, b: 0, a: 1}
+    summaryColor: {r: 0.006274463, g: 0.4433962, b: 0.006274463, a: 1}
   typeSettings:
-    defaultTypeColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+    defaultTypeColor: {r: 0.29256728, g: 0.35686275, b: 0, a: 1}
     typeColors:
     - type:
         kind: 1
         serializedString: System.Object
         serializedBytes: 
         references: []
-      color: {r: 0.3, g: 1, b: 0.5, a: 1}
+      color: {r: 0, g: 0.33962262, b: 0.098600104, a: 1}
       includingSubTypes: 0
     - type:
         kind: 1
         serializedString: System.String
         serializedBytes: 
         references: []
-      color: {r: 0.3, g: 0.5, b: 1, a: 1}
+      color: {r: 0, g: 0.2165068, b: 0.745283, a: 1}
       includingSubTypes: 0
     - type:
         kind: 1
         serializedString: System.Single
         serializedBytes: 
         references: []
-      color: {r: 1, g: 0.5, b: 0.4, a: 1}
+      color: {r: 0.7830189, g: 0.2894196, b: 0.18836774, a: 1}
       includingSubTypes: 0
     - type:
         kind: 1
         serializedString: System.Int32
         serializedBytes: 
         references: []
-      color: {r: 0.8, g: 1, b: 0.25, a: 1}
+      color: {r: 0.7647059, g: 0.49019608, b: 0, a: 1}
       includingSubTypes: 0
     - type:
         kind: 1
         serializedString: System.Boolean
         serializedBytes: 
         references: []
-      color: {r: 1, g: 0.22, b: 0.26, a: 1}
+      color: {r: 0.7264151, g: 0.119927004, b: 0.14537394, a: 1}
       includingSubTypes: 0
     - type:
         kind: 1
@@ -89,9 +89,9 @@ MonoBehaviour:
       color: {r: 0.48, g: 0.34, b: 0.8, a: 1}
       includingSubTypes: 0
     typeIcons: []
-  visual: 0
+  visual: 1
   expanded: 0
-  coloredPortBorder: 0
+  coloredPortBorder: 1
   coloredReference: 0
   coloredNodeBorder: 1
   preferredDisplayValue: 0
@@ -110,10 +110,13 @@ MonoBehaviour:
   nodeSuccessColor: {r: 0, g: 1, b: 0, a: 1}
   nodeFailureColor: {r: 1, g: 0, b: 0, a: 1}
   nodeRunningColor: {r: 0, g: 0, b: 1, a: 1}
-  graphStyle: {fileID: 0}
-  nodeStyle: {fileID: 0}
+  graphStyle: {fileID: 7433441132597879392, guid: 31351ed99c844d342967086fd27aa069,
+    type: 3}
+  nodeStyle: {fileID: 7433441132597879392, guid: 31f6c937582822d48ae34306aeaa5880,
+    type: 3}
   blockStyle: {fileID: 0}
   transitionStyle: {fileID: 0}
   graphPanelStyle: {fileID: 0}
-  portStyle: {fileID: 0}
+  portStyle: {fileID: 7433441132597879392, guid: aa80b7c3bd3af3040a4b1600f15ab473,
+    type: 3}
   tabbarStyle: {fileID: 0}

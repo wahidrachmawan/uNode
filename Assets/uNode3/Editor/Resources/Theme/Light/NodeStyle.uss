@@ -1,0 +1,68 @@
+
+#node-border {
+	background-color: #c2c2c2;
+}
+
+#node-border > #title {
+	background-color: #e2e2e2;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+}
+
+#contents > #top > #input {
+	background-color: rgba(0, 0, 0, 0);
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
+}
+
+#contents > #top > #output {
+	background-color: rgba(0, 0, 0, 0);
+	border-top-right-radius: 6px;
+	border-bottom-right-radius: 6px;
+}
+
+.compact-node > #node-border > #title {
+	background-color: rgba(0, 0, 0, 0);
+}
+
+#node-blocks.compact > #node-border {
+	background-color: #c2c2c2;
+}
+
+.compact-value > #node-border > #contents > #top > #output {
+	border-left-color: #2d2d2d;
+	border-left-width: 1px;
+}
+
+#node-border.flowNodeBorder {
+	background-color: #c8c8c8;
+	border-color: #098d20
+}
+
+#portInputContainer > PortInputView > #container {
+	background-color: #C8C8C8;
+}
+
+.transition > #node-border {
+	background-color: rgba(19, 154, 64, 0.80);
+	border-color: rgba(16, 229, 136, 0.80);
+}
+
+
+#node-border > #title > #title-label {
+	-unity-font-style: bold;
+}
+
+:selected > #selection-border {
+	border-color: #6ecdf2;
+}
+
+:hover > #selection-border {
+	border-color: #4bcdff;
+}
+
+.compact > #node-border {
+	background-color: #e2e2e2;
+	border-color: rgba(147,147,147,0.8);
+	border-radius: 14px 6px 14px 6px;
+}

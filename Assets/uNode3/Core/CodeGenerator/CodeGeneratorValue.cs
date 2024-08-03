@@ -112,12 +112,23 @@ namespace MaxyGames {
 			} else if(left is string) {
 				result = left.ToString();
 			}
-			if(leftType != null && !leftType.IsCastableTo(typeof(Delegate)) && !(leftType is RuntimeType)) {
-				if(rightType == null || !rightType.IsCastableTo(leftType) && !rightType.IsValueType && rightType != typeof(string)) {
-					if(leftType.IsValueType) {
-						set = set.Insert(0, "(" + Type(leftType) + ")");
-					} else if(set != "null") {
-						set = set + " as " + Type(leftType);
+			if(leftType != null && !(leftType is RuntimeType)) {
+				if(!leftType.IsCastableTo(typeof(Delegate))) {
+					if(rightType == null || !rightType.IsCastableTo(leftType) && !rightType.IsValueType && rightType != typeof(string)) {
+						if(leftType.IsValueType) {
+							set = set.Insert(0, "(" + Type(leftType) + ")");
+						}
+						else if(set != "null") {
+							set = set + " as " + Type(leftType);
+						}
+					}
+				}
+				else if(leftType != typeof(Delegate)) {
+					//For delegate
+					if(rightType == null || rightType != leftType) {
+						if(set != "null") {
+							set = New(leftType, set);
+						}
 					}
 				}
 			}
