@@ -338,10 +338,6 @@ namespace MaxyGames.UNode.Editors {
 			/// Are the right panel is visible?
 			/// </summary>
 			public bool rightVisibility = false;
-			/// <summary>
-			/// The heigh of variable editor.
-			/// </summary>
-			public float variableEditorHeight = 150f;
 
 			#region Panel
 			[SerializeField]
@@ -374,6 +370,9 @@ namespace MaxyGames.UNode.Editors {
 					return _leftPanelWidth;
 				}
 				set {
+					if(value < 100) {
+						value = 100;
+					}
 					_leftPanelWidth = value;
 				}
 			}

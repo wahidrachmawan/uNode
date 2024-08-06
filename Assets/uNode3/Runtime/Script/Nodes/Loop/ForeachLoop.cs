@@ -235,22 +235,38 @@ namespace MaxyGames.UNode.Nodes {
 			if(!string.IsNullOrEmpty(targetCollection)) {
 				string contents = CG.Flow(body).AddLineInFirst();
 				string additionalContents = null;
-				var targetType = collection.ValueType;
-				var elementType = targetType.ElementType();
 				if(output == null) {
 					string[] paramDatas = new string[deconstructDatas.Count];
 					for(int i = 0; i < deconstructDatas.Count; i++) {
 						var data = deconstructDatas[i];
 						if(data.port != null && data.port.hasValidConnections) {
 							string vName;
-							if(!CG.CanDeclareLocal(data.port, body)) {
-								vName = CG.GenerateName("tempVar", this);
-								var vdata = CG.GetVariableData(data.port);
-								vdata.SetToInstanceVariable();
-								additionalContents = CG.Set(vdata.name, vName);
+
+							if(CG.generatePureScript && ReflectionUtils.IsNativeType(data.port.type) == false) {
+								//Auto convert to actual type if the target type is not native type.
+								if(!CG.CanDeclareLocal(data.port, body)) {
+									vName = CG.GenerateName("tempVar", (this, data.port));
+									var vdata = CG.GetVariableData(data.port);
+									vdata.SetToInstanceVariable();
+									additionalContents = CG.Flow(additionalContents, CG.Set(vdata.name, CG.As(vName, data.port.type)));
+									//This for auto declare variable
+									CG.DeclareVariable(data.port, "", body);
+								}
+								else {
+									vName = CG.GenerateName("tempVar", (this, data.port));
+									additionalContents = CG.Flow(additionalContents, "var " + CG.Set(CG.GetVariableName(data.port), CG.As(vName, data.port.type)));
+								}
 							}
 							else {
-								vName = CG.GetVariableData(data.port).name;
+								if(!CG.CanDeclareLocal(data.port, body)) {
+									vName = CG.GenerateName("tempVar", (this, data.port));
+									var vdata = CG.GetVariableData(data.port);
+									vdata.SetToInstanceVariable();
+									additionalContents = CG.Flow(additionalContents, CG.Set(vdata.name, vName));
+								}
+								else {
+									vName = CG.GetVariableData(data.port).name;
+								}
 							}
 							paramDatas[i] = vName;
 						}
@@ -265,6 +281,8 @@ namespace MaxyGames.UNode.Nodes {
 						);
 				}
 				else {
+					var targetType = collection.ValueType;
+					var elementType = targetType.ElementType();
 					string vName;
 					if(CG.generatePureScript && ReflectionUtils.IsNativeType(targetType) == false) {
 						//Auto convert to actual type if the target type is not native type.

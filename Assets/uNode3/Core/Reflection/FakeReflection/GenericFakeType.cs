@@ -66,13 +66,32 @@ namespace MaxyGames.UNode {
 				var type = ifaces[i];
 				if(type.IsGenericType) {
 					var types = type.GetGenericArguments();
-					for(int x = 0; x < types.Length; x++) {
+
+					Type ChangeType(Type type) {
 						for(int y = 0; y < parameterConstraints.Length; y++) {
-							if(types[x] == parameterConstraints[y]) {
-								types[x] = genericParameters[y];
-								break;
+							if(type == parameterConstraints[y]) {
+								return genericParameters[y];
 							}
 						}
+						if(type.IsGenericType && type.IsConstructedGenericType) {
+							bool changed = false;
+							var args = type.GetGenericArguments();
+							for(int x = 0; x < args.Length; x++) {
+								if(args[x].IsGenericParameter) {
+									args[x] = ChangeType(args[x]);
+									changed = true;
+								}
+							}
+							if(changed) {
+								var def = type.GetGenericTypeDefinition();
+								return ReflectionUtils.MakeGenericType(def, args);
+							}
+						}
+						return type;
+					}
+
+					for(int x = 0; x < types.Length; x++) {
+						types[x] = ChangeType(types[x]);
 					}
 					var definition = type.GetGenericTypeDefinition();
 					result[i] = ReflectionUtils.MakeGenericType(definition, types);
@@ -114,7 +133,7 @@ namespace MaxyGames.UNode {
 				}
 				//TODO: add support for array
 				//else if(type.IsArray) {
-					
+
 				//}
 				return type;
 			}
@@ -205,7 +224,19 @@ namespace MaxyGames.UNode {
 							}
 							else if(pType.ContainsGenericParameters) {
 								void ValidateParameterType(Type t, out Type runtimeType, out Type nativeType) {
-									if(t.IsGenericType) {
+									if(t.IsGenericParameter) {
+										int idx = IndexOf(gArgs, p => p.Name == t.Name);
+										if(idx >= 0) {
+											runtimeType = genericParameters[idx];
+											nativeType = GetActualNativeType(genericParameters[idx]);
+										}
+										else {
+											runtimeType = null;
+											nativeType = null;
+										}
+										return;
+									}
+									else if(t.IsGenericType) {
 										var gTypes = t.GetGenericArguments();
 										var nativeTypes = new Type[gTypes.Length];
 										for(int x = 0; x < gTypes.Length; x++) {
@@ -277,6 +308,11 @@ namespace MaxyGames.UNode {
 											runtimeType = null;
 											nativeType = null;
 										}
+									}
+									else if(t.IsByRef) {
+										ValidateParameterType(t.GetElementType(), out runtimeType, out nativeType);
+										runtimeType = runtimeType.MakeByRefType();
+										nativeType = nativeType.MakeByRefType();
 									}
 									else {
 										runtimeType = t;
@@ -576,6 +612,6 @@ namespace MaxyGames.UNode {
 			}
 			return type.GetMethod(method.Name, flags, null, mpTypes, null);
 		}
-#endregion
+		#endregion
 	}
 }

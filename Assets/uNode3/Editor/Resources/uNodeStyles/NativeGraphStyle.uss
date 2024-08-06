@@ -13,11 +13,37 @@
 	flex-direction: row;
 }
 
+#graph-splitter-left-anchor,
+#graph-splitter-right-anchor {
+	width: 1px;
+	background-color: #6f6f6f;
+}
+
+#graph-splitter-left,
+#graph-splitter-right {
+	width: 10px;
+	background-color: rgba(0,0,0,0);
+	left: -5px;
+	top: 0px;
+	bottom: 0px;
+	position: absolute;
+	cursor: resize-horizontal;
+}
+
 #inspector-panel {
 	border-left-width: 2px;
 	border-left-color: #191919;
 	border-bottom-width: 1px;
 	border-bottom-color: #191919;
+	flex-direction: row;
+}
+
+#inspector-panel > IMGUIContainer {
+	left: 4px;
+	top: 0px;
+	bottom: 0px;
+	right: 2px;
+	position: absolute;
 }
 
 .graphView {
@@ -29,9 +55,12 @@
 }
 
 #graph-panel {
-	border-color: rgb(78 78 78);
-	border-right-width: 2px;
 	margin-top: 2px;
+	flex-direction: row-reverse;
+}
+
+#graph-panel > GraphPanel {
+	margin-right: 2px;
 }
 
 #status-bar {

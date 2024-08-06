@@ -6,7 +6,6 @@
     --grid-background-color: rgba(0, 0, 0, 0);
     --spacing: 20;
     --line-color: rgba(118, 118, 118, 0.84);
-    --thick-lines: 20;
     --thick-line-color: rgba(83, 83, 83, 0.84);
 }
 

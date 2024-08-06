@@ -602,7 +602,9 @@ namespace MaxyGames.UNode.Editors {
 					MemberData.TargetType.Null |
 					MemberData.TargetType.uNodeGenericParameter)) {
 				Rect rect = position;
-				DrawInstanceValue(ref rect, GUIContent.none, member, unityObject, onChange);
+				if(member.isTargeted) {
+					DrawInstanceValue(ref rect, GUIContent.none, member, unityObject, onChange);
+				}
 				DrawMember(rect, member, filter, unityObject, onChange);
 			}
 			else {
@@ -739,7 +741,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				EditorGUI.BeginChangeCheck();
 				var newVar = target as UnityEngine.Object;
-				newVar = EditorGUI.ObjectField(position, newVar, typeof(UnityEngine.Object), uNodeEditorUtility.IsSceneObject(unityObject));
+				newVar = EditorGUI.ObjectField(position, newVar, t, uNodeEditorUtility.IsSceneObject(unityObject));
 				if(EditorGUI.EndChangeCheck()) {
 					if(unityObject)
 						uNodeEditorUtility.RegisterUndo(unityObject, label.text);

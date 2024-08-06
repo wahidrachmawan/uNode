@@ -18,6 +18,8 @@ namespace MaxyGames.UNode {
 
 		public override Type ParameterType => parameterType ?? target.ParameterType;
 
+		public override ParameterAttributes Attributes => target.Attributes;
+
 		public override string ToString() {
 			return ParameterType.ToString() + " " + Name;
 		}

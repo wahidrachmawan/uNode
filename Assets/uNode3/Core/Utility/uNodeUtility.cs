@@ -1164,12 +1164,12 @@ namespace MaxyGames.UNode {
 								}
 							}
 						}
-						if(displayKind == DisplayKind.Full) {
+						if(displayKind == DisplayKind.Full && i > 0) {
 							if(paramsType.Length > 0 ||
 								member.targetType == MemberData.TargetType.uNodeFunction ||
 								member.targetType == MemberData.TargetType.uNodeConstructor ||
 								member.targetType == MemberData.TargetType.Constructor ||
-								member.targetType == MemberData.TargetType.Method && !member.isDeepTarget) {
+								member.targetType == MemberData.TargetType.Method && i + 1 == member.Items.Length) {
 								for(int x = 0; x < paramsType.Length; x++) {
 									Type t = paramsType[x].ToType(false);
 									if(t == null) {
@@ -1917,20 +1917,20 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public static class StringHelper {
 		static readonly IDictionary<string, string> m_replaceDict = new Dictionary<string, string>();
-		static readonly char[] m_escapeCodes = new[] {
-			'\a',
-			'\b',
-			'\f',
-			'\n',
-			'\r',
-			'\t',
-			'\v',
+		//static readonly char[] m_escapeCodes = new[] {
+		//	'\a',
+		//	'\b',
+		//	'\f',
+		//	'\n',
+		//	'\r',
+		//	'\t',
+		//	'\v',
 
-			'\\',
-			'\0',
-			'\"',
+		//	'\\',
+		//	'\0',
+		//	'\"',
 
-		};
+		//};
 
 		const string ms_regexEscapes = @"[\a\b\f\n\r\t\v\\""]";
 		static readonly Regex m_regex = new Regex(ms_regexEscapes, RegexOptions.Compiled);
@@ -1940,12 +1940,13 @@ namespace MaxyGames.UNode {
 		}
 
 		public static string StringLiteralCode(string input) {
-			for(int i=0;i< m_escapeCodes.Length;i++) {
-				if(input.Contains(m_escapeCodes[i])) {
-					return $"@\"{input}\"";
-				}
-			}
-			return $"\"{input}\"";
+			//for(int i=0;i< m_escapeCodes.Length;i++) {
+			//	if(input.Contains(m_escapeCodes[i])) {
+			//		return $"@\"{input}\"";
+			//	}
+			//}
+
+			return $"\"{StringLiteral(input)}\"";
 		}
 
 		public static string CharLiteral(char c) {

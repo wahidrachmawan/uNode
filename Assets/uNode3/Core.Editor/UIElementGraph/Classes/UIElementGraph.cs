@@ -226,6 +226,71 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 	}
+
+	class SquareResizer : MouseManipulator {
+		private Vector2 m_Start;
+		protected bool m_Active;
+		private VisualElement m_Panel;
+		private Action<VisualElement> onChanged;
+		private Action<VisualElement, Vector2> onDragged;
+
+		public SquareResizer(VisualElement panel, Action<VisualElement, Vector2> onDragged, Action<VisualElement> onChanged = null) {
+			m_Panel = panel;
+			this.onChanged = onChanged;
+			this.onDragged = onDragged;
+			activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
+			m_Active = false;
+		}
+
+		protected override void RegisterCallbacksOnTarget() {
+			target.RegisterCallback<MouseDownEvent>(OnMouseDown);
+			target.RegisterCallback<MouseMoveEvent>(OnMouseMove);
+			target.RegisterCallback<MouseUpEvent>(OnMouseUp);
+		}
+
+		protected override void UnregisterCallbacksFromTarget() {
+			target.UnregisterCallback<MouseDownEvent>(OnMouseDown);
+			target.UnregisterCallback<MouseMoveEvent>(OnMouseMove);
+			target.UnregisterCallback<MouseUpEvent>(OnMouseUp);
+		}
+
+		protected void OnMouseDown(MouseDownEvent e) {
+			if(m_Active) {
+				e.StopImmediatePropagation();
+				return;
+			}
+
+			if(CanStartManipulation(e)) {
+				m_Start = e.localMousePosition;
+
+				m_Active = true;
+				target.CaptureMouse();
+				e.StopPropagation();
+			}
+		}
+
+		protected void OnMouseMove(MouseMoveEvent e) {
+			if(!m_Active || !target.HasMouseCapture())
+				return;
+
+			Vector2 diff = e.localMousePosition - m_Start;
+
+			onDragged?.Invoke(m_Panel, diff);
+			e.StopPropagation();
+		}
+
+		protected void OnMouseUp(MouseUpEvent e) {
+			if(!m_Active || !target.HasMouseCapture() || !CanStopManipulation(e))
+				return;
+
+			m_Active = false;
+			target.ReleaseMouse();
+			e.StopPropagation();
+
+			onChanged?.Invoke(m_Panel);
+		}
+	}
+
 	#endregion
 
 	public class UIElementGraph : NodeGraph {
@@ -1212,9 +1277,43 @@ namespace MaxyGames.UNode.Editors {
 				graphPanelView.Add(graphPanel = new GraphPanel(this));
 				rootContainer.Add(graphPanelView);
 
+				{
+					var dragAnchor = new VisualElement() {
+						name = "graph-splitter-left-anchor",
+					};
+					var splitterLeft = new VisualElement() {
+						name = "graph-splitter-left",
+					};
+					splitterLeft.AddManipulator(new SquareResizer(graphPanelView, (e, diff) => {
+						e.style.width = e.layout.width + diff.x;
+						uNodeEditor.SavedData.leftPanelWidth = e.style.width.value.value;
+					}));
+					dragAnchor.Add(splitterLeft);
+					graphPanelView.Add(dragAnchor);
+				}
+
+				//var splitterRight = new VisualElement() {
+				//	name = "graph-splitter-left",
+				//};
+				//rootContainer.Add(splitterRight);
+
 				inspectorPanel = new VisualElement() {
 					name = "inspector-panel",
 				};
+				{
+					var dragAnchor = new VisualElement() {
+						name = "graph-splitter-right-anchor",
+					};
+					var splitterLeft = new VisualElement() {
+						name = "graph-splitter-right",
+					};
+					splitterLeft.AddManipulator(new SquareResizer(inspectorPanel, (e, diff) => {
+						e.style.width = e.layout.width - diff.x;
+						uNodeEditor.SavedData.rightPanelWidth = e.style.width.value.value;
+					}));
+					dragAnchor.Add(splitterLeft);
+					inspectorPanel.Add(dragAnchor);
+				}
 				inspectorPanel.Add(new IMGUIContainer(OnInspectorGUI));
 
 				rootContent = new VisualElement() {
@@ -1364,15 +1463,15 @@ namespace MaxyGames.UNode.Editors {
 					text = "Zoom : 1.00",
 				};
 				zoomStatus.variant = ToolbarMenu.Variant.Popup;
-				zoomStatus.menu.AppendAction("0.3x", act => {
-					graphView.SetZoomScale(0.3f);
-				});
-				zoomStatus.menu.AppendAction("0.5x", act => {
-					graphView.SetZoomScale(0.5f);
-				});
-				zoomStatus.menu.AppendAction("0.7x", act => {
-					graphView.SetZoomScale(0.7f);
-				});
+				//zoomStatus.menu.AppendAction("0.3x", act => {
+				//	graphView.SetZoomScale(0.3f);
+				//});
+				//zoomStatus.menu.AppendAction("0.5x", act => {
+				//	graphView.SetZoomScale(0.5f);
+				//});
+				//zoomStatus.menu.AppendAction("0.7x", act => {
+				//	graphView.SetZoomScale(0.7f);
+				//});
 				zoomStatus.menu.AppendAction("1x", act => {
 					graphView.SetZoomScale(1);
 				});
@@ -1518,6 +1617,12 @@ namespace MaxyGames.UNode.Editors {
 			if(graphPanelView?.parent != null) {
 				graphPanelView.RemoveFromHierarchy();
 			}
+			//if(leftPanelSplitter?.parent != null) {
+			//	leftPanelSplitter.RemoveFromHierarchy();
+			//}
+			//if(rightPanelSplitter?.parent != null) {
+			//	rightPanelSplitter.RemoveFromHierarchy();
+			//}
 		}
 
 		public override void DrawCanvas(uNodeEditor window) {

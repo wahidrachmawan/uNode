@@ -21,7 +21,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else {
 				if(!Application.isPlaying) {
-					uNodeGUI.DrawGraphVariables(asset.GraphData, null);
+					uNodeGUI.DrawGraphVariables(asset.GraphData, asset);
 				}
 				else if(asset.runtimeInstance != null) {
 					if(asset.runtimeInstance is RuntimeInstancedGraph instancedGraph) {
@@ -29,7 +29,7 @@ namespace MaxyGames.UNode.Editors {
 							uNodeGUI.DrawRuntimeGraphVariables(instancedGraph.Instance);
 						}
 						else {
-							uNodeGUI.DrawGraphVariables(asset.GraphData, null);
+							uNodeGUI.DrawGraphVariables(asset.GraphData, asset);
 						}
 					}
 					else {
