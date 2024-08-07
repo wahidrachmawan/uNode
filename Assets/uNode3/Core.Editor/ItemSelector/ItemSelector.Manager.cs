@@ -1288,12 +1288,24 @@ namespace MaxyGames.UNode.Editors {
 						var filter = new FilterAttribute(window.filter) { Static = window.filter.Static && lastTree is TypeTreeView };
 						if(treeView is MemberTreeView) {
 							var item = treeView as MemberTreeView;
-							var members = TreeFunction.CreateItemsFromType(ReflectionUtils.GetMemberType(item.member), filter);
+							var mType = ReflectionUtils.GetMemberType(item.member);
+							var members = TreeFunction.CreateItemsFromType(mType, filter);
+							var inheritTree = new SelectorCategoryTreeView("Inherit Members", -1, -1);
 							foreach(var tree in members) {
 								if(CanAddTree(tree)) {
-									root.AddChild(tree);
-									AddTrees(tree, rows);
+									if(tree.member.DeclaringType != mType) {
+										inheritTree.AddChild(tree);
+									}
+									else {
+										root.AddChild(tree);
+										AddTrees(tree, rows);
+									}
 								}
+							}
+							if(inheritTree.hasChildren) {
+								inheritTree.expanded = true;
+								root.AddChild(inheritTree);
+								AddTrees(inheritTree, rows);
 							}
 							deepItems = new List<TreeViewItem>(members);
 						}
