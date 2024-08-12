@@ -451,29 +451,20 @@ namespace MaxyGames.UNode {
 			if(parameters != null && parameters.Count > 0) {
 				target.GetMembers();
 				object[] paramsValue = null;
-				if(!target.HasRefOrOut) {
-					if(parameters.Count > 0) {
-						paramsValue = new object[parameters.Count];
-						for(int i = 0; i < paramsValue.Length; i++) {
+				if(parameters.Count > 0) {
+					paramsValue = new object[parameters.Count];
+					for(int i = 0; i < paramsValue.Length; i++) {
+						if(parameters[i].input != null) {
 							paramsValue[i] = parameters[i].input.GetValue(flow);
 						}
-					}
-					target.Set(flow, value, paramsValue);
-				}
-				else {
-					if(parameters.Count > 0) {
-						paramsValue = new object[parameters.Count];
-						for(int i = 0; i < paramsValue.Length; i++) {
-							if(parameters[i].input != null) {
-								paramsValue[i] = parameters[i].input.GetValue(flow);
-							}
-							else {
-								//The parameter is using output, so leave the parameter value to null.
-								paramsValue[i] = null;
-							}
+						else {
+							//The parameter is using output, so leave the parameter value to null.
+							paramsValue[i] = null;
 						}
 					}
-					target.Set(flow, value, paramsValue);
+				}
+				target.Set(flow, value, paramsValue);
+				if(target.HasRefOrOut) {
 					if(paramsValue != null) {
 						for(int i = 0; i < paramsValue.Length; i++) {
 							if(parameters[i].IsByRef) {

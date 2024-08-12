@@ -136,7 +136,7 @@ namespace MaxyGames.UNode.Editors {
 							GUI.changed = true;
 						}
 						if(array != null) {
-							int num = EditorGUI.IntField(position, label, array.Count);
+							int num = EditorGUI.DelayedIntField(position, label, array.Count);
 							if(num != array.Count) {
 								uNodeUtility.ResizeList(array, elementType, num, true);
 							}
@@ -2556,7 +2556,7 @@ namespace MaxyGames.UNode.Editors {
 					Rect position = GetRect();
 					if(settings.nullable)
 						position.width -= 16;
-					int num = EditorGUI.IntField(position, label, array.Length);
+					int num = EditorGUI.DelayedIntField(position, label, array.Length);
 					if(settings.nullable) {
 						position.x += position.width;
 						position.width = 16;
@@ -2633,7 +2633,7 @@ namespace MaxyGames.UNode.Editors {
 					Rect position = GetRect();
 					if(settings.nullable)
 						position.width -= 16;
-					int num = EditorGUI.IntField(position, label, array.Count);
+					int num = EditorGUI.DelayedIntField(position, label, array.Count);
 					if(settings.nullable) {
 						position.x += position.width;
 						position.width = 16;

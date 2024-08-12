@@ -2,12 +2,16 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class AwaitNode : FlowAndValueNode {
+	public class AwaitNode : FlowNode {
 		public ValueInput value { get; set; }
+		public ValueOutput output { get; set; }
 
 		protected override void OnRegister() {
 			base.OnRegister();
 			value = ValueInput(nameof(value), typeof(object), MemberData.Null);
+			if(ReturnType() != typeof(void)) {
+				output = PrimaryValueOutput(nameof(output)).SetName("Out");
+			}
 		}
 
 		protected override void OnExecuted(Flow flow) {

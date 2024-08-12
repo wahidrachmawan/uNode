@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			if(att != null) {
 				fieldValue = (byte)EditorGUI.IntSlider(position, option.label, fieldValue, (int)att.min, (int)att.max);
 			} else {
-				fieldValue = (byte)EditorGUI.IntField(position, option.label, fieldValue);
+				fieldValue = (byte)EditorGUI.DelayedIntField(position, option.label, fieldValue);
 			}
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;

@@ -51,7 +51,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						Rect position = uNodeGUIUtility.GetRect();
 						if(option.nullable)
 							position.width -= 16;
-						int num = EditorGUI.IntField(position, option.label, array.Length);
+						int num = EditorGUI.DelayedIntField(position, option.label, array.Length);
 						if(option.nullable) {
 							position.x += position.width;
 							position.width = 16;

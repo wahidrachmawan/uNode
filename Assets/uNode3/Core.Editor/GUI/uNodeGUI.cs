@@ -505,7 +505,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void DrawIntField(Rect position, ref int variable, Object unityObject, GUIContent label) {
 			EditorGUI.BeginChangeCheck();
-			var newVar = EditorGUI.IntField(position, label, variable);
+			var newVar = EditorGUI.DelayedIntField(position, label, variable);
 			if(EditorGUI.EndChangeCheck()) {
 				if(newVar != variable) {
 					uNodeEditorUtility.RegisterUndo(unityObject, label.text);
@@ -516,7 +516,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void DrawFloatField(Rect position, ref float variable, Object unityObject, GUIContent label) {
 			EditorGUI.BeginChangeCheck();
-			var newVar = EditorGUI.FloatField(position, label, variable);
+			var newVar = EditorGUI.DelayedFloatField(position, label, variable);
 			if(EditorGUI.EndChangeCheck()) {
 				if(newVar != variable) {
 					uNodeEditorUtility.RegisterUndo(unityObject, label.text);

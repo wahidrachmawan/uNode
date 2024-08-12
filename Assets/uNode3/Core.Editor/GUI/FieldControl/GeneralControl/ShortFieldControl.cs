@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var oldValue = (short)value;
-			var newValue = (short)EditorGUI.IntField(position, label, (int)oldValue);
+			var newValue = (short)EditorGUI.DelayedIntField(position, label, (int)oldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				onChanged(newValue);
 			}

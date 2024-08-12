@@ -11,7 +11,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 		public override void Draw(Rect position, DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
-			fieldValue = EditorGUI.DoubleField(position, option.label, fieldValue);
+			fieldValue = EditorGUI.DelayedDoubleField(position, option.label, fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
 			}

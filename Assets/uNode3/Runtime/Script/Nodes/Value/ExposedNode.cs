@@ -10,6 +10,7 @@ namespace MaxyGames.UNode.Nodes {
 		public class OutputData {
 			public string name;
 			public SerializedType type = typeof(object);
+			public bool isProperty;
 			[NonSerialized]
 			public ValueOutput port;
 		}
@@ -25,7 +26,7 @@ namespace MaxyGames.UNode.Nodes {
 				d.port = ValueOutput(d.name, d.type.type);
 				d.port.AssignGetCallback(instance => {
 					var val = value.GetValue(instance);
-					var member = val.GetType().GetMemberCached(d.name);
+					var member = value.type.GetMemberCached(d.name);
 					if(member is FieldInfo field) {
 						return field.GetValueOptimized(val);
 					}

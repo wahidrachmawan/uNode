@@ -212,7 +212,7 @@ namespace MaxyGames.UNode.Editors.Control {
 							}
 							case PersistentListenerMode.Float: {
 								EditorGUI.BeginChangeCheck();
-								var result = EditorGUI.FloatField(argRect, GUIContent.none, ArgumentCache.FloatArgument.GetValueOptimized(argument).ConvertTo<float>());
+								var result = EditorGUI.DelayedFloatField(argRect, GUIContent.none, ArgumentCache.FloatArgument.GetValueOptimized(argument).ConvertTo<float>());
 								if(EditorGUI.EndChangeCheck()) {
 									ArgumentCache.FloatArgument.SetValueOptimized(argument, result);
 									onChanged(newValue);
@@ -221,7 +221,7 @@ namespace MaxyGames.UNode.Editors.Control {
 							}
 							case PersistentListenerMode.Int: {
 								EditorGUI.BeginChangeCheck();
-								var result = EditorGUI.IntField(argRect, GUIContent.none, ArgumentCache.IntArgument.GetValueOptimized(argument).ConvertTo<int>());
+								var result = EditorGUI.DelayedIntField(argRect, GUIContent.none, ArgumentCache.IntArgument.GetValueOptimized(argument).ConvertTo<int>());
 								if(EditorGUI.EndChangeCheck()) {
 									ArgumentCache.IntArgument.SetValueOptimized(argument, result);
 									onChanged(newValue);

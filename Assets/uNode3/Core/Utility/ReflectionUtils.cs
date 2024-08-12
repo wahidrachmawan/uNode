@@ -1731,6 +1731,11 @@ namespace MaxyGames.UNode {
 					MemberInfo[] member = type.GetMember(mName, bindingAttr);
 					if(member != null && member.Length > 0) {
 						infoArray[i - 1] = member[0];
+						if(member[0] is MethodBase) {
+							if(HasRefOrOutParameter(member[0] as MethodBase)) {
+								memberData.HasRefOrOut = true;
+							}
+						}
 						if(i + 1 == path.Length)
 							break;
 						type = GetMemberType(member[0]);

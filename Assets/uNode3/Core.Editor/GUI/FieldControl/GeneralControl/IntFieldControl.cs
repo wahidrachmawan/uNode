@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Editors.Control {
 				fieldValue = EditorGUI.IntSlider(position, label, fieldValue, (int)att.min, (int)att.max);
 			}
 			else {
-				fieldValue = EditorGUI.IntField(position, label, fieldValue);
+				fieldValue = EditorGUI.DelayedIntField(position, label, fieldValue);
 			}
 			if(EditorGUI.EndChangeCheck()) {
 				onChanged(fieldValue);
