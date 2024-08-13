@@ -54,6 +54,7 @@ namespace MaxyGames.UNode.Editors.Control {
 				}
 				else {
 					position.width -= 16;
+					position.height = EditorGUIUtility.singleLineHeight;
 					fieldValue = EditorGUI.TextField(position, label, fieldValue);
 					position.x += position.width;
 					position.width = 16;

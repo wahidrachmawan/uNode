@@ -109,13 +109,18 @@ namespace MaxyGames.UNode {
 				CG.RegisterPostInitialization(() => {
 					foreach(var p in parameters) {
 						if(p.output != null && p.output.isConnected) {
+							string name;
 							if(CG.CanDeclareLocal(p.output, flows)) {
-								string name = CG.RegisterVariable(p.output, isLocal: true);
+								name = CG.RegisterVariable(p.output, isLocal: true);
+							}
+							else {
+								name = CG.RegisterVariable(p.output, isLocal: false);
+							}
+							if(ReflectionUtils.IsNativeType(p.output.type)) {
 								CG.RegisterPort(p.output, () => name);
 							}
 							else {
-								string name = CG.RegisterVariable(p.output, isLocal: false);
-								CG.RegisterPort(p.output, () => name);
+								CG.RegisterPort(p.output, () => CG.Convert(name, p.output.type));
 							}
 						}
 					}

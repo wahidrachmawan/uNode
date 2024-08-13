@@ -32,7 +32,12 @@ namespace MaxyGames.UNode {
 		public List<MultipurposeMember.InitializerData> initializers => member.initializers;
 
 		public override void OnGeneratorInitialize() {
-			member.OnGeneratorInitialize(exit);
+			if(output != null && output.hasValidConnections) {
+				member.OnGeneratorInitialize(output.ValidConnections.SelectMany(c => c.Input.node.FlowOutputs).ToArray());
+			}
+			else {
+				member.OnGeneratorInitialize(exit);
+			}
 			CG.RegisterPort(enter, () => {
 				return CG.Flow(CG.Value(member).AddSemicolon(), CG.FlowFinish(enter, exit));
 			});
@@ -132,6 +137,17 @@ namespace MaxyGames.UNode {
 
 			if(enter != null && enter.isConnected && output != null && output.isConnected) {
 				analizer.RegisterError(this, "Flow and Value is both connected, this causes double-execution");
+			}
+
+			if(useOutputParameters && member.target.HasRefOrOut) {
+				if((enter == null || !enter.hasValidConnections) && (output == null || !output.hasValidConnections)) {
+					foreach(var param in member.parameters) {
+						if(param.output != null && param.output.hasValidConnections) {
+							analizer.RegisterError(this, "Please connect the enter or output port in order to use output parameters");
+							break;
+						}
+					}
+				}
 			}
 		}
 	}

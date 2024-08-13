@@ -18,13 +18,17 @@ namespace MaxyGames.UNode.Editors {
 		public virtual void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
 
 		}
+
+		public virtual float GetControlHeight(GUIContent label, object value, Type type, uNodeUtility.EditValueSettings settings) {
+			return 18f;
+		}
 		
 		public virtual void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
 			DrawDecorators(settings);
 			if(string.IsNullOrEmpty(label.tooltip)) {
 				label.tooltip = settings?.Tooltip;
 			}
-			Draw(uNodeGUIUtility.GetRect(), label, value, type, onChanged, settings);
+			Draw(uNodeGUIUtility.GetRect(EditorGUIUtility.labelWidth, GetControlHeight(label, value, type, settings)), label, value, type, onChanged, settings);
 		}
 
 		protected void DrawDecorators(uNodeUtility.EditValueSettings settings) {
@@ -140,103 +144,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 	}
-
-	//public class HLActionFieldControl : FieldControl<Events.HLAction> {
-	//	public override bool IsValidControl(Type type, bool layouted) {
-	//		return layouted && base.IsValidControl(type, layouted);
-	//	}
-
-	//	public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
-	//		DrawDecorators(settings);
-	//		EditorGUI.BeginChangeCheck();
-	//		ValidateValue(ref value);
-	//		var fieldValue = (Events.HLAction)value;
-	//		Rect position = uNodeGUIUtility.GetRect();
-	//		position = EditorGUI.PrefixLabel(position, label);
-	//		Type instanceType = fieldValue.type.startType;
-	//		if (instanceType != null) {
-	//			EditorGUI.indentLevel++;
-	//			var fields = EditorReflectionUtility.GetFields(instanceType);
-	//			foreach(var field in fields) {
-	//				if(field.IsDefined(typeof(NonSerializedAttribute)) || field.IsDefined(typeof(HideAttribute))) continue;
-	//				var option = field.GetCustomAttribute(typeof(NodePortAttribute), true) as NodePortAttribute;
-	//				if(option != null && option.hideInNode) continue;
-	//				var val = fieldValue.initializers.FirstOrDefault(d => d.name == field.Name);
-	//				if(val == null) {
-	//					val = new FieldValueData() {
-	//						name = field.Name,
-	//						value = MemberData.CreateFromValue(
-	//							field.GetValueOptimized(ReflectionUtils.CreateInstance(instanceType)), 
-	//							field.FieldType),
-	//					};
-	//					fieldValue.initializers.Add(val);
-	//					GUI.changed = true;
-	//				}
-	//				uNodeGUIUtility.EditValueLayouted(new GUIContent(field.Name), val.value, typeof(MemberData), (obj) => {
-	//					val.value = obj as MemberData;
-	//				}, new uNodeUtility.EditValueSettings() {
-	//					attributes = new object[] { new FilterAttribute(field.FieldType) },
-	//				});
-	//			}
-	//			if(instanceType.HasImplementInterface(typeof(IStateNode)) ||
-	//				instanceType.HasImplementInterface(typeof(IStateCoroutineNode))) {
-	//				uNodeGUIUtility.ShowField(
-	//					fieldValue.GetType().GetFieldCached(nameof(Events.HLAction.storeResult)), 
-	//					fieldValue, 
-	//					settings.unityObject);
-	//			}
-	//			EditorGUI.indentLevel--;
-	//		}
-	//		if (EditorGUI.EndChangeCheck()) {
-	//			onChanged(fieldValue);
-	//		}
-	//	}
-	//}
-
-	//public class HLConditionFieldControl : FieldControl<Events.HLCondition> {
-	//	public override bool IsValidControl(Type type, bool layouted) {
-	//		return layouted && base.IsValidControl(type, layouted);
-	//	}
-
-	//	public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
-	//		DrawDecorators(settings);
-	//		EditorGUI.BeginChangeCheck();
-	//		ValidateValue(ref value);
-	//		var fieldValue = (Events.HLCondition)value;
-	//		Rect position = uNodeGUIUtility.GetRect();
-	//		position = EditorGUI.PrefixLabel(position, label);
-	//		Type instanceType = fieldValue.type.startType;
-	//		if (instanceType != null) {
-	//			EditorGUI.indentLevel++;
-	//			var fields = EditorReflectionUtility.GetFields(instanceType);
-	//			foreach(var field in fields) {
-	//				if(field.IsDefined(typeof(NonSerializedAttribute)) || field.IsDefined(typeof(HideAttribute))) continue;
-	//				var option = field.GetCustomAttribute(typeof(NodePortAttribute), true) as NodePortAttribute;
-	//				if(option != null && option.hideInNode) continue;
-	//				var val = fieldValue.initializers.FirstOrDefault(d => d.name == field.Name);
-	//				if(val == null) {
-	//					val = new FieldValueData() {
-	//						name = field.Name,
-	//						value = MemberData.CreateFromValue(
-	//							field.GetValueOptimized(ReflectionUtils.CreateInstance(instanceType)), 
-	//							field.FieldType),
-	//					};
-	//					fieldValue.initializers.Add(val);
-	//					GUI.changed = true;
-	//				}
-	//				uNodeGUIUtility.EditValueLayouted(new GUIContent(field.Name), val.value, typeof(MemberData), (obj) => {
-	//					val.value = obj as MemberData;
-	//				}, new uNodeUtility.EditValueSettings() {
-	//					attributes = new object[] { new FilterAttribute(field.FieldType) },
-	//				});
-	//			}
-	//			EditorGUI.indentLevel--;
-	//		}
-	//		if (EditorGUI.EndChangeCheck()) {
-	//			onChanged(fieldValue);
-	//		}
-	//	}
-	//}
 }
 
 namespace MaxyGames.UNode.Editors.Control {

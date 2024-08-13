@@ -10,7 +10,6 @@ namespace MaxyGames.UNode.Editors {
     public class ClassComponentEditor : Editor {
 		public override void OnInspectorGUI() {
 			var asset = target as ClassComponent;
-			serializedObject.UpdateIfRequiredOrScript();
 			var position = uNodeGUIUtility.GetRect();
 			var bPos = position;
 			bPos.x += position.width - 20;
@@ -19,8 +18,7 @@ namespace MaxyGames.UNode.Editors {
 				var items = ItemSelector.MakeCustomItemsForInstancedType(
 					new System.Type[] { typeof(ClassDefinition) }, 
 					(val) => {
-						serializedObject.FindProperty(nameof(asset.target)).objectReferenceValue = val as ClassDefinition;
-						serializedObject.ApplyModifiedProperties();
+						asset.target = val as ClassDefinition;
 					}, 
 					uNodeEditorUtility.IsSceneObject(asset),
 					obj => {
@@ -32,9 +30,11 @@ namespace MaxyGames.UNode.Editors {
 				ItemSelector.ShowWindow(null, null, null, items).ChangePosition(bPos.ToScreenRect()).displayDefaultItem = false;
 				Event.current.Use();
 			}
-			EditorGUI.PropertyField(position, serializedObject.FindProperty(nameof(asset.target)), new GUIContent("Graph", "The target graph reference"));
-			// EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(root.mainObject)));
-			serializedObject.ApplyModifiedProperties();
+			EditorGUI.BeginChangeCheck();
+			var targetVal = EditorGUI.ObjectField(position, new GUIContent("Graph", "The target graph reference"), asset.target, typeof(ClassDefinition), false);
+			if(EditorGUI.EndChangeCheck()) {
+				asset.target = targetVal as ClassDefinition;
+			}
 
 			if(asset.target != null) {
 				if(!Application.isPlaying) {

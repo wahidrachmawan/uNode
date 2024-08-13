@@ -147,10 +147,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 			);
 			//EditorGUILayout.BeginHorizontal();
-			//if(GUILayout.Button(new GUIContent("Refresh", ""), EditorStyles.miniButtonLeft)) {
-			//	node.Refresh();
-			//	uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-			//}
+			if(GUILayout.Button(new GUIContent("Refresh", ""), EditorStyles.miniButtonLeft)) {
+				node.Refresh();
+				uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+			}
 			//EditorGUILayout.EndHorizontal();
 		}
 	}

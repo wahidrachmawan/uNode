@@ -67,7 +67,8 @@ namespace MaxyGames.UNode.Editors {
 			Action<Rect> add,
 			Action<int> remove,
 			ReorderableList.ReorderCallbackDelegateWithDetails reorder = null,
-			ReorderableList.ElementHeightCallbackDelegate elementHeight = null) {
+			ReorderableList.ElementHeightCallbackDelegate elementHeight = null,
+			float? headerHeight = null) {
 			if(values == null) {
 				throw new ArgumentNullException(nameof(values));
 			}
@@ -82,6 +83,9 @@ namespace MaxyGames.UNode.Editors {
 				};
 				if(elementHeight != null) {
 					reorderable.elementHeightCallback = elementHeight;
+				}
+				if(headerHeight != null) {
+					reorderable.headerHeight = headerHeight.Value;
 				}
 				reorderable.displayAdd = add != null;
 				reorderable.displayRemove = remove != null;
