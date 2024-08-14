@@ -77,40 +77,37 @@ namespace MaxyGames.UNode.Editors {
 						return;
 					}
 					Type elementType = type.GetElementType();
-					Array array = value as Array;
-					if(array == null) {
-						array = Array.CreateInstance(nativeElementType, 0);
+					Array list = value as Array;
+					if(list == null) {
+						list = Array.CreateInstance(nativeElementType, 0);
 						GUI.changed = true;
 					}
-					if(array != null) {
+					if(list != null) {
 						EditorGUI.BeginChangeCheck();
-						int num = EditorGUI.DelayedIntField(position, label, array.Length);
-						if(EditorGUI.EndChangeCheck()) {
-							if(num != array.Length) {
-								array = uNodeUtility.ResizeArray(array, nativeElementType, num);
-								GUI.changed = true;
-							}
+						int num = EditorGUI.DelayedIntField(position, label, list.Length);
+						if(num != list.Length) {
 							uNodeEditorUtility.RegisterUndo(unityObject, "");
-							value = array;
+							list = uNodeUtility.ResizeArray(list, nativeElementType, num);
+							value = list;
 							if(onChange != null) {
 								onChange(value);
 							}
 							GUIChanged(unityObject);
 						}
-						if(array.Length > 0) {
+						if(list.Length > 0) {
 							Event currentEvent = Event.current;
 							EditorGUI.indentLevel++;
-							for(int i = 0; i < array.Length; i++) {
-								var elementToEdit = array.GetValue(i);
+							for(int i = 0; i < list.Length; i++) {
+								var elementToEdit = list.GetValue(i);
 								int a = i;
 								EditValueLayouted(new GUIContent("Element " + i), elementToEdit, elementType, delegate (object val) {
 									uNodeEditorUtility.RegisterUndo(unityObject, "");
 									elementToEdit = val;
-									array.SetValue(elementToEdit, a);
+									list.SetValue(elementToEdit, a);
 									if(onChange != null)
-										onChange(array);
+										onChange(list);
 									GUIChanged(unityObject);
-								});
+								}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 							}
 							EditorGUI.indentLevel--;
 						}
@@ -130,29 +127,35 @@ namespace MaxyGames.UNode.Editors {
 					if(type.IsCastableTo(typeof(IList))) {
 						EditorGUI.BeginChangeCheck();
 						Type elementType = type.GetGenericArguments()[0];
-						IList array = value as IList;
-						if(array == null) {
-							array = ReflectionUtils.CreateInstance(type) as IList;
+						IList list = value as IList;
+						if(list == null) {
+							list = ReflectionUtils.CreateInstance(type) as IList;
 							GUI.changed = true;
 						}
-						if(array != null) {
-							int num = EditorGUI.DelayedIntField(position, label, array.Count);
-							if(num != array.Count) {
-								uNodeUtility.ResizeList(array, elementType, num, true);
+						if(list != null) {
+							int num = EditorGUI.DelayedIntField(position, label, list.Count);
+							if(num != list.Count) {
+								uNodeEditorUtility.RegisterUndo(unityObject, "");
+								uNodeUtility.ResizeList(list, elementType, num, true);
+								value = list;
+								if(onChange != null) {
+									onChange(value);
+								}
+								GUIChanged(unityObject);
 							}
-							if(array.Count > 0) {
+							if(list.Count > 0) {
 								EditorGUI.indentLevel++;
-								for(int i = 0; i < array.Count; i++) {
-									var elementToEdit = array[i];
+								for(int i = 0; i < list.Count; i++) {
+									var elementToEdit = list[i];
 									int a = i;
 									EditValueLayouted(new GUIContent("Element " + i), elementToEdit, elementType, delegate (object val) {
 										uNodeEditorUtility.RegisterUndo(unityObject, "");
 										elementToEdit = val;
-										array[a] = elementToEdit;
+										list[a] = elementToEdit;
 										if(onChange != null)
-											onChange(array);
+											onChange(list);
 										GUIChanged(unityObject);
-									}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject });
+									}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 								}
 								EditorGUI.indentLevel--;
 							}
@@ -162,7 +165,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						if(EditorGUI.EndChangeCheck()) {
 							uNodeEditorUtility.RegisterUndo(unityObject, "");
-							value = array;
+							value = list;
 							if(onChange != null) {
 								onChange(value);
 							}
@@ -187,10 +190,10 @@ namespace MaxyGames.UNode.Editors {
 										object[] o = val as object[];
 										EditValueLayouted(new GUIContent("Key"), o[0], keyType, delegate (object v) {
 											o[0] = v;
-										}, new uNodeUtility.EditValueSettings() { nullable = false });
+										}, new uNodeUtility.EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 										EditValueLayouted(new GUIContent("Value"), o[1], valType, delegate (object v) {
 											o[1] = v;
-										});
+										}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 										if(GUILayout.Button(new GUIContent("Add"))) {
 											if(!map.Contains(o[0])) {
 												uNodeEditorUtility.RegisterUndo(unityObject, "" + "Add Dictonary Value");
@@ -307,7 +310,7 @@ namespace MaxyGames.UNode.Editors {
 													}
 													GUIChanged(unityObject);
 												}
-											}, new uNodeUtility.EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject });
+											}, new uNodeUtility.EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 											EditValueLayouted(new GUIContent("Value"), values[i], valType, delegate (object val) {
 												uNodeEditorUtility.RegisterUndo(unityObject, "");
 												values[i] = val;
@@ -320,7 +323,7 @@ namespace MaxyGames.UNode.Editors {
 													onChange(value);
 												}
 												GUIChanged(unityObject);
-											});
+											}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 											EditorGUI.indentLevel--;
 										}
 										EditorGUI.indentLevel--;
@@ -375,7 +378,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					//TODO: in playmode show actual value instead of default value
 					if(value is IRuntimeGraphWrapper graphWrapper) {
-							uNodeGUI.DrawLinkedVariables(graphWrapper.WrappedVariables, graphWrapper.OriginalGraph, unityObject: unityObject);
+						uNodeGUI.DrawLinkedVariables(graphWrapper.WrappedVariables, graphWrapper.OriginalGraph, unityObject: unityObject);
 					}
 				}
 				else {
@@ -2458,7 +2461,7 @@ namespace MaxyGames.UNode.Editors {
 						onChange(fieldValue);
 					}
 					GUIChanged(unityObject);
-				}, uNodeEditorUtility.IsSceneObject(unityObject), acceptUnityObject: settings.acceptUnityObject);
+				}, uNodeEditorUtility.IsSceneObject(unityObject), unityObject: unityObject, acceptUnityObject: settings.acceptUnityObject);
 			}
 			else if((type == typeof(UnityEngine.Object) || type.IsSubclassOf(typeof(UnityEngine.Object)))) {
 				if(fieldValue != null && !(fieldValue is UnityEngine.Object)) {
@@ -2568,7 +2571,11 @@ namespace MaxyGames.UNode.Editors {
 					Array newArray = array;
 					if(newArray != null) {
 						if(num != array.Length) {
+							uNodeEditorUtility.RegisterUndo(unityObject, "");
 							newArray = uNodeUtility.ResizeArray(array, type.GetElementType(), num);
+							if(onChange != null) {
+								onChange(newArray);
+							}
 						}
 						if(newArray.Length > 0) {
 							Event currentEvent = Event.current;

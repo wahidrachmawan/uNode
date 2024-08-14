@@ -807,6 +807,7 @@ namespace MaxyGames.UNode.Editors {
 					bool flag = EditorGUILayout.Toggle(ownerVar != null, GUILayout.Width(EditorGUIUtility.singleLineHeight));
 					EditorGUI.indentLevel = indent;
 					if(flag != (ownerVar != null)) {
+						uNodeEditorUtility.RegisterUndo(unityObject);
 						if(flag) {
 							instanceVariables.Add(new VariableData() {
 								name = linkedVar.name,

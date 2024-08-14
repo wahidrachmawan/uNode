@@ -249,9 +249,9 @@ namespace MaxyGames.UNode.Editors {
 					//Clear the invalid Runtime Type
 					ReflectionUtils.ClearInvalidRuntimeType();
 
-					uNodeThreadUtility.ExecuteAfter(5, () => {
-						uNodeEditor.ClearCache();
-					});
+					//uNodeThreadUtility.ExecuteAfter(5, () => {
+					//	uNodeEditor.ClearCache();
+					//});
 					//EditorBinding.restorePatch?.Invoke();
 					break;
 				}
