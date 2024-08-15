@@ -217,6 +217,7 @@ namespace MaxyGames.UNode.Editors {
 										EditorGUI.indentLevel++;
 										for(int i = 0; i < keys.Count; i++) {
 											Rect rect = GetRect();
+											int index = i;
 											EditorGUI.LabelField(rect, new GUIContent("Element " + i));
 											if(Event.current.button == 1 && rect.Contains(Event.current.mousePosition)) {
 												GenericMenu menu = new GenericMenu();
@@ -299,7 +300,7 @@ namespace MaxyGames.UNode.Editors {
 											EditValueLayouted(new GUIContent("Key"), keys[i], keyType, delegate (object val) {
 												if(!newMap.Contains(val)) {
 													uNodeEditorUtility.RegisterUndo(unityObject, "");
-													keys[i] = val;
+													keys[index] = val;
 													newMap = ReflectionUtils.CreateInstance(type) as IDictionary;
 													for(int x = 0; x < keys.Count; x++) {
 														newMap.Add(keys[x], values[x]);
@@ -313,7 +314,7 @@ namespace MaxyGames.UNode.Editors {
 											}, new uNodeUtility.EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 											EditValueLayouted(new GUIContent("Value"), values[i], valType, delegate (object val) {
 												uNodeEditorUtility.RegisterUndo(unityObject, "");
-												values[i] = val;
+												values[index] = val;
 												newMap = ReflectionUtils.CreateInstance(type) as IDictionary;
 												for(int x = 0; x < values.Count; x++) {
 													newMap.Add(keys[x], values[x]);

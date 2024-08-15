@@ -508,35 +508,60 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			for(int x = 0; x < genericArguments.Length; x++) {
 				var index = x;
 				var arg = genericArguments[index];
-				using(new EditorGUILayout.HorizontalScope()) {
-					EditorGUILayout.PrefixLabel(rawGenericArguments[index].Name);
-					var rect = uNodeGUIUtility.GetRect();
-					if(EditorGUI.DropdownButton(rect, new GUIContent(arg.PrettyName(), arg.FullName), FocusType.Keyboard)) {
-						var filter = new FilterAttribute();
-						filter.ToFilterGenericConstraints(rawGenericArguments[index]);
-						ItemSelector.ShowType(node, filter, member => {
-							genericArguments[index] = member.startType;
-							var changedMethod = ReflectionUtils.MakeGenericMethod(methodDefinition, genericArguments);
 
-							List<MemberInfo> infos = new List<MemberInfo>(members);
-							var methodIndex = infos.IndexOf(method);
-							infos[methodIndex] = changedMethod;
+				void DoChange(Type type) {
+					genericArguments[index] = type;
+					var changedMethod = ReflectionUtils.MakeGenericMethod(methodDefinition, genericArguments);
 
-							if(ReflectionUtils.GetMemberType(method) != ReflectionUtils.GetMemberType(changedMethod)) {
-								if(infos.Count > methodIndex + 1  && ReflectionUtils.GetMemberType(changedMethod).IsCastableTo(infos[methodIndex + 1].DeclaringType) == false) {
-									uNodeEditorUtility.RegisterUndo(node.GetUnityObject());
-									uNodeUtility.ResizeList(infos, methodIndex + 1);
-									target.target = MemberData.CreateFromMembers(infos);
-									node.Register();
-									uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-									return;
-								}
-							}
+					List<MemberInfo> infos = new List<MemberInfo>(members);
+					var methodIndex = infos.IndexOf(method);
+					infos[methodIndex] = changedMethod;
+
+					if(ReflectionUtils.GetMemberType(method) != ReflectionUtils.GetMemberType(changedMethod)) {
+						if(infos.Count > methodIndex + 1 && ReflectionUtils.GetMemberType(changedMethod).IsCastableTo(infos[methodIndex + 1].DeclaringType) == false) {
 							uNodeEditorUtility.RegisterUndo(node.GetUnityObject());
+							uNodeUtility.ResizeList(infos, methodIndex + 1);
 							target.target = MemberData.CreateFromMembers(infos);
 							node.Register();
 							uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-						}).ChangePosition(rect.ToScreenRect());
+							return;
+						}
+					}
+					uNodeEditorUtility.RegisterUndo(node.GetUnityObject());
+					target.target = MemberData.CreateFromMembers(infos);
+					node.Register();
+					uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+				}
+
+				using(new EditorGUILayout.HorizontalScope()) {
+					EditorGUILayout.PrefixLabel(rawGenericArguments[index].Name);
+					var rect = uNodeGUIUtility.GetRect();
+					rect.width -= 20;
+					if(EditorGUI.DropdownButton(rect, new GUIContent(arg.PrettyName(), arg.FullName), FocusType.Keyboard)) {
+						var filter = new FilterAttribute();
+						filter.ToFilterGenericConstraints(rawGenericArguments[index]);
+
+						if(Event.current.shift || Event.current.control) {
+							TypeBuilderWindow.Show(rect, null, filter, (types) => {
+								DoChange(types[0].startType);
+							}, new TypeItem[] { new TypeItem(genericArguments[index], filter) });
+						}
+						else {
+							ItemSelector.ShowType(node, filter, member => {
+								DoChange(member.startType);
+							}).ChangePosition(rect.ToScreenRect());
+						}
+					}
+					rect.x += rect.width;
+					rect.width = 20;
+					if(EditorGUI.DropdownButton(rect, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
+						var filter = new FilterAttribute();
+						filter.ToFilterGenericConstraints(rawGenericArguments[index]);
+
+						GUI.changed = false;
+						TypeBuilderWindow.Show(rect, null, filter, (types) => {
+							DoChange(types[0].startType);
+						}, new TypeItem[] { new TypeItem(genericArguments[index], filter) });
 					}
 				}
 			}

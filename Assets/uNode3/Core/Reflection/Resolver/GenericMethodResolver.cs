@@ -79,7 +79,7 @@ namespace MaxyGames.UNode {
 		}
 
 		protected virtual object DoInvoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
-			return ConstructedMethodInfo.InvokeOptimized(obj, invokeAttr, binder, parameters, culture);
+			return ConstructedMethodInfo.InvokeOptimized(obj, parameters);
 		}
 
 		public void GenerateCode(List<string> members, string[] parameters) {

@@ -287,7 +287,7 @@ namespace MaxyGames.UNode.Editors {
 			if(EditorSettings.enterPlayModeOptionsEnabled && EditorSettings.enterPlayModeOptions.HasFlags(EnterPlayModeOptions.DisableDomainReload)) {
 				//then enable is playing and clean graph cache
 				uNodeUtility.isPlaying = true;
-				uNodeEditor.ClearCache();
+				//uNodeEditor.ClearCache();
 				//Clean Type Cache so it get fresh types.
 				TypeSerializer.CleanCache();
 				//Clean compiled runtime assembly so the runtime type is cannot be loaded again.
