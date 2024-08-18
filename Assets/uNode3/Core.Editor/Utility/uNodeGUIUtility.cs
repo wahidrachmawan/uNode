@@ -2116,28 +2116,6 @@ namespace MaxyGames.UNode.Editors {
 					GUIChanged(unityObject);
 				}, uNodeEditorUtility.IsSceneObject(unityObject), settings.acceptUnityObject);
 			}
-			else if(type.IsCastableTo(typeof(UnityEngine.Object))) {
-				if(settings.acceptUnityObject) {
-					if(fieldValue != null && !(fieldValue is UnityEngine.Object)) {
-						fieldValue = null;
-					}
-					UnityEngine.Object oldValue = fieldValue as UnityEngine.Object;
-					oldValue = EditorGUI.ObjectField(position, label, oldValue, type, uNodeEditorUtility.IsSceneObject(unityObject));
-					if(EditorGUI.EndChangeCheck()) {
-						uNodeEditorUtility.RegisterUndo(unityObject, "");
-						fieldValue = oldValue;
-						if(onChange != null) {
-							onChange(fieldValue);
-						}
-						GUIChanged(unityObject);
-					}
-				}
-				else {
-					position = EditorGUI.PrefixLabel(position, label);
-					uNodeGUI.Label(position, "null", EditorStyles.helpBox);
-					EditorGUI.EndChangeCheck();
-				}
-			}
 			else if(type == typeof(Type)) {
 				var oldValue = fieldValue;
 				Type t = oldValue as Type;
@@ -2463,31 +2441,6 @@ namespace MaxyGames.UNode.Editors {
 					}
 					GUIChanged(unityObject);
 				}, uNodeEditorUtility.IsSceneObject(unityObject), unityObject: unityObject, acceptUnityObject: settings.acceptUnityObject);
-			}
-			else if((type == typeof(UnityEngine.Object) || type.IsSubclassOf(typeof(UnityEngine.Object)))) {
-				if(fieldValue != null && !(fieldValue is UnityEngine.Object)) {
-					fieldValue = null;
-				}
-				if(settings.acceptUnityObject) {
-					UnityEngine.Object oldValue = fieldValue as UnityEngine.Object;
-					oldValue = EditorGUI.ObjectField(GetRect(), label, oldValue, type, uNodeEditorUtility.IsSceneObject(unityObject));
-					if(EditorGUI.EndChangeCheck()) {
-						uNodeEditorUtility.RegisterUndo(unityObject, "");
-						fieldValue = oldValue;
-						if(onChange != null) {
-							onChange(fieldValue);
-						}
-						GUIChanged(unityObject);
-					}
-				}
-				else {
-					Rect rect = GetRect();
-					rect = EditorGUI.PrefixLabel(rect, label);
-					if(EditorGUI.DropdownButton(rect, new GUIContent("null"), FocusType.Keyboard, EditorStyles.miniButton)) {
-
-					}
-					EditorGUI.EndChangeCheck();
-				}
 			}
 			else if(type == typeof(Type)) {
 				var oldValue = fieldValue;

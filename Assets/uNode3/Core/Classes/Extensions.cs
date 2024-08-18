@@ -767,7 +767,12 @@ namespace MaxyGames.UNode {
 				return default;
 			}
 			if(obj is IRuntimeClassContainer container) {
-				return (T)container.RuntimeClass;
+				try {
+					return (T)container.RuntimeClass;
+				}
+				catch(InvalidCastException) {
+					throw new InvalidCastException($"Cannot convert: {container.RuntimeClass.GetType()} to : {typeof(T)}");
+				}
 			}
 			try {
 				return (T)obj;
@@ -787,7 +792,12 @@ namespace MaxyGames.UNode {
 				return default;
 			}
 			if(obj is IRuntimeClassContainer container) {
-				return (T)container.RuntimeClass;
+				try {
+					return (T)container.RuntimeClass;
+				}
+				catch(InvalidCastException) {
+					throw new InvalidCastException($"Cannot convert: {container.RuntimeClass.GetType()} to : {typeof(T)}");
+				}
 			}
 			try {
 				if(obj is T) {

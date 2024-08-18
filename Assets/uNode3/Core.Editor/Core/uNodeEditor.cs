@@ -966,9 +966,7 @@ namespace MaxyGames.UNode.Editors {
 				case PlayModeStateChange.EnteredPlayMode:
 					LoadEditorData();
 					//GraphDebug.useDebug = _useDebug;
-					if(!EditorSettings.enterPlayModeOptionsEnabled || EditorSettings.enterPlayModeOptions.HasFlags(EnterPlayModeOptions.DisableDomainReload)) {
-						Refresh();
-					}
+					Refresh();
 					break;
 				case PlayModeStateChange.EnteredEditMode:
 					CustomInspector.ResetEditor();

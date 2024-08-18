@@ -204,6 +204,10 @@ namespace MaxyGames.UNode.Editors {
 				EditorUtility.DisplayDialog("Error", "The project graph cannot reference scene object.", "Ok");
 				return;
 			}
+			else if(graphData.graph.GetGraphType().IsSubclassOf(typeof(UnityEngine.Object)) == false) {
+				EditorUtility.DisplayDialog("Error", "The graph that's not inherited from UnityEngine.Object cannot reference project and scene object.", "Ok");
+				return;
+			}
 			GenericMenu menu = new GenericMenu();
 
 			#region Dragged Action

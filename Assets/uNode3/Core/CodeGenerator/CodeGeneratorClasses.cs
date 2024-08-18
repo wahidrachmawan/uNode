@@ -1264,8 +1264,10 @@ namespace MaxyGames {
 						//If it is a fake type and not native type
 						vType = Type((type as IFakeType).GetNativeType());
 					}
-					//don't generate default value when the type is not native (CLR) type
-					defaultValue = null;
+					if(graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+						//don't generate default value when the type is not native (CLR) type
+						defaultValue = null;
+					}
 				}
 				if(type == null || defaultValue is IInstancedGraph) {
 					defaultValue = null;
