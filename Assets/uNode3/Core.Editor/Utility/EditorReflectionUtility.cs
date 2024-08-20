@@ -756,7 +756,7 @@ namespace MaxyGames.UNode.Editors {
 				if(filter.NonPublic && !filter.Private && !ReflectionUtils.IsPublicMember(member) && !ReflectionUtils.IsProtectedMember(member)) {
 					return false;
 				}
-				if(filter.SetMember && !ReflectionUtils.CanSetMember(member)) {
+				if(filter.SetMember && !ReflectionUtils.CanSetMemberValue(member)) {
 					return false;
 				}
 			}

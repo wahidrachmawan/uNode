@@ -19,6 +19,9 @@ namespace MaxyGames.UNode {
 		[System.NonSerialized]
 		public FlowOutput exit;
 
+		[SerializeField]
+		internal bool isUsingNewPosition = true;
+
 		protected override void OnRegister() {
 			exit = FlowOutput(nameof(exit)).SetName("");
 			enter = FlowInput(nameof(enter), (flow) => throw new System.InvalidOperationException()).SetName("");

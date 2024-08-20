@@ -9,7 +9,7 @@ using UnityEditor;
 namespace MaxyGames.UNode.Editors.Control {
 	class UnityObjectFieldControl : FieldControl<UnityEngine.Object> {
 		public override bool IsValidControl(Type type, bool layouted) {
-			return type == typeof(UnityEngine.Object) || type.IsSubclassOf(typeof(UnityEngine.Object));
+			return type == typeof(UnityEngine.Object) || type.IsSubclassOf(typeof(UnityEngine.Object)) && type is not RuntimeType;
 		}
 
 		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {

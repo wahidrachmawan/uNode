@@ -395,6 +395,15 @@ namespace MaxyGames.UNode.Editors {
 			ToogleGrid(uNodePreference.GetPreference().showGrid);
 			//Mark full reload to false for more faster reload after full reload
 			_fullReload = false;
+			//For keep the selections after refresh
+			if(graphData.hasSelection) {
+				foreach(var node in graphData.selectedNodes) {
+					if(node == null) continue;
+					if(nodeViewsPerNode.TryGetValue(node, out var view)) {
+						base.AddToSelection(view);
+					}
+				}
+			}
 			yield break;
 		}
 		#endregion

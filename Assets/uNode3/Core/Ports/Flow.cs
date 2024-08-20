@@ -875,14 +875,34 @@ namespace MaxyGames.UNode {
 			var targetFlow = port;
 			if(targetFlow.IsCoroutine() && targetFlow.actionCoroutine != null) {
 				var target = targetFlow.actionCoroutine(this);
-				while(target.MoveNext()) {
+				while(true) {
+					try {
+						if(target.MoveNext() == false) {
+							break;
+						}
+					}
+					catch(Exception ex) {
+						if(ex is GraphException)
+							throw;
+						throw new GraphException(ex, targetFlow.node);
+					}
 					var current = target.Current;
 					if(current is CustomYieldInstruction) {
 						yield return current;
 					}
 					else if(current is IEnumerable) {
 						var runner = new GraphRunner.NestedRunners((current as IEnumerable).GetEnumerator());
-						while(runner.MoveNext()) {
+						while(true) {
+							try {
+								if(runner.MoveNext() == false) {
+									break;
+								}
+							}
+							catch(Exception ex) {
+								if(ex is GraphException)
+									throw;
+								throw new GraphException(ex, targetFlow.node);
+							}
 							if(jumpStatement != null) {
 								goto FINISH;
 							}
@@ -892,7 +912,17 @@ namespace MaxyGames.UNode {
 					}
 					else if(current is IEnumerator) {
 						var runner = new GraphRunner.NestedRunners(current as IEnumerator);
-						while(runner.MoveNext()) {
+						while(true) {
+							try {
+								if(runner.MoveNext() == false) {
+									break;
+								}
+							}
+							catch(Exception ex) {
+								if(ex is GraphException)
+									throw;
+								throw new GraphException(ex, targetFlow.node);
+							}
 							if(jumpStatement != null) {
 								goto FINISH;
 							}
@@ -914,7 +944,14 @@ FINISH:
 				}
 			}
 			else {
-				targetFlow.action?.Invoke(this);
+				try {
+					targetFlow.action?.Invoke(this);
+				}
+				catch (Exception ex) {
+					if(ex is GraphException)
+						throw;
+					throw new GraphException(ex, targetFlow.node);
+				}
 			}
 			while(nextFlows.TryDequeue(out var nextPort)) {
 				FlowInput nextFlow = null;
@@ -935,14 +972,34 @@ FINISH:
 				}
 				var flow = new CoroutineFlow(nextFlow, runner);
 				var target = flow.GetIterator();
-				while(target.MoveNext()) {
+				while(true) {
+					try {
+						if(target.MoveNext() == false) {
+							break;
+						}
+					}
+					catch(Exception ex) {
+						if(ex is GraphException)
+							throw;
+						throw new GraphException(ex, targetFlow.node);
+					}
 					var current = target.Current;
 					if(current is CustomYieldInstruction) {
 						yield return current;
 					}
 					else if(current is IEnumerable) {
 						var runner = new GraphRunner.NestedRunners((current as IEnumerable).GetEnumerator());
-						while(runner.MoveNext()) {
+						while(true) {
+							try {
+								if(runner.MoveNext() == false) {
+									break;
+								}
+							}
+							catch(Exception ex) {
+								if(ex is GraphException)
+									throw;
+								throw new GraphException(ex, targetFlow.node);
+							}
 							if(flow.jumpStatement != null) {
 								goto FINISH;
 							}
@@ -953,7 +1010,17 @@ FINISH:
 					}
 					else if(current is IEnumerator) {
 						var runner = new GraphRunner.NestedRunners(current as IEnumerator);
-						while(runner.MoveNext()) {
+						while(true) {
+							try {
+								if(runner.MoveNext() == false) {
+									break;
+								}
+							}
+							catch(Exception ex) {
+								if(ex is GraphException)
+									throw;
+								throw new GraphException(ex, targetFlow.node);
+							}
 							if(flow.jumpStatement != null) {
 								goto FINISH;
 							}

@@ -23,7 +23,12 @@ namespace MaxyGames.UNode {
 			return CreateWrapper(graphUID, false);
 		}
 
-		//For code generation to create correct instance.
+		/// <summary>
+		/// Create instance of a ClassObject work on reflection & compiled grpah.
+		/// And it is used for code generation to create correct instance.
+		/// </summary>
+		/// <param name="graphUID"></param>
+		/// <returns></returns>
 		public static BaseRuntimeObject Create(string graphUID) {
 			//Get the native c# type
 			var type = graphUID.ToType(false);
@@ -44,6 +49,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Create instance of a ClassObject ( only work in reflection )
+		/// </summary>
+		/// <param name="graphUID"></param>
+		/// <param name="initialize"></param>
+		/// <returns></returns>
 		public static ClassObject CreateWrapper(string graphUID, bool initialize = true) {
 			//Get the actual graph by id
 			var target = uNodeUtility.GetDatabase().GetGraphByUID(graphUID) as ClassDefinition;

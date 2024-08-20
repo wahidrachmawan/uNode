@@ -75,19 +75,23 @@ namespace MaxyGames.UNode.Editors {
 			// }
 			base.SetPosition(newPos);
 
-			transition.position = new Rect(newPos.x - transition.node.position.x, newPos.y - transition.node.position.y, 0, 0);
+			transition.position = newPos;
 		}
 
 		public override void Teleport(Rect position) {
 			base.SetPosition(position);
-			transition.position = new Rect(position.x - transition.node.position.x, position.y - transition.node.position.y, 0, 0);
+			transition.position = position;
 		}
 
 		public void UpdatePosition() {
-			Rect pos = transition.node.position;
-			pos.x += transition.position.x;
-			pos.y += transition.position.y;
-			Teleport(pos);
+			if(transition.isUsingNewPosition == false) {
+				Rect pos = transition.node.position;
+				pos.x += transition.position.x;
+				pos.y += transition.position.y;
+				transition.nodeObject.position.position = pos.position;
+				transition.isUsingNewPosition = true;
+			}
+			Teleport(transition.position);
 		}
 
 		public override void ReloadView() {

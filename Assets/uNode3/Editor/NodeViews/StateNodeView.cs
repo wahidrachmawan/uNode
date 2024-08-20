@@ -57,48 +57,5 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 		}
-
-		public override void SetPosition(Rect newPos) {
-			// if(newPos != targetNode.editorRect && uNodePreference.GetPreference().snapNode) {
-			// 	var preference = uNodePreference.GetPreference();
-			// 	float range = preference.snapRange;
-			// 	newPos.x = NodeEditorUtility.SnapTo(newPos.x, range);
-			// 	newPos.y = NodeEditorUtility.SnapTo(newPos.y, range);
-			// 	if(preference.snapToPin && owner.selection.Count == 1) {
-			// 		var connectedPort = inputPorts.Where((p) => p.connected).ToList();
-			// 		for(int i = 0; i < connectedPort.Count; i++) {
-			// 			if(connectedPort[i].orientation != Orientation.Vertical) continue;
-			// 			var edges = connectedPort[i].GetEdges();
-			// 			foreach(var e in edges) {
-			// 				if(e != null) {
-			// 					float distanceToPort = e.edgeControl.to.x - e.edgeControl.from.x;
-			// 					if(Mathf.Abs(distanceToPort) <= preference.snapToPinRange && Mathf.Abs(newPos.x - layout.x) <= preference.snapToPinRange) {
-			// 						newPos.x = layout.x - distanceToPort;
-			// 						break;
-			// 					}
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
-			float xPos = newPos.x - targetNode.position.x;
-			float yPos = newPos.y - targetNode.position.y;
-
-			Teleport(newPos);
-
-			if(xPos != 0 || yPos != 0) {
-				foreach(var port in outputPorts) {
-					if(port.isFlow && !port.enabledSelf) {
-						TransitionView transition = port.portData.userData as TransitionView;
-						if(transition != null) {
-							Rect rect = transition.transition.position;
-							rect.x += targetNode.position.x;
-							rect.y += targetNode.position.y;
-							transition.Teleport(rect);
-						}
-					}
-				}
-			}
-		}
 	}
 }

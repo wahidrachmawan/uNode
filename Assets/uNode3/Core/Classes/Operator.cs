@@ -238,7 +238,7 @@ namespace MaxyGames.UNode {
 				//	return value;
 				//}
 				else if(!type.IsInstanceOfType(value) && !(value is RuntimeType)) {
-					throw new Exception($"Cannot convert '{value.GetType().FullName}' to {type.FullName}");
+					throw new Exception($"Cannot convert '{ReflectionUtils.GetObjectType(value).FullName}' to {type.FullName}");
 				}
 				// else if(value is ScriptableObject scriptableObject) {
 
@@ -2084,14 +2084,14 @@ namespace MaxyGames.UNode {
 				return func(a);
 			}
 			catch(InvalidCastException ex) {
-				throw new InvalidCastException($"Cannot convert '{a.GetType().FullName}' to {type.FullName}" + "\n" + ex.ToString());
+				throw new InvalidCastException($"Cannot convert '{ReflectionUtils.GetObjectType(a).FullName}' to {type.FullName}" + "\n" + ex.ToString());
 			}
 			catch(NullReferenceException ex) {
 				throw new NullReferenceException($"Cannot convert to {type.FullName} because the value is null.", ex);
 			}
 			catch(Exception ex) {
 				if(a != null) {
-					throw new Exception($"Failed to convert: '{a.GetType().FullName}' to {type.FullName}", ex);
+					throw new Exception($"Failed to convert: '{ReflectionUtils.GetObjectType(a).FullName}' to {type.FullName}", ex);
 				}
 				throw;
 			}

@@ -2842,6 +2842,16 @@ namespace MaxyGames {
 		}
 
 		private static string DoGenerateValueCode(object value, Type type, string initializer = null, bool includeField = true, bool includeProperty = false) {
+			if(value != null && value is IRuntimeGraphWrapper) {
+				var graphWrapper = value as IRuntimeGraphWrapper;
+				var graphType = ReflectionUtils.GetRuntimeType(graphWrapper);
+				if(graphType != null && graphType.IsCastableTo(typeof(UnityEngine.Object)) == false) {
+					return CG.New(graphType, null, graphWrapper.WrappedVariables.Select(v => CG.SetValue(v.name, CG.Value(v.value))));
+				}
+				else {
+					return Null;
+				}
+			}
 			if(type.IsValueType || ReflectionUtils.GetDefaultConstructor(type) != null) {
 				object clone = ReflectionUtils.CreateInstance(type);
 				List<string> initializers = new List<string>();

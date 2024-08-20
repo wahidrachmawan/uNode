@@ -1574,7 +1574,7 @@ namespace MaxyGames.UNode.Editors {
 								menuItem.type,
 								menuItem.name,
 							};
-							evt.menu.AppendAction("Add Transition/" + menuItem.path, (Action<DropdownMenuAction>)((e) => {
+							evt.menu.AppendAction("Add Transition/" + menuItem.path, ((e) => {
 								object[] objToArray = e.userData as object[];
 								System.Type type = (System.Type)objToArray[0];
 								if(node is Nodes.StateNode stateNode) {
@@ -1583,7 +1583,7 @@ namespace MaxyGames.UNode.Editors {
 										stateNode.transitions.container,
 										objToArray[1] as string,
 										type,
-										new Vector2(stateNode.position.width / 2, (stateNode.position.height / 2) + 50),
+										new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
 										(transition) => {
 											MarkRepaint();
 										});

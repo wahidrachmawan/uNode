@@ -154,6 +154,14 @@ namespace MaxyGames.UNode {
 			return obj.ReflectionType;
 		}
 
+		public static Type GetObjectType(object obj) {
+			if(obj == null) return null;
+			if(obj is IReflectionType || obj is IInstancedGraph || obj is IRuntimeClass) {
+				return GetRuntimeType(obj) ?? obj.GetType();
+			}
+			return obj.GetType();
+		}
+
 		/// <summary>
 		/// Get runtime type.
 		/// </summary>
@@ -1181,19 +1189,19 @@ namespace MaxyGames.UNode {
 			if(!CanSetMemberValue(member)) {
 				return false;
 			}
-			Type memberType = GetMemberType(member);
-			if(memberType != typeof(string) &&
-				memberType != typeof(int) &&
-				memberType != typeof(float) &&
-				memberType != typeof(Vector2) &&
-				memberType != typeof(Vector3) &&
-				memberType != typeof(Color) &&
-				(memberType != typeof(bool)) &&
-				memberType != typeof(Quaternion) &&
-				memberType != typeof(Rect) &&
-				!memberType.IsSubclassOf(typeof(UnityEngine.Object))) {
-				return memberType.IsEnum;
-			}
+			//Type memberType = GetMemberType(member);
+			//if(memberType != typeof(string) &&
+			//	memberType != typeof(int) &&
+			//	memberType != typeof(float) &&
+			//	memberType != typeof(Vector2) &&
+			//	memberType != typeof(Vector3) &&
+			//	memberType != typeof(Color) &&
+			//	(memberType != typeof(bool)) &&
+			//	memberType != typeof(Quaternion) &&
+			//	memberType != typeof(Rect) &&
+			//	!memberType.IsSubclassOf(typeof(UnityEngine.Object))) {
+			//	return memberType.IsEnum;
+			//}
 			return true;
 		}
 

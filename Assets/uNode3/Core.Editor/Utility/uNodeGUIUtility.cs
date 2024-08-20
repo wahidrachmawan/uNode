@@ -182,6 +182,7 @@ namespace MaxyGames.UNode.Editors {
 							GUI.changed = true;
 						}
 						if(map != null) {
+							position = EditorGUI.PrefixLabel(position, label);
 							if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ", " + valType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 								GUI.changed = false;
 								ActionPopupWindow.ShowWindow(position,

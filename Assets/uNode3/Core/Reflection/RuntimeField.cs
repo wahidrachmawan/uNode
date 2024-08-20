@@ -57,5 +57,9 @@ namespace MaxyGames.UNode {
 		public override bool IsDefined(Type attributeType, bool inherit) {
 			return false;
 		}
+
+		public override string ToString() {
+			return base.ToString() + "." + Name;
+		}
 	}
 }

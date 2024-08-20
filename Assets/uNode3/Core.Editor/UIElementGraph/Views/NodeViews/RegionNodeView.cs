@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using System.Linq;
 
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeRegion))]
@@ -49,11 +50,27 @@ namespace MaxyGames.UNode.Editors {
 			});
 			RegisterCallback<MouseDownEvent>((e) => {
 				if(e.button == 0) {
-					nodes = new List<NodeObject>(owner.graph.nodes);
+					nodes = new List<NodeObject>();
+					foreach(var n in owner.graph.nodes) {
+						if(n == null) continue;
+						nodes.Add(n);
+						if(n.node is Nodes.StateNode state) {
+							foreach(var tr in state.GetTransitions()) {
+								if(tr == null) continue;
+								nodes.Add(tr);
+							}
+						}
+					}
 					nodes.RemoveAll((n) => {
 						if(n == null || n == targetNode)
 							return false;
-						var targetRect = n.position;
+						Rect targetRect;
+						if(owner.nodeViewsPerNode.TryGetValue(n, out var view)) {
+							targetRect = view.GetPosition();
+						}
+						else {
+							targetRect = n.position;
+						}
 						var regionRect = targetNode.position;
 						if(regionRect.Overlaps(targetRect)) {
 							if(targetRect.x < regionRect.x) {

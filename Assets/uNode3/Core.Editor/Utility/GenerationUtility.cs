@@ -41,6 +41,7 @@ namespace MaxyGames.UNode.Editors {
 			public string path;
 			public int lastCompiledID;
 			public int uniqueID;
+			public float compilerVersion;
 			public string[] errors;
 			public string generatedScript;
 
@@ -51,6 +52,11 @@ namespace MaxyGames.UNode.Editors {
 				path = null;
 				fileHash = default;
 				lastCompiledID = 0;
+				compilerVersion = 0;
+			}
+
+			public void Update() {
+				compilerVersion = About.compilerVersion;
 			}
 		}
 
@@ -101,6 +107,8 @@ namespace MaxyGames.UNode.Editors {
 
 		public static bool IsGraphUpToDate(Object graphAsset) {
 			var scriptData = persistenceData.GetGraphData(graphAsset);
+			if(scriptData.compilerVersion != About.compilerVersion)
+				return false;
 			if(scriptData.isValid && File.Exists(scriptData.path)) {
 				var hash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(graphAsset));
 				return scriptData.fileHash == hash;
@@ -197,6 +205,8 @@ namespace MaxyGames.UNode.Editors {
 						scriptData.fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
 						scriptData.lastCompiledID = script.GetSettingUID();
 						scriptData.generatedScript = generatedScript;
+						scriptData.Update();
+
 					}
 					GraphUtility.UpdateDatabase(new[] { script });
 				}
@@ -365,9 +375,10 @@ namespace MaxyGames.UNode.Editors {
 							scriptData.path = path;
 							scriptData.fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
 							var lastCompiledID = script.GetSettingUID();
-							if(scriptData.generatedScript != generatedScript || scriptData.lastCompiledID != lastCompiledID) {
+							if(scriptData.generatedScript != generatedScript || scriptData.lastCompiledID != lastCompiledID || scriptData.compilerVersion != About.compilerVersion) {
 								scriptData.generatedScript = generatedScript;
 								scriptData.lastCompiledID = lastCompiledID;
+								scriptData.Update();
 							} else {
 								skippedCount++;
 							}
