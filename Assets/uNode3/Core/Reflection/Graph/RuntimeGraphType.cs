@@ -309,8 +309,6 @@ namespace MaxyGames.UNode {
 			if(o is IInstancedGraph || o is IRuntimeClass) {
 				var type = ReflectionUtils.GetRuntimeType(o);
 				if(type != null) {
-					var isEqual = type == this;
-					Debug.Log(isEqual);
 					return type.IsCastableTo(this);
 				}
 			}
