@@ -1315,7 +1315,10 @@ namespace MaxyGames.UNode.Editors {
 
 					var filter = inputPort.portData.GetFilter();
 					var outputType = outputPort.portData.portType;
-					if(filter.IsValidType(outputType) || outputType.IsCastableTo(inputPort.portType)) {
+					if(outputType.IsCastableTo(inputPort.portType)) {
+						return true;
+					}
+					else if(filter.IsValidType(outputType)) {
 						return true;
 					}
 					else {

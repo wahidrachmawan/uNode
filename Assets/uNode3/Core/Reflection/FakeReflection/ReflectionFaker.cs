@@ -7,7 +7,32 @@ using System.Runtime.InteropServices;
 
 namespace MaxyGames.UNode {
 	public static class ReflectionFaker {
-		static Dictionary<int, FakeType> genericFakeTypes = new Dictionary<int, FakeType>();
+		static Dictionary<(Type, Type[]), FakeType> genericFakeTypes = new Dictionary<(Type, Type[]), FakeType>(new RuntimeTypeComparer());
+
+		class RuntimeTypeComparer : IEqualityComparer<(Type, Type[])> {
+			public bool Equals((Type, Type[]) x, (Type, Type[]) y) {
+				if(x.Item1 != y.Item1 || x.Item2.Length != y.Item2.Length) {
+					return false;
+				}
+				for(int i = 0; i < x.Item2.Length; i++) {
+					if(x.Item2[i] != y.Item2[i]) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			public int GetHashCode((Type, Type[]) obj) {
+				int result = 23;
+				result = result * 31 + obj.Item1.GetHashCode();
+				for(int i = 0; i < obj.Item2.Length; i++) {
+					unchecked {
+						result = result * 31 + obj.Item2[i].GetHashCode();
+					}
+				}
+				return result;
+			}
+		}
 
 		public static FakeType FakeGenericType(Type type, Type[] typeArguments) {
 			if(typeArguments == null) {
@@ -17,17 +42,9 @@ namespace MaxyGames.UNode {
 				//throw new ArgumentException("Invalid type: a type must non-constructed type", nameof(type));
 				type = type.GetGenericTypeDefinition();
 			}
-			int hash = 23;
-			hash = hash * 31 + type.GetHashCode();
-			for(int i = 0; i < typeArguments.Length; i++) {
-				if(typeArguments[i] == null) {
-					throw new ArgumentNullException(nameof(typeArguments), "Null type argument at index:" + i);
-				}
-				hash = hash * 31 + typeArguments[i].GetHashCode();
-			}
-			if(!genericFakeTypes.TryGetValue(hash, out var result)) {
+			if(!genericFakeTypes.TryGetValue((type, typeArguments), out var result)) {
 				result = new GenericFakeType(type, typeArguments);
-				genericFakeTypes[hash] = result;
+				genericFakeTypes[(type, typeArguments)] = result;
 			}
 			return result;
 		}

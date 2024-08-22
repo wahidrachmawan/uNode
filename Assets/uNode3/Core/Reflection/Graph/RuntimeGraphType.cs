@@ -271,11 +271,39 @@ namespace MaxyGames.UNode {
 			if(c == typeof(IRuntimeClass)) {
 				return true;
 			}
+			//if(target is IClassDefinition classDefinition) {
+			//	var model = classDefinition.GetModel();
+			//	if(c == model.ProxyScriptType) {
+			//		return true;
+			//	}
+			//}
+			return false;
+		}
+
+		public override bool IsSubclassOf(Type c) {
 			if(target is IClassDefinition classDefinition) {
 				var model = classDefinition.GetModel();
 				if(c == model.ProxyScriptType) {
 					return true;
 				}
+			}
+			return base.IsSubclassOf(c);
+		}
+
+		public override bool IsInstanceOfType(object o) {
+			if(o == null || o.Equals(target)) return false;
+			if(o is IInstancedGraph || o is IRuntimeClass) {
+				var type = ReflectionUtils.GetRuntimeType(o);
+				if(type != null) {
+					return type.IsCastableTo(this);
+				}
+			}
+			var c = o.GetType();
+			if(this == c) {
+				return true;
+			}
+			if(c.IsSubclassOf(this)) {
+				return true;
 			}
 			return false;
 		}
@@ -302,24 +330,6 @@ namespace MaxyGames.UNode {
 				return TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.ClassSemanticsMask | TypeAttributes.Abstract | TypeAttributes.Interface;
 			}
 			return TypeAttributes.Public | TypeAttributes.Class;
-		}
-
-		public override bool IsInstanceOfType(object o) {
-			if(o == null || o.Equals(target)) return false;
-			if(o is IInstancedGraph || o is IRuntimeClass) {
-				var type = ReflectionUtils.GetRuntimeType(o);
-				if(type != null) {
-					return type.IsCastableTo(this);
-				}
-			}
-			var c = o.GetType();
-			if(this == c) {
-				return true;
-			}
-			if(c.IsSubclassOf(this)) {
-				return true;
-			}
-			return false;
 		}
 		#endregion
 

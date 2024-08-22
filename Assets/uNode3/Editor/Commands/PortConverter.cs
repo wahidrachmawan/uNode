@@ -37,7 +37,7 @@ namespace MaxyGames.UNode.Editors.PortConverter {
 			if(force) {
 				return rightType is not IFakeType;
 			}
-			return rightType.IsCastableTo(leftType) || rightType == typeof(string) || 
+			return rightType.IsCastableTo(leftType) || rightType.IsSubclassOf(leftType) || rightType == typeof(string) || 
 				(leftType == typeof(GameObject) || leftType.IsCastableTo(typeof(Component))) && (rightType == typeof(GameObject) || rightType.IsCastableTo(typeof(Component)));
 		}
 

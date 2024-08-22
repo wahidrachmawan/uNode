@@ -1424,7 +1424,20 @@ namespace MaxyGames.UNode {
 				else if(to is RuntimeType) {
 					return to.IsAssignableFrom(from);
 				}
-				return from.BaseType.IsCastableTo(to);
+				if(from.IsSubclassOf(to)) {
+					return true;
+				}
+				if(from is RuntimeGraphType runtimeGraphType) {
+					if(runtimeGraphType.target is IClassDefinition classDefinition) {
+						var model = classDefinition.GetModel();
+						return model.ProxyScriptType.IsCastableTo(to);
+					}
+				}
+				var baseType = from.BaseType;
+				while(baseType is RuntimeType) {
+					baseType = baseType.BaseType;
+				}
+				return baseType.IsCastableTo(to);
 			}
 			else if(to is RuntimeType) {
 				return to.IsAssignableFrom(from);
@@ -1565,6 +1578,39 @@ namespace MaxyGames.UNode {
 					}
 				}
 			}
+
+			if(from is RuntimeType) {
+				if(ReflectionUtils.IsTypeEqual(from, to)) return true;
+				if(to == typeof(object)) return true;
+				if(to.IsInterface) {
+					return from.HasImplementInterface(to);
+				}
+				else if(from.IsInterface) {
+					return to.HasImplementInterface(from);
+				}
+				else if(to is RuntimeType) {
+					return to.IsAssignableFrom(from);
+				}
+				if(from.IsSubclassOf(to) || to.IsSubclassOf(from)) {
+					return true;
+				}
+				if(from is RuntimeGraphType runtimeGraphType) {
+					if(runtimeGraphType.target is IClassDefinition classDefinition) {
+						var model = classDefinition.GetModel();
+						return model.ProxyScriptType.IsCastableTo(to, true);
+					}
+				}
+				var baseType = from.BaseType;
+				while(baseType is RuntimeType) {
+					baseType = baseType.BaseType;
+				}
+				return baseType.IsCastableTo(to, true);
+			}
+			else if(to is RuntimeType) {
+				return to.IsAssignableFrom(from) || from.IsSubclassOf(to) || to.IsSubclassOf(from);
+			}
+
+
 			if(from.IsEnum && to.IsPrimitive) {
 				return to != typeof(bool);
 			}
