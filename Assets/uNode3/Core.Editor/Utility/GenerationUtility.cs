@@ -164,7 +164,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[MenuItem("Tools/uNode/Generate C# Scripts ( Full )", false, 22)]
+		[MenuItem("Tools/uNode/Advanced/Generate C# Scripts ( Full )", false, 1000010)]
 		public static void GenerateCSharpScriptFull() {
 			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
 				CompileProjectGraphs(true);
@@ -468,6 +468,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(File.Exists(tempAssemblyPath)) {
 				File.Delete(tempAssemblyPath);
+			}
+			//For marking all graph to dirty to it will always get compiled in future
+			if(persistenceData != null && persistenceData.graphs != null) {
+				foreach(var data in persistenceData.graphs) {
+					data.Value?.MarkDirty();
+				}
 			}
 			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
