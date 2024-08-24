@@ -151,15 +151,33 @@ namespace MaxyGames.UNode.Editors {
 		[MenuItem("Tools/uNode/Generate C# Scripts", false, 22)]
 		public static void GenerateCSharpScript() {
 			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
-				CompileProjectGraphs();
+				CompileProjectGraphs(false);
 			} else {
 				if(Directory.Exists(projectScriptPath)) {
 					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");
 				}
 				if(preferenceData.generatorData.compileInBackground && uNodeUtility.IsProVersion) {
-					CompileGraphsInBackground();
+					CompileGraphsInBackground(false);
 				} else {
 					CompileProjectGraphs(true, false);
+				}
+			}
+		}
+
+		[MenuItem("Tools/uNode/Generate C# Scripts ( Full )", false, 22)]
+		public static void GenerateCSharpScriptFull() {
+			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
+				CompileProjectGraphs(true);
+			}
+			else {
+				if(Directory.Exists(projectScriptPath)) {
+					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");
+				}
+				if(preferenceData.generatorData.compileInBackground && uNodeUtility.IsProVersion) {
+					CompileGraphsInBackground(true);
+				}
+				else {
+					CompileProjectGraphs(true, true);
 				}
 			}
 		}
@@ -310,10 +328,10 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Compile project runtime graphs in the background.
 		/// </summary>
-		public static void CompileGraphsInBackground() {
+		public static void CompileGraphsInBackground(bool force) {
 			if(!isGeneratingInBackground) {
 				isGeneratingInBackground = true;
-				uNodeThreadUtility.CreateThread(DoCompileGraphsInBackground).Start();
+				uNodeThreadUtility.CreateThread(() => DoCompileGraphsInBackground(force)).Start();
 			}
 		}
 
@@ -321,7 +339,7 @@ namespace MaxyGames.UNode.Editors {
 		/// Generate and compile all runtime graphs in background.
 		/// Note: don't call it from main thread.
 		/// </summary>
-		public static void DoCompileGraphsInBackground() {
+		public static void DoCompileGraphsInBackground(bool force = false) {
 			try {
 #if !UNODE_PRO
 				if(uNodeUtility.IsProVersion == false) {
@@ -331,7 +349,7 @@ namespace MaxyGames.UNode.Editors {
 				uNodeThreadUtility.WaitOneFrame();
 				var dir = tempRoslynFolder;
 				var dirInfo = Directory.CreateDirectory(dir);
-				var scripts = GenerationUtility.GenerateRuntimeGraphAsync(false);
+				var scripts = GenerationUtility.GenerateRuntimeGraphAsync(force);
 				var scriptPaths = new List<string>();
 				int skippedCount = 0;
 				uNodeThreadUtility.QueueAndWait(() => {

@@ -106,6 +106,12 @@ namespace MaxyGames.UNode {
 			Object,
 		}
 
+		/// <summary>
+		/// Get or create graph runner
+		/// </summary>
+		/// <param name="graphAsset"></param>
+		/// <param name="instance"></param>
+		/// <returns></returns>
 		public static IGraph GetOrCreateGraphRunner(GraphAsset graphAsset, object instance) {
 			if(GraphRunner.cachedRunners.TryGetValue(instance, out var result)) {
 				return result;
@@ -115,9 +121,27 @@ namespace MaxyGames.UNode {
 			return result;
 		}
 
+		/// <summary>
+		/// Destroy graph runner
+		/// </summary>
+		/// <param name="runner"></param>
 		public static void DestroyGraphRunner(IGraph runner) {
 			if(runner is GraphRunner graphRunner) {
 				graphRunner.Destroy();
+			}
+		}
+
+		/// <summary>
+		/// Clear all global event listeners
+		/// </summary>
+		public static void ClearAllGraphListeners() {
+			var db = uNodeDatabase.instance;
+			if(db != null) {
+				foreach(var evt in db.globalEventDatabases) {
+					if(evt.asset is UGlobalEvent globalEvent) {
+						globalEvent.ClearListener();
+					}
+				}
 			}
 		}
 
@@ -177,6 +201,12 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
+		/// <summary>
+		/// Initialize the graph and variable value for instanced graph
+		/// </summary>
+		/// <param name="graphReference"></param>
+		/// <param name="instance"></param>
+		/// <param name="variables"></param>
 		public static void InitializeInstanceGraphValue(IGraph graphReference, GraphInstance instance, IList<VariableData> variables) {
 			if(variables == null) return;
 			try {

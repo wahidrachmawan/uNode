@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow", "Trigger Global Event")]
 	public class NodeTriggerGlobalEvent : FlowNode {
+		[AllowAssetReference]
 		public UGlobalEvent target;
 
 		public class Data {

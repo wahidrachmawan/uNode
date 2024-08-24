@@ -14,8 +14,17 @@ namespace MaxyGames.UNode.Editors.Control {
 
 		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
 			bool flag = true;
-			if(settings.acceptUnityObject == false || settings.unityObject is IGraph graph && !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+			if(settings.acceptUnityObject == false) {
 				flag = false;
+				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
+					flag = true;
+				}
+			}
+			else if(settings.unityObject is IGraph graph && !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+				flag = false;
+				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
+					flag = true;
+				}
 			}
 			if(flag) {
 				EditorGUI.BeginChangeCheck();
@@ -37,8 +46,17 @@ namespace MaxyGames.UNode.Editors.Control {
 
 		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
 			bool flag = true;
-			if(settings.acceptUnityObject == false || settings.unityObject is IGraph graph && !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+			if(settings.acceptUnityObject == false) {
 				flag = false;
+				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
+					flag = true;
+				}
+			}
+			else if(settings.unityObject is IGraph graph && !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+				flag = false;
+				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
+					flag = true;
+				}
 			}
 			if(flag) {
 				DrawDecorators(settings);

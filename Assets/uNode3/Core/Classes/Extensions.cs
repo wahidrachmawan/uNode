@@ -1644,6 +1644,16 @@ namespace MaxyGames.UNode {
 				}
 				return false; // IntPtr, UIntPtr, Enum, Boolean
 			}
+			if(from.IsInterface && to.IsSealed == false) {
+				lock(_lockObject) {
+					if(map == null) {
+						map = new Dictionary<Type, bool>();
+					}
+					map[to] = true;
+					castableMap2[from] = map;
+				}
+				return true;
+			}
 			if(from.IsSubclassOf(typeof(Delegate)) && to.IsSubclassOf(typeof(Delegate))) {
 				var a = from.GetMethod("Invoke");
 				var b = to.GetMethod("Invoke");

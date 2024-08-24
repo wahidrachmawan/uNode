@@ -126,22 +126,26 @@ namespace MaxyGames.UNode {
 				//Instance native c# graph
 				var instance = Activator.CreateInstance(type) as RuntimeObject;
 				nativeInstance = instance;
-				//Initialize the references
-				var references = target.scriptData.unityObjects;
-				for(int i = 0; i < references.Count; i++) {
-					SetVariable(references[i].name, references[i].value);
-				}
-				//Initialize the variable
-				foreach(var v in target.GetAllVariables()) {
-					object value = v.defaultValue;
-					for(int x = 0; x < variables.Count; x++) {
-						if(v.name.Equals(variables[x].name)) {
-							value = variables[x].Get();
-							break;
-						}
-					}
-					SetVariable(v.name, value);
-				}
+
+				////Initialize the references
+				//var references = target.scriptData.unityObjects;
+				//for(int i = 0; i < references.Count; i++) {
+				//	SetVariable(references[i].name, references[i].value);
+				//}
+				////Initialize the variable
+				//foreach(var v in target.GetAllVariables()) {
+				//	if(v.type is RuntimeType) {
+				//		continue;
+				//	}
+				//	object value = v.defaultValue;
+				//	for(int x = 0; x < variables.Count; x++) {
+				//		if(v.name.Equals(variables[x].name)) {
+				//			value = variables[x].Get();
+				//			break;
+				//		}
+				//	}
+				//	SetVariable(v.name, value);
+				//}
 			}
 			else {
 				//Instance reflection graph

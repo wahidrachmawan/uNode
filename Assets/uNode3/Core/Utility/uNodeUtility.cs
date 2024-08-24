@@ -275,6 +275,17 @@ namespace MaxyGames.UNode {
 				}
 			}
 
+			public bool HasAttribute<T>() where T : Attribute {
+				if(attributes != null) {
+					for(int i = 0; i < attributes.Length; i++) {
+						if(attributes[i] is T) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
 			public bool drawDecorator = true;
 
 			public EditValueSettings() { }
