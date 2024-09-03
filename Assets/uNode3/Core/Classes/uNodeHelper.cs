@@ -220,7 +220,7 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
-		/// Get the actual runtime object, if the target is uNodeSpawner then get the RuntimeBehaviour
+		/// Get the actual runtime object
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>

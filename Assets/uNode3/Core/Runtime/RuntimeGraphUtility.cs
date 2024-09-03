@@ -134,7 +134,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// Clear all global event listeners
 		/// </summary>
-		public static void ClearAllGraphListeners() {
+		public static void ClearAllGlobalEventListeners() {
 			var db = uNodeDatabase.instance;
 			if(db != null) {
 				foreach(var evt in db.globalEventDatabases) {
@@ -232,7 +232,7 @@ namespace MaxyGames.UNode {
 				Debug.LogError($"Error on trying to initialize graph: {graphReference} to the {instance.target}.\nError: {ex.ToString()}");
 				throw;
 			}
-        }
+		}
 
 		/// <summary>
 		/// Execute graph function ( support both runtime and in editor )
@@ -243,32 +243,32 @@ namespace MaxyGames.UNode {
 		/// <param name="target"></param>
 		/// <param name="variables"></param>
 		public static void ExecuteFunction(string name, ref GraphInstance instance, IGraph graphReference, MonoBehaviour target, IList<VariableData> variables) {
-            if(!Application.isPlaying) {
-                var version = graphReference.GraphData.version;
-                if(instance == null || instance.version != version) {
-                    if(graphReference.GraphData.functionContainer.collections.Any(f => f.name == name)) {
-                        instance = InitializeComponentGraph(graphReference, target);
-                        instance.version = version;
-                        InitializeInstanceGraphValue(graphReference, instance, variables);
-                    }
-                }
-            }
+			if(!Application.isPlaying) {
+				var version = graphReference.GraphData.version;
+				if(instance == null || instance.version != version) {
+					if(graphReference.GraphData.functionContainer.collections.Any(f => f.name == name)) {
+						instance = InitializeComponentGraph(graphReference, target);
+						instance.version = version;
+						InitializeInstanceGraphValue(graphReference, instance, variables);
+					}
+				}
+			}
 			if(instance != null) {
 				var func = graphReference.GetFunction(name);
 				if(func != null) {
-                    if(variables != null) {//This is for set variable value to same with overridden variable in instanced graph
-                        foreach(var var in graphReference.GraphData.variableContainer.collections) {
-                            for(int x = 0; x < variables.Count; x++) {
-                                if(var.name.Equals(variables[x].name)) {
+					if(variables != null) {//This is for set variable value to same with overridden variable in instanced graph
+						foreach(var var in graphReference.GraphData.variableContainer.collections) {
+							for(int x = 0; x < variables.Count; x++) {
+								if(var.name.Equals(variables[x].name)) {
 									var.Set(instance, variables[x].Get());
 								}
-                            }
-                        }
-                    }
-                    func.Invoke(instance);
+							}
+						}
+					}
+					func.Invoke(instance);
 				}
-            }
-        }
+			}
+		}
 
 		/// <summary>
 		/// Execute custom graph event ( support both runtime and in editor )
@@ -352,6 +352,20 @@ namespace MaxyGames.UNode {
 				}
 				data.onDrawGizmosSelected.Invoke(instance);
 			}
+		}
+
+		public static void ResetRuntimeGraphVariables(IRuntimeClass instance) {
+			var identifier = instance.uniqueIdentifier;
+			var graphAsset = uNodeDatabase.instance.GetGraphByUID(identifier);
+			foreach(var variable in graphAsset.GetAllVariables()) {
+				instance.SetVariable(variable.name, SerializerUtility.Duplicate(variable.defaultValue));
+			}
+		}
+
+		public static void ResetRuntimeGraphVariables(IRuntimeClass instance, IRuntimeGraphWrapper instanceGraph) {
+			var identifier = instance.uniqueIdentifier;
+			var graphAsset = uNodeDatabase.instance.GetGraphByUID(identifier);
+			uNodeHelper.RuntimeUtility.InitializeVariables(instance, graphAsset, instanceGraph.WrappedVariables);
 		}
 
 		public static GraphInstance InitializeComponentGraph(IGraph graphReference, MonoBehaviour target, IList<VariableData> variables = null) {
@@ -498,7 +512,8 @@ namespace MaxyGames.UNode {
 							});
 							break;
 					}
-				} else if(evt.Parameters.Count == 1) {
+				}
+				else if(evt.Parameters.Count == 1) {
 					switch(evt.name) {
 						case nameof(UEventID.OnAnimatorIK):
 							UEvent.Register<int>(UEventID.OnAnimatorIK, target, (arg) => {
@@ -616,13 +631,17 @@ namespace MaxyGames.UNode {
 			foreach(var evt in graph.mainGraphContainer.GetNodesInChildren<BaseGraphEvent>(true)) {
 				if(evt is StartEvent) {
 					data.onStart += evt.Trigger;
-				} else if(evt is AwakeEvent) {
+				}
+				else if(evt is AwakeEvent) {
 					data.onAwake += evt.Trigger;
-				} else if(evt is OnDestroyEvent) {
+				}
+				else if(evt is OnDestroyEvent) {
 					data.onDestroy += evt.Trigger;
-				} else if(evt is OnDisableEvent) {
+				}
+				else if(evt is OnDisableEvent) {
 					data.onDisable += evt.Trigger;
-				} else if(evt is OnEnableEvent) {
+				}
+				else if(evt is OnEnableEvent) {
 					data.onEnable += evt.Trigger;
 				}
 			}
@@ -637,9 +656,9 @@ namespace MaxyGames.UNode {
 				InitializeInstanceGraphValue(graphReference, graphInstance, variables);
 			}
 			graphInstance.Initialize();
-			foreach (var evt in graph.functionContainer.GetObjectsInChildren<Function>(true)) {
-				if (evt.Parameters.Count == 0) {
-					switch (evt.name) {
+			foreach(var evt in graph.functionContainer.GetObjectsInChildren<Function>(true)) {
+				if(evt.Parameters.Count == 0) {
+					switch(evt.name) {
 						case "Awake":
 							data.onAwake += (instance) => evt.Invoke(instance);
 							break;
@@ -655,17 +674,17 @@ namespace MaxyGames.UNode {
 					}
 				}
 			}
-			foreach (var evt in graph.mainGraphContainer.GetNodesInChildren<BaseGraphEvent>(true)) {
-				if (evt is AwakeEvent) {
+			foreach(var evt in graph.mainGraphContainer.GetNodesInChildren<BaseGraphEvent>(true)) {
+				if(evt is AwakeEvent) {
 					data.onAwake += evt.Trigger;
 				}
-				else if (evt is OnDestroyEvent) {
+				else if(evt is OnDestroyEvent) {
 					data.onDestroy += evt.Trigger;
 				}
-				else if (evt is OnDisableEvent) {
+				else if(evt is OnDisableEvent) {
 					data.onDisable += evt.Trigger;
 				}
-				else if (evt is OnEnableEvent) {
+				else if(evt is OnEnableEvent) {
 					data.onEnable += evt.Trigger;
 				}
 			}

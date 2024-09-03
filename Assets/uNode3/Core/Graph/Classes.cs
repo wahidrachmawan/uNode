@@ -93,6 +93,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public void OnAfterDeserialize() {
+			Debug.Log(serializedData.type);
 			_value = SerializerUtility.Deserialize(serializedData);
 		}
 

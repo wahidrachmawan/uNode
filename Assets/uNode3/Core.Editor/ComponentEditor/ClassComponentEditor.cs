@@ -19,6 +19,7 @@ namespace MaxyGames.UNode.Editors {
 					new System.Type[] { typeof(ClassDefinition) }, 
 					(val) => {
 						asset.target = val as ClassDefinition;
+						uNodeEditorUtility.MarkDirty(asset);
 					}, 
 					uNodeEditorUtility.IsSceneObject(asset),
 					obj => {

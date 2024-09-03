@@ -598,6 +598,7 @@ namespace MaxyGames.UNode.Editors {
 				deepTrees.Add(tree);
 				editorData.searchField.SetFocus();
 				Reload();
+				window?.Focus();
 			}
 
 			private void Back() {

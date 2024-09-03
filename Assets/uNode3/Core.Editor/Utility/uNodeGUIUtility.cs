@@ -3228,7 +3228,7 @@ namespace MaxyGames.UNode.Editors {
 						nullable = true,
 					});
 				}
-				else if(IsSupportedType(type) || type.IsClass) {
+				else if(IsSupportedType(type) || type.IsClass || type.IsInterface || type.IsValueType && type.IsSerializable) {
 					if(type == typeof(object) && !object.ReferenceEquals(serializedValue.value, null)) {
 						type = serializedValue.value.GetType();
 					}

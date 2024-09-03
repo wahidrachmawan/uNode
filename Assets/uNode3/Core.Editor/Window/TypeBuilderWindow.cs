@@ -127,6 +127,8 @@ namespace MaxyGames.UNode.Editors {
 				}
 				EditorGUILayout.EndHorizontal();
 			}
+			if(contentRect.height > 350)
+				EditorGUILayout.EndScrollView();
 			if(GUILayout.Button(new GUIContent("Select"))) {
 				if(filter.Types == null ||
 					filter.Types.Count == 0 ||
@@ -138,10 +140,9 @@ namespace MaxyGames.UNode.Editors {
 					selectCallback(Value.Select(item => item.Value).ToArray());
 				}
 			}
-			if(contentRect.height > 350)
-				GUI.EndScrollView();
 			EditorGUILayout.EndVertical();
-			if(contentRect == Rect.zero && Event.current.type == EventType.Repaint) {
+			cRect.height = Mathf.Min(cRect.height, 360);
+			if(contentRect.height != cRect.height && contentRect.height < 350 && Event.current.type == EventType.Repaint) {
 				contentRect = cRect;
 				maxSize = new Vector2(maxSize.x, contentRect.height + 10);
 			}

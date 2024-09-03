@@ -24,7 +24,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			else if(value is int) {
 				value = Enum.ToObject(type, value);
 			}
-			else if(value.GetType() != type) {
+			else if(ReflectionUtils.IsTypeEqual(value.GetType(), type) == false) {
 				value = ReflectionUtils.CreateInstance(type);
 			}
 			var oldValue = (Enum)value;

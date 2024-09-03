@@ -80,6 +80,8 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(!Application.isPlaying || asset.runtimeInstance == null) {
 					DrawOpenGraph();
+
+					uNodeGUIUtility.ShowField(new GUIContent("Compile to C#", "If true, the graph will be compiled to C# to run using native c# performance on build or in editor using ( Generate C# Scripts ) menu."), nameof(asset.scriptData.compileToScript), asset.scriptData, asset);
 				}
 			}
 		}
