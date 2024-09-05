@@ -352,7 +352,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var port = data.port as ValueInput;
 			if(port == null || port.type == null)
 				return false;
-			return filter.IsValidTypeForValueConstant(port.type) && port.type.IsArray == false && port.type.IsByRef == false && filter.SetMember == false;
+			return FilterAttribute.IsTypeAllowedForEdit(port.type) && port.type.IsArray == false && port.type.IsByRef == false && filter.SetMember == false;
 		}
 	}
 
@@ -463,6 +463,52 @@ namespace MaxyGames.UNode.Editors.Commands {
 					type = type.GetElementType();
 				}
 				return true;
+			}
+			return false;
+		}
+	}
+
+	class PromoteToLocalVariableOutputPortCommand : PortMenuCommand {
+		Type type;
+
+		public override string name {
+			get {
+				return "Promote to local variable";
+			}
+		}
+		public override bool onlyContextMenu => true;
+
+		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
+			if(source.nodeObject.graphContainer is UnityEngine.Object unityObject) {
+				Undo.SetCurrentGroupName("Promote to local variable");
+				Undo.RegisterFullObjectHierarchyUndo(unityObject, "Promote to local variable");
+			}
+			var port = data.port as ValueOutput;
+			if(type != null) {
+				var parent = port.node.parent;
+				NodeEditorUtility.AddNewVariable((parent as NodeContainer).variableContainer, port != null ? port.name : "", type, (variable) => {
+					if(type.IsByRef) {
+						variable.modifier.SetPrivate();
+					}
+					NodeEditorUtility.AddNewNode(graph.graphData, mousePositionOnCanvas, (NodeSetValue setNode) => {
+						setNode.target.AssignToDefault(MemberData.CreateFromValue(variable));
+						setNode.value.ConnectTo(port);
+					});
+				});
+			}
+			uNodeGUIUtility.GUIChanged(source.nodeObject.graphContainer, UIChangeType.Important);
+		}
+
+		public override bool IsValidPort(Node source, PortCommandData data) {
+			if(data.portKind != PortKind.ValueOutput)
+				return false;
+			var port = data.port as ValueOutput;
+			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			if(type != null) {
+				if(type.IsByRef) {
+					type = type.GetElementType();
+				}
+				return port.node.parent is ILocalVariableSystem;
 			}
 			return false;
 		}

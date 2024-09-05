@@ -473,7 +473,7 @@ namespace MaxyGames.UNode {
 			return false;
 		}
 
-		private readonly HashSet<Type> allowedNonSerializableTypesForValue = new HashSet<Type>() {
+		private static readonly HashSet<Type> allowedNonSerializableTypesForValue = new HashSet<Type>() {
 			typeof(string),
 			typeof(Vector2),
 			typeof(Vector2Int),
@@ -491,6 +491,26 @@ namespace MaxyGames.UNode {
 			typeof(Rect),
 			typeof(RectInt),
 		};
+
+		/// <summary>
+		/// True if the type is constant type that can be edited.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		public static bool IsTypeAllowedForEdit(Type t) {
+			if(t.IsByRef) {
+				return false;
+			}
+			if(t.IsPrimitive) return true;
+			if(t.IsCastableTo(typeof(UnityEngine.Object))) return true;
+			if(t.IsInterface || t.IsAbstract) return false;
+			if(!ReflectionUtils.CanCreateInstance(t)) return false;
+			if(t.IsEnum) return true;
+			if(allowedNonSerializableTypesForValue.Contains(t)) {
+				return true;
+			}
+			return false;
+		}
 
 		/// <summary>
 		/// The valid type for edits ( Valid only for string, value types and any serializable type )

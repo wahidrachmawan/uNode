@@ -148,6 +148,10 @@ namespace MaxyGames.UNode.Editors {
 					uNodeEditorUtility.DisplayErrorMessage("The current edited graph doesn't support for compile to c# scripts.");
 					return;
 				}
+				if(graphData.graph is IInstancedGraph) {
+					uNodeEditorUtility.DisplayErrorMessage("The current edited graph doesn't support for compile to c# scripts with this button, instead try use menu: Tools > uNode > Generate C# including Scenes.");
+					return;
+				}
 			}
 
 			var preferenceData = uNodePreference.preferenceData;

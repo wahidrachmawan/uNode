@@ -135,9 +135,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(editorData.manager.isDeep) {
 				var items = editorData.manager.deepTrees;
-				var lastItem = items.LastOrDefault();
+				var lastItem = items.LastOrDefault().tree;
 				if(lastItem != null) {
-					string fullPath = string.Join(" > ", items.Select(i => GetPrettyTreeName(i)));
+					string fullPath = string.Join(" > ", items.Select(i => GetPrettyTreeName(i.tree)));
 					if(items.Count == 1 && lastItem is MemberTreeView) {
 						var member = (lastItem as MemberTreeView).member;
 						if(member is Type) {
@@ -149,10 +149,7 @@ namespace MaxyGames.UNode.Editors {
 					bool canSelect = !(lastItem is SelectorGroupedTreeView || lastItem is NamespaceTreeView) && editorData.manager.CanSelectTree(lastItem);
 					var rect = uNodeGUIUtility.GetRect();
 					if(GUI.Button(new Rect(rect.x, rect.y, canSelect ? rect.width - 60 : rect.width, rect.height), new GUIContent("<-" + lastItem.displayName, fullPath), EditorStyles.miniButton)) {
-						items.RemoveAt(items.Count - 1);
-						editorData.manager.searchString = string.Empty;
-						editorData.manager.Reload();
-						editorData.searchField.SetFocus();
+						editorData.manager.Back();
 						return;
 					}
 					if(canSelect) {

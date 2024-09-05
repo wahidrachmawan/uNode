@@ -477,6 +477,8 @@ namespace MaxyGames.UNode {
 					return "new" + name;
 				case TargetType.Values:
 					if(type != null) {
+						if(instance == null)
+							return "null";
 						return "v: " + type.PrettyName();
 					}
 					return "Missing Type";

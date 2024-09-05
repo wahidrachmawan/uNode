@@ -7,7 +7,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 	public class MemberControl : ValueControl {
 		ValueControl control;
 		PopupElement popupElement;
-		MemberData member;
+		MemberData member => config.value as MemberData;
 
 		string oldRichText;
 		bool hideInstance = false;
@@ -24,10 +24,8 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			popupElement.visible = false;
 			popupElement.AddManipulator(new LeftMouseClickable(PopupClick));
 			popupElement.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
-			member = config.value as MemberData;
 			if(member == null) {
-				member = MemberData.None;
-				config.OnValueChanged(member);
+				config.OnValueChanged(MemberData.None);
 			}
 
 			if(config.filter == null) {
@@ -91,7 +89,8 @@ namespace MaxyGames.UNode.Editors.UIControl {
 						popupElement.visible = false;
 						popupElement.RemoveFromHierarchy();
 					}
-				} else if(!member.IsTargetingUNode && !member.isStatic && !hideInstance && member.startType != null) {
+				}
+				else if(!member.IsTargetingUNode && !member.isStatic && !hideInstance && member.startType != null) {
 					if(config.filter == null) {
 						config.filter = new FilterAttribute();
 					}
@@ -110,7 +109,8 @@ namespace MaxyGames.UNode.Editors.UIControl {
 							if(member.targetType != MemberData.TargetType.Self) {
 								control = new PopupControl("this", ClassListContains("Layout"));
 							}
-						} else {
+						}
+						else {
 							CreateInstanceControl(portType);
 						}
 						showInstance = true;
@@ -125,7 +125,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 				}
 				popupElement.MarkDirtyRepaint();
 			}
-			if (control != null) {
+			if(control != null) {
 				control.RemoveFromHierarchy();
 				Insert(0, control);
 			}
@@ -174,7 +174,8 @@ namespace MaxyGames.UNode.Editors.UIControl {
 									UpdateControl();
 								}, DropdownMenuAction.AlwaysEnabled);
 							}
-						} else if(instance as Component) {
+						}
+						else if(instance as Component) {
 							var component = instance as Component;
 							Component[] comps = component.GetComponents<Component>();
 							evt.menu.AppendAction("0-" + typeof(GameObject).Name, (act) => {
@@ -229,7 +230,8 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					UpdateControl();
 					config.owner.MarkRepaint();
 				}, new TypeItem[1] { member }).ChangePosition(GUIUtility.GUIToScreenPoint(mouseEvent.mousePosition));
-			} else {
+			}
+			else {
 				ItemSelector.ShowWindow(config.targetCanvas, filter, (m) => {
 					m.ResetCache();
 					config.OnValueChanged(m);
@@ -244,11 +246,14 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			if(config.type != null) {
 				if(config.filter == null || !config.filter.SetMember && config.filter.IsValidTarget(MemberData.TargetType.Values)) {
 					evt.menu.AppendAction("To Default", (e) => {
+						var member = this.member;
 						if(config.type == typeof(Type)) {
 							member = new MemberData(typeof(object));
-						} else if(config.type is RuntimeType) {
+						}
+						else if(config.type is RuntimeType) {
 							member = MemberData.CreateFromValue(null, config.type);
-						} else {
+						}
+						else {
 							member = new MemberData(ReflectionUtils.CanCreateInstance(config.type) ? ReflectionUtils.CreateInstance(config.type) : null) {
 								startType = config.type,
 								type = config.type,
@@ -263,7 +268,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 						var types = EditorReflectionUtility.GetCommonType();
 						foreach(var t in types) {
 							evt.menu.AppendAction("To Value/" + t.PrettyName(), (e) => {
-								member = new MemberData(ReflectionUtils.CanCreateInstance(t) ? ReflectionUtils.CreateInstance(t) : null) {
+								var member = new MemberData(ReflectionUtils.CanCreateInstance(t) ? ReflectionUtils.CreateInstance(t) : null) {
 									startType = t,
 									type = t,
 								};
@@ -273,7 +278,8 @@ namespace MaxyGames.UNode.Editors.UIControl {
 								UpdateControl();
 							}, DropdownMenuAction.AlwaysEnabled);
 						}
-					} else if(config.type == typeof(Type)) {
+					}
+					else if(config.type == typeof(Type)) {
 						var mPos = NodeGraph.openedGraph.GetMousePosition();
 						evt.menu.AppendAction("Change Type", (e) => {
 							TypeBuilderWindow.Show(mPos, config.targetCanvas, new FilterAttribute() { OnlyGetType = true },
@@ -309,11 +315,13 @@ namespace MaxyGames.UNode.Editors.UIControl {
 				if(control == null || showInstance) {
 					if(member.targetType == MemberData.TargetType.NodePort) {
 						popupElement.text = string.Empty;
-					} else {
+					}
+					else {
 						popupElement.text = popupElement.richText ? uNodeUtility.GetNicelyDisplayName(config.value) : uNodeUtility.GetDisplayName(config.value);
 					}
 					popupElement.EnableInClassList("Layout", ClassListContains("Layout"));
-				} else {
+				}
+				else {
 					popupElement.text = string.Empty;
 					popupElement.tooltip = string.Empty;
 					popupElement.EnableInClassList("Layout", false);

@@ -11,12 +11,18 @@ using UnityEditor.IMGUI.Controls;
 
 namespace MaxyGames.UNode.Editors {
 	public partial class ItemSelector {
+		public class NestedTreeData {
+			public TreeViewItem tree;
+			public Vector2 scrollPos;
+			public string searchString;
+		}
+
 		public sealed class Manager : TreeView, IDisposable {
 			public ItemSelector window;
 
-			public List<TreeViewItem> deepTrees = new List<TreeViewItem>();
+			public List<NestedTreeData> deepTrees = new List<NestedTreeData>();
 			public bool isDeep => deepTrees.Count > 0;
-			public TreeViewItem lastTree => deepTrees.LastOrDefault();
+			public TreeViewItem lastTree => deepTrees.LastOrDefault().tree;
 
 			private Dictionary<int, bool> expandedStates = new Dictionary<int, bool>();
 			private Dictionary<int, bool> nonSearchExpandeds = new Dictionary<int, bool>();
@@ -38,22 +44,13 @@ namespace MaxyGames.UNode.Editors {
 			private TreeViewItem hoveredTree;
 
 			private string _searchString;
-			private string _searchString2;
 			public new string searchString {
-				get => isDeep ? _searchString2 : _searchString;
+				get => _searchString;
 				set {
 					treeHightlights.Clear();
-					if(isDeep) {
-						if(_searchString2 != value) {
-							_searchString2 = value;
-							ReloadInBackground();
-						}
-					}
-					else {
-						if(_searchString != value) {
-							_searchString = value;
-							ReloadInBackground();
-						}
+					if(_searchString != value) {
+						_searchString = value;
+						ReloadInBackground();
 					}
 				}
 			}
@@ -465,6 +462,14 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			#region Select & Next
+			private void DoAddNestedTree(TreeViewItem tree) {
+				deepTrees.Add(new NestedTreeData() {
+					tree = tree,
+					searchString = searchString,
+					scrollPos = state.scrollPos,
+				});
+			}
+
 			public void SelectTree(TreeViewItem tree) {
 				if(tree is TypeTreeView) {
 					var type = (tree as TypeTreeView).type;
@@ -472,17 +477,17 @@ namespace MaxyGames.UNode.Editors {
 					//Auto resolve generic type
 					var resolvedMember = ReflectionUtils.AutoResolveGenericMember(type) as Type;
 					if(resolvedMember != null) {
-						deepTrees.Add(new TypeTreeView(resolvedMember, tree.id, tree.depth));
+						DoAddNestedTree(new TypeTreeView(resolvedMember, tree.id, tree.depth));
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
 					}
 
 					if(ResolveGenericItem(type, (mInfo) => {
-						deepTrees.Add(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
+						DoAddNestedTree(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
 					})) { return; }
-					deepTrees.Add(tree);
+					DoAddNestedTree(tree);
 					SelectDeepTrees();
 				}
 				else if(tree is MemberTreeView) {
@@ -491,18 +496,18 @@ namespace MaxyGames.UNode.Editors {
 					//Auto resolve generic type
 					var resolvedMember = ReflectionUtils.AutoResolveGenericMember(item.member);
 					if(resolvedMember != null) {
-						deepTrees.Add(new MemberTreeView(resolvedMember, item.id, item.depth) { instance = item.instance });
+						DoAddNestedTree(new MemberTreeView(resolvedMember, item.id, item.depth) { instance = item.instance });
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
 					}
 
 					if(ResolveGenericItem(item.member, (mInfo) => {
-						deepTrees.Add(new MemberTreeView(mInfo, item.id, item.depth) { instance = item.instance });
+						DoAddNestedTree(new MemberTreeView(mInfo, item.id, item.depth) { instance = item.instance });
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
 					})) { return; }
 
-					deepTrees.Add(tree);
+					DoAddNestedTree(tree);
 					SelectDeepTrees();
 				}
 				else if(tree is SelectorCallbackTreeView) {
@@ -525,10 +530,10 @@ namespace MaxyGames.UNode.Editors {
 								var resolvedMember = ReflectionUtils.AutoResolveGenericMember(member);
 								if(resolvedMember != null) {
 									if(member is Type) {
-										deepTrees.Add(new TypeTreeView(resolvedMember as Type, tree.id, tree.depth));
+										DoAddNestedTree(new TypeTreeView(resolvedMember as Type, tree.id, tree.depth));
 									}
 									else {
-										deepTrees.Add(new MemberTreeView(resolvedMember, tree.id, tree.depth) {
+										DoAddNestedTree(new MemberTreeView(resolvedMember, tree.id, tree.depth) {
 											instance = ri.item.instance
 										});
 									}
@@ -538,10 +543,10 @@ namespace MaxyGames.UNode.Editors {
 
 								if(ResolveGenericItem(member, (mInfo) => {
 									if(member is Type) {
-										deepTrees.Add(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
+										DoAddNestedTree(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
 									}
 									else {
-										deepTrees.Add(new MemberTreeView(mInfo, tree.id, tree.depth) {
+										DoAddNestedTree(new MemberTreeView(mInfo, tree.id, tree.depth) {
 											instance = ri.item.instance
 										});
 									}
@@ -549,10 +554,10 @@ namespace MaxyGames.UNode.Editors {
 									GUIUtility.ExitGUI();
 								})) { return; }
 								if(member is Type) {
-									deepTrees.Add(new TypeTreeView(member as Type, tree.id, tree.depth));
+									DoAddNestedTree(new TypeTreeView(member as Type, tree.id, tree.depth));
 								}
 								else {
-									deepTrees.Add(new MemberTreeView(member, tree.id, tree.depth) {
+									DoAddNestedTree(new MemberTreeView(member, tree.id, tree.depth) {
 										instance = ri.item.instance
 									});
 								}
@@ -594,25 +599,28 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			private void DoNextTree(TreeViewItem tree) {
-				_searchString2 = string.Empty;
-				deepTrees.Add(tree);
+				DoAddNestedTree(tree);
+				_searchString = string.Empty;
 				editorData.searchField.SetFocus();
 				Reload();
 				window?.Focus();
 			}
 
-			private void Back() {
+			public void Back() {
 				if(isDeep) {
-					_searchString2 = string.Empty;
+					var lastData = deepTrees.Last();
 					deepTrees.RemoveAt(deepTrees.Count - 1);
+					searchString = lastData.searchString;
 					editorData.searchField.SetFocus();
+					state.scrollPos = lastData.scrollPos;
 					Reload();
 				}
 			}
 
 			public void SelectDeepTrees() {
 				List<TreeViewItem> items = new List<TreeViewItem>();
-				foreach(var tree in deepTrees) {
+				foreach(var data in deepTrees) {
+					var tree = data.tree;
 					if(tree is MemberTreeView || tree is SelectorCustomTreeView) {
 						items.Add(tree);
 					}
