@@ -14,7 +14,7 @@ namespace MaxyGames.UNode {
 		public struct DebugValue {
 			public bool isSet;
 			public float time;
-			public object value;
+			public WeakReference value;
 
 			public bool isValid => time > 0;
 		}
@@ -33,9 +33,7 @@ namespace MaxyGames.UNode {
 			}
 			public float calledTime;
 			public float breakpointTimes;
-			public bool isTransitionRunning;
 			public Func<StateType> customCondition;
-			public object nodeValue;
 			public bool isValid => calledTime > 0;
 		}
 
@@ -226,7 +224,7 @@ namespace MaxyGames.UNode {
 		private static int m_lastDebugID;
 		private static ConditionalWeakTable<object, string> m_debugIDs = new ConditionalWeakTable<object, string>();
 
-		internal static string GetDebugID(object obj) {
+		public static string GetDebugID(object obj) {
 			if(obj is UnityEngine.Object) {
 				return obj.GetHashCode().ToString();
 			}
@@ -399,7 +397,7 @@ namespace MaxyGames.UNode {
 			var id = nodeUID + portID;
 			data.valueConnectionDebug[id] = new DebugValue() {
 				time = debugTime,
-				value = value,
+				value = new WeakReference(value),
 				isSet = isSet,
 			};
 #if UNODE_PRO

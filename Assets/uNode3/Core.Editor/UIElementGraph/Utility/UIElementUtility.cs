@@ -158,54 +158,12 @@ namespace MaxyGames.UNode.Editors {
 			}, DropdownMenuAction.AlwaysEnabled);
 			if(info is IRuntimeMember) {
 				evt.menu.AppendAction($"{startMenuName}Go To Definition: {info.Name} ({info.MemberType})", (e) => {
-					RuntimeType runtimeType = info as RuntimeType;
-					if(info is RuntimeField) {
-						runtimeType = (info as RuntimeField).owner;
-					}
-					else if(info is RuntimeProperty) {
-						runtimeType = (info as RuntimeProperty).owner;
-					}
-					else if(info is RuntimeMethod) {
-						runtimeType = (info as RuntimeMethod).owner;
-					}
-					if(runtimeType is IRuntimeMemberWithRef) {
-						var obj = (runtimeType as IRuntimeMemberWithRef)?.GetReference().ReferenceValue;
-						if(obj != null) {
-							if(obj is IGraph) {
-								uNodeEditor.Open(obj as IGraph);
-							}
-							else if(obj is IScriptGraph) {
-								uNodeEditor.Open(obj as IScriptGraph);
-							}
-							else if(obj is IScriptGraphType) {
-								uNodeEditor.Open(obj as IScriptGraphType);
-							}
-							else if(obj is UGraphElement element) {
-								uNodeEditor.Open(element.graphContainer);
-							}
-							else {
-								throw null;
-							}
-						}
-						else {
-							throw null;
-						}
-					}
-					else {
-						uNodeEditorUtility.DisplayErrorMessage("Un-implemented current runtime type: " + runtimeType.GetType());
-					}
+					GraphUtility.GoToDefinition(info);
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			else {
 				evt.menu.AppendAction($"{startMenuName}Go To Definition: {info.Name} ({info.MemberType})", (e) => {
-					var type = info as Type ?? info.DeclaringType;
-					MonoScript mono = uNodeEditorUtility.GetMonoScript(type);
-					if(mono != null) {
-						AssetDatabase.OpenAsset(mono);
-					}
-					else {
-						uNodeEditorUtility.OpenILSpy(info);
-					}
+					GraphUtility.GoToDefinition(info);
 				}, DropdownMenuAction.AlwaysEnabled);
 				
 			}

@@ -371,8 +371,8 @@ namespace MaxyGames.UNode.Editors {
 						var debug = debugData.GetDebugValue(port);
 						if(debug.isValid) {
 							GUIContent debugContent;
-							if(debug.value != null) {
-								debugContent= new GUIContent(uNodeUtility.GetDisplayName(debug.value), uNodeEditorUtility.GetTypeIcon(debug.value.GetType()));
+							if(debug.value != null && debug.value.IsAlive) {
+								debugContent= new GUIContent(uNodeUtility.GetDisplayName(debug.value.Target), uNodeEditorUtility.GetTypeIcon(debug.value.Target.GetType()));
 							}
 							else {
 								debugContent = new GUIContent("null");

@@ -762,6 +762,52 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		public static void DrawRuntimeGraphVariables(IRuntimeGraphWrapper graphWrapper, bool publicOnly = true, Object unityObject = null) {
+
+			IEnumerable<Variable> GetVariables() {
+				var originalGraph = graphWrapper.OriginalGraph;
+				if(originalGraph != null) {
+					foreach(var v in originalGraph.GetAllVariables()) {
+						if(publicOnly) {
+							if(v.modifier.isPublic) {
+								yield return v;
+							}
+						}
+						else {
+							yield return v;
+						}
+					}
+				}
+			}
+
+			if(Application.isPlaying && graphWrapper.RuntimeClass != null) {
+				var instance = graphWrapper.RuntimeClass;
+				if(instance is IInstancedGraph) {
+					var graphInstance = (instance as IInstancedGraph).Instance;
+					if(graphInstance != null) {
+						foreach(var v in GetVariables()) {
+							uNodeGUIUtility.EditValueLayouted(new GUIContent(v.name), v.Get(graphInstance), v.type, val => {
+								v.Set(graphInstance, val);
+							});
+						}
+					}
+					else {
+						DrawLinkedVariables(graphWrapper.WrappedVariables, graphWrapper.OriginalGraph, unityObject: unityObject);
+					}
+				}
+				else {
+					foreach(var v in GetVariables()) {
+						uNodeGUIUtility.EditValueLayouted(new GUIContent(v.name), instance.GetVariable(v.name), v.type, val => {
+							instance.SetVariable(v.name, val);
+						});
+					}
+				}
+			}
+			else {
+				DrawLinkedVariables(graphWrapper.WrappedVariables, graphWrapper.OriginalGraph, unityObject: unityObject);
+			}
+		}
+
 		public static void DrawLinkedVariables(IList<VariableData> instanceVariables, IGraph linked, bool publicOnly = true, Object unityObject = null) {
 			DoDrawLinkedVariables(instanceVariables, linked, publicOnly, unityObject);
 		}

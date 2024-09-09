@@ -215,10 +215,10 @@ namespace MaxyGames.UNode.Editors {
 									}
 									if(showLabel) {//Debug label
 										GUIContent debugContent;
-										if(debug.value != null) {
+										if(debug.value != null && debug.value.IsAlive) {
 											debugContent = new GUIContent(
-												uNodeUtility.GetDisplayName(debug.value),
-												uNodeEditorUtility.GetTypeIcon(debug.value.GetType())
+												uNodeUtility.GetDisplayName(debug.value.Target),
+												uNodeEditorUtility.GetTypeIcon(debug.value.Target.GetType())
 											);
 										}
 										else {
@@ -246,10 +246,10 @@ namespace MaxyGames.UNode.Editors {
 									}
 									if(showLabel) {//Debug label
 										GUIContent debugContent;
-										if(debug.value != null) {
+										if(debug.value != null && debug.value.IsAlive) {
 											debugContent = new GUIContent(
-												uNodeUtility.GetDisplayName(debug.value),
-												uNodeEditorUtility.GetTypeIcon(debug.value.GetType())
+												uNodeUtility.GetDisplayName(debug.value.Target),
+												uNodeEditorUtility.GetTypeIcon(debug.value.Target.GetType())
 											);
 										}
 										else {

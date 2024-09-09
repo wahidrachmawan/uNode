@@ -87,6 +87,8 @@ namespace MaxyGames.UNode {
 
 		public object serializedValue => _value;
 
+		internal OdinSerializedData SerializedData => serializedData;
+
 		public void ChangeValue(object value) {
 			_value = value;
 			OnBeforeSerialize();

@@ -11,12 +11,18 @@ namespace MaxyGames.UNode.Editors {
 	public class MultipurposeNodeView : BaseNodeView {
 		bool isCompact;
 
-		void OpenFunction() {
+		void GoToDefinition() {
 			var node = targetNode as MultipurposeNode;
 			if(node.target.targetType == MemberData.TargetType.uNodeFunction) {
 				var obj = node.target.startItem.GetReferenceValue() as Function;
 				if(obj != null) {
 					uNodeEditor.Open(obj.graphContainer, obj);
+				}
+			}
+			else if(node.target.IsTargetingReflection) {
+				var members = node.target.GetMembers(false);
+				if(members != null && members.Length > 0) {
+					GraphUtility.GoToDefinition(members[members.Length - 1]);
 				}
 			}
 		}
@@ -25,7 +31,7 @@ namespace MaxyGames.UNode.Editors {
 			MultipurposeNode node = nodeObject.node as MultipurposeNode;
 			titleContainer.RegisterCallback<MouseDownEvent>(e => {
 				if(e.button == 0 && e.clickCount == 2) {
-					OpenFunction();
+					GoToDefinition();
 				}
 			});
 			{//Initialize ports

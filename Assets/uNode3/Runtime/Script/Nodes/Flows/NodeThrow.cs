@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Throw")]
+	[NodeMenu("Flow", "Throw", hasFlowInput =true)]
 	public class NodeThrow : BaseFlowNode {
 		[System.NonSerialized]
 		public ValueInput value;

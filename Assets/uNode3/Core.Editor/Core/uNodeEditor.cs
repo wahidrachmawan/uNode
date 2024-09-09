@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 using UnityEditor.IMGUI.Controls;
 
 namespace MaxyGames.UNode.Editors {
-    public partial class uNodeEditor : EditorWindow {
+	public partial class uNodeEditor : EditorWindow {
 		#region Const
 		internal const string MESSAGE_PATCH_WARNING = "Patching should be done in 'Compatibility' generation mode or there will be visible/invisible errors, please use 'Compatibility' mode when trying to make live changes to compiled code.";
 		#endregion
@@ -195,9 +195,9 @@ namespace MaxyGames.UNode.Editors {
 
 			[System.Runtime.Serialization.OnDeserialized]
 			void OnDeserialized() {
-				if (datas == null)
+				if(datas == null)
 					datas = new List<TabData>();
-				if (main == null)
+				if(main == null)
 					main = new TabData();
 			}
 		}
@@ -215,7 +215,7 @@ namespace MaxyGames.UNode.Editors {
 
 			[System.Runtime.Serialization.OnDeserialized]
 			void OnDeserialized() {
-				if (graphDatas == null)
+				if(graphDatas == null)
 					graphDatas = new List<GraphEditorData>();
 			}
 
@@ -307,7 +307,7 @@ namespace MaxyGames.UNode.Editors {
 			public TabData() { }
 
 			public TabData(UnityEngine.Object owner) {
-				if (owner is IScriptGraphType || owner is not IGraph && owner is not IScriptGraph)
+				if(owner is IScriptGraphType || owner is not IGraph && owner is not IScriptGraph)
 					throw new InvalidOperationException();
 				this.owner = owner;
 				if(owner is IScriptGraph) {
@@ -320,7 +320,8 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
-				} else if(owner is IGraph) {
+				}
+				else if(owner is IGraph) {
 					graphDatas.Add(new GraphEditorData(owner));
 				}
 			}
@@ -601,7 +602,8 @@ namespace MaxyGames.UNode.Editors {
 						return null;
 					if(uNodeUtility.GetObjectID(obj) == uid) {
 						return obj;
-					} else {
+					}
+					else {
 						var objs = AssetDatabase.LoadAllAssetsAtPath(path);
 						if(objs != null) {
 							for(int i = 0; i < objs.Length; i++) {
@@ -822,7 +824,8 @@ namespace MaxyGames.UNode.Editors {
 			get {
 				if(tabList.selectedIndex > 0 && tabDatas.Count >= tabList.selectedIndex) {
 					return tabDatas[tabList.selectedIndex - 1];
-				} else {
+				}
+				else {
 					tabList.selectedIndex = 0;
 				}
 				return mainTab;
@@ -830,7 +833,8 @@ namespace MaxyGames.UNode.Editors {
 			set {
 				if(value != null && value != mainTab && tabDatas.Contains(value)) {
 					tabList.selectedIndex = tabDatas.IndexOf(value) + 1;
-				} else {
+				}
+				else {
 					tabList.selectedIndex = 0;
 				}
 			}
@@ -844,7 +848,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeGUIUtility.onGUIChanged += GUIChanged;
 			EditorApplication.playModeStateChanged += OnPlaymodeStateChanged;
 			LoadEditorData();
-			if (!hasLoad) {
+			if(!hasLoad) {
 				LoadOptions();
 				hasLoad = true;
 			}
@@ -923,7 +927,7 @@ namespace MaxyGames.UNode.Editors {
 									selected = obj;
 								}
 							}
-							else if(selected is IRuntimeClassContainer container){
+							else if(selected is IRuntimeClassContainer container) {
 								if(container.IsInitialized && container.RuntimeClass?.GetType() == type) {
 									selected = container.RuntimeClass;
 								}
@@ -1061,7 +1065,8 @@ namespace MaxyGames.UNode.Editors {
 		public void ChangeEditorSelection(UGraphElement value, bool addSelection = true) {
 			if(value == null) {
 				graphData.ClearSelection();
-			} else {
+			}
+			else {
 				if(!addSelection) {
 					graphData.ClearSelection();
 				}
@@ -1175,7 +1180,8 @@ namespace MaxyGames.UNode.Editors {
 					GraphAsset asset = AssetDatabase.LoadAssetAtPath<GraphAsset>(path);
 					if(asset != null) {
 						lastOpenedObjects.Add(asset);
-					} else {
+					}
+					else {
 						//var data = go.GetComponent<uNodeData>();
 						//if(data != null) {
 						//	lastOpenedObjects.Add(data);
@@ -1202,7 +1208,7 @@ namespace MaxyGames.UNode.Editors {
 			Profiler.BeginSample("Check Errors");
 #endif
 			var analizer = GraphUtility.ErrorChecker.defaultAnalizer;
-			
+
 			analizer.ClearErrors(graphData.graph);
 			analizer.CheckErrors(graphData.graph);
 
@@ -1259,15 +1265,15 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="column"></param>
 		/// <returns></returns>
 		public static bool HighlightNode(EditorScriptInfo scriptInfo, int line, int column = -1) {
-			if (scriptInfo == null)
+			if(scriptInfo == null)
 				return false;
-			if (scriptInfo.informations == null)
+			if(scriptInfo.informations == null)
 				return false;
 			var path = AssetDatabase.GUIDToAssetPath(scriptInfo.guid);
-			if (string.IsNullOrEmpty(path))
+			if(string.IsNullOrEmpty(path))
 				return false;
 			var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
-			if (asset is IGraph) {
+			if(asset is IGraph) {
 				return HighlightNode(asset as IGraph, scriptInfo.informations, line, column);
 			}
 			else if(asset is IScriptGraph scriptGraph) {
@@ -1302,26 +1308,26 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="column"></param>
 		/// <returns></returns>
 		public static bool HighlightNode(IGraph graph, IEnumerable<ScriptInformation> informations, int line, int column = -1) {
-			if (informations == null)
+			if(informations == null)
 				return false;
 			List<ScriptInformation> information = new List<ScriptInformation>();
-			foreach (var info in informations) {
-				if (info == null)
+			foreach(var info in informations) {
+				if(info == null)
 					continue;
-				if (info.startLine <= line && info.endLine >= line) {
+				if(info.startLine <= line && info.endLine >= line) {
 					information.Add(info);
 				}
 			}
-			if (column > 0) {
+			if(column > 0) {
 				information.Sort((x, y) => {
 					int result = CompareUtility.Compare(x.lineRange, y.lineRange);
-					if (result == 0) {
+					if(result == 0) {
 						int xColumn = int.MaxValue;
-						if (x.startColumn <= column && x.endColumn >= column) {
+						if(x.startColumn <= column && x.endColumn >= column) {
 							xColumn = x.columnRange;
 						}
 						int yColumn = int.MaxValue;
-						if (y.startColumn <= column && y.endColumn >= column) {
+						if(y.startColumn <= column && y.endColumn >= column) {
 							yColumn = y.columnRange;
 						}
 						return CompareUtility.Compare(xColumn, yColumn);
@@ -1332,39 +1338,40 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				information.Sort((x, y) => {
 					int result = CompareUtility.Compare(x.lineRange, y.lineRange);
-					if (result == 0) {
+					if(result == 0) {
 						return CompareUtility.Compare(y.columnRange, x.columnRange);
 					}
 					return result;
 				});
 			}
-			foreach (var info in information) {
-				if (info != null) {
+			foreach(var info in information) {
+				if(info != null) {
 					// Debug.Log(line + ":" + column);
 					// Debug.Log(info.startLine + "-" + info.endLine);
 					// Debug.Log(info.startColumn + "-" + info.endColumn);
 					// Debug.Log(info.lineRange + ":" + info.columnRange);
-					if (int.TryParse(info.id, out var id)) {
+					if(int.TryParse(info.id, out var id)) {
 						UGraphElement element = null;
-						if (graph != null) {
+						if(graph != null) {
 							element = graph.GetGraphElement(id);
-							if (element == null && int.TryParse(info.ghostID, out var gID)) {
+							if(element == null && int.TryParse(info.ghostID, out var gID)) {
 								element = graph.GetGraphElement(gID);
 							}
-						} else if(info.ownerID != 0) {
+						}
+						else if(info.ownerID != 0) {
 							var obj = EditorUtility.InstanceIDToObject(info.ownerID);
 							if(obj is IGraph g) {
 								element = g.GetGraphElement(id);
-								if (element == null && int.TryParse(info.ghostID, out var gID)) {
+								if(element == null && int.TryParse(info.ghostID, out var gID)) {
 									element = g.GetGraphElement(gID);
 								}
 							}
 						}
-						if (element != null) {
+						if(element != null) {
 							if(element is NodeObject) {
 								HighlightNode(element as NodeObject);
 							}
-							else if (element is NodeContainerWithEntry nodeContainer && nodeContainer.Entry != null) {
+							else if(element is NodeContainerWithEntry nodeContainer && nodeContainer.Entry != null) {
 								HighlightNode(nodeContainer.Entry);
 							}
 							return true;
@@ -1386,7 +1393,8 @@ namespace MaxyGames.UNode.Editors {
 			var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
 			if(asset is IGraph graph) {
 				return CanHighlightNode(graph, scriptInfo.informations, line, column);
-			} else if(asset is IScriptGraph scriptGraph) {
+			}
+			else if(asset is IScriptGraph scriptGraph) {
 				foreach(var type in scriptGraph.TypeList) {
 					if(type is IGraph) {
 						if(CanHighlightNode(type as IGraph, scriptInfo.informations, line, column)) {
@@ -1394,7 +1402,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-			} 
+			}
 			return false;
 		}
 
@@ -1464,16 +1472,16 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void Open(IScriptGraph scriptGraph) {
-			if (scriptGraph == null)
+			if(scriptGraph == null)
 				throw new ArgumentNullException(nameof(scriptGraph));
-			if (window == null) {
+			if(window == null) {
 				ShowWindow();
 			}
 			var cachedGraph = FindCachedGraph(scriptGraph as UnityEngine.Object);
-			if (cachedGraph != null) {
-				for (int i = 0; i < cachedGraph.graphDatas.Count; i++) {
+			if(cachedGraph != null) {
+				for(int i = 0; i < cachedGraph.graphDatas.Count; i++) {
 					var d = cachedGraph.graphDatas[i];
-					if (d.owner == null) {
+					if(d.owner == null) {
 						cachedGraph.graphDatas.RemoveAt(i);
 						i--;
 						continue;
@@ -1564,13 +1572,15 @@ namespace MaxyGames.UNode.Editors {
 					throw new Exception("Invalid canvas");
 				if(canvas is NodeContainer) {
 
-				} else if(canvas is NodeObject) {
+				}
+				else if(canvas is NodeObject) {
 					UGraphElement current = canvas;
 					while(current != null) {
 						if(current is NodeContainer) {
 							canvas = current;
 							break;
-						} else if(current is NodeObject node && node.node is ISuperNode) {
+						}
+						else if(current is NodeObject node && node.node is ISuperNode) {
 							canvas = current;
 							break;
 						}
@@ -1578,9 +1588,10 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(current == null)
 						canvas = null;
-				} else {
-					throw new Exception("Invalid canvas");
 				}
+				//else {
+				//	throw new Exception("Invalid canvas");
+				//}
 			}
 			//if(graph == null) {
 			//	ChangeMainTarget(target);
@@ -1595,17 +1606,17 @@ namespace MaxyGames.UNode.Editors {
 			}
 			var cachedGraph = FindCachedGraph(owner);
 			if(cachedGraph != null) {
-				for (int i = 0; i < cachedGraph.graphDatas.Count; i++) {
+				for(int i = 0; i < cachedGraph.graphDatas.Count; i++) {
 					var d = cachedGraph.graphDatas[i];
-					if (d.graph == graph) {
-						if (d.owner == null) {
+					if(d.graph == graph) {
+						if(d.owner == null) {
 							cachedGraph.graphDatas.RemoveAt(i);
 							i--;
 							continue;
 						}
 						window.selectedTab = cachedGraph;
 						window.selectedTab.selectedGraphData = d;
-						if (canvas != null) {
+						if(canvas != null) {
 							window.selectedTab.selectedGraphData.currentCanvas = canvas;
 						}
 						window.ChangeEditorSelection(null);
@@ -1618,7 +1629,7 @@ namespace MaxyGames.UNode.Editors {
 				cachedGraph.graphDatas.Add(ED);
 				cachedGraph.selectedGraphData = ED;
 				window.selectedTab = cachedGraph;
-				if (canvas != null) {
+				if(canvas != null) {
 					window.selectedTab.selectedGraphData.currentCanvas = canvas;
 				}
 				window.ChangeEditorSelection(null);
@@ -1638,10 +1649,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		static TabData FindCachedGraph(UnityEngine.Object owner) {
-			foreach (var data in window.tabDatas) {
-				if (data == null)
+			foreach(var data in window.tabDatas) {
+				if(data == null)
 					continue;
-				if (data.owner == owner) {
+				if(data.owner == owner) {
 					return data;
 				}
 			}
@@ -1675,7 +1686,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				var generatedScript = script.ToScript(out var informations);
 				string path = GenerationUtility.tempFolder + separator + script.fileName + ".cs";
-				using (StreamWriter sw = new StreamWriter(path)) {
+				using(StreamWriter sw = new StreamWriter(path)) {
 					sw.Write(generatedScript);
 					sw.Close();
 				}
@@ -1698,7 +1709,7 @@ namespace MaxyGames.UNode.Editors {
 				uNodeEditorUtility.CopyToClipboard(script.ToRawScript());
 #endif
 			}
-			catch (Exception ex) {
+			catch(Exception ex) {
 				EditorUtility.ClearProgressBar();
 				Debug.LogError("Aborting Generating C# Script because of errors.\nErrors: " + ex.ToString());
 				throw;

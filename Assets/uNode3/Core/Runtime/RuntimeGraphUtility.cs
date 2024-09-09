@@ -354,20 +354,6 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public static void ResetRuntimeGraphVariables(IRuntimeClass instance) {
-			var identifier = instance.uniqueIdentifier;
-			var graphAsset = uNodeDatabase.instance.GetGraphByUID(identifier);
-			foreach(var variable in graphAsset.GetAllVariables()) {
-				instance.SetVariable(variable.name, SerializerUtility.Duplicate(variable.defaultValue));
-			}
-		}
-
-		public static void ResetRuntimeGraphVariables(IRuntimeClass instance, IRuntimeGraphWrapper instanceGraph) {
-			var identifier = instance.uniqueIdentifier;
-			var graphAsset = uNodeDatabase.instance.GetGraphByUID(identifier);
-			uNodeHelper.RuntimeUtility.InitializeVariables(instance, graphAsset, instanceGraph.WrappedVariables);
-		}
-
 		public static GraphInstance InitializeComponentGraph(IGraph graphReference, MonoBehaviour target, IList<VariableData> variables = null) {
 			var graph = graphReference.GraphData;
 			var data = new RuntimeGraphEventData();

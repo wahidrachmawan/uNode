@@ -468,6 +468,51 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 	}
 
+	class PromoteToParameterOutputPortCommand : PortMenuCommand {
+		Type type;
+
+		public override string name {
+			get {
+				return "Promote to parameter";
+			}
+		}
+		public override bool onlyContextMenu => true;
+
+		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
+			if(EditorUtility.DisplayDialog("", "Promoting to parameter will change the function signature, are you sure?", "Yes", "Cancel") == false)
+				return;
+			if(source.nodeObject.graphContainer is UnityEngine.Object unityObject) {
+				Undo.SetCurrentGroupName("Promote to parameter");
+				Undo.RegisterFullObjectHierarchyUndo(unityObject, "Promote to parameter");
+			}
+			var port = data.port as ValueOutput;
+			if(type != null) {
+				var parent = graph.graphData.selectedRoot as IParameterSystem;
+				var pdata = new ParameterData(port.name, type);
+				parent.Parameters.Add(pdata);
+				NodeEditorUtility.AddNewNode(graph.graphData, mousePositionOnCanvas, (NodeSetValue setNode) => {
+					setNode.target.AssignToDefault(MemberData.CreateFromValue(new ParameterRef(parent as UGraphElement, pdata)));
+					setNode.value.ConnectTo(port);
+				});
+			}
+			uNodeGUIUtility.GUIChanged(source.nodeObject.graphContainer, UIChangeType.Important);
+		}
+
+		public override bool IsValidPort(Node source, PortCommandData data) {
+			if(data.portKind != PortKind.ValueOutput)
+				return false;
+			var port = data.port as ValueOutput;
+			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			if(type != null) {
+				if(type.IsByRef) {
+					type = type.GetElementType();
+				}
+				return graph.graphData.selectedRoot is IParameterSystem;
+			}
+			return false;
+		}
+	}
+
 	class PromoteToLocalVariableOutputPortCommand : PortMenuCommand {
 		Type type;
 
@@ -733,6 +778,50 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
 			if(graph.graphData.selectedRoot is ILocalVariableSystem) {
+				var port = data.port as ValueInput;
+				type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+				if(port.UseDefaultValue && type != null) {
+					if(type.IsByRef) {
+						type = type.GetElementType();
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	class PromoteToParameterInputPortCommand : PortMenuCommand {
+		Type type;
+
+		public override string name {
+			get {
+				return "Promote to parameter";
+			}
+		}
+		public override bool onlyContextMenu => true;
+
+		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
+			if(EditorUtility.DisplayDialog("", "Promoting to parameter will change the function signature, are you sure?", "Yes", "Cancel") == false)
+				return;
+			if(source.nodeObject.graphContainer is UnityEngine.Object unityObject) {
+				Undo.SetCurrentGroupName("Promote to parameter");
+				Undo.RegisterFullObjectHierarchyUndo(unityObject, "Promote to parameter");
+			}
+			var port = data.port as ValueInput;
+			if(type != null) {
+				var parent = graph.graphData.selectedRoot as IParameterSystem;
+				var pdata = new ParameterData(port.name, type);
+				parent.Parameters.Add(pdata);
+				port.AssignToDefault(MemberData.CreateFromValue(new ParameterRef(parent as UGraphElement, pdata)));
+			}
+			uNodeGUIUtility.GUIChanged(source.nodeObject.graphContainer, UIChangeType.Important);
+		}
+
+		public override bool IsValidPort(Node source, PortCommandData data) {
+			if(data.portKind != PortKind.ValueInput)
+				return false;
+			if(graph.graphData.selectedRoot is IParameterSystem) {
 				var port = data.port as ValueInput;
 				type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
 				if(port.UseDefaultValue && type != null) {

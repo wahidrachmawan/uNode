@@ -81,7 +81,7 @@ namespace MaxyGames.UNode.Editors.PortConverter {
 		}
 
 		public override bool IsValid() {
-			if(canvas != null && output != null && output.node.node is NodeLambda lambda && lambda.autoDelegateType) {
+			if(canvas != null && output != null && output.node != null && output.node.node is NodeLambda lambda && lambda.autoDelegateType) {
 				return rightType.IsSubclassOf(typeof(Delegate));
 			}
 			return false;

@@ -514,7 +514,11 @@ namespace MaxyGames.UNode.Editors {
 											}
 											string niceName = uNodeUtility.GetObjectName(pair.Key);
 											if(instances.Add(pair.Key)) {
-												menu.AddItem(new GUIContent("Instances/" + instances.Count + "-" + niceName), debugTarget == debugObject, delegate (object reference) {
+												var id = instances.Count.ToString();
+												if(pair.Key is not UnityEngine.Object) {
+													id = GraphDebug.GetDebugID(pair.Key);
+												}
+												menu.AddItem(new GUIContent("Instances/" + id + "-" + niceName), debugTarget == debugObject, delegate (object reference) {
 													KeyValuePair<object, GraphDebug.DebugData> objPair = (KeyValuePair<object, GraphDebug.DebugData>)reference;
 													UnityEngine.Object o = objPair.Key as UnityEngine.Object;
 													if(o != null) {
@@ -994,8 +998,10 @@ namespace MaxyGames.UNode.Editors {
 					name = "tabbar"
 				};
 				tabbarContainer.Add(tabbar);
-
-				InitTabbar(tabbar);
+				var scroll = new ScrollView(ScrollViewMode.Horizontal);
+				scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+				tabbar.Add(scroll);
+				InitTabbar(scroll);
 			}
 #endregion
 

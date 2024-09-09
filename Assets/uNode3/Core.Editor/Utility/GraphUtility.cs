@@ -12,8 +12,6 @@ using System.IO;
 
 namespace MaxyGames.UNode.Editors {
 	public static class GraphUtility {
-		public const string KEY_TEMP_OBJECT = "[uNode_Temp_";
-
 		#region Copy & Paste
 		public static class CopyPaste {
 			class CopiedData {
@@ -768,6 +766,49 @@ namespace MaxyGames.UNode.Editors {
 			return references;
 		}
 
+		public static List<object> FindReferences(UnityEngine.Object value) {
+			List<object> references = new List<object>();
+			var assets = GraphUtility.FindAllGraphAssets();
+
+			void Validate(IGraph graph) {
+				var graphData = graph.GraphData;
+				graphData.ForeachInChildrens(element => {
+					if(Analizer.AnalizeObject(element, ValidateValue)) {
+						references.Add(element);
+					}
+				}, true);
+			}
+
+			bool ValidateValue(object obj) {
+				return obj == value as object;
+			};
+
+			foreach(var asset in assets) {
+				if(asset is IScriptGraph scriptGraph) {
+					foreach(var scriptType in scriptGraph.TypeList) {
+						if(scriptType is IGraph graph) {
+							try {
+								Validate(graph);
+							}
+							catch(System.Exception ex) {
+								Debug.LogException(ex, scriptType);
+							}
+						}
+					}
+				}
+				else if(asset is IGraph graph) {
+					try {
+						Validate(graph);
+					}
+					catch(System.Exception ex) {
+						Debug.LogException(ex, asset);
+					}
+				}
+			}
+			references = references.Distinct().ToList();
+			return references;
+		}
+
 		public static List<object> FindVariableUsages(Variable variable, bool allGraphs = true) {
 			if(variable == null)
 				throw new ArgumentNullException(nameof(variable));
@@ -1055,7 +1096,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 
 					while(list.Count > 0) {
-						for(int i=0;i<list.Count;i++) {
+						for(int i = 0; i < list.Count; i++) {
 							if(Recursive(hierarchy, list[i])) {
 								list.RemoveAt(i);
 								i--;
@@ -1124,6 +1165,101 @@ namespace MaxyGames.UNode.Editors {
 			ShowReferencesInWindow(references);
 		}
 
+		public static void GoToDefinition(MemberInfo info) {
+			if(info is IRuntimeMember) {
+				var reference = info as IRuntimeMemberWithRef;
+				if(reference == null) {
+					RuntimeType runtimeType = info as RuntimeType;
+					if(info is RuntimeField) {
+						runtimeType = (info as RuntimeField).owner;
+					}
+					else if(info is RuntimeProperty) {
+						runtimeType = (info as RuntimeProperty).owner;
+					}
+					else if(info is RuntimeMethod) {
+						runtimeType = (info as RuntimeMethod).owner;
+					}
+					else if(info is RuntimeConstructor) {
+						runtimeType = (info as RuntimeConstructor).owner;
+					}
+					if(runtimeType is IRuntimeMemberWithRef) {
+						reference = runtimeType as IRuntimeMemberWithRef;
+					}
+					else {
+						uNodeEditorUtility.DisplayErrorMessage("Un-implemented go to definition for runtime type: " + runtimeType.GetType());
+					}
+				}
+				if(reference != null) {
+					var obj = reference.GetReference().ReferenceValue;
+					if(obj != null) {
+						if(obj is IGraph) {
+							uNodeEditor.Open(obj as IGraph);
+						}
+						else if(obj is IScriptGraph) {
+							uNodeEditor.Open(obj as IScriptGraph);
+						}
+						else if(obj is IScriptGraphType) {
+							uNodeEditor.Open(obj as IScriptGraphType);
+						}
+						else if(obj is UGraphElement element) {
+							uNodeEditor.Open(element.graphContainer, element);
+						}
+						else {
+							throw null;
+						}
+					}
+					else {
+						throw null;
+					}
+				}
+			}
+			else {
+				var type = info as Type ?? info.DeclaringType;
+
+
+				var runtimeTypes = EditorReflectionUtility.GetRuntimeTypes();
+				foreach(var t in runtimeTypes) {
+					if(t is INativeType nativeType && nativeType.GetNativeType() == type) {
+						if(info is Type) {
+							GoToDefinition(t);
+							return;
+						}
+						var members = t.GetMember(info.Name);
+						if(members.Length == 1) {
+							GoToDefinition(members[0]);
+						}
+						else {
+							foreach(var m in members) {
+								if(m is INativeMember member) {
+									var nativeMember = member.GetNativeMember();
+									if(nativeMember == info) {
+										GoToDefinition(m);
+										return;
+									}
+								}
+							}
+						}
+						return;
+					}
+				}
+
+				MonoScript mono = uNodeEditorUtility.GetMonoScript(type);
+				if(mono != null) {
+					//AssetDatabase.OpenAsset(mono);
+					var line = RoslynUtility.GetLineForMember(info, AssetDatabase.GetAssetPath(mono));
+					if(line >= 0) {
+						AssetDatabase.OpenAsset(mono, line);
+					}
+					else {
+
+					}
+				}
+				else {
+					uNodeEditorUtility.OpenILSpy(info);
+				}
+			}
+		}
+
 		//TODO: fix me
 #if false
 		/// <summary>
@@ -1190,6 +1326,15 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="info"></param>
 		public static void ShowMemberUsages(MemberInfo info) {
 			var references = FindReferences(info);
+			ShowReferencesInWindow(references);
+		}
+
+		/// <summary>
+		/// Find references of UnityEngine.Object from all graphs in the project and show it in window.
+		/// </summary>
+		/// <param name="obj"></param>
+		public static void ShowUnityReferenceUsages(UnityEngine.Object obj) {
+			var references = FindReferences(obj);
 			ShowReferencesInWindow(references);
 		}
 
@@ -1526,11 +1671,11 @@ namespace MaxyGames.UNode.Editors {
 						if(generatedData.classNames.TryGetValue(typeWithScriptData, out var className)) {
 							typeWithScriptData.ScriptData.selfTypeData.typeName = settings.nameSpace.Add(".") + className;
 							uNodeEditorUtility.MarkDirty(typeWithScriptData as UnityEngine.Object);//this will ensure the graph will be saved
-							// Skip on generating in background
-							// if (!settings.isAsync) { 
-							// 	graph.graphData.lastCompiled = UnityEngine.Random.Range(1, int.MaxValue);
-							// 	graph.graphData.lastSaved = graph.graphData.lastCompiled;
-							// }
+																								   // Skip on generating in background
+																								   // if (!settings.isAsync) { 
+																								   // 	graph.graphData.lastCompiled = UnityEngine.Random.Range(1, int.MaxValue);
+																								   // 	graph.graphData.lastSaved = graph.graphData.lastCompiled;
+																								   // }
 						}
 					}
 				}
@@ -1625,51 +1770,6 @@ namespace MaxyGames.UNode.Editors {
 			if(Application.isPlaying)
 				return;
 			SaveAllGraph();
-		}
-
-		/// <summary>
-		/// Save the runtime graph to a prefab
-		/// </summary>
-		/// <param name="runtimeGraph"></param>
-		/// <param name="graphAsset"></param>
-		public static void SaveRuntimeGraph(IGraph runtimeGraph) {
-			//if(!Application.isPlaying)
-			//	throw new System.Exception("Saving runtime graph can only be done in playmode");
-			//if(runtimeGraph.originalGraph == null)
-			//	throw new System.Exception("Cannot save runtime graph because the original graph was null / missing");
-			//var graph = runtimeGraph.originalGraph;
-			//if(!EditorUtility.IsPersistent(graph))
-			//	throw new System.Exception("Cannot save graph to unpersistent asset");
-			//var prefabContent = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(graph));
-			//var originalGraph = uNodeHelper.GetGraphComponent(prefabContent, graph.GraphName);
-			//if(originalGraph != null) {
-			//	if(runtimeGraph.RootObject != null) {
-			//		//Duplicate graph data
-			//		var tempRoot = Object.Instantiate(runtimeGraph.RootObject);
-			//		tempRoot.name = "Root";
-			//		//Move graph data to original graph
-			//		tempRoot.transform.SetParent(originalGraph.transform);
-			//		//Retarget graph data owner
-			//		AnalizerUtility.RetargetNodeOwner(runtimeGraph, originalGraph, tempRoot.GetComponentsInChildren<MonoBehaviour>(true));
-			//		if(originalGraph.RootObject != null) {
-			//			//Destroy old graph data
-			//			Object.DestroyImmediate(originalGraph.RootObject);
-			//		}
-			//		//Update graph data to new
-			//		originalGraph.RootObject = tempRoot;
-			//		//Save the graph to prefab
-			//		uNodeEditorUtility.SavePrefabAsset(prefabContent, graph.gameObject);
-			//		//GraphUtility.DestroyTempGraphObject(originalGraph.gameObject);
-
-			//		//This will update the original graph
-			//		GraphUtility.DestroyTempGraphObject(graph.gameObject);
-			//		//Refresh uNode Editor window
-			//		uNodeEditor.window?.Refresh();
-			//	}
-			//} else {
-			//	Debug.LogError("Cannot save instanced graph because the cannot find original graph with id:" + graph.GraphName);
-			//}
-			//PrefabUtility.UnloadPrefabContents(prefabContent);
 		}
 
 		public static void SaveGraph(Object graphAsset) {

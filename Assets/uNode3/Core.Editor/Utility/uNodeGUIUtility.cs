@@ -378,9 +378,8 @@ namespace MaxyGames.UNode.Editors {
 							container.ResetInitialization();
 						}
 					}
-					//TODO: in playmode show actual value instead of default value
 					if(value is IRuntimeGraphWrapper graphWrapper) {
-						uNodeGUI.DrawLinkedVariables(graphWrapper.WrappedVariables, graphWrapper.OriginalGraph, unityObject: unityObject);
+						uNodeGUI.DrawRuntimeGraphVariables(graphWrapper);
 					}
 				}
 				else {

@@ -708,16 +708,16 @@ namespace MaxyGames.UNode.Editors {
 			if(target == null)
 				return false;
 			if(!EditorUtility.IsPersistent(target)) {
-				Transform root = null;
-				if(target is Component) {
-					root = (target as Component).transform.root;
-				} else if(target is GameObject) {
-					root = (target as GameObject).transform.root;
-				}
-				if(root != null && root.gameObject.name.StartsWith(GraphUtility.KEY_TEMP_OBJECT)) {
-					//Ensure to return false when the target is a temporary object
-					return false;
-				}
+				//Transform root = null;
+				//if(target is Component) {
+				//	root = (target as Component).transform.root;
+				//} else if(target is GameObject) {
+				//	root = (target as GameObject).transform.root;
+				//}
+				//if(root != null && root.gameObject.name.StartsWith(GraphUtility.KEY_TEMP_OBJECT)) {
+				//	//Ensure to return false when the target is a temporary object
+				//	return false;
+				//}
 				return true;
 			}
 			return false;

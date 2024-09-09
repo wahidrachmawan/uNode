@@ -1264,12 +1264,14 @@ namespace MaxyGames {
 						//If it is a fake type and not native type
 						vType = Type((type as IFakeType).GetNativeType());
 					}
+					//Check if the graph is inherited from UnityEngine.Object, true for Class Component & Class Asset
+					//and will not generate default value because it is initialized at runtime by uNode so no need to init value again
 					if(graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
 						//don't generate default value when the type is not native (CLR) type
 						defaultValue = null;
 					}
 				}
-				if(type == null || defaultValue is IInstancedGraph) {
+				if(type == null) {
 					defaultValue = null;
 				}
 				if(isGeneric) {

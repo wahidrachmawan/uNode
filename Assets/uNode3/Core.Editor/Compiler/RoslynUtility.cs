@@ -157,7 +157,7 @@ namespace MaxyGames.UNode.Editors {
 		static UnityEditor.Compilation.Assembly AssemblyCSharp {
 			get {
 				if(CachedData.assemblyCSharp == null && CachedData.hasDefaultAssembly == null) {
-					CachedData .hasDefaultAssembly = false;
+					CachedData.hasDefaultAssembly = false;
 					uNodeThreadUtility.RunOnMainThread(() => {
 						var assemblies = CompilationPipeline.GetAssemblies();
 						for(int i = 0; i < assemblies.Length; i++) {
@@ -286,7 +286,8 @@ namespace MaxyGames.UNode.Editors {
 						continue;
 					preprocessorSymbols.Add(symbol);
 				}
-			} else {
+			}
+			else {
 				uNodeThreadUtility.QueueAndWait(() => {
 					foreach(var symbol in UnityEditor.EditorUserBuildSettings.activeScriptCompilationDefines) {
 						if(symbol.StartsWith("UNITY_EDITOR", StringComparison.Ordinal))
@@ -363,7 +364,8 @@ namespace MaxyGames.UNode.Editors {
 						symbolsStream,
 						embeddedTexts: embeddedTexts,
 						options: emitOptions);
-				} else {
+				}
+				else {
 					emitResult = compilation.Emit(assemblyStream);
 				}
 				if(emitResult.Success) {
@@ -372,10 +374,12 @@ namespace MaxyGames.UNode.Editors {
 					if(useDebug) {
 						result.rawAssembly = assemblyStream.ToArray();
 						result.rawPdb = symbolsStream.ToArray();
-					} else {
+					}
+					else {
 						result.rawAssembly = assemblyStream.ToArray();
 					}
-				} else {
+				}
+				else {
 					var failures = emitResult.Diagnostics.Where(d => d.IsWarningAsError || d.Severity == DiagnosticSeverity.Error);
 					List<CompileResult.CompileError> compileErrors = new List<CompileResult.CompileError>();
 					foreach(var d in failures) {
@@ -440,7 +444,8 @@ namespace MaxyGames.UNode.Editors {
 						symbolsStream,
 						embeddedTexts: embeddedTexts,
 						options: emitOptions);
-				} else {
+				}
+				else {
 					emitResult = compilation.Emit(assemblyStream);
 				}
 				if(emitResult.Success) {
@@ -456,14 +461,16 @@ namespace MaxyGames.UNode.Editors {
 						File.Open(pdbPath, FileMode.OpenOrCreate).Close();
 						File.WriteAllBytes(assemblyPath, assemblyStream.ToArray());
 						File.WriteAllBytes(pdbPath, symbolsStream.ToArray());
-					} else {
+					}
+					else {
 						result.rawAssembly = assemblyStream.ToArray();
 						if(loadAssembly)
 							result.LoadAssembly();
 						File.Open(assemblyPath, FileMode.OpenOrCreate).Close();
 						File.WriteAllBytes(assemblyPath, assemblyStream.ToArray());
 					}
-				} else {
+				}
+				else {
 					var failures = emitResult.Diagnostics.Where(d => d.IsWarningAsError || d.Severity == DiagnosticSeverity.Error);
 					List<CompileResult.CompileError> compileErrors = new List<CompileResult.CompileError>();
 					foreach(var d in failures) {
@@ -495,7 +502,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			return result;
 		}
-#endregion
+		#endregion
 
 		public static CompilationUnitSyntax GetSyntaxTree(string script) {
 			if(script == null) {
@@ -517,6 +524,453 @@ namespace MaxyGames.UNode.Editors {
 			var compilation = CSharpCompilation.Create("CSharpParser", syntaxTrees: trees, references: GetMetadataReferences());
 			model = compilation.GetSemanticModel(tree, true);
 			return (CompilationUnitSyntax)tree.GetRoot();
+		}
+
+		public static int GetLineForMember(MemberInfo info, string path) {
+			var syntaxTree = GetSyntaxTree(File.ReadAllText(path), out var model);
+			switch(info.MemberType) {
+				case MemberTypes.TypeInfo:
+				case MemberTypes.NestedType: {
+					foreach(var syntax in syntaxTree.DescendantNodesAndSelf().OfType<TypeDeclarationSyntax>()) {
+						if(GetMemberInfoFromSyntax(syntax, model) == info) {
+							return syntax.GetLocation().GetLineSpan().Span.Start.Line + 1;
+						}
+					}
+					break;
+				}
+				case MemberTypes.Field: {
+					foreach(var syntax in syntaxTree.DescendantNodesAndSelf().OfType<VariableDeclaratorSyntax>()) {
+						if(GetMemberInfoFromSyntax(syntax, model) == info) {
+							return syntax.GetLocation().GetLineSpan().Span.Start.Line + 1;
+						}
+					}
+					break;
+				}
+				case MemberTypes.Event: {
+					foreach(var syntax in syntaxTree.DescendantNodesAndSelf().OfType<EventDeclarationSyntax>()) {
+						if(GetMemberInfoFromSyntax(syntax, model) == info) {
+							return syntax.GetLocation().GetLineSpan().Span.Start.Line + 1;
+						}
+					}
+					break;
+				}
+				case MemberTypes.Property: {
+					foreach(var syntax in syntaxTree.DescendantNodesAndSelf().OfType<PropertyDeclarationSyntax>()) {
+						if(GetMemberInfoFromSyntax(syntax, model) == info) {
+							return syntax.GetLocation().GetLineSpan().Span.Start.Line + 1;
+						}
+					}
+					break;
+				}
+				case MemberTypes.Method: {
+					foreach(var syntax in syntaxTree.DescendantNodesAndSelf().OfType<MethodDeclarationSyntax>()) {
+						if(GetMemberInfoFromSyntax(syntax, model) == info) {
+							return syntax.GetLocation().GetLineSpan().Span.Start.Line + 1;
+						}
+					}
+					break;
+				}
+				case MemberTypes.Constructor: {
+					foreach(var syntax in syntaxTree.DescendantNodesAndSelf().OfType<ConstructorDeclarationSyntax>()) {
+						if(GetMemberInfoFromSyntax(syntax, model) == info) {
+							return syntax.GetLocation().GetLineSpan().Span.Start.Line + 1;
+						}
+					}
+					break;
+				}
+			}
+			return -1;
+		}
+
+		private static Type GetMemberInfoFromSyntax(TypeDeclarationSyntax syntax, SemanticModel model) {
+			var symbol = model.GetDeclaredSymbol(syntax);
+			if(symbol != null) {
+				var nativeType = GetTypeFromTypeSymbol(symbol);
+				if(nativeType != null) {
+					return nativeType;
+				}
+			}
+			return null;
+		}
+
+		private static EventInfo GetMemberInfoFromSyntax(EventDeclarationSyntax syntax, SemanticModel model) {
+			var symbol = model.GetDeclaredSymbol(syntax);
+			if(symbol != null) {
+				var nativeType = GetTypeFromTypeSymbol(symbol.ContainingType);
+				if(nativeType != null) {
+					var member = nativeType.GetEvent(symbol.Name);
+					if(member != null) {
+						return member;
+					}
+				}
+			}
+			return null;
+		}
+
+		private static PropertyInfo GetMemberInfoFromSyntax(PropertyDeclarationSyntax syntax, SemanticModel model) {
+			var symbol = model.GetDeclaredSymbol(syntax);
+			if(symbol != null) {
+				var nativeType = GetTypeFromTypeSymbol(symbol.ContainingType);
+				if(nativeType != null) {
+					var member = nativeType.GetProperty(symbol.Name);
+					if(member != null) {
+						return member;
+					}
+				}
+			}
+			return null;
+		}
+
+		private static FieldInfo GetMemberInfoFromSyntax(VariableDeclaratorSyntax syntax, SemanticModel model) {
+			var symbol = model.GetDeclaredSymbol(syntax);
+			if(symbol != null) {
+				var nativeType = GetTypeFromTypeSymbol(symbol.ContainingType);
+				if(nativeType != null) {
+					var member = nativeType.GetField(symbol.Name);
+					if(member != null) {
+						return member;
+					}
+				}
+			}
+			return null;
+		}
+
+		private static MethodInfo GetMemberInfoFromSyntax(MethodDeclarationSyntax syntax, SemanticModel model) {
+			var symbol = model.GetDeclaredSymbol(syntax);
+			if(symbol != null) {
+				var nativeType = GetTypeFromTypeSymbol(symbol.ContainingType);
+				if(nativeType != null) {
+					var members = nativeType.GetMember(symbol.Name);
+					foreach(var member in members) {
+						if(member is MethodInfo method) {
+							if(IsValidMember(method, symbol)) {
+								return method;
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		private static ConstructorInfo GetMemberInfoFromSyntax(ConstructorDeclarationSyntax syntax, SemanticModel model) {
+			var symbol = model.GetDeclaredSymbol(syntax);
+			if(symbol != null) {
+				var nativeType = GetTypeFromTypeSymbol(symbol.ContainingType);
+				if(nativeType != null) {
+					var members = nativeType.GetConstructors();
+					foreach(var member in members) {
+						if(IsValidMember(member, symbol)) {
+							return member;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		private static bool IsValidMember(ConstructorInfo ctor, IMethodSymbol symbol) {
+			if(ctor.IsGenericMethod && symbol.IsGenericMethod == false)
+				return false;
+			var mparam = ctor.GetParameters();
+			var sparam = symbol.Parameters;
+			if(mparam.Length != sparam.Length)
+				return false;
+			for(int i = 0; i < mparam.Length; i++) {
+				if(mparam[i].ParameterType != GetTypeFromTypeSymbol(sparam[i].Type)) {
+					return false;
+				}
+			}
+			//var mgparam = ctor.GetGenericArguments();
+			//var sgparam = symbol.TypeArguments;
+			//if(mgparam.Length != sgparam.Length)
+			//	return false;
+			return true;
+		}
+
+		private static bool IsValidMember(MethodInfo method, IMethodSymbol symbol) {
+			if(method.Name != symbol.Name)
+				return false;
+			if(method.IsGenericMethod && symbol.IsGenericMethod == false)
+				return false;
+			if(method.ReturnType != GetTypeFromTypeSymbol(symbol.ReturnType))
+				return false;
+			var mparam = method.GetParameters();
+			var sparam = symbol.Parameters;
+			if(mparam.Length != sparam.Length)
+				return false;
+			for(int i = 0; i < mparam.Length; i++) {
+				if(mparam[i].ParameterType != GetTypeFromTypeSymbol(sparam[i].Type)) {
+					return false;
+				}
+			}
+			var mgparam = method.GetGenericArguments();
+			var sgparam = symbol.TypeArguments;
+			if(mgparam.Length != sgparam.Length)
+				return false;
+			return true;
+		}
+
+
+		internal static Dictionary<string, Type> typeKeywords = new Dictionary<string, Type> {
+			{ "bool", typeof(Boolean) },
+			{ "byte", typeof(Byte) },
+			{ "char", typeof(Char) },
+			{ "decimal", typeof(Decimal) },
+			{ "double", typeof(Double) },
+			{ "float", typeof(Single) },
+			{ "int", typeof(Int32) },
+			{ "long", typeof(Int64) },
+			{ "sbyte", typeof(SByte) },
+			{ "short", typeof(Int16) },
+			{ "string", typeof(string) },
+			{ "uint", typeof(UInt32) },
+			{ "ulong", typeof(UInt64) },
+			{ "ushort", typeof(UInt16) },
+			{ "void", typeof(void) },
+			{ "object", typeof(object) },
+		};
+
+		public static readonly SymbolDisplayFormat genericDisplayFormat = new SymbolDisplayFormat(SymbolDisplayGlobalNamespaceStyle.Omitted, SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces, SymbolDisplayGenericsOptions.None);
+
+		public static Type GetTypeFromTypeName(string name) {
+			Type type = null;
+			List<string> paramList = new List<string>();
+			string str = string.Empty;
+			string param = string.Empty;
+			int deep = 0;
+			for(int i = 0; i < name.Length; i++) {
+				var c = name[i];
+				if(c == ' ')
+					continue;
+				if(c == '<') {
+					deep++;
+				}
+				else if(c == '>') {
+					deep--;
+					if(deep == 0) {
+						paramList.Add(param);
+						param = string.Empty;
+
+						type = (str + "`" + paramList.Count).ToType(false);
+						if(type == null)
+							return null;
+						str = string.Empty;
+						if(type.IsGenericType) {
+							var pTypes = paramList.Select(p => GetTypeFromTypeName(p)).ToArray();
+							if(pTypes.Any(p => p == null))
+								return null;
+							type = type.MakeGenericType(pTypes);
+						}
+						paramList.Clear();
+						i++;
+						continue;
+					}
+				}
+				else if(c == ',' && deep == 1) {
+					paramList.Add(param);
+					param = string.Empty;
+				}
+				else if(deep > 0) {
+					param += c;
+				}
+				else {
+					str += c;
+				}
+			}
+			if(type != null) {
+				return (type.FullName + "." + str).ToType(false);
+			}
+			else {
+				if(typeKeywords.TryGetValue(str, out var t)) {
+					return t;
+				}
+				return str.ToType(false);
+			}
+		}
+
+		private static Type GetTypeFromTypeSymbol(ITypeSymbol typeSymbol, bool isByRef = false) {
+			if(typeSymbol == null) {
+				throw new ArgumentNullException("typeSymbol");
+			}
+
+			if(typeSymbol.Kind == SymbolKind.ArrayType) {
+				var arraySymbol = typeSymbol as IArrayTypeSymbol;
+				var elementType = GetTypeFromTypeSymbol(arraySymbol.ElementType);
+				Type t = elementType.MakeArrayType(arraySymbol.Rank);
+				if(isByRef) {
+					t = t.MakeByRefType();
+				}
+				return t;
+			}
+			if(typeSymbol.SpecialType != SpecialType.None) {
+				switch(typeSymbol.SpecialType) {
+					case SpecialType.System_Boolean:
+						return !isByRef ? typeof(bool) : typeof(bool).MakeByRefType();
+					case SpecialType.System_Byte:
+						return !isByRef ? typeof(byte) : typeof(byte).MakeByRefType();
+					case SpecialType.System_Char:
+						return !isByRef ? typeof(char) : typeof(char).MakeByRefType();
+					case SpecialType.System_Decimal:
+						return !isByRef ? typeof(decimal) : typeof(decimal).MakeByRefType();
+					case SpecialType.System_Double:
+						return !isByRef ? typeof(double) : typeof(double).MakeByRefType();
+					case SpecialType.System_Int16:
+						return !isByRef ? typeof(short) : typeof(short).MakeByRefType();
+					case SpecialType.System_Int32:
+						return !isByRef ? typeof(int) : typeof(int).MakeByRefType();
+					case SpecialType.System_Int64:
+						return !isByRef ? typeof(long) : typeof(long).MakeByRefType();
+					case SpecialType.System_Object:
+						return !isByRef ? typeof(object) : typeof(object).MakeByRefType();
+					case SpecialType.System_SByte:
+						return !isByRef ? typeof(sbyte) : typeof(sbyte).MakeByRefType();
+					case SpecialType.System_Single:
+						return !isByRef ? typeof(float) : typeof(float).MakeByRefType();
+					case SpecialType.System_String:
+						return !isByRef ? typeof(string) : typeof(string).MakeByRefType();
+					case SpecialType.System_UInt16:
+						return !isByRef ? typeof(ushort) : typeof(ushort).MakeByRefType();
+					case SpecialType.System_UInt32:
+						return !isByRef ? typeof(uint) : typeof(uint).MakeByRefType();
+					case SpecialType.System_UInt64:
+						return !isByRef ? typeof(ulong) : typeof(ulong).MakeByRefType();
+					case SpecialType.System_Void:
+						return !isByRef ? typeof(void) : typeof(void).MakeByRefType();
+					case SpecialType.System_ValueType:
+						return !isByRef ? typeof(ValueType) : typeof(ValueType).MakeByRefType();
+					case SpecialType.System_Collections_Generic_ICollection_T:
+						return !isByRef ? typeof(ICollection<>) : typeof(ICollection<>).MakeByRefType();
+					case SpecialType.System_Collections_Generic_IEnumerable_T:
+						return !isByRef ? typeof(IEnumerable<>) : typeof(IEnumerable<>).MakeByRefType();
+					case SpecialType.System_Collections_Generic_IEnumerator_T:
+						return !isByRef ? typeof(IEnumerator<>) : typeof(IEnumerator<>).MakeByRefType();
+					case SpecialType.System_Collections_Generic_IList_T:
+						return !isByRef ? typeof(IList<>) : typeof(IList<>).MakeByRefType();
+					case SpecialType.System_Collections_Generic_IReadOnlyCollection_T:
+						return !isByRef ? typeof(IReadOnlyCollection<>) : typeof(IReadOnlyCollection<>).MakeByRefType();
+					case SpecialType.System_Collections_Generic_IReadOnlyList_T:
+						return !isByRef ? typeof(IReadOnlyList<>) : typeof(IReadOnlyList<>).MakeByRefType();
+					case SpecialType.System_Collections_IEnumerable:
+						return !isByRef ? typeof(IEnumerable) : typeof(IEnumerable).MakeByRefType();
+					case SpecialType.System_Collections_IEnumerator:
+						return !isByRef ? typeof(IEnumerator) : typeof(IEnumerator).MakeByRefType();
+					case SpecialType.System_DateTime:
+						return !isByRef ? typeof(DateTime) : typeof(DateTime).MakeByRefType();
+					case SpecialType.System_Delegate:
+						return !isByRef ? typeof(Delegate) : typeof(Delegate).MakeByRefType();
+					case SpecialType.System_Enum:
+						return !isByRef ? typeof(Enum) : typeof(Enum).MakeByRefType();
+					case SpecialType.System_IAsyncResult:
+						return !isByRef ? typeof(IAsyncResult) : typeof(IAsyncResult).MakeByRefType();
+					case SpecialType.System_IDisposable:
+						return !isByRef ? typeof(IDisposable) : typeof(IDisposable).MakeByRefType();
+					case SpecialType.System_IntPtr:
+						return !isByRef ? typeof(IntPtr) : typeof(IntPtr).MakeByRefType();
+					case SpecialType.System_MulticastDelegate:
+						return !isByRef ? typeof(MulticastDelegate) : typeof(MulticastDelegate).MakeByRefType();
+					case SpecialType.System_Nullable_T:
+						return !isByRef ? typeof(Nullable<>) : typeof(Nullable<>).MakeByRefType();
+					case SpecialType.System_RuntimeArgumentHandle:
+						return !isByRef ? typeof(RuntimeArgumentHandle) : typeof(RuntimeArgumentHandle).MakeByRefType();
+					case SpecialType.System_RuntimeFieldHandle:
+						return !isByRef ? typeof(RuntimeFieldHandle) : typeof(RuntimeFieldHandle).MakeByRefType();
+					case SpecialType.System_RuntimeMethodHandle:
+						return !isByRef ? typeof(RuntimeMethodHandle) : typeof(RuntimeMethodHandle).MakeByRefType();
+					case SpecialType.System_RuntimeTypeHandle:
+						return !isByRef ? typeof(RuntimeTypeHandle) : typeof(RuntimeTypeHandle).MakeByRefType();
+				}
+			}
+			if(typeSymbol is INamedTypeSymbol) {
+				INamedTypeSymbol namedTypeSymbol = typeSymbol as INamedTypeSymbol;
+				if(namedTypeSymbol.IsGenericType) {
+					Type genericType = namedTypeSymbol.ConstructUnboundGenericType().ToDisplayString(genericDisplayFormat).Add("`" + namedTypeSymbol.TypeArguments.Length).ToType(false);
+					if(genericType == null) {//Retry to parse type using different method.
+						if(namedTypeSymbol != namedTypeSymbol.OriginalDefinition) {
+							var baseType = GetTypeFromTypeSymbol(namedTypeSymbol.OriginalDefinition);
+							if(baseType != null) {
+								genericType = baseType.MakeGenericType(namedTypeSymbol.TypeArguments.Select(item => GetTypeFromTypeSymbol(item)).ToArray());
+								if(isByRef) {
+									genericType = genericType.MakeByRefType();
+								}
+								return genericType;
+							}
+							else {
+								baseType = GetTypeFromTypeName(namedTypeSymbol.ToString());
+								if(baseType != null) {
+									if(isByRef) {
+										baseType = baseType.MakeByRefType();
+									}
+									return baseType;
+								}
+								throw new System.Exception("Failed to deserialize type: " + namedTypeSymbol.ToString());
+							}
+						}
+						else {
+							return SerializedType.None;
+						}
+					}
+					List<SerializedType> types = new List<SerializedType>();
+					foreach(var arg in namedTypeSymbol.TypeArguments) {
+						types.Add(GetTypeFromTypeSymbol(arg));
+					}
+					if(types.Any(item => item.typeKind == SerialiedTypeKind.GenericParameter)) {
+						//TODO: add support for generic parameter
+						throw new NotImplementedException();
+						//var member = new MemberData() {
+						//	instance = types[0].instance,
+						//	targetType = MemberData.TargetType.uNodeGenericParameter,
+						//};
+						//var typeDatas = MemberDataUtility.MakeTypeDatas(types);
+						//member.Items = new MemberData.ItemData[]{
+						//	new MemberData.ItemData() {
+						//		genericArguments = new TypeData[] { new TypeData() {
+						//				name = genericType.FullName,
+						//				parameters = typeDatas.ToArray()
+						//			}
+						//		}
+						//	}
+						//};
+						//return member;
+					}
+					var gTypes = types.Select(item => item.type);
+					if(gTypes.All(item => item != null)) {
+						Type t = genericType.MakeGenericType(gTypes.ToArray());
+						if(isByRef) {
+							t = t.MakeByRefType();
+						}
+						return t;
+					}
+					return !isByRef ? genericType : genericType.MakeByRefType();
+				}
+			}
+			//Check if type is nested type
+			if(typeSymbol.ContainingType != null) {
+				return (GetTypeFromTypeSymbol(typeSymbol.ContainingType).FullName + "+" + typeSymbol.Name + (isByRef ? "&" : "")).ToType();
+			}
+			Type type = TypeSerializer.Deserialize(typeSymbol.ToString() + (isByRef ? "&" : ""), false);
+			//If type not found, try to find it manually.
+			if(type == null) {
+				//if(usingNamespaces != null) {
+				//	string nm = typeSymbol.ToString() + (isByRef ? "&" : "");
+				//	foreach(var n in usingNamespaces) {
+				//		type = TypeSerializer.Deserialize(n + "." + nm, false);
+				//		if(type != null)
+				//			break;
+				//	}
+				//	if(type == null) {
+				//		foreach(var n in usingNamespaces) {
+				//			type = TypeSerializer.Deserialize(n + "." + nm + "Attribute", false);
+				//			if(type != null)
+				//				break;
+				//		}
+				//	}
+				//}
+				if(type == null) {
+					throw new Exception("The type name : " + typeSymbol.ToString() + (isByRef ? "&" : "") + " not found");
+				}
+			}
+			return type;
 		}
 	}
 }

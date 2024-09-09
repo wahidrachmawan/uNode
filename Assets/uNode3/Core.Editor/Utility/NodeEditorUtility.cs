@@ -579,8 +579,13 @@ namespace MaxyGames.UNode.Editors {
 					c.output = outputPort;
 					c.position = inputPort.node.position.position;
 					c.force = forceConvert;
-					if(c.IsValid()) {
-						return true;
+					try {
+						if(c.IsValid()) {
+							return true;
+						}
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
 					}
 				}
 			}
@@ -603,7 +608,7 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 			return false;
-			
+
 		}
 
 		internal static bool CanAutoConvertOuput(Type outputType, FilterAttribute inputFilter) {
@@ -652,8 +657,13 @@ namespace MaxyGames.UNode.Editors {
 				c.output = null;
 				c.position = Vector2.zero;
 				c.force = false;
-				if(c.IsValid()) {
-					return true;
+				try {
+					if(c.IsValid()) {
+						return true;
+					}
+				}
+				catch(Exception ex) {
+					Debug.LogException(ex);
 				}
 			}
 			return false;
@@ -688,11 +698,16 @@ namespace MaxyGames.UNode.Editors {
 					c.output = output;
 					c.position = input.node.position.position;
 					c.force = forceConvert;
-					if(c.IsValid()) {
-						if(c.CreateNode(action)) {
-							return true;
+					try {
+						if(c.IsValid()) {
+							if(c.CreateNode(action)) {
+								return true;
+							}
+							return false;
 						}
-						return false;
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
 					}
 				}
 			}
@@ -1457,7 +1472,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(tree.outputs.Count == 1) {
 						var rect = GetNodeRect(listNodes);
-						var sourcePosition = GetNodeRect(new[] { tree.outputs[0].node } );
+						var sourcePosition = GetNodeRect(new[] { tree.outputs[0].node });
 						MoveNodes(listNodes, new Vector2(0, -(sourcePosition.y - rect.y) + (parentPos.height - sourcePosition.height) / 2));
 					}
 					else {

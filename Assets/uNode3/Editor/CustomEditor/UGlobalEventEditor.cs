@@ -5,8 +5,22 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Editors {
+	[CustomEditor(typeof(UGlobalEvent), true)]
+	public class UGlobalEventEditor : Editor {
+		public override void OnInspectorGUI() {
+			base.OnInspectorGUI();
+			DrawFindReferences();
+		}
+
+		protected void DrawFindReferences() {
+			if(GUILayout.Button("Find All References")) {
+				GraphUtility.ShowUnityReferenceUsages(target);
+			}
+		}
+	}
+
     [CustomEditor(typeof(UGlobalEventCustom), true)]
-    public class UGlobalEventCustomEditor : Editor {
+    class UGlobalEventCustomEditor : UGlobalEventEditor {
 		public override void OnInspectorGUI() {
 			var monoScript = uNodeEditorUtility.GetMonoScript(target);
 			if(monoScript != null) {
@@ -39,6 +53,7 @@ namespace MaxyGames.UNode.Editors {
 				elementHeight: index => {
 					return EditorGUIUtility.singleLineHeight * 2;
 				});
+			DrawFindReferences();
 		}
 	}
 }

@@ -132,20 +132,11 @@ namespace MaxyGames.UNode {
 				//for(int i = 0; i < references.Count; i++) {
 				//	SetVariable(references[i].name, references[i].value);
 				//}
-				////Initialize the variable
-				//foreach(var v in target.GetAllVariables()) {
-				//	if(v.type is RuntimeType) {
-				//		continue;
-				//	}
-				//	object value = v.defaultValue;
-				//	for(int x = 0; x < variables.Count; x++) {
-				//		if(v.name.Equals(variables[x].name)) {
-				//			value = variables[x].Get();
-				//			break;
-				//		}
-				//	}
-				//	SetVariable(v.name, value);
-				//}
+
+				//Initialize the overridden variable
+				foreach(var v in variables) {
+					SetVariable(v.name, v.Get());
+				}
 			}
 			else {
 				//Instance reflection graph
