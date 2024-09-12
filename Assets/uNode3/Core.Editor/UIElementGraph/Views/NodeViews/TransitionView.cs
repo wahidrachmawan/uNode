@@ -125,16 +125,16 @@ namespace MaxyGames.UNode.Editors {
 			foreach(var port in nodeObject.ValueInputs) {
 				AddInputValuePort(new ValueInputData(port));
 			}
-			//foreach(var port in nodeObject.ValueOutputs) {
-			//	if(port == nodeObject.primaryValueOutput) {
-			//		AddPrimaryOutputValue();
-			//		if(flowLayout == Orientation.Horizontal) {
-			//			uNodeThreadUtility.Queue(() => primaryOutputValue?.BringToFront());
-			//		}
-			//		continue;
-			//	}
-			//	AddOutputValuePort(new ValueOutputData(port));
-			//}
+			foreach(var port in nodeObject.ValueOutputs) {
+				if(port == nodeObject.primaryValueOutput) {
+					AddPrimaryOutputValue();
+					if(flowLayout == Orientation.Horizontal) {
+						uNodeThreadUtility.Queue(() => primaryOutputValue?.BringToFront());
+					}
+					continue;
+				}
+				AddOutputValuePort(new ValueOutputData(port));
+			}
 		}
 	}
 

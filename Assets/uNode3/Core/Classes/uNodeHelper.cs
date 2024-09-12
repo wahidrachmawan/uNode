@@ -1185,5 +1185,11 @@ namespace MaxyGames.UNode {
 					throw new System.InvalidCastException();
 			}
 		}
+
+		public static IEnumerator GetIteratorTargets(IEnumerator iterator) {
+
+
+			yield break;
+		}
 	}
 }

@@ -98,8 +98,8 @@ namespace MaxyGames.UNode {
 		public RuntimeBehaviour nativeInstance { get; private set; }
 		IGraph IInstancedGraph.OriginalGraph => this;
 
-		private GraphInstance m_graphInstance;
-		public GraphInstance Instance => m_graphInstance;
+		private GraphInstance m_instance;
+		public GraphInstance Instance => m_instance;
 		#endregion
 
 		#region Initialization
@@ -136,8 +136,8 @@ namespace MaxyGames.UNode {
 			}
 			else {
 				//Instance reflection graph
-				m_graphInstance = RuntimeGraphUtility.InitializeComponentGraph(this, this);
-				m_graphInstance.eventData.onAwake?.Invoke(Instance);
+				m_instance = RuntimeGraphUtility.InitializeComponentGraph(this, this);
+				m_instance.eventData.onAwake?.Invoke(Instance);
 			}
 		}
 		#endregion
@@ -149,8 +149,8 @@ namespace MaxyGames.UNode {
 
 		void Start() {
 			EnsureInitialized();
-			if(m_graphInstance != null) {
-				m_graphInstance.eventData.onStart?.Invoke(Instance);
+			if(m_instance != null) {
+				m_instance.eventData.onStart?.Invoke(Instance);
 			}
 		}
 
@@ -160,8 +160,8 @@ namespace MaxyGames.UNode {
 				nativeInstance.enabled = true;
 				nativeInstance.OnBehaviourEnable();
 			}
-			else if(m_graphInstance != null) {
-				m_graphInstance.eventData.onEnable?.Invoke(Instance);
+			else if(m_instance != null) {
+				m_instance.eventData.onEnable?.Invoke(Instance);
 			}
 		}
 
@@ -169,20 +169,26 @@ namespace MaxyGames.UNode {
 			if(nativeInstance != null) {
 				nativeInstance.enabled = false;
 			}
-			else if(m_graphInstance != null) {
-				m_graphInstance.eventData.onDisable?.Invoke(Instance);
+			else if(m_instance != null) {
+				m_instance.eventData.onDisable?.Invoke(Instance);
+			}
+		}
+
+		void OnDestroy() {
+			if(m_instance != null) {
+				m_instance.eventData.onDestroy?.Invoke(Instance);
 			}
 		}
 
 		void OnDrawGizmos() {
 			if(nativeInstance == null || Application.isPlaying == false) {
-				RuntimeGraphUtility.DrawGizmos(ref m_graphInstance, this, this, null);
+				RuntimeGraphUtility.DrawGizmos(ref m_instance, this, this, null);
 			}
 		}
 
 		void OnDrawGizmosSelected() {
 			if(nativeInstance == null || Application.isPlaying == false) {
-				RuntimeGraphUtility.DrawGizmosSelected(ref m_graphInstance, this, this, null);
+				RuntimeGraphUtility.DrawGizmosSelected(ref m_instance, this, this, null);
 			}
 		}
 		#endregion

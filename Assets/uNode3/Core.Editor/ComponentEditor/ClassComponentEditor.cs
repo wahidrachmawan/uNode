@@ -35,6 +35,7 @@ namespace MaxyGames.UNode.Editors {
 			var targetVal = EditorGUI.ObjectField(position, new GUIContent("Graph", "The target graph reference"), asset.target, typeof(ClassDefinition), false);
 			if(EditorGUI.EndChangeCheck()) {
 				asset.target = targetVal as ClassDefinition;
+				uNodeEditorUtility.MarkDirty(asset);
 			}
 
 			if(asset.target != null) {

@@ -519,14 +519,16 @@ namespace MaxyGames.UNode.Editors {
 													id = GraphDebug.GetDebugID(pair.Key);
 												}
 												menu.AddItem(new GUIContent("Instances/" + id + "-" + niceName), debugTarget == debugObject, delegate (object reference) {
-													KeyValuePair<object, GraphDebug.DebugData> objPair = (KeyValuePair<object, GraphDebug.DebugData>)reference;
-													UnityEngine.Object o = objPair.Key as UnityEngine.Object;
-													if(o != null) {
-														EditorGUIUtility.PingObject(o);
+													var weakRef = reference as WeakReference;
+													if(weakRef.IsAlive) {
+														UnityEngine.Object o = weakRef.Target as UnityEngine.Object;
+														if(o != null) {
+															EditorGUIUtility.PingObject(o);
+														}
+														debugTarget = weakRef.Target;
+														GraphDebug.useDebug = true;
 													}
-													debugTarget = objPair.Key;
-													GraphDebug.useDebug = true;
-												}, pair);
+												}, new WeakReference(pair.Key));
 											}
 										}
 									}

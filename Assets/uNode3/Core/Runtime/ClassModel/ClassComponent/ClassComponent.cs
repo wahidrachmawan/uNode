@@ -122,6 +122,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		void OnDestroy() {
+			if(m_instance != null) {
+				m_instance.eventData.onDestroy?.Invoke(Instance);
+			}
+		}
+
 		void OnDrawGizmos() {
 			if(target != null) {
 				RuntimeGraphUtility.DrawGizmos(ref m_instance, target, this, variables);

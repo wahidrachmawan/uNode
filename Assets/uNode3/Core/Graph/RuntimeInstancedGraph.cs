@@ -72,6 +72,12 @@ namespace MaxyGames.UNode {
 				m_instance.eventData.onDisable?.Invoke(Instance);
 			}
 		}
+
+		void OnDestroy() {
+			if(m_instance != null) {
+				m_instance.eventData.onDestroy?.Invoke(Instance);
+			}
+		}
 		#endregion
 
 		#region Functions

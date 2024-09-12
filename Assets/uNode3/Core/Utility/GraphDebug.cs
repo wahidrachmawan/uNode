@@ -224,7 +224,7 @@ namespace MaxyGames.UNode {
 		private static int m_lastDebugID;
 		private static ConditionalWeakTable<object, string> m_debugIDs = new ConditionalWeakTable<object, string>();
 
-		public static string GetDebugID(object obj) {
+		internal static string GetDebugID(object obj) {
 			if(obj is UnityEngine.Object) {
 				return obj.GetHashCode().ToString();
 			}

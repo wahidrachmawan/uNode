@@ -532,6 +532,19 @@ namespace MaxyGames.UNode {
 				return GetHashCode64(hashBytes);
 			}
 		}
+
+		static Dictionary<string, (DateTime, long)> m_cachedFileHash = new();
+		internal static long GetFileHashCached(string filePath) {
+			var time = System.IO.File.GetLastWriteTime(filePath);
+			if(m_cachedFileHash.TryGetValue(filePath, out var cached)) {
+				if(cached.Item1 == time) {
+					return cached.Item2;
+				}
+			}
+			var hash = GetFileHash(filePath);
+			m_cachedFileHash[filePath] = (time, hash);
+			return hash;
+		}
 		#endregion
 
 		/// <summary>

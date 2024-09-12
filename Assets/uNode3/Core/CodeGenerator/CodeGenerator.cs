@@ -342,7 +342,7 @@ namespace MaxyGames {
 									code += "\n" + s;
 								}
 								var method = generatorData.AddMethod("Awake", typeof(void), new Type[0]);
-								method.code = code + method.code.AddLineInFirst();
+								method.AddCode(code, int.MinValue);
 							}
 						}
 						#endregion

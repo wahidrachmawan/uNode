@@ -43,7 +43,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					nullable = false,
 				});
 			}
-			if(uNodeUtility.isPlaying) {//Debug
+			if(uNodeUtility.isPlaying && value.resetOnEnter == false) {//Debug
 				uNodeEditor.GetDebugData(out var debugTarget);
 				if(debugTarget is IInstancedGraph instancedGraph) {
 					var instance = instancedGraph.Instance;

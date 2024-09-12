@@ -1732,6 +1732,12 @@ namespace MaxyGames.UNode {
             else if(type.HasImplementInterface(typeof(IEnumerable))) {
 				return typeof(object);
 			}
+			else if(type.HasImplementInterface(typeof(IEnumerator))) {
+				return typeof(object);
+			}
+			else if(type == typeof(IEnumerable) || type == typeof(IEnumerator)) {
+				return typeof(object);
+			}
 			return null;
 		}
 

@@ -110,7 +110,7 @@ namespace MaxyGames.UNode.Editors {
 			if(scriptData.compilerVersion != About.compilerVersion)
 				return false;
 			if(scriptData.isValid && File.Exists(scriptData.path)) {
-				var hash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(graphAsset));
+				var hash = uNodeUtility.GetFileHashCached(AssetDatabase.GetAssetPath(graphAsset));
 				return scriptData.fileHash == hash;
 			}
 			return false;
