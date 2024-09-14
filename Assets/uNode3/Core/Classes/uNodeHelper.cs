@@ -1186,9 +1186,54 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		class NestedRunners : IEnumerator {
+			public List<IEnumerator> enumerators = new List<IEnumerator>();
+
+			public NestedRunners() { }
+
+			public NestedRunners(IEnumerator enumerator) {
+				enumerators.Add(enumerator);
+			}
+
+			public object Current { get; private set; }
+
+			public bool MoveNext() {
+				var target = enumerators[enumerators.Count - 1];
+				bool flag = target.MoveNext();
+				Current = target.Current;
+				if(flag) {
+					if(Current is IEnumerator && !(Current is CustomYieldInstruction)) {
+						enumerators.Add(Current as IEnumerator);
+						return MoveNext();
+					}
+				}
+				else {
+					enumerators.RemoveAt(enumerators.Count - 1);
+					if(enumerators.Count > 0) {
+						return MoveNext();
+					}
+				}
+				return enumerators.Count > 0;
+			}
+
+			public void Reset() {
+
+			}
+		}
+
+		public static IEnumerator GetIteratorTargets(IEnumerable iterator) {
+			var runner = new NestedRunners(iterator.GetEnumerator());
+			while(runner.MoveNext()) {
+				yield return runner.Current;
+			}
+			yield break;
+		}
+
 		public static IEnumerator GetIteratorTargets(IEnumerator iterator) {
-
-
+			var runner = new NestedRunners(iterator);
+			while(runner.MoveNext()) {
+				yield return runner.Current;
+			}
 			yield break;
 		}
 	}

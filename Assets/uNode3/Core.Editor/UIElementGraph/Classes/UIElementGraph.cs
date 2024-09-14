@@ -321,6 +321,7 @@ namespace MaxyGames.UNode.Editors {
 		private ToolbarButton debugButton;
 		private ToolbarButton saveButton;
 		private ToolbarButton frameButton;
+		private float m_tabbarScroll;
 
 		public static bool richText {
 			get {
@@ -1000,9 +1001,15 @@ namespace MaxyGames.UNode.Editors {
 					name = "tabbar"
 				};
 				tabbarContainer.Add(tabbar);
+
 				var scroll = new ScrollView(ScrollViewMode.Horizontal);
 				scroll.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
 				tabbar.Add(scroll);
+				scroll.horizontalScroller.highValue = float.MaxValue;
+				scroll.scrollOffset = new(m_tabbarScroll, 0);
+				scroll.horizontalScroller.valueChanged += (value) => {
+					m_tabbarScroll = value;
+				};
 				InitTabbar(scroll);
 			}
 #endregion

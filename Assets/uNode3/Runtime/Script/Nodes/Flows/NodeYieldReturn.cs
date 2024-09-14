@@ -50,5 +50,12 @@ namespace MaxyGames.UNode.Nodes {
 		public override string GetRichName() {
 			return uNodeUtility.WrapTextWithKeywordColor("yield return ") + value.GetRichName();
 		}
+
+		public override void CheckError(ErrorAnalyzer analyzer) {
+			if(value.isAssigned && value.ValueType == typeof(Coroutine)) {
+				analyzer.RegisterError(this, "Yielding coroutine is not supported yet.");
+			}
+			base.CheckError(analyzer);
+		}
 	}
 }
