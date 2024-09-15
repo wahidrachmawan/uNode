@@ -6,6 +6,7 @@ using System;
 
 namespace MaxyGames.UNode.Nodes {
 	public class LinkedMacroNode : Node, IMacro, ILocalVariableSystem, IRefreshable, IGeneratorPrePostInitializer {
+		[AllowAssetReference]
 		public MacroGraph macroAsset;
 
 		[HideInInspector]
@@ -100,6 +101,9 @@ namespace MaxyGames.UNode.Nodes {
 					});
 					outputValues.Add(port);
 				}
+			}
+			else {
+				nodeObject.RestorePreviousPort();
 			}
 		}
 

@@ -73,14 +73,16 @@ namespace MaxyGames.UNode.Editors {
 						try {
 							//Start compiling in background.
 							RoslynUtility.CompileScript(new[] { "struct Dummy { public int x; public int y; }" });
-							uNodeThreadUtility.Queue(() => {
-								//Clear the progress bar
-								EditorProgressBar.ClearProgressBar();
-							});
 						}
 						catch(System.Threading.ThreadAbortException) { }
 						catch(Exception ex) {
 							Debug.Log(ex.Message + "\n" + ex.GetType());
+						}
+						finally {
+							uNodeThreadUtility.Queue(() => {
+								//Clear the progress bar
+								EditorProgressBar.ClearProgressBar();
+							});
 						}
 					});
 					thread.IsBackground = true;

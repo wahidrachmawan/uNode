@@ -140,49 +140,58 @@ namespace MaxyGames.UNode {
 				case MemberData.TargetType.Self:
 					createOutPort?.Invoke();
 					break;
+				case MemberData.TargetType.uNodeFunction: {
+					createFlowPort?.Invoke();
+
+					var reference = target.startItem.GetReferenceValue() as Function;
+					if(reference != null) {
+						parameters = new List<MParamInfo>();
+						datas = new MInfo[] {
+							new MInfo()
+						};
+						for(int i = 0; i < reference.parameters.Count; i++) {
+							var p = reference.parameters[i];
+							var pdata = new MParamInfo() {
+								info = null,
+								refKind = p.refKind,
+							};
+							if(preferOutputForParameters && pdata.IsOut) {
+								pdata.output = Node.Utilities.ValueOutput(
+									node,
+									pathID + "-" + i + "-" + 0, p.Type,
+									PortAccessibility.ReadWrite).SetName(p.name);
+							}
+							else {
+								pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type, out var isNew).SetName(p.name);
+								if(isNew) {
+									pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.Type));
+								}
+								if(pdata.refKind == RefKind.Out) {
+									pdata.input.filter = new FilterAttribute() {
+										SetMember = true,
+									};
+								}
+							}
+							datas[0].parameters.Add(pdata);
+							parameters.Add(pdata);
+						}
+					}
+					else {
+						//In case missing members, restore the previously ports instead
+						node.nodeObject.RestorePreviousPort();
+						return;
+					}
+					break;
+				}
 				default:
 					var members = target.GetMembers(false);
 					if(members == null || members.Length == 0) {
-						if(target.CanGetValue() || target.CanSetValue()) {
-							createOutPort?.Invoke();
+						if(target.IsTargetingReflection) {
+							//In case missing members, restore the previously ports instead
+							node.nodeObject.RestorePreviousPort();
 						}
-						if(target.targetType.HasFlags(MemberData.TargetType.Constructor | MemberData.TargetType.Method | MemberData.TargetType.uNodeFunction)) {
-							createFlowPort?.Invoke();
-							if(target.targetType == MemberData.TargetType.uNodeFunction) {
-								var reference = target.startItem.GetReferenceValue() as Function;
-								if(reference != null) {
-									parameters = new List<MParamInfo>();
-									datas = new MInfo[] {
-										new MInfo()
-									};
-									for(int i = 0; i < reference.parameters.Count; i++) {
-										var p = reference.parameters[i];
-										var pdata = new MParamInfo() {
-											info = null,
-											refKind = p.refKind,
-										};
-										if(preferOutputForParameters && pdata.IsOut) {
-											pdata.output = Node.Utilities.ValueOutput(
-												node,
-												pathID + "-" + i + "-" + 0, p.Type,
-												PortAccessibility.ReadWrite).SetName(p.name);
-										}
-										else {
-											pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type, out var isNew).SetName(p.name);
-											if(isNew) {
-												pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.Type));
-											}
-											if(pdata.refKind == RefKind.Out) {
-												pdata.input.filter = new FilterAttribute() {
-													SetMember = true,
-												};
-											}
-										}
-										datas[0].parameters.Add(pdata);
-										parameters.Add(pdata);
-									}
-								}
-							}
+						else if(target.CanGetValue() || target.CanSetValue()) {
+							createOutPort?.Invoke();
 						}
 						return;
 					}

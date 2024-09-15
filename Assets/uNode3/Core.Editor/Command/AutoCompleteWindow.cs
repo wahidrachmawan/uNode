@@ -223,7 +223,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(evt.keyCode == KeyCode.UpArrow || evt.keyCode == KeyCode.DownArrow || evt.keyCode == KeyCode.Return) {
 					evt.StopImmediatePropagation();
+#pragma warning disable CS0618 // Type or member is obsolete
 					evt.PreventDefault();
+#pragma warning restore CS0618 // Type or member is obsolete
 				}
 			}, TrickleDown.TrickleDown);
 			textField = new TextField();

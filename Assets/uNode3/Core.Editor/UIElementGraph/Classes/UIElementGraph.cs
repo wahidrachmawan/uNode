@@ -561,7 +561,9 @@ namespace MaxyGames.UNode.Editors {
 								}
 							}
 
+#pragma warning disable
 							var objs = GameObject.FindObjectsOfType<MonoBehaviour>();
+#pragma warning restore
 							int counts = 0;
 							foreach(var obj in objs) {
 								if(counts > 250)

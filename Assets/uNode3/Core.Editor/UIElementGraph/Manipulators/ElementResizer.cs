@@ -10,8 +10,6 @@ using UnityEditor.Experimental.GraphView;
 using NodeView = UnityEditor.Experimental.GraphView.Node;
 
 namespace MaxyGames.UNode.Editors {
-	class ResizableElementFactory : UxmlFactory<ResizableElement> { }
-
 	public class ResizableElement : VisualElement {
 		public ResizableElement() : this("uxml/Resizable") {
 			pickingMode = PickingMode.Ignore;

@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace MaxyGames.UNode {
 	public abstract class GraphAsset : ScriptableObject, IGraph, IIcon {
+		[AllowAssetReference]
 		public Texture2D icon;
 
 		[SerializeField]

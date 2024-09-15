@@ -227,6 +227,13 @@ namespace MaxyGames.UNode {
 			isRegistered = false;
 		}
 
+		/// <summary>
+		/// Can only be call inside <see cref="Node.OnRegister"/>
+		/// </summary>
+		public void RestorePreviousPort() {
+			preservation.RestoreCauseOfErrors();
+		}
+
 		public ValueInput RegisterPort(ValueInput port) {
 			if(preservation != null) {
 				return preservation.RestorePort(port);
@@ -579,22 +586,22 @@ namespace MaxyGames.UNode {
 
 		public void RestoreCauseOfErrors() {
 			foreach(var port in valueInputs) {
-				if(node.ValueInputs.Any((p) => p.id == port.Key)) {
+				if(node.ValueInputs.Any((p) => p.id == port.Key) == false && node.InvalidPorts.Contains(port.Value) == false) {
 					node.ValueInputs.Add(port.Value);
 				}
 			}
 			foreach(var port in valueOutputs) {
-				if(node.ValueOutputs.Any((p) => p.id == port.Key)) {
+				if(node.ValueOutputs.Any((p) => p.id == port.Key) == false && node.InvalidPorts.Contains(port.Value) == false) {
 					node.ValueOutputs.Add(port.Value);
 				}
 			}
 			foreach(var port in flowInputs) {
-				if(node.FlowInputs.Any((p) => p.id == port.Key)) {
+				if(node.FlowInputs.Any((p) => p.id == port.Key) == false && node.InvalidPorts.Contains(port.Value) == false) {
 					node.FlowInputs.Add(port.Value);
 				}
 			}
 			foreach(var port in flowOutputs) {
-				if(node.FlowOutputs.Any((p) => p.id == port.Key)) {
+				if(node.FlowOutputs.Any((p) => p.id == port.Key) == false && node.InvalidPorts.Contains(port.Value) == false) {
 					node.FlowOutputs.Add(port.Value);
 				}
 			}

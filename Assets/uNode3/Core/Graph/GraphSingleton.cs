@@ -203,7 +203,9 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 		/// <returns></returns>
 		public static T GetInstance<T>() where T : BaseRuntimeBehaviour {
 			if(!instanceMaps.TryGetValue(typeof(T), out var instance) || instance == null) {
-				var objs = GameObject.FindObjectsOfType<T>();
+#pragma warning disable
+				var objs = UnityEngine.Object.FindObjectsOfType<T>();
+#pragma warning restore
 				T result = objs.FirstOrDefault();
 				if(result == null) {
 					var db = uNodeUtility.GetDatabase()?.GetGraphDatabase<T>();

@@ -59,6 +59,7 @@ namespace MaxyGames.UNode.Nodes {
 				}
 				else {
 					m_instance = null;
+					nodeObject.RestorePreviousPort();
 					return;
 				}
 			}

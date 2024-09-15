@@ -280,7 +280,9 @@ namespace MaxyGames.UNode.Editors {
 					uNodeThreadUtility.Update();
 				}
 				var currentScene = EditorSceneManager.OpenScene(scene.path);
+#pragma warning disable
 				var graphs = GameObject.FindObjectsOfType<GraphComponent>();
+#pragma warning restore
 				var scripts = new List<CG.GeneratedData>();
 				int count = 0;
 				foreach(var graph in graphs) {
