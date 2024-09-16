@@ -141,10 +141,14 @@ namespace MaxyGames.UNode {
 					createOutPort?.Invoke();
 					break;
 				case MemberData.TargetType.uNodeFunction: {
-					createFlowPort?.Invoke();
 
 					var reference = target.startItem.GetReferenceValue() as Function;
 					if(reference != null) {
+						createFlowPort?.Invoke();
+						if(target.CanGetValue() || target.CanSetValue()) {
+							createOutPort?.Invoke();
+						}
+
 						parameters = new List<MParamInfo>();
 						datas = new MInfo[] {
 							new MInfo()
