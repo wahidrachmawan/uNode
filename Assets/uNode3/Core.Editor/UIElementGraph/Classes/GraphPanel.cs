@@ -977,6 +977,9 @@ namespace MaxyGames.UNode.Editors {
 				//Setup the item height
 				treeView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
 				treeView.fixedItemHeight = 20;
+#if UNITY_6000_0_OR_NEWER
+				treeView.canStartDrag += (v) => false;
+#endif
 				//Create the dragger handler
 				var dragger = new TreeViewDragger(treeView);
 				dragger.dragAndDropController = new TreeViewUGraphElementDragAndDropController(treeView, container);
@@ -1232,6 +1235,9 @@ namespace MaxyGames.UNode.Editors {
 						//Setup the item height
 						treeView.fixedItemHeight = 20;
 						treeView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
+#if UNITY_6000_0_OR_NEWER
+						treeView.canStartDrag += (v) => false;
+#endif
 						if(tabData.owner is IScriptGraph) {
 							var scriptGraph = tabData.owner as IScriptGraph;
 							//Create the dragger handler
@@ -1484,6 +1490,9 @@ namespace MaxyGames.UNode.Editors {
 						//Setup the item height
 						treeView.fixedItemHeight = 20;
 						treeView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
+#if UNITY_6000_0_OR_NEWER
+						treeView.canStartDrag += (v) => false;
+#endif
 						//TODO: implement reordering for events
 						//if(tabData.owner is IScriptGraph) {
 						//	var scriptGraph = tabData.owner as IScriptGraph;
@@ -1540,7 +1549,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				else {
-					eventContainer.SetDisplay(false);
+					eventContainer.parent.SetDisplay(false);
 				}
 			}
 			else {

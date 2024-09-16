@@ -203,10 +203,11 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 		/// <returns></returns>
 		public static T GetInstance<T>() where T : BaseRuntimeBehaviour {
 			if(!instanceMaps.TryGetValue(typeof(T), out var instance) || instance == null) {
-#pragma warning disable
-				var objs = UnityEngine.Object.FindObjectsOfType<T>();
-#pragma warning restore
-				T result = objs.FirstOrDefault();
+#if UNITY_6000_0_OR_NEWER
+				T result = UnityEngine.Object.FindAnyObjectByType<T>();
+#else
+				T result = UnityEngine.Object.FindObjectOfType<T>();
+#endif
 				if(result == null) {
 					var db = uNodeUtility.GetDatabase()?.GetGraphDatabase<T>();
 					if(db != null && db.asset != null) {
@@ -253,6 +254,6 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 			}
 			return null;
 		}
-		#endregion
+#endregion
 	}
 }
