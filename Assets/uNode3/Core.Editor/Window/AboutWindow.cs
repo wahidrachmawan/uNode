@@ -6,6 +6,7 @@ namespace MaxyGames.UNode.Editors {
 		public const string version = "3.0.2";
 		public const float compilerVersion = 3.02f;
 
+
 		GUIStyle PublisherNameStyle, headerStyle, infoStyle;
 		GUIStyle ToolBarStyle;
 		int ToolBarIndex, packageIndex;
