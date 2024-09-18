@@ -254,8 +254,20 @@ namespace MaxyGames.UNode {
 							types.Add(iface.type);
 						}
 					}
+					if(target is IClassDefinition definition) {
+						var model = definition.GetModel();
+						if(model.ScriptInheritType is RuntimeType) {
+							types.AddRange(model.ScriptInheritType.GetInterfaces());
+						}
+						else {
+							types.Add(typeof(IRuntimeClass));
+						}
+					}
 					return types.ToArray();
 				}
+			}
+			if(target is IClassDefinition) {
+				return new[] { typeof(IRuntimeClass) };
 			}
 			return Type.EmptyTypes;
 		}
@@ -268,9 +280,9 @@ namespace MaxyGames.UNode {
 			if(c.IsSubclassOf(this)) {
 				return true;
 			}
-			if(c == typeof(IRuntimeClass)) {
-				return true;
-			}
+			//if(c == typeof(IRuntimeClass)) {
+			//	return true;
+			//}
 			//if(target is IClassDefinition classDefinition) {
 			//	var model = classDefinition.GetModel();
 			//	if(c == model.ProxyScriptType) {
