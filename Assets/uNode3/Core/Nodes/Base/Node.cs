@@ -82,7 +82,7 @@ namespace MaxyGames.UNode {
 
 		public virtual System.Type GetNodeIcon() {
 			if(GetType().IsDefined(typeof(NodeMenu), true)) {
-				var icon = GetType().GetCustomAttribute<NodeMenu>().icon;
+				var icon = GetType().GetCustomAttribute<NodeMenu>().GetIcon();
 				if(icon != null)
 					return icon;
 			}

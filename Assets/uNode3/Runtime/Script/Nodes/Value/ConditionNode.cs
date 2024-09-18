@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Condition", typeof(bool))]
+	[NodeMenu("Data", "Condition", typeof(bool), icon = typeof(bool), outputs = new[] {typeof(bool) })]
 	public class ConditionNode : ValueNode, IStackedNode {
 		[Hide]
 		public BlockData data = new BlockData();

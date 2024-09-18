@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Cache", hasFlowInput = true, hasFlowOutput = true)]
+	[NodeMenu("Data", "Cache", hasFlowInput = true, hasFlowOutput = true, icon = typeof(TypeIcons.DatabaseIcon))]
 	public class CacheNode : FlowAndValueNode {
 		public SerializedType type = SerializedType.None;
 		public bool compactView;
@@ -25,10 +25,6 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override bool CanSetValue() {
 			return true;
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.DatabaseIcon);
 		}
 
 		public override string GetTitle() => "Variable: " + name;

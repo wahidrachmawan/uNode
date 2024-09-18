@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "FlowControl", hasFlowOutput = true)]
+	[NodeMenu("Flow", "FlowControl", icon = typeof(TypeIcons.BranchIcon), hasFlowOutput = true)]
 	public class FlowControl : BaseFlowNode {
 		[Range(1, 10)]
 		public int flowCount = 2;
@@ -36,10 +36,6 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override bool IsCoroutine() {
 			return HasCoroutineInFlows(flows);
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.BranchIcon);
 		}
 	}
 }

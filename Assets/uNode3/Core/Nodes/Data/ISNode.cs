@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Data", "IS", typeof(bool), inputs = new[] { typeof(object) })]
+    [NodeMenu("Data", "IS", typeof(bool), icon = typeof(bool), inputs = new[] { typeof(object) })]
 	public class ISNode : ValueNode {
 		[Hide, FieldDrawer("Type"), Filter(OnlyGetType = true, DisplayRuntimeType = true, ArrayManipulator = true)]
 		public SerializedType type = typeof(object);

@@ -721,7 +721,7 @@ namespace MaxyGames.UNode.Editors {
 							});
 							portView.owner.owner.MarkRepaint();
 						},
-						icon: menuItem.icon != null ? uNodeEditorUtility.GetTypeIcon(menuItem.icon) : null));
+						icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon())));
 				}
 				customItems.AddRange(ItemSelector.MakeCustomItemsForMacros(owner.graphData.currentCanvas, position, NodeFilter.ValueOutput, type, n => {
 					NodeEditorUtility.AutoConnectPortToTarget(portView.GetPortValue(), n, owner.graphData.currentCanvas);

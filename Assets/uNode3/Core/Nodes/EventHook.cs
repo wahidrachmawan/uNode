@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.Events;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Event Hook", inputs = new[] { typeof(Delegate), typeof(UnityEventBase) })]
+	[NodeMenu("Flow", "Event Hook", icon = typeof(TypeIcons.EventIcon), inputs = new[] { typeof(Delegate), typeof(UnityEventBase) })]
 	public class EventHook : Node {
 		public ValueInput target { get; set; }
 		public FlowInput register { get; set; }
@@ -356,10 +356,6 @@ namespace MaxyGames.UNode.Nodes {
 			}
 
 			return CG.Lambda(types, parameterNames, contents);
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.EventIcon);
 		}
 	}
 }

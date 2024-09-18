@@ -470,7 +470,7 @@ namespace MaxyGames.UNode.Editors {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menuItem.nodeName ?? menuItem.name.Split(' ')[0], menuItem.type, position, onAddNode);
 								Refresh();
 							},
-							icon: menuItem.icon != null ? uNodeEditorUtility.GetTypeIcon(menuItem.icon) : null,
+							icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon()),
 							category: "Nodes"));
 					}
 				}
@@ -540,7 +540,7 @@ namespace MaxyGames.UNode.Editors {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menuItem.nodeName ?? menuItem.name.Split(' ')[0], menuItem.type, position, onAddNode);
 								Refresh();
 							},
-							icon: menuItem.icon != null ? uNodeEditorUtility.GetTypeIcon(menuItem.icon) : null,
+							icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon()),
 							category: "Nodes"));
 					}
 				}
@@ -577,7 +577,7 @@ namespace MaxyGames.UNode.Editors {
 							NodeEditorUtility.AddNewNode<Node>(graphData, menuItem.nodeName ?? menuItem.name.Split(' ')[0], menuItem.type, position, onAddNode);
 							Refresh();
 						},
-						icon: menuItem.icon != null ? uNodeEditorUtility.GetTypeIcon(menuItem.icon) : null));
+						icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon())));
 				}
 			}
 

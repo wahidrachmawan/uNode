@@ -26,7 +26,7 @@ namespace MaxyGames.UNode.Nodes {
 				length = ValueInput(nameof(length), typeof(int), MemberData.None).SetName("Length");
 			}
 			for(int i = 0; i < elements.Count; i++) {
-				elements[i].port = ValueInput(elements[i].id, () => elementType.type).SetName("elements " + (i + 1));
+				elements[i].port = ValueInput(elements[i].id, () => elementType.type).SetName("element " + (i + 1));
 			}
 		}
 

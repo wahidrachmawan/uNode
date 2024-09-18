@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Action", order = -1)]
+	[NodeMenu("Flow", "Action", order = -1, icon = typeof(TypeIcons.ActionIcon))]
 	public class NodeAction : FlowNode, IStackedNode {
 		[HideInInspector]
 		public BlockData data = new BlockData();
@@ -20,10 +20,6 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override string GetTitle() {
 			return name;
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.ActionIcon);
 		}
 
 		protected override bool IsSelfCoroutine() {

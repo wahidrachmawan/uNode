@@ -134,9 +134,31 @@ namespace MaxyGames.UNode {
 		/// The tooltip of menu
 		/// </summary>
 		public string tooltip;
+		/// <summary>
+		/// The menu icon
+		/// </summary>
 		public Type icon;
 
+		public Type GetIcon() {
+			if(icon == null) {
+				if(hasFlowInput || hasFlowOutput) {
+					return typeof(TypeIcons.FlowIcon);
+				}
+				if(outputs != null && outputs.Length > 0) {
+					return outputs[0];
+				}
+				//return typeof(TypeIcons.ExtensionIcon);
+			}
+			return icon;
+		}
+
+		/// <summary>
+		/// The list of all value inputs
+		/// </summary>
 		public Type[] inputs;
+		/// <summary>
+		/// The list of all value outputs
+		/// </summary>
 		public Type[] outputs;
 
 		/// <summary>

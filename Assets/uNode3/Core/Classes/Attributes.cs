@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace MaxyGames.UNode {
 	/// <summary>
@@ -49,6 +49,9 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	/// <summary>
+	/// Allow unity asset to be referenced even if the graph is not allow it.
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
 	public sealed class AllowAssetReferenceAttribute : Attribute {
 

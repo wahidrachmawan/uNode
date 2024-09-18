@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Math.Time", "Per Second", typeof(float), inputs = new[] { typeof(float), typeof(Vector2), typeof(Vector3) })]
+	[NodeMenu("Math.Time", "Per Second", typeof(float), icon = typeof(TypeIcons.ClockIcon), inputs = new[] { typeof(float), typeof(Vector2), typeof(Vector3) })]
 	public class PerSecond : ValueNode {
 		public ValueInput input;
 		public bool unscaledTime;
@@ -47,10 +47,6 @@ namespace MaxyGames.UNode.Nodes {
 				}
 				return CG.Arithmetic(1.CGValue(), typeof(Time).CGAccess(nameof(Time.deltaTime)), ArithmeticType.Multiply);
 			}
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.ClockIcon);
 		}
 
 		public override string GetTitle() {

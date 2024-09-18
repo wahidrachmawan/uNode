@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow", "If", icon = typeof(TypeIcons.BranchIcon), inputs = new[] { typeof(bool) })]
+	[Description("The If node will Identifies which flow to run based on the value of a Boolean expression")]
 	public class NodeIf : FlowNode {
 		public ValueInput condition { get; set; }
 		public FlowOutput onTrue { get; set; }
