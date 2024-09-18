@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Anonymous Function", typeof(System.Delegate), icon = typeof(System.Delegate))]
+	[NodeMenu("Data", "Anonymous Function", typeof(System.Delegate))]
 	public class NodeAnonymousFunction : ValueNode {
 		public FlowOutput body;
 		[Filter(OnlyGetType = true, VoidType = true)]

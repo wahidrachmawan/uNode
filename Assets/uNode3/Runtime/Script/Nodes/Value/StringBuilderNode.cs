@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Linq;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "StringBuilder", typeof(string), icon = typeof(string), inputs = new[] { typeof(string) })]
+	[NodeMenu("Data", "StringBuilder", typeof(string), inputs = new[] { typeof(string) })]
 	public class StringBuilderNode : ValueNode {
 		public class Data {
 			public string id = uNodeUtility.GenerateUID();

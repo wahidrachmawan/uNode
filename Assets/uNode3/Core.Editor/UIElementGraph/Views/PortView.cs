@@ -1010,7 +1010,11 @@ namespace MaxyGames.UNode.Editors {
 					}
 					return;
 				}
-				else if(option != 1) {
+				else if(option == 1) {
+					uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
+					graph.Connect(edge, true);
+				}
+				else {
 					return;
 				}
 			}
@@ -1051,7 +1055,11 @@ namespace MaxyGames.UNode.Editors {
 					}
 					return;
 				}
-				else if(option != 1) {
+				else if(option == 1) {
+					uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
+					graph.Connect(edge, true);
+				}
+				else {
 					return;
 				}
 			}

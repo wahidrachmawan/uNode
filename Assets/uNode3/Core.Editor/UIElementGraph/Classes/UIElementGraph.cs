@@ -221,7 +221,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(enable) {
 				breadcrumb.ShowElement();
-			} else {
+			}
+			else {
 				breadcrumb.HideElement();
 			}
 		}
@@ -444,7 +445,8 @@ namespace MaxyGames.UNode.Editors {
 									});
 								}
 							}
-						} else if(graphData.graph is IGraphWithScriptData graph) {
+						}
+						else if(graphData.graph is IGraphWithScriptData graph) {
 							menu.AddItem(new GUIContent("Debug Mode " + (graph.ScriptData.debug ? " (Enabled) " : " (Disabled) ")), graph.ScriptData.debug, delegate () {
 								graph.ScriptData.debug = !graph.ScriptData.debug;
 							});
@@ -716,6 +718,54 @@ namespace MaxyGames.UNode.Editors {
 						});
 						menu.AddItem(new GUIContent("Check All Graph Errors"), false, () => {
 							GraphUtility.ErrorChecker.CheckGraphErrors();
+						});
+						menu.AddItem(new GUIContent("Change All C# Type to Graph Type"), false, () => {
+							GraphUtility.UpdateDatabase();
+							var graphAssets = GraphUtility.FindAllGraphIncludingNestedGraphs().ToArray();
+							HashSet<(Type type, UGraphElement element)> changedTypes = new();
+							int totalChanged = 0;
+
+							Debug.Log("Searcing c# type to changed on " + graphAssets.Length + " graph assets");
+							foreach(var asset in graphAssets) {
+								Debug.Log("Searcing on graph: " + asset, asset);
+
+								bool changed = false;
+								UGraphElement uElement = null;
+								GraphUtility.Analizer.AnalizeObject(asset, val => {
+									if(val is UGraphElement) {
+										uElement = val as UGraphElement;
+									}
+									if(val is SerializedType serializedType) {
+										if(serializedType.type != null && serializedType.type is not RuntimeType) {
+											var runtimeType = ReflectionUtils.GetRuntimeType(serializedType.nativeType);
+											if(runtimeType != null) {
+												if(changed == false) {
+													//Make sure to register undo before any action
+													uNodeEditorUtility.RegisterUndo(uElement.graphContainer, "change c# type to graph type");
+													changed = true;
+												}
+												serializedType.type = runtimeType;
+												changedTypes.Add((runtimeType, uElement));
+												return true;
+											}
+										}
+									}
+									return false;
+								});
+								if(changed) {
+									uNodeEditorUtility.MarkDirty(asset);
+									Debug.Log("Found: " + changedTypes.Count + " c# type to changed on asset: " + asset, asset);
+									foreach(var (type, element) in changedTypes) {
+										Debug.Log("Native Type found: " + type + " in element: " + element + "\n" + GraphException.GetMessage(element));
+									}
+									totalChanged += changedTypes.Count;
+									changedTypes.Clear();
+								}
+							}
+							Debug.Log("Total c# type changed to graph type: " + totalChanged);
+							if(totalChanged > 0) {
+								uNodeEditor.ClearCache();
+							}
 						});
 						menu.AddSeparator("");
 						menu.AddItem(new GUIContent("Show All Breakpoints"), false, () => {
@@ -1014,7 +1064,7 @@ namespace MaxyGames.UNode.Editors {
 				};
 				InitTabbar(scroll);
 			}
-#endregion
+			#endregion
 
 			#region Pathbar
 			var pathbar = new VisualElement() {
@@ -1028,7 +1078,7 @@ namespace MaxyGames.UNode.Editors {
 				if(tabData.owner is IScriptGraph) {
 					var scriptGraph = tabData.owner as IScriptGraph;
 					graph.menu = new DropdownMenu();
-					
+
 					var graphs = scriptGraph.TypeList.references.Where(item => item is IGraph).Select(item => item as IGraph).ToArray();
 					if(graphs == null)
 						return;
@@ -1097,7 +1147,8 @@ namespace MaxyGames.UNode.Editors {
 						function.menu.AppendAction(r.name, (act) => {
 							if(graphData.currentCanvas == r) {
 								window.ChangeEditorSelection(r);
-							} else {
+							}
+							else {
 								graphData.currentCanvas = r;
 								SelectionChanged();
 								Refresh();
@@ -1122,7 +1173,8 @@ namespace MaxyGames.UNode.Editors {
 							if(parentNode.node is ISuperNode) {
 								GN.Add(parentNode);
 							}
-						} else if(parent is NodeContainer) {
+						}
+						else if(parent is NodeContainer) {
 							break;
 						}
 						parent = parent.parent;
@@ -1148,7 +1200,8 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-			} else {
+			}
+			else {
 				var graph = new ClickableElement("[NO GRAPH]") {
 					name = "path-element"
 				};
@@ -1192,11 +1245,13 @@ namespace MaxyGames.UNode.Editors {
 								if(view.autoReload) {
 									//Reload the node if auto reload is true
 									graphView.MarkRepaint(view);
-								} else {
+								}
+								else {
 									view.UpdateUI();
 									view.MarkDirtyRepaint();
 								}
-							} else {
+							}
+							else {
 								//This will ensure the node will create up to date views when the GUI changed.
 								graphView.nodeViews.Remove(view);
 								graphView.cachedNodeMap.Remove(nodeObject);
@@ -1212,7 +1267,8 @@ namespace MaxyGames.UNode.Editors {
 							if(graphView.nodeViews.Contains(view)) {
 								//Ensure to reload node view when the GUI changed
 								graphView.MarkRepaint(view);
-							} else {
+							}
+							else {
 								//This will ensure the node will create up to date views when the GUI changed.
 								graphView.nodeViews.Remove(view);
 								graphView.cachedNodeMap.Remove(nodeObject);
@@ -1373,7 +1429,8 @@ namespace MaxyGames.UNode.Editors {
 					if(errorImage?.parent == null) {
 						errorStatus?.Insert(0, errorImage);
 					}
-				} else {
+				}
+				else {
 					errorImage?.RemoveFromHierarchy();
 				}
 			}
@@ -1668,7 +1725,8 @@ namespace MaxyGames.UNode.Editors {
 							rootContainer.Insert(0, graphPanelView);
 						}
 						graphPanelView.style.width = uNodeEditor.SavedData.leftPanelWidth;
-					} else {
+					}
+					else {
 						if(graphPanelView.parent != null) {
 							graphPanelView.RemoveFromHierarchy();
 						}
@@ -1691,7 +1749,8 @@ namespace MaxyGames.UNode.Editors {
 				if(EditorUtility.IsPersistent(graphData.owner) == false) {
 					if(saveButton.visible)
 						saveButton.visible = false;
-				} else {
+				}
+				else {
 					if(saveButton.visible == false)
 						saveButton.visible = true;
 				}

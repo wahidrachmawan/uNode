@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Linq.Expressions;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Delegate Function", typeof(System.Delegate), icon = typeof(System.Delegate))]
+	[NodeMenu("Data", "Delegate Function", typeof(System.Delegate))]
 	public class NodeDelegateFunction : ValueNode {
 		public MultipurposeMember member = new MultipurposeMember();
 

@@ -568,15 +568,24 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(obj is MemberData) {
 					MemberData mData = obj as MemberData;
+					bool flag = false;
 					if(mData != null && mData.instance != null && !(mData.instance is UnityEngine.Object)) {
-						bool flag = AnalizeObject(mData.instance, validation, doAction);
+						flag = AnalizeObject(mData.instance, validation, doAction);
 						if(flag) {
 							//This make sure to serialize the data.
 							mData.instance = mData.instance;
 						}
-						return flag;
 					}
-					return false;
+					flag |= AnalizeObject(mData.StartSerializedType, validation, doAction);
+					flag |= AnalizeObject(mData.TargetSerializedType, validation, doAction);
+					flag |= AnalizeObject(mData.Items, validation, doAction);
+					if(mData.serializedInstance != null) {
+						flag |= AnalizeObject(mData.serializedInstance.serializedType, validation, doAction);
+					}
+					if(flag) {
+						mData.ResetCache();
+					}
+					return flag;
 				}
 				bool changed = false;
 				if(obj is IGraph) {
@@ -2003,7 +2012,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Find all graphs assets ( all type of graphs )
+		/// Find all graphs assets ( <see cref="IGraph"/>, <see cref="IScriptGraph"/> )
 		/// </summary>
 		/// <returns></returns>
 		public static IEnumerable<Object> FindAllGraphAssets() {
@@ -2019,7 +2028,33 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Find all graphs assets ( excluding the ScriptGraph )
+		/// Find all graphs in projects including the nested graphs.
+		/// </summary>
+		/// <remarks>
+		/// This will including <see cref="IGraph"/>, <see cref="IScriptGraph"/> and all nested graphs.
+		/// </remarks>
+		/// <returns></returns>
+		public static IEnumerable<UnityEngine.Object> FindAllGraphIncludingNestedGraphs() {
+			var assets = uNodeEditorUtility.FindAssetsByType<ScriptableObject>(type => {
+				return type.IsCastableTo(typeof(IGraph)) || type.IsCastableTo(typeof(IScriptGraph));
+			});
+			foreach(var asset in assets) {
+				if(asset is IGraph) {
+					yield return asset;
+				}
+				if(asset is IScriptGraph scriptGraph) {
+					yield return asset;
+					foreach(var t in scriptGraph.TypeList) {
+						if(t is IGraph) {
+							yield return t;
+						}
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Find all graphs assets ( excluding the <see cref="IScriptGraph"/> )
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>

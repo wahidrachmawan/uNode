@@ -54,6 +54,11 @@ namespace MaxyGames.UNode.Nodes {
 					inputFlows.Add(
 						FlowInput(macroPort.id.ToString(), flow => {
 							var data = flow.GetElementData<LinkedData>(this);
+							if(data == null) {
+								//In case it is live editing.
+								OnRuntimeInitialize(flow);
+								data = flow.GetElementData<LinkedData>(this);
+							}
 							if(data.flowCallback.TryGetValue(macroPort.id, out var exit)) {
 								flow.Next(exit);
 							}
@@ -83,6 +88,11 @@ namespace MaxyGames.UNode.Nodes {
 					var port = ValueOutput(macroPort.id.ToString(), macroPort.ReturnType(), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
 					port.AssignGetCallback(instance => {
 						var data = instance.GetElementData<LinkedData>(this);
+						if(data == null) {
+							//In case it is live editing.
+							OnRuntimeInitialize(instance);
+							data = instance.GetElementData<LinkedData>(this);
+						}
 						if(data.valueCallback.TryGetValue(macroPort.id, out var input)) {
 							return input.GetValue(instance);
 						}
@@ -92,6 +102,11 @@ namespace MaxyGames.UNode.Nodes {
 					});
 					port.AssignSetCallback((instance, value) => {
 						var data = instance.GetElementData<LinkedData>(this);
+						if(data == null) {
+							//In case it is live editing.
+							OnRuntimeInitialize(instance);
+							data = instance.GetElementData<LinkedData>(this);
+						}
 						if(data.valueCallback.TryGetValue(macroPort.id, out var input)) {
 							input.SetValue(instance, value);
 						}

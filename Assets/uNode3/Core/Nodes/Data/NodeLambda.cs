@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Lambda", typeof(System.Delegate), icon = typeof(System.Delegate))]
+	[NodeMenu("Data", "Lambda", typeof(System.Delegate))]
 	public class NodeLambda : ValueNode {
 		public bool autoDelegateType = true;
 		[Filter(typeof(System.Delegate), OnlyGetType = true, DisplayAbstractType = false)]

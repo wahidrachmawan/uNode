@@ -91,7 +91,7 @@ MonoBehaviour:
     typeIcons: []
   visual: 0
   expanded: 0
-  coloredPortBorder: 0
+  coloredPortBorder: 1
   coloredReference: 0
   coloredNodeBorder: 1
   preferredDisplayValue: 0

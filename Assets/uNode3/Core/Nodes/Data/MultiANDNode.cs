@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "AND {&&}", typeof(bool), icon = typeof(bool), inputs = new[] { typeof(bool) })]
+	[NodeMenu("Data", "AND {&&}", typeof(bool), inputs = new[] { typeof(bool) })]
 	public class MultiANDNode : ValueNode {
 		public class PortData {
 			public string id = uNodeUtility.GenerateUID();

@@ -779,7 +779,7 @@ namespace MaxyGames {
 							result = "/*Error from variable: " + vdata.name + " */";
 							return;
 						}
-						UnityEngine.Debug.LogError("Error on generating variable:" + vdata.name + "\nFrom graph:" + graph, graph as UnityEngine.Object);
+						UnityEngine.Debug.LogError("Error on generating variable:" + vdata.name + "\nFrom graph:" + graph + "\nException: " + ex.ToString(), graph as UnityEngine.Object);
 						throw;
 					}
 				});
