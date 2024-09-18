@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Game Event", "On Application Pause")]
 	[StateEvent]
+	[Description("Event is called when the playing application pauses or resumes on losing or regaining focus.")]
 	public class OnApplicationPauseEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

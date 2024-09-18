@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Collision Stay")]
 	[StateEvent]
+	[Description("OnCollisionStay is called once per frame for every Collider or Rigidbody that touches another Collider or Rigidbody.")]
 	public class OnCollisionStayEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

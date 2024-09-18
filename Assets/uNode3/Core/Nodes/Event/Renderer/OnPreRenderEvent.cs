@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Renderer", "On Pre Render")]
 	[StateEvent]
+	[Description("Event function that Unity calls before a Camera renders the scene.")]
 	public class OnPreRenderEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

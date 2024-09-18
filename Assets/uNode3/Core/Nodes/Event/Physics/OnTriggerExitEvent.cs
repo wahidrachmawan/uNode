@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Trigger Exit")]
 	[StateEvent]
+	[Description("OnTriggerExit is called when the Collider other has stopped touching the trigger.")]
 	public class OnTriggerExitEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

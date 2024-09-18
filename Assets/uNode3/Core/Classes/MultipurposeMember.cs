@@ -21,6 +21,9 @@ namespace MaxyGames.UNode {
 			public bool IsOut => refKind == RefKind.Out;
 			public bool IsIn => refKind == RefKind.In;
 
+			/// <summary>
+			/// Name of the parameter
+			/// </summary>
 			public string name {
 				get {
 					if(info != null) {
@@ -34,17 +37,25 @@ namespace MaxyGames.UNode {
 					}
 				}
 			}
+			/// <summary>
+			/// True if the parameter is using output
+			/// </summary>
 			public bool useOutput => output != null;
 
 			[NonSerialized]
 			public ValueInput input;
-			//The output only available for parameter with `out` modifier.
+			/// <summary>
+			/// The output only available for parameter with `out` modifier.
+			/// </summary>
 			[NonSerialized]
 			public ValueOutput output;
 
 			[NonSerialized]
 			public ParameterInfo info;
 
+			/// <summary>
+			/// The type of parameter
+			/// </summary>
 			public Type type {
 				get {
 					if(info != null) {

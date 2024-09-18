@@ -6,6 +6,7 @@ using UnityEngine.Events;
 
 namespace MaxyGames.UNode.Nodes {
 	[EventMenu("", "C# Event", order = 1)]
+	[Description("Event will be called every time when the target c# event is invoked/triggered.")]
 	public class CSharpEventListener : BaseComponentEvent {
 		[Filter(typeof(Delegate), typeof(UnityEventBase), ValidTargetType = MemberData.TargetType.Field | MemberData.TargetType.Event | MemberData.TargetType.Property, UnityReference =false)]
         public MemberData target = MemberData.None;

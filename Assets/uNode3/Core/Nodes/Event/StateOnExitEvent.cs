@@ -5,7 +5,8 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
 	[EventMenu("", "On Exit", category = "State")]
 	[StateEvent]
-    public class StateOnExitEvent : BaseGraphEvent {
+	[Description("On Exit is called once when the state becomes inactive.")]
+	public class StateOnExitEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			var stateNode = nodeObject.GetNodeInParent<StateNode>();
 			if(stateNode != null) {

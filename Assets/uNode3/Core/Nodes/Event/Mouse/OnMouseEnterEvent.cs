@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Mouse", "On Mouse Enter")]
 	[StateEvent]
+	[Description("Called when the mouse enters the Collider.")]
 	public class OnMouseEnterEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

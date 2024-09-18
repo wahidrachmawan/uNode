@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[EventMenu("", "Global Event", order = 1)]
+	[Description("Event will be called every time when the target global event is triggered.")]
 	public class GlobalEventListenerEvent : BaseComponentEvent {
         public UGlobalEvent target;
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Transform", "On Transform Children Changed")]
 	[StateEvent]
+	[Description("This function is called when the list of children of the transform of the GameObject has changed.")]
 	public class OnTransformChildrenChangedEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

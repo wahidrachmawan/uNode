@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Collision Exit")]
 	[StateEvent]
+	[Description("OnCollisionExit is called when this collider/rigidbody has stopped touching another rigidbody/collider.")]
 	public class OnCollisionExitEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Collision Stay 2D")]
 	[StateEvent]
+	[Description("Sent each frame where a collider on another object is touching this object's collider (2D physics only).")]
 	public class OnCollisionStay2DEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

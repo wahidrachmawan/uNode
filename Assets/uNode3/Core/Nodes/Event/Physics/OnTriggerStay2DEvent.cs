@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Trigger Stay 2D")]
 	[StateEvent]
+	[Description("Sent each frame where another object is within a trigger collider attached to this object (2D physics only).")]
 	public class OnTriggerStay2DEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

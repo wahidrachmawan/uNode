@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Game Event", "On Application Focus")]
 	[StateEvent]
+	[Description("Event is called when the player gets or loses focus.")]
 	public class OnApplicationFocusEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

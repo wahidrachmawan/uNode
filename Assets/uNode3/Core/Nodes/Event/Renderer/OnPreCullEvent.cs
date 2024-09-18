@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Renderer", "On Pre Cull")]
 	[StateEvent]
+	[Description("Event function that Unity calls before a Camera culls the scene.")]
 	public class OnPreCullEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

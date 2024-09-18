@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Renderer", "On Became Invisible")]
 	[StateEvent]
+	[Description("OnBecameInvisible is called when the renderer is no longer visible by any camera.")]
 	public class OnBecameInvisibleEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

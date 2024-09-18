@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Collision Enter 2D")]
 	[StateEvent]
+	[Description("Sent when an incoming collider makes contact with this object's collider (2D physics only).")]
 	public class OnCollisionEnter2DEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

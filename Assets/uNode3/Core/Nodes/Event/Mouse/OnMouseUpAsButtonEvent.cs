@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Mouse", "On Mouse Up As Button")]
 	[StateEvent]
+	[Description("OnMouseUpAsButton is only called when the mouse is released over the same Collider as it was pressed.")]
 	public class OnMouseUpAsButtonEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

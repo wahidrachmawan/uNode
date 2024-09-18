@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Gameloop", "FixedUpdate")]
 	[StateEvent]
+	[Description("Frame-rate independent MonoBehaviour.FixedUpdate message for physics calculations.")]
 	public class FixedUpdateEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

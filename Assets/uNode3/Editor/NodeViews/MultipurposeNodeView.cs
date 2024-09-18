@@ -31,6 +31,7 @@ namespace MaxyGames.UNode.Editors {
 			MultipurposeNode node = nodeObject.node as MultipurposeNode;
 			titleContainer.RegisterCallback<MouseDownEvent>(e => {
 				if(e.button == 0 && e.clickCount == 2) {
+					e.StopImmediatePropagation();
 					GoToDefinition();
 				}
 			});

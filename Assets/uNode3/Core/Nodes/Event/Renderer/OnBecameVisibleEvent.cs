@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Renderer", "On Became Visible")]
 	[StateEvent]
+	[Description("OnBecameVisible is called when the renderer became visible by any camera.")]
 	public class OnBecameVisibleEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

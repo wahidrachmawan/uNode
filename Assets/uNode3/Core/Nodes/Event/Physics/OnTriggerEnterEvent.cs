@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Trigger Enter")]
 	[StateEvent]
+	[Description("When a GameObject collides with another GameObject, Unity calls OnTriggerEnter.")]
 	public class OnTriggerEnterEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

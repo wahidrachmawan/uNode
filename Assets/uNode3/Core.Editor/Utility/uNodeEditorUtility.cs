@@ -605,6 +605,11 @@ namespace MaxyGames.UNode.Editors {
 					break;
 				case MemberTypes.Constructor:
 					var ctor = info as ConstructorInfo;
+					if(ctor.GetParameters().Length == 0) {
+						//In case it is a default constructor open the type instead to avoid error when there's no user defined constructor.
+						OpenILSpy(type);
+						return;
+					}
 					arguments += $"\"/navigateTo:M:{type.FullName}.#ctor({string.Join(',', ctor.GetParameters().Select(p => p.ParameterType.FullName))})\"";
 					break;
 				default:

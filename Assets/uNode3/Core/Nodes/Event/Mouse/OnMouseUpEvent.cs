@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Mouse", "On Mouse Up")]
 	[StateEvent]
+	[Description("OnMouseUp is called when the user has released the mouse button.")]
 	public class OnMouseUpEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

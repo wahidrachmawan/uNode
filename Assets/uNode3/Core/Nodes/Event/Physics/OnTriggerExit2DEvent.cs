@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Trigger Exit 2D")]
 	[StateEvent]
+	[Description("Sent when another object leaves a trigger collider attached to this object (2D physics only).")]
 	public class OnTriggerExit2DEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

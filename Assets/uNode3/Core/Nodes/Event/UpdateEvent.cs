@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("", "Update")]
 	[StateEvent]
+	[Description("Update is called every frame, if the MonoBehaviour is enabled.")]
 	public class UpdateEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

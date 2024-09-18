@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Mouse", "On Mouse Down")]
 	[StateEvent]
+	[Description("OnMouseDown is called when the user has pressed the mouse button while over the Collider.")]
 	public class OnMouseDownEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

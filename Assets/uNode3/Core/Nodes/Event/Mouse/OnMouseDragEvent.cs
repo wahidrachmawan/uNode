@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Mouse", "On Mouse Drag")]
 	[StateEvent]
+	[Description("OnMouseDrag is called when the user has clicked on a Collider and is still holding down the mouse.")]
 	public class OnMouseDragEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

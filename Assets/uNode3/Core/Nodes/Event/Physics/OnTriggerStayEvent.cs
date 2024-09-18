@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Physics", "On Trigger Stay")]
 	[StateEvent]
+	[Description("OnTriggerStay is called once per physics update for every Collider other that is touching the trigger.")]
 	public class OnTriggerStayEvent : BaseComponentEvent {
 		public ValueOutput value { get; set; }
 

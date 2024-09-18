@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Game Event", "On Application Quit")]
 	[StateEvent]
+	[Description("Event is called before the application quits.")]
 	public class OnApplicationQuitEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

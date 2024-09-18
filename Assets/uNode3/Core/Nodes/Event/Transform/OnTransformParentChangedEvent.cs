@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Transform", "On Transform Parent Changed")]
 	[StateEvent]
+	[Description("This function is called when a direct or indirect parent of the transform of the GameObject has changed.")]
 	public class OnTransformParentChangedEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

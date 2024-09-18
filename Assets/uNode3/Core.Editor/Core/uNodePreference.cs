@@ -440,7 +440,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				using(new EditorGUILayout.HorizontalScope()) {
 					preferenceData.ilSpyPath = EditorGUILayout.TextField("ILSpy Path", preferenceData.ilSpyPath);
 					if(GUILayout.Button("Browse", GUILayout.Width(100))) {
-						string path = EditorUtility.OpenFilePanel("Select ILSpy executable", "", "exe");
+						string path = EditorUtility.OpenFilePanel("Select ILSpy executable", "", uNodeUtility.isOSXPlatform ? "" : "exe");
 						if(!string.IsNullOrEmpty(path)) {
 							preferenceData.ilSpyPath = path;
 						}

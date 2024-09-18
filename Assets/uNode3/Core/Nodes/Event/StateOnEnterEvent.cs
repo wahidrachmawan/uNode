@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("", "On Enter", category ="State")]
 	[StateEvent]
+	[Description("On Enter is called once when the state becomes active.")]
 	public class StateOnEnterEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			if(nodeObject.parent is NodeObject parentNode && parentNode.node is StateNode stateNode) {

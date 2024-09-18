@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Gameloop", "OnGUI")]
 	[StateEvent]
+	[Description("OnGUI is called for rendering and handling GUI events.")]
 	public class OnGUIEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);

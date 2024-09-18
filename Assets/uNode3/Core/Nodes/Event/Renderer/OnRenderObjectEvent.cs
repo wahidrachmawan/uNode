@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
     [EventMenu("Renderer", "On Render Object")]
 	[StateEvent]
+	[Description("OnRenderObject is called after camera has rendered the Scene.")]
 	public class OnRenderObjectEvent : BaseComponentEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);
