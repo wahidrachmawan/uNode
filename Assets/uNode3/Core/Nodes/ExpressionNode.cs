@@ -10,6 +10,7 @@ namespace MaxyGames.UNode.Nodes {
 	public class ExpressionNode : ValueNode {
 		public class InputData {
 			public string name;
+			public string displayName;
 			[Filter(DisplayGeneratedRuntimeType = false)]
 			public SerializedType type = new SerializedType(null);
 
@@ -39,7 +40,7 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnRegister() {
 			for(int i = 0; i < inputs.Count; i++) {
 				var input = inputs[i];
-				input.port = ValueInput(input.name, () => input.type?.type ?? ReturnType()).SetName(input.name);
+				input.port = ValueInput(input.name, () => input.type?.type ?? ReturnType()).SetName(string.IsNullOrEmpty(input.displayName) ? input.name : input.displayName);
 			}
 			base.OnRegister();
 		}

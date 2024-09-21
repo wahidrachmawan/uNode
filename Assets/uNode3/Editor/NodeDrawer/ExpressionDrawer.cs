@@ -28,7 +28,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					walker.DoVisit(expression, syntax => {
 						if(syntax is IdentifierNameSyntax identifier) {
 							if(identifier.Parent is MemberAccessExpressionSyntax memberAccess) {
-								if(memberAccess.Expression != identifier) {
+								if(memberAccess.Expression != identifier || identifier.Identifier.Text.Length > 3) {
 									return;
 								}
 							}
@@ -43,6 +43,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 								else {
 									node.inputs.Add(new ExpressionNode.InputData() {
 										name = identifierValue,
+										type = node.outputType.type ?? typeof(float),
 									});
 								}
 							}
@@ -93,8 +94,15 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					position.height = EditorGUIUtility.singleLineHeight;
 					EditorGUI.LabelField(position, node.inputs[index].name);
 					position.y += EditorGUIUtility.singleLineHeight;
+					uNodeGUIUtility.EditValue(position, new GUIContent("Display Name"), value.displayName, typeof(string), val => {
+						uNodeEditorUtility.RegisterUndo(node);
+						node.inputs[index].displayName = val as string;
+						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+					});
+					position.y += EditorGUIUtility.singleLineHeight;
 					position = EditorGUI.PrefixLabel(position, new GUIContent("Type"));
 					uNodeGUIUtility.DrawTypeDrawer(position, node.inputs[index].type, GUIContent.none, (type) => {
+						uNodeEditorUtility.RegisterUndo(node);
 						node.inputs[index].type = type;
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 					}, targetObject: option.unityObject, filter: filter);
@@ -107,7 +115,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					uNodeUtility.ReorderList(node.inputs, oldIndex, newIndex);
 					uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 				},
-				elementHeight: (index) => EditorGUIUtility.singleLineHeight * 2);
+				elementHeight: (index) => EditorGUIUtility.singleLineHeight * 3);
 
 			if(GUILayout.Button(new GUIContent("Compile"))) {
 				string expression = node.expression;

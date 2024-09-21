@@ -43,12 +43,14 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				drawElement: (position, index, value) => {
 					position.height = EditorGUIUtility.singleLineHeight;
 					uNodeGUIUtility.EditValue(position, new GUIContent("name"), value.name, typeof(string), val => {
+						uNodeEditorUtility.RegisterUndo(node);
 						node.inputs[index].name = val as string;
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 					});
 					position.y += EditorGUIUtility.singleLineHeight;
 					position = EditorGUI.PrefixLabel(position, new GUIContent("Type"));
 					uNodeGUIUtility.DrawTypeDrawer(position, node.inputs[index].type, GUIContent.none, (type) => {
+						uNodeEditorUtility.RegisterUndo(node);
 						node.inputs[index].type = type;
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 					}, targetObject: option.unityObject, filter: filter);
