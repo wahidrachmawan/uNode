@@ -1,5 +1,6 @@
 ﻿using MaxyGames.OdinSerializer.Utilities;
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -31,6 +32,8 @@ namespace MaxyGames.UNode.Nodes {
 			public FlowInput flowInput;
 			public FlowOutput flowOutput;
 			public FlowOutputData[] flowOutputs;
+
+			public List<FlowOutput> exits;
 
 		}
 
@@ -112,12 +115,13 @@ namespace MaxyGames.UNode.Nodes {
 		private void ValidatePorts() {
 			foreach(var data in ports) {
 				if(data.memberInfo is MethodInfo method) {
-
+					data.exits = new List<FlowOutput>();
 					if(data.attribute is InputAttribute inputAttribute && inputAttribute.exit != null) {
 						var portData = GetFieldData(inputAttribute.exit);
 						if(portData == null || portData.flowOutput == null) {
 							throw new Exception($"No flow output port with name: {inputAttribute.exit}, please ensure to have flow output port with this name.");
 						}
+						data.exits.Add(portData.flowOutput);
 					}
 
 					var parameters = method.GetParameters();
@@ -133,12 +137,33 @@ namespace MaxyGames.UNode.Nodes {
 							if(portData.flowOutputs == null) {
 								throw new Exception($"The port: {portData.name} is not multi flow output, please specify the multi output type from {typeof(OutputAttribute)} attribute");
 							}
+							else {
+								foreach(var p in portData.flowOutputs) {
+									data.exits.Add(p.port);
+								}
+							}
 						}
 						else {
 							if(portData == null || portData.valueInput == null) {
 								throw new Exception($"No value input port with name: {parameters[i].Name}, please ensure to have value input port with this name.");
 							}
 						}
+					}
+
+					if(data.exits.Count > 0) {
+						var port = data.flowInput;
+						var exits = data.exits;
+
+						port.isCoroutine = () => {
+							for(int i = 0; i < exits.Count; i++) {
+								if(exits[i] != null) {
+									if(exits[i].IsCoroutine()) {
+										return true;
+									}
+								}
+							}
+							return false;
+						};
 					}
 				}
 			}
@@ -149,7 +174,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public void RegisterPort(MemberInfo member) {
-			if(member.IsDefinedAttribute<NodePortAttribute>() == false)
+			if(member.IsDefinedAttribute<NodePortAttribute>() == false) 
 				return;
 			var att = member.GetAttribute<NodePortAttribute>();
 			if(member is FieldInfo field) {
@@ -344,7 +369,6 @@ namespace MaxyGames.UNode.Nodes {
 								throw Exception_MultiplePrimaryFlowInput;
 							nodeObject.primaryFlowInput = port;
 						}
-
 						ports.Add(new PortData() {
 							name = member.Name,
 							memberInfo = member,
