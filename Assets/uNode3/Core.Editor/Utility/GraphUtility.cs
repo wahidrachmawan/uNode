@@ -1748,9 +1748,9 @@ namespace MaxyGames.UNode.Editors {
 			var dir = Directory.CreateDirectory(directory);
 			var files = dir.GetFiles();
 			if(files.Length > maxBackup) {
-				for(int i = 0; i < files.Length; i++) {
-					if(files.Length - i <= maxBackup)
-						break;
+				files = files.OrderBy(f => f.CreationTime).ToArray();
+				int num = files.Length - maxBackup;
+				for(int i = 0; i < num; i++) {
 					files[i].Delete();
 				}
 			}

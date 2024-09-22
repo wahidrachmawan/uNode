@@ -36,11 +36,29 @@ namespace MaxyGames.UNode.Nodes {
 				} else if(t.IsCastableTo(typeof(Component))) {
 					if(value is GameObject gameObject) {
 						if(t is RuntimeType) {
+							if(ReflectionUtils.IsNativeType(t)) {
+								var nativeType = ReflectionUtils.GetNativeType(t);
+								if(nativeType != null) {
+									return gameObject.GetComponent(nativeType);
+								}
+								else {
+									throw new Exception($"The graph: {t} need to be compiled first.");
+								}
+							}
 							return gameObject.GetGeneratedComponent(t as RuntimeType);
 						}
 						return gameObject.GetComponent(t);
 					} else if(value is Component component) {
 						if(t is RuntimeType) {
+							if(ReflectionUtils.IsNativeType(t)) {
+								var nativeType = ReflectionUtils.GetNativeType(t);
+								if(nativeType != null) {
+									return component.GetComponent(nativeType);
+								}
+								else {
+									throw new Exception($"The graph: {t} need to be compiled first.");
+								}
+							}
 							return component.GetGeneratedComponent(t as RuntimeType);
 						}
 						return component.GetComponent(t);

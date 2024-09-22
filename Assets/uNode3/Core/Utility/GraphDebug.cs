@@ -14,7 +14,7 @@ namespace MaxyGames.UNode {
 		public struct DebugValue {
 			public bool isSet;
 			public float time;
-			public WeakReference value;
+			public object value;
 
 			public bool isValid => time > 0;
 		}
@@ -397,7 +397,7 @@ namespace MaxyGames.UNode {
 			var id = nodeUID + portID;
 			data.valueConnectionDebug[id] = new DebugValue() {
 				time = debugTime,
-				value = new WeakReference(value),
+				value = value,
 				isSet = isSet,
 			};
 #if UNODE_PRO

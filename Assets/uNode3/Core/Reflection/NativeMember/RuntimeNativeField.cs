@@ -8,7 +8,7 @@ namespace MaxyGames.UNode {
 
 		}
 
-		private Exception throwIfNotCompiled => new Exception($"The graph: {target.reference.graphContainer} need to be compiled first.");
+		private Exception throwIfNotCompiled => new GraphException($"The graph: {target.reference.graphContainer} need to be compiled first.", target.reference);
 
 		#region Functions
 		private FieldInfo m_nativeField;

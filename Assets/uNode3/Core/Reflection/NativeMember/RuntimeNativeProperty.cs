@@ -6,7 +6,7 @@ namespace MaxyGames.UNode {
 	public class RuntimeNativeProperty : RuntimeProperty<PropertyRef>, ISummary, IRuntimeMemberWithRef, INativeProperty {
         public RuntimeNativeProperty(RuntimeNativeType owner, PropertyRef target) : base(owner, target) { }
 
-		private Exception throwIfNotCompiled => new Exception($"The graph: {target.reference.graphContainer} need to be compiled first.");
+		private Exception throwIfNotCompiled => new GraphException($"The graph: {target.reference.graphContainer} need to be compiled first.", target.reference);
 
 		public override string Name => target.name;
 

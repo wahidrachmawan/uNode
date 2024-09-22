@@ -720,8 +720,17 @@ namespace MaxyGames.UNode.Editors {
 							GraphUtility.ErrorChecker.CheckGraphErrors();
 						});
 						menu.AddItem(new GUIContent("Change All C# Type to Graph Type"), false, () => {
+							//Update the database first
 							GraphUtility.UpdateDatabase();
+
+							if(EditorUtility.DisplayDialog("", "This action will change all c# reference type to graph type, please backup your project before doing it.\nAre you sure you want to continue?", "Yes", "Cancel") == false) {
+								return;
+							}
+							//Find all graphs
 							var graphAssets = GraphUtility.FindAllGraphIncludingNestedGraphs().ToArray();
+							//Create backup before processing
+							GraphUtility.CreateBackup(graphAssets.Where(obj => AssetDatabase.IsMainAsset(obj)).Select(obj => AssetDatabase.GetAssetPath(obj)));
+
 							HashSet<(Type type, UGraphElement element)> changedTypes = new();
 							int totalChanged = 0;
 
@@ -738,7 +747,7 @@ namespace MaxyGames.UNode.Editors {
 									if(val is SerializedType serializedType) {
 										if(serializedType.type != null && serializedType.type is not RuntimeType) {
 											var runtimeType = ReflectionUtils.GetRuntimeType(serializedType.nativeType);
-											if(runtimeType != null) {
+											if(runtimeType != null && string.IsNullOrEmpty(runtimeType.Name) == false) {
 												if(changed == false) {
 													//Make sure to register undo before any action
 													uNodeEditorUtility.RegisterUndo(uElement.graphContainer, "change c# type to graph type");

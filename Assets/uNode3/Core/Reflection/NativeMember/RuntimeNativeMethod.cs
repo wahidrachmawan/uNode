@@ -11,7 +11,7 @@ namespace MaxyGames.UNode {
 			this.target = target;
 		}
 
-		private Exception throwIfNotCompiled => new Exception($"The graph: {target.reference.graphContainer} need to be compiled first.");
+		private Exception throwIfNotCompiled => new GraphException($"The graph: {target.reference.graphContainer} need to be compiled first.", target.reference);
 
 		public override string Name => target.name;
 
