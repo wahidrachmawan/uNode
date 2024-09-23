@@ -27,6 +27,8 @@ namespace MaxyGames.UNode {
 
 		public override Type ReturnType => returnType ?? target.ReturnType;
 
+		public object Original => target;
+
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
 			return target.Invoke(obj, invokeAttr, binder, parameters, culture);
 		}
@@ -51,6 +53,7 @@ namespace MaxyGames.UNode {
 		public override Type ReflectedType => target.ReflectedType;
 		public override Type ReturnType => returnType ?? target.ReturnType;
 		public override bool IsGenericMethod => true;
+		public object Original => target;
 
 		public FakeNativeMethod(MethodInfo nativeMethod, Type[] typeArguments) {
 			if(nativeMethod.IsConstructedGenericMethod)

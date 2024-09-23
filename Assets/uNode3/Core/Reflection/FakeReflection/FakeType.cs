@@ -77,6 +77,7 @@ namespace MaxyGames.UNode {
 		public override bool IsEnum => target.IsEnum;
 		public override MemberTypes MemberType => target.MemberType;
 		public override Type ReflectedType => target.ReflectedType;
+		public virtual object Original => target;
 
 		public override Type[] GetGenericArguments() {
 			return target.GetGenericArguments();

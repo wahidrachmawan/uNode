@@ -83,6 +83,8 @@ namespace MaxyGames.UNode {
 
 			public override Type ReturnType => owner.GetElementType();
 
+			public object Original => null;
+
 			public override ParameterInfo[] GetParameters() {
 				var result = new ParameterInfo[parameters.Length];
 				Array.Copy(parameters, result, parameters.Length);
@@ -108,6 +110,8 @@ namespace MaxyGames.UNode {
 			public override string Name => "Set";
 
 			public override Type ReturnType => typeof(void);
+
+			public object Original => null;
 
 			public override ParameterInfo[] GetParameters() {
 				var result = new ParameterInfo[parameters.Length];
@@ -229,6 +233,8 @@ namespace MaxyGames.UNode {
 		}
 
 		protected override bool IsArrayImpl() => true;
+
+		public object Original => GetNativeType();
 
 		public Type GetNativeType() {
 			var elementType = ReflectionUtils.GetNativeType(target);

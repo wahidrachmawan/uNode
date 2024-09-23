@@ -202,7 +202,10 @@ namespace MaxyGames.UNode {
 	/// A interface for all Fake Type, Field, Property, Parameter and Method
 	/// </summary>
 	public interface IFakeMember {
-
+		/// <summary>
+		/// The original member
+		/// </summary>
+		object Original { get; }
 	}
 
 	public interface IGenericMethodWithResolver {

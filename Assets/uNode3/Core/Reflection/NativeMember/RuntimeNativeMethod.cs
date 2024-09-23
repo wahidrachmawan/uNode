@@ -78,7 +78,7 @@ namespace MaxyGames.UNode {
 
 		private Type[] GetParamTypes() {
 			if(functionTypes == null) {
-				functionTypes = target.reference?.Parameters.Select(p => p.Type).ToArray();
+				functionTypes = target.reference?.Parameters.Select(p => ReflectionUtils.GetNativeType(p.Type) ?? p.Type).ToArray();
 			}
 			return functionTypes;
 		}

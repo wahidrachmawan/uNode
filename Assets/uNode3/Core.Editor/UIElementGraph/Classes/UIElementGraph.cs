@@ -759,6 +759,36 @@ namespace MaxyGames.UNode.Editors {
 											}
 										}
 									}
+									else if(val is MemberData member) {
+										if(member.IsTargetingReflection) {
+											var startType = member.startType;
+											if(startType != null && startType is not RuntimeType) {
+												var runtimeType = ReflectionUtils.GetRuntimeType(startType);
+
+												if(runtimeType != null && string.IsNullOrEmpty(runtimeType.Name) == false) {
+													if(changed == false) {
+														//Make sure to register undo before any action
+														uNodeEditorUtility.RegisterUndo(uElement.graphContainer, "change c# type to graph type");
+														changed = true;
+													}
+
+													var members = member.GetMembers(false);
+													if(members != null && members.Length > 0) {
+														for(int i=0;i<members.Length;i++) {
+															members[i] = ReflectionUtils.GetRuntimeMember(members[i]) ?? members[i];
+														}
+													}
+													var instance = member.serializedInstance;
+													member.CopyFrom(MemberData.CreateFromMembers(members));
+													member.serializedInstance.value = instance.serializedValue;
+
+													member.startType = runtimeType;
+													changedTypes.Add((runtimeType, uElement));
+													return true;
+												}
+											}
+										}
+									}
 									return false;
 								});
 								if(changed) {

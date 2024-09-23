@@ -588,26 +588,6 @@ namespace MaxyGames.UNode.Editors {
 					return flag;
 				}
 				bool changed = false;
-				if(obj is IGraph) {
-					var graphData = (obj as IGraph).GraphData;
-					foreach(var element in graphData.GetObjectsInChildren(true)) {
-						changed = AnalizeObject(element, validation, doAction) || changed;
-					}
-				}
-				else if(obj is NodeObject) {
-					var nodeObject = obj as NodeObject;
-					var references = nodeObject.serializedData.references;
-					foreach(var reference in references) {
-						if(reference is not Object/* || reference is not IGraphElement*/) {
-							changed = AnalizeObject(reference, validation, doAction) || changed;
-						}
-					}
-					foreach(var port in nodeObject.ValueInputs) {
-						if(port != null && port.UseDefaultValue) {
-							changed = AnalizeObject(port.defaultValue, validation, doAction) || changed;
-						}
-					}
-				}
 				bool ValidateReference(object reference) {
 					if(reference is UnityEngine.Object || reference is IGraphElement) {
 						if(validation(reference)) {
@@ -618,6 +598,28 @@ namespace MaxyGames.UNode.Editors {
 						return true;
 					}
 					return false;
+				}
+				if(obj is IGraph) {
+					var graphData = (obj as IGraph).GraphData;
+					foreach(var element in graphData.GetObjectsInChildren(true)) {
+						changed = AnalizeObject(element, validation, doAction) || changed;
+					}
+				}
+				else if(obj is NodeObject) {
+					var nodeObject = obj as NodeObject;
+					var references = nodeObject.serializedData.references;
+					foreach(var reference in references) {
+						if(ValidateReference(reference))
+							continue;
+						changed = AnalizeObject(reference, validation, doAction) || changed;
+					}
+					foreach(var port in nodeObject.ValueInputs) {
+						if(port != null && port.UseDefaultValue) {
+							if(ValidateReference(port.defaultValue))
+								continue;
+							changed = AnalizeObject(port.defaultValue, validation, doAction) || changed;
+						}
+					}
 				}
 				if(obj is IList) {
 					IList list = obj as IList;
@@ -1947,6 +1949,7 @@ namespace MaxyGames.UNode.Editors {
 				onGUIBottom: () => {
 					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
 						if(tempName != function.name) {
+							uNodeEditorUtility.RegisterUndo(function, "Rename function: " + function.name);
 							function.name = GetUniqueName(tempName, function.graph);
 							uNodeGUIUtility.GUIChangedMajor(function);
 							onRenamed?.Invoke();
@@ -1965,6 +1968,7 @@ namespace MaxyGames.UNode.Editors {
 				onGUIBottom: () => {
 					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
 						if(tempName != property.name) {
+							uNodeEditorUtility.RegisterUndo(property, "Rename property: " + property.name);
 							property.name = GetUniqueName(tempName, property.graph);
 							uNodeGUIUtility.GUIChangedMajor(property);
 							onRenamed?.Invoke();
@@ -1983,6 +1987,7 @@ namespace MaxyGames.UNode.Editors {
 				onGUIBottom: () => {
 					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
 						if(tempName != variable.name) {
+							uNodeEditorUtility.RegisterUndo(variable, "Rename variable: " + variable.name);
 							variable.name = GetUniqueName(tempName, variable.graph);
 							uNodeGUIUtility.GUIChangedMajor(variable);
 							onRenamed?.Invoke();

@@ -20,6 +20,8 @@ namespace MaxyGames.UNode {
 
 		public override string Name => target.Name;
 
+		public object Original => target;
+
 		public override object GetValue(object obj) {
 			return target.GetValue(obj);
 		}

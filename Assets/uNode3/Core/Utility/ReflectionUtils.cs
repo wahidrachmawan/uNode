@@ -150,6 +150,57 @@ namespace MaxyGames.UNode {
 			return types;
 		}
 
+		public static MemberInfo GetRuntimeMember(MemberInfo member) {
+			if(member != null) {
+				if(member is not IRuntimeMember) {
+					if(member is Type) {
+						return GetRuntimeType(member);
+					}
+					else if(member is FieldInfo || member is PropertyInfo || member is EventInfo) {
+						var type = member.DeclaringType;
+						var nativeType = GetNativeType(type);
+
+						if(nativeType != null) {
+							return nativeType.GetMember(member.Name).FirstOrDefault();
+						}
+					}
+					else if(member is MethodInfo method) {
+						var type = member.DeclaringType;
+						var runtimeType = GetRuntimeType(type);
+
+						if(runtimeType != null) {
+							if(method.IsGenericMethod) {
+								var genericLength = method.GetGenericArguments().Length;
+
+								var methods = runtimeType.GetMethods(MemberData.flags).Where(m => m.Name == method.Name && m.IsGenericMethod && m.GetGenericArguments().Length == genericLength);
+
+								foreach(var m in methods) {
+
+								}
+							}
+							else {
+								var parameters = method.GetParameters();
+								if(parameters.Length == 0) {
+									return runtimeType.GetMethod(member.Name, MemberData.flags, null, Type.EmptyTypes, null);
+								}
+								var methods = runtimeType.GetMethods(MemberData.flags).Where(m => m.Name == method.Name && m.GetParameters().Length == parameters.Length);
+
+								foreach(var m in methods) {
+									if(m is INativeMember nativeMember && nativeMember.GetNativeMember() == member) {
+										return m;
+									}
+								}
+							}
+						}
+					}
+				}
+				else {
+					return member;
+				}
+			}
+			return null;
+		}
+
 		public static Type GetRuntimeType(IReflectionType obj) {
 			return obj.ReflectionType;
 		}
@@ -858,6 +909,20 @@ namespace MaxyGames.UNode {
 				return false;
 			}
 			return true;
+		}
+
+		public static MemberInfo GetNativeMember(MemberInfo member) {
+			if(member == null) return null;
+			if(member is not IRuntimeMember) {
+				return member;
+			}
+			if(member is INativeMember native) {
+				return native.GetNativeMember();
+			}
+			if(member is IFakeMember fake) {
+				return fake.Original as MemberInfo;
+			}
+			return null;
 		}
 
 		/// <summary>
