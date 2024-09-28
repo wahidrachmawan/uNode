@@ -1,6 +1,3 @@
-[submodule "Assets/uNode3/uNodeSamples"]
-	path = Assets/uNode3/uNodeSamples
-	url = https://github.com/wahidrachmawan/uNodeSamples.git
 [submodule "Assets/uNode3/Samples~"]
 	path = Assets/uNode3/Samples~
 	url = https://github.com/wahidrachmawan/uNodeSamples.git
