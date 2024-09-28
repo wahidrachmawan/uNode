@@ -115,7 +115,6 @@ namespace MaxyGames.UNode.Editors {
 		public bool isValidGraph => owner is IGraph && graph != null;
 
 		public GraphSystemAttribute graphSystem => GraphUtility.GetGraphSystem(_owner);
-		//}
 
 		/// <summary>
 		/// The current scope of graph editing.
@@ -129,9 +128,64 @@ namespace MaxyGames.UNode.Editors {
 			set {
 				if(value == null) {
 					_selectedCanvas = null;
-				} else {
+				}
+				else {
 					_selectedCanvas = new UGraphElementRef(value);
 				}
+				UpdateScopes(value);
+			}
+		}
+
+		void UpdateScopes(UGraphElement canvas) {
+			if(m_scopes == null) {
+				m_scopes = new();
+			}
+			m_scopes.Clear();
+			if(canvas is NodeObject) {
+				if(canvas is ISuperNode) {
+					NodeScope.ApplyScopes((canvas as ISuperNode).SupportedScope, m_scopes, null, out _);
+				}
+				else {
+					m_scopes.Add(NodeScope.FlowGraph);
+				}
+			}
+			else {
+				var root = selectedRoot;
+				if(root is MainGraphContainer) {
+					if(graph is IStateGraph) {
+						m_scopes.Add(NodeScope.StateGraph);
+						m_scopes.Add(NodeScope.FlowGraph);
+						m_scopes.Add(NodeScope.Coroutine);
+					}
+					else if(graph is ICustomMainGraph mainGraph) {
+						NodeScope.ApplyScopes(mainGraph.MainGraphScope, m_scopes, null, out _);
+						if(mainGraph.AllowCoroutine) {
+							m_scopes.Add(NodeScope.Coroutine);
+						}
+					}
+				}
+				else if(root is BaseFunction) {
+					m_scopes.Add(NodeScope.Function);
+					m_scopes.Add(NodeScope.FlowGraph);
+				}
+				if(isInMacro) {
+					m_scopes.Add(NodeScope.Macro);
+					m_scopes.Add(NodeScope.FlowGraph);
+				}
+				if(root.AllowCoroutine()) {
+					m_scopes.Add(NodeScope.Coroutine);
+				}
+			}
+		}
+
+		[System.NonSerialized]
+		private HashSet<string> m_scopes;
+		public HashSet<string> scopes {
+			get {
+				if(m_scopes == null) {
+					UpdateScopes(currentCanvas);
+				}
+				return m_scopes;
 			}
 		}
 

@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[EventMenu("", "On Exit", category = "State")]
+	[EventMenu("", "On Exit", scope = NodeScope.State)]
 	[StateEvent]
 	[Description("On Exit is called once when the state becomes inactive.")]
 	public class StateOnExitEvent : BaseGraphEvent {

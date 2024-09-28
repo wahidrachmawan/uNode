@@ -16,6 +16,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		public IEnumerable<NodeObject> nestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
+		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph;
+
 		public IEnumerable<TransitionEvent> GetTransitions() {
 			return transitions.GetFlowNodes<TransitionEvent>();
 		}

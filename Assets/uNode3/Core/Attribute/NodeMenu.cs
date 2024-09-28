@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode {
 	public static class NodeScope {
-		public const string Default = All;
+		public const string Default = FlowGraph;
 
 		public const string All = nameof(All);
 		public const string GameObject = nameof(GameObject);
@@ -13,8 +13,33 @@ namespace MaxyGames.UNode {
 		public const string Macro = nameof(Macro);
 		public const string StateGraph = nameof(StateGraph);
 		public const string ECSGraph = nameof(ECSGraph);
+		public const string FlowGraph = nameof(FlowGraph);
+
+		public const string State = nameof(State);
 
 		public const string Function = nameof(Function);
+
+		public static void ApplyScopes(string scope, ICollection<string> includedScopes, ICollection<string> excludedScopes, out bool hasAllScope) {
+			hasAllScope = false;
+			if(scope == null) {
+				scope = NodeScope.All;
+				hasAllScope = true;
+			}
+			var scopes = scope.Split(',', '|');
+			foreach(var s in scopes) {
+				if(s == NodeScope.All) {
+					hasAllScope = true;
+					continue;
+				}
+				if(string.IsNullOrEmpty(s))
+					continue;
+				if(s[0] == '!') {
+					excludedScopes.Add(s[1..]);
+					continue;
+				}
+				includedScopes?.Add(s);
+			}
+		}
 	}
 
 	public abstract class BaseNodeMenuAttribute : Attribute {
@@ -62,19 +87,7 @@ namespace MaxyGames.UNode {
 					_includedScopes = new HashSet<string>();
 					if(scope == null)
 						scope = NodeScope.All;
-					var scopes = scope.Split(',');
-					foreach(var s in scopes) {
-						if(s == NodeScope.All) {
-							_hasAllScope = true;
-							continue;
-						}
-						if(string.IsNullOrEmpty(s))
-							continue;
-						if(s[0] == '!') {
-							continue;
-						}
-						_includedScopes.Add(s);
-					}
+					NodeScope.ApplyScopes(scope, _includedScopes, null, out _hasAllScope);
 				}
 				return _includedScopes;
 			}
@@ -87,18 +100,7 @@ namespace MaxyGames.UNode {
 					_excludedScopes = new HashSet<string>();
 					if(scope == null)
 						scope = NodeScope.All;
-					var scopes = scope.Split(',');
-					foreach(var s in scopes) {
-						if(s == NodeScope.All) {
-							_hasAllScope = true;
-							continue;
-						}
-						if(string.IsNullOrEmpty(s))
-							continue;
-						if(s[0] == '!') {
-							_excludedScopes.Add(s[1..]);
-						}
-					}
+					NodeScope.ApplyScopes(scope, null, _excludedScopes, out _hasAllScope);
 				}
 				return _excludedScopes;
 			}

@@ -420,6 +420,7 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public interface ISuperNode {
 		IEnumerable<NodeObject> nestedFlowNodes { get; }
+		string SupportedScope => NodeScope.FlowGraph;
 		bool AllowCoroutine();
 	}
 

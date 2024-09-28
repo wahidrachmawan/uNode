@@ -1255,40 +1255,31 @@ namespace MaxyGames.UNode.Editors {
 			//		return false;
 			//	}
 			//}
-			if(graphData.selectedRoot is MainGraphContainer) {
-				var graph = graphData.graph;
-				if(graph is IStateGraph) {
-					if(!menuItem.IsValidScope(NodeScope.StateGraph)) {
-						return false;
-					}
-				}
-				else if(graph is IMacroGraph) {
-					if(menuItem.IsExcludedScope(NodeScope.Macro)) {
-						return false;
-					}
-				}
-				else if(graph is ICustomMainGraph mainGraph) {
-					var scope = mainGraph.MainGraphScope;
-					if(!menuItem.IsValidScope(scope)) {
-						return false;
-					}
-					if(menuItem.IsCoroutine && !mainGraph.AllowCoroutine) {
-						return false;
-					}
-				}
-				else if(graphData.currentCanvas == graphData.selectedRoot) {
-					return false;
-				}
-			}
-			else {
-				if(!menuItem.IsValidScope(NodeScope.Function)) {
-					if(menuItem.IsCoroutine == false || menuItem.IsValidScope(NodeScope.Coroutine) == false) {
-						return false;
-					}
-				}
-			}
 			if(menuItem.IsCoroutine && !graphData.supportCoroutine) {
 				return false;
+			}
+			if(menuItem.hasAllScope == false) {
+				if(menuItem.IsCoroutine) {
+					if(graphData.scopes.Contains(NodeScope.Coroutine) == false) {
+						//Skip the menu if the supported graph scope is not coroutine but the menu is coroutine
+						return false;
+					}
+				}
+				bool hasSupportedScope = false;
+				foreach(var scope in graphData.scopes) {
+					if(menuItem.excludedScopes.Contains(scope)) {
+						return false;
+					}
+				}
+				foreach(var scope in graphData.scopes) {
+					if(menuItem.includedScopes.Contains(scope)) {
+						hasSupportedScope = true;
+						break;
+					}
+				}
+				if(hasSupportedScope == false) {
+					return false;
+				}
 			}
 			if(nodeFilter == NodeFilter.None)
 				return true;

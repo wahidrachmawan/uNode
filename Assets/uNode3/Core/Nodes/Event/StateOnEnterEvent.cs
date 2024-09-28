@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-    [EventMenu("", "On Enter", category ="State")]
+    [EventMenu("", "On Enter", scope = NodeScope.State)]
 	[StateEvent]
 	[Description("On Enter is called once when the state becomes active.")]
 	public class StateOnEnterEvent : BaseGraphEvent {

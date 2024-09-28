@@ -581,7 +581,7 @@ namespace MaxyGames.UNode {
 								finishCoroutine = instance.StartCoroutine(Finish(i, wait), node);
 								return;
 							}
-							return;
+							throw new GraphException("Invalid operation, node is still running.", nextFlow.node);
 						}
 						var js = nextFlow.jumpStatement;
 						if(js != null) {
@@ -695,8 +695,10 @@ namespace MaxyGames.UNode {
 		}
 
 		private void AfterFinish() {
-			port.actionOnExit?.Invoke(this);
-			coroutine = null;
+			if(coroutine != null) {
+				instance.StopCoroutine(coroutine);
+				coroutine = null;
+			}
 			if(finishCoroutine != null) {
 				instance.StopCoroutine(finishCoroutine);
 				finishCoroutine = null;
@@ -706,6 +708,8 @@ namespace MaxyGames.UNode {
 			if(state == StateType.Running) {
 				state = StateType.Success;
 			}
+
+			port.actionOnExit?.Invoke(this);
 #if UNITY_EDITOR
 			if(uNodeUtility.isPlaying && GraphDebug.useDebug) {
 				GraphDebug.FlowNode(target, port.node.graphContainer.GetGraphID(), node.id, port.isPrimaryPort ? null : port.id, state == StateType.Success ? true : state == StateType.Failure ? false : null);
