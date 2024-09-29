@@ -23,9 +23,13 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 			if(graphData == null) return;
 			if(graph is IUsingNamespace) {
 				var namespaces = EditorReflectionUtility.GetNamespaces();
+				var graphNamespace = string.Empty;
+				if(graph is INamespace nsGraph) {
+					graphNamespace = nsGraph.Namespace;
+				}
 				foreach(var ns in graph.GetUsingNamespaces()) {
 					if(!namespaces.Contains(ns)) {
-						if(graph is INamespace nsGraph && nsGraph.Namespace != ns) {
+						if(graphNamespace != ns && graphNamespace.Add(".").StartsWith(ns) == false) {
 							analyzer.RegisterError(graphData, $@"Using Namespace: '{ns}' was not found.");
 						}
 					}
@@ -33,9 +37,10 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 			}
 			else if(graph is IScriptGraphType scriptGraphType) {
 				var namespaces = EditorReflectionUtility.GetNamespaces();
+				var graphNamespace = scriptGraphType.ScriptTypeData.scriptGraph.Namespace;
 				foreach(var ns in graph.GetUsingNamespaces()) {
 					if(!namespaces.Contains(ns)) {
-						if(scriptGraphType.ScriptTypeData.scriptGraph.Namespace != ns) {
+						if(graphNamespace != ns && graphNamespace.Add(".").StartsWith(ns) == false) {
 							analyzer.RegisterError(graphData, $@"Using Namespace: '{ns}' was not found.");
 						}
 					}
