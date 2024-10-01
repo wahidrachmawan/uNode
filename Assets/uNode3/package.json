@@ -14,5 +14,17 @@
 	],
 	"author": {
 		"name": "Wahid Rachmawan"
-	}
+	},
+	"samples": [
+        {
+            "displayName": "Roll A Ball",
+            "description": "A simple Roll A Ball sample game.",
+            "path": "Samples~/RollABall"
+        },
+        {
+            "displayName": "Global Event",
+            "description": "Contains sample for using Global Event feature",
+            "path": "Samples~/Global Event"
+        }
+    ]
 }
