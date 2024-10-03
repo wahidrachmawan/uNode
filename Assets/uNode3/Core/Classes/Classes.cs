@@ -491,7 +491,7 @@ namespace MaxyGames.UNode {
 		public List<UnityEngine.Object> references;
 
 		public SerializedType() {
-			this.type = typeof(object);
+			this.type = null;
 		}
 
 		public SerializedType(Type type) {

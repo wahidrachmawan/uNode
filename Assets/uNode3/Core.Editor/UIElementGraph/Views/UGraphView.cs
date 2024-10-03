@@ -974,7 +974,7 @@ namespace MaxyGames.UNode.Editors {
 				else {
 
 				}
-				
+
 			}
 			if(nodes.Count > 0) {
 				GraphUtility.CopyPaste.Copy(nodes.ToArray());
@@ -1194,10 +1194,10 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var macro in macros) {
 						var m = macro;
 						customItems.Add(ItemSelector.CustomItem.Create(
-							m.GetGraphName(), 
+							m.GetGraphName(),
 							() => {
 								CreateLinkedMacro(m, clickedPos);
-							}, 
+							},
 							m.category,
 							icon: uNodeEditorUtility.GetTypeIcon(m.GetIcon()),
 							tooltip: new GUIContent(m.GraphData.comment)));
@@ -1624,6 +1624,99 @@ namespace MaxyGames.UNode.Editors {
 					if(node is MultipurposeNode) {
 						MultipurposeNode mNode = node as MultipurposeNode;
 						if(mNode.target.isAssigned) {
+							if(mNode.target.isDeepTarget) {
+								var members = mNode.target.GetMembers(false);
+								if(members != null && members.Length > 0) {
+									evt.menu.AppendAction("Split Nodes", (e) => {
+										int choice = EditorUtility.DisplayDialogComplex("", "Did you want to replace the node?", "Yes", "No", "Cancel");
+										if(choice != 2) {
+											uNodeEditorUtility.RegisterUndo(mNode, "Split nodes: " + mNode.GetTitle());
+
+											List<NodeObject> nodes = new List<NodeObject>();
+											var member = mNode.target;
+											int index = 0;
+
+											void AssignParameters(MultipurposeNode n) {
+												if(n.parameters != null && n.parameters.Count > 0) {
+													for(int x = 0; x < n.parameters.Count; x++) {
+														var param = mNode.parameters[x + index];
+														if(param.input != null) {
+															n.parameters[x].input.AssignToDefault(param.input);
+														}
+														else if(param.output != null) {
+															foreach(var port in param.output.GetConnectedPorts().ToArray()) {
+																if(port == null) continue;
+																n.parameters[x].output.ConnectTo(port);
+															}
+														}
+														else {
+															throw null;
+														}
+													}
+													index += n.parameters.Count;
+												}
+											}
+
+											if(member.IsTargetingUNode) {
+												NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, clickedPos, n => {
+													var val = member.startItem.GetReferenceValue();
+													if(val is Variable) {
+														n.target = MemberData.CreateFromValue(val as Variable);
+													}
+													else if(val is Function) {
+														n.target = MemberData.CreateFromValue(val as Function);
+													}
+													else if(val is Property) {
+														n.target = MemberData.CreateFromValue(val as Property);
+													}
+													n.useOutputParameters = mNode.useOutputParameters;
+													n.Register();
+													AssignParameters(n);
+													nodes.Add(n);
+												});
+											}
+											for(int i = 0; i < members.Length; i++) {
+												NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, clickedPos, n => {
+													n.target = MemberData.CreateFromMember(members[i]);
+													n.Register();
+													AssignParameters(n);
+													if(nodes.Count > 0) {
+														n.instance?.ConnectTo(nodes.Last().primaryValueOutput);
+														if(i == members.Length - 1) {
+															if(mNode.exit != null && mNode.exit.GetTargetFlow() != null) {
+																n.exit.ConnectTo(mNode.exit.GetTargetFlow());
+															}
+														}
+													}
+													else {
+														n.instance?.AssignToDefault(mNode.instance);
+													}
+													nodes.Add(n);
+												});
+											}
+											for(int i = 0; i < nodes.Count; i++) {
+												nodes[(nodes.Count - i - 1)].position = node.position;
+												nodes[(nodes.Count - i - 1)].position.x -= i * (nodes[i].position.width + 50);
+												nodes[(nodes.Count - i - 1)].position.y += i * (nodes[i].position.height + 50);
+											}
+											if(choice == 0) {
+												if(mNode.output != null) {
+													foreach(var port in mNode.output.GetConnectedPorts().ToArray()) {
+														port.ConnectTo(nodes.Last().primaryValueOutput);
+													}
+												}
+												if(mNode.enter != null) {
+													foreach(var port in mNode.enter.GetConnectedPorts().ToArray()) {
+														port.ConnectTo(nodes.Last().primaryFlowInput);
+													}
+												}
+												mNode.nodeObject.Destroy();
+											}
+											MarkRepaint();
+										}
+									}, DropdownMenuAction.AlwaysEnabled);
+								}
+							}
 							if(mNode.target.targetType == MemberData.TargetType.Method) {
 								var members = mNode.target.GetMembers(false);
 								if(members != null && members.Length == 1) {
@@ -2692,7 +2785,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 	}
-	
+
 	#region Classes
 	public struct GraphDraggedData {
 		public UGraphView graphView;

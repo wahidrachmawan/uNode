@@ -256,7 +256,7 @@ namespace MaxyGames.UNode {
 		public SerializedType StartSerializedType {
 			get {
 				if(startSerializedType == null) {
-					startSerializedType = new SerializedType(typeof(object));
+					startSerializedType = new SerializedType();
 				}
 				return startSerializedType;
 			}
@@ -268,7 +268,7 @@ namespace MaxyGames.UNode {
 		public SerializedType TargetSerializedType {
 			get {
 				if(targetSerializedType == null) {
-					targetSerializedType = new SerializedType(typeof(object));
+					targetSerializedType = new SerializedType();
 				}
 				return targetSerializedType;
 			}
