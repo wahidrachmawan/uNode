@@ -71,6 +71,8 @@ namespace MaxyGames.UNode {
 					return target.startType;
 				case MemberData.TargetType.Values:
 					return output?.type ?? typeof(object);
+				case MemberData.TargetType.uNodeFunction:
+					return output?.type ?? typeof(void);
 			}
 			if(target.isDeepTarget) {
 				return target.startType;
