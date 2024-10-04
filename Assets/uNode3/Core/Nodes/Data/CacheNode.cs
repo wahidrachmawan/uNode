@@ -17,6 +17,7 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRegister();
 			target = ValueInput(nameof(target), () => type?.type ?? typeof(object)).SetName("");
 			output.isVariable = true;
+			output.SetTitle(() => name);
 		}
 
 		public override Type ReturnType() {
@@ -30,7 +31,7 @@ namespace MaxyGames.UNode.Nodes {
 		public override string GetTitle() => "Variable: " + name;
 
 		public override string GetRichName() {
-			return $"Cache Value: {target.GetRichName()}";
+			return $"{uNodeUtility.WrapTextWithKeywordColor("var")} {name} = {target.GetRichName()}";
 		}
 
 		protected override void OnExecuted(Flow flow) {

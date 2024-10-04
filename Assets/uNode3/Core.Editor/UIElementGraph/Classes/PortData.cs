@@ -24,6 +24,7 @@ namespace MaxyGames.UNode.Editors {
 		public abstract UPort portValue { get; }
 		public virtual string portID => portValue.id;
 		public virtual string name => portValue.name;
+		public virtual string title => portValue.title;
 		public virtual string tooltip => portType?.PrettyName(true) ?? string.Empty;
 		public virtual object defaultValue => null;
 		public abstract Type portType { get; }

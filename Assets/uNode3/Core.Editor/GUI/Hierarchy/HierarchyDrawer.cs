@@ -38,7 +38,7 @@ namespace MaxyGames.UNode.Editors {
 						var flowItem = CreateFlowTree(
 							nodeComponent,
 							port,
-							port.GetPrettyName()
+							port.GetRichName()
 						);
 						parentTree.AddChild(flowItem);
 						rows.Add(flowItem);

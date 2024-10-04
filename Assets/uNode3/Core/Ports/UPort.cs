@@ -9,6 +9,9 @@ namespace MaxyGames.UNode {
 	public abstract class UPort : IGraphElement {
 		[SerializeField]
 		private string _id;
+		/// <summary>
+		/// The id of the port
+		/// </summary>
 		public string id {
 			get {
 				return _id;
@@ -19,6 +22,9 @@ namespace MaxyGames.UNode {
 		}
 		[SerializeField]
 		private string _name;
+		/// <summary>
+		/// The name of the port
+		/// </summary>
 		public string name {
 			get {
 				return _name ?? id;
@@ -32,19 +38,56 @@ namespace MaxyGames.UNode {
 		}
 		[SerializeField]
 		private string _tooltip;
+		/// <summary>
+		/// The port tooltip
+		/// </summary>
 		public string tooltip {
 			get => _tooltip;
 			set => _tooltip = value;
 		}
 
+		internal Func<string> m_title;
+		/// <summary>
+		/// The port title, use for proxy name, and others
+		/// </summary>
+		public string title {
+			get {
+				if(m_title == null) {
+					return name;
+				}
+				return m_title.Invoke();
+			}
+			set {
+				if(value is null) {
+					m_title = null;
+					return;
+				}
+				string val = value;
+				m_title = () => val;
+			}
+		}
+
+		/// <summary>
+		/// The node that own this port
+		/// </summary>
 		public NodeObject node { get; set; }
 
+		/// <summary>
+		/// The node that own this port
+		/// </summary>
+		/// <returns></returns>
 		public Node GetNode() => node?.node;
 
 		public UPort(NodeObject node) => this.node = node;
 
+		/// <summary>
+		/// Iterate all connection including valid and invalid connections
+		/// </summary>
 		public abstract IEnumerable<Connection> Connections { get; }
 
+		/// <summary>
+		/// Iterate all valid connection
+		/// </summary>
 		public IEnumerable<Connection> ValidConnections {
 			get {
 				foreach(var c in Connections) {
@@ -54,6 +97,23 @@ namespace MaxyGames.UNode {
 				}
 			}
 		}
+
+		/// <summary>
+		/// Iterate all invalid connection
+		/// </summary>
+		public IEnumerable<Connection> InvalidConnections {
+			get {
+				foreach(var c in Connections) {
+					if(c.isValid == false) {
+						yield return c;
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Clear all connection that's connected with this port
+		/// </summary>
 		public virtual void ClearConnections() {
 			while(Connections.Any()) {
 				var c = Connections.FirstOrDefault();
@@ -61,8 +121,17 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// True if the port is a valid port
+		/// </summary>
 		public bool isValid => node != null;
+		/// <summary>
+		/// True if the port is connected
+		/// </summary>
 		public bool isConnected => Connections.Any();
+		/// <summary>
+		/// True if the port has a valid connection
+		/// </summary>
 		public bool hasValidConnections {
 			get {
 				foreach(var c in Connections) { 
@@ -74,6 +143,10 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get pretty name of the port
+		/// </summary>
+		/// <returns></returns>
 		public string GetPrettyName() {
 			var str = name;
 			if(string.IsNullOrEmpty(str)) {
@@ -92,6 +165,34 @@ namespace MaxyGames.UNode {
 				return UnityEditor.ObjectNames.NicifyVariableName(str);
 			}
 #endif
+			return str;
+		}
+
+		/// <summary>
+		/// Get rich name of the port
+		/// </summary>
+		/// <returns></returns>
+		public virtual string GetRichName() {
+			var str = title;
+			if(this is ValueOutput && this.IsPrimaryPort()) {
+				if(string.IsNullOrEmpty(str) || str == "Out" || str == "out" || str == "output") {
+					return node.GetRichName();
+				}
+			}
+			if(string.IsNullOrEmpty(str)) {
+				if(this is FlowInput) {
+					return "Enter";
+				}
+				else if(this is FlowOutput) {
+					return "Exit";
+				}
+				else if(this is ValueInput) {
+					return "Input";
+				}
+				else if(this is ValueOutput) {
+					return "Output";
+				}
+			}
 			return str;
 		}
 

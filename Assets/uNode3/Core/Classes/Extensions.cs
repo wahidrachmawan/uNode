@@ -115,6 +115,30 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// Set the port title
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="port"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public static T SetTitle<T>(this T port, string title) where T : UPort {
+			port.title = title;
+			return port;
+		}
+
+		/// <summary>
+		/// Set the port title
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="port"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public static T SetTitle<T>(this T port, Func<string> title) where T : UPort {
+			port.m_title = title;
+			return port;
+		}
+
+		/// <summary>
 		/// Set the port tooltip
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

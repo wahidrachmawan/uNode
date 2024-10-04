@@ -17,6 +17,9 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		public FilterAttribute filter;
 
+		/// <summary>
+		/// True if the port is using default value / inline value
+		/// </summary>
 		public bool UseDefaultValue => connections.Count == 0;
 
 		/// <summary>
@@ -65,23 +68,19 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
-		/// <summary>
-		/// Get rich name of the port
-		/// </summary>
-		/// <returns></returns>
-		public string GetRichName() {
+		public override string GetRichName() {
 			if(UseDefaultValue) {
 				return defaultValue.GetNicelyDisplayName(richName: true);
 			} else {
 				var targetPort = this.GetTargetPort();
 				if(targetPort != null) {
-					if(targetPort == targetPort.node?.primaryValueOutput) {
-						return targetPort.node.GetRichName();
-					}
-					return targetPort.GetPrettyName();
+					//if(targetPort == targetPort.node?.primaryValueOutput) {
+					//	return targetPort.node.GetRichName();
+					//}
+					return targetPort.GetRichName();
 				}
 			}
-			return GetPrettyName();
+			return base.GetRichName();
 		}
 
 		public void Validate() {

@@ -1269,7 +1269,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private string GetProxyName() {
-			var str = GetName();
+			var str = portData.title;
+			if(string.IsNullOrEmpty(str) || str == portData.name) {
+				str = GetName();
+			}
 			if(string.IsNullOrEmpty(str) || str == "Out" || str == "Output") {
 				if(isFlow) {
 					if(direction == Direction.Input) {

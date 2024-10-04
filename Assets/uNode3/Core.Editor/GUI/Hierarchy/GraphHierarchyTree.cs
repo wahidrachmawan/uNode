@@ -758,7 +758,7 @@ namespace MaxyGames.UNode.Editors {
 							flowInput,
 							uNodeEditorUtility.GetUIDFromString($"{n.id}:FI={flow.id}"),
 							-1,
-							$"{n.GetTitle()} ( {ObjectNames.NicifyVariableName(flowInput.GetPrettyName())} )") {
+							$"{n.GetTitle()} ( {ObjectNames.NicifyVariableName(flowInput.GetRichName())} )") {
 							icon = uNodeEditorUtility.GetTypeIcon(n.GetNodeIcon()) as Texture2D
 						};
 						flowPortsMap[flowInput] = flowTree;
