@@ -163,6 +163,16 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
+			else if(node.instance != null && primaryOutputValue != null && inputPorts.Count == 1 && inputControls.Count == 0 && uNodeUtility.preferredDisplay != DisplayKind.Full) {
+				ConstructCompactTitle(node.instance);
+				EnableInClassList(ussClassCompactTitle, true);
+				Color c = uNodePreference.GetColorForType(primaryOutputValue.GetPortType());
+				c.a = 0.8f;
+				elementTypeColor = c;
+				if(UIElementUtility.Theme.coloredNodeBorder) {
+					border.style.SetBorderColor(c);
+				}
+			}
 		}
 
 		protected override void OnCustomStyleResolved(ICustomStyle style) {
