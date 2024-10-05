@@ -363,6 +363,10 @@ namespace MaxyGames.UNode.Editors {
 						EditorGUILayout.ObjectField("Action Asset", action, typeof(InputActionReference), false);
 						EditorGUI.indentLevel--;
 						EditorGUI.EndDisabledGroup();
+
+						if(action.action.type != InputActionType.Value && node.inputActionChangeType != EventOnInputSystemButton.InputActionOption.OnPressed) {
+							EditorGUILayout.HelpBox("Action Type of the action asset must using Value in order to work except the Input Action Change Type is set to pressed.", MessageType.Warning);
+						}
 						break;
 					}
 				}
