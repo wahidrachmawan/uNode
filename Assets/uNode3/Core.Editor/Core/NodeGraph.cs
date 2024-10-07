@@ -197,13 +197,25 @@ namespace MaxyGames.UNode.Editors {
 					window?.GenerateSource();
 					EditorUtility.ClearProgressBar();
 				});
-				menu.AddItem(new GUIContent("Compile All C# Graph"), false, () => {
+				menu.AddItem(new GUIContent("Compile Opened C# Graphs"), false, () => {
+					uNodeEditor.AutoSaveCurrentGraph();
+
+					List<IScriptGraph> graphs = new();
+					foreach(var tab in window.tabDatas) {
+						if(tab != null && tab.owner is IScriptGraph) {
+							graphs.Add(tab.owner as IScriptGraph);
+						}
+					}
+					if(graphs.Count > 0)
+						GenerationUtility.GenerateNativeGraphs(graphs);
+				});
+				menu.AddItem(new GUIContent("Compile All C# Graphs in project"), false, () => {
 					if(Application.isPlaying) {
 						uNodeEditorUtility.DisplayErrorMessage("Cannot compile all graph on playmode");
 						return;
 					}
 					uNodeEditor.AutoSaveCurrentGraph();
-					GenerationUtility.GenerateNativeGraphInProject();
+					GenerationUtility.GenerateNativeGraphsInProject();
 				});
 				menu.AddSeparator("");
 				menu.AddItem(new GUIContent("Compile Graphs (Project)"), false, () => {

@@ -522,11 +522,15 @@ namespace MaxyGames.UNode.Editors {
 		}
 #endregion
 
-		public static void GenerateNativeGraphInProject(bool enableLogging = true) {
+		public static void GenerateNativeGraphsInProject(bool enableLogging = true) {
+			GenerateNativeGraphs(GraphUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph).Select(g => g as IScriptGraph), enableLogging);
+		}
+
+		public static void GenerateNativeGraphs(IEnumerable<IScriptGraph> graphs, bool enableLogging = true) {
 			try {
 				System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 				watch.Start();
-				var scripts = GenerateNativeProjectScripts(true);
+				var scripts = GenerateNativeProjectScripts(graphs, true);
 				watch.Stop();
 				if(enableLogging)
 					Debug.LogFormat("Generating C# took {0,8:N3} s.", watch.Elapsed.TotalSeconds);
@@ -595,16 +599,17 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static CG.GeneratedData[] GenerateNativeProjectScripts(
-			bool force,
+			IEnumerable<IScriptGraph> graphs,
+			bool force = true,
 			string label = "Generating C# Scripts",
 			bool clearProgressOnFinish = true) {
 			try {
 				int count = 0;
-				var objects = GraphUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph).ToList();
+				var objects = graphs.Select(g => g as Object).ToArray();
 				var scripts = objects.Select(gameObject => {
 					count++;
 					return GenerateCSharpScript(gameObject, (progress, text) => {
-						EditorUtility.DisplayProgressBar($"{label} {count}-{objects.Count}", text, progress);
+						EditorUtility.DisplayProgressBar($"{label} {count}-{objects.Length}", text, progress);
 					});
 				}).Where(s => s != null);
 				return scripts.ToArray();
