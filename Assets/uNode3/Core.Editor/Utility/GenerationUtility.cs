@@ -200,7 +200,14 @@ namespace MaxyGames.UNode.Editors {
 				}
 				Directory.CreateDirectory(dir);
 				foreach(var script in scripts) {
-					var path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					string path;
+					if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
+						Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.Namespace + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
+					else {
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
 					var assetPath = AssetDatabase.GetAssetPath(script.graphOwner);
 					if(File.Exists(assetPath.RemoveLast(6).Add("cs"))) {
 						//Skip when the graph has been compiled manually
@@ -360,7 +367,14 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var script in scripts) {
 						if(script == null)
 							continue;
-						var path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+						string path;
+						if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
+							Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
+							path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.Namespace + Path.DirectorySeparatorChar + script.fileName + ".cs";
+						}
+						else {
+							path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+						}
 						//var assetPath = AssetDatabase.GetAssetPath(script.graphOwner);
 						//if(File.Exists(assetPath.RemoveLast(6).Add("cs"))) {
 						//	//Skip when the graph has been compiled manually
@@ -528,7 +542,14 @@ namespace MaxyGames.UNode.Editors {
 						fileName = script.fileName + index;
 					}
 					if(CanCompileScript()) {//Save to temp
-						var path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + fileName + ".cs";
+						string path;
+						if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
+							Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
+							path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.Namespace + Path.DirectorySeparatorChar + fileName + ".cs";
+						}
+						else {
+							path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + fileName + ".cs";
+						}
 						using(StreamWriter sw = new StreamWriter(path)) {
 							var generatedScript = script.ToScript(out var informations, true);
 							if(informations != null) {
@@ -614,7 +635,7 @@ namespace MaxyGames.UNode.Editors {
 						graphObject = scriptGraphType.ScriptTypeData.scriptGraphReference;
 					} else {
 						if(graphObject == null) return;
-						throw new Exception("Attemp to compile sub asset which is not supported.");
+						throw new Exception("Attemp to compile sub asset which is not supported.\nType:" + graphObject.GetType());
 					}
 				}
 			}
@@ -773,7 +794,14 @@ namespace MaxyGames.UNode.Editors {
 					while(!fileNames.Add(fileName)) {
 						fileName = script.fileName + index;
 					}
-					var path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					string path;
+					if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
+						Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.Namespace + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
+					else {
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
 					using(StreamWriter sw = new StreamWriter(path)) {
 						var generatedScript = script.ToScript(out var informations, true);
 						if(informations != null) {
@@ -805,7 +833,14 @@ namespace MaxyGames.UNode.Editors {
 					while(!fileNames.Add(fileName)) {
 						fileName = script.fileName + index;
 					}
-					var path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					string path;
+					if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
+						Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.Namespace + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
+					else {
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
 					using(StreamWriter sw = new StreamWriter(path)) {
 						var generatedScript = script.ToScript(out var informations, true);
 						if(informations != null) {
