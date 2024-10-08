@@ -9,14 +9,15 @@ namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Statement", "For")]
 	[Description("The for number statement can run a node repeatedly until a condition evaluates to false.")]
 	public class ForNumberLoop : FlowNode {
-		public FlowOutput body { get; private set; }
-
 		[Filter(typeof(int), typeof(float), typeof(decimal), typeof(long), typeof(byte), typeof(sbyte),
 			typeof(short), typeof(double), typeof(uint), typeof(ulong), typeof(ushort), OnlyGetType = true, UnityReference = false)]
 		public SerializedType indexType = typeof(int);
 		public ComparisonType compareType = ComparisonType.LessThan;
 		public SetType iteratorSetType = SetType.Add;
 
+		public string indexName;
+
+		public FlowOutput body { get; private set; }
 		public ValueInput start { get; private set; }
 		public ValueInput count { get; private set; }
 		public ValueInput step { get; private set; }
@@ -29,6 +30,9 @@ namespace MaxyGames.UNode.Nodes {
 			step = ValueInput(nameof(step), indexType.type, 1);
 			index = ValueOutput(nameof(index), indexType.type, PortAccessibility.ReadWrite);
 			index.isVariable = true;
+			if(string.IsNullOrEmpty(indexName) == false) {
+				index.SetName(indexName);
+			}
 			base.OnRegister();
 			exit.SetName("Exit");
 		}
