@@ -605,6 +605,10 @@ namespace MaxyGames.UNode {
 				}
 				parent = parent.parent;
 			}
+			//In case it is linked graph
+			if(element.graph.linkedOwner != null) {
+				return GetNodeInParent<T>(element.graph.linkedOwner);
+			}
 			return default;
 		}
 
@@ -617,6 +621,10 @@ namespace MaxyGames.UNode {
 					return result;
 				}
 				parent = parent.parent;
+			}
+			//In case it is linked graph
+			if(element.graph.linkedOwner != null) {
+				return GetObjectOrNodeInParent<T>(element.graph.linkedOwner);
 			}
 			return default;
 		}

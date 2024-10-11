@@ -344,6 +344,10 @@ namespace MaxyGames.UNode {
 				}
 				parent = parent.parent;
 			}
+			//In case it is linked graph
+			if(graph.linkedOwner != null) {
+				return graph.linkedOwner.GetObjectInParent<T>();
+			}
 			return default;
 		}
 		#endregion

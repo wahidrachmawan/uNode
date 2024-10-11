@@ -92,6 +92,12 @@ namespace MaxyGames.UNode {
 			return m_UniqueID;
 		}
 
+		[field: NonSerialized]
+		internal UGraphElement linkedOwner { get; private set; }
+		internal void SetAsLinkedGraph(UGraphElement parent) {
+			linkedOwner = parent;
+		}
+
 		Dictionary<int, UGraphElement> _cachedElements;
 		private Dictionary<int, UGraphElement> cachedElements {
 			get {

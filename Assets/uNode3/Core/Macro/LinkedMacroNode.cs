@@ -135,6 +135,8 @@ namespace MaxyGames.UNode.Nodes {
 			instance.SetUserData(this, key);
 			var runner = RuntimeGraphUtility.GetOrCreateGraphRunner(macroAsset, key);
 			var graph = runner.GraphData;
+
+			graph.SetAsLinkedGraph(this);
 			//Debug.Log(graph.version + " <> " + macroAsset.GraphData.version);
 			graph.ForeachInChildrens(element => {
 				element.OnRuntimeInitialize(instance);
@@ -221,6 +223,7 @@ namespace MaxyGames.UNode.Nodes {
 			var runner = RuntimeGraphUtility.GetOrCreateGraphRunner(macroAsset, this);
 			var graph = runner.GraphData;
 
+			graph.SetAsLinkedGraph(this);
 			graph.ForeachInChildrens(element => {
 				if(element is NodeObject nodeObject) {
 					if(nodeObject.node is MacroPortNode) {
