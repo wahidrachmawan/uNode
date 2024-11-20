@@ -29,9 +29,6 @@ namespace MaxyGames.UNode.Editors {
 					if(editor != null) {
 						EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Runtime Component");
 						editor.OnInspectorGUI();
-						if(Event.current.type == EventType.Repaint) {
-							editor.Repaint();
-						}
 					}
 					else {
 						uNodeGUIUtility.ShowFields(asset.nativeInstance, asset.nativeInstance);

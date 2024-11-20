@@ -523,7 +523,7 @@ namespace MaxyGames.UNode.Editors {
 							Rect debugRect = args.rowRect;
 							debugRect.width = GetContentIndent(args.item);
 							GUI.DrawTexture(new Rect(debugRect.x + debugRect.width - 10, debugRect.y, 10, debugRect.height), Texture2D.whiteTexture);
-							float time = (GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 2;
+							float time = (GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 2;
 							GUI.color = Color.Lerp(GUI.color, Color.clear, time);
 							if(time < 1) {
 								GUI.DrawTexture(new Rect(debugRect.x, debugRect.y, debugRect.width - 10, debugRect.height), Texture2D.whiteTexture);
@@ -544,7 +544,7 @@ namespace MaxyGames.UNode.Editors {
 							if(flow is FlowInput) {
 								var flowDebugData = debugData.GetDebugValue(flow as FlowInput);
 								if(flowDebugData != null) {
-									times = GraphDebug.debugTime - flowDebugData.calledTime;
+									times = GraphDebug.debugTime - flowDebugData.time;
 								}
 							}
 							else {

@@ -325,6 +325,9 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override string GetRichName() {
+			if(deconstructValue && deconstructMethod != null) {
+				return uNodeUtility.WrapTextWithKeywordColor("foreach: var ") + string.Join(", ", deconstructDatas.Select(d => d.port.GetRichName())).Wrap() + uNodeUtility.WrapTextWithKeywordColor(" in ") + collection.GetRichName();
+			}
 			return uNodeUtility.WrapTextWithKeywordColor("foreach:") + collection.GetRichName();
 		}
 	}

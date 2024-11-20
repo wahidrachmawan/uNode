@@ -310,16 +310,6 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public static Graph GetGraphData(object obj) {
-			if(obj is IGraph) {
-				return (obj as IGraph).GraphData;
-			}
-			if(obj is UGraphElement) {
-				return (obj as UGraphElement).graph;
-			}
-			return null;
-		}
-
 		/// <summary>
 		/// Validate that variable name is valid
 		/// </summary>
@@ -348,7 +338,7 @@ namespace MaxyGames.UNode {
 			return true;
 		}
 
-		private static HashSet<string> csharpKeyword = new HashSet<string>() {
+		private static readonly HashSet<string> csharpKeyword = new HashSet<string>() {
 			"for",
 			"foreach",
 			"while",
@@ -382,6 +372,13 @@ namespace MaxyGames.UNode {
 			"uint",
 			"ulong",
 		};
+
+
+		/// <summary>
+		/// Auto fix incorrect name for c# naming, replace symbol with underscore etc...
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
 		public static string AutoCorrectName(string name) {
 			if(name == null)
 				return "_";
@@ -534,7 +531,12 @@ namespace MaxyGames.UNode {
 		}
 
 		static Dictionary<string, (DateTime, long)> m_cachedFileHash = new();
-		internal static long GetFileHashCached(string filePath) {
+		/// <summary>
+		/// Get file hash and cached the result for later usage, the cached is based on last write time.
+		/// </summary>
+		/// <param name="filePath"></param>
+		/// <returns>When input same, the result should be same but not 100% guarantee</returns>
+		public static long GetFileHashCached(string filePath) {
 			var time = System.IO.File.GetLastWriteTime(filePath);
 			if(m_cachedFileHash.TryGetValue(filePath, out var cached)) {
 				if(cached.Item1 == time) {
@@ -1002,7 +1004,12 @@ namespace MaxyGames.UNode {
 											result += mTarget.Items[i].GetActualName().WrapWithColor(editorColor.typeColor);
 										}
 										else if(mTarget.Items.Length > 1) {
-											result += mTarget.Items[i].GetActualName().WrapWithColor(getColorForType(mTarget.startType));
+											if(richName) {
+												result += member.instance.GetRichName();
+											}
+											else {
+												result += mTarget.Items[i].GetActualName().WrapWithColor(getColorForType(mTarget.startType));
+											}
 										}
 										else {
 											result += mTarget.Items[i].GetActualName().WrapWithColor(typeColor);

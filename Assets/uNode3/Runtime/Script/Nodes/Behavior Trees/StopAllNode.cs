@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow.Other", "Stop All", scope = NodeScope.StateGraph)]
+	[Description("Stop all running nodes in same graph canvas.\nNote: nested node will not be stopped")]
 	public class StopAllNode : BaseFlowNode {
 		protected override void OnExecuted(Flow flow) {
 			foreach(var element in nodeObject.parent) {

@@ -1652,6 +1652,21 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Get the graph from <paramref name="obj"/>
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static Graph GetGraphData(object obj) {
+			if(obj is IGraph) {
+				return (obj as IGraph).GraphData;
+			}
+			if(obj is UGraphElement) {
+				return (obj as UGraphElement).graph;
+			}
+			return null;
+		}
+
+		/// <summary>
 		/// Get a graph system from a type
 		/// </summary>
 		/// <param name="type"></param>

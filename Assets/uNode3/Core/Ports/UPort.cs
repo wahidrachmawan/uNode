@@ -70,7 +70,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The node that own this port
 		/// </summary>
-		public NodeObject node { get; set; }
+		public NodeObject node { get; internal set; }
 
 		/// <summary>
 		/// The node that own this port

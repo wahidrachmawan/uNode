@@ -894,7 +894,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-				Graph targetGraph = uNodeUtility.GetGraphData(targetObject);
+				Graph targetGraph = GraphUtility.GetGraphData(targetObject);
 				if(targetGraph != null && targetGraph != graph) {
 					var itemData = new List<GraphItem>();
 					if(filter.IsValidTarget(MemberData.TargetType.uNodeVariable)) {

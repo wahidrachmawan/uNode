@@ -14,6 +14,8 @@ namespace MaxyGames.UNode {
 		public struct DebugValue {
 			public bool isSet;
 			public float time;
+			public int frame;
+
 			public object value;
 
 			public bool isValid => time > 0;
@@ -31,10 +33,10 @@ namespace MaxyGames.UNode {
 					_state = value;
 				}
 			}
-			public float calledTime;
+			public float time;
 			public float breakpointTimes;
 			public Func<StateType> customCondition;
-			public bool isValid => calledTime > 0;
+			public bool isValid => time > 0;
 		}
 
 		public class DebugMessage {
@@ -397,6 +399,7 @@ namespace MaxyGames.UNode {
 			var id = nodeUID + portID;
 			data.valueConnectionDebug[id] = new DebugValue() {
 				time = debugTime,
+				frame = uNodeThreadUtility.playingFrame,
 				value = value,
 				isSet = isSet,
 			};
@@ -443,6 +446,7 @@ namespace MaxyGames.UNode {
 			var id = nodeUID + portID;
 			data.flowConnectionDebug[id] = new DebugValue() {
 				time = debugTime,
+				frame = uNodeThreadUtility.playingFrame,
 			};
 #if UNODE_PRO
 			if(data.messageData != null) {
@@ -495,7 +499,7 @@ namespace MaxyGames.UNode {
 					nodeDebug = new DebugFlow();
 					data.nodeDebug[nodeUID] = nodeDebug;
 				}
-				nodeDebug.calledTime = debugTime;
+				nodeDebug.time = debugTime;
 				nodeDebug.nodeState = s;
 				if(Breakpoint.HasBreakpoint(objectUID, nodeUID)) {
 					nodeDebug.breakpointTimes = debugTime;
@@ -510,7 +514,7 @@ namespace MaxyGames.UNode {
 					nodeDebug = new DebugFlow();
 					flowData[portID] = nodeDebug;
 				}
-				nodeDebug.calledTime = debugTime;
+				nodeDebug.time = debugTime;
 				nodeDebug.nodeState = s;
 				if(Breakpoint.HasBreakpoint(objectUID, nodeUID)) {
 					nodeDebug.breakpointTimes = debugTime;

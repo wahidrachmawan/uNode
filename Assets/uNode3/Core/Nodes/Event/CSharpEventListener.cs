@@ -124,16 +124,16 @@ namespace MaxyGames.UNode.Nodes {
 								}
 								Trigger(flow);
 							}, method.GetParameters().Select(i => i.ParameterType).ToArray());
-							UEvent.Register(UEventID.OnEnable, comp, () => {
+							instance.eventData.onEnable += instance => {
 								object obj = this.instance.GetValue(instance.defaultFlow);
 								target.startTarget = obj;
 								evt.AddEventHandler(instance, @delegate);
-							});
-							UEvent.Register(UEventID.OnDisable, comp, () => {
+							};
+							instance.eventData.onDisable += instance => {
 								object obj = this.instance.GetValue(instance.defaultFlow);
 								target.startTarget = obj;
 								evt.RemoveEventHandler(instance, @delegate);
-							});
+							};
 						}
 					}
 					else if(targetType.IsCastableTo(typeof(UnityEventBase))) {
@@ -150,16 +150,16 @@ namespace MaxyGames.UNode.Nodes {
 							Trigger(flow);
 						}, types);
 						@delegate = Delegate.CreateDelegate(delegateType, @delegate.Target, @delegate.Method);
-						UEvent.Register(UEventID.OnEnable, comp, () => {
+						instance.eventData.onEnable += instance => {
 							object obj = this.instance.GetValue(instance.defaultFlow);
 							target.startTarget = obj;
 							addListener.InvokeOptimized(target.Get(instance.defaultFlow), @delegate);
-						});
-						UEvent.Register(UEventID.OnDisable, comp, () => {
+						};
+						instance.eventData.onDisable += instance => {
 							object obj = this.instance.GetValue(instance.defaultFlow);
 							target.startTarget = obj;
 							removeListener.InvokeOptimized(target.Get(instance.defaultFlow), @delegate);
-						});
+						};
 					}
 					
 				}

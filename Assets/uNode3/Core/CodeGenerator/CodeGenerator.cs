@@ -429,6 +429,11 @@ namespace MaxyGames {
 					generatedData.errors = generatorData.errors;
 					generatedData.InitOwner();
 				});
+#if !UNODE_PRO
+				RegisterScriptHeader(@"///--------------------------------------------///
+///-----MADE WITH: UNODE VISUAL SCRIPTING-----///
+///------------------------------------------///");
+#endif
 				RegisterScriptHeader("#pragma warning disable");
 
 				//Build the full script and mark the data to valid.

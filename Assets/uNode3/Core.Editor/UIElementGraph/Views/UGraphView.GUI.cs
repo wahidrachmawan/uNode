@@ -1007,24 +1007,25 @@ namespace MaxyGames.UNode.Editors {
 				int currentCount = 0;
 				for(int y = 0; y < textures.GetLength(0); y++) {
 					for(int x = 0; x < textures.GetLength(1); x++) {
+						uNodeThreadUtility.WaitFrame(3);
 						uNodeThreadUtility.QueueAndWait(() => {
 							UpdatePosition(new Vector2(graphRect.x + (x * width) - offset.x, graphRect.y + (y * height) - offset.x));
 						});
-						uNodeThreadUtility.WaitFrame(3);
-						uNodeThreadUtility.QueueAndWait(/*6,*/() => {
+						uNodeThreadUtility.WaitFrame(6);
+						uNodeThreadUtility.QueueAndWait(() => {
 							var pixels = UnityEditorInternal.InternalEditorUtility.ReadScreenPixel(position, layoutWidth, layoutHeight);
 							var texture = new Texture2D(layoutWidth, layoutHeight, TextureFormat.RGB24, false);
 							texture.SetPixels(pixels);
 							textures[y, x] = texture;
 							//EditorUtility.DisplayProgressBar("Capturing", "", progress);
 						});
-						//uNodeThreadUtility.WaitFrame(6);
 						currentCount++;
 						progress = currentCount / (yCount * xCount);
 						graph.loadingProgress = progress;
 						//GC.KeepAlive(textures);
 					}
 				}
+				uNodeThreadUtility.WaitFrame(10);
 				uNodeThreadUtility.QueueAndWait(() => {
 					var canvasTexture = new Texture2D((int)xCount * layoutWidth, (int)yCount * layoutHeight, TextureFormat.RGB24, false);
 					int realY = (int)yCount;

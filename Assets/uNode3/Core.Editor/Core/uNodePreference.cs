@@ -38,7 +38,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public DisplayKind displayKind;
 
-			public bool showGrid = true,
+			public bool showGrid = false,
 				inEditorDocumentation = true,
 				inspectorIntegration = true,
 				autoBackupOnSave = true,

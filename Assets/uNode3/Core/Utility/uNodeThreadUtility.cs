@@ -71,27 +71,33 @@ namespace MaxyGames.UNode {
 		private static ConcurrentDictionary<object, Action> actionExecutedOnce = new ConcurrentDictionary<object, Action>();
 		private static int queueCount;
 
-#if !UNITY_EDITOR
+		[DefaultExecutionOrder(int.MinValue)]
 		class ThreadRunner : MonoBehaviour {
 			public void Update() {
+				playingFrame = Time.frameCount;
+#if !UNITY_EDITOR
 				uNodeThreadUtility.Update();
+#endif
 			}
 		}
 
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-		internal static void Init() {
+		static void Init() {
 			GameObject go = new GameObject("ThreadRunner");
-			//go.hideFlags = HideFlags.HideAndDontSave;
+			go.hideFlags = HideFlags.HideAndDontSave;
 			go.AddComponent<ThreadRunner>();
 			UnityEngine.Object.DontDestroyOnLoad(go);
 		}
-#endif
 
 		/// <summary>
 		/// The frame count from the start of application
 		/// </summary>
 		/// <value></value>
 		public static long frame { get; private set; }
+		/// <summary>
+		/// The frame count since the start of the game
+		/// </summary>
+		public static int playingFrame { get; private set; }
 		/// <summary>
 		/// The time since application startup
 		/// </summary>
@@ -122,7 +128,7 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
-		/// Don't call this, this function will be called automaticly by the uNodeEditorInitializer.
+		/// Don't call this, this function will be called automaticly.
 		/// </summary>
 		public static void Update() {
 			lock(lockObject) {

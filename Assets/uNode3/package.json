@@ -1,6 +1,6 @@
 {
 	"name": "com.maxygames.unode",
-	"version": "3.0.2",
+	"version": "3.0.3",
 	"unity": "2022.3",
 	"displayName": "uNode 3",
 	"description": "Visual Scripting Plugin for Unity.",
@@ -22,9 +22,19 @@
             "path": "Samples~/RollABall"
         },
         {
+            "displayName": "2D UFO",
+            "description": "A simple 2D UFO sample game",
+            "path": "Samples~/2D UFO"
+        },
+        {
             "displayName": "Global Event",
             "description": "Contains sample for using Global Event feature",
             "path": "Samples~/Global Event"
+        },
+        {
+            "displayName": "Custom Nodes",
+            "description": "Contains sample for creating custom node with HLAPI",
+            "path": "Samples~/Custom Nodes"
         }
     ]
 }

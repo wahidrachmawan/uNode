@@ -18,11 +18,29 @@ namespace MaxyGames.UNode.Editors {
 		/// Note: this will be executed in the next frame after gui changed
 		/// </summary>
 		public static event Action<object, UIChangeType> onGUIChanged;
+		/// <summary>
+		/// An event to be called when GUI has been changed ( Major ).
+		/// Note: this will be executed in the next frame after gui changed
+		/// </summary>
+		public static event Action<object> onGUIChangedMajor;
 
 		public static void GUIChangedMajor(object owner) {
 			uNodeEditor.ClearCache();
 			EditorReflectionUtility.UpdateRuntimeTypes();
 			//GUIChanged(owner, UIChangeType.Important);
+			if(owner != null) {
+				if(owner is Node) {
+					owner = (owner as Node).nodeObject;
+				}
+				uNodeThreadUtility.ExecuteOnce(() => {
+					onGUIChangedMajor?.Invoke(owner);
+				}, "UNODE_GUI_CHANGED_MAJOR_CALLBACK:" + owner.GetHashCode());
+			}
+			else {
+				uNodeThreadUtility.ExecuteOnce(() => {
+					onGUIChangedMajor?.Invoke(owner);
+				}, "UNODE_GUI_CHANGED_MAJOR_CALLBACK");
+			}
 		}
 
 		public static void GUIChanged(object owner, UIChangeType changeType = UIChangeType.Small) {

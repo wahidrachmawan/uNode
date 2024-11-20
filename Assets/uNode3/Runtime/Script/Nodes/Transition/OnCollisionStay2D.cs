@@ -36,9 +36,10 @@
 				mData.AddCode(
 					CG.Condition(
 						"if",
-						CG.CompareNodeState(enter, null),
+						CG.CompareNodeState(node.enter, null),
 						set + CG.FlowTransitionFinish(this)
-					)
+					),
+					this
 				);
 			}
 			return null;

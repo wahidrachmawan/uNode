@@ -111,75 +111,85 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 			if(inheritType != null && graph is IGraphWithFunctions) {
 				var functions = graph.GetFunctions();
 				foreach(var function in functions) {
-					var returnType = function.ReturnType();
-					if(returnType != typeof(void)) {
-						bool isCoroutine = returnType.IsCastableTo(typeof(IEnumerable)) || returnType.IsCastableTo(typeof(IEnumerator));
-						bool hasReturn = false;
+					try {
+						var returnType = function.ReturnType();
+						if(returnType != typeof(void)) {
+							bool isCoroutine = returnType.IsCastableTo(typeof(IEnumerable)) || returnType.IsCastableTo(typeof(IEnumerator));
+							bool hasReturn = false;
 
-						var nodes = CG.Nodes.FindAllConnections(function.Entry, includeFlowOutput: true);
-						foreach(var node in nodes) {
-							if(node.node is NodeReturn) {
-								hasReturn = true;
-								break;
-							}
-							else if(isCoroutine) {
-								foreach(var port in node.FlowInputs) {
-									if(port.IsCoroutine()) {
-										hasReturn = true;
-										break;
-									}
+							var nodes = CG.Nodes.FindAllConnections(function.Entry, includeFlowOutput: true);
+							foreach(var node in nodes) {
+								if(node.node is NodeReturn) {
+									hasReturn = true;
+									break;
 								}
-								if(hasReturn) break;
+								else if(isCoroutine) {
+									foreach(var port in node.FlowInputs) {
+										if(port.IsCoroutine()) {
+											hasReturn = true;
+											break;
+										}
+									}
+									if(hasReturn) break;
+								}
+							}
+							if(hasReturn == false) {
+								if(isCoroutine) {
+									analyzer.RegisterError(function.Entry, $@"Function: {function.name} need to have return or yield return node.");
+								}
+								else {
+									analyzer.RegisterError(function.Entry, $@"Function: {function.name} need to have return node.");
+								}
 							}
 						}
-						if(hasReturn == false) {
-							if(isCoroutine) {
-								analyzer.RegisterError(function.Entry, $@"Function: {function.name} need to have return or yield return node.");
-							}
-							else {
-								analyzer.RegisterError(function.Entry, $@"Function: {function.name} need to have return node.");
-							}
-						}
-					}
-					if(function.modifier.Static) {
-						//Analizer for static function
-						if(function.attributes.Any(a => a.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute))) {
-							if(function.parameters.Count == 0) {
-								analyzer.RegisterError(function, $@"Function: {function.name} need at least one parameter to mark as extension.");
-							}
-						}
-					}
-					else {
-						var baseMember = inheritType.GetMethod(function.name, MemberData.flags, null, function.ParameterTypes, null);
-						if(function.modifier.Override) {
-							if(baseMember == null) {
-								analyzer.RegisterError(function, $@"Function: {function.name} has no suitable function found to override.");
-							}
-							else if(baseMember.IsVirtual == false) {
-								analyzer.RegisterError(function, $@"Function: {function.name} is unable to overriden because the base function is not virtual/abstract.");
+						if(function.modifier.Static) {
+							//Analizer for static function
+							if(function.attributes.Any(a => a.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute))) {
+								if(function.parameters.Count == 0) {
+									analyzer.RegisterError(function, $@"Function: {function.name} need at least one parameter to mark as extension.");
+								}
 							}
 						}
 						else {
-							if(baseMember != null && baseMember.IsVirtual) {
-								analyzer.RegisterError(function, $@"Function: {function.name} is virtual/overridable but this function is not use override modifier this lead to incorrect behavior please use override modifier or rename this function.", () => {
-									function.modifier.SetOverride();
-								});
+							var baseMember = inheritType.GetMethod(function.name, MemberData.flags, null, function.ParameterTypes, null);
+							if(function.modifier.Override) {
+								if(baseMember == null) {
+									analyzer.RegisterError(function, $@"Function: {function.name} has no suitable function found to override.");
+								}
+								else if(baseMember.IsVirtual == false) {
+									analyzer.RegisterError(function, $@"Function: {function.name} is unable to overriden because the base function is not virtual/abstract.");
+								}
+							}
+							else {
+								if(baseMember != null && baseMember.IsVirtual) {
+									analyzer.RegisterError(function, $@"Function: {function.name} is virtual/overridable but this function is not use override modifier this lead to incorrect behavior please use override modifier or rename this function.", () => {
+										function.modifier.SetOverride();
+									});
+								}
 							}
 						}
+					}
+					catch (Exception ex) {
+						analyzer.RegisterError(function, ex.ToString());
 					}
 				}
 			}
 			if(inheritType != null && graph is IGraphWithProperties) {
 				var properties = graph.GetProperties();
 				foreach(var property in properties) {
-					if(property.modifier.Override) {
-						var member = inheritType.GetProperty(property.name, MemberData.flags);
-						if(member == null) {
-							analyzer.RegisterError(property, $@"Property: {property.name} has no suitable property found to override.");
+					try {
+						if(property.modifier.Override) {
+							var member = inheritType.GetProperty(property.name, MemberData.flags);
+							if(member == null) {
+								analyzer.RegisterError(property, $@"Property: {property.name} has no suitable property found to override.");
+							}
+							else {
+								//TODO: check for property error because of override
+							}
 						}
-						else {
-							//TODO: check for property error because of override
-						}
+					}
+					catch (Exception ex) {
+						analyzer.RegisterError(property, ex.ToString());
 					}
 				}
 			}

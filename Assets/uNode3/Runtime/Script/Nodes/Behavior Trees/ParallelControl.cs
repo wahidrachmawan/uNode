@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow.Other", "ParallelControl", scope = NodeScope.StateGraph)]
+	[Description("Act like a Flow Control but this will executes all nodes in same frame in order ( no waiting )")]
 	public class ParallelControl : BaseFlowNode {
 		[Range(0, 10)]
-		public int flowCount = 1;
+		public int flowCount = 2;
 		[System.NonSerialized]
 		public FlowOutput[] flows;
 

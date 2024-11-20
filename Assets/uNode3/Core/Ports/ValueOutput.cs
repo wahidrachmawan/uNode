@@ -51,13 +51,13 @@ namespace MaxyGames.UNode {
 
 		public object GetValue(Flow flow) {
 			if(get == null)
-				throw new GraphException("The get action on the port is null.", node);
+				throw new GraphException($"The get action on the port is null.\nError from node: {node.GetRichName()}", node);
 			return get(flow);
 		}
 
 		public void SetValue(Flow flow, object value) {
-			if(get == null)
-				throw new GraphException("The get action on the port is null.", node);
+			if(set == null)
+				throw new GraphException($"The set action on the port is null.\nError from node: {node.GetRichName()}", node);
 			set(flow, value);
 		}
 

@@ -4,7 +4,7 @@ namespace MaxyGames.UNode.Editors {
 	/// <summary>
 	/// Base class for all custom port menu.
 	/// </summary>
-	public abstract class PortMenuCommand : ICustomIcon {
+	public abstract class PortMenuCommand : IIcon {
 		/// <summary>
 		/// The graph editor.
 		/// </summary>
@@ -49,7 +49,7 @@ namespace MaxyGames.UNode.Editors {
 		/// The command icon
 		/// </summary>
 		/// <returns></returns>
-		public virtual Texture GetIcon() {
+		public virtual System.Type GetIcon() {
 			return null;
 		}
 	}

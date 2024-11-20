@@ -178,7 +178,11 @@ namespace MaxyGames.UNode.Editors {
 
 							var debug = debugData.GetDebugValue(portData);
 							if(debug.isValid) {
-								var times = (GraphDebug.debugTime - debug.time) * GraphDebug.transitionSpeed;
+								var time = debug.time;
+								if(debug.frame == uNodeThreadUtility.playingFrame) {
+									time = GraphDebug.debugTime;
+								}
+								var times = (GraphDebug.debugTime - time) * GraphDebug.transitionSpeed;
 								if(times >= 0) {
 									if(Mathf.Abs(edgeControl.controlPoints[0].x - edgeControl.controlPoints[3].x) <= 4) {
 										Vector2 v1 = this.ChangeCoordinatesTo(iMGUIContainer, edgeControl.controlPoints[0]);
@@ -203,7 +207,11 @@ namespace MaxyGames.UNode.Editors {
 							var debug = debugData.GetDebugValue(portData);
 
 							if(debug.isValid) {
-								var times = (GraphDebug.debugTime - debug.time) * GraphDebug.transitionSpeed;
+								var time = debug.time;
+								if(debug.frame == uNodeThreadUtility.playingFrame) {
+									time = GraphDebug.debugTime;
+								}
+								var times = (GraphDebug.debugTime - time) * GraphDebug.transitionSpeed;
 								if(Mathf.Abs(edgeControl.controlPoints[0].y - edgeControl.controlPoints[3].y) <= 4) {
 									Vector2 v1 = this.ChangeCoordinatesTo(iMGUIContainer, edgeControl.controlPoints[0]);
 									Vector2 v4 = this.ChangeCoordinatesTo(iMGUIContainer, edgeControl.controlPoints[3]);

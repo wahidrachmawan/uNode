@@ -524,7 +524,7 @@ namespace MaxyGames.Runtime {
 					nodeDebug = new GraphDebug.DebugFlow();
 					data.nodeDebug[nodeUID] = nodeDebug;
 				}
-				nodeDebug.calledTime = GraphDebug.debugTime;
+				nodeDebug.time = GraphDebug.debugTime;
 				nodeDebug.customCondition = Func;
 				if(GraphDebug.Breakpoint.HasBreakpoint(objectUID, nodeUID)) {
 					nodeDebug.breakpointTimes = GraphDebug.debugTime;
@@ -540,7 +540,7 @@ namespace MaxyGames.Runtime {
 					nodeDebug = new GraphDebug.DebugFlow();
 					flowData[portID] = nodeDebug;
 				}
-				nodeDebug.calledTime = GraphDebug.debugTime;
+				nodeDebug.time = GraphDebug.debugTime;
 				nodeDebug.customCondition = Func;
 				if(GraphDebug.Breakpoint.HasBreakpoint(objectUID, nodeUID)) {
 					nodeDebug.breakpointTimes = GraphDebug.debugTime;

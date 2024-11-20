@@ -95,13 +95,13 @@ namespace MaxyGames.UNode.Nodes {
 					});
 				}
 				(target as IGlobalEvent).AddListener(@delegate);
-				UEvent.Register(UEventID.OnEnable, comp, () => {
+				instance.eventData.onEnable += instance => {
 					(target as IGlobalEvent).RemoveListener(@delegate);
 					(target as IGlobalEvent).AddListener(@delegate);
-				});
-				UEvent.Register(UEventID.OnDisable, comp, () => {
+				};
+				instance.eventData.onDisable += instance => {
 					(target as IGlobalEvent).RemoveListener(@delegate);
-				});
+				};
 			}
 			else {
 				throw new Exception("Invalid target: " + instance.target + "\nThe target type must inherit from `UnityEngine.Component`");

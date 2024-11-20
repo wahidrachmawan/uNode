@@ -20,7 +20,7 @@
 				CG.InsertCodeToFunction(
 					"OnMouseDrag",
 					typeof(void),
-					CG.Condition("if", CG.CompareNodeState(enter, null), CG.FlowTransitionFinish(this)));
+					CG.Condition("if", CG.CompareNodeState(node.enter, null), CG.FlowTransitionFinish(this)));
 			}
 			return null;
 		}

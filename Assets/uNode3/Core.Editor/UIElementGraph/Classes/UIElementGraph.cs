@@ -780,7 +780,8 @@ namespace MaxyGames.UNode.Editors {
 													}
 													var instance = member.serializedInstance;
 													member.CopyFrom(MemberData.CreateFromMembers(members));
-													member.serializedInstance.value = instance.serializedValue;
+													if(instance != null)
+														member.serializedInstance.value = instance.serializedValue;
 
 													member.startType = runtimeType;
 													changedTypes.Add((runtimeType, uElement));

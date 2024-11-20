@@ -151,7 +151,11 @@ namespace MaxyGames.UNode {
 				if(UseDefaultValue && defaultValue != null && defaultValue.isAssigned) {
 					return defaultValue.type ?? typeof(object);
 				} else if(connections.Count == 1) {
-					return connections[0].output.type;
+					var output = connections[0].output;
+					//Make sure that the other ports is initialized
+					output.node?.EnsureRegistered();
+					//return the result
+					return output.type;
 				}
 				if(_type != null)
 					return _type;

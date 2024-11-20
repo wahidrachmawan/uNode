@@ -79,6 +79,9 @@ namespace MaxyGames.UNode {
 		public ValueOutput primaryValueOutput;
 
 		private NodePorts<ValueInput> _valueInputs;
+		/// <summary>
+		/// The list of all value input ports
+		/// </summary>
 		[SerializeField]
 		public NodePorts<ValueInput> ValueInputs {
 			get {
@@ -93,6 +96,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private NodePorts<ValueOutput> _valueOutputs;
+		/// <summary>
+		/// The list of all value output ports
+		/// </summary>
 		[SerializeField]
 		public NodePorts<ValueOutput> ValueOutputs {
 			get {
@@ -107,6 +113,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private NodePorts<FlowInput> _flowInputs;
+		/// <summary>
+		/// The list of all flow input ports
+		/// </summary>
 		[SerializeField]
 		public NodePorts<FlowInput> FlowInputs {
 			get {
@@ -121,6 +130,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private NodePorts<FlowOutput> _flowOutputs;
+		/// <summary>
+		/// The list of all flow output ports
+		/// </summary>
 		[SerializeField]
 		public NodePorts<FlowOutput> FlowOutputs {
 			get {
@@ -135,6 +147,9 @@ namespace MaxyGames.UNode {
 		}
 		[SerializeField]
 		private List<UPort> _invalidPorts;
+		/// <summary>
+		/// The list of all invalid ports
+		/// </summary>
 		public List<UPort> InvalidPorts {
 			get {
 				if(_invalidPorts == null)
@@ -143,18 +158,38 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get the value input port by id
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
 		public ValueInput GetValueInput(string key) {
 			return ValueInputs.FirstOrDefault(p => p.id == key);
 		}
 
+		/// <summary>
+		/// Get the value output port by id
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
 		public ValueOutput GetValueOutput(string key) {
 			return ValueOutputs.FirstOrDefault(p => p.id == key);
 		}
 
+		/// <summary>
+		/// Get the flow input port by id
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
 		public FlowInput GetFlowInput(string key) {
 			return FlowInputs.FirstOrDefault(p => p.id == key);
 		}
 
+		/// <summary>
+		/// Get the flow output port by id
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns></returns>
 		public FlowOutput GetFlowOutput(string key) {
 			return FlowOutputs.FirstOrDefault(p => p.id == key);
 		}
@@ -176,6 +211,7 @@ namespace MaxyGames.UNode {
 
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			try {
+				EnsureRegistered();
 				node?.OnRuntimeInitialize(instance);
 			}
 			catch(Exception ex) {
@@ -197,6 +233,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Register the node
+		/// </summary>
 		public void Register() {
 			if(_node == null)
 				return;//Skip register if the node is null / missing.
@@ -316,6 +355,10 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Functions
+		/// <summary>
+		/// Get the title of the node
+		/// </summary>
+		/// <returns></returns>
 		public string GetTitle() {
 			try {
 				return node?.GetTitle() ?? name;
@@ -326,6 +369,10 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get rich title of the node
+		/// </summary>
+		/// <returns></returns>
 		public string GetRichTitle() {
 			try {
 				return node?.GetRichTitle() ?? name;
@@ -336,6 +383,10 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get rich name of the node
+		/// </summary>
+		/// <returns></returns>
 		public string GetRichName() {
 			try {
 				return node?.GetRichName() ?? name;
@@ -362,6 +413,10 @@ namespace MaxyGames.UNode {
 			return node?.ReturnType();
 		}
 
+		/// <summary>
+		/// Get the node icon
+		/// </summary>
+		/// <returns></returns>
 		public Type GetNodeIcon() {
 			return node?.GetNodeIcon() ?? typeof(object);
 		}

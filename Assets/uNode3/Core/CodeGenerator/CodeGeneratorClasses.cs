@@ -1570,7 +1570,6 @@ namespace MaxyGames {
 			public UGraphElement owner;
 
 			private List<(int priority, string code)> codeList = new List<(int, string)>();
-			private HashSet<float> ownerUID = new HashSet<float>();
 
 			public string GenerateCode() {
 				string result = null;
@@ -1772,21 +1771,16 @@ namespace MaxyGames {
 				codeList.Add((priority, code));
 			}
 
-			public void AddCode(string code, UnityEngine.Object owner, int priority = 0) {
-				AddCode(code, owner.GetInstanceID(), priority);
+			public void AddCode(string code, object owner, int priority = 0) {
+				AddCode(CG.WrapWithInformation(code, owner), priority);
 			}
 
 			public void AddCode(string code, float ownerID, int priority) {
-				if(ownerUID.Contains(ownerID)) {
-					return;
-				}
-				ownerUID.Add(ownerID);
 				codeList.Add((priority, code));
 			}
 
 			public void ClearCode() {
 				codeList.Clear();
-				ownerUID.Clear();
 			}
 			#endregion
 		}

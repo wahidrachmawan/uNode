@@ -743,6 +743,55 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 	}
 
+	class CreateFunctionForDelegateInputPortCommand : PortMenuCommand {
+		Type type;
+
+		public override string name {
+			get {
+				return "Assign to function";
+			}
+		}
+
+		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
+			if(source.nodeObject.graphContainer is UnityEngine.Object unityObject) {
+				Undo.SetCurrentGroupName("Assign to function");
+				Undo.RegisterFullObjectHierarchyUndo(unityObject, "Assign to function");
+			}
+			var pos = mousePositionOnCanvas != Vector2.zero ? mousePositionOnCanvas : new Vector2(source.position.x - 100, source.position.y);
+			var method = type.GetMethod("Invoke");
+			NodeEditorUtility.AddNewFunction(source.nodeObject.graph.functionContainer, "newFunction_" + UnityEngine.Random.Range(0, 9999), method.ReturnType, func => {
+				foreach(var p in method.GetParameters()) {
+					func.parameters.Add(new ParameterData() {
+						name = p.Name,
+						type = p.ParameterType,
+						refKind = p.IsOut ? RefKind.Out : p.IsIn ? RefKind.In : p.ParameterType.IsByRef ? RefKind.Ref : RefKind.None
+					});
+				}
+				NodeEditorUtility.AddNewNode<NodeDelegateFunction>(graph.graphData, null, null,
+					pos,
+					(node) => {
+						node.member.target = MemberData.CreateFromValue(func);
+						node.Register();
+						node.output.ConnectTo(data.port);
+						graph.Refresh();
+					});
+			});
+		}
+
+		public override bool IsValidPort(Node source, PortCommandData data) {
+			if(data.portKind != PortKind.ValueInput)
+				return false;
+			type = filter != null ? filter.GetActualType() : typeof(object);
+			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
+				if(filter != null && filter.SetMember) {
+					return false;
+				}
+				return source.nodeObject.graphContainer is IGraphWithFunctions;
+			}
+			return false;
+		}
+	}
+
 	class PromoteToLocalVariableInputPortCommand : PortMenuCommand {
 		Type type;
 

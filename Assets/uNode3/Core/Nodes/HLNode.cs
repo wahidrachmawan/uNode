@@ -139,6 +139,7 @@ namespace MaxyGames.UNode.Nodes {
 							}
 							else {
 								foreach(var p in portData.flowOutputs) {
+									if(p == null) continue;
 									data.exits.Add(p.port);
 								}
 							}

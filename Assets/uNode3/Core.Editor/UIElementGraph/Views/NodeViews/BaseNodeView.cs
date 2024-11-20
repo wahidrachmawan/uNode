@@ -131,14 +131,14 @@ namespace MaxyGames.UNode.Editors {
 										Color.Lerp(
 											UIElementUtility.Theme.nodeRunningColor,
 											UIElementUtility.Theme.nodeSuccessColor,
-											(GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4), 0, 0);
+											(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Failure:
 									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
 										Color.Lerp(
 											UIElementUtility.Theme.nodeRunningColor,
 											UIElementUtility.Theme.nodeFailureColor,
-											(GraphDebug.debugTime - nodeDebug.calledTime) * GraphDebug.transitionSpeed * 4), 0, 0);
+											(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Running:
 									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,

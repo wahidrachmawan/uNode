@@ -590,7 +590,7 @@ namespace MaxyGames.UNode.Editors {
 								uNodeEditorUtility.RegisterUndo(editorData.owner, "Connect port");
 								command.OnClick(owner.targetNode, commandData, position);
 								owner.MarkRepaint();
-							}, "@", icon: command.GetIcon()));
+							}, "@", icon: uNodeEditorUtility.GetTypeIcon(command.GetIcon())));
 						}
 					}
 				}
