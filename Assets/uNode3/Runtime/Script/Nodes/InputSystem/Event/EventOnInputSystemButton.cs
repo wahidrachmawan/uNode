@@ -92,6 +92,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override void OnRuntimeInitialize(GraphInstance instance) {
+			base.OnRuntimeInitialize(instance);
 			instance.eventData.onStart += obj => {
 				var o = target.GetValue(obj.defaultFlow) ?? obj.target;
 				if(o != null) {

@@ -87,6 +87,10 @@ namespace MaxyGames.UNode {
 		[SerializeField]
 		private int m_UniqueID;
 
+		/// <summary>
+		/// Acquire new UID
+		/// </summary>
+		/// <returns></returns>
 		internal int GetNewUniqueID() {
 			while(GetElementByID(++m_UniqueID) != null) { }
 			return m_UniqueID;
@@ -94,6 +98,10 @@ namespace MaxyGames.UNode {
 
 		[field: NonSerialized]
 		internal UGraphElement linkedOwner { get; private set; }
+		/// <summary>
+		/// Set the graph as linked graph ( macros )
+		/// </summary>
+		/// <param name="parent"></param>
 		internal void SetAsLinkedGraph(UGraphElement parent) {
 			linkedOwner = parent;
 		}
