@@ -125,7 +125,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
-					if(node.targetNode is Nodes.NodeReroute) {
+					if(node.targetNode is IRerouteNode) {
 						//Reroute auto re-connection
 						inputPort = node.inputPorts.FirstOrDefault();
 						outputPort = node.outputPorts.FirstOrDefault();

@@ -1976,7 +1976,7 @@ namespace MaxyGames.UNode.Editors {
 								return string.Compare(x.MetadataToken.ToString(), y.MetadataToken.ToString(), StringComparison.OrdinalIgnoreCase);
 							});
 							EditorGUI.indentLevel++;
-							ShowFields(fieldInfo, obj, settings.unityObject);
+							ShowFields(fieldInfo, obj, settings.unityObject, settings);
 							EditorGUI.indentLevel--;
 						}
 					}
@@ -3103,7 +3103,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						if(obj != null) {
 							EditorGUI.indentLevel++;
-							ShowFields(fieldInfo, obj, unityObject);
+							ShowFields(fieldInfo, obj, unityObject, settings);
 							EditorGUI.indentLevel--;
 						}
 					}

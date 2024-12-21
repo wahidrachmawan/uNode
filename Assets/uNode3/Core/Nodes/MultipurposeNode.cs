@@ -49,7 +49,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public override string GetTitle() {
-			return target.DisplayName();
+			return uNodeUtility.GetNicelyDisplayName(target, richName: false);
 		}
 
 		public override string GetRichTitle() {

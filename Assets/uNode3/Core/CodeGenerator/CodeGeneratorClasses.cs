@@ -802,6 +802,8 @@ namespace MaxyGames {
 			public Dictionary<string, string> namedParameters;
 
 			public string GenerateCode() {
+				if(attributeType == null) return null;
+
 				string parameters = null;
 				if(attributeParameters != null) {
 					foreach(var str in attributeParameters) {

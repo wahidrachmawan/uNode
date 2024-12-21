@@ -154,8 +154,11 @@ namespace MaxyGames.UNode {
 	public sealed class GraphInstance {
         public readonly object target;
 		public readonly IGraph graph;
+		[HideInInspector]
 		public readonly RuntimeGraphEventData eventData;
+		[HideInInspector]
 		public readonly MemberReferenceTree members = new MemberReferenceTree();
+		[HideInInspector]
 		public readonly StateGraphRunner stateRunner;
 
 		public Flow defaultFlow => stateRunner.defaultFlow;

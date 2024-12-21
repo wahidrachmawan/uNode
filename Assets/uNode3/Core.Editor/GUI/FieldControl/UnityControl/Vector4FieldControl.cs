@@ -12,7 +12,8 @@ namespace MaxyGames.UNode.Editors.Control {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var oldValue = (Vector4)value;
-			var newValue = EditorGUI.Vector4Field(position, label, oldValue);
+			position = EditorGUI.PrefixLabel(position, label);
+			var newValue = EditorGUI.Vector4Field(position, GUIContent.none, oldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				onChanged(newValue);
 			}

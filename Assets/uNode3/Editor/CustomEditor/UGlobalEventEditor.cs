@@ -3,18 +3,86 @@ using UnityEditor;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MaxyGames.UNode.Editors {
 	[CustomEditor(typeof(UGlobalEvent), true)]
 	public class UGlobalEventEditor : Editor {
+		static ConditionalWeakTable<Delegate, Delegate[]> listenerMap = new();
+
 		public override void OnInspectorGUI() {
 			base.OnInspectorGUI();
 			DrawFindReferences();
+
+			if(Application.isPlaying) {
+				DrawEvents((target as UGlobalEvent).GetDelegate());
+			}
 		}
 
 		protected void DrawFindReferences() {
 			if(GUILayout.Button("Find All References")) {
 				GraphUtility.ShowUnityReferenceUsages(target);
+			}
+		}
+
+		protected void DrawEvents(Delegate evt) {
+			if(evt == null) return;
+			if(!listenerMap.TryGetValue(evt, out var delegates)) {
+				delegates = evt.GetInvocationList();
+				listenerMap.AddOrUpdate(evt, delegates);
+			}
+			DrawEventListeners(delegates);
+		}
+
+		protected void DrawEventListeners(Delegate[] events) {
+			EditorGUILayout.LabelField("Listeners", EditorStyles.boldLabel);
+			EditorGUI.BeginDisabledGroup(true);
+			EditorGUILayout.BeginVertical("Box");
+			foreach(var evt in events) {
+				DrawDelegate(evt);
+				EditorGUILayout.Separator();
+			}
+			EditorGUILayout.EndVertical();
+			EditorGUI.EndDisabledGroup();
+		}
+
+		protected void DrawDelegate(Delegate @delegate) {
+			EditorGUILayout.LabelField(EditorReflectionUtility.GetPrettyMethodName(@delegate.Method), EditorStyles.centeredGreyMiniLabel);
+			EditorGUI.indentLevel++;
+			if(@delegate.Target != null) {
+				var target = @delegate.Target;
+				var type = target.GetType();
+				DrawListenerTarget(target, type);
+			}
+			EditorGUI.indentLevel--;
+		}
+
+		private void DrawListenerTarget(object target, Type type) {
+			if(target is Node) {
+				target = (target as Node).nodeObject;
+			}
+			if(target is UGraphElement) {
+				uNodeGUI.DrawReference(uNodeGUIUtility.GetRect(), target, type); 
+			}
+			EditorGUILayout.LabelField(target.GetType().ToString(), EditorStyles.miniBoldLabel);
+
+			if(type.IsDefinedAttribute<CompilerGeneratedAttribute>()) {
+				var fields = EditorReflectionUtility.GetFields(type);
+				foreach(var field in fields) {
+					var val = field.GetValueOptimized(target);
+					if(val is Delegate) {
+						EditorGUILayout.LabelField(new GUIContent(ObjectNames.NicifyVariableName(field.Name)), EditorStyles.boldLabel);
+						EditorGUI.indentLevel++;
+						DrawDelegate(val as Delegate);
+						EditorGUI.indentLevel--;
+					}
+					else {
+						uNodeGUIUtility.EditValueLayouted(new GUIContent(ObjectNames.NicifyVariableName(field.Name)), val, field.FieldType, null, new uNodeUtility.EditValueSettings() { nullable = true });
+					}
+				}
+			}
+			else {
+				uNodeGUIUtility.EditValueLayouted(new GUIContent("value"), target, type, null, new uNodeUtility.EditValueSettings() { nullable = true });
 			}
 		}
 	}
@@ -54,6 +122,10 @@ namespace MaxyGames.UNode.Editors {
 					return EditorGUIUtility.singleLineHeight * 2;
 				});
 			DrawFindReferences();
+
+			if(Application.isPlaying) {
+				DrawEvents(asset.GetDelegate());
+			}
 		}
 	}
 }

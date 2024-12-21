@@ -36,7 +36,7 @@ namespace MaxyGames.UNode.Nodes {
 						if(string.IsNullOrWhiteSpace(transitionName) == false) {
 							state.transitions.container.AddChild(new NodeObject(new Transition.CustomTransition()) {
 								name = transitionName,
-								position = new Rect(0, 100, 0, 0),
+								position = new Rect(state.position.x + (state.position.width / 2), state.position.position.y + (state.position.height / 2) + 50, 0, 0),
 							});
 						}
 					});

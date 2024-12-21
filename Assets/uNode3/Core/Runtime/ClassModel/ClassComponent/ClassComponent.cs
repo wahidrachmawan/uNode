@@ -63,7 +63,7 @@ namespace MaxyGames.UNode {
 			if(type != null) {
 				//Instance native c# graph, native graph will call Awake immediately
 				var instance = gameObject.AddComponent(type) as RuntimeBehaviour;
-				instance.hideFlags = HideFlags.HideInInspector;
+				instance.hideFlags = HideFlags.HideInInspector | HideFlags.DontSaveInEditor;
 
 				nativeInstance = instance;
 				//Initialize the references

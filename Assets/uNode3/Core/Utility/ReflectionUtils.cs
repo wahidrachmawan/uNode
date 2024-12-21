@@ -899,18 +899,36 @@ namespace MaxyGames.UNode {
 					return true;
 				}
 				else if(type is IFakeType) {
-					if(type is GenericFakeType GFT) {
-						return GFT.IsOnlyNativeTypes();
-					}
-					else if(type.IsArray) {
-						return IsNativeType(type.GetElementType());
-					}
+					return (type as IFakeType).IsNativeMember;
 				}
 				return false;
 			}
 			return true;
 		}
 
+		/// <summary>
+		/// Is the member is Native member ( from c# or type that implement <see cref="INativeMember"/> )
+		/// </summary>
+		/// <param name="member"></param>
+		/// <returns></returns>
+		public static bool IsNativeMember(MemberInfo member) {
+			if(member is IRuntimeMember) {
+				if(member is IFakeMember) {
+					return (member as IFakeMember).IsNativeMember;
+				}
+				if(member is INativeMember) {
+					return true;
+				}
+				return false;
+			}
+			return true;
+		}
+
+		/// <summary>
+		/// Get native c# member from MemberInfo
+		/// </summary>
+		/// <param name="member"></param>
+		/// <returns></returns>
 		public static MemberInfo GetNativeMember(MemberInfo member) {
 			if(member == null) return null;
 			if(member is not IRuntimeMember) {
@@ -923,35 +941,6 @@ namespace MaxyGames.UNode {
 				return fake.Original as MemberInfo;
 			}
 			return null;
-		}
-
-		/// <summary>
-		/// Is the member is Native member ( from c# or type that implement <see cref="INativeMember"/> )
-		/// </summary>
-		/// <param name="member"></param>
-		/// <returns></returns>
-		public static bool IsNativeMember(MemberInfo member) {
-			if(member is IRuntimeMember) {
-				if(member is IFakeMember) {
-					if(member is MethodBase method) {
-						var args = method.GetGenericArguments();
-						for(int i = 0; i < args.Length; i++) {
-							if(IsNativeType(args[i]) == false)
-								return false;
-						}
-						var parameters = method.GetParameters();
-						for(int i = 0; i < parameters.Length; i++) {
-							if(IsNativeType(parameters[i].ParameterType) == false)
-								return false;
-						}
-					}
-				}
-				if(member is INativeMember) {
-					return true;
-				}
-				return false;
-			}
-			return true;
 		}
 
 		/// <summary>
@@ -975,6 +964,13 @@ namespace MaxyGames.UNode {
 			return type;
 		}
 
+		/// <summary>
+		/// Get the actual native c# type.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="throwOnError"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
 		public static Type GetNativeType(Type type, bool throwOnError) {
 			if(type is IRuntimeMember) {
 				if(type is INativeMember native) {
@@ -1005,6 +1001,20 @@ namespace MaxyGames.UNode {
 					return null;
 			}
 			return type;
+		}
+
+		/// <summary>
+		/// True if the method is extension method.
+		/// </summary>
+		/// <param name="method"></param>
+		/// <returns></returns>
+		public static bool IsExtensionMethod(MethodInfo method) {
+			if(method is not IRuntimeMember) {
+				if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		/// <summary>

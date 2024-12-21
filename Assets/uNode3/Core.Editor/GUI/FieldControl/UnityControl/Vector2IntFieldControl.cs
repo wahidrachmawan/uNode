@@ -12,7 +12,8 @@ namespace MaxyGames.UNode.Editors.Control {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var oldValue = (Vector2Int)value;
-			var newValue = EditorGUI.Vector2IntField(position, label, oldValue);
+			position = EditorGUI.PrefixLabel(position, label);
+			var newValue = EditorGUI.Vector2IntField(position, GUIContent.none, oldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				onChanged(newValue);
 			}

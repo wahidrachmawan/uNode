@@ -50,6 +50,8 @@ namespace MaxyGames.UNode {
 
 		public abstract void ClearListener();
 
+		public abstract Delegate GetDelegate();
+
 		public virtual void Refresh() {
 			if(!Application.isPlaying) {
 				ClearListener();

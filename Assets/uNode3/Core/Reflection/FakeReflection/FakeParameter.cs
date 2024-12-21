@@ -21,6 +21,7 @@ namespace MaxyGames.UNode {
 		public override ParameterAttributes Attributes => target.Attributes;
 
 		public object Original => target;
+		public bool IsNativeMember => false;
 
 		public override string ToString() {
 			return ParameterType.ToString() + " " + Name;

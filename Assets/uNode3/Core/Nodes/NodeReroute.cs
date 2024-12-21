@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	public class NodeReroute : Node {
+	public class NodeReroute : Node, IRerouteNode {
 		public enum RerouteKind {
 			Flow,
 			Value,
@@ -17,6 +17,27 @@ namespace MaxyGames.UNode.Nodes {
 		public FlowOutput exit { get; set; }
 		public ValueInput input { get; set; }
 		public ValueOutput output { get; set; }
+
+		UPort IRerouteNode.Input { 
+			get {
+				if(kind == RerouteKind.Flow) {
+					return enter;
+				}
+				else {
+					return input;
+				}
+			}
+		}
+		UPort IRerouteNode.Output {
+			get {
+				if(kind == RerouteKind.Flow) {
+					return exit;
+				}
+				else {
+					return output;
+				}
+			}
+		}
 
 		protected override void OnRegister() {
 			switch(kind) {

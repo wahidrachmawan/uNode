@@ -696,8 +696,26 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static string GetUNodePath() {
 			if(string.IsNullOrEmpty(_uNodePath)) {
-				var path = AssetDatabase.GetAssetPath(uNodeEditorUtility.GetMonoScript(typeof(Graph)));
-				_uNodePath = path.Remove(path.LastIndexOf("Core/Graph") - 1);
+				//GraphComponent guid
+				var path = AssetDatabase.GUIDToAssetPath("3e605966f4ce83c499c692a5320a78b1");
+				if(string.IsNullOrEmpty(path)) {
+					path = AssetDatabase.GetAssetPath(uNodeEditorUtility.GetMonoScript(typeof(GraphComponent)));
+					if(string.IsNullOrEmpty(path)) {
+						//Core folder guid
+						path = AssetDatabase.GUIDToAssetPath("6dc50b636032caf4089891c670440a82");
+					}
+				}
+				try {
+					_uNodePath = path.Remove(path.LastIndexOf("Core/Graph") - 1);
+				}
+				catch {
+					try {
+						_uNodePath = path.Remove(path.LastIndexOf("Core") - 1);
+					}
+					catch (Exception ex) {
+						throw new Exception("uNode path is not found", ex);
+					}
+				}
 			}
 			return _uNodePath;
 		}

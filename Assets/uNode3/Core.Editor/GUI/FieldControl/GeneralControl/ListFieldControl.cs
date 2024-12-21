@@ -46,7 +46,9 @@ namespace MaxyGames.UNode.Editors.Control {
 		}
 
 		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
-			ValidateValue(ref value, type);
+			if(ValidateValue(ref value, type)) {
+				onChanged(value);
+			}
 			IList list = value as IList;
 			var elementType = type.ElementType();
 			int size = EditorGUILayout.DelayedIntField(label, list.Count);

@@ -75,7 +75,7 @@ crashlytics-build.properties
 # uNode Stuff
 /Assets/*
 !/Assets/uNode3
-/Assets/uNode3.meta
+!/Assets/uNode3.meta
 /Packages
 /TempScript
 /uNode3Data

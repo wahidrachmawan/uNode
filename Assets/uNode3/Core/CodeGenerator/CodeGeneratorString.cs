@@ -1484,10 +1484,17 @@ namespace MaxyGames {
 		/// <param name="type"></param>
 		/// <returns></returns>
 		public static string Convert(string value, string type) {
-			if(string.IsNullOrEmpty(value) == false && value[0] == '-') {
-				//In case it is negative number
-                return "((" + type + ")(" + value + "))";
-            }
+			if(string.IsNullOrEmpty(value) == false) {
+				if(value[0] == '-') {
+					//In case it is negative number
+					return "((" + type + ")(" + value + "))";
+				}
+				else if(value[0] == '[') {
+					//In case it is indexer
+					RegisterUsingNamespace("MaxyGames.UNode");
+					return DoGenerateInvokeCode(value.CGAccess(nameof(Extensions.ToRuntimeInstance)), new string[0], new string[] { type });
+				}
+			}
 			return "((" + type + ")" + value + ")";
 		}
 

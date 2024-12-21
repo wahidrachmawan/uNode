@@ -20,7 +20,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public void RemoveListener(Action<object[]> action) {
-			Event += action;
+			Event -= action;
 		}
 
 		public override void ClearListener() {
@@ -29,6 +29,10 @@ namespace MaxyGames.UNode {
 
 		public void Trigger(object[] value) {
 			Event?.Invoke(value);
+		}
+
+		public override Delegate GetDelegate() {
+			return Event;
 		}
 
 		public override CG.MData GenerateMethodCode(out string[] parameterNames, out string actionCode) {

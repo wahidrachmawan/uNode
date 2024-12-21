@@ -141,7 +141,7 @@ namespace MaxyGames.UNode {
 
 		protected string GenerateRunFlows() {
 			if(IsHandledByState()) {
-				return CG.WrapWithInformation(CG.If(CG.CompareEventState(nodeObject.GetNodeInParent<Nodes.StateNode>().enter, null), CG.RunEvent(this)), this);
+				return CG.WrapWithInformation(CG.If(CG.CompareEventState(nodeObject.GetNodeInParent<Nodes.StateNode>().enter, null), GenerateFlows()), this);
 			}
 			else {
 				return CG.WrapWithInformation(GenerateFlows(), this);
@@ -200,7 +200,7 @@ namespace MaxyGames.UNode {
 
 		protected CG.MData DoGenerateCode(string name, ValueOutput[] outputs) {
 			var parameterTypes = new Type[outputs.Length];
-			for(int i=0;i<outputs.Length;i++) {
+			for(int i = 0; i < outputs.Length; i++) {
 				parameterTypes[i] = outputs[i].type;
 			}
 			var mdata = GetMethodData(name, parameterTypes);
@@ -208,9 +208,25 @@ namespace MaxyGames.UNode {
 			var contents = GenerateRunFlows();
 			if(!string.IsNullOrEmpty(contents)) {
 				if(outputs.Length > 0) {
+					string[] variables = new string[outputs.Length];
+
+					for(int i = 0; i < outputs.Length; i++) {
+						var port = outputs[i];
+						if(CG.CanDeclareLocal(port, this.outputs)) {
+							variables[i] = CG.DeclareVariable(port, mdata.parameters[i].name, this.outputs);
+						}
+						else {
+							var vdata = CG.GetVariableData(port);
+							vdata.SetToInstanceVariable();
+							variables[i] = CG.Set(vdata.name, CG.As(mdata.parameters[i].name, port.type));
+							//This for auto declare variable
+							CG.DeclareVariable(port, "");
+						}
+					}
+
 					mdata.AddCodeForEvent(
 						CG.Flow(
-							CG.Flow(outputs.Select((p, index) => CG.DeclareVariable(p, mdata.parameters[index].name, this.outputs))),
+							CG.Flow(variables),
 							contents
 						));
 				}

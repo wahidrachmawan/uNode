@@ -22,6 +22,8 @@ namespace MaxyGames.UNode {
 
 		public object Original => target;
 
+		public bool IsNativeMember => ReflectionUtils.IsNativeType(owner);
+
 		public override object GetValue(object obj) {
 			return target.GetValue(obj);
 		}

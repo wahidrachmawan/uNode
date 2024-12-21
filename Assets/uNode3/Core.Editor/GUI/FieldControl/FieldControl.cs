@@ -36,26 +36,44 @@ namespace MaxyGames.UNode.Editors {
 				FieldDecorator.DrawDecorators(settings.attributes);
 		}
 
-		protected void ValidateValue<T>(ref object value, bool nullable = false) {
+		/// <summary>
+		/// Validate a value, and return True if the value is validated.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="value"></param>
+		/// <param name="nullable"></param>
+		/// <returns></returns>
+		protected bool ValidateValue<T>(ref object value, bool nullable = false) {
 			if (!(value is T)) {
 				if (value != null && value.GetType().IsCastableTo(typeof(T))) {
 					value = (T)value;
 					GUI.changed = true;
+					return true;
 				} else {
 					value = default(T);
 					if(value == null && !nullable && ReflectionUtils.CanCreateInstance(typeof(T))) {
 						value = ReflectionUtils.CreateInstance(typeof(T));
 					}
 					GUI.changed = value != null;
+					return true;
 				}
 			}
+			return false;
 		}
 
-		protected void ValidateValue(ref object value, Type type, bool nullable = false) {
+		/// <summary>
+		/// Validate a value, and return True if the value is validated.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="type"></param>
+		/// <param name="nullable"></param>
+		/// <returns></returns>
+		protected bool ValidateValue(ref object value, Type type, bool nullable = false) {
 			if(value == null || value.GetType().IsCastableTo(type) == false) {
 				if(value != null && value.GetType().IsCastableTo(type)) {
 					value = Operator.Convert(value, type);
 					GUI.changed = true;
+					return true;
 				}
 				else {
 					if(!nullable && ReflectionUtils.CanCreateInstance(type) || type.IsValueType) {
@@ -65,8 +83,10 @@ namespace MaxyGames.UNode.Editors {
 						value = null;
 					}
 					GUI.changed = value != null;
+					return true;
 				}
 			}
+			return false;
 		}
 
 		private static List<FieldControl> _fieldControls;
@@ -129,19 +149,29 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		protected void ValidateValue(ref object value, bool nullable = false) {
+		/// <summary>
+		/// Validate a value, and return True if the value is validated.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="nullable"></param>
+		/// <returns></returns>
+		protected bool ValidateValue(ref object value, bool nullable = false) {
 			if (!(value is T)) {
 				if (value != null && value.GetType().IsCastableTo(typeof(T))) {
 					value = Operators.Convert(value, typeof(T));
 					GUI.changed = true;
-				} else {
+					return true;
+				}
+				else {
 					value = default(T);
 					if(value == null && !nullable && ReflectionUtils.CanCreateInstance(typeof(T))) {
 						value = ReflectionUtils.CreateInstance(typeof(T));
 					}
 					GUI.changed |= value != null;
+					return true;
 				}
 			}
+			return false;
 		}
 	}
 }

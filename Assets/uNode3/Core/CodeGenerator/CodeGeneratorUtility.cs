@@ -1,4 +1,5 @@
 ﻿using MaxyGames.UNode;
+using MaxyGames.UNode.Nodes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace MaxyGames {
 			public static ValueInput GetActualPort(ValueInput port) {
 				if(port == null) return null;
 				if(port.isConnected) {
-					if(port.GetTargetNode().node is UNode.Nodes.NodeReroute) {
+					if(port.GetTargetNode().node is IRerouteNode) {
 						return GetActualPort(port.GetTargetNode().ValueInputs[0]);
 					}
 				}
@@ -265,12 +266,18 @@ namespace MaxyGames {
 		#endregion
 
 		#region Variables
+		/// <summary>
+		/// True if variable from value output port can be declared as local variable.
+		/// </summary>
+		/// <param name="outputPort"></param>
+		/// <param name="flows"></param>
+		/// <returns></returns>
 		public static bool CanDeclareLocal(ValueOutput outputPort, params FlowOutput[] flows) {
 			return CanDeclareLocal(outputPort, flows as IEnumerable<FlowOutput>);
 		}
 
 		/// <summary>
-		///  if variable from value output port can be declared as local variable.
+		/// True if variable from value output port can be declared as local variable.
 		/// </summary>
 		/// <param name="outputPort"></param>
 		/// <param name="flows"></param>
@@ -288,11 +295,20 @@ namespace MaxyGames {
 					Nodes.FindAllConnections(flow.GetTargetNode(), ref allFlows);
 				}
 				var allConnectedNodes = new HashSet<NodeObject>();
+				void RegisterConnection(ValueConnection con) {
+					allConnectedNodes.Add(con.input.node);
+					if(con.input.node.node is IRerouteNode) {
+						foreach(var c in con.input.node.ValueOutputs[0].connections) {
+							if(c != null && c.isValid) {
+								RegisterConnection(c);
+							}
+						}
+					}
+					//Nodes.FindAllConnections(con.input.node, ref allConnectedNodes, false, false, false, true);
+				}
 				foreach(var con in outputPort.connections) {
 					if(con.isValid) {
-						allConnectedNodes.Add(con.input.node);
-						//Nodes.FindAllConnections(con.input.node, ref allConnectedNodes, false, false, false, true);
-						
+						RegisterConnection(con);
 					}
 				}
 				foreach(var node in allConnectedNodes) {
@@ -313,7 +329,7 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
-		/// if variable from value output port can be declared as local variable.
+		/// True if variable from value output port can be declared as local variable.
 		/// </summary>
 		/// <param name="outputPort"></param>
 		/// <param name="ports"></param>
@@ -332,9 +348,20 @@ namespace MaxyGames {
 					Nodes.FindAllConnections(flow.GetTargetNode(), ref allFlows);
 				}
 				var allConnectedNodes = new HashSet<NodeObject>();
+				void RegisterConnection(ValueConnection con) {
+					allConnectedNodes.Add(con.input.node);
+					if(con.input.node.node is IRerouteNode) {
+						foreach(var c in con.input.node.ValueOutputs[0].connections) {
+							if(c != null && c.isValid) {
+								RegisterConnection(c);
+							}
+						}
+					}
+					//Nodes.FindAllConnections(con.input.node, ref allConnectedNodes, false, false, false, true);
+				}
 				foreach(var con in outputPort.connections) {
 					if(con.isValid) {
-						allConnectedNodes.Add(con.input.node);
+						RegisterConnection(con);
 					}
 				}
 				foreach(var node in allConnectedNodes) {

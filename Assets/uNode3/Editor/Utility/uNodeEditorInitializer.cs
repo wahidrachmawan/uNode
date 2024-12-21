@@ -1006,8 +1006,9 @@ namespace MaxyGames.UNode.Editors {
 
 		static void Update() {
 			#region Startup
-			if(WelcomeWindow.IsShowOnStartup && EditorApplication.timeSinceStartup < 30) {
+			if(WelcomeWindow.IsShowOnStartup && EditorApplication.timeSinceStartup < 30 && SessionState.GetBool("unode-welcome", true)) {
 				WelcomeWindow.ShowWindow();
+				SessionState.SetBool("unode-welcome", false);
 			}
 			#endregion
 

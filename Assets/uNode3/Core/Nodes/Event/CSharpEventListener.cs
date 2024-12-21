@@ -7,6 +7,7 @@ using UnityEngine.Events;
 namespace MaxyGames.UNode.Nodes {
 	[EventMenu("", "C# Event", order = 1)]
 	[Description("Event will be called every time when the target c# event is invoked/triggered.")]
+	[StateEvent]
 	public class CSharpEventListener : BaseComponentEvent {
 		[Filter(typeof(Delegate), typeof(UnityEventBase), ValidTargetType = MemberData.TargetType.Field | MemberData.TargetType.Event | MemberData.TargetType.Property, UnityReference =false)]
         public MemberData target = MemberData.None;
@@ -62,10 +63,22 @@ namespace MaxyGames.UNode.Nodes {
 		private string evtCode;
 		public override void OnGeneratorInitialize() {
 			base.OnGeneratorInitialize();
+			var mData = CG.generatorData.AddMethod(
+				CG.GenerateNewName("M_GeneratedEvent"),
+				typeof(void),
+				datas.Select(item => new CG.MPData(CG.RegisterVariable(item.port), item.port.type)).ToArray());
+			CG.RegisterUserObject(mData, this);
 			for(int i = 0; i < datas.Count; i++) {
 				int index = i;
 				var vName = CG.RegisterVariable(datas[index].port);
-				CG.RegisterPort(datas[i].port, () => vName);
+				if(CG.CanDeclareLocal(datas[i].port, this.outputs)) {
+					CG.RegisterPort(datas[i].port, () => vName);
+				}
+				else {
+					var vname = CG.RegisterPrivateVariable("m_cs_value" + id + "_" + i, datas[i].port.type);
+					mData.AddCodeForEvent(vname.CGSet(vName));
+					CG.RegisterPort(datas[i].port, () => vname);
+				}
 			}
 		}
 
@@ -75,10 +88,7 @@ namespace MaxyGames.UNode.Nodes {
 			var targetType = target.type;
 			if(targetType == null)
 				return;
-			var mData = CG.generatorData.AddMethod(
-				CG.GenerateNewName("M_GeneratedEvent"), 
-				typeof(void), 
-				datas.Select(item => new CG.MPData(CG.GetVariableName(item.port), item.port.type)).ToArray());
+			var mData = CG.GetUserObject<CG.MData>(this);
 			mData.AddCodeForEvent(GenerateRunFlows());
 
 			var enableEvent = CG.GetOrRegisterFunction(nameof(UEventID.OnEnable), typeof(void));

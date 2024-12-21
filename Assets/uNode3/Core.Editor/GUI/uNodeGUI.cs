@@ -15,7 +15,67 @@ namespace MaxyGames.UNode.Editors {
 		#region Reorderable
 		static ConditionalWeakTable<object, ReorderableList> _reorderabeMap = new ConditionalWeakTable<object, ReorderableList>();
 		static ConditionalWeakTable<object, ReorderableList> _reorderabeMap2 = new ConditionalWeakTable<object, ReorderableList>();
-		static ConditionalWeakTable<object, ReorderableList> _reorderabeMemberMap = new ConditionalWeakTable<object, ReorderableList>();
+
+		static class CopyPasteValue {
+			static Dictionary<Type, OdinSerializedData> map = new();
+			static Dictionary<Type, List<OdinSerializedData>> element_Map = new();
+
+			public static void Copy(object value, Type type) {
+				map[type] = SerializerUtility.SerializeValue(value);
+			}
+
+			public static void CopyAsElement(object value, Type type) {
+				element_Map[type] = new List<OdinSerializedData>() { SerializerUtility.SerializeValue(value) };
+			}
+
+			public static void CopyElement(IEnumerable value, Type elementType) {
+				List<OdinSerializedData> list = new();
+				foreach(var v in value) {
+					list.Add(SerializerUtility.SerializeValue(v));
+				}
+				element_Map[elementType] = list;
+			}
+
+			public static object GetValue(Type type) {
+				if(map.TryGetValue(type, out var result)) {
+					return result;
+				}
+				return null;
+			}
+
+			public static object[] GetElementValue(Type elementType) {
+				if(element_Map.TryGetValue(elementType, out var result)) {
+					object[] objects = new object[result.Count];
+					for(int i = 0; i < objects.Length; i++) {
+						objects[i] = result[i].ToValue();
+					}
+					return objects;
+				}
+				return null;
+			}
+
+			public static T[] GetElementValue<T>() {
+				if(element_Map.TryGetValue(typeof(T), out var result)) {
+					T[] objects = new T[result.Count];
+					for(int i = 0; i < objects.Length; i++) {
+						var val = result[i].ToValue();
+						if(val is T) {
+							objects[i] = (T)val;
+						}
+					}
+					return objects;
+				}
+				return null;
+			}
+
+			public static bool HasValue(Type type) {
+				return map.ContainsKey(type);
+			}
+
+			public static bool HasElementValue(Type elementType) {
+				return element_Map.ContainsKey(elementType);
+			}
+		}
 
 		public static void DrawCustomList<T>(
 			List<T> values,
@@ -33,9 +93,56 @@ namespace MaxyGames.UNode.Editors {
 				reorderable = new ReorderableList(values as System.Collections.IList, typeof(T));
 				reorderable.drawHeaderCallback = (pos) => {
 					EditorGUI.LabelField(pos, headerLabel);
+					if(Event.current.button == 1 && Event.current.clickCount == 1 && pos.Contains(Event.current.mousePosition)) {
+						GenericMenu menu = new GenericMenu();
+						menu.AddItem(new GUIContent("Copy"), false, () => {
+							CopyPasteValue.CopyElement(values, typeof(T));
+						});
+						if(CopyPasteValue.HasElementValue(typeof(T))) {
+							menu.AddItem(new GUIContent("Paste as new"), false, () => {
+								//if(unityObject != null)
+								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
+								var pasteValues = CopyPasteValue.GetElementValue<T>();
+								values.AddRange(pasteValues);
+							});
+							menu.AddItem(new GUIContent("Paste as overwrite"), false, () => {
+								//if(unityObject != null)
+								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
+								var pasteValues = CopyPasteValue.GetElementValue<T>();
+								values.Clear();
+								values.AddRange(pasteValues);
+							});
+						}
+						menu.ShowAsContext();
+					}
 				};
 				reorderable.drawElementCallback = (pos, index, isActive, isFocused) => {
-					drawElement(pos, index, values[index]);
+					try {
+						drawElement(pos, index, values[index]);
+					}
+					catch(Exception ex) { Debug.LogException(ex); }
+				};
+				reorderable.drawElementBackgroundCallback = (pos, index, isActive, isFocused) => {
+					if(Event.current.type == EventType.Repaint) {
+						ReorderableList.defaultBehaviours.elementBackground.Draw(pos, false, isActive, isActive, isFocused);
+					}
+					if(pos.Contains(Event.current.mousePosition) && Event.current.button == 1 && Event.current.clickCount == 1 && Event.current.mousePosition.x > 20 && Event.current.mousePosition.x < 38) {
+						GenericMenu menu = new GenericMenu();
+						menu.AddItem(new GUIContent("Copy"), false, () => {
+							CopyPasteValue.CopyAsElement(values[index], typeof(T));
+						});
+						if(CopyPasteValue.HasElementValue(typeof(T))) {
+							menu.AddItem(new GUIContent("Paste as new"), false, () => {
+								//if(unityObject != null)
+								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
+								var pasteValues = CopyPasteValue.GetElementValue<T>();
+								for(int i = pasteValues.Length - 1; i >= 0; i--) {
+									values.Insert(index, pasteValues[i]);
+								}
+							});
+						}
+						menu.ShowAsContext();
+					}
 				};
 				if(elementHeight != null) {
 					reorderable.elementHeightCallback = elementHeight;
@@ -77,9 +184,62 @@ namespace MaxyGames.UNode.Editors {
 				reorderable = new ReorderableList(values, values.GetType().ElementType());
 				reorderable.drawHeaderCallback = (pos) => {
 					EditorGUI.LabelField(pos, headerLabel);
+					if(Event.current.button == 1 && Event.current.clickCount == 1 && pos.Contains(Event.current.mousePosition)) {
+						var elementType = values.GetType().ElementType();
+						GenericMenu menu = new GenericMenu();
+						menu.AddItem(new GUIContent("Copy"), false, () => {
+							CopyPasteValue.CopyElement(values, elementType);
+						});
+						if(CopyPasteValue.HasElementValue(elementType)) {
+							menu.AddItem(new GUIContent("Paste as new"), false, () => {
+								//if(unityObject != null)
+								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
+								var pasteValues = CopyPasteValue.GetElementValue(elementType);
+								foreach(var v in pasteValues) {
+									values.Add(v);
+								}
+							});
+							menu.AddItem(new GUIContent("Paste as overwrite"), false, () => {
+								//if(unityObject != null)
+								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
+								var pasteValues = CopyPasteValue.GetElementValue(elementType);
+								values.Clear();
+								foreach(var v in pasteValues) {
+									values.Add(v);
+								}
+							});
+						}
+						menu.ShowAsContext();
+					}
 				};
 				reorderable.drawElementCallback = (pos, index, isActive, isFocused) => {
-					drawElement(pos, index, values[index]);
+					try {
+						drawElement(pos, index, values[index]);
+					}
+					catch(Exception ex) { Debug.LogException(ex); }
+				};
+				reorderable.drawElementBackgroundCallback = (pos, index, isActive, isFocused) => {
+					if(Event.current.type == EventType.Repaint) {
+						ReorderableList.defaultBehaviours.elementBackground.Draw(pos, false, isActive, isActive, isFocused);
+					}
+					if(pos.Contains(Event.current.mousePosition) && Event.current.button == 1 && Event.current.clickCount == 1 && Event.current.mousePosition.x > 20 && Event.current.mousePosition.x < 38) {
+						var elementType = values.GetType().ElementType();
+						GenericMenu menu = new GenericMenu();
+						menu.AddItem(new GUIContent("Copy"), false, () => {
+							CopyPasteValue.CopyAsElement(values[index], elementType);
+						});
+						if(CopyPasteValue.HasElementValue(elementType)) {
+							menu.AddItem(new GUIContent("Paste as new"), false, () => {
+								//if(unityObject != null)
+								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
+								var pasteValues = CopyPasteValue.GetElementValue(elementType);
+								for(int i = pasteValues.Length - 1; i >= 0; i--) {
+									values.Insert(index, pasteValues[i]);
+								}
+							});
+						}
+						menu.ShowAsContext();
+					}
 				};
 				if(elementHeight != null) {
 					reorderable.elementHeightCallback = elementHeight;
@@ -123,9 +283,61 @@ namespace MaxyGames.UNode.Editors {
 				reorderable = new ReorderableList(property.value as IList, property.type.ElementType());
 				reorderable.drawHeaderCallback = (pos) => {
 					EditorGUI.LabelField(pos, headerLabel);
+					if(Event.current.button == 1 && Event.current.clickCount == 1 && pos.Contains(Event.current.mousePosition)) {
+						var values = property.value as IList;
+						var elementType = values.GetType().ElementType();
+						GenericMenu menu = new GenericMenu();
+						menu.AddItem(new GUIContent("Copy"), false, () => {
+							CopyPasteValue.CopyElement(values, elementType);
+						});
+						if(CopyPasteValue.HasElementValue(elementType)) {
+							menu.AddItem(new GUIContent("Paste as new"), false, () => {
+								property.RegisterUndo("Paste");
+								var pasteValues = CopyPasteValue.GetElementValue(elementType);
+								foreach(var v in pasteValues) {
+									values.Add(v);
+								}
+							});
+							menu.AddItem(new GUIContent("Paste as overwrite"), false, () => {
+								property.RegisterUndo("Paste");
+								var pasteValues = CopyPasteValue.GetElementValue(elementType);
+								values.Clear();
+								foreach(var v in pasteValues) {
+									values.Add(v);
+								}
+							});
+						}
+						menu.ShowAsContext();
+					}
 				};
 				reorderable.drawElementCallback = (pos, index, isActive, isFocused) => {
-					drawElement(pos, index);
+					try {
+						drawElement(pos, index);
+					}
+					catch(Exception ex) { Debug.LogException(ex); }
+				};
+				reorderable.drawElementBackgroundCallback = (pos, index, isActive, isFocused) => {
+					if(Event.current.type == EventType.Repaint) {
+						ReorderableList.defaultBehaviours.elementBackground.Draw(pos, false, isActive, isActive, isFocused);
+					}
+					if(pos.Contains(Event.current.mousePosition) && Event.current.button == 1 && Event.current.clickCount == 1 && Event.current.mousePosition.x > 20 && Event.current.mousePosition.x < 38) {
+						var values = property.value as IList;
+						var elementType = values.GetType().ElementType();
+						GenericMenu menu = new GenericMenu();
+						menu.AddItem(new GUIContent("Copy"), false, () => {
+							CopyPasteValue.CopyAsElement(values[index], elementType);
+						});
+						if(CopyPasteValue.HasElementValue(elementType)) {
+							menu.AddItem(new GUIContent("Paste as new"), false, () => {
+								property.RegisterUndo("Paste");
+								var pasteValues = CopyPasteValue.GetElementValue(elementType);
+								for(int i = pasteValues.Length - 1; i >= 0; i--) {
+									values.Insert(index, pasteValues[i]);
+								}
+							});
+						}
+						menu.ShowAsContext();
+					}
 				};
 				if(elementHeight != null) {
 					reorderable.elementHeightCallback = elementHeight;
@@ -166,11 +378,15 @@ namespace MaxyGames.UNode.Editors {
 						unityObject
 					);
 				},
-				add: position => {
-					ItemSelector.ShowType(unityObject, typeFilter, member => {
+				add: pos => {
+					var selector = ItemSelector.ShowType(unityObject, typeFilter, member => {
 						uNodeEditorUtility.RegisterUndo(unityObject);
 						types.Add(member.startType);
-					}).ChangePosition(GUIUtility.GUIToScreenRect(position));
+					});
+					Rect r = pos.ToScreenRect();
+					Vector2 position = new Vector2(r.position.x - selector.position.width, r.position.y);
+					r.position = position;
+					selector.ChangePosition(r);
 				},
 				remove: (index) => {
 					uNodeEditorUtility.RegisterUndo(unityObject);
@@ -178,36 +394,30 @@ namespace MaxyGames.UNode.Editors {
 				});
 		}
 
-		public static void DrawAttribute(List<AttributeData> attributes,
-			UnityEngine.Object targetObject,
+		public static void DrawAttribute(List<AttributeData> values,
+			UnityEngine.Object unityObject,
 			Action<List<AttributeData>> action,
 			AttributeTargets attributeTargets = AttributeTargets.All,
 			string header = "Attributes"
 		) {
-			if(attributes == null) {
-				attributes = new();
+			if(values == null) {
+				values = new();
 				if(action != null) {
-					action(attributes);
+					action(values);
 				}
 			}
-			ReorderableList reorderable;
-			if(!_reorderabeMap.TryGetValue(attributes, out reorderable)) {
-				reorderable = new ReorderableList(attributes as System.Collections.IList, typeof(AttributeData));
-				_reorderabeMap.AddOrUpdate(attributes, reorderable);
-				reorderable.drawHeaderCallback = (pos) => {
-					EditorGUI.LabelField(pos, header);
-				};
-				reorderable.drawElementCallback = (pos, index, isActive, isFocused) => {
+			DrawCustomList<AttributeData>(values, header,
+				drawElement: (pos, index, value) => {
 					if(pos.Contains(Event.current.mousePosition) && Event.current.button == 0 && Event.current.clickCount == 2) {
-						FieldsEditorWindow.ShowWindow(attributes[index], targetObject, delegate (object obj) {
-							return attributes[(int)obj];
+						FieldsEditorWindow.ShowWindow(values[index], unityObject, delegate (object obj) {
+							return values[(int)obj];
 						}, index);
 					}
-					var attName = attributes[index].attributeType != null ? attributes[index].attributeType.prettyName : "null";
+					var attName = values[index].attributeType != null ? values[index].attributeType.prettyName : "null";
 					if(attName.EndsWith("Attribute")) {
 						attName = attName.RemoveLast("Attribute".Length);
 					}
-					var ctor = attributes[index].constructor;
+					var ctor = values[index].constructor;
 					if(ctor?.parameters?.Length > 0) {
 						var parameters = ctor.parameters;
 						string pInfo = null;
@@ -222,37 +432,9 @@ namespace MaxyGames.UNode.Editors {
 						attName += $"({pInfo})";
 					}
 					EditorGUI.LabelField(pos, new GUIContent(attName));
-				};
-				reorderable.onReorderCallbackWithDetails = (list, oldIndex, newIndex) => {
-					var val = attributes[newIndex];
-					attributes.RemoveAt(newIndex);
-					if(oldIndex >= attributes.Count) {
-						attributes.Add(val);
-					}
-					else {
-						attributes.Insert(oldIndex, val);
-					}
-					if(action != null) {
-						action(attributes);
-					}
-					if(targetObject)
-						uNodeEditorUtility.RegisterUndo(targetObject, "Reorder List");
-					val = attributes[oldIndex];
-					attributes.RemoveAt(oldIndex);
-					if(newIndex >= attributes.Count) {
-						attributes.Add(val);
-					}
-					else {
-						attributes.Insert(newIndex, val);
-					}
-					reorderable.list = attributes as System.Collections.IList;
-					if(action != null) {
-						action(attributes);
-					}
-				};
-
-				reorderable.onAddDropdownCallback = (pos, list) => {
-					ItemSelector.ShowWindow(targetObject, new FilterAttribute(typeof(Attribute)) {
+				},
+				add: (pos) => {
+					var selector = ItemSelector.ShowWindow(unityObject, new FilterAttribute(typeof(Attribute)) {
 						DisplayAbstractType = false,
 						DisplayInterfaceType = false,
 						OnlyGetType = true,
@@ -271,48 +453,69 @@ namespace MaxyGames.UNode.Editors {
 								att.constructor = null;
 							}
 						}
-						attributes.Add(att);
+						values.Add(att);
 						if(action != null) {
-							action(attributes);
+							action(values);
 						}
-						reorderable.list = attributes as System.Collections.IList;
-					}).ChangePosition(pos.ToScreenRect());
-				};
-				reorderable.onRemoveCallback = (list) => {
-					if(targetObject)
-						uNodeEditorUtility.RegisterUndo(targetObject, "Remove Attribute: " + attributes[reorderable.index].attributeType);
-					attributes.RemoveAt(reorderable.index);
+					});
+					Rect r = pos.ToScreenRect();
+					Vector2 position = new Vector2(r.position.x - selector.position.width, r.position.y);
+					r.position = position;
+					selector.ChangePosition(r);
+				},
+				remove: index => {
+					if(unityObject)
+						uNodeEditorUtility.RegisterUndo(unityObject, "Remove Attribute");
+					values.RemoveAt(index);
 					if(action != null) {
-						action(attributes);
+						action(values);
 					}
-					reorderable.list = attributes as System.Collections.IList;
-				};
-			}
-			reorderable.DoLayoutList();
+				},
+				reorder: (list, oldIndex, newIndex) => {
+					var val = values[newIndex];
+					values.RemoveAt(newIndex);
+					if(oldIndex >= values.Count) {
+						values.Add(val);
+					}
+					else {
+						values.Insert(oldIndex, val);
+					}
+					if(action != null) {
+						action(values);
+					}
+					if(unityObject)
+						uNodeEditorUtility.RegisterUndo(unityObject, "Reorder List");
+					val = values[oldIndex];
+					values.RemoveAt(oldIndex);
+					if(newIndex >= values.Count) {
+						values.Add(val);
+					}
+					else {
+						values.Insert(newIndex, val);
+					}
+					if(action != null) {
+						action(values);
+					}
+				});
 		}
 
-		public static void DrawNamespace(string header, IList<string> namespaces, UnityEngine.Object targetObject, Action<IList<string>> action = null) {
+		public static void DrawNamespace(string header, IList<string> namespaces, UnityEngine.Object unityObject, Action<IList<string>> action = null) {
 			if(namespaces == null) {
 				namespaces = new List<string>();
 				if(action != null) {
 					action(namespaces);
 				}
 			}
-			ReorderableList reorderable;
-			if(!_reorderabeMap.TryGetValue(namespaces, out reorderable)) {
-				reorderable = new ReorderableList(namespaces as IList, typeof(string));
-				reorderable.drawHeaderCallback = (pos) => {
-					EditorGUI.LabelField(pos, header);
-				};
-				reorderable.drawElementCallback = (pos, index, isActive, isFocused) => {
+			DrawCustomList(namespaces as IList, header,
+				drawElement: (pos, index, value) => {
 					namespaces[index] = EditorGUI.TextField(pos, namespaces[index]);
 					if(GUI.changed) {
-						if(targetObject) {
-							uNodeEditorUtility.MarkDirty(targetObject);
+						if(unityObject) {
+							uNodeEditorUtility.MarkDirty(unityObject);
 						}
 					}
-				};
-				reorderable.onAddDropdownCallback = (pos, list) => {
+				},
+				add: pos => {
 					List<ItemSelector.CustomItem> items = new List<ItemSelector.CustomItem>();
 					var ns = EditorReflectionUtility.GetNamespaces();
 					if(ns != null && ns.Count > 0) {
@@ -323,94 +526,32 @@ namespace MaxyGames.UNode.Editors {
 									if(action != null) {
 										action(namespaces);
 									}
-									reorderable.list = namespaces as System.Collections.IList;
-									if(targetObject && uNodeEditorUtility.IsPrefab(targetObject)) {
-										uNodeEditorUtility.MarkDirty(targetObject);
+									if(unityObject && uNodeEditorUtility.IsPrefab(unityObject)) {
+										uNodeEditorUtility.MarkDirty(unityObject);
 									}
 								}, "Namespaces"));
 							}
 						}
 						items.Sort((x, y) => string.CompareOrdinal(x.name, y.name));
 					}
-					ItemSelector.ShowWindow(null, null, null, items).ChangePosition(pos.ToScreenRect()).displayDefaultItem = false;
-				};
-				reorderable.onRemoveCallback = (list) => {
-					if(targetObject)
-						uNodeEditorUtility.RegisterUndo(targetObject, "Remove Namespace: " + namespaces[list.index]);
-					uNodeUtility.RemoveListAt(ref namespaces, list.index);
+					var selector = ItemSelector.ShowWindow(null, null, null, items);
+					Rect r = pos.ToScreenRect();
+					Vector2 position = new Vector2(r.position.x - selector.position.width, r.position.y);
+					r.position = position;
+					selector.ChangePosition(r);
+					selector.displayDefaultItem = false;
+				},
+				remove: index => {
+					if(unityObject)
+						uNodeEditorUtility.RegisterUndo(unityObject, "Remove Namespace: " + namespaces[index]);
+					uNodeUtility.RemoveListAt(ref namespaces, index);
 					if(action != null) {
 						action(namespaces);
 					}
-					if(targetObject && uNodeEditorUtility.IsPrefab(targetObject)) {
-						uNodeEditorUtility.MarkDirty(targetObject);
+					if(unityObject && uNodeEditorUtility.IsPrefab(unityObject)) {
+						uNodeEditorUtility.MarkDirty(unityObject);
 					}
-				};
-				_reorderabeMap.AddOrUpdate(namespaces, reorderable);
-			}
-			reorderable.DoLayoutList();
-		}
-
-		public static void DrawMembers(GUIContent label,
-			List<MemberData> members,
-			Object targetObject,
-			FilterAttribute filter,
-			Action<List<MemberData>> action,
-			Action onDropDownClick = null,
-			Action<int, int> onReorderCallback = null) {
-			if(members == null) {
-				members = new List<MemberData>();
-				if(action != null) {
-					action(members);
-				}
-			}
-			ReorderableList reorderable;
-			if(!_reorderabeMemberMap.TryGetValue(members, out reorderable)) {
-				reorderable = new ReorderableList(members, typeof(AttributeData));
-				reorderable.drawHeaderCallback = (pos) => {
-					EditorGUI.LabelField(pos, label);
-				};
-				if(onReorderCallback != null) {
-					reorderable.onReorderCallbackWithDetails = (list, oldIndex, newIndex) => {
-						onReorderCallback(oldIndex, newIndex);
-					};
-				}
-				reorderable.drawElementCallback = (pos, index, isActive, isFocused) => {
-					pos = EditorGUI.PrefixLabel(pos, new GUIContent("Element " + index));
-					pos.height = EditorGUIUtility.singleLineHeight;
-					uNodeGUIUtility.DrawMember(pos, members[index], filter, targetObject, (obj) => {
-						members[index] = obj;
-						if(action != null) {
-							action(members);
-						}
-					});
-				};
-				reorderable.onAddDropdownCallback = (pos, list) => {
-					if(onDropDownClick == null) {
-						if(members.Count > 0) {
-							members.Add(new MemberData(members[members.Count - 1]));
-						}
-						else {
-							members.Add(MemberData.None);
-						}
-					}
-					else {
-						onDropDownClick();
-					}
-				};
-				reorderable.onRemoveCallback = (list) => {
-					if(targetObject)
-						uNodeEditorUtility.RegisterUndo(targetObject, "Remove Member: " + members[reorderable.index]);
-					members.RemoveAt(reorderable.index);
-					if(action != null) {
-						action(members);
-					}
-				};
-				reorderable.onChangedCallback = (list) => {
-					uNodeGUIUtility.GUIChanged(targetObject);
-				};
-				_reorderabeMemberMap.AddOrUpdate(members, reorderable);
-			}
-			reorderable.DoLayoutList();
+				});
 		}
 
 		public static void DrawInterfaces(IInterfaceSystem system, string headerLabel = "Interfaces", Action onChanged = null) {
@@ -459,7 +600,7 @@ namespace MaxyGames.UNode.Editors {
 							return type.IsInterface;
 						}
 					};
-					ItemSelector.ShowWindow(system as Object, filter, (member) => {
+					var selector = ItemSelector.ShowWindow(system as Object, filter, (member) => {
 						if(system as UnityEngine.Object)
 							uNodeEditorUtility.RegisterUndo(system as UnityEngine.Object, "Add Interface");
 						interfaces.Add(member.startType);
@@ -467,7 +608,11 @@ namespace MaxyGames.UNode.Editors {
 						if(system as UnityEngine.Object && uNodeEditorUtility.IsPrefab(system as UnityEngine.Object)) {
 							uNodeEditorUtility.MarkDirty(system as UnityEngine.Object);
 						}
-					}).ChangePosition(pos.ToScreenRect());
+					});
+					Rect r = pos.ToScreenRect();
+					Vector2 position = new Vector2(r.position.x - selector.position.width, r.position.y);
+					r.position = position;
+					selector.ChangePosition(r);
 				};
 				reorderable.onRemoveCallback = (list) => {
 					if(system as UnityEngine.Object)
@@ -603,6 +748,43 @@ namespace MaxyGames.UNode.Editors {
 					uNodeEditorUtility.RegisterUndo(unityObject, label.text);
 					variable = newVar;
 				}
+			}
+		}
+
+		public static void DrawReference(Rect position, object reference, Type objectType) {
+			if(reference is Node) {
+				DrawReference(position, (reference as Node).nodeObject, typeof(NodeObject));
+			}
+			else if(reference is UGraphElement) {
+				var element = reference as UGraphElement;
+				var text = element.name;
+				if(element is IPrettyName) {
+					text = (element as IPrettyName).GetPrettyName();
+				}
+				var icon = objectType;
+				if(element is IIcon) {
+					icon = (element as IIcon).GetIcon() ?? objectType;
+				}
+				if(Event.current.clickCount == 1 && Event.current.button == 0 && position.Contains(Event.current.mousePosition)) {
+					if(element is NodeObject) {
+						uNodeEditor.HighlightNode(element as NodeObject);
+					}
+					else {
+						uNodeEditor.Open(element.graphContainer, element);
+					}
+				}
+				EditorGUI.DropdownButton(position, new GUIContent(text, uNodeEditorUtility.GetTypeIcon(icon)), FocusType.Keyboard, EditorStyles.objectField);
+			}
+			else if(reference is Object) {
+				EditorGUI.BeginDisabledGroup(true);
+				EditorGUI.ObjectField(position, GUIContent.none, reference as Object, objectType, true);
+				EditorGUI.EndDisabledGroup();
+			}
+			else if(reference == null) {
+				EditorGUI.DropdownButton(position, new GUIContent("null", uNodeEditorUtility.GetTypeIcon(objectType)), FocusType.Keyboard, EditorStyles.objectField);
+			}
+			else {
+				throw new InvalidOperationException();
 			}
 		}
 
@@ -889,7 +1071,7 @@ namespace MaxyGames.UNode.Editors {
 			//	DoDrawLinkedVariables(instanceVariables, linkedVariable, publicOnly, unityObject);
 			//}
 			//else {
-				DoDrawLinkedVariables(instanceVariables, linked.GetAllVariables(), publicOnly, unityObject);
+			DoDrawLinkedVariables(instanceVariables, linked.GetAllVariables(), publicOnly, unityObject);
 			//}
 		}
 		#endregion

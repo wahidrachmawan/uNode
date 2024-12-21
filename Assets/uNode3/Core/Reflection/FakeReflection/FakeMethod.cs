@@ -29,6 +29,25 @@ namespace MaxyGames.UNode {
 
 		public object Original => target;
 
+		public bool IsNativeMember {
+			get {
+				if(ReflectionUtils.IsNativeType(owner)) {
+					var args = GetGenericArguments();
+					for(int i = 0; i < args.Length; i++) {
+						if(ReflectionUtils.IsNativeType(args[i]) == false)
+							return false;
+					}
+					var parameters = GetParameters();
+					for(int i = 0; i < parameters.Length; i++) {
+						if(ReflectionUtils.IsNativeType(parameters[i].ParameterType) == false)
+							return false;
+					}
+					return true;
+				}
+				return false;
+			}
+		}
+
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
 			return target.Invoke(obj, invokeAttr, binder, parameters, culture);
 		}
@@ -54,6 +73,21 @@ namespace MaxyGames.UNode {
 		public override Type ReturnType => returnType ?? target.ReturnType;
 		public override bool IsGenericMethod => true;
 		public object Original => target;
+		public bool IsNativeMember {
+			get {
+				var args = GetGenericArguments();
+				for(int i = 0; i < args.Length; i++) {
+					if(ReflectionUtils.IsNativeType(args[i]) == false)
+						return false;
+				}
+				var parameters = GetParameters();
+				for(int i = 0; i < parameters.Length; i++) {
+					if(ReflectionUtils.IsNativeType(parameters[i].ParameterType) == false)
+						return false;
+				}
+				return true;
+			}
+		}
 
 		public FakeNativeMethod(MethodInfo nativeMethod, Type[] typeArguments) {
 			if(nativeMethod.IsConstructedGenericMethod)

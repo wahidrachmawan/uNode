@@ -25,16 +25,18 @@ namespace MaxyGames.UNode {
 
 		static BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-		public bool IsOnlyNativeTypes() {
-			if(!ReflectionUtils.IsNativeType(genericType)) {
-				return false;
-			}
-			for(int i = 0; i < genericParameters.Length; i++) {
-				if(!ReflectionUtils.IsNativeType(genericParameters[i])) {
+		public override bool IsNativeMember {
+			get {
+				if(!ReflectionUtils.IsNativeType(genericType)) {
 					return false;
 				}
+				for(int i = 0; i < genericParameters.Length; i++) {
+					if(!ReflectionUtils.IsNativeType(genericParameters[i])) {
+						return false;
+					}
+				}
+				return true;
 			}
-			return true;
 		}
 
 		public override Type GetNativeType() {

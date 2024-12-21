@@ -206,6 +206,10 @@ namespace MaxyGames.UNode {
 		/// The original member
 		/// </summary>
 		object Original { get; }
+		/// <summary>
+		/// True if the member is a native member
+		/// </summary>
+		bool IsNativeMember { get; }
 	}
 
 	public interface IGenericMethodWithResolver {
@@ -433,6 +437,12 @@ namespace MaxyGames.UNode {
 
 	public interface IStackedNode {
 		IEnumerable<NodeObject> stackedNodes { get; }
+	}
+
+	public interface IRerouteNode {
+		UPort Input { get; }
+
+		UPort Output { get; }
 	}
 
 	/// <summary>

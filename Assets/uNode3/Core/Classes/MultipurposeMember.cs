@@ -182,7 +182,7 @@ namespace MaxyGames.UNode {
 									pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.Type));
 								}
 								if(pdata.refKind == RefKind.Out) {
-									pdata.input.filter = new FilterAttribute() {
+									pdata.input.filter = new FilterAttribute(p.Type) {
 										SetMember = true,
 									};
 								}
@@ -269,7 +269,7 @@ namespace MaxyGames.UNode {
 										pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.ParameterType));
 									}
 									if(pdata.refKind == RefKind.Out) {
-										pdata.input.filter = new FilterAttribute() {
+										pdata.input.filter = new FilterAttribute(p.ParameterType) {
 											SetMember = true,
 										};
 									}

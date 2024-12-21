@@ -609,7 +609,10 @@ namespace MaxyGames.UNode.Editors {
 					else {
 						XmlElement documentation = XmlDoc.XMLFromMember(member);
 						if(documentation != null) {
-							contents.Add(new GUIContent("<b>Documentation ▼</b> " + documentation["summary"].InnerText.Trim().AddLineInFirst()));
+							documentation = documentation["summary"];
+							if(documentation != null) {
+								contents.Add(new GUIContent("<b>Documentation ▼</b> " + documentation.InnerText.Trim().AddLineInFirst()));
+							}
 						}
 						switch(member.MemberType) {
 							case MemberTypes.Method:

@@ -97,14 +97,14 @@ namespace MaxyGames.UNode.Nodes {
 				transition?.OnGeneratorInitialize();
 			}
 			CG.SetStateInitialization(enter, () => CG.GeneratePort(enter));
-			foreach(BaseEventNode node in nestedFlowNodes) {
-				foreach(var flow in node.outputs) {
-					var targetFlow = flow.GetTargetFlow();
-					if(targetFlow != null) {
-						CG.RegisterAsStateFlow(targetFlow);
-					}
-				}
-			}
+			//foreach(BaseEventNode node in nestedFlowNodes) {
+			//	foreach(var flow in node.outputs) {
+			//		var targetFlow = flow.GetTargetFlow();
+			//		if(targetFlow != null) {
+			//			CG.RegisterAsStateFlow(targetFlow);
+			//		}
+			//	}
+			//}
 			CG.RegisterPort(enter, () => {
 				string onEnter = null;
 				string onUpdate = null;
@@ -134,7 +134,7 @@ namespace MaxyGames.UNode.Nodes {
 						} else if(evt is StateOnExitEvent) {
 							onExit += evt.GenerateFlows().AddLineInFirst();
 						} else {
-							CG.SetStateInitialization(evt, CG.Routine(CG.LambdaForEvent(evt.GenerateFlows())));
+							//CG.SetStateInitialization(evt, CG.Routine(CG.LambdaForEvent(evt.GenerateFlows())));
 						}
 					}
 				}

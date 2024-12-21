@@ -78,6 +78,7 @@ namespace MaxyGames.UNode {
 		public override MemberTypes MemberType => target.MemberType;
 		public override Type ReflectedType => target.ReflectedType;
 		public virtual object Original => target;
+		public abstract bool IsNativeMember { get; }
 
 		public override Type[] GetGenericArguments() {
 			return target.GetGenericArguments();

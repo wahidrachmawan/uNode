@@ -7,39 +7,6 @@ using UnityEditor;
 using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
-	[Serializable]
-	public class GraphSearchQuery {
-		public enum SearchType {
-			None,
-			Node,
-			Port,
-			NodeType,
-		}
-
-		public List<string> query = new List<string>();
-		public SearchType type = SearchType.None;
-
-		public static HashSet<string> csharpKeyword = new HashSet<string>() {
-			"false",
-			"true",
-			"null",
-			"bool",
-			"byte",
-			"char",
-			"decimal",
-			"double",
-			"float",
-			"int",
-			"long",
-			"object",
-			"sbyte",
-			"short",
-			"string",
-			"uint",
-			"ulong",
-		};
-	}
-
 	public abstract class NodeGraph {
 		#region Variables
 		public uNodeEditor window;
@@ -49,7 +16,7 @@ namespace MaxyGames.UNode.Editors {
 
 		#region Static
 		public static NodeGraph openedGraph;
-		
+
 		public const string TabDragKEY = "[uNode-Tab]";
 
 		public static HashSet<string> GetOpenedGraphUsingNamespaces() {
@@ -341,6 +308,13 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Menu
+
+		private static Lazy<List<CreateNodeProcessor>> m_createNodeProcessors = new(() => {
+			var value = EditorReflectionUtility.GetListOfType<CreateNodeProcessor>();
+			value.Sort((x, y) => CompareUtility.Compare(x.order, y.order));
+			return value;
+		});
+
 		public static bool CreateNodeProcessor(MemberData member, GraphEditorData editorData, Vector2 position, Action<Node> onCreated) {
 			var members = member.GetMembers(false);
 			void PostAction() {
@@ -360,55 +334,14 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
-			if(members != null && members.Length > 0 && members[members.Length - 1] is MethodInfo method && method.Name.StartsWith("op_", StringComparison.Ordinal)) {
-				string name = method.Name;
-				switch(name) {
-					case "op_Addition":
-					case "op_Subtraction":
-					case "op_Multiply":
-					case "op_Division":
-						NodeEditorUtility.AddNewNode<Nodes.MultiArithmeticNode>(editorData, null, null, position, n => {
-							switch(name) {
-								case "op_Addition":
-									n.operatorKind = ArithmeticType.Add;
-									break;
-								case "op_Subtraction":
-									n.operatorKind = ArithmeticType.Subtract;
-									break;
-								case "op_Multiply":
-									n.operatorKind = ArithmeticType.Multiply;
-									break;
-								case "op_Division":
-									n.operatorKind = ArithmeticType.Divide;
-									break;
-							}
-							n.EnsureRegistered();
-							var param = method.GetParameters();
-							for(int i = 0; i < param.Length; i++) {
-								n.inputs[i].type = param[i].ParameterType;
-								n.inputs[i].port.AssignToDefault(MemberData.Default(param[i].ParameterType));
-							}
-							n.nodeObject.Register();
-							onCreated?.Invoke(n);
-							PostAction();
-						});
-						return true;
+			
+			foreach(var processor in m_createNodeProcessors.Value) {
+				if(processor.Process(member, editorData, position, onCreated)) {
+					PostAction();
+					return true;
 				}
 			}
-			if(member.targetType.IsTargetingReflection() &&
-				member.isStatic == false &&
-				member.isDeepTarget == false &&
-				member.instance is IClassGraph classGraph &&
-				(member.startType == classGraph.InheritType || classGraph.InheritType.IsSubclassOf(member.startType))) {
 
-				NodeEditorUtility.AddNewNode<NodeBaseCaller>(editorData, position, n => {
-					n.target = member;
-					n.EnsureRegistered();
-					onCreated?.Invoke(n);
-					PostAction();
-				});
-				return true;
-			}
 			NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, n => {
 				n.target = member;
 				n.Register();

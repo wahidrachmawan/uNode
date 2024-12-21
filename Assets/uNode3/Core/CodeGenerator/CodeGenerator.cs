@@ -1049,13 +1049,15 @@ namespace MaxyGames {
 
 							if(member.Name == "Item" || member.Name == "get_Item") {
 								if(isRuntime && member is IFakeMember) {
-									if(generatePureScript && !(ReflectionUtils.GetMemberType(member) is IFakeMember)) {
-										//Get indexer and convert to actual type
-										result.Add(Convert("[" + data + "]", ReflectionUtils.GetMemberType(member)));
-									}
-									else if(!generatePureScript) {
-										//Get indexer and convert to actual type
-										result.Add(Convert("[" + data + "]", ReflectionUtils.GetMemberType(member), true));
+									if(ReflectionUtils.IsNativeMember(member) == false) {
+										if(generatePureScript) {
+											//Get indexer and convert to actual type
+											result.Add(Convert("[" + data + "]", ReflectionUtils.GetMemberType(member)));
+										}
+										else {
+											//Get indexer and convert to actual type
+											result.Add(Convert("[" + data + "]", ReflectionUtils.GetMemberType(member), true));
+										}
 									}
 									else {
 										//Get indexer
@@ -1453,8 +1455,8 @@ namespace MaxyGames {
 			if(type is RuntimeType && type is not INativeMember) {
 				var runtimeType = type as RuntimeType;
 				if(!generatePureScript) {
-					RegisterUsingNamespace("MaxyGames.UNode");
 					if(runtimeType is RuntimeGraphType graphType) {
+						RegisterUsingNamespace("MaxyGames.UNode");
 						if(graphType.target is IClassDefinition classDefinition) {
 							return Type(classDefinition.GetModel().ProxyScriptType);
 						}

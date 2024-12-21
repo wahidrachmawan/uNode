@@ -261,7 +261,7 @@ namespace MaxyGames.UNode {
 			//and checking tries serializing the whole value
 			//TODO: fix error caused by UnityEditor.Selection.activeObject regarding to domain backup
 			try {
-				if(graph.graphContainer != null && uNodeThreadUtility.frame > 1000 && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
+				if(graph.graphContainer != null && uNodeThreadUtility.frame > 3000 && !UnityEditor.EditorApplication.isCompiling && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
 					if(Event.current == null)
 						return;
 				}

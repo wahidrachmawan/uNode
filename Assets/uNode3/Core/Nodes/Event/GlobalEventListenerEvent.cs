@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
 	[EventMenu("", "Global Event", order = 1)]
 	[Description("Event will be called every time when the target global event is triggered.")]
+	[StateEvent]
 	public class GlobalEventListenerEvent : BaseComponentEvent {
         public UGlobalEvent target;
 
@@ -35,10 +36,18 @@ namespace MaxyGames.UNode.Nodes {
 		private string evtCode;
 		public override void OnGeneratorInitialize() {
 			base.OnGeneratorInitialize();
-			CG.RegisterUserObject(target.GenerateMethodCode(out var names, out evtCode), this);
+			var mData = target.GenerateMethodCode(out var names, out evtCode);
+			CG.RegisterUserObject(mData, this);
 			for(int i = 0; i < names.Length; i++) {
 				int index = i;
-				CG.RegisterPort(datas[i].port, () => names[index]);
+				if(CG.CanDeclareLocal(datas[i].port, this.outputs)) {
+					CG.RegisterPort(datas[i].port, () => names[index]);
+				}
+				else {
+					var vname = CG.RegisterPrivateVariable("m_ge_value" + id + "_" + i, datas[i].port.type);
+					mData.AddCodeForEvent(vname.CGSet(names[index]));
+					CG.RegisterPort(datas[i].port, () => vname);
+				}
 			}
 		}
 
@@ -94,7 +103,6 @@ namespace MaxyGames.UNode.Nodes {
 						Trigger(instance);
 					});
 				}
-				(target as IGlobalEvent).AddListener(@delegate);
 				instance.eventData.onEnable += instance => {
 					(target as IGlobalEvent).RemoveListener(@delegate);
 					(target as IGlobalEvent).AddListener(@delegate);

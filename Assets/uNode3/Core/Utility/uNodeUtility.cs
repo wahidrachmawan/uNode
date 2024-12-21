@@ -610,9 +610,9 @@ namespace MaxyGames.UNode {
 				return member.DisplayName(displayKind == DisplayKind.Full, typeTargetWithTypeof);
 			}
 			string result = member.DisplayName(displayKind == DisplayKind.Full, typeTargetWithTypeof);
-			if(!member.isDeepTarget && member.Items.Length > 1) {
+			if(member.Items.Length > 1) {
 				int index = result.IndexOf('.');
-				return result.Substring(0, index > 0 ? index : 0);
+				return result.Substring(index > 0 ? index + 1 : 0);
 			}
 			return result;
 		}

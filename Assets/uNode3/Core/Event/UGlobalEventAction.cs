@@ -24,5 +24,9 @@ namespace MaxyGames.UNode {
 		public void Trigger() {
 			Event?.Invoke();
 		}
+
+		public override Delegate GetDelegate() {
+			return Event;
+		}
 	}
 }

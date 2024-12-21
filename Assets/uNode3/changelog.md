@@ -1,3 +1,12 @@
+# v3.0.4
+- added ability to copy paste value in reorderable list
+- added ability to view all listeners in global events
+- added ability to find all reference for global events
+- improved c# parser
+- improved code generation
+- improved editor
+- fixed most of reported bugs
+
 # v3.0.3
 - added description for some nodes
 - added `Change All C# Type to Graph Type` menu to change all reference of CLR type to uNode graph type useful for some cases like after parsing c# script

@@ -153,7 +153,9 @@ namespace MaxyGames.UNode.Editors.Control {
 
 		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
-			ValidateValue(ref value, type);
+			if(ValidateValue(ref value, type)) {
+				onChanged(value);
+			}
 			var newValue = value.ConvertTo<UnityEventBase>();
 			if(newValue != null) {
 				var persistenceCalls = UnityEventBaseInfo.PersistentCalls.GetValueOptimized(value);

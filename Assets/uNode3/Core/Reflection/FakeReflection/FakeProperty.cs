@@ -20,6 +20,7 @@ namespace MaxyGames.UNode {
 		public override string Name => target.Name;
 
 		public object Original => target;
+		public bool IsNativeMember => ReflectionUtils.IsNativeType(owner);
 
 		public override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture) {
 			return target.GetValueOptimized(obj);
