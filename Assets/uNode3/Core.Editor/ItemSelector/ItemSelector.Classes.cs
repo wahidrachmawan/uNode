@@ -194,6 +194,7 @@ namespace MaxyGames.UNode.Editors {
 
 		#region Enum
 		enum SearchKind {
+			Relevence,
 			Contains,
 			Startwith,
 			Equal,

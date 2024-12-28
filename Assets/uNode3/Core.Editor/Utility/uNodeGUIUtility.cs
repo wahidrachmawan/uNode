@@ -1369,7 +1369,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void ShowFields(FieldInfo[] fields, object targetField, UnityEngine.Object unityObject = null, uNodeUtility.EditValueSettings setting = null) {
 			foreach(FieldInfo field in fields) {
-				if(IsHide(field, targetField)) {
+				if(IsHide(field, targetField) || field.IsInitOnly) {
 					continue;
 				}
 				var control = FieldControl.FindControl(field.FieldType, false);

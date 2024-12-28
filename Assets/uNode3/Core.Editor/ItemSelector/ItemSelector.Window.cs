@@ -118,7 +118,7 @@ namespace MaxyGames.UNode.Editors {
 		void DrawToolbar() {
 			if(canSearch) {
 				Rect rect = uNodeGUIUtility.GetRectCustomHeight(17);
-				editorData.searchKind = (SearchKind)GUI.Toolbar(rect, (int)editorData.searchKind, new string[] { "Contains", "Start with", "Equals", "Ends with" }, EditorStyles.radioButton);
+				editorData.searchKind = (SearchKind)GUI.Toolbar(rect, (int)editorData.searchKind, new string[] { "Relevent", "Contains", "Start with", "Equals", "Ends with" }, new GUIStyle(EditorStyles.radioButton) { fontSize = 11});
 				if(!_hasFocus) {
 					if(Event.current.type == EventType.Repaint) {
 						editorData.searchField.SetFocus();
