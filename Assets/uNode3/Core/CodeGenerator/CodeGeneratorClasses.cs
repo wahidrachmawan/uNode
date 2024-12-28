@@ -1354,7 +1354,7 @@ namespace MaxyGames {
 					}
 				}
 				string localVar = M_GenerateLocalVariable(obj.LocalVariables).AddLineInFirst().AddTabAfterNewLine();
-				result += (m + name + "(" + parameters + ") {" + localVar.Add("\n", string.IsNullOrEmpty(code)) + code.AddTabAfterNewLine().AddLineInEnd() + "}").AddFirst("\n", !string.IsNullOrEmpty(result));
+				result += (m + name + "(" + parameters + $") {(obj.InitializerType != ConstructorInitializer.None ? (": " + (obj.InitializerType == ConstructorInitializer.Base ? "base" : "this") + $"({string.Join(", ", obj.parameters.Where(p => p.useInInitializer).Select(p => p.name))}) ") : string.Empty)}{{" + localVar.Add("\n", string.IsNullOrEmpty(code)) + code.AddTabAfterNewLine().AddLineInEnd() + "}").AddFirst("\n", !string.IsNullOrEmpty(result));
 				if(!string.IsNullOrEmpty(summary)) {
 					result = "/// <summary>".AddLineInEnd() +
 						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +

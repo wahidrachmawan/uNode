@@ -893,7 +893,7 @@ namespace MaxyGames.UNode {
 		public string name;
 		public SerializedType type;
 		public RefKind refKind;
-
+		public bool useInInitializer;
 		public bool isByRef {
 			get {
 				return refKind != RefKind.None;
