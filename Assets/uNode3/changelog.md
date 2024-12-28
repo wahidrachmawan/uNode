@@ -1,3 +1,6 @@
+# v3.0.5
+- Added Constructor Initializers, psudo Default Constructors and Relevant search kind by @S2NX7
+
 # v3.0.4
 - added ability to copy paste value in reorderable list
 - added ability to view all listeners in global events
