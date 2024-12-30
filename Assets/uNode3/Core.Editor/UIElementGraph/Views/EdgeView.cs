@@ -161,7 +161,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected void DebugGUI(bool showLabel) {
-			if(isProxy && !visible)
+			if(!visible || isHidding)
 				return;
 			if(Application.isPlaying && GraphDebug.useDebug) {
 				PortView port = input as PortView ?? output as PortView;

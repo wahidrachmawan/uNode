@@ -1037,6 +1037,20 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// True if the method is extension method.
+		/// </summary>
+		/// <param name="method"></param>
+		/// <returns></returns>
+		public static bool IsExtensionMethod(MethodInfo method) {
+			if(method is not IRuntimeMember) {
+				if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/// <summary>
 		/// Are the type can be create a new instance.
 		/// </summary>
 		/// <param name="type"></param>

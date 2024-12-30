@@ -6,23 +6,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-namespace MaxyGames.UNode.Editors.Control
-{
-	class ParameterListFieldControl : FieldControl<List<ParameterData>>
-	{
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings)
-		{
+namespace MaxyGames.UNode.Editors.Control {
+	class ParameterListFieldControl : FieldControl<List<ParameterData>> {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var fieldValue = value as List<ParameterData>;
-			if (fieldValue != null)
-			{
+			if(fieldValue != null) {
 				uNodeGUI.DrawCustomList(fieldValue, label.text,
-					drawElement: (pos, index, parameter) =>
-					{
+					drawElement: (pos, index, parameter) => {
 						var name = EditorGUI.DelayedTextField(new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight), "Name", parameter.name);
-						if (name != parameter.name)
-						{
+						if(name != parameter.name) {
 							parameter.name = uNodeUtility.AutoCorrectName(name);
 							onChanged(fieldValue);
 							uNodeGUIUtility.GUIChangedMajor(settings?.unityObject);
@@ -31,8 +25,7 @@ namespace MaxyGames.UNode.Editors.Control
 							new Rect(pos.x, pos.y + EditorGUIUtility.singleLineHeight, pos.width, EditorGUIUtility.singleLineHeight),
 							parameter.type,
 							new GUIContent("Type"),
-							type =>
-							{
+							type => {
 								uNodeEditorUtility.RegisterUndo(settings?.unityObject);
 								parameter.type = type;
 								onChanged(fieldValue);
@@ -42,47 +35,40 @@ namespace MaxyGames.UNode.Editors.Control
 							new Rect(pos.x, pos.y + EditorGUIUtility.singleLineHeight * 2, pos.width, EditorGUIUtility.singleLineHeight),
 							new GUIContent("Ref Kind"),
 							parameter.refKind,
-							onChange: (val) =>
-							{
+							onChange: (val) => {
 								uNodeEditorUtility.RegisterUndo(settings?.unityObject);
 								parameter.refKind = val;
 								onChanged(fieldValue);
 							});
-						if (settings.parentValue is Constructor constructor && constructor.InitializerType != ConstructorInitializer.None)
-						{
+						if(settings.parentValue is Constructor constructor && constructor.InitializerType != ConstructorInitializer.None) {
 							uNodeGUIUtility.EditValue(
 							new Rect(pos.x, pos.y + EditorGUIUtility.singleLineHeight * 3, pos.width, EditorGUIUtility.singleLineHeight),
 							new GUIContent("Use In Initializer"),
 							parameter.useInInitializer,
-							onChange: (val) =>
-							{
+							onChange: (val) => {
 								uNodeEditorUtility.RegisterUndo(settings?.unityObject);
 								parameter.useInInitializer = val;
 								onChanged(fieldValue);
 							});
 						}
 					},
-					add: pos =>
-					{
+					add: pos => {
 						fieldValue.Add(new ParameterData("newParameter", typeof(object)));
 						onChanged(fieldValue);
 						uNodeGUIUtility.GUIChangedMajor(settings?.unityObject);
 					},
-					remove: index =>
-					{
+					remove: index => {
 						fieldValue.RemoveAt(index);
 						onChanged(fieldValue);
 						uNodeGUIUtility.GUIChangedMajor(settings?.unityObject);
 					},
-					elementHeight: index =>
-					{
+					elementHeight: index => {
 						return settings.parentValue is Constructor constructor && constructor.InitializerType != ConstructorInitializer.None ? EditorGUIUtility.singleLineHeight * 4 : EditorGUIUtility.singleLineHeight * 3;
 					}
 				);
 			}
 
-			if (EditorGUI.EndChangeCheck())
-			{
+			if(EditorGUI.EndChangeCheck()) {
 				onChanged(fieldValue);
 			}
 		}
