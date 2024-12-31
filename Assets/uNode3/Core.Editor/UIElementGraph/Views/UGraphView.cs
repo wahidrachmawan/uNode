@@ -1129,12 +1129,13 @@ namespace MaxyGames.UNode.Editors {
 #else
 		public override void HandleEvent(EventBase evt) {
 #endif
-			if(evt is MouseUpEvent && graphDragger.isActive) {
-				graphDragger.OnMouseUp(evt as MouseUpEvent);
-				this.ReleaseMouse();
-				return;
-			}
-			else if(evt is IMouseEvent) {
+			//if(evt is MouseUpEvent && graphDragger.isActive) {
+			//	graphDragger.OnMouseUp(evt as MouseUpEvent);
+			//	this.ReleaseMouse();
+			//	return;
+			//}
+			//else 
+			if(evt is IMouseEvent) {
 				GetMousePosition(evt as IMouseEvent, out var position);
 				graph.topMousePos = position;
 			}
