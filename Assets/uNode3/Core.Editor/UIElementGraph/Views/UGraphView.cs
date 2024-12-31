@@ -1125,16 +1125,17 @@ namespace MaxyGames.UNode.Editors {
 #if UNITY_2023_2_OR_NEWER
 		protected override void HandleEventBubbleUp(EventBase evt) { 
 #elif UNITY_2022_1_OR_NEWER
-		protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
+		protected override void ExecuteDefaultAction(EventBase evt) {
 #else
 		public override void HandleEvent(EventBase evt) {
 #endif
-			if(evt is MouseUpEvent && graphDragger.isActive) {
-				graphDragger.OnMouseUp(evt as MouseUpEvent);
-				this.ReleaseMouse();
-				return;
-			}
-			else if(evt is IMouseEvent) {
+			//if(evt is MouseUpEvent && graphDragger.isActive) {
+			//	graphDragger.OnMouseUp(evt as MouseUpEvent);
+			//	this.ReleaseMouse();
+			//	return;
+			//}
+			//else 
+			if(evt is IMouseEvent) {
 				GetMousePosition(evt as IMouseEvent, out var position);
 				graph.topMousePos = position;
 			}
@@ -1152,7 +1153,7 @@ namespace MaxyGames.UNode.Editors {
 #if UNITY_2023_2_OR_NEWER
 			base.HandleEventBubbleUp(evt);
 #elif UNITY_2022_1_OR_NEWER
-			base.ExecuteDefaultActionAtTarget(evt);
+			base.ExecuteDefaultAction(evt);
 #else
 			base.HandleEvent(evt);
 #endif

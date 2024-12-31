@@ -42,22 +42,6 @@ using MaxyGames.UNode;
 [assembly: RegisterEventListener(typeof(OnTriggerStay2DListener), UEventID.OnTriggerStay2D)]
 [assembly: RegisterEventListener(typeof(OnWillRenderObjectListener), UEventID.OnWillRenderObject)]
 [assembly: RegisterEventListener(typeof(OnParticleCollisionListener), UEventID.OnParticleCollision)]
-
-[assembly: RegisterEventListener(typeof(OnButtonClickListener), UEventID.OnButtonClick)]
-[assembly: RegisterEventListener(typeof(OnInputFieldValueChangedListener), UEventID.OnInputFieldValueChanged)]
-[assembly: RegisterEventListener(typeof(OnInputFieldEndEditListener), UEventID.OnInputFieldEndEdit)]
-[assembly: RegisterEventListener(typeof(OnDropdownValueChangedListener), UEventID.OnDropdownValueChanged)]
-[assembly: RegisterEventListener(typeof(OnToggleValueChangedListener), UEventID.OnToggleValueChanged)]
-[assembly: RegisterEventListener(typeof(OnScrollbarValueChangedListener), UEventID.OnScrollbarValueChanged)]
-[assembly: RegisterEventListener(typeof(OnScrollRectValueChangedListener), UEventID.OnScrollRectValueChanged)]
-[assembly: RegisterEventListener(typeof(OnSliderValueChangedListener), UEventID.OnSliderValueChanged)]
-
-[assembly: RegisterEventListener(typeof(OnPointerClickListener), UEventID.OnPointerClick)]
-[assembly: RegisterEventListener(typeof(OnPointerDownListener), UEventID.OnPointerDown)]
-[assembly: RegisterEventListener(typeof(OnPointerEnterListener), UEventID.OnPointerEnter)]
-[assembly: RegisterEventListener(typeof(OnPointerExitListener), UEventID.OnPointerExit)]
-[assembly: RegisterEventListener(typeof(OnPointerMoveListener), UEventID.OnPointerMove)]
-[assembly: RegisterEventListener(typeof(OnPointerUpListener), UEventID.OnPointerUp)]
 namespace MaxyGames.UNode { 
 	/// <summary>
 	/// The available event IDs

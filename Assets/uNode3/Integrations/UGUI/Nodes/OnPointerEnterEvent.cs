@@ -1,13 +1,12 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
 namespace MaxyGames.UNode.Nodes {
-    [EventMenu("GUI", "On Pointer Down")]
+    [EventMenu("GUI", "On Pointer Enter")]
 	[StateEvent]
-	public class OnPointerDownEvent : BaseComponentEvent {
+	public class OnPointerEnterEvent : BaseComponentEvent {
 		public ValueInput target { get; set; }
 		public ValueOutput value { get; set; }
 
@@ -23,13 +22,13 @@ namespace MaxyGames.UNode.Nodes {
 			var val = target.GetValue(instance.defaultFlow);
 			if(val != null) {
 				if(val is GameObject) {
-					UEvent.Register<PointerEventData>(UEventID.OnPointerDown, val as GameObject, (value) => OnTriggered(instance, value));
+					UEvent.Register<PointerEventData>(UEventID.OnPointerEnter, val as GameObject, (value) => OnTriggered(instance, value));
 				} else if(val is Component) {
-					UEvent.Register<PointerEventData>(UEventID.OnPointerDown, val as Component, (value) => OnTriggered(instance, value));
+					UEvent.Register<PointerEventData>(UEventID.OnPointerEnter, val as Component, (value) => OnTriggered(instance, value));
 				}
 			} else {
 				if(instance.target is Component comp) {
-					UEvent.Register<PointerEventData>(UEventID.OnPointerDown, comp, (value) => OnTriggered(instance, value));
+					UEvent.Register<PointerEventData>(UEventID.OnPointerEnter, comp, (value) => OnTriggered(instance, value));
 				} else {
 					throw new Exception("Invalid target: " + instance.target + "\nThe target type must inherit from `UnityEngine.Component`");
 				}
@@ -68,7 +67,7 @@ namespace MaxyGames.UNode.Nodes {
 						CG.FlowInvoke(
 							typeof(UEvent),
 							nameof(UEvent.Register),
-							CG.Value(UEventID.OnPointerDown),
+							CG.Value(UEventID.OnPointerEnter),
 							CG.Value(target),
 							CG.Lambda(new[] { typeof(PointerEventData) }, new[] { parameter }, contents)
 						)
@@ -79,7 +78,7 @@ namespace MaxyGames.UNode.Nodes {
 						CG.FlowInvoke(
 							typeof(UEvent),
 							nameof(UEvent.Register),
-							CG.Value(UEventID.OnPointerDown),
+							CG.Value(UEventID.OnPointerEnter),
 							CG.This,
 							CG.Lambda(new[] { typeof(PointerEventData) }, new[] { parameter }, contents)
 						)
