@@ -120,6 +120,7 @@ namespace MaxyGames.UNode.Editors {
 					Vector3 position = graphView.contentViewContainer.transform.position;
 					Vector3 scale = graphView.contentViewContainer.transform.scale;
 					graphView.UpdateViewTransform(position, scale);
+<<<<<<< .mine
 					if(m_rightClickPressed && m_hasMove) {
 						uNodeThreadUtility.Queue(() => {
 							m_Active = false;
@@ -127,6 +128,15 @@ namespace MaxyGames.UNode.Editors {
 							e.StopImmediatePropagation();
 						});
 						e.IgnoreEvent();
+=======
+					if(m_rightClickPressed && m_hasMove) {
+						uNodeThreadUtility.Queue(() => {
+							m_Active = false;
+							target.ReleaseMouse();
+							e.StopImmediatePropagation();
+						});
+
+>>>>>>> .theirs
 					}
 					else {
 						m_Active = false;
