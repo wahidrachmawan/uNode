@@ -2873,7 +2873,7 @@ namespace MaxyGames {
 						object fieldObj = field.GetValueOptimized(value);
 						if(field.FieldType.IsValueType) {
 							object cloneObj = field.GetValueOptimized(clone);
-							if(cloneObj.Equals(fieldObj))
+							if(cloneObj == null || cloneObj.Equals(fieldObj))
 								continue;
 						}
 						initializers.Add(CG.SetValue(field.Name, CG.Value(fieldObj)));
@@ -2886,7 +2886,7 @@ namespace MaxyGames {
 							object fieldObj = property.GetValueOptimized(value);
 							if(property.PropertyType.IsValueType) {
 								object cloneObj = property.GetValueOptimized(clone);
-								if(cloneObj.Equals(fieldObj))
+								if(cloneObj == null || cloneObj.Equals(fieldObj))
 									continue;
 							}
 							initializers.Add(CG.SetValue(property.Name, CG.Value(fieldObj)));
