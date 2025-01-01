@@ -28,6 +28,10 @@ namespace MaxyGames.UNode {
 			return runtimeAssembly;
 		}
 
+		/// <summary>
+		/// Used for register loaded runtime assembly
+		/// </summary>
+		/// <param name="assembly"></param>
 		internal static void RegisterPrivateLoadedAssembly(Assembly assembly) {
 			if(assembly == null)
 				return;
@@ -45,10 +49,30 @@ namespace MaxyGames.UNode {
 			loadedRuntimeAssemblies.Add(assembly);
 		}
 
+		/// <summary>
+		/// Clean runtime assemblies
+		/// </summary>
 		public static void CleanRuntimeAssembly() {
 			runtimeAssembly = new Assembly[0];
 		}
 
+		internal static void ClearInvalidRuntimeType() {
+			//TODO: clear invalid runtime type.
+
+		}
+
+		/// <summary>
+		/// Update runtime assemblies and clean the type cache
+		/// </summary>
+		public static void UpdateAssemblies() {
+			loadedAssemblies = null;
+			TypeSerializer.CleanCache();
+		}
+
+		/// <summary>
+		/// Get all CLR assemblies
+		/// </summary>
+		/// <returns></returns>
 		public static IEnumerable<Assembly> GetAssemblies() {
 			if(loadedAssemblies == null) {
 				List<Assembly> ass = AppDomain.CurrentDomain.GetAssemblies().ToList();
@@ -67,11 +91,6 @@ namespace MaxyGames.UNode {
 				loadedAssemblies = ass.ToArray();
 			}
 			return loadedAssemblies;
-		}
-
-		public static void UpdateAssemblies() {
-			loadedAssemblies = null;
-			TypeSerializer.CleanCache();
 		}
 
 		/// <summary>
@@ -252,6 +271,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get runtime type of an <paramref name="obj"/>
+		/// </summary>
+		/// <param name="obj">The instance object</param>
+		/// <param name="throwOnNull">Throw an exception if null</param>
+		/// <returns></returns>
 		public static Type GetRuntimeType(object obj, bool throwOnNull) {
 			if(obj is IReflectionType reflection) {
 				return reflection.ReflectionType;
@@ -331,11 +356,6 @@ namespace MaxyGames.UNode {
 				throw new Exception($"No graph with name: {instance.uniqueIdentifier} found, maybe the graph was removed or database is outdated.");
 			}
 			return targetType.IsCastableTo(type);
-		}
-
-		internal static void ClearInvalidRuntimeType() {
-			//TODO: clear invalid runtime type.
-
 		}
 
 		/// <summary>
