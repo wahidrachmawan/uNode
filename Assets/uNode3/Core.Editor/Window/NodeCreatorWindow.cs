@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using Object = UnityEngine.Object;
+using System.IO;
 
 namespace MaxyGames.UNode.Editors {
 	class NodeCreatorWindow : EditorWindow {
@@ -136,7 +137,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeGUI.DrawCustomList(valueOutputs, "Value Outputs",
 				drawElement: (position, index, value) => {
 					position.height = EditorGUIUtility.singleLineHeight;
-					value.name = EditorGUI.TextField(position, "Name", value.name);
+					value.name = uNodeUtility.AutoCorrectName(EditorGUI.DelayedTextField(position, "Name", value.name));
 					position.y += EditorGUIUtility.singleLineHeight;
 					value.description = EditorGUI.TextField(position, "Description", value.description);
 					position.y += EditorGUIUtility.singleLineHeight;
@@ -176,7 +177,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeGUI.DrawCustomList(flowInputs, "Flow Inputs",
 				drawElement: (position, index, value) => {
 					position.height = EditorGUIUtility.singleLineHeight;
-					value.name = EditorGUI.TextField(position, "Name", value.name);
+					value.name = uNodeUtility.AutoCorrectName(EditorGUI.DelayedTextField(position, "Name", value.name));
 					position.y += EditorGUIUtility.singleLineHeight;
 					value.description = EditorGUI.TextField(position, "Description", value.description);
 					{
@@ -269,7 +270,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeGUI.DrawCustomList(flowOutputs, "Flow Outputs",
 				drawElement: (position, index, value) => {
 					position.height = EditorGUIUtility.singleLineHeight;
-					value.name = EditorGUI.TextField(position, "Name", value.name);
+					value.name = uNodeUtility.AutoCorrectName(EditorGUI.DelayedTextField(position, "Name", value.name));
 					position.y += EditorGUIUtility.singleLineHeight;
 					uNodeGUIUtility.EditValue(position, nameof(value.kind), value);
 					if(value.kind != FlowOutputKind.Enum) {
@@ -292,7 +293,7 @@ namespace MaxyGames.UNode.Editors {
 						var reorderable = uNodeGUI.GetReorderableList(value.enums, "Enums",
 							drawElement: (pos, idx, val) => {
 								pos.height = EditorGUIUtility.singleLineHeight;
-								val.name = EditorGUI.TextField(pos, "Name", val.name);
+								val.name = uNodeUtility.AutoCorrectName(EditorGUI.DelayedTextField(pos, "Name", val.name));
 								pos.y += EditorGUIUtility.singleLineHeight;
 								val.description = EditorGUI.TextField(pos, "Description", val.description);
 							},
@@ -335,7 +336,15 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void OnSave() {
-
+			string script = GenerateScript();
+			string path = EditorUtility.SaveFilePanelInProject("Create new graph asset",
+				uNodeUtility.AutoCorrectName(nodeName) + ".cs",
+				"cs",
+				"Please enter a file name to save the script to");
+			if(path.Length != 0) {
+				File.WriteAllText(path, script);
+				AssetDatabase.Refresh();
+			}
 		}
 
 		public void OnPreview() {
@@ -351,7 +360,8 @@ namespace MaxyGames.UNode.Editors {
 		public string GenerateScript() {
 			IGraph obj = null;
 			var setting = new CG.GeneratorSetting(obj) {
-				onInitialize = Generate
+				onInitialize = Generate,
+				disableScriptWarning = false,
 			};
 			setting.nameSpace = @namespace;
 			setting.usingNamespace = usingNamespaces.ToHashSet();
@@ -367,9 +377,26 @@ namespace MaxyGames.UNode.Editors {
 
 			var classBuilder = new CG.ClassData(className, instanceNode ? typeof(IInstanceNode) : typeof(IStaticNode));
 			classBuilder.SetToPublic();
-			classBuilder.attributes = new List<CG.AData>() {
-				new CG.AData(typeof(NodeMenu), CG.Value(nodeName), CG.Value(nodeCategory + "/" + nodeName))
-			};
+
+			var menuAtt = new CG.AData(typeof(NodeMenu), CG.Value(nodeCategory), CG.Value(nodeName));
+			menuAtt.namedParameters = new();
+			if(string.IsNullOrWhiteSpace(nodeDescription) == false) {
+				menuAtt.namedParameters.Add(nameof(NodeMenu.tooltip), CG.Value(nodeDescription));
+			}
+			if(flowInputs.Count > 0) {
+				menuAtt.namedParameters.Add(nameof(NodeMenu.hasFlowInput), CG.Value(true));
+			}
+			if(flowOutputs.Count > 0) {
+				menuAtt.namedParameters.Add(nameof(NodeMenu.hasFlowOutput), CG.Value(true));
+			}
+			if(valueInputs.Count > 0) {
+				menuAtt.namedParameters.Add(nameof(NodeMenu.inputs), CG.MakeArray(typeof(Type), valueInputs.Select(p => CG.Value(p.type.type)).ToArray()));
+			}
+			if(valueOutputs.Count > 0) {
+				menuAtt.namedParameters.Add(nameof(NodeMenu.outputs), CG.MakeArray(typeof(Type), valueOutputs.Select(p => CG.Value(p.type.type)).ToArray()));
+			}
+			classBuilder.attributes = new List<CG.AData>() { menuAtt };
+
 			foreach(var data in valueInputs) {
 				CG.VData variable = new CG.VData(data.name, typeof(ValuePortDefinition));
 				variable.modifier = new FieldModifier() {
@@ -398,6 +425,7 @@ namespace MaxyGames.UNode.Editors {
 						att.namedParameters.Add(nameof(OutputAttribute.primary), CG.Value(true));
 					}
 					prop.attributes = new List<CG.AData>() { att };
+					prop.getContents = CG.Throw(CG.New(typeof(NotImplementedException)));
 					classBuilder.RegisterProperty(prop.GenerateCode());
 				}
 				else {
@@ -422,7 +450,7 @@ namespace MaxyGames.UNode.Editors {
 						att.namedParameters.Add(nameof(OutputAttribute.primary), CG.Value(true));
 					}
 					method.attributes = new List<CG.AData>() { att };
-					method.code = CG.Flow(CG.Comment("Tips: remove any parameter if not used."), CG.Comment("Insert code here"), CG.Throw(CG.New(typeof(NotImplementedException))));
+					method.code = CG.Flow(parameters.Count > 0 ? CG.Comment("Tips: remove any parameter if not used.") : null, CG.Comment("Insert code here"), CG.Throw(CG.New(typeof(NotImplementedException))));
 					classBuilder.RegisterFunction(method.GenerateCode());
 				}
 			}
@@ -514,7 +542,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 
-				method.code = CG.Flow(CG.Comment("Tips: remove any parameter if not used."), CG.Comment("Insert code here"), CG.Throw(CG.New(typeof(NotImplementedException))));
+				method.code = CG.Flow(parameters.Count > 0 ? CG.Comment("Tips: remove any parameter if not used.") : null, CG.Comment("Insert code here"), CG.Throw(CG.New(typeof(NotImplementedException))));
 				classBuilder.RegisterFunction(method.GenerateCode());
 			}
 

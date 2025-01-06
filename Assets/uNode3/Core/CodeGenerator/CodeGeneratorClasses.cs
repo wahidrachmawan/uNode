@@ -625,6 +625,8 @@ namespace MaxyGames {
 
 			public GenerationKind generationMode = GenerationKind.Default;
 
+			public bool disableScriptWarning = true;
+
 			public bool debugScript;
 			public bool debugValueNode;
 			public bool debugPreprocessor = false;

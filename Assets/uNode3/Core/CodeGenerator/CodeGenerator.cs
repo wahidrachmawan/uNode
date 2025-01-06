@@ -73,10 +73,13 @@ namespace MaxyGames {
 
 				GeneratedData generatedData = new GeneratedData(setting);
 
+				ResetGenerator();
+				generatorData.setting = setting;
+
 				if(setting.onInitialize != null) {
-					ResetGenerator();
-					generatorData.setting = setting;
-					setting.onInitialize(generatedData);
+					ThreadingUtil.Do(() => {
+						setting.onInitialize(generatedData);
+					});
 				}
 
 				foreach(var classes in setting.types) {
@@ -426,10 +429,7 @@ namespace MaxyGames {
 						throw new InvalidOperationException("Unsupported script type: " + classes.GetType());
 					}
 				}
-				if(setting.types.Count == 0) {
-					ResetGenerator();
-					generatorData.setting = setting;
-				}
+
 				ThreadingUtil.Do(() => {
 					//Initialize the generated data for futher use
 					generatedData.errors = generatorData.errors;
@@ -440,7 +440,9 @@ namespace MaxyGames {
 ///-----MADE WITH: UNODE VISUAL SCRIPTING-----///
 ///------------------------------------------///");
 #endif
-				RegisterScriptHeader("#pragma warning disable");
+				if(setting.disableScriptWarning) {
+					RegisterScriptHeader("#pragma warning disable");
+				}
 
 				//Build the full script and mark the data to valid.
 				generatedData.BuildScript();
