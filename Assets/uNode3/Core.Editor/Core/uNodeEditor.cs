@@ -1694,13 +1694,12 @@ namespace MaxyGames.UNode.Editors {
 				string originalScript = generatedScript;
 				EditorUtility.DisplayProgressBar($"Generating C# Scripts", "Analizing Generated C# Script", 1);
 				//Debug.LogFormat("Generating C# took {0,8:N3} s.", watch.Elapsed.TotalSeconds);
-				var syntaxHighlighter = EditorBinding.syntaxHighlighter;
-				if(syntaxHighlighter != null) {
-					string highlight = syntaxHighlighter.GetMethod("GetRichText").InvokeOptimized(null, new object[] { generatedScript }) as string;
-					if(!string.IsNullOrEmpty(highlight)) {
-						generatedScript = highlight;
-					}
+
+				string highlight = EditorBinding.HighlightSyntax(generatedScript);
+				if(!string.IsNullOrEmpty(highlight)) {
+					generatedScript = highlight;
 				}
+
 				var previewWindow = PreviewSourceWindow.ShowWindow(generatedScript, originalScript);
 				previewWindow.informations = informations?.ToArray();
 				previewWindow.OnChanged(graphData);

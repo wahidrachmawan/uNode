@@ -658,6 +658,10 @@ namespace MaxyGames {
 			}
 
 			public Action<float, string> updateProgress;
+			/// <summary>
+			/// Called before performing generations
+			/// </summary>
+			public Action<GeneratedData> onInitialize;
 
 			//TODO: fix me
 			//public GeneratorSetting(uNodeInterface ifaceAsset) {
@@ -1058,10 +1062,26 @@ namespace MaxyGames {
 				keyword = "interface ";
 			}
 
+			public void SetTypeToEnum() {
+				keyword = "enum ";
+			}
+
 			public void SetToPartial() {
 				if(modifier == null)
 					modifier = new ClassModifier();
 				modifier.Partial = true;
+			}
+
+			public void SetToPublic() {
+				if(modifier == null)
+					modifier = new ClassModifier();
+				modifier.Public = true;
+			}
+
+			public void SetToPrivate() {
+				if(modifier == null)
+					modifier = new ClassModifier();
+				modifier.Private = true;
 			}
 			#endregion
 
@@ -1369,15 +1389,159 @@ namespace MaxyGames {
 		/// Used for store Property Data
 		/// </summary>
 		public class PData {
+			string m_name;
 			public string name {
 				get {
+					if(string.IsNullOrEmpty(m_name) == false) {
+						return m_name;
+					}
 					return obj.name;
+				}
+				set {
+					m_name = value;
+				}
+			}
+			Type m_type;
+			public Type type {
+				get {
+					if(m_type != null) {
+						return m_type;
+					}
+					return obj.ReturnType();
+				}
+				set {
+					m_type = value;
 				}
 			}
 			public string summary;
 			public Property obj;
-			public PropertyModifier modifier;
-			public IList<AData> attributes;
+			public PropertyModifier modifier = new() {  Public = false };
+			public ICollection<AData> attributes;
+
+			public FunctionModifier getterModifier = new(), setterModifier = new();
+
+			string m_getContents;
+			public string getContents {
+				private get {
+					if(string.IsNullOrEmpty(m_getContents)) {
+						string str = null;
+						if(obj.getRoot.LocalVariables.Any()) {
+							string lv = M_GenerateLocalVariable(obj.getRoot.LocalVariables);
+							str += lv.AddLineInFirst();
+						}
+						return str + GeneratePort(obj.getRoot.Entry.nodeObject.primaryFlowOutput);
+					}
+					return m_getContents;
+				}
+				set {
+					m_getContents = value;
+				}
+			}
+
+			string m_setContents;
+			public string setContents {
+				private get {
+					if(string.IsNullOrEmpty(m_setContents)) {
+						string str = null;
+						if(obj.setRoot.LocalVariables.Any()) {
+							string lv = M_GenerateLocalVariable(obj.setRoot.LocalVariables);
+							str += lv.AddLineInFirst();
+						}
+						return str + GeneratePort(obj.setRoot.Entry.nodeObject.primaryFlowOutput);
+					}
+					return m_setContents;
+				}
+				set {
+					m_setContents = value;
+				}
+			}
+
+			public bool AutoProperty {
+				get {
+					if(obj != null) {
+						return obj.AutoProperty;
+					}
+					else {
+						return string.IsNullOrEmpty(m_getContents) && string.IsNullOrEmpty(m_setContents);
+					}
+				}
+			}
+
+			public bool CanGetValue {
+				get {
+					if(obj != null) {
+						return obj.CanGetValue();
+					}
+					else {
+						return m_getContents != null || m_setContents == null;
+					}
+				}
+			}
+
+			public bool CanSetValue {
+				get {
+					if(obj != null) {
+						return obj.CanSetValue();
+					}
+					else {
+						return m_setContents != null || m_getContents == null;
+					}
+				}
+			}
+
+			ICollection<AData> m_fieldAttributes;
+			public ICollection<AData> fieldAttributes {
+				get {
+					if(m_fieldAttributes == null && obj != null) {
+						m_fieldAttributes = obj.fieldAttributes.Select(v => TryParseAttributeData(v)).ToArray();
+					}
+					return m_fieldAttributes;
+				}
+				set {
+					m_fieldAttributes = value;
+				}
+			}
+
+			ICollection<AData> m_getterAttributes;
+			public ICollection<AData> getterAttributes {
+				get {
+					if(m_getterAttributes == null) {
+						if(obj != null) {
+							m_getterAttributes = obj.getterAttributes.Select(v => TryParseAttributeData(v)).ToArray();
+						}
+						else {
+							m_getterAttributes = Array.Empty<AData>();
+						}
+					}
+					return m_getterAttributes;
+				}
+				set {
+					m_getterAttributes = value;
+				}
+			}
+
+			ICollection<AData> m_setterAttributes;
+			public ICollection<AData> setterAttributes {
+				get {
+					if(m_setterAttributes == null) {
+						if(obj != null) {
+							m_setterAttributes = obj.setterAttributes.Select(v => TryParseAttributeData(v)).ToArray();
+						}
+						else {
+							m_setterAttributes = Array.Empty<AData>();
+						}
+					}
+					return m_setterAttributes;
+				}
+				set {
+					m_setterAttributes = value;
+				}
+			}
+
+			public PData(string name, Type type) {
+				this.name = name;
+				this.type = type;
+			}
 
 			public PData(Property property) {
 				obj = property;
@@ -1398,11 +1562,11 @@ namespace MaxyGames {
 						result += code.AddFirst("\n", !string.IsNullOrEmpty(result));
 					}
 				}
-				bool autoProperty = obj.AutoProperty;
+				bool autoProperty = AutoProperty;
 				if(autoProperty) {
-					if(obj.fieldAttributes != null) {
-						foreach(var att in obj.fieldAttributes) {
-							var a = TryParseAttributeData(att);
+					var atts = fieldAttributes;
+					if(atts != null) {
+						foreach(var a in atts) {
 							string code = a.GenerateCode();
 							if(!string.IsNullOrEmpty(code)) {
 								result += code.Insert(1, "field: ").AddFirst("\n", !string.IsNullOrEmpty(result));
@@ -1418,17 +1582,17 @@ namespace MaxyGames {
 				if(autoProperty) {
 					p += "{\n";
 					string getter;
-					if(obj.CanGetValue()) {
-						getter = CG.Flow(obj.getterAttributes.Select(a => TryParseAttributeData(a).GenerateCode()).ToArray()).AddLineInEnd() +
-							"get;".AddFirst(obj.getterModifier.GenerateCode(), !obj.getterModifier.isPublic);
+					if(CanGetValue) {
+						getter = CG.Flow(getterAttributes.Select(a => a.GenerateCode()).ToArray()).AddLineInEnd() +
+							"get;".AddFirst(getterModifier.GenerateCode(), !getterModifier.isPublic);
 					}
 					else {
 						getter = null;
 					}
 					string setter;
-					if(obj.CanSetValue()) {
-						setter = CG.Flow(obj.setterAttributes.Select(a => TryParseAttributeData(a).GenerateCode()).ToArray()).AddLineInEnd() +
-						"set;".AddFirst(obj.setterModifier.GenerateCode(), !obj.setterModifier.isPublic);
+					if(CanSetValue) {
+						setter = CG.Flow(setterAttributes.Select(a => a.GenerateCode()).ToArray()).AddLineInEnd() +
+						"set;".AddFirst(setterModifier.GenerateCode(), !setterModifier.isPublic);
 					}
 					else {
 						setter = null;
@@ -1436,41 +1600,33 @@ namespace MaxyGames {
 					p += CG.Flow(getter, setter).AddTabAfterNewLine() + "\n}";
 				} else {
 					p += "{\n";
-					if(obj.CanGetValue()) {
+					if(CanGetValue) {
 						var str = "get {\n";
-						if(!obj.getterModifier.isPublic) {
-							str = str.Insert(0, obj.getterModifier.GenerateCode());
+						if(!getterModifier.isPublic) {
+							str = str.Insert(0, getterModifier.GenerateCode());
 						}
-						if(obj.getRoot.LocalVariables.Any()) {
-							string lv = M_GenerateLocalVariable(obj.getRoot.LocalVariables);
-							str += lv.AddLineInFirst().AddTabAfterNewLine();
-						}
-						str += GeneratePort(obj.getRoot.Entry.nodeObject.primaryFlowOutput).AddTabAfterNewLine();
+						str += getContents.AddTabAfterNewLine();
 						str += "\n}";
-                        if(obj.getRoot.attributes.Count > 0) {
-                            str = CG.Flow(obj.getRoot.attributes.Select(a => TryParseAttributeData(a).GenerateCode())).AddLineInEnd().Add(str);
+                        if(getterAttributes != null && getterAttributes.Count > 0) {
+                            str = CG.Flow(getterAttributes.Select(a => a.GenerateCode())).AddLineInEnd().Add(str);
                         }
                         p += str.AddTabAfterNewLine() + "\n";
 					}
-					if(obj.CanSetValue()) {
+					if(CanSetValue) {
 						var str = "set {\n";
-						if(!obj.setterModifier.isPublic) {
-							str = str.Insert(0, obj.setterModifier.GenerateCode());
+						if(!setterModifier.isPublic) {
+							str = str.Insert(0, setterModifier.GenerateCode());
 						}
-						if(obj.setRoot.LocalVariables.Any()) {
-							string lv = M_GenerateLocalVariable(obj.setRoot.LocalVariables);
-							str += lv.AddLineInFirst().AddTabAfterNewLine();
-						}
-						str += GeneratePort(obj.setRoot.Entry.nodeObject.primaryFlowOutput).AddTabAfterNewLine();
+						str += setContents.AddTabAfterNewLine();
 						str += "\n}";
-                        if(obj.setRoot.attributes.Count > 0) {
-                            str = CG.Flow(obj.setRoot.attributes.Select(a => TryParseAttributeData(a).GenerateCode())).AddLineInEnd().Add(str);
+                        if(setterAttributes != null && setterAttributes.Count > 0) {
+                            str = CG.Flow(setterAttributes.Select(a => a.GenerateCode())).AddLineInEnd().Add(str);
                         }
                         p += str.AddTabAfterNewLine() + "\n";
 					}
 					p += "}";
 				}
-				result += (m + DeclareType(obj.ReturnType()) + " " + name + " " + p).AddFirst("\n", !string.IsNullOrEmpty(result));
+				result += (m + DeclareType(type) + " " + name + " " + p).AddFirst("\n", !string.IsNullOrEmpty(result));
 				if(!string.IsNullOrEmpty(summary)) {
 					result = "/// <summary>".AddLineInEnd() +
 						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
@@ -1566,7 +1722,7 @@ namespace MaxyGames {
 			public IList<GPData> genericParameters;
 			public List<AData> attributes;
 			public string code;
-			public FunctionModifier modifier;
+			public FunctionModifier modifier = new() { Public = false };
 			public string summary;
 
 			public UGraphElement owner;

@@ -73,6 +73,12 @@ namespace MaxyGames {
 
 				GeneratedData generatedData = new GeneratedData(setting);
 
+				if(setting.onInitialize != null) {
+					ResetGenerator();
+					generatorData.setting = setting;
+					setting.onInitialize(generatedData);
+				}
+
 				foreach(var classes in setting.types) {
 					ResetGenerator();
 					generatorData.setting = setting;
@@ -409,9 +415,9 @@ namespace MaxyGames {
 						var classBuilder = new ClassData(classes, graphSystem) {
 							name = enumData.ScriptName,
 							modifier = modifier,
-							keyword = "enum ",
 							variables = EL,
 						};
+						classBuilder.SetTypeToEnum();
 						generatedData.RegisterClass(classes, classBuilder);
 						generatorData.classData = classBuilder;
 						generatedData.classNames[enumData] = enumData.ScriptName;
@@ -1426,6 +1432,14 @@ namespace MaxyGames {
 		#endregion
 
 		#region Parse Type
+		public static string Typeof(Type type) {
+			return Value(type);
+		}
+
+		public static string Typeof(string type) {
+			return $"typeof({type})";
+		}
+
 		/// <summary>
 		/// Function to get correct code for type
 		/// </summary>
@@ -2099,6 +2113,15 @@ namespace MaxyGames {
 				name += "." + path[i];
 			}
 			return name;
+		}
+
+		/// <summary>
+		/// Generate nameof syntax
+		/// </summary>
+		/// <param name="member"></param>
+		/// <returns></returns>
+		public static string Nameof(string value) {
+			return $"nameof({value})";
 		}
 
 		/// <summary>
