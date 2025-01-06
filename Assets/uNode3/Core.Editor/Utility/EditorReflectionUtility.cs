@@ -463,32 +463,6 @@ namespace MaxyGames.UNode.Editors {
 			return fields;
 		}
 
-		public static bool HasFieldDependencies(string[] fieldNames, IEnumerable<FieldInfo> fields) {
-			foreach(var f in fields) {
-				if(f != null) {
-					ObjectTypeAttribute objectType = GetAttributes(f).OfType<ObjectTypeAttribute>().FirstOrDefault();
-					if(objectType != null && !string.IsNullOrEmpty(objectType.targetFieldPath) && fieldNames.Contains(objectType.targetFieldPath)) {
-						return true;
-					}
-					HideAttribute hideAttribute = GetAttributes(f).OfType<HideAttribute>().FirstOrDefault();
-					if(hideAttribute != null && !string.IsNullOrEmpty(hideAttribute.targetField) && fieldNames.Contains(hideAttribute.targetField)) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		public static List<FieldInfo> GetFieldDependencies(string[] fieldNames, IEnumerable<FieldInfo> fields) {
-			List<FieldInfo> values = new List<FieldInfo>();
-			foreach(var f in fields) {
-				if(f != null && fieldNames.Contains(f.Name)) {
-					values.Add(f);
-				}
-			}
-			return values;
-		}
-
 		public static object[] GetAttributes(MemberInfo member) {
 			if(member == null)
 				return null;

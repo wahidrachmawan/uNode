@@ -77,7 +77,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawCustomList<T>(
+		public static ReorderableList GetReorderableList<T>(
 			List<T> values,
 			string headerLabel,
 			Action<Rect, int, T> drawElement,
@@ -164,10 +164,28 @@ namespace MaxyGames.UNode.Editors {
 				reorderable.onReorderCallbackWithDetails = reorder;
 				_reorderabeMap.AddOrUpdate(values, reorderable);
 			}
+			return reorderable;
+		}
+
+		public static void DrawCustomList<T>(
+			List<T> values,
+			string headerLabel,
+			Action<Rect, int, T> drawElement,
+			Action<Rect> add,
+			Action<int> remove,
+			ReorderableList.ReorderCallbackDelegateWithDetails reorder = null,
+			ReorderableList.ElementHeightCallbackDelegate elementHeight = null) {
+			if(values == null) {
+				throw new ArgumentNullException(nameof(values));
+			}
+			ReorderableList reorderable;
+			if(!_reorderabeMap.TryGetValue(values, out reorderable)) {
+				reorderable = GetReorderableList(values, headerLabel, drawElement, add, remove, reorder, elementHeight);
+			}
 			reorderable.DoLayoutList();
 		}
 
-		public static void DrawCustomList(
+		public static ReorderableList GetReorderableList(
 			IList values,
 			string headerLabel,
 			Action<Rect, int, object> drawElement,
@@ -176,9 +194,6 @@ namespace MaxyGames.UNode.Editors {
 			ReorderableList.ReorderCallbackDelegateWithDetails reorder = null,
 			ReorderableList.ElementHeightCallbackDelegate elementHeight = null,
 			float? headerHeight = null) {
-			if(values == null) {
-				throw new ArgumentNullException(nameof(values));
-			}
 			ReorderableList reorderable;
 			if(!_reorderabeMap2.TryGetValue(values, out reorderable)) {
 				reorderable = new ReorderableList(values, values.GetType().ElementType());
@@ -263,6 +278,25 @@ namespace MaxyGames.UNode.Editors {
 				}
 				reorderable.onReorderCallbackWithDetails = reorder;
 				_reorderabeMap2.AddOrUpdate(values, reorderable);
+			}
+			return reorderable;
+		}
+
+		public static void DrawCustomList(
+			IList values,
+			string headerLabel,
+			Action<Rect, int, object> drawElement,
+			Action<Rect> add,
+			Action<int> remove,
+			ReorderableList.ReorderCallbackDelegateWithDetails reorder = null,
+			ReorderableList.ElementHeightCallbackDelegate elementHeight = null,
+			float? headerHeight = null) {
+			if(values == null) {
+				throw new ArgumentNullException(nameof(values));
+			}
+			ReorderableList reorderable;
+			if(!_reorderabeMap2.TryGetValue(values, out reorderable)) {
+				reorderable = GetReorderableList(values, headerLabel, drawElement, add, remove, reorder, elementHeight, headerHeight);
 			}
 			reorderable.DoLayoutList();
 		}

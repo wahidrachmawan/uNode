@@ -29,12 +29,22 @@ namespace MaxyGames.UNode.Editors {
 			public DefaultAccessor newFunctionAccessor;
 
 			//Node snapping
+			[Tooltip("Enable the snapping feature")]
 			public bool enableSnapping = true;
+			[Tooltip("Enable snapping to graph")]
 			public bool graphSnapping = true;
+			[Tooltip("Enable snapping to port")]
 			public bool nodePortSnapping = true;
+			[Tooltip("The snapping range to a port")]
 			public float portSnappingRange = 10;
+			[Tooltip("Enable snapping to grid")]
 			public bool gridSnapping = false;
+			[Tooltip("Enable the space snapping feature")]
 			public bool spacingSnapping = false;
+
+			//Controls
+			[Tooltip("When true, right click to move the canvas will be disabled")]
+			public bool disableRightClickMove;
 
 			public DisplayKind displayKind;
 
@@ -427,6 +437,10 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 					}
 					uNodeGUIUtility.ShowField(nameof(preferenceData.gridSnapping), preferenceData);
 					uNodeGUIUtility.ShowField(nameof(preferenceData.spacingSnapping), preferenceData);
+				}
+				EditorGUILayout.LabelField("Controls", EditorStyles.boldLabel);
+				if(uNodeUtility.isOSXPlatform == false) {
+					uNodeGUIUtility.ShowField(nameof(preferenceData.disableRightClickMove), preferenceData);
 				}
 			}
 			else if(selectedMenu == 1) {

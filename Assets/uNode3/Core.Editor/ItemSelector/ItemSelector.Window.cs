@@ -118,7 +118,7 @@ namespace MaxyGames.UNode.Editors {
 		void DrawToolbar() {
 			if(canSearch) {
 				Rect rect = uNodeGUIUtility.GetRectCustomHeight(17);
-				editorData.searchKind = (SearchKind)GUI.Toolbar(rect, (int)editorData.searchKind, new string[] { "Relevent", "Contains", "Start with", "Equals", "Ends with" }, new GUIStyle(EditorStyles.radioButton) { fontSize = 11});
+				editorData.searchKind = (SearchKind)GUI.Toolbar(rect, (int)editorData.searchKind, new string[] { "Contains", "Start with", "Equals", "Ends with", "Relevant" }, new GUIStyle(EditorStyles.radioButton) { fontSize = 11 });
 				if(!_hasFocus) {
 					if(Event.current.type == EventType.Repaint) {
 						editorData.searchField.SetFocus();
@@ -142,7 +142,8 @@ namespace MaxyGames.UNode.Editors {
 						var member = (lastItem as MemberTreeView).member;
 						if(member is Type) {
 							fullPath = (member as Type).PrettyName();
-						} else {
+						}
+						else {
 							fullPath = member.DeclaringType.PrettyName() + "." + member.Name;
 						}
 					}
@@ -168,22 +169,26 @@ namespace MaxyGames.UNode.Editors {
 					if(evt.modifiers == EventModifiers.Control && evt.keyCode == KeyCode.A) {
 						editorData.searchField.SetFocus();
 						evt.Use();
-					} else {
+					}
+					else {
 						var key = evt.keyCode.ToString();
 						if(key.Length == 1) {
 							if(evt.shift || evt.capsLock) {
 								editorData.searchString += key;
-							} else {
+							}
+							else {
 								editorData.searchString += key.ToLower();
 							}
 							evt.Use();
-						} else if(evt.keyCode == KeyCode.Backspace) {
+						}
+						else if(evt.keyCode == KeyCode.Backspace) {
 							var str = editorData.searchString;
 							if(str.Length > 0) {
 								editorData.searchString = str.RemoveLast();
 								evt.Use();
 							}
-						} else if(evt.keyCode == KeyCode.Space) {
+						}
+						else if(evt.keyCode == KeyCode.Space) {
 							editorData.searchString += " ";
 							evt.Use();
 						}
@@ -203,19 +208,22 @@ namespace MaxyGames.UNode.Editors {
 				if(!editorData.manager.isReloading) {
 					Rect rect = GUILayoutUtility.GetRect(0, 100000, 0, 100000);
 					editorData.manager.OnGUI(rect);
-				} else {
+				}
+				else {
 					if(progresses != null && progresses.Count > 0) {
-						for(int i=0; i<progresses.Count; i++) {
+						for(int i = 0; i < progresses.Count; i++) {
 							if(progresses[i] == null || i >= 4) {
 								break;
 							}
 							EditorGUI.ProgressBar(uNodeGUIUtility.GetRect(), progresses[i].progress, progresses[i].info);
 						}
-					} else {
+					}
+					else {
 						EditorGUI.ProgressBar(uNodeGUIUtility.GetRect(), editorData.setup.progress, "Searching Items");
 					}
 				}
-			} else {
+			}
+			else {
 				EditorGUI.ProgressBar(uNodeGUIUtility.GetRect(), editorData.setup.progress, "Loading Types");
 			}
 			if(Event.current.keyCode == KeyCode.Escape) {

@@ -1817,7 +1817,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public GraphDebug.DebugData GetDebugInfo() {
 			if(_debugData == null) {
-				return GetDebugData();
+				_debugData = GetDebugData();
 			}
 			return _debugData;
 		}

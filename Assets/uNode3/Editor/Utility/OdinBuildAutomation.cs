@@ -52,7 +52,6 @@ namespace MaxyGames.OdinSerializer.Utilities.Editor
             return Path.GetDirectoryName(filePath);
         }
 
-		static MethodInfo uNodeAOTScanMethod;
         public static void OnPreprocessBuild()
         {
             BuildTarget platform = EditorUserBuildSettings.activeBuildTarget;

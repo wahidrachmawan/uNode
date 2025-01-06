@@ -1276,7 +1276,15 @@ namespace MaxyGames.UNode.Editors {
 				}
 				aOTSupportScanner.GetType().GetField("allowRegisteringScannedTypes", MemberData.flags).SetValueOptimized(aOTSupportScanner, true);
 				var graphTypes = ScanAOTOnGraphs();
-				OnPreprocessBuild();
+				//OnPreprocessBuild();
+				GraphUtility.UpdateDatabase();
+				GraphUtility.SaveAllGraph();
+				if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild) {
+					GenerationUtility.CompileProjectGraphs(true);
+					while(uNodeThreadUtility.IsNeedUpdate()) {
+						uNodeThreadUtility.Update();
+					}
+				}
 				var types = aOTSupportScanner.EndScan();
 				foreach(var type in types) {
 					graphTypes.Add(type);

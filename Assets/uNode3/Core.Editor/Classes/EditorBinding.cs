@@ -26,6 +26,17 @@ namespace MaxyGames.UNode.Editors {
 		internal static Type syntaxHighlighter { get; private set; }
 		internal static Type codeFormatter { get; private set; }
 
+		public static string HighlightSyntax(string syntax) {
+			var syntaxHighlighter = EditorBinding.syntaxHighlighter;
+			if(syntaxHighlighter != null) {
+				string highlight = syntaxHighlighter.GetMethod("GetRichText").InvokeOptimized(null, new object[] { syntax }) as string;
+				if(!string.IsNullOrEmpty(highlight)) {
+					return highlight;
+				}
+			}
+			return null;
+		}
+
 		[InitializeOnLoadMethod]
 		internal static void OnInitialize() {
 			GraphUtility.Initialize();

@@ -18,12 +18,13 @@ namespace MaxyGames.UNode {
 		public override Type BaseType => typeof(T);
 	}
 
-	public class MissingType : RuntimeType, ICustomIcon {
+	public class MissingType : RuntimeType, ICustomIcon, INativeType {
 		public string missingType;
 
 		public override Type BaseType => typeof(object);
 
 		public override string Name => missingType;
+		public override string Namespace => string.Empty;
 
 		public override string ToString() {
 			if(string.IsNullOrEmpty(missingType)) {
@@ -65,6 +66,10 @@ namespace MaxyGames.UNode {
 
 		public Texture GetIcon() {
 			return Resources.Load<Texture2D>("Icons/IconMissing");
+		}
+
+		public Type GetNativeType() {
+			return this;
 		}
 	}
 

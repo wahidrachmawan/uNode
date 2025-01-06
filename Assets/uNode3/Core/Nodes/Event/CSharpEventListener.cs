@@ -70,7 +70,7 @@ namespace MaxyGames.UNode.Nodes {
 			CG.RegisterUserObject(mData, this);
 			for(int i = 0; i < datas.Count; i++) {
 				int index = i;
-				var vName = CG.RegisterVariable(datas[index].port);
+				var vName = CG.GetVariableName(datas[index].port);
 				if(CG.CanDeclareLocal(datas[i].port, this.outputs)) {
 					CG.RegisterPort(datas[i].port, () => vName);
 				}

@@ -771,6 +771,16 @@ namespace MaxyGames {
 		}
 		#endregion
 
+		#region Throw
+		/// <summary>
+		/// Get break code.
+		/// </summary>
+		/// <returns></returns>
+		public static string Throw(string exception) {
+			return $"throw {exception};";
+		}
+		#endregion
+
 		#region Routine
 		public static string Routine(params string[] parameters) {
 			for(int i = 0; i < parameters.Length; i++) {

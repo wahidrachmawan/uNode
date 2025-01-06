@@ -2336,6 +2336,18 @@ namespace MaxyGames.UNode.Editors {
 			}, unityObject, field.GetCustomAttributes(true));
 		}
 
+		public static void EditValue(Rect position, string fieldName, object parentField, UnityEngine.Object unityObject = null) {
+			if(object.ReferenceEquals(parentField, null))
+				return;
+			FieldInfo field = parentField.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic);
+			if(field == null) {
+				throw new System.Exception("The field name : " + fieldName + " does't exists");
+			}
+			EditValue(position, new GUIContent(ObjectNames.NicifyVariableName(fieldName)), field.GetValueOptimized(parentField), field.FieldType, (obj) => {
+				field.SetValueOptimized(parentField, obj);
+			}, unityObject, field.GetCustomAttributes(true));
+		}
+
 		public static void EditValue(Rect position, GUIContent label, string fieldName, int elementIndex, object parentField, UnityEngine.Object unityObject = null) {
 			if(object.ReferenceEquals(parentField, null))
 				return;
@@ -2362,7 +2374,12 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void EditValueLayouted(FieldInfo field, object owner, Action<object> onChange = null, uNodeUtility.EditValueSettings settings = null) {
 			EditValueLayouted(new GUIContent(ObjectNames.NicifyVariableName(field.Name)), field.GetValueOptimized(owner), field.FieldType, (val) => {
-				onChange?.Invoke(val);
+				if(onChange != null) {
+					onChange(val);
+				}
+				else {
+					field.SetValueOptimized(owner, val);
+				}
 			}, settings ?? new uNodeUtility.EditValueSettings() {
 				attributes = field.GetCustomAttributes(true)
 			});

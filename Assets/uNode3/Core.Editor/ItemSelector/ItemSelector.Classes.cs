@@ -42,7 +42,8 @@ namespace MaxyGames.UNode.Editors {
 							}
 							childTrees = null;
 						}
-					} else if(childTrees == null) {
+					}
+					else if(childTrees == null) {
 						childTrees = base.children;
 						base.children = new List<TreeViewItem>();
 					}
@@ -194,11 +195,11 @@ namespace MaxyGames.UNode.Editors {
 
 		#region Enum
 		enum SearchKind {
-			Relevence,
 			Contains,
 			Startwith,
 			Equal,
 			Endwith,
+			Relevant,
 		}
 
 		enum SearchFilter {
@@ -241,7 +242,8 @@ namespace MaxyGames.UNode.Editors {
 							uNodePreference.preferenceData.m_itemDeepSearchKind = (int)value;
 							uNodePreference.SavePreference();
 						}
-					} else {
+					}
+					else {
 						m_searchKind = value;
 						if(uNodePreference.preferenceData.m_itemSearchKind != (int)value) {
 							uNodePreference.preferenceData.m_itemSearchKind = (int)value;
@@ -531,7 +533,8 @@ namespace MaxyGames.UNode.Editors {
 			public void SetFavorite(bool value) {
 				if(value) {
 					uNodeEditor.SavedData.AddFavorite("NODES", menu.type.FullName, null);
-				} else {
+				}
+				else {
 					uNodeEditor.SavedData.RemoveFavorite("NODES", menu.type.FullName);
 				}
 			}
@@ -575,7 +578,8 @@ namespace MaxyGames.UNode.Editors {
 			public void SetFavorite(bool value) {
 				if(value) {
 					uNodeEditor.SavedData.AddFavorite(item.memberInfo);
-				} else {
+				}
+				else {
 					uNodeEditor.SavedData.RemoveFavorite(item.memberInfo);
 				}
 			}
@@ -725,7 +729,8 @@ namespace MaxyGames.UNode.Editors {
 								selectValidation = () => EditorReflectionUtility.ValidateMember(member, filter),
 								nextValidation = () => EditorReflectionUtility.ValidateNextMember(member, filter),
 							};
-						} else if(member.MemberType == MemberTypes.Method) {
+						}
+						else if(member.MemberType == MemberTypes.Method) {
 							MethodInfo method = member as MethodInfo;
 							if(ReflectionUtils.IsValidMethod(method, filter.MaxMethodParam, filter.MinMethodParam, filter)) {
 								return new MemberTreeView(member, member.GetHashCode(), -1) {
@@ -733,7 +738,8 @@ namespace MaxyGames.UNode.Editors {
 									nextValidation = () => EditorReflectionUtility.ValidateNextMember(member, filter),
 								};
 							}
-						} else if(member.MemberType == MemberTypes.Constructor) {
+						}
+						else if(member.MemberType == MemberTypes.Constructor) {
 							ConstructorInfo ctor = member as ConstructorInfo;
 							if(ReflectionUtils.IsValidConstructor(ctor, filter.MaxMethodParam, filter.MinMethodParam)) {
 								return new MemberTreeView(member, member.GetHashCode(), -1) {
@@ -742,7 +748,8 @@ namespace MaxyGames.UNode.Editors {
 								};
 							}
 						}
-					} else if(member.MemberType != MemberTypes.Constructor) {
+					}
+					else if(member.MemberType != MemberTypes.Constructor) {
 						bool canGet = ReflectionUtils.CanGetMember(member, filter);
 						if(canGet) {
 							return new MemberTreeView(member, member.GetHashCode(), -1) {
@@ -751,7 +758,8 @@ namespace MaxyGames.UNode.Editors {
 							};
 						}
 					}
-				} else if(EditorReflectionUtility.ValidateNextMember(member, filter)) {
+				}
+				else if(EditorReflectionUtility.ValidateNextMember(member, filter)) {
 					bool flag = ReflectionUtils.CanGetMember(member, filter);
 					if(flag) {
 						return new MemberTreeView(member, member.GetHashCode(), -1) {
@@ -792,13 +800,15 @@ namespace MaxyGames.UNode.Editors {
 								if(y.member.MemberType != MemberTypes.Constructor) {
 									return -1;
 								}
-							} else if(y.member.MemberType == MemberTypes.Constructor) {
+							}
+							else if(y.member.MemberType == MemberTypes.Constructor) {
 								return 1;
 							}
 						}
 						return string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase);
 					});
-				} else {
+				}
+				else {
 					var members = EditorReflectionUtility.GetSortedMembers(type, flags);
 					if(filter.Static && !filter.SetMember && filter.ValidMemberType.HasFlags(MemberTypes.Constructor) &&
 						!type.IsCastableTo(typeof(Delegate)) && !type.IsSubclassOf(typeof(Component))) {
@@ -841,7 +851,8 @@ namespace MaxyGames.UNode.Editors {
 					if(targetObject is IGraph) {
 						graph = (targetObject as IGraph).GraphData;
 						targetElement = graph;
-					} else if(targetObject is UGraphElement) {
+					}
+					else if(targetObject is UGraphElement) {
 						targetElement = (targetObject as UGraphElement);
 						graph = targetElement.graph;
 					}
@@ -914,7 +925,8 @@ namespace MaxyGames.UNode.Editors {
 						itemData.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 						result.Add(categTree);
 					}
-				} else if(graph == null && targetObject != null) {
+				}
+				else if(graph == null && targetObject != null) {
 					var itemData = new List<GraphItem>();
 					if(targetObject is IGraphWithVariables) {
 						var variableSystem = targetObject as IGraph;
@@ -976,12 +988,14 @@ namespace MaxyGames.UNode.Editors {
 									cTree = new SelectorCategoryTreeView(path[i], "", uNodeEditorUtility.GetUIDFromString("[CITEM]" + p), -1);
 									if(tree != null) {
 										tree.AddChild(cTree);
-									} else {
+									}
+									else {
 										result.Add(cTree);
 									}
 									tree = cTree;
 									trees[p] = cTree;
-								} else {
+								}
+								else {
 									tree = cTree;
 								}
 							}
@@ -1009,9 +1023,11 @@ namespace MaxyGames.UNode.Editors {
 				UGraphElement element;
 				if(targetObject is UGraphElement) {
 					element = targetObject as UGraphElement;
-				} else if(targetObject is IGraph) {
+				}
+				else if(targetObject is IGraph) {
 					element = (targetObject as IGraph).GraphData;
-				} else {
+				}
+				else {
 					return new List<TreeViewItem>();
 				}
 				var result = new List<TreeViewItem>();
@@ -1042,7 +1058,8 @@ namespace MaxyGames.UNode.Editors {
 							graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 							result.Add(categTree);
 						}
-					} else {
+					}
+					else {
 						Constructor ctor = element.GetObjectInParent<Constructor>();
 						if(ctor != null) {
 							var graphItems = new List<GraphItem>();
@@ -1058,7 +1075,8 @@ namespace MaxyGames.UNode.Editors {
 								graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 								result.Add(categTree);
 							}
-						} else {
+						}
+						else {
 							IGraph root = element.graphContainer;
 							if(root is IGenericParameterSystem) {
 								var graphItems = new List<GraphItem>();
@@ -1110,7 +1128,8 @@ namespace MaxyGames.UNode.Editors {
 							});
 						}
 					}
-				} else {
+				}
+				else {
 					var fil = new FilterAttribute(filter);
 					fil.NestedType = false;
 					fil.Static = false;

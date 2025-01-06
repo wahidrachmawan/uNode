@@ -417,6 +417,16 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Prevent the default action to executed for this event
+		/// </summary>
+		/// <param name="event"></param>
+		public static void IgnoreEvent(this EventBase @event) {
+#pragma warning disable CS0618 // Type or member is obsolete
+			@event.PreventDefault();
+#pragma warning restore CS0618 // Type or member is obsolete
+		}
+
+		/// <summary>
 		/// Is the visual element is visible, true if opacity not zero and visible is true
 		/// </summary>
 		/// <param name="visualElement"></param>
