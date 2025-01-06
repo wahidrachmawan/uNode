@@ -105,7 +105,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var preference = uNodePreference.GetPreference();
 			var assemblies = EditorReflectionUtility.GetAssemblies();
 			var includedAssemblies = uNodePreference.GetIncludedAssemblies();
-			var ns = graph.graphData.GetNamespaces();
+			var ns = graph.graphData.GetUsingNamespaces();
 			foreach(var assembly in assemblies) {
 				if(!includedAssemblies.Contains(assembly.GetName().Name)) {
 					continue;
@@ -198,7 +198,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var preference = uNodePreference.GetPreference();
 			var assemblies = EditorReflectionUtility.GetAssemblies();
 			var includedAssemblies = uNodePreference.GetIncludedAssemblies();
-			var ns = graph.graphData.GetNamespaces();
+			var ns = graph.graphData.GetUsingNamespaces();
 			foreach(var assembly in assemblies) {
 				if(!includedAssemblies.Contains(assembly.GetName().Name)) {
 					continue;

@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Editors {
-	//public enum EditorSelectionType {
-	//	None,
-	//	Graph,
-	//	GraphElements,
-	//	Other,
-	//}
-
+	/// <summary>
+	/// The graph editor data
+	/// </summary>
 	[System.Serializable]
 	public class GraphEditorData {
 		#region Fields
@@ -63,6 +59,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		/// <summary>
+		/// Set owner of the data
+		/// </summary>
+		/// <param name="owner"></param>
 		public void SetOwner(Object owner) {
 			if(owner is IGraph) {
 				_owner = owner;
@@ -108,12 +108,24 @@ namespace MaxyGames.UNode.Editors {
 
 		public UBind bindGraph => UBind.FromObject(owner);
 
+		/// <summary>
+		/// The actual graph data
+		/// </summary>
 		public Graph graphData => graph?.GraphData;
 
+		/// <summary>
+		/// The graph layout
+		/// </summary>
 		public GraphLayout graphLayout => graphData.graphLayout;
 
+		/// <summary>
+		/// True if the data is valid
+		/// </summary>
 		public bool isValidGraph => owner is IGraph && graph != null;
 
+		/// <summary>
+		/// Get the graph system
+		/// </summary>
 		public GraphSystemAttribute graphSystem => GraphUtility.GetGraphSystem(_owner);
 
 		/// <summary>
@@ -180,6 +192,9 @@ namespace MaxyGames.UNode.Editors {
 
 		[System.NonSerialized]
 		private HashSet<string> m_scopes;
+		/// <summary>
+		/// The scope of the graph
+		/// </summary>
 		public HashSet<string> scopes {
 			get {
 				if(m_scopes == null) {
@@ -212,6 +227,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Return true, if can add node to the <see cref="currentCanvas"/>
+		/// </summary>
 		public bool canAddNode {
 			get {
 				if(isValidGraph) {
@@ -238,6 +256,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Return true if the current canvas is supporting coroutine
+		/// </summary>
 		public bool supportCoroutine {
 			get {
 				if(selectedRoot == graphData.mainGraphContainer && (graph is IMacroGraph || graph is IStateGraph state && state.CanCreateStateGraph)) {
@@ -264,18 +285,27 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Return the selected nested node
+		/// </summary>
 		public NodeObject selectedGroup {
 			get {
 				return currentCanvas as NodeObject;
 			}
 		}
 
+		/// <summary>
+		/// Return true if it is currently in Main Graph
+		/// </summary>
 		public bool isInMainGraph {
 			get {
 				return selectedRoot is MainGraphContainer;
 			}
 		}
 
+		/// <summary>
+		/// Return true if the graph is support main graph
+		/// </summary>
 		public bool isSupportMainGraph {
 			get {
 				if(graph is IStateGraph stateGraph) {
@@ -291,6 +321,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// The title of main graph
+		/// </summary>
 		public string mainGraphTitle {
 			get {
 				if(graph is IStateGraph) {
@@ -318,6 +351,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Add element to selection
+		/// </summary>
+		/// <param name="element"></param>
 		public void AddToSelection(UGraphElement element) {
 			if(element is not NodeObject) {
 				serializedSelecteds.Clear();
@@ -329,6 +366,10 @@ namespace MaxyGames.UNode.Editors {
 			serializedSelecteds.Add(new UGraphElementRef(element));
 		}
 
+		/// <summary>
+		/// Add element to selection
+		/// </summary>
+		/// <param name="reference"></param>
 		public void AddToSelection(BaseReference reference) {
 			if(reference.ReferenceValue is not NodeObject) {
 				serializedSelecteds.Clear();
@@ -337,6 +378,10 @@ namespace MaxyGames.UNode.Editors {
 			serializedSelecteds.Add(reference);
 		}
 
+		/// <summary>
+		/// Remove element from selection
+		/// </summary>
+		/// <param name="element"></param>
 		public void RemoveFromSelection(UGraphElement element) {
 			for(int i=0;i< serializedSelecteds.Count;i++) {
 				if(serializedSelecteds[i].ReferenceValue as UGraphElement == element) {
@@ -345,12 +390,21 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Clear selections
+		/// </summary>
 		public void ClearSelection() {
 			serializedSelecteds.Clear();
 		}
 
+		/// <summary>
+		/// Return true if has selected elements
+		/// </summary>
 		public bool hasSelection => serializedSelecteds.Count > 0;
 
+		/// <summary>
+		/// All selection objects
+		/// </summary>
 		public IEnumerable<object> selecteds {
 			get {
 				foreach(var ele in serializedSelecteds) {
@@ -359,6 +413,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// All selecteds nodes
+		/// </summary>
 		public IEnumerable<NodeObject> selectedNodes {
 			get {
 				foreach(var ele in serializedSelecteds) {
@@ -599,7 +656,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public HashSet<string> GetNamespaces() {
+		/// <summary>
+		/// Get using namespace of the graph
+		/// </summary>
+		/// <returns></returns>
+		public HashSet<string> GetUsingNamespaces() {
 			return graph.GetUsingNamespaces();
 		}
 	}

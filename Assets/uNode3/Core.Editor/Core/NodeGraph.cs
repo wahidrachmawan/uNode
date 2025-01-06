@@ -22,7 +22,7 @@ namespace MaxyGames.UNode.Editors {
 		public static HashSet<string> GetOpenedGraphUsingNamespaces() {
 			HashSet<string> ns = null;
 			if(openedGraph != null) {
-				ns = openedGraph.graphData.GetNamespaces();
+				ns = openedGraph.graphData.GetUsingNamespaces();
 			}
 			return ns;
 		}
