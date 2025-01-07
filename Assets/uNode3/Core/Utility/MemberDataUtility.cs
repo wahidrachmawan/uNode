@@ -15,7 +15,7 @@ namespace MaxyGames.UNode {
 				throw new NullReferenceException("The graph container is null");
 			return new MemberData.ItemData() {
 				name = variable.name,
-				reference = new VariableRef(variable, variable.graphContainer),
+				reference = new VariableRef(variable),
 			};
 		}
 
@@ -26,7 +26,7 @@ namespace MaxyGames.UNode {
 				throw new NullReferenceException("The graph container is null");
 			return new MemberData.ItemData() {
 				name = property.name,
-				reference = new PropertyRef(property, property.graphContainer),
+				reference = new PropertyRef(property),
 			};
 		}
 
@@ -37,7 +37,7 @@ namespace MaxyGames.UNode {
 				throw new NullReferenceException("The graph container is null");
 			var data = new MemberData.ItemData() {
 				name = function.name,
-				reference = new FunctionRef(function, function.graphContainer),
+				reference = new FunctionRef(function),
 			};
 			if(function.genericParameters.Length > 0) {
 				throw new System.Exception("Can't Add Function with generic parameter, try using Add Value Node or manually select function");
@@ -67,7 +67,7 @@ namespace MaxyGames.UNode {
 				throw new NullReferenceException("The graph container is null");
 			var data = new MemberData.ItemData() {
 				name = function.name,
-				reference = new FunctionRef(function, function.graphContainer),
+				reference = new FunctionRef(function),
 			};
 			GenericParameterData[] genericParamArgs = function.genericParameters;
 			if(genericParamArgs.Length > 0) {

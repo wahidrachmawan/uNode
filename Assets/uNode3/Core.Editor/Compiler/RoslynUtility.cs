@@ -914,7 +914,7 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var arg in namedTypeSymbol.TypeArguments) {
 						types.Add(GetTypeFromTypeSymbol(arg));
 					}
-					if(types.Any(item => item.typeKind == SerialiedTypeKind.GenericParameter)) {
+					if(types.Any(item => item.typeKind == SerializedTypeKind.GenericParameter)) {
 						//TODO: add support for generic parameter
 						throw new NotImplementedException();
 						//var member = new MemberData() {

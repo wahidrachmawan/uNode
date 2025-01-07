@@ -353,11 +353,11 @@ namespace MaxyGames.UNode.Editors {
 			public object GetInstance() {
 				switch(targetType) {
 					case MemberData.TargetType.uNodeFunction:
-						return new FunctionRef(function, targetObject as IGraph);
+						return new FunctionRef(function);
 					case MemberData.TargetType.uNodeProperty:
-						return new PropertyRef(property, targetObject as IGraph);
+						return new PropertyRef(property);
 					case MemberData.TargetType.uNodeVariable:
-						return new VariableRef(variable, targetObject as IGraph);
+						return new VariableRef(variable);
 					case MemberData.TargetType.uNodeParameter:
 						return reference;
 					default:

@@ -361,6 +361,42 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// True if the variable can be added to the graph
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		public static bool CanAddVariable(this Graph graph) {
+			return graph?.graphContainer is IGraphWithVariables;
+		}
+
+		/// <summary>
+		/// True if the property can be added to the graph
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		public static bool CanAddProperty(this Graph graph) {
+			return graph?.graphContainer is IGraphWithProperties;
+		}
+
+		/// <summary>
+		/// True if the function can be added to the graph
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		public static bool CanAddFunction(this Graph graph) {
+			return graph?.graphContainer is IGraphWithFunctions;
+		}
+
+		/// <summary>
+		/// True if the constructor can be added to the graph
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		public static bool CanAddConstructor(this Graph graph) {
+			return graph?.graphContainer is IGraphWithConstructors;
+		}
+
+		/// <summary>
 		/// True if the graph is Native Graph
 		/// </summary>
 		/// <param name="graph"></param>

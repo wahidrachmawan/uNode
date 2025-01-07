@@ -193,7 +193,7 @@ namespace MaxyGames.UNode {
 		[SerializeField]
 		private SerializedType _type = typeof(object);
 
-		public VariableRef(Variable variable, IGraph graph) : base(variable, graph) {
+		public VariableRef(Variable variable) : base(variable, variable.graphContainer) {
 			_type = variable.type;
 		}
 
@@ -276,7 +276,7 @@ namespace MaxyGames.UNode {
 		[SerializeField]
 		private SerializedType _type = typeof(object);
 
-		public FunctionRef(Function function, IGraph graph) : base(function, graph) {
+		public FunctionRef(Function function) : base(function, function.graphContainer) {
 			_type = function.ReturnType();
 		}
 
@@ -300,7 +300,7 @@ namespace MaxyGames.UNode {
 		[SerializeField]
 		private SerializedType _type = typeof(object);
 
-		public ConstructorRef(Constructor ctor, IGraph graph) : base(ctor, graph) {
+		public ConstructorRef(Constructor ctor) : base(ctor, ctor.graphContainer) {
 			_type = ctor.ReturnType();
 		}
 
@@ -381,7 +381,7 @@ namespace MaxyGames.UNode {
 		[SerializeField]
 		private SerializedType _type = typeof(object);
 
-		public PropertyRef(Property property, IGraph graph) : base(property, graph) {
+		public PropertyRef(Property property) : base(property, property.graphContainer) {
 			_type = property.type;
 		}
 
@@ -478,7 +478,7 @@ namespace MaxyGames.UNode {
 			base.OnChildrenChanged();
 		}
 
-		public Variable NewVariable(string name, Type type, object value = null) {
+		public Variable AddVariable(string name, Type type, object value = null) {
 			var variables = GetObjects(true);
 			string fixName = name;
 			int index = 0;
@@ -491,6 +491,15 @@ namespace MaxyGames.UNode {
 				defaultValue = value ?? ReflectionUtils.CreateInstance(type),
 				resetOnEnter = GetObjectInParent<ILocalVariableSystem>() != null,
 			});
+		}
+
+		public Variable GetVariable(string name) {
+			var variables = GetObjects(true);
+			foreach(var v in variables) {
+				if(v.name == name)
+					return v;
+			}
+			return null;
 		}
 	}
 

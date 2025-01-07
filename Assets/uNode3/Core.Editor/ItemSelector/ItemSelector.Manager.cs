@@ -927,7 +927,7 @@ namespace MaxyGames.UNode.Editors {
 				if(item.function != null) {
 					iData = new MemberData.ItemData() {
 						name = item.function.name,
-						reference = new FunctionRef(item.function, item.function.graphContainer),
+						reference = new FunctionRef(item.function),
 					};
 					GenericParameterData[] genericParamArgs = item.function.genericParameters;
 					if(genericParamArgs.Length > 0) {

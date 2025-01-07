@@ -84,27 +84,99 @@ namespace MaxyGames.UNode {
 				}
 				else {
 					if(member.targetType == MemberData.TargetType.uNodeVariable || member.targetType == MemberData.TargetType.uNodeLocalVariable) {
-						var reference = member.startItem.GetReference<BaseGraphReference>();
+						var rawReference = member.startItem;
+						var reference = rawReference.GetReference<BaseGraphReference>();
 						if(reference != null) {
 							if(reference.ReferenceValue == null) {
-								RegisterError(owner, name.Add(" is ") + "missing variable reference: " + reference.name + " with id: " + reference.id);
+								void autoFix() {
+									if(owner.graph.CanAddVariable()) {
+										var reference = rawReference.GetReferenceValue() as VariableRef;
+										if(owner.graphContainer.GetVariable(reference.name) == null) {
+											var newVal = new Variable() {
+												name = reference.name,
+												type = reference.type,
+											};
+											owner.graph.variableContainer.AddChild(newVal);
+											rawReference.reference = BaseReference.FromValue(newVal);
+										}
+									}
+								}
+								RegisterError(owner, name.Add(" is ") + "missing variable reference: " + reference.name + " with id: " + reference.id, autoFix);
 								return true;
 							}
 							else if(reference.graph != owner.graph) {
-								RegisterError(owner, name.Add(" is ") + "invalid variable reference: " + reference.name + ", please re-assign it");
+								void autoFix() {
+									var reference = rawReference.GetReferenceValue() as BaseGraphReference;
+									if(reference.ReferenceValue is Variable @ref) {
+										if(@ref.IsLocalVariable) {
+											var container = owner.GetObjectInParent<NodeContainer>();
+											if(container != null && container is ILocalVariableSystem) {
+												if(container.variableContainer.GetVariable(@ref.name) == null) {
+													var newVal = new Variable() {
+														name = @ref.name,
+														serializedValue = new(@ref.serializedValue.value),
+														type = @ref.type,
+														resetOnEnter = true,
+													};
+													container.variableContainer.AddChild(newVal);
+													rawReference.reference = BaseReference.FromValue(newVal);
+												}
+												return;
+											}
+										}
+										if(owner.graph.CanAddVariable()) {
+											if(owner.graphContainer.GetVariable(@ref.name) == null) {
+												var newVal = new Variable() {
+													name = @ref.name,
+													serializedValue = new(@ref.serializedValue.value),
+													type = @ref.type,
+												};
+												owner.graph.variableContainer.AddChild(newVal);
+												rawReference.reference = BaseReference.FromValue(newVal);
+											}
+										}
+									}
+								}
+								RegisterError(owner, name.Add(" is ") + "invalid variable reference: " + reference.name + ", please re-assign it", autoFix);
 								return true;
 							}
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeProperty) {
-						var reference = member.startItem.GetReference<BaseGraphReference>();
+						var rawReference = member.startItem;
+						var reference = rawReference.GetReference<BaseGraphReference>();
 						if(reference != null) {
 							if(reference.ReferenceValue == null) {
-								RegisterError(owner, name.Add(" is ") + "missing property reference: " + reference.name + " with id: " + reference.id);
+								void autoFix() {
+									var reference = rawReference.GetReferenceValue() as PropertyRef;
+									if(owner.graph.CanAddProperty()) {
+										if(owner.graphContainer.GetProperty(reference.name) == null) {
+											var newVal = new Property() {
+												name = reference.name,
+												type = reference.type,
+											};
+											owner.graph.propertyContainer.AddChild(newVal);
+											rawReference.reference = BaseReference.FromValue(newVal);
+										}
+									}
+								}
+								RegisterError(owner, name.Add(" is ") + "missing property reference: " + reference.name + " with id: " + reference.id, autoFix);
 								return true;
 							}
 							else if(reference.graph != owner.graph) {
-								RegisterError(owner, name.Add(" is ") + "invalid property reference: " + reference.name + ", please re-assign it");
+								void autoFix() {
+									if(reference.ReferenceValue is Property @ref) {
+										if(owner.graph.CanAddProperty()) {
+											if(owner.graphContainer.GetProperty(@ref.name) == null) {
+												owner.graph.propertyContainer.AddChild(new Property() {
+													name = @ref.name,
+													type = @ref.type,
+												});
+											}
+										}
+									}
+								}
+								RegisterError(owner, name.Add(" is ") + "invalid property reference: " + reference.name + ", please re-assign it", autoFix);
 								return true;
 							}
 						}
@@ -117,7 +189,22 @@ namespace MaxyGames.UNode {
 								return true;
 							}
 							else if(reference.graph != owner.graph) {
-								RegisterError(owner, name.Add(" is ") + "invalid function reference: " + reference.name + ", please re-assign it");
+								void autoFix() {
+									if(reference.ReferenceValue is Function @ref) {
+										if(owner.graph.CanAddFunction()) {
+											if(owner.graphContainer.GetFunction(@ref.name, @ref.ParameterTypes) == null) {
+												var newVal = new Function() {
+													name = @ref.name,
+													returnType = @ref.ReturnType(),
+													parameters = SerializerUtility.Duplicate(@ref.parameters),
+												};
+												owner.graph.propertyContainer.AddChild(newVal);
+												member.Items[0].reference = BaseReference.FromValue(newVal);
+											}
+										}
+									}
+								}
+								RegisterError(owner, name.Add(" is ") + "invalid function reference: " + reference.name + ", please re-assign it", autoFix);
 								return true;
 							}
 						}
@@ -130,7 +217,23 @@ namespace MaxyGames.UNode {
 								return true;
 							}
 							else if(reference.graph != owner.graph) {
-								RegisterError(owner, name.Add(" is ") + "invalid parameter reference: " + reference.name + ", please re-assign it");
+								void autoFix() {
+									if(reference.ReferenceValue is ParameterData @ref) {
+										var sys = owner.GetObjectInParent<IParameterSystem>();
+										if(sys != null && sys is BaseFunction function) {
+											if(function.Parameters.Any(p => p.name == @ref.name) == false) {
+												function.parameters.Add(new ParameterData() {
+													name = @ref.name,
+													type = @ref.Type,
+													refKind = @ref.refKind,
+													useInInitializer = @ref.useInInitializer,
+													value = SerializerUtility.Duplicate(@ref.value)
+												});
+											}
+										}
+									}
+								}
+								RegisterError(owner, name.Add(" is ") + "invalid parameter reference: " + reference.name + ", please re-assign it", autoFix);
 								return true;
 							}
 						}
@@ -154,7 +257,24 @@ namespace MaxyGames.UNode {
 										else {
 											graphName = "Null";
 										}
-										RegisterError(owner, $"graph: {graphName} is missing variable: " + reference.name + " with id: " + reference.id);
+										Action autoFix = null;
+										if(reference.graphContainer != null) {
+											autoFix = () => {
+												var reference = item.reference as VariableRef;
+												var graph = reference.graphContainer;
+												if(graph.GraphData.CanAddVariable()) {
+													if(graph.GetVariable(reference.name) == null) {
+														var newVal = new Variable() {
+															name = reference.name,
+															type = reference.type,
+														};
+														graph.GraphData.variableContainer.AddChild(newVal);
+														item.reference = BaseReference.FromValue(newVal);
+													}
+												}
+											};
+										}
+										RegisterError(owner, $"graph: {graphName} is missing variable: " + reference.name + " with id: " + reference.id, autoFix);
 										return true;
 									}
 								}
@@ -173,6 +293,23 @@ namespace MaxyGames.UNode {
 										}
 										else {
 											graphName = "Null";
+										}
+										Action autoFix = null;
+										if(reference.graphContainer != null) {
+											autoFix = () => {
+												var reference = item.reference as PropertyRef;
+												var graph = reference.graphContainer;
+												if(graph.GraphData.CanAddProperty()) {
+													if(graph.GetProperty(reference.name) == null) {
+														var newVal = new Property() {
+															name = reference.name,
+															type = reference.type,
+														};
+														graph.GraphData.propertyContainer.AddChild(newVal);
+														item.reference = BaseReference.FromValue(newVal);
+													}
+												}
+											};
 										}
 										RegisterError(owner, $"graph: {graphName} is missing property: " + reference.name + " with id: " + reference.id);
 										return true;
@@ -342,7 +479,7 @@ namespace MaxyGames.UNode {
 		public void RegisterError(UGraphElement owner, string message, Action autoFix) {
 			RegisterError(owner, new uNodeUtility.ErrorMessage() {
 				message = message,
-				autoFix = (_) => autoFix?.Invoke(),
+				autoFix = autoFix != null ? (_) => autoFix() : null,
 			});
 		}
 
@@ -362,7 +499,7 @@ namespace MaxyGames.UNode {
 		public void RegisterWarning(UGraphElement owner, string message, Action autoFix) {
 			RegisterWarning(owner, new uNodeUtility.ErrorMessage() {
 				message = message,
-				autoFix = (_) => autoFix?.Invoke(),
+				autoFix = autoFix != null ? (_) => autoFix() : null,
 			});
 		}
 
@@ -481,7 +618,7 @@ namespace MaxyGames.UNode {
 	[Serializable]
 	public class SerializedType : ISerializationCallbackReceiver, IValueReference, IGetValue {
 		[SerializeField]
-		private SerialiedTypeKind kind;
+		private SerializedTypeKind kind;
 
 		[SerializeField]
 		private string serializedString;
@@ -501,9 +638,9 @@ namespace MaxyGames.UNode {
 		public bool isFilled {
 			get {
 				switch(kind) {
-					case SerialiedTypeKind.Native:
+					case SerializedTypeKind.Native:
 						return !string.IsNullOrEmpty(serializedString);
-					case SerialiedTypeKind.Runtime:
+					case SerializedTypeKind.Runtime:
 						return serializedBytes != null && serializedBytes.Length > 0;
 				}
 				return false;
@@ -518,18 +655,18 @@ namespace MaxyGames.UNode {
 		public Type type {
 			get {
 				switch(kind) {
-					case SerialiedTypeKind.Native:
+					case SerializedTypeKind.Native:
 						if(_type == null) {
 							_type = TypeSerializer.Deserialize(serializedString, false);
 						}
 						break;
-					case SerialiedTypeKind.Runtime:
+					case SerializedTypeKind.Runtime:
 						if(_type == null || _type.Equals(null)) {
 							var data = SerializerUtility.Deserialize<TypeData>(serializedBytes, references);
 							_type = MemberDataUtility.GetParameterType(data, throwError: false);
 						}
 						break;
-					case SerialiedTypeKind.None:
+					case SerializedTypeKind.None:
 						return null;
 				}
 				return _type;
@@ -537,15 +674,15 @@ namespace MaxyGames.UNode {
 			set {
 				_type = value;
 				if(value == null) {
-					kind = SerialiedTypeKind.None;
+					kind = SerializedTypeKind.None;
 				}
 				else if(value is RuntimeType) {
-					kind = SerialiedTypeKind.Runtime;
+					kind = SerializedTypeKind.Runtime;
 					serializedString = string.Empty;
 					serializedBytes = SerializerUtility.Serialize(MemberDataUtility.GetTypeData(value), out references);
 				}
 				else {
-					kind = SerialiedTypeKind.Native;
+					kind = SerializedTypeKind.Native;
 					if(value != null) {
 						serializedString = value.FullName;
 					}
@@ -568,14 +705,14 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public SerialiedTypeKind typeKind => kind;
+		public SerializedTypeKind typeKind => kind;
 
 		public string typeName {
 			get {
 				switch(kind) {
-					case SerialiedTypeKind.Native:
+					case SerializedTypeKind.Native:
 						return serializedString;
-					case SerialiedTypeKind.Runtime:
+					case SerializedTypeKind.Runtime:
 						return MemberDataUtility.GetParameterName(SerializerUtility.Deserialize<TypeData>(serializedBytes, references), null);
 				}
 				return "None";
@@ -585,16 +722,16 @@ namespace MaxyGames.UNode {
 		public string prettyName {
 			get {
 				switch(kind) {
-					case SerialiedTypeKind.Native:
+					case SerializedTypeKind.Native:
 						return type?.PrettyName() ?? serializedString;
-					case SerialiedTypeKind.Runtime:
+					case SerializedTypeKind.Runtime:
 						return typeName;
 				}
 				return "None";
 			}
 		}
 
-		public bool isNative => kind == SerialiedTypeKind.Native;
+		public bool isNative => kind == SerializedTypeKind.Native;
 
 		public string GetRichName(bool withTypeOf = false) {
 			return uNodeUtility.GetRichTypeName(prettyName, withTypeOf);
@@ -614,11 +751,11 @@ namespace MaxyGames.UNode {
 
 		public override string ToString() {
 			switch(kind) {
-				case SerialiedTypeKind.None:
+				case SerializedTypeKind.None:
 					return "None";
-				case SerialiedTypeKind.Native:
+				case SerializedTypeKind.Native:
 					return serializedString;
-				case SerialiedTypeKind.Runtime:
+				case SerializedTypeKind.Runtime:
 					return "Runtime Type";
 			}
 			return base.ToString();
@@ -664,16 +801,16 @@ namespace MaxyGames.UNode {
 				return new UGraphElementRef((value as Node).nodeObject);
 			}
 			else if(value is Variable variable) {
-				return new VariableRef(variable, variable.graphContainer);
+				return new VariableRef(variable);
 			}
 			else if(value is Function function) {
-				return new FunctionRef(function, function.graphContainer);
+				return new FunctionRef(function);
 			}
 			else if(value is Property property) {
-				return new PropertyRef(property, property.graphContainer);
+				return new PropertyRef(property);
 			}
 			else if(value is Constructor ctor) {
-				return new ConstructorRef(ctor, ctor.graphContainer);
+				return new ConstructorRef(ctor);
 			}
 			else if(value is Graph graph) {
 				return new GraphRef(graph.graphContainer);
@@ -714,6 +851,15 @@ namespace MaxyGames.UNode {
 			get {
 				if(unityObject is IGraph g) {
 					return g.GraphData;
+				}
+				return null;
+			}
+		}
+
+		public IGraph graphContainer {
+			get {
+				if(unityObject is IGraph g) {
+					return g;
 				}
 				return null;
 			}

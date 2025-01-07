@@ -21,12 +21,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public SerialiedTypeKind typeKind {
+		public SerializedTypeKind typeKind {
 			get {
 				if(serializedValue != null) {
 					return serializedValue.serializedType.typeKind;
 				}
-				return SerialiedTypeKind.None;
+				return SerializedTypeKind.None;
 			}
 		}
 
@@ -90,6 +90,18 @@ namespace MaxyGames.UNode {
 
 		public string GetSummary() {
 			return comment;
+		}
+
+		/// <summary>
+		/// True when <see cref="resetOnEnter"/> is true and the variable is inside of local variable system
+		/// </summary>
+		public bool IsLocalVariable {
+			get {
+				if(resetOnEnter) {
+					return GetObjectInParent<ILocalVariableSystem>() != null;
+				}
+				return false;
+			}
 		}
 
 		#region Editor

@@ -194,7 +194,7 @@ namespace MaxyGames.UNode.Editors {
 		public override bool CreateNewLocalVariable(Vector2 mousePosition, Action postAction) {
 			ShowTypeMenu(mousePosition, type => {
 				uNodeEditorUtility.RegisterUndo(graph);
-				graphData.selectedRoot.variableContainer.NewVariable("localVariable", type);
+				graphData.selectedRoot.variableContainer.AddVariable("localVariable", type);
 				postAction?.Invoke();
 			});
 			return true;

@@ -401,7 +401,9 @@ namespace MaxyGames.UNode.Editors {
 						EditorGUILayout.HelpBox(message, (MessageType)e.type);
 						EditorGUILayout.EndVertical();
 						if(e.autoFix != null && Event.current.button == 0 && Event.current.type == EventType.MouseDown && errorRect.Contains(Event.current.mousePosition)) {
+							uNodeEditorUtility.RegisterUndo(element);
 							e.autoFix(Event.current.mousePosition);
+							uNodeGUIUtility.GUIChanged(element, UIChangeType.Important);
 						}
 					}
 				}

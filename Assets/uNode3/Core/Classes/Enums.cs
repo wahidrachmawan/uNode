@@ -23,7 +23,7 @@
 		uNodeGenericType,
 	}
 
-	public enum SerialiedTypeKind {
+	public enum SerializedTypeKind {
 		None,
 		Native,
 		Runtime,

@@ -1938,7 +1938,7 @@ namespace MaxyGames.UNode {
 							case TargetType.uNodeLocalVariable: {
 								var result = startItem.GetReference<VariableRef>()?.type;
 								if(result != null) {
-									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+									if(StartSerializedType.typeKind != SerializedTypeKind.None) {
 										StartSerializedType.type = null;
 									}
 									return result;
@@ -1948,7 +1948,7 @@ namespace MaxyGames.UNode {
 							case TargetType.uNodeProperty: {
 								var result = startItem.GetReference<PropertyRef>()?.type;
 								if(result != null) {
-									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+									if(StartSerializedType.typeKind != SerializedTypeKind.None) {
 										StartSerializedType.type = null;
 									}
 									return result;
@@ -1958,7 +1958,7 @@ namespace MaxyGames.UNode {
 							case TargetType.uNodeFunction: {
 								var result = startItem.GetReference<FunctionRef>()?.type;
 								if(result != null) {
-									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+									if(StartSerializedType.typeKind != SerializedTypeKind.None) {
 										StartSerializedType.type = null;
 									}
 									return result;
@@ -1968,7 +1968,7 @@ namespace MaxyGames.UNode {
 							case TargetType.uNodeParameter: {
 								var result = startItem.GetReference<ParameterRef>()?.type;
 								if(result != null) {
-									if(StartSerializedType.typeKind != SerialiedTypeKind.None) {
+									if(StartSerializedType.typeKind != SerializedTypeKind.None) {
 										StartSerializedType.type = null;
 									}
 									return result;
@@ -2236,7 +2236,7 @@ namespace MaxyGames.UNode {
 				Items = new[] {
 					new ItemData() {
 						name = variable.name,
-						reference = new VariableRef(variable, variable.graphContainer)
+						reference = new VariableRef(variable)
 					}
 				},
 				targetType = TargetType.uNodeVariable,
