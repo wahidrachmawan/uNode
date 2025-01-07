@@ -90,7 +90,7 @@ namespace MaxyGames.UNode {
 							if(reference.ReferenceValue == null) {
 								void autoFix() {
 									if(owner.graph.CanAddVariable()) {
-										var reference = rawReference.GetReferenceValue() as VariableRef;
+										var reference = rawReference.reference as VariableRef;
 										if(owner.graphContainer.GetVariable(reference.name) == null) {
 											var newVal = new Variable() {
 												name = reference.name,
@@ -99,6 +99,9 @@ namespace MaxyGames.UNode {
 											owner.graph.variableContainer.AddChild(newVal);
 											rawReference.reference = BaseReference.FromValue(newVal);
 										}
+										else {
+											rawReference.reference = BaseReference.FromValue(owner.graphContainer.GetVariable(reference.name));
+										}
 									}
 								}
 								RegisterError(owner, name.Add(" is ") + "missing variable reference: " + reference.name + " with id: " + reference.id, autoFix);
@@ -106,7 +109,7 @@ namespace MaxyGames.UNode {
 							}
 							else if(reference.graph != owner.graph) {
 								void autoFix() {
-									var reference = rawReference.GetReferenceValue() as BaseGraphReference;
+									var reference = rawReference.reference as BaseGraphReference;
 									if(reference.ReferenceValue is Variable @ref) {
 										if(@ref.IsLocalVariable) {
 											var container = owner.GetObjectInParent<NodeContainer>();
@@ -121,6 +124,9 @@ namespace MaxyGames.UNode {
 													container.variableContainer.AddChild(newVal);
 													rawReference.reference = BaseReference.FromValue(newVal);
 												}
+												else {
+													rawReference.reference = BaseReference.FromValue(container.variableContainer.GetVariable(reference.name));
+												}
 												return;
 											}
 										}
@@ -133,6 +139,9 @@ namespace MaxyGames.UNode {
 												};
 												owner.graph.variableContainer.AddChild(newVal);
 												rawReference.reference = BaseReference.FromValue(newVal);
+											}
+											else {
+												rawReference.reference = BaseReference.FromValue(owner.graphContainer.GetVariable(reference.name));
 											}
 										}
 									}
@@ -148,7 +157,7 @@ namespace MaxyGames.UNode {
 						if(reference != null) {
 							if(reference.ReferenceValue == null) {
 								void autoFix() {
-									var reference = rawReference.GetReferenceValue() as PropertyRef;
+									var reference = rawReference.reference as PropertyRef;
 									if(owner.graph.CanAddProperty()) {
 										if(owner.graphContainer.GetProperty(reference.name) == null) {
 											var newVal = new Property() {
@@ -157,6 +166,9 @@ namespace MaxyGames.UNode {
 											};
 											owner.graph.propertyContainer.AddChild(newVal);
 											rawReference.reference = BaseReference.FromValue(newVal);
+										}
+										else {
+											rawReference.reference = BaseReference.FromValue(owner.graphContainer.GetProperty(reference.name));
 										}
 									}
 								}
@@ -172,6 +184,9 @@ namespace MaxyGames.UNode {
 													name = @ref.name,
 													type = @ref.type,
 												});
+											}
+											else {
+												rawReference.reference = BaseReference.FromValue(owner.graphContainer.GetProperty(@ref.name));
 											}
 										}
 									}
@@ -192,7 +207,8 @@ namespace MaxyGames.UNode {
 								void autoFix() {
 									if(reference.ReferenceValue is Function @ref) {
 										if(owner.graph.CanAddFunction()) {
-											if(owner.graphContainer.GetFunction(@ref.name, @ref.ParameterTypes) == null) {
+											var func = owner.graphContainer.GetFunction(@ref.name, @ref.ParameterTypes);
+											if(func == null) {
 												var newVal = new Function() {
 													name = @ref.name,
 													returnType = @ref.ReturnType(),
@@ -200,6 +216,9 @@ namespace MaxyGames.UNode {
 												};
 												owner.graph.propertyContainer.AddChild(newVal);
 												member.Items[0].reference = BaseReference.FromValue(newVal);
+											}
+											else {
+												member.Items[0].reference = BaseReference.FromValue(func);
 											}
 										}
 									}
@@ -221,7 +240,8 @@ namespace MaxyGames.UNode {
 									if(reference.ReferenceValue is ParameterData @ref) {
 										var sys = owner.GetObjectInParent<IParameterSystem>();
 										if(sys != null && sys is BaseFunction function) {
-											if(function.Parameters.Any(p => p.name == @ref.name) == false) {
+											var para = function.Parameters.FirstOrDefault(p => p.name == @ref.name);
+											if(para == null) {
 												function.parameters.Add(new ParameterData() {
 													name = @ref.name,
 													type = @ref.Type,
@@ -229,6 +249,9 @@ namespace MaxyGames.UNode {
 													useInInitializer = @ref.useInInitializer,
 													value = SerializerUtility.Duplicate(@ref.value)
 												});
+											}
+											else {
+												member.Items[0].reference = new ParameterRef(function, para);
 											}
 										}
 									}
