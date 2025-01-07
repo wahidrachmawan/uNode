@@ -66,12 +66,12 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override void OnClick(Vector2 mousePosition) {
-			NodeEditorUtility.AddNewNode<Nodes.ActivateTransition>(graph.graphData, null, null, mousePositionOnCanvas, null);
-			graph.Refresh();
+			NodeEditorUtility.AddNewNode<Nodes.ActivateTransition>(graphEditor.graphData, null, null, mousePositionOnCanvas, null);
+			graphEditor.Refresh();
 		}
 
 		public override bool IsValid() {
-			return graph.graphData.currentCanvas is NodeObject nod && nod.node is StateNode;
+			return graphEditor.graphData.currentCanvas is NodeObject nod && nod.node is StateNode;
 		}
 	}
 
@@ -84,15 +84,15 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override void OnClick(Vector2 mousePosition) {
-			NodeEditorUtility.AddNewNode<MacroPortNode>(graph.graphData, null, null, mousePositionOnCanvas, (node) => {
+			NodeEditorUtility.AddNewNode<MacroPortNode>(graphEditor.graphData, null, null, mousePositionOnCanvas, (node) => {
 				node.nodeObject.name = "flow" + Random.Range(0, 255);
 				node.kind = PortKind.FlowInput;
 			});
-			graph.Refresh();
+			graphEditor.Refresh();
 		}
 
 		public override bool IsValid() {
-			return graph.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graph.graphData.graph is IMacroGraph;
+			return graphEditor.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graphEditor.graphData.graph is IMacroGraph;
 		}
 	}
 
@@ -104,15 +104,15 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override void OnClick(Vector2 mousePosition) {
-			NodeEditorUtility.AddNewNode<MacroPortNode>(graph.graphData, null, null, mousePositionOnCanvas, (node) => {
+			NodeEditorUtility.AddNewNode<MacroPortNode>(graphEditor.graphData, null, null, mousePositionOnCanvas, (node) => {
 				node.nodeObject.name = "flow" + Random.Range(0, 255);
 				node.kind = PortKind.FlowOutput;
 			});
-			graph.Refresh();
+			graphEditor.Refresh();
 		}
 
 		public override bool IsValid() {
-			return graph.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graph.graphData.graph is IMacroGraph;
+			return graphEditor.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graphEditor.graphData.graph is IMacroGraph;
 		}
 	}
 
@@ -124,15 +124,15 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override void OnClick(Vector2 mousePosition) {
-			NodeEditorUtility.AddNewNode<MacroPortNode>(graph.graphData, null, null, mousePositionOnCanvas, (node) => {
+			NodeEditorUtility.AddNewNode<MacroPortNode>(graphEditor.graphData, null, null, mousePositionOnCanvas, (node) => {
 				node.nodeObject.name = "value" + Random.Range(0, 255);
 				node.kind = PortKind.ValueInput;
 			});
-			graph.Refresh();
+			graphEditor.Refresh();
 		}
 
 		public override bool IsValid() {
-			return graph.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graph.graphData.graph is IMacroGraph;
+			return graphEditor.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graphEditor.graphData.graph is IMacroGraph;
 		}
 	}
 
@@ -144,15 +144,15 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override void OnClick(Vector2 mousePosition) {
-			NodeEditorUtility.AddNewNode<MacroPortNode>(graph.graphData, null, null, mousePositionOnCanvas, (node) => {
+			NodeEditorUtility.AddNewNode<MacroPortNode>(graphEditor.graphData, null, null, mousePositionOnCanvas, (node) => {
 				node.nodeObject.name = "value" + Random.Range(0, 255);
 				node.kind = PortKind.ValueOutput;
 			});
-			graph.Refresh();
+			graphEditor.Refresh();
 		}
 
 		public override bool IsValid() {
-			return graph.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graph.graphData.graph is IMacroGraph;
+			return graphEditor.graphData.currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro || graphEditor.graphData.graph is IMacroGraph;
 		}
 	}
 	#endregion
@@ -168,8 +168,8 @@ namespace MaxyGames.UNode.Editors.Commands {
 			SurroundWithWindow.ShowWindow((command) => {
 				// Get first node in selection where the selection does not contain any node from all inputs connections
 				var sourceOutputs = new List<FlowOutput>();
-				var sourceNodes = graph.nodes.Where(node => !graph.graphData.selectedNodes.Contains(node) && node.FlowOutputs.Any(output => {
-					if(output.hasValidConnections && graph.graphData.selectedNodes.Contains(output.connections[0].input.node)) {
+				var sourceNodes = graphEditor.nodes.Where(node => !graphEditor.graphData.selectedNodes.Contains(node) && node.FlowOutputs.Any(output => {
+					if(output.hasValidConnections && graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node)) {
 						sourceOutputs.Add(output);
 						return true;
 					}
@@ -189,25 +189,25 @@ namespace MaxyGames.UNode.Editors.Commands {
 				}
 				var sourceNode = firstDestination;
 				if(sourceNode == null) return;
-				NodeEditorUtility.AddNewNode<Node>(graph.graphData, command.SurroundUnit.GetType(), mousePositionOnCanvas, (node) => {
+				NodeEditorUtility.AddNewNode<Node>(graphEditor.graphData, command.SurroundUnit.GetType(), mousePositionOnCanvas, (node) => {
 					node.nodeObject.node = command.SurroundUnit;
 					command.SurroundUnit.Register();
 					command.unitEnterPort.ConnectTo(sourceNode.FlowInputs[0].connections[0].output);
 					command.surroundSource.ConnectTo(sourceNode.FlowInputs[0]);
 					command.SurroundUnit.position = new Rect(sourceNode.position.position.x, sourceNode.position.position.y, command.SurroundUnit.position.width, command.SurroundUnit.position.height);
-					var lastUnit = graph.nodes.FirstOrDefault(node => graph.graphData.selectedNodes.Contains(node) && node.FlowOutputs.Any(output => output.hasValidConnections && !graph.graphData.selectedNodes.Contains(output.connections[0].input.node))) ?? graph.nodes.FirstOrDefault(node => graph.graphData.selectedNodes.Contains(node) && !node.FlowOutputs.Any(output => output.hasValidConnections));
+					var lastUnit = graphEditor.nodes.FirstOrDefault(node => graphEditor.graphData.selectedNodes.Contains(node) && node.FlowOutputs.Any(output => output.hasValidConnections && !graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node))) ?? graphEditor.nodes.FirstOrDefault(node => graphEditor.graphData.selectedNodes.Contains(node) && !node.FlowOutputs.Any(output => output.hasValidConnections));
 					if(lastUnit != null && lastUnit.FlowOutputs.Any(output => output.isConnected)) {
-						command.surroundExit.ConnectTo(lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graph.graphData.selectedNodes.Contains(output.connections[0].input.node)).connections[0].input);
-						lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graph.graphData.selectedNodes.Contains(output.connections[0].input.node)).ClearConnections();
+						command.surroundExit.ConnectTo(lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node)).connections[0].input);
+						lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node)).ClearConnections();
 					}
 				});
 				NodeEditorUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
-				graph.ReloadView(true);
-			}, graph.graphData, mousePosition);
+				graphEditor.ReloadView(true);
+			}, graphEditor.graphData, mousePosition);
 		}
 
 		public override bool IsValid() {
-			return graph.graphData.selectedNodes.Count() > 0;
+			return graphData.selectedNodes.Count() > 0 && graphData.selectedNodes.Any(item => item.FlowInputs.Any(p => p.hasValidConnections));
 		}
 	}
 }

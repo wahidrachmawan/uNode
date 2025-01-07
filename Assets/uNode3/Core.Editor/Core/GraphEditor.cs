@@ -7,7 +7,7 @@ using UnityEditor;
 using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
-	public abstract class NodeGraph {
+	public abstract class GraphEditor {
 		#region Variables
 		public uNodeEditor window;
 
@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Static
-		public static NodeGraph openedGraph;
+		public static GraphEditor openedGraph;
 
 		public const string TabDragKEY = "[uNode-Tab]";
 

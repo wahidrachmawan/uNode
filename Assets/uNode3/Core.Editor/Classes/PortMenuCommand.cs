@@ -8,7 +8,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// The graph editor.
 		/// </summary>
-		public NodeGraph graph;
+		public GraphEditor graph;
 		/// <summary>
 		/// The mouse position on canvas.
 		/// </summary>

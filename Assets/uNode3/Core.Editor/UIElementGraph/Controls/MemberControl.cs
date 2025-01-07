@@ -280,7 +280,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 						}
 					}
 					else if(config.type == typeof(Type)) {
-						var mPos = NodeGraph.openedGraph.GetMousePosition();
+						var mPos = GraphEditor.openedGraph.GetMousePosition();
 						evt.menu.AppendAction("Change Type", (e) => {
 							TypeBuilderWindow.Show(mPos, config.targetCanvas, new FilterAttribute() { OnlyGetType = true },
 								delegate (MemberData[] types) {

@@ -673,7 +673,7 @@ namespace MaxyGames.UNode.Editors {
 				if(customInputItems != null && customInputItems.Count > 0) {
 					var source = portView.GetPortValue() as ValueOutput;
 					foreach(var c in customInputItems) {
-						c.graph = owner.owner.graph;
+						c.graphEditor = owner.owner.graph;
 						c.mousePositionOnCanvas = position;
 						if(c.IsValidPort(source,
 							canSetValue && canGetValue ?
@@ -732,7 +732,7 @@ namespace MaxyGames.UNode.Editors {
 				FA.Static = true;
 				ItemSelector.SortCustomItems(customItems);
 				ItemSelector w = ItemSelector.ShowWindow(portView.owner.nodeObject, FA, (MemberData mData) => {
-					NodeGraph.CreateNodeProcessor(mData, owner.owner.graph.graphData, position, (n) => {
+					GraphEditor.CreateNodeProcessor(mData, owner.owner.graph.graphData, position, (n) => {
 						bool needAutoConnect = true;
 						if(n is MultipurposeNode multipurposeNode && multipurposeNode.instance != null) {//For auto connect to parameter ports
 							if(type.IsCastableTo(mData.startType)) {

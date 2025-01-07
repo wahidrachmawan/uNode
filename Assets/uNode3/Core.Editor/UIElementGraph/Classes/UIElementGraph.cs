@@ -294,7 +294,7 @@ namespace MaxyGames.UNode.Editors {
 
 	#endregion
 
-	public class UIElementGraph : NodeGraph {
+	public class UIElementGraph : GraphEditor {
 		public UGraphView graphView;
 		[NonSerialized]
 		public VisualElement graphContentView, graphRootView;

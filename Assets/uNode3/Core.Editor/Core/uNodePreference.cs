@@ -307,7 +307,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 			#endregion
 		}
 
-		class NoneGraph : NodeGraph {
+		class NoneGraph : GraphEditor {
 			private static NoneGraph _instance;
 			public static NoneGraph instance {
 				get {
@@ -767,7 +767,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			}
 		}
 
-		public static NodeGraph nodeGraph {
+		public static GraphEditor nodeGraph {
 			get {
 				if(Cached.nodeGraph == null) {
 					if(!string.IsNullOrEmpty(preferenceData.editorTheme) && preferenceData.editorTheme.StartsWith("@")) {
@@ -776,7 +776,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 							if(string.IsNullOrEmpty(g.name))
 								continue;
 							if(preferenceData.editorTheme == "@" + g.name) {
-								Cached.nodeGraph = ReflectionUtils.CreateInstance(g.type) as NodeGraph;
+								Cached.nodeGraph = ReflectionUtils.CreateInstance(g.type) as GraphEditor;
 								return Cached.nodeGraph;
 							}
 						}
@@ -792,7 +792,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 								return NoneGraph.instance;
 							}
 						}
-						Cached.nodeGraph = System.Activator.CreateInstance(graphType) as NodeGraph;
+						Cached.nodeGraph = System.Activator.CreateInstance(graphType) as GraphEditor;
 					}
 					else {
 						return NoneGraph.instance;
@@ -803,7 +803,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 		}
 
 		private static class Cached {
-			public static NodeGraph nodeGraph;
+			public static GraphEditor nodeGraph;
 			public static EditorTheme editorTheme;
 			public static Dictionary<Type, Color> colorMap = new Dictionary<Type, Color>();
 			public static Dictionary<Type, Texture> iconMap = new Dictionary<Type, Texture>();

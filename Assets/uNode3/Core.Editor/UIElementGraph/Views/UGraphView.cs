@@ -1433,7 +1433,7 @@ namespace MaxyGames.UNode.Editors {
 				if(commands != null && commands.Count > 0) {
 					bool addSeparator = false;
 					foreach(var c in commands) {
-						c.graph = graph;
+						c.graphEditor = graph;
 						c.mousePositionOnCanvas = clickedPos;
 						if(c.IsValid()) {
 							if(c.name == "") {
@@ -1601,7 +1601,7 @@ namespace MaxyGames.UNode.Editors {
 					if(commands != null && commands.Count > 0) {
 						bool addSeparator = false;
 						foreach(var c in commands) {
-							c.graph = graph;
+							c.graphEditor = graph;
 							c.mousePositionOnCanvas = clickedPos;
 							if(c.IsValidNode(node)) {
 								if(c.name == "") {
@@ -2192,7 +2192,7 @@ namespace MaxyGames.UNode.Editors {
 									portKind = PortKind.ValueInput,
 								};
 								foreach(var c in commands) {
-									c.graph = NodeGraph.openedGraph;
+									c.graph = GraphEditor.openedGraph;
 									c.mousePositionOnCanvas = clickedPos;
 									c.filter = port.portData.GetFilter();
 									if(c.IsValidPort(port.owner.targetNode, commandData)) {
@@ -2255,7 +2255,7 @@ namespace MaxyGames.UNode.Editors {
 								portKind = PortKind.ValueOutput,
 							};
 							foreach(var c in commands) {
-								c.graph = NodeGraph.openedGraph;
+								c.graph = GraphEditor.openedGraph;
 								c.mousePositionOnCanvas = clickedPos;
 								c.filter = port.portData.GetFilter();
 								if(c.IsValidPort(port.owner.targetNode, commandData)) {
@@ -2337,7 +2337,7 @@ namespace MaxyGames.UNode.Editors {
 										portKind = PortKind.FlowOutput,
 									};
 									foreach(var c in commands) {
-										c.graph = NodeGraph.openedGraph;
+										c.graph = GraphEditor.openedGraph;
 										c.mousePositionOnCanvas = clickedPos;
 										if(c.IsValidPort(node, commandData)) {
 											evt.menu.AppendAction(c.name, (e) => {

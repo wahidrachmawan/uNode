@@ -204,7 +204,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				Undo.SetCurrentGroupName("New Constructor : " + name);
 			});
-			NodeGraph.RefreshOpenedGraph();
+			GraphEditor.RefreshOpenedGraph();
 		}
 		#endregion
 

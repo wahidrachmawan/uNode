@@ -153,7 +153,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				var customInputItems = NodeEditorUtility.FindCustomInputPortItems();
 				if(customInputItems != null && customInputItems.Count > 0) {
 					foreach(var c in customInputItems) {
-						c.graph = graph;
+						c.graphEditor = graph;
 						c.mousePositionOnCanvas = mousePositionOnCanvas;
 						if(c.IsValidPort(data.port as ValueOutput, PortAccessibility.ReadOnly)) {
 							var items = c.GetItems(data.port as ValueOutput);

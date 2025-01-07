@@ -8,13 +8,13 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override IList<ItemSelector.CustomItem> GetItems(ValueOutput source) {
 			var items = new List<ItemSelector.CustomItem>();
 			items.Add(ItemSelector.CustomItem.Create("Set Value", () => {
-				NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (NodeSetValue n) => {
+				NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (NodeSetValue n) => {
 					n.Register();
 					n.target.ConnectTo(source);
 					var type = source.type;
 					if(type != null) {
 						if(type.IsSubclassOf(typeof(System.MulticastDelegate))) {
-							NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas - new Vector2(100, 0), delegate (NodeLambda node) {
+							NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas - new Vector2(100, 0), delegate (NodeLambda node) {
 								node.Register();
 								Connection.Connect(n.value, node.output);
 								n.setType = SetType.Add;
@@ -24,7 +24,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 							n.value.AssignToDefault(MemberData.Default(type));
 						}
 					}
-					graph.Refresh();
+					graphEditor.Refresh();
 				});
 			}, "Flow", icon: uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FlowIcon))));
 			return items;
@@ -42,7 +42,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(type.IsPrimitive && type != typeof(bool) && type != typeof(char)) {
 				string typeName = type.PrettyName();
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Add ({0}, {0})", typeName), () => {
-					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
+					NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
 						n.inputs[0].type = type;
 						n.inputs[0].port.ConnectTo(source);
@@ -50,11 +50,11 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Add;
 						n.Register();
-						graph.Refresh();
+						graphEditor.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Subtract ({0}, {0})", typeName), () => {
-					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
+					NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
 						n.inputs[0].type = type;
 						n.inputs[0].port.ConnectTo(source);
@@ -62,11 +62,11 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Subtract;
 						n.Register();
-						graph.Refresh();
+						graphEditor.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Divide ({0}, {0})", typeName), () => {
-					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
+					NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
 						n.inputs[0].type = type;
 						n.inputs[0].port.ConnectTo(source);
@@ -74,11 +74,11 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Divide;
 						n.Register();
-						graph.Refresh();
+						graphEditor.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Multiply ({0}, {0})", typeName), () => {
-					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
+					NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
 						n.inputs[0].type = type;
 						n.inputs[0].port.ConnectTo(source);
@@ -86,18 +86,18 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Multiply;
 						n.Register();
-						graph.Refresh();
+						graphEditor.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 				items.Add(ItemSelector.CustomItem.Create(string.Format("Modulo ({0}, {0})", typeName), () => {
-					NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
+					NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 						n.EnsureRegistered();
 						n.inputs[0].type = type;
 						n.inputs[0].port.ConnectTo(source);
 						n.inputs[1].type = type;
 						n.inputs[1].port.AssignToDefault(MemberData.Default(type));
 						n.operatorKind = ArithmeticType.Modulo;
-						graph.Refresh();
+						graphEditor.Refresh();
 					});
 				}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(type)));
 			}
@@ -105,7 +105,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var preference = uNodePreference.GetPreference();
 			var assemblies = EditorReflectionUtility.GetAssemblies();
 			var includedAssemblies = uNodePreference.GetIncludedAssemblies();
-			var ns = graph.graphData.GetUsingNamespaces();
+			var ns = graphEditor.graphData.GetUsingNamespaces();
 			foreach(var assembly in assemblies) {
 				if(!includedAssemblies.Contains(assembly.GetName().Name)) {
 					continue;
@@ -161,7 +161,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 
 		private ItemSelector.CustomItem GetItem(Type type, Type param1, Type param2, Type returnType, ValueOutput source, ArithmeticType operatorType) {
 			return ItemSelector.CustomItem.Create(string.Format(operatorType.ToString() + " ({0}, {1})", param1.PrettyName(), param2.PrettyName()), () => {
-				NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
+				NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (MultiArithmeticNode n) => {
 					n.EnsureRegistered();
 					if(param1.IsCastableTo(type)) {
 						n.inputs[0].type = param1;
@@ -175,7 +175,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputs[1].port.ConnectTo(source);
 					}
 					n.operatorKind = operatorType;
-					graph.Refresh();
+					graphEditor.Refresh();
 				});
 			}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(returnType));
 		}
@@ -198,7 +198,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var preference = uNodePreference.GetPreference();
 			var assemblies = EditorReflectionUtility.GetAssemblies();
 			var includedAssemblies = uNodePreference.GetIncludedAssemblies();
-			var ns = graph.graphData.GetUsingNamespaces();
+			var ns = graphEditor.graphData.GetUsingNamespaces();
 			foreach(var assembly in assemblies) {
 				if(!includedAssemblies.Contains(assembly.GetName().Name)) {
 					continue;
@@ -272,7 +272,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 
 		private ItemSelector.CustomItem GetItem(Type type, Type param1, Type param2, Type returnType, ValueOutput source, ComparisonType operatorType) {
 			return ItemSelector.CustomItem.Create(string.Format(operatorType.ToString() + " ({0}, {1})", param1.PrettyName(), param2.PrettyName()), () => {
-				NodeEditorUtility.AddNewNode(graph.graphData, null, null, mousePositionOnCanvas, (ComparisonNode n) => {
+				NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (ComparisonNode n) => {
 					n.EnsureRegistered();
 					n.operatorKind = operatorType;
 					if(param1 == param2) {
@@ -286,7 +286,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 						n.inputB.ConnectTo(source);
 					}
 					n.Register();
-					graph.Refresh();
+					graphEditor.Refresh();
 				});
 			}, "Operator", icon: uNodeEditorUtility.GetTypeIcon(returnType));
 		}

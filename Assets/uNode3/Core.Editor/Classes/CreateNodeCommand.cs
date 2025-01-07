@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Editors {
 	public abstract class CreateNodeCommand<T> : INodeItemCommand where T : Node {
-		public NodeGraph graph { get; set; }
+		public GraphEditor graph { get; set; }
 		public FilterAttribute filter { get; set; }
 
 		public abstract string name { get; }

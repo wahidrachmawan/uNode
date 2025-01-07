@@ -675,7 +675,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// The graph editor.
 		/// </summary>
-		public NodeGraph graphEditor {
+		public GraphEditor graphEditor {
 			get {
 				return uNodePreference.nodeGraph;
 			}
