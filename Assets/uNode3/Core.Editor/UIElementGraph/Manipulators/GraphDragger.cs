@@ -5,12 +5,11 @@ using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
 	public class GraphDragger : MouseManipulator {
-		bool m_rightClickPressed;
-		bool m_hasMove;
+		bool m_rightClickPressed, m_hasMove, m_hasCaptured;
 
 		public bool isActive {
 			get {
-				return m_Active || m_rightClickPressed;
+				return m_Active && m_hasCaptured;
 			}
 		}
 
@@ -93,14 +92,31 @@ namespace MaxyGames.UNode.Editors {
 					m_Start = graphView.ChangeCoordinatesTo(graphView.contentViewContainer, e.localMousePosition);
 					m_Active = true;
 					m_rightClickPressed = e.button == 1;
-					target.CaptureMouse();
-					e.StopImmediatePropagation();
+					if(m_rightClickPressed == false) {
+						m_hasCaptured = true;
+						target.CaptureMouse();
+						e.StopImmediatePropagation();
+					}
 				}
 			}
 		}
 
 		public void OnMouseMove(MouseMoveEvent e) {
 			if(m_Active) {
+				if(e.pressedButtons == 0) {
+					if(m_hasCaptured) {
+						target.ReleaseMouse();
+					}
+					m_Active = false;
+					m_rightClickPressed = false;
+					m_hasMove = false;
+					m_hasCaptured = false;
+					return;
+				}
+				if(m_rightClickPressed && m_hasMove == false) {
+					target.CaptureMouse();
+					m_hasCaptured = true;
+				}
 				m_hasMove = true;
 				GraphView graphView = target as GraphView;
 				if(graphView != null) {
@@ -114,25 +130,31 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void OnMouseUp(MouseUpEvent e) {
-			if(m_Active && CanStopManipulation(e)) {
-				GraphView graphView = target as GraphView;
-				if(graphView != null) {
-					Vector3 position = graphView.contentViewContainer.transform.position;
-					Vector3 scale = graphView.contentViewContainer.transform.scale;
-					graphView.UpdateViewTransform(position, scale);
-					if(m_rightClickPressed && m_hasMove) {
-						uNodeThreadUtility.Queue(() => {
-							m_Active = false;
-							target.ReleaseMouse();
-							e.StopImmediatePropagation();
-						});
-						e.IgnoreEvent();
+			if(m_Active && (CanStopManipulation(e) || m_rightClickPressed)) {
+				if(m_hasMove) {
+					GraphView graphView = target as GraphView;
+					if(graphView != null) {
+						Vector3 position = graphView.contentViewContainer.transform.position;
+						Vector3 scale = graphView.contentViewContainer.transform.scale;
+						graphView.UpdateViewTransform(position, scale);
 					}
-					else {
+				}
+				if(m_rightClickPressed && m_hasMove) {
+					uNodeThreadUtility.Queue(() => {
 						m_Active = false;
-						target.ReleaseMouse();
+						if(m_hasCaptured)
+							target.ReleaseMouse();
+						m_hasCaptured = false;
 						e.StopImmediatePropagation();
-					}
+					});
+					e.IgnoreEvent();
+				}
+				else {
+					m_Active = false;
+					if(m_hasCaptured)
+						target.ReleaseMouse();
+					m_hasCaptured = false;
+					e.StopImmediatePropagation();
 				}
 				m_rightClickPressed = false;
 				m_hasMove = false;

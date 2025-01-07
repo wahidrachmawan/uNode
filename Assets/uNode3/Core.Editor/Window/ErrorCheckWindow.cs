@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Editors {
 
 		class ErrorData {
 			public UGraphElementRef element;
-			public uNodeUtility.ErrorMessage message;
+			public ErrorMessage message;
 		}
 
 		static int _updateID;

@@ -1,5 +1,6 @@
 # v3.0.5
 - Added Constructor Initializers, psudo Default Constructors and Relevant search kind by @S2NX7
+- Added Surround menu commands by @S2NX7
 - Added disable right click to move the graph canvas in preference
 - Improved Editor
 - Removed dependency to `com.unity.ugui`

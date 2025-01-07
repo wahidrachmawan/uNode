@@ -985,7 +985,7 @@ namespace MaxyGames.UNode.Editors {
 		public void CopySelectedNodes() {
 			var nodes = new HashSet<UGraphElement>();
 			foreach(var n in graphData.selecteds) {
-				if(n is not NodeObject node)
+				if(n is not NodeObject node || node.node is TransitionEvent)
 					continue;
 				nodes.Add(node);
 				var view = GetNodeView(node);
@@ -1013,39 +1013,63 @@ namespace MaxyGames.UNode.Editors {
 			GraphUtility.CopyPaste.Copy(nodes.ToArray());
 		}
 
-		public override void AddToSelection(ISelectable selectable) {
-			base.AddToSelection(selectable);
-			if(selectable is BaseNodeView) {
-				graph.SelectNode((selectable as BaseNodeView).nodeObject, false);
-				AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
-			}
-			else if(selectable is EdgeView) {
-				var edge = (selectable as EdgeView);
-				if(graphData.selectedNodes.Any() == false) {
-					if(edge.isFlow) {
-						if(edge.Output != null) {
-							graph.Select(new UPortRef(edge.Output.GetPortValue()));
-							return;
-						}
+		public void AddToSelection(IEnumerable<ISelectable> selectables) {
+			if(selectables.Any(s => s is BaseNodeView)) {
+				foreach(var selected in selectables) {
+					if(selected is BaseNodeView) {
+						AddToSelection(selected);
 					}
-					else {
-						if(edge.Input != null) {
-							graph.Select(new UPortRef(edge.Input.GetPortValue()));
-						}
-					}
-					graph.Select(new UPortRef(edge.Input?.GetPortValue() ?? edge.Output?.GetPortValue()));
 				}
 			}
-			else if(selectable is TransitionView) {
-				graph.Select((selectable as TransitionView).transition);
-				AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
+			else {
+				foreach(var selected in selectables) {
+					if(selected != null) {
+						AddToSelection(selected);
+						break;
+					}
+				}
 			}
-			//else if(selectable is BlockView) {
-			//	var block = (selectable as BlockView);
-			//	if(block.data != null && block.data.block != null && editorData.selected != editorData.selectedNodes) {
-			//		graph.Select(new uNodeEditor.ValueInspector(block.data.block, block.owner.nodeView.targetNode));
-			//	}
-			//} 
+		}
+
+		public override void AddToSelection(ISelectable selectable) {
+			base.AddToSelection(selectable);
+			uNodeThreadUtility.ExecuteOnce(() => {
+				bool onlyNodes = this.selection.Count > 1 && this.selection.Any(s => s is BaseNodeView);
+				graph.ClearSelection();
+				foreach(var selectable in this.selection.ToArray()) {
+					if(onlyNodes) {
+						if(selectable is not BaseNodeView) {
+							base.RemoveFromSelection(selectable);
+							continue;
+						}
+					}
+					if(selectable is BaseNodeView) {
+						graph.SelectNode((selectable as BaseNodeView).nodeObject, false);
+						AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
+					}
+					else if(selectable is EdgeView) {
+						var edge = (selectable as EdgeView);
+						if(graphData.selectedNodes.Any() == false) {
+							if(edge.isFlow) {
+								if(edge.Output != null) {
+									graph.Select(new UPortRef(edge.Output.GetPortValue()));
+									return;
+								}
+							}
+							else {
+								if(edge.Input != null) {
+									graph.Select(new UPortRef(edge.Input.GetPortValue()));
+								}
+							}
+							graph.Select(new UPortRef(edge.Input?.GetPortValue() ?? edge.Output?.GetPortValue()));
+						}
+					}
+					else if(selectable is TransitionView) {
+						graph.Select((selectable as TransitionView).transition);
+						AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
+					}
+				}
+			}, "[GRAPH_ADD_SELECTIONS]");
 		}
 
 		public override void RemoveFromSelection(ISelectable selectable) {
@@ -1125,7 +1149,7 @@ namespace MaxyGames.UNode.Editors {
 #if UNITY_2023_2_OR_NEWER
 		protected override void HandleEventBubbleUp(EventBase evt) { 
 #elif UNITY_2022_1_OR_NEWER
-		protected override void ExecuteDefaultAction(EventBase evt) {
+		protected override void ExecuteDefaultActionAtTarget(EventBase evt) {
 #else
 		public override void HandleEvent(EventBase evt) {
 #endif
@@ -1153,7 +1177,7 @@ namespace MaxyGames.UNode.Editors {
 #if UNITY_2023_2_OR_NEWER
 			base.HandleEventBubbleUp(evt);
 #elif UNITY_2022_1_OR_NEWER
-			base.ExecuteDefaultAction(evt);
+			base.ExecuteDefaultActionAtTarget(evt);
 #else
 			base.HandleEvent(evt);
 #endif
@@ -2433,6 +2457,12 @@ namespace MaxyGames.UNode.Editors {
 		void OnNodeRemoved(NodeView view) {
 			if(view is UNodeView) {
 				var node = view as UNodeView;
+				try {
+					node.OnNodeRemoved();
+				}
+				catch(Exception ex) {
+					Debug.LogException(ex);
+				}
 				foreach(var p in node.inputPorts) {
 					if(p == null)
 						continue;
@@ -2675,9 +2705,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(type == GraphShortcutType.SelectAllNodes) {
 				ClearSelection();
-				foreach(var view in nodeViews) {
-					AddToSelection(view);
-				}
+				AddToSelection(nodeViews.Select(view => view as ISelectable));
 				return true;
 			}
 			else if(type == GraphShortcutType.CreateRegion) {

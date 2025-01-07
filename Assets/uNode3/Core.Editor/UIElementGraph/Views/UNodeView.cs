@@ -504,6 +504,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Called when node will be removed/deleted
+		/// </summary>
+		public virtual void OnNodeRemoved() { }
+
+		/// <summary>
 		/// Called on any value changed.
 		/// </summary>
 		public virtual void OnValueChanged() {

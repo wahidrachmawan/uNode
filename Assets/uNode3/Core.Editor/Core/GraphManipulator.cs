@@ -914,6 +914,21 @@ namespace MaxyGames.UNode.Editors {
 											function.modifier.Internal = true;
 											function.modifier.Protected = true;
 										}
+										function.Entry.EnsureRegistered();
+										NodeEditorUtility.AddNewNode<NodeBaseCaller>(function, new Vector2(0, 100), baseNode => {
+											baseNode.target = MemberData.CreateFromMember(m);
+											baseNode.EnsureRegistered();
+											if(function.ReturnType() == typeof(void)) {
+												function.Entry.exit.ConnectTo(baseNode.enter);
+											}
+											else {
+												NodeEditorUtility.AddNewNode<Nodes.NodeReturn>(function, new Vector2(0, 100), returnNode => {
+													baseNode.position = new Rect(-200, 100, 0, 0);
+													returnNode.value.ConnectTo(baseNode.output);
+													function.Entry.exit.ConnectTo(returnNode.enter);
+												});
+											}
+										});
 									});
 								GraphChanged();
 							}

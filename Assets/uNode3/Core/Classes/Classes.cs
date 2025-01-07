@@ -39,6 +39,14 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	public class ErrorMessage {
+		public string message;
+		public Action<Vector2> autoFix;
+		public InfoType type = InfoType.Error;
+
+		public string niceMessage => message;
+	}
+
 	public abstract class ErrorAnalyzer {
 		public bool CheckIsConvertible(ValueInput input) {
 			return CheckIsConvertible(input, input.type);
@@ -392,7 +400,7 @@ namespace MaxyGames.UNode {
 				var p = port as ValueInput;
 				if(p.UseDefaultValue) {
 					if(p.defaultValue == null || !p.defaultValue.isAssigned) {
-						RegisterError(port.node, new uNodeUtility.ErrorMessage() {
+						RegisterError(port.node, new ErrorMessage() {
 							message = "Unassigned port: " + port.GetPrettyName(),
 						});
 						return true;
@@ -416,7 +424,7 @@ namespace MaxyGames.UNode {
 						}
 						else {
 							if(inputType.IsCastableTo(targetType) == false) {
-								RegisterError(port.node, new uNodeUtility.ErrorMessage() {
+								RegisterError(port.node, new ErrorMessage() {
 									message = $"Cannot convert: {inputType.PrettyName(true)} to {targetType.PrettyName(true)}. Error from port: {port.GetPrettyName()}",
 								});
 							}
@@ -451,7 +459,7 @@ namespace MaxyGames.UNode {
 			else if(port is ValueOutput) {
 				var p = port as ValueOutput;
 				if(!p.isConnected) {
-					RegisterError(port.node, new uNodeUtility.ErrorMessage() {
+					RegisterError(port.node, new ErrorMessage() {
 						message = "Unassigned port: " + port.GetPrettyName(),
 					});
 					return true;
@@ -465,7 +473,7 @@ namespace MaxyGames.UNode {
 			else if(port is FlowOutput) {
 				var p = port as FlowOutput;
 				if(!p.isConnected) {
-					RegisterError(port.node, new uNodeUtility.ErrorMessage() {
+					RegisterError(port.node, new ErrorMessage() {
 						message = "Unassigned port: " + port.GetPrettyName(),
 					});
 					return true;
@@ -479,7 +487,7 @@ namespace MaxyGames.UNode {
 			else if(port is FlowInput) {
 				var p = port as FlowInput;
 				if(!p.isConnected) {
-					RegisterError(port.node, new uNodeUtility.ErrorMessage() {
+					RegisterError(port.node, new ErrorMessage() {
 						message = "Unassigned port: " + port.GetPrettyName(),
 					});
 					return true;
@@ -494,51 +502,51 @@ namespace MaxyGames.UNode {
 		}
 
 		public void RegisterError(UGraphElement owner, string message) {
-			RegisterError(owner, new uNodeUtility.ErrorMessage() {
+			RegisterError(owner, new ErrorMessage() {
 				message = message,
 			});
 		}
 
 		public void RegisterError(UGraphElement owner, string message, Action autoFix) {
-			RegisterError(owner, new uNodeUtility.ErrorMessage() {
+			RegisterError(owner, new ErrorMessage() {
 				message = message,
 				autoFix = autoFix != null ? (_) => autoFix() : null,
 			});
 		}
 
 		public void RegisterError(UGraphElement owner, string message, Action<Vector2> autoFix) {
-			RegisterError(owner, new uNodeUtility.ErrorMessage() {
+			RegisterError(owner, new ErrorMessage() {
 				message = message,
 				autoFix = autoFix,
 			});
 		}
 
 		public void RegisterWarning(UGraphElement owner, string message) {
-			RegisterWarning(owner, new uNodeUtility.ErrorMessage() {
+			RegisterWarning(owner, new ErrorMessage() {
 				message = message,
 			});
 		}
 
 		public void RegisterWarning(UGraphElement owner, string message, Action autoFix) {
-			RegisterWarning(owner, new uNodeUtility.ErrorMessage() {
+			RegisterWarning(owner, new ErrorMessage() {
 				message = message,
 				autoFix = autoFix != null ? (_) => autoFix() : null,
 			});
 		}
 
 		public void RegisterWarning(UGraphElement owner, string message, Action<Vector2> autoFix) {
-			RegisterWarning(owner, new uNodeUtility.ErrorMessage() {
+			RegisterWarning(owner, new ErrorMessage() {
 				message = message,
 				autoFix = autoFix,
 			});
 		}
 
-		public void RegisterWarning(UGraphElement owner, uNodeUtility.ErrorMessage error) {
+		public void RegisterWarning(UGraphElement owner, ErrorMessage error) {
 			error.type = InfoType.Warning;
 			RegisterError(owner, error);
 		}
 
-		public abstract void RegisterError(UGraphElement owner, uNodeUtility.ErrorMessage error);
+		public abstract void RegisterError(UGraphElement owner, ErrorMessage error);
 		public abstract void ClearErrors(UGraphElement owner);
 		public abstract void ClearErrors(IGraph graph);
 		public abstract void ClearErrors();

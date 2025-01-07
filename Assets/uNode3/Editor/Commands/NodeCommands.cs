@@ -178,6 +178,10 @@ namespace MaxyGames.UNode.Editors.Commands {
 				graphEditor.ReloadView(true);
 			}, graphEditor.graphData, mousePosition);
 		}
+
+		public override bool IsValidNode(Node source) {
+			return source.nodeObject.FlowInputs.Any(input => input.hasValidConnections);
+		}
 	}
 
 	public class SurroundSelectionWith : NodeMenuCommand {
@@ -230,7 +234,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override bool IsValidNode(Node source) {
-			return graphEditor.graphData.selectedNodes.Count() > 1;
+			return graphData.selectedNodes.Count() > 1 && graphData.selectedNodes.Any(n => n.FlowInputs.Any(p => p.hasValidConnections));
 		}
 	}
 }

@@ -1465,14 +1465,6 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Classes
-		public class ErrorMessage {
-			public string message;
-			public Action<Vector2> autoFix;
-			public InfoType type = InfoType.Error;
-
-			public string niceMessage => message;
-		}
-
 		public class GraphErrorData {
 			public UGraphElementRef element;
 

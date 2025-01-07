@@ -368,7 +368,7 @@ namespace MaxyGames.UNode.Editors {
 					CheckGraphErrors(graph, this);
 				}
 
-				public override void RegisterError(UGraphElement element, uNodeUtility.ErrorMessage error) {
+				public override void RegisterError(UGraphElement element, ErrorMessage error) {
 					if(element == null)
 						throw new ArgumentNullException(nameof(element));
 					var graph = element.graphContainer;
@@ -409,9 +409,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			public static IEnumerable<uNodeUtility.ErrorMessage> GetErrorMessages(UGraphElement element, InfoType type) {
+			public static IEnumerable<ErrorMessage> GetErrorMessages(UGraphElement element, InfoType type) {
 				if(element == null)
-					return Enumerable.Empty<uNodeUtility.ErrorMessage>();
+					return Enumerable.Empty<ErrorMessage>();
 				var graph = element.graphContainer;
 				if(graph == null)
 					return null;
@@ -421,12 +421,12 @@ namespace MaxyGames.UNode.Editors {
 					}
 
 				}
-				return Enumerable.Empty<uNodeUtility.ErrorMessage>();
+				return Enumerable.Empty<ErrorMessage>();
 			}
 
-			public static IEnumerable<uNodeUtility.ErrorMessage> GetErrorMessages(UGraphElement element) {
+			public static IEnumerable<ErrorMessage> GetErrorMessages(UGraphElement element) {
 				if(element == null)
-					return Enumerable.Empty<uNodeUtility.ErrorMessage>();
+					return Enumerable.Empty<ErrorMessage>();
 				var graph = element.graphContainer;
 				if(graph == null)
 					return null;
@@ -436,10 +436,10 @@ namespace MaxyGames.UNode.Editors {
 					}
 
 				}
-				return Enumerable.Empty<uNodeUtility.ErrorMessage>();
+				return Enumerable.Empty<ErrorMessage>();
 			}
 
-			public static void RegisterErrorMessage(UGraphElement element, uNodeUtility.ErrorMessage error) {
+			public static void RegisterErrorMessage(UGraphElement element, ErrorMessage error) {
 				defaultAnalizer.RegisterError(element, error);
 			}
 
@@ -1383,9 +1383,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			class ErrorTreeView : TreeViewItem {
-				public uNodeUtility.ErrorMessage error;
+				public ErrorMessage error;
 
-				public ErrorTreeView(uNodeUtility.ErrorMessage error) : base(error.GetHashCode(), -1, error.message) {
+				public ErrorTreeView(ErrorMessage error) : base(error.GetHashCode(), -1, error.message) {
 					this.error = error;
 				}
 			}
