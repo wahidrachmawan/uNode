@@ -489,6 +489,9 @@ namespace MaxyGames.UNode.Editors {
 					classBuilder.RegisterNestedType(enums.GenerateCode());
 				}
 				else {
+					if(data.kind == FlowOutputKind.Conditional) {
+						att.namedParameters.Add(nameof(OutputAttribute.type), CG.Value(typeof(bool)));
+					}
 					if(string.IsNullOrWhiteSpace(data.description) == false) {
 						att.namedParameters.Add(nameof(PortDescriptionAttribute.description), CG.Value(data.description));
 					}
