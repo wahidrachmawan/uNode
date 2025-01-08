@@ -10,7 +10,7 @@ using static MaxyGames.UNode.Editors.Commands.SurroundCommands;
 namespace MaxyGames.UNode.Editors {
     public class SurroundWithWindow : EditorWindow {
         private Action<SurroundCommand> action;
-        HashSet<Type> surroundCommands = new HashSet<Type>();
+        List<Type> surroundCommands;
         private GraphEditorData graphData;
         private bool positionSet;
         Vector2 scrollPos = new Vector2();
@@ -19,10 +19,7 @@ namespace MaxyGames.UNode.Editors {
             window.action = action;
             window.graphData = graphData;
             window.position = new Rect(mousePosition, new Vector2(250, 250));
-            window.surroundCommands = AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(assembly => assembly.GetTypes())
-            .Where(type => typeof(SurroundCommand).IsAssignableFrom(type) && !type.IsAbstract)
-            .ToHashSet();
+            window.surroundCommands = EditorReflectionUtility.GetSubClassesOfType<SurroundCommand>().ToList();
             window.ShowPopup();
         }
 

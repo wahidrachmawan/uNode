@@ -10,13 +10,10 @@ namespace MaxyGames.UNode.Editors {
 	public static class EditorReflectionUtility {
 		private static Dictionary<Type, FieldInfo[]> fieldsInfoMap = new Dictionary<Type, FieldInfo[]>();
 		private static Dictionary<MemberInfo, object[]> attributesMap = new Dictionary<MemberInfo, object[]>();
-		private static Dictionary<Assembly, Type[]> assemblyTypeMap = new Dictionary<Assembly, Type[]>();
 		private static Dictionary<Assembly, HashSet<string>> assemblyNamespaces = new Dictionary<Assembly, HashSet<string>>();
 		private static Dictionary<Assembly, List<MethodInfo>> extensionsMap = new Dictionary<Assembly, List<MethodInfo>>();
 		private static Dictionary<Assembly, List<MethodInfo>> operatorsMap = new Dictionary<Assembly, List<MethodInfo>>();
 		private static HashSet<string> namespaces;
-		//private static Dictionary<Assembly, Dictionary<string, Type[]>> assemblyTypeMap2 = new Dictionary<Assembly, Dictionary<string, Type[]>>();
-		private static Assembly[] assemblies;
 		//private static object lockObject = new object();
 		private static Type[] generalTypes;
 		private static readonly HashSet<string> editorAssemblyNames;
@@ -175,10 +172,20 @@ namespace MaxyGames.UNode.Editors {
 			return ReflectionUtils.GetStaticAssemblies();
 		}
 
+		/// <summary>
+		/// Get all type available in assembly
+		/// </summary>
+		/// <param name="assembly"></param>
+		/// <returns></returns>
 		public static Type[] GetAssemblyTypes(Assembly assembly) {
 			return ReflectionUtils.GetAssemblyTypes(assembly);
 		}
 
+		/// <summary>
+		/// Get all namaspace available in the assembly
+		/// </summary>
+		/// <param name="assembly"></param>
+		/// <returns></returns>
 		public static HashSet<string> GetAssemblyNamespaces(Assembly assembly) {
 			HashSet<string> hash;
 			if(!assemblyNamespaces.TryGetValue(assembly, out hash)) {
@@ -195,6 +202,10 @@ namespace MaxyGames.UNode.Editors {
 			return hash;
 		}
 
+		/// <summary>
+		/// Get all available namespace in all assemblies
+		/// </summary>
+		/// <returns></returns>
 		public static HashSet<string> GetNamespaces() {
 			if(namespaces != null)
 				return namespaces;
@@ -263,7 +274,7 @@ namespace MaxyGames.UNode.Editors {
 				extensionsMap[assembly] = methods;
 			}
 			if(methods.Count > 0 && (extendedType != null || validation != null)) {
-				List<MethodInfo> infos = new List<MethodInfo>();
+				List<MethodInfo> infos = new List<MethodInfo>(methods.Count);
 
 				//This for caching purpose, so we don't fetch value multiple times
 				Type elementType = null;
@@ -391,7 +402,7 @@ namespace MaxyGames.UNode.Editors {
 			if(validation == null) {
 				return new List<MethodInfo>(methods);
 			}
-			List<MethodInfo> infos = new List<MethodInfo>();
+			List<MethodInfo> infos = new List<MethodInfo>(methods.Count);
 			foreach(MethodInfo mi in methods) {
 				try {
 					MethodInfo method = mi;
@@ -425,6 +436,11 @@ namespace MaxyGames.UNode.Editors {
 		//	return types;
 		//}
 
+		/// <summary>
+		/// Return all sub classes of Type <typeparamref name="T"/>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public static IEnumerable<Type> GetSubClassesOfType<T>() where T : class {
 			foreach(var assembly in GetAssemblies()) {
 				foreach(var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && (typeof(T).IsAssignableFrom(t)))) {
@@ -433,6 +449,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Return list object of Type <typeparamref name="T"/>.
+		/// This method will create a new instance of <typeparamref name="T"/> so only valid for non-abstacted type
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public static List<T> GetListOfType<T>() where T : class {
 			List<T> objects = new List<T>();
 			foreach(var assembly in GetAssemblies()) {
