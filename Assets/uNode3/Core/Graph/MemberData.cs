@@ -686,6 +686,20 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// Return true if the member is assigned to a null / none
+		/// </summary>
+		public bool IsTargetingNull {
+			get {
+				switch(targetType) {
+					case TargetType.Null:
+					case TargetType.None:
+						return true;
+				}
+				return false;
+			}
+		}
+
+		/// <summary>
 		/// Indicate is targeting uNode Member whether it's graph, pin, or nodes.
 		/// </summary>
 		public bool IsTargetingUNode => targetType.IsTargetingUNode();

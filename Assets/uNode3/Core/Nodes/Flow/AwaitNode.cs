@@ -55,6 +55,12 @@ namespace MaxyGames.UNode.Nodes {
 		public override void CheckError(ErrorAnalyzer analizer) {
 			analizer.CheckPort(value);
 			if(value.isAssigned) {
+				if(value.UseDefaultValue) {
+					if(value.defaultValue.IsTargetingNull) {
+						analizer.RegisterError(this, $"The value must be assigned.");
+						return;
+					}
+				}
 				var type = value.ValueType;
 				if(type != null && type != typeof(void)) {
 					var awaiterMethod = type.GetMemberCached(nameof(System.Threading.Tasks.Task.GetAwaiter));

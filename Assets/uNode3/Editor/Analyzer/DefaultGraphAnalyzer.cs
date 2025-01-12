@@ -116,10 +116,17 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 						if(returnType != typeof(void)) {
 							bool isCoroutine = returnType.IsCastableTo(typeof(IEnumerable)) || returnType.IsCastableTo(typeof(IEnumerator));
 							bool hasReturn = false;
+							bool isAsync = function.modifier.Async;
 
 							var nodes = CG.Nodes.FindAllConnections(function.Entry, includeFlowOutput: true);
 							foreach(var node in nodes) {
-								if(node.node is NodeReturn) {
+								if(isAsync) {
+									if(node.node is AwaitNode) {
+										hasReturn = true;
+										break;
+									}
+								}
+								else if(node.node is NodeReturn) {
 									hasReturn = true;
 									break;
 								}
@@ -134,7 +141,10 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 								}
 							}
 							if(hasReturn == false) {
-								if(isCoroutine) {
+								if(isAsync) {
+									analyzer.RegisterError(function.Entry, $@"Function: {function.name} need to have await node.");
+								}
+								else if(isCoroutine) {
 									analyzer.RegisterError(function.Entry, $@"Function: {function.name} need to have return or yield return node.");
 								}
 								else {
@@ -169,7 +179,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							}
 						}
 					}
-					catch (Exception ex) {
+					catch(Exception ex) {
 						analyzer.RegisterError(function, ex.ToString());
 					}
 				}
@@ -188,7 +198,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							}
 						}
 					}
-					catch (Exception ex) {
+					catch(Exception ex) {
 						analyzer.RegisterError(property, ex.ToString());
 					}
 				}
@@ -204,7 +214,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 						if(type == null)
 							continue;
 						var methods = type.GetMethods();
-						for(int i=0;i< methods.Length;i++) {
+						for(int i = 0; i < methods.Length; i++) {
 							var member = methods[i];
 							if(member.Name.StartsWith("get_", StringComparison.Ordinal) || member.Name.StartsWith("set_", StringComparison.Ordinal)) {
 								continue;
@@ -213,7 +223,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 								member.Name,
 								member.GetGenericArguments().Length,
 								member.GetParameters().Select(item => item.ParameterType).ToArray())) {
-								analyzer.RegisterError(graphData, 
+								analyzer.RegisterError(graphData,
 									$@"The graph does not implement interface method: '{type.PrettyName()}' type: '{EditorReflectionUtility.GetPrettyMethodName(member)}'",
 									() => {
 										uNodeEditorUtility.RegisterUndo(graph);
@@ -225,7 +235,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							}
 						}
 						var properties = type.GetProperties();
-						for(int i=0;i< properties.Length;i++) {
+						for(int i = 0; i < properties.Length; i++) {
 							var member = properties[i];
 							if(!graph.GetProperty(member.Name)) {
 								analyzer.RegisterError(graphData,
