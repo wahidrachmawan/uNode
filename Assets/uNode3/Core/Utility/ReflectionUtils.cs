@@ -918,7 +918,7 @@ namespace MaxyGames.UNode {
 			if(src == null || src.GetType() == targetType)
 				return src;
 			//Is it multiple cast?
-			return src.GetInvocationList().Count() == 1
+			return src.GetInvocationList().Length == 1
 				? Delegate.CreateDelegate(targetType, src.Target, src.Method, doTypeCheck)
 				: src.GetInvocationList().Aggregate<Delegate, Delegate>
 					(null, (current, d) => Delegate.Combine(current, ConvertDelegate(d, targetType, doTypeCheck)));

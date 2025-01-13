@@ -38,6 +38,13 @@ namespace MaxyGames.UNode {
 			//Instance reflection graph
 			m_instance = RuntimeGraphUtility.InitializeComponentGraph(OriginalGraph, this);
 			m_instance.eventData.onAwake?.Invoke(Instance);
+
+			if(enabled) {
+				OnBehaviourEnable();
+			}
+			else {
+				OnBehaviourDisable();
+			}
 		}
 		#endregion
 
@@ -50,7 +57,18 @@ namespace MaxyGames.UNode {
 		}
 
 		void OnEnable() {
-			EnsureInitialized();
+			if(hasInitialize) {
+				OnBehaviourEnable();
+			}
+		}
+
+		void OnDisable() {
+			if(hasInitialize) {
+				OnBehaviourDisable();
+			}
+		}
+
+		void OnBehaviourEnable() {
 			if(nativeInstance != null) {
 				nativeInstance.enabled = true;
 				nativeInstance.OnBehaviourEnable();
@@ -60,7 +78,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		void OnDisable() {
+		void OnBehaviourDisable() {
 			//if(target is uNodeComponentSingleton singleton && singleton.IsPersistence) {
 			//	//If the target graph is a persistence singleton then we don't need to disable it as it might cause a bugs.
 			//	return;

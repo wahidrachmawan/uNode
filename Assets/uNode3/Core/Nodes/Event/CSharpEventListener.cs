@@ -134,6 +134,7 @@ namespace MaxyGames.UNode.Nodes {
 								}
 								Trigger(flow);
 							}, method.GetParameters().Select(i => i.ParameterType).ToArray());
+							@delegate = ReflectionUtils.ConvertDelegate(@delegate, evt.EventHandlerType);
 							instance.eventData.onEnable += instance => {
 								object obj = this.instance.GetValue(instance.defaultFlow);
 								target.startTarget = obj;

@@ -23,6 +23,18 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public override Type EventHandlerType {
+			get {
+				if(target is MemberData member) {
+					member.GetMembers(false);
+					if(member.eventInfo != null) {
+						return member.eventInfo.EventHandlerType;
+					}
+				}
+				return base.EventHandlerType;
+			}
+		}
+
 		public override void DoAddMethod(object instance, Delegate evt) {
 			if(evt == null) return;
 			var graphInstance = uNodeHelper.GetGraphInstance(instance).defaultFlow;

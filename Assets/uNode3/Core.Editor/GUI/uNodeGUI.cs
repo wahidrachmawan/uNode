@@ -972,7 +972,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 				string varName = ObjectNames.NicifyVariableName(variable.name);
 				System.Type type = variable.type;
-				uNodeGUIUtility.EditValueLayouted(new GUIContent(varName), variable.Get(instance), type, (val) => {
+				var value = variable.Get(instance);
+				if(value != null)
+					type = value.GetType();
+				uNodeGUIUtility.EditValueLayouted(new GUIContent(varName), value, type, (val) => {
 					variable.Set(instance, val);
 				});
 			}
