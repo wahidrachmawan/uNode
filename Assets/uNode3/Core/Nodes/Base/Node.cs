@@ -61,6 +61,10 @@ namespace MaxyGames.UNode {
 		public virtual void OnRuntimeInitialize(GraphInstance instance) { }
 
 		#region Editors
+		/// <summary>
+		/// Return the title of the node
+		/// </summary>
+		/// <returns></returns>
 		public virtual string GetTitle() {
 			var type = GetType();
 			if(type.IsDefined(typeof(NodeMenu), true)) {
@@ -72,10 +76,18 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Return the rich title of the node
+		/// </summary>
+		/// <returns></returns>
 		public virtual string GetRichTitle() {
 			return GetTitle();
 		}
 
+		/// <summary>
+		/// Return rich name of the node
+		/// </summary>
+		/// <returns></returns>
 		public virtual string GetRichName() {
 			return GetRichTitle();
 		}

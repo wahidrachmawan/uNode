@@ -1374,6 +1374,9 @@ namespace MaxyGames.UNode.Editors {
 							else if(element is NodeContainerWithEntry nodeContainer && nodeContainer.Entry != null) {
 								HighlightNode(nodeContainer.Entry);
 							}
+							else {
+								Open(element.graphContainer, element);
+							}
 							return true;
 						}
 					}
@@ -1604,6 +1607,10 @@ namespace MaxyGames.UNode.Editors {
 			if(graph is IScriptGraphType) {
 				owner = (graph as IScriptGraphType).ScriptTypeData.scriptGraph as UnityEngine.Object;
 			}
+			BaseReference selection = null;
+			if(canvas != null) {
+				selection = BaseReference.FromValue(canvas);
+			}
 			var cachedGraph = FindCachedGraph(owner);
 			if(cachedGraph != null) {
 				for(int i = 0; i < cachedGraph.graphDatas.Count; i++) {
@@ -1619,7 +1626,7 @@ namespace MaxyGames.UNode.Editors {
 						if(canvas != null) {
 							window.selectedTab.selectedGraphData.currentCanvas = canvas;
 						}
-						window.ChangeEditorSelection(null);
+						window.ChangeEditorSelection(selection);
 						window.Refresh();
 						window.UpdatePosition();
 						return;
@@ -1632,7 +1639,7 @@ namespace MaxyGames.UNode.Editors {
 				if(canvas != null) {
 					window.selectedTab.selectedGraphData.currentCanvas = canvas;
 				}
-				window.ChangeEditorSelection(null);
+				window.ChangeEditorSelection(selection);
 				window.Refresh();
 				window.UpdatePosition();
 				return;
@@ -1643,7 +1650,7 @@ namespace MaxyGames.UNode.Editors {
 			if(canvas != null) {
 				window.selectedTab.selectedGraphData.currentCanvas = canvas;
 			}
-			window.ChangeEditorSelection(null);
+			window.ChangeEditorSelection(selection);
 			window.Refresh();
 			window.UpdatePosition();
 		}
@@ -1674,15 +1681,8 @@ namespace MaxyGames.UNode.Editors {
 				var script = GenerationUtility.GenerateCSharpScript(selectedTab.owner, (progress, text) => {
 					EditorUtility.DisplayProgressBar($"Generating C# Scripts", text, progress);
 				});
-				if(preferenceData.generatorData != null && preferenceData.generatorData.analyzeScript && preferenceData.generatorData.formatScript) {
-					var codeFormatter = EditorBinding.codeFormatter;
-					if(codeFormatter != null) {
-						script.postScriptModifier += input => {
-							return codeFormatter.
-								GetMethod("FormatCode").
-								InvokeOptimized(null, new object[] { input }) as string;
-						};
-					}
+				if(preferenceData.generatorData != null && preferenceData.generatorData.analyzeScript) {
+					script.postScriptModifier += EditorBinding.AnalizeCode;
 				}
 				var generatedScript = script.ToScript(out var informations);
 				string path = GenerationUtility.tempFolder + separator + script.fileName + ".cs";

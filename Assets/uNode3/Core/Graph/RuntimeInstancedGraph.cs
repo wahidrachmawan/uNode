@@ -20,14 +20,14 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Initialization
-		public void Initialize(IGraph graph) {
+		public void Initialize(IGraph graph, Dictionary<string, object> overrideValues = null) {
 			this.hideFlags = HideFlags.DontSave;
 			OriginalGraph = graph;
-			EnsureInitialized();
+			EnsureInitialized(overrideValues);
 		}
 
 		private bool hasInitialize;
-		void EnsureInitialized() {
+		void EnsureInitialized(Dictionary<string, object> overrideValues = null) {
 			if(hasInitialize || OriginalGraph == null) {
 				return;
 			}
@@ -36,7 +36,7 @@ namespace MaxyGames.UNode {
 				throw new System.Exception("Can't initialize graph instance when not playing.");
 			}
 			//Instance reflection graph
-			m_instance = RuntimeGraphUtility.InitializeComponentGraph(OriginalGraph, this);
+			m_instance = RuntimeGraphUtility.InitializeComponentGraph(OriginalGraph, this, overrideValues);
 			m_instance.eventData.onAwake?.Invoke(Instance);
 
 			if(enabled) {

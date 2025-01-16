@@ -1004,7 +1004,7 @@ namespace MaxyGames.UNode {
 											result += mTarget.Items[i].GetActualName().WrapWithColor(editorColor.typeColor);
 										}
 										else if(mTarget.Items.Length > 1) {
-											if(richName) {
+											if(richName && member.instance != null) {
 												result += member.instance.GetRichName();
 											}
 											else {

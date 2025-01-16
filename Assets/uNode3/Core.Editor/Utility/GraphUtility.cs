@@ -1539,7 +1539,7 @@ namespace MaxyGames.UNode.Editors {
 								labelRect.x += 16;
 								labelRect.width -= 16;
 							}
-							var content = new GUIContent(path);
+							var content = new GUIContent(path.Replace('\n', '↵'));
 							style.Draw(labelRect, content, false, false, false, false);
 							labelRect.x += style.CalcSize(content).x;
 						}
@@ -1560,6 +1560,12 @@ namespace MaxyGames.UNode.Editors {
 						else if(evt.button == 0 && evt.clickCount == 2) {
 							if(reference.reference is NodeObject nodeObject) {
 								uNodeEditor.HighlightNode(nodeObject);
+							}
+							else if(reference.reference is Function function) {
+								uNodeEditor.HighlightNode(function.Entry);
+							}
+							else if(reference.reference is UGraphElement element) {
+								uNodeEditor.Open(element.graphContainer, element);
 							}
 							else {
 								//TODO: highlight element

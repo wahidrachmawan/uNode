@@ -100,7 +100,7 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 		private BaseRuntimeBehaviour m_instance;
 		public BaseRuntimeBehaviour runtimeInstance => m_instance;
 
-		internal void EnsureInitialized() {
+		internal void EnsureInitialized(Dictionary<string, object> overrideValues = null) {
 			if(m_instance != null) {
 				return;
 			}
@@ -126,16 +126,21 @@ False: The graph will be destroyed on Loading a scene, this usefull for Scene Ma
 				}
 				//Initialize the variable
 				foreach(var v in this.GetVariables()) {
+					if(overrideValues != null && overrideValues.TryGetValue(v.name, out var val)) {
+						SetVariable(v.name, val);
+						continue;
+					}
 					SetVariable(v.name, SerializerUtility.Duplicate(v.defaultValue));
 				}
 				//Call awake
 				instance.OnAwake();
 				instance.enabled = true;
+				instance.OnBehaviourEnable();
 			}
 			else {
 				var instance = gameObject.AddComponent<RuntimeInstancedGraph>();
 				m_instance = instance;
-				instance.Initialize(this);
+				instance.Initialize(this, overrideValues);
 			}
 		}
 		#endregion

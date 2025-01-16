@@ -666,14 +666,7 @@ namespace MaxyGames.UNode.Editors {
 					};
 				}
 				if(preferenceData.generatorData != null && preferenceData.generatorData.analyzeScript && preferenceData.generatorData.formatScript) {
-					var codeFormatter = TypeSerializer.Deserialize("MaxyGames.UNode.Editors.CSharpFormatter", false);
-					if(codeFormatter != null) {
-						script.postScriptModifier += input => {
-							return codeFormatter.
-								GetMethod("FormatCode").
-								Invoke(null, new object[] { input }) as string;
-						};
-					}
+					script.postScriptModifier += EditorBinding.AnalizeCode;
 				}
 
 				List<ScriptInformation> informations;

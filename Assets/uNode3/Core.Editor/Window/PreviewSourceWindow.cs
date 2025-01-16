@@ -289,7 +289,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 #if UNODE_PRO
 			if(clickedInfo != null) {
-				selectedInfos = new ScriptInformation[] { clickedInfo };
 				if(int.TryParse(clickedInfo.id, out var id)) {
 					var obj = EditorUtility.InstanceIDToObject(clickedInfo.ownerID);
 					if(obj is IGraph graph) {
@@ -305,6 +304,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
+				selectedInfos = new ScriptInformation[] { clickedInfo };
 				window?.Repaint();
 			}
 #endif

@@ -24,7 +24,16 @@ namespace MaxyGames.UNode.Editors {
 		public static event Action onFinishCompiling;
 
 		internal static Type syntaxHighlighter { get; private set; }
-		internal static Type codeFormatter { get; private set; }
+		private static Func<string, string> syntaxAnalizer;
+
+		public static string AnalizeCode(string syntax) {
+#if UNODE_PRO
+			if(syntaxAnalizer != null) {
+				return syntaxAnalizer(syntax);
+			}
+#endif
+			return syntax;
+		}
 
 		public static string HighlightSyntax(string syntax) {
 			var syntaxHighlighter = EditorBinding.syntaxHighlighter;
@@ -49,7 +58,13 @@ namespace MaxyGames.UNode.Editors {
 
 #if UNODE_PRO
 			syntaxHighlighter = "MaxyGames.UNode.SyntaxHighlighter.CSharpSyntaxHighlighter".ToType(false);
-			codeFormatter = "MaxyGames.UNode.Editors.CSharpFormatter".ToType(false);
+			var analizer = "MaxyGames.UNode.Editors.SyntaxAnalizer".ToType(false);
+			if(analizer != null) {
+				var m_analizer = analizer.GetMethod("AnalizeCode", MemberData.flags);
+				syntaxAnalizer = (val) => {
+					return m_analizer.InvokeOptimized(null, val) as string;
+				};
+			}
 #endif
 		}
 

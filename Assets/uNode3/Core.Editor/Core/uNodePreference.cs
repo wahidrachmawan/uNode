@@ -174,6 +174,8 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				public bool analyzeScript;
 				[Hide(nameof(analyzeScript), false)]
 				public bool formatScript = true;
+				[Hide(nameof(analyzeScript), false)]
+				public bool removeUnusedCode = true;
 
 				public bool IsAutoGenerateOnSave => compilationMethod == CompilationMethod.Roslyn && compileInBackground && autoGenerateOnSave;
 			}

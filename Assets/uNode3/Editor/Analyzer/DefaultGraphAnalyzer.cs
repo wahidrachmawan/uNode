@@ -108,6 +108,22 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 					}
 				}
 			}
+			if(graph is IGraphWithVariables) {
+				var variables = graph.GetVariables();
+				foreach(var element in variables) {
+					if(element.attributes != null) {
+						foreach(var att in element.attributes) {
+							var usage = ReflectionUtils.GetAttributeUsage(att.type);
+							if(usage != null && usage.AllowMultiple == false) {
+								if(element.attributes.Count(a => a.type == att.type) > 1) {
+									analyzer.RegisterError(element, $"Duplicate '{att.type}' attribute");
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
 			if(inheritType != null && graph is IGraphWithFunctions) {
 				var functions = graph.GetFunctions();
 				foreach(var function in functions) {
@@ -178,6 +194,17 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 								}
 							}
 						}
+						if(function.attributes != null) {
+							foreach(var att in function.attributes) {
+								var usage = ReflectionUtils.GetAttributeUsage(att.type);
+								if(usage != null && usage.AllowMultiple == false) {
+									if(function.attributes.Count(a => a.type == att.type) > 1) {
+										analyzer.RegisterError(function, $"Duplicate '{att.type}' attribute");
+										break;
+									}
+								}
+							}
+						}
 					}
 					catch(Exception ex) {
 						analyzer.RegisterError(function, ex.ToString());
@@ -195,6 +222,17 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							}
 							else {
 								//TODO: check for property error because of override
+							}
+						}
+						if(property.attributes != null) {
+							foreach(var att in property.attributes) {
+								var usage = ReflectionUtils.GetAttributeUsage(att.type);
+								if(usage != null && usage.AllowMultiple == false) {
+									if(property.attributes.Count(a => a.type == att.type) > 1) {
+										analyzer.RegisterError(property, $"Duplicate '{att.type}' attribute");
+										break;
+									}
+								}
 							}
 						}
 					}

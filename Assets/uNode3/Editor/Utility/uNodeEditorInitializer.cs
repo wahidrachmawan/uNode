@@ -7,8 +7,6 @@ using System.Linq;
 using System.IO;
 using UnityEditor.Callbacks;
 using System.Reflection;
-using UnityEditor.UIElements;
-using UnityEngine.UIElements;
 using UnityEditor.SceneManagement;
 using MaxyGames.OdinSerializer.Editor;
 using Object = UnityEngine.Object;
@@ -29,6 +27,7 @@ namespace MaxyGames.UNode.Editors {
 			EditorApplication.projectWindowItemInstanceOnGUI += ProjectItem;
 			SceneView.duringSceneGui += OnSceneGUI;
 			EditorApplication.update += Update;
+			EditorApplication.update += ShowWelcomeScreen;
 			Undo.undoRedoPerformed += UndoRedoPerformed;
 			// Setup();
 			uNodeUtility.Init();
@@ -1003,15 +1002,16 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		static int refreshTime;
-
-		static void Update() {
+		static void ShowWelcomeScreen() {
 			#region Startup
-			if(WelcomeWindow.IsShowOnStartup && EditorApplication.timeSinceStartup < 30 && SessionState.GetBool("unode-welcome", true)) {
+			if(WelcomeWindow.IsShowOnStartup && SessionState.GetBool("unode-welcome", true)) {
 				WelcomeWindow.ShowWindow();
 				SessionState.SetBool("unode-welcome", false);
 			}
 			#endregion
+		}
 
+		static void Update() {
 			uNodeUtility.preferredDisplay = uNodePreference.preferenceData.displayKind;
 			GraphDebug.transitionSpeed = uNodePreference.preferenceData.debugTransitionSpeed;
 

@@ -19,11 +19,7 @@ namespace MaxyGames.UNode {
 			if(target == null) {
 				return;
 			}
-			target.EnsureInitialized();
-			//Initialize the variable
-			for(int x = 0; x < variables.Count; x++) {
-				target.SetVariable(variables[x].name, variables[x].Get());
-			}
+			target.EnsureInitialized(variables.ToDictionary(v => v.name, v => v.Get()));
 		}
 	}
 }

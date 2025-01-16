@@ -1,3 +1,9 @@
+# v3.0.6
+- Added `remove unused code` preference to remove unnecessary code for better readable code. can be enable from uNode preference > Code Generation > Analize Script > Remove Unused Code
+- Improved Editor
+- Improved Global Search
+- Fixed some bugs
+
 # v3.0.5
 - Added Node Creator Wizard
 - Added Constructor Initializers, psudo Default Constructors and Relevant search kind by @S2NX7

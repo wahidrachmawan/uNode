@@ -163,17 +163,22 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else {
 				var root = selectedRoot;
-				if(root is MainGraphContainer) {
-					if(graph is IStateGraph) {
-						m_scopes.Add(NodeScope.StateGraph);
-						m_scopes.Add(NodeScope.FlowGraph);
-						m_scopes.Add(NodeScope.Coroutine);
-					}
-					else if(graph is ICustomMainGraph mainGraph) {
-						NodeScope.ApplyScopes(mainGraph.MainGraphScope, m_scopes, null, out _);
-						if(mainGraph.AllowCoroutine) {
+				if(root != null) {
+					if(root is MainGraphContainer) {
+						if(graph is IStateGraph) {
+							m_scopes.Add(NodeScope.StateGraph);
+							m_scopes.Add(NodeScope.FlowGraph);
 							m_scopes.Add(NodeScope.Coroutine);
 						}
+						else if(graph is ICustomMainGraph mainGraph) {
+							NodeScope.ApplyScopes(mainGraph.MainGraphScope, m_scopes, null, out _);
+							if(mainGraph.AllowCoroutine) {
+								m_scopes.Add(NodeScope.Coroutine);
+							}
+						}
+					}
+					if(root.AllowCoroutine()) {
+						m_scopes.Add(NodeScope.Coroutine);
 					}
 				}
 				else if(root is BaseFunction) {
@@ -183,9 +188,6 @@ namespace MaxyGames.UNode.Editors {
 				if(isInMacro) {
 					m_scopes.Add(NodeScope.Macro);
 					m_scopes.Add(NodeScope.FlowGraph);
-				}
-				if(root.AllowCoroutine()) {
-					m_scopes.Add(NodeScope.Coroutine);
 				}
 			}
 		}

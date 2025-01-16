@@ -743,7 +743,6 @@ namespace MaxyGames.UNode.Editors {
 
 			//Prevent freeze/unsync data.
 			object lockSearch = new object();
-			bool abortSearch;
 			public List<SearchProgress> progresses;
 			public Manager manager;
 
@@ -928,35 +927,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			bool isWait;
-			int seacrhRefreshTime;
 			public void Terminate() {
 				if(searchThread != null) {
 					searchThread.Abort();
 					searchThread = null;
-					//if(isWait) {
-					//	if(System.DateTime.Now.Millisecond - seacrhRefreshTime > 100) {
-					//		isWait = false;
-					//		if(searchThread.IsAlive) {
-					//			isWait = true;
-					//			seacrhRefreshTime = System.DateTime.Now.Second;
-					//		}
-					//	}
-					//	return;
-					//}
-					//if(searchThread.IsAlive) {
-					//	lock(lockSearch) {
-					//		abortSearch = true;
-					//	}
-					//	isWait = true;
-					//} else {
-					//	lock(lockSearch) {
-					//		if(hasFinishSearch) {
-					//			searchThread = null;
-					//			abortSearch = false;
-					//		}
-					//	}
-					//}
 				}
 			}
 		}

@@ -2164,6 +2164,26 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
+		private static Dictionary<Type, AttributeUsageAttribute> m_attributeUsages = new();
+		/// <summary>
+		/// Get attribute usage from attribute type
+		/// </summary>
+		/// <param name="attributeType"></param>
+		/// <returns></returns>
+		public static AttributeUsageAttribute GetAttributeUsage(Type attributeType) {
+			if(attributeType != null) {
+				if(attributeType is not RuntimeType) {
+					if(!m_attributeUsages.TryGetValue(attributeType, out var attribute)) {
+						attribute = attributeType.GetCustomAttribute<AttributeUsageAttribute>();
+						m_attributeUsages[attributeType] = attribute;
+					}
+					return attribute;
+				}
+				return attributeType.GetCustomAttribute<AttributeUsageAttribute>();
+			}
+			return null;
+		}
+
 		public static MemberInfo AutoResolveGenericMember(MemberInfo member) {
 			if(member is IRuntimeMember) {
 				return null;
@@ -2349,11 +2369,17 @@ namespace MaxyGames.UNode {
 			return method;
 		}
 
-		public static bool MatchesArgumentTypes(this MethodInfo mi, Type[] argTypes) {
-			if(mi == null || argTypes == null) {
+		/// <summary>
+		/// Return true ifthe method arguments is match with the <paramref name="argTypes"/>
+		/// </summary>
+		/// <param name="method"></param>
+		/// <param name="argTypes"></param>
+		/// <returns></returns>
+		public static bool MatchesArgumentTypes(this MethodInfo method, Type[] argTypes) {
+			if(method == null || argTypes == null) {
 				return false;
 			}
-			ParameterInfo[] parameters = mi.GetParameters();
+			ParameterInfo[] parameters = method.GetParameters();
 			if(parameters.Length != argTypes.Length) {
 				return false;
 			}

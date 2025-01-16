@@ -206,24 +206,56 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <param name="graphReference"></param>
 		/// <param name="instance"></param>
-		/// <param name="variables"></param>
-		public static void InitializeInstanceGraphValue(IGraph graphReference, GraphInstance instance, IList<VariableData> variables) {
-			if(variables == null) return;
+		/// <param name="overrideVariables"></param>
+		public static void InitializeInstanceGraphValue(IGraph graphReference, GraphInstance instance, IList<VariableData> overrideVariables) {
+			if(overrideVariables == null) return;
 			try {
 				var baseGraph = GetInheritedGraph(graphReference);
 				if(baseGraph != null) {
-					InitializeInstanceGraphValue(baseGraph, instance, variables);
+					InitializeInstanceGraphValue(baseGraph, instance, overrideVariables);
 				}
 				var graph = graphReference.GraphData;
-				if(variables != null) {
+				if(overrideVariables != null) {
 					//This is for set variable value to same with overridden variable in instanced graph
 					for(int i = 0; i < graph.variableContainer.collections.Count; i++) {
 						var var = graph.variableContainer.collections[i];
-						for(int x = 0; x < variables.Count; x++) {
-							if(var.name.Equals(variables[x].name)) {
+						for(int x = 0; x < overrideVariables.Count; x++) {
+							if(var.name.Equals(overrideVariables[x].name)) {
 								//Change the default variable value
-								var.Set(instance, variables[x].Get());
+								var.Set(instance, overrideVariables[x].Get());
 							}
+						}
+					}
+				}
+			}
+			catch(Exception ex) {
+				Debug.LogError($"Error on trying to initialize graph: {graphReference} to the {instance.target}.\nError: {ex.ToString()}");
+				throw;
+			}
+		}
+
+
+
+		/// <summary>
+		/// Initialize the graph and variable value for instanced graph
+		/// </summary>
+		/// <param name="graphReference"></param>
+		/// <param name="instance"></param>
+		/// <param name="variables"></param>
+		public static void InitializeInstanceGraphValue(IGraph graphReference, GraphInstance instance, Dictionary<string, object> overrideValues) {
+			if(overrideValues == null) return;
+			try {
+				var baseGraph = GetInheritedGraph(graphReference);
+				if(baseGraph != null) {
+					InitializeInstanceGraphValue(baseGraph, instance, overrideValues);
+				}
+				var graph = graphReference.GraphData;
+				if(overrideValues != null) {
+					//This is for set variable value to same with overridden variable in instanced graph
+					for(int i = 0; i < graph.variableContainer.collections.Count; i++) {
+						var var = graph.variableContainer.collections[i];
+						if(overrideValues.TryGetValue(var.name, out var val)) {
+							var.Set(instance, val);
 						}
 					}
 				}
@@ -354,13 +386,31 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public static GraphInstance InitializeComponentGraph(IGraph graphReference, MonoBehaviour target, IList<VariableData> variables = null) {
+		public static GraphInstance InitializeComponentGraph(IGraph graphReference, MonoBehaviour target, IList<VariableData> overrideVariables) {
+			Action<GraphInstance> beforeInitialize = null;
+			if(overrideVariables != null) {
+				beforeInitialize = (instance) => {
+					InitializeInstanceGraphValue(graphReference, instance, overrideVariables);
+				};
+			}
+			return InitializeComponentGraph(graphReference, target, beforeInitialize);
+		}
+
+		public static GraphInstance InitializeComponentGraph(IGraph graphReference, MonoBehaviour target, Dictionary<string, object> overrideValues) {
+			Action<GraphInstance> beforeInitialize = null;
+			if(overrideValues != null) {
+				beforeInitialize = (instance) => {
+					InitializeInstanceGraphValue(graphReference, instance, overrideValues);
+				};
+			}
+			return InitializeComponentGraph(graphReference, target, beforeInitialize);
+		}
+
+		public static GraphInstance InitializeComponentGraph(IGraph graphReference, MonoBehaviour target, Action<GraphInstance> beforeInitialize = null) {
 			var graph = graphReference.GraphData;
 			var data = new RuntimeGraphEventData();
 			GraphInstance graphInstance = new GraphInstance(target, graphReference, data);
-			if(variables != null) {
-				InitializeInstanceGraphValue(graphReference, graphInstance, variables);
-			}
+			beforeInitialize?.Invoke(graphInstance);
 			graphInstance.Initialize();
 
 			foreach(var evt in graph.functionContainer.GetObjectsInChildren<Function>(true)) {
