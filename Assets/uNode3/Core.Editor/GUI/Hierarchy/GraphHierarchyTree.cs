@@ -693,24 +693,16 @@ namespace MaxyGames.UNode.Editors {
 		#region Functions
 		private void Inspect(TreeViewItem treeView, Vector2 position) {
 			if(treeView is HierarchyNodeTree nodeTree) {
-				ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-					CustomInspector.ShowInspector(new GraphEditorData(graph as UnityEngine.Object, new[] { nodeTree.node }));
-				}, 300, 300).ChangePosition(position);
+				CustomInspector.Inspect(position, new GraphEditorData(graph as UnityEngine.Object, new[] { nodeTree.node }));
 			}
 			else if(treeView is HierarchyFunctionTree functionTree) {
-				ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-					CustomInspector.ShowInspector(new GraphEditorData(graph as UnityEngine.Object, new[] { functionTree.function }));
-				}, 300, 300).ChangePosition(position);
+				CustomInspector.Inspect(position, new GraphEditorData(graph as UnityEngine.Object, new[] { functionTree.function }));
 			}
 			else if(treeView is HierarchyPropertyTree propertyTree) {
-				ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-					CustomInspector.ShowInspector(new GraphEditorData(graph as UnityEngine.Object, new[] { propertyTree.property }));
-				}, 300, 300).ChangePosition(position);
+					CustomInspector.Inspect(position, new GraphEditorData(graph as UnityEngine.Object, new[] { propertyTree.property }));
 			}
 			else if(treeView is HierarchyVariableTree variableTree) {
-				ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-					CustomInspector.ShowInspector(new GraphEditorData(graph as UnityEngine.Object, new[] { variableTree.variable }));
-				}, 300, 300).ChangePosition(position);
+				CustomInspector.Inspect(position, new GraphEditorData(graph as UnityEngine.Object, new[] { variableTree.variable }));
 			}
 		}
 

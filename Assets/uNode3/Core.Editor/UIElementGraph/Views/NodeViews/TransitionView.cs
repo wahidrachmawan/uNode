@@ -34,7 +34,7 @@ namespace MaxyGames.UNode.Editors {
 
 			RegisterCallback<MouseDownEvent>((e) => {
 				if(e.button == 0 && e.clickCount == 2) {
-					ActionPopupWindow.ShowWindow(owner.GetScreenMousePosition(e), transition.name,
+					ActionPopupWindow.Show(owner.GetScreenMousePosition(e), transition.name,
 						(ref object obj) => {
 							object str = EditorGUILayout.TextField(obj as string);
 							if(obj != str) {

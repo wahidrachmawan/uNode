@@ -154,12 +154,6 @@ namespace MaxyGames.UNode.Editors {
 
 		#region Repaint
 		UNodeView RepaintNode(NodeObject node, bool fullReload) {
-			foreach(var p in GraphProcessor) {
-				var v = p.RepaintNode(this, node, fullReload);
-				if(v != null) {
-					return v;
-				}
-			}
 			if(cachedNodeMap.TryGetValue(node, out var view) && view != null && view.owner == this) {
 				try {
 					if(!nodeViewsPerNode.ContainsKey(node)) {
@@ -167,6 +161,11 @@ namespace MaxyGames.UNode.Editors {
 						AddElement(view);
 						nodeViews.Add(view);
 						nodeViewsPerNode[node] = view;
+					}
+					foreach(var p in GraphProcessor) {
+						if(p.RepaintNode(this, view, node, fullReload)) {
+							return view;
+						}
 					}
 					if(view is IRefreshable) {
 						(view as IRefreshable).Refresh();

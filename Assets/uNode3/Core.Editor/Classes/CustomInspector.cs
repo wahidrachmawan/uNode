@@ -73,7 +73,7 @@ namespace MaxyGames.UNode.Editors {
 				return;
 			}
 			int drawCount = 0;
-			foreach(var selection in editorData.selecteds) {
+			foreach(var selection in editorData.selecteds.Distinct()) {
 				if(selection == null)
 					continue;
 				if(drawCount >= limitMultiEdit)
@@ -200,9 +200,21 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		public static void Inspect(Vector2 position, GraphEditorData editorData, int limitMultiEdit = 5) {
+			ActionPopupWindow.Show(Vector2.zero, () => {
+				ShowInspector(editorData);
+			}).ChangePosition(position);
+		}
+
+		public static void Inspect(Vector2 position, object value, UnityEngine.Object unityObject = null) {
+			ActionPopupWindow.Show(Vector2.zero, () => {
+				uNodeGUIUtility.ShowFields(value, unityObject);
+			}).ChangePosition(position);
+		}
+
 		private static void RenameObject(UnityEngine.Object obj, Rect rect) {
 			string name = obj.name;
-			ActionPopupWindow.ShowWindow(rect,
+			ActionPopupWindow.Show(rect.ToScreenRect(),
 				onGUI: () => {
 					name = EditorGUILayout.TextField("Name", name);
 				},
@@ -227,7 +239,7 @@ namespace MaxyGames.UNode.Editors {
 
 		private static void RenameNode(NodeObject node, Rect rect) {
 			string name = node.name;
-			ActionPopupWindow.ShowWindow(rect,
+			ActionPopupWindow.Show(rect.ToScreenRect(),
 				onGUI: () => {
 					name = EditorGUILayout.TextField("Name", name);
 				},

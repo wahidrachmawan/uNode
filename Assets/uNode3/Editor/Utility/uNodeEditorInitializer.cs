@@ -65,10 +65,12 @@ namespace MaxyGames.UNode.Editors {
 				//Wait for 100 frame before start the initialization
 				//Cause we don't want to impact a performance after recompilation or entering playmode
 				uNodeThreadUtility.ExecuteAfter(100, () => {
-					EditorProgressBar.ShowProgressBar("Initializing Compiler", 1);
 					//Create a new thread to init the Roslyn, since we don't want to freeze the Unity even for a few seconds.
 					var thread = new System.Threading.Thread(() => {
 						try {
+							uNodeThreadUtility.Queue(() => {
+								EditorProgressBar.ShowProgressBar("Initializing Compiler", 1);
+							});
 							//Start compiling in background.
 							RoslynUtility.CompileScript(new[] { "struct Dummy { public int x; public int y; }" });
 						}

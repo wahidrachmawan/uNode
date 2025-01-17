@@ -72,6 +72,9 @@ namespace MaxyGames.UNode {
 		[IconPath("Icons/IconPackage")]
 		public class RuntimeTypeIcon { }
 
+		[IconPath("Icons/bookmark")]
+		public class BookmarkIcon { }
+
 		[IconPath("Icons/IconFormula")]
 		public class FormulaIcon { }
 

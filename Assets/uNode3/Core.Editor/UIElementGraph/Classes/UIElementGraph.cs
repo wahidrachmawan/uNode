@@ -661,7 +661,7 @@ namespace MaxyGames.UNode.Editors {
 					if(evt is MouseUpEvent || evt is PointerUpEvent) {
 						GenericMenu menu = new GenericMenu();
 						menu.AddItem(new GUIContent("Preference Editor"), false, () => {
-							ActionWindow.ShowWindow(() => {
+							ActionWindow.Show(() => {
 								uNodePreference.PreferencesGUI();
 							});
 						});
@@ -1828,6 +1828,13 @@ namespace MaxyGames.UNode.Editors {
 				graphView.UpdatePosition(position, graphView.scale);
 			}
 			// ReloadView();
+		}
+
+		public override void SetZoomScale(float zoomScale) {
+			base.SetZoomScale(zoomScale);
+			if(graphView != null) {
+				graphView.SetZoomScale(zoomScale);
+			}
 		}
 
 		public override void Highlight(UGraphElement element) {

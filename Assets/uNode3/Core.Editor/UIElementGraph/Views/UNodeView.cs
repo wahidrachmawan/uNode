@@ -82,6 +82,28 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		#region Hidden Views
+		class HiddenView : UNodeView {
+			public override void ReloadView() {
+
+			}
+
+			public override void Initialize(UGraphView owner, NodeObject node) {
+				this.AddToClassList("hidden-node");
+				nodeObject = node;
+				this.owner = owner;
+				this.HideElement();
+				this.SetDisplay(false);
+			}
+		}
+
+		public static UNodeView GetHiddenView(UGraphView owner, NodeObject node) {
+			var result = new HiddenView();
+			result.Initialize(owner, node);
+			return result;
+		}
+		#endregion
+
 		#region VisualElement
 		private IconBadge errorBadge;
 		protected VisualElement debugContainer;
@@ -134,9 +156,7 @@ namespace MaxyGames.UNode.Editors {
 			RegisterCallback<MouseDownEvent>(evt => {
 				var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graph.window);
 				if(evt.button == 0 && evt.shiftKey && !evt.altKey) {
-					ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-						CustomInspector.ShowInspector(new GraphEditorData(graph.graphData, nodeObject));
-					}, 300, 300).ChangePosition(mPos);
+					CustomInspector.Inspect(mPos, new GraphEditorData(graph.graphData, nodeObject));
 				}
 			});
 			RegisterCallback<MouseOverEvent>((e) => {

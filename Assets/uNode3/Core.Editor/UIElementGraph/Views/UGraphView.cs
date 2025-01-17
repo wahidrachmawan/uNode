@@ -2732,7 +2732,7 @@ namespace MaxyGames.UNode.Editors {
 				if(graphData.selectedCount == 1) {
 					var selected = graphData.selecteds.First();
 					if(selected is NodeObject nodeObject) {
-						ActionPopupWindow.ShowWindow(Vector2.zero, nodeObject.name,
+						ActionPopupWindow.Show(Vector2.zero, nodeObject.name,
 							(ref object obj) => {
 								object str = EditorGUILayout.TextField(obj as string);
 								if(obj != str) {

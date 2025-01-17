@@ -174,6 +174,18 @@ namespace MaxyGames.UNode.Editors {
 				throw new ArgumentNullException(nameof(node));
 			}
 
+			foreach(var p in GraphProcessor) {
+				var v = p.InitializeView(this, node);
+				if(v != null) {
+					AddElement(v);
+
+					nodeViews.Add(v);
+					nodeViewsPerNode[node] = v;
+					cachedNodeMap[node] = v;
+					return v;
+				}
+			}
+
 			var viewType = node.node != null ? UIElementUtility.GetNodeViewTypeFromType(node.node.GetType()) : null;
 
 			if(viewType == null) {

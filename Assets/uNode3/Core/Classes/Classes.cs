@@ -807,9 +807,13 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class BaseReference {
 		[SerializeField]
 		protected int _id;
+		/// <summary>
+		/// The id of the reference
+		/// </summary>
 		public virtual int id {
 			get {
 				return _id;
@@ -817,14 +821,27 @@ namespace MaxyGames.UNode {
 		}
 		[SerializeField]
 		protected string _name;
+		/// <summary>
+		/// The name of the reference
+		/// </summary>
 		public virtual string name {
 			get {
 				return _name;
 			}
 		}
 
+		/// <summary>
+		/// The reference value
+		/// </summary>
 		public abstract object ReferenceValue { get; }
 
+		/// <summary>
+		/// Create a new reference from a value
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="Exception"></exception>
 		public static BaseReference FromValue(object value) {
 			if(value == null)
 				throw new ArgumentNullException(nameof(value));
@@ -856,6 +873,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class BaseUnityObjectReference : BaseReference {
 		[SerializeField]
 		protected UnityEngine.Object unityObject;
@@ -877,6 +895,7 @@ namespace MaxyGames.UNode {
 		public UnityObjectReference(UnityEngine.Object unityObject) : base(unityObject) { }
 	}
 
+	[Serializable]
 	public abstract class BaseGraphReference : BaseUnityObjectReference {
 		public Graph graph {
 			get {
@@ -985,6 +1004,7 @@ namespace MaxyGames.UNode {
 	/// <summary>
 	/// This class used to save type data
 	/// </summary>
+	[Serializable]
 	public class TypeData {
 		/// <summary>
 		/// The Full Type Name or the name of referenced id.
@@ -993,10 +1013,12 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The reference
 		/// </summary>
+		[SerializeReference]
 		public BaseReference reference;
 		/// <summary>
 		/// The list of type parameters
 		/// </summary>
+		[SerializeReference]
 		public TypeData[] parameters;
 
 		/// <summary>

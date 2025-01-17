@@ -203,7 +203,7 @@ namespace MaxyGames.UNode.Editors {
 							position = EditorGUI.PrefixLabel(position, label);
 							if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ", " + valType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 								GUI.changed = false;
-								ActionPopupWindow.ShowWindow(position,
+								ActionPopupWindow.Show(position.ToScreenRect(),
 									new object[] { ReflectionUtils.CreateInstance(keyType), ReflectionUtils.CreateInstance(valType), map },
 									delegate (ref object val) {
 										object[] o = val as object[];
@@ -449,7 +449,7 @@ namespace MaxyGames.UNode.Editors {
 				if(EditorGUI.DropdownButton(position, new GUIContent(value != null ? type.PrettyName(true) : "null", type.PrettyName(true)), FocusType.Keyboard) && Event.current.button == 0) {
 					//Make sure don't mark if value changed.
 					GUI.changed = false;
-					var w = ActionPopupWindow.ShowWindow(position,
+					var w = ActionPopupWindow.Show(position.ToScreenRect(),
 						value,
 						delegate (ref object obj) {
 							EditValueLayouted(new GUIContent("Values", type.PrettyName(true)), obj, type, delegate (object val) {
@@ -463,7 +463,7 @@ namespace MaxyGames.UNode.Editors {
 								GUI.changed = false;
 								ActionPopupWindow.CloseLast();
 							}
-						}, width: 300, height: 250);
+						});
 					w.headerName = "Edit Values";
 					if(type.IsValueType) {
 						//Close Action when editing value type and performing redo or undo to avoid wrong value.
@@ -2292,7 +2292,7 @@ namespace MaxyGames.UNode.Editors {
 				if(EditorGUI.DropdownButton(position, new GUIContent(fieldValue != null ? type.PrettyName(true) : "null", type.PrettyName(true)), FocusType.Keyboard) && Event.current.button == 0) {
 					//Make sure don't mark if value changed.
 					GUI.changed = false;
-					var w = ActionPopupWindow.ShowWindow(position,
+					var w = ActionPopupWindow.Show(position.ToScreenRect(),
 						fieldValue,
 						delegate (ref object obj) {
 							EditValueLayouted(new GUIContent("Values", type.PrettyName(true)), obj, type, delegate (object val) {
@@ -2306,7 +2306,7 @@ namespace MaxyGames.UNode.Editors {
 								GUI.changed = false;
 								ActionPopupWindow.CloseLast();
 							}
-						}, width: 300, height: 250);
+						});
 					w.headerName = "Edit Values";
 					if(type.IsValueType) {
 						//Close Action when editing value type and performing redo or undo to avoid wrong value.
@@ -2709,7 +2709,7 @@ namespace MaxyGames.UNode.Editors {
 					position = EditorGUI.PrefixLabel(position, label);
 					if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ", " + valType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 						GUI.changed = false;
-						ActionPopupWindow.ShowWindow(position,
+						ActionPopupWindow.Show(position.ToScreenRect(),
 							new object[] { ReflectionUtils.CreateInstance(keyType), ReflectionUtils.CreateInstance(valType), map },
 							delegate (ref object val) {
 								object[] o = val as object[];
@@ -2913,7 +2913,7 @@ namespace MaxyGames.UNode.Editors {
 					position = EditorGUI.PrefixLabel(position, label);
 					if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 						GUI.changed = false;
-						ActionPopupWindow.ShowWindow(position, new object[] { ReflectionUtils.CreateInstance(keyType), map, type },
+						ActionPopupWindow.Show(position.ToScreenRect(), new object[] { ReflectionUtils.CreateInstance(keyType), map, type },
 							delegate (ref object val) {
 								object[] o = val as object[];
 								EditValueLayouted(new GUIContent("Value"), o[0], keyType, delegate (object v) {

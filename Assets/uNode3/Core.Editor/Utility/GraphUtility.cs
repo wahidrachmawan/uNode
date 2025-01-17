@@ -1124,7 +1124,7 @@ namespace MaxyGames.UNode.Editors {
 				GUIStyle selectedStyle = new GUIStyle(EditorStyles.label);
 				selectedStyle.normal.textColor = Color.white;
 				var tree = new ReferenceTree(references);
-				var win = ActionWindow.ShowWindow(() => {
+				var win = ActionWindow.Show(() => {
 					tree.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
 				});
 				win.titleContent = new GUIContent("Found: " + references.Count + " references");
@@ -1518,6 +1518,27 @@ namespace MaxyGames.UNode.Editors {
 				return root;
 			}
 
+			public static void DrawReferencePath(Rect position, List<(string, Texture)> paths) {
+				var style = uNodeGUIStyle.itemNormal;
+				bool flag = false;
+				foreach(var (path, icon) in paths) {
+					if(flag) {
+						uNodeGUIStyle.itemNext.Draw(new Rect(position.x, position.y, 13, 16), GUIContent.none, false, false, false, false);
+						position.x += 13;
+						position.width -= 13;
+					}
+					flag = true;
+					if(icon != null) {
+						GUI.DrawTexture(new Rect(position.x, position.y, 16, 16), icon);
+						position.x += 16;
+						position.width -= 16;
+					}
+					var content = new GUIContent(path.Replace('\n', '↵'));
+					style.Draw(position, content, false, false, false, false);
+					position.x += style.CalcSize(content).x;
+				}
+			}
+
 			protected override void RowGUI(RowGUIArgs args) {
 				Event evt = Event.current;
 				if(evt.type == EventType.Repaint) {
@@ -1525,24 +1546,7 @@ namespace MaxyGames.UNode.Editors {
 						args.label = "";
 						Rect labelRect = args.rowRect;
 						labelRect.x += GetContentIndent(args.item);
-						var style = uNodeGUIStyle.itemNormal;
-						bool flag = false;
-						foreach(var (path, icon) in tree.paths) {
-							if(flag) {
-								uNodeGUIStyle.itemNext.Draw(new Rect(labelRect.x, labelRect.y, 13, 16), GUIContent.none, false, false, false, false);
-								labelRect.x += 13;
-								labelRect.width -= 13;
-							}
-							flag = true;
-							if(icon != null) {
-								GUI.DrawTexture(new Rect(labelRect.x, labelRect.y, 16, 16), icon);
-								labelRect.x += 16;
-								labelRect.width -= 16;
-							}
-							var content = new GUIContent(path.Replace('\n', '↵'));
-							style.Draw(labelRect, content, false, false, false, false);
-							labelRect.x += style.CalcSize(content).x;
-						}
+						DrawReferencePath(labelRect, tree.paths);
 					}
 				}
 				else if(evt.type == EventType.MouseDown && args.rowRect.Contains(evt.mousePosition)) {
@@ -1582,7 +1586,7 @@ namespace MaxyGames.UNode.Editors {
 				GUIStyle selectedStyle = new GUIStyle(EditorStyles.label);
 				selectedStyle.normal.textColor = Color.white;
 				var tree = new ReferenceTree(errors);
-				var win = ActionWindow.ShowWindow(() => {
+				var win = ActionWindow.Show(() => {
 					tree.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
 				});
 				win.titleContent = new GUIContent("Error Checkers");
@@ -1600,7 +1604,7 @@ namespace MaxyGames.UNode.Editors {
 				GUIStyle selectedStyle = new GUIStyle(EditorStyles.label);
 				selectedStyle.normal.textColor = Color.white;
 				var tree = new ReferenceTree(references);
-				var win = ActionWindow.ShowWindow(() => {
+				var win = ActionWindow.Show(() => {
 					tree.OnGUI(GUILayoutUtility.GetRect(0, 100000, 0, 100000));
 				});
 				win.titleContent = new GUIContent("Found: " + references.Count + " references");
@@ -1965,7 +1969,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorFunctionName(Vector2 mousePosition, Function function, Action onRenamed) {
 			string tempName = function.name;
-			ActionPopupWindow.ShowWindow(Vector2.zero,
+			ActionPopupWindow.Show(Vector2.zero,
 				() => {
 					tempName = EditorGUILayout.TextField("Function Name", tempName);
 				},
@@ -1984,7 +1988,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorPropertyName(Vector2 mousePosition, Property property, Action onRenamed) {
 			string tempName = property.name;
-			ActionPopupWindow.ShowWindow(Vector2.zero,
+			ActionPopupWindow.Show(Vector2.zero,
 				() => {
 					tempName = EditorGUILayout.TextField("Property Name", tempName);
 				},
@@ -2003,7 +2007,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorVariableName(Vector2 mousePosition, Variable variable, Action onRenamed) {
 			string tempName = variable.name;
-			ActionPopupWindow.ShowWindow(Vector2.zero,
+			ActionPopupWindow.Show(Vector2.zero,
 				() => {
 					tempName = EditorGUILayout.TextField("Variable Name", tempName);
 				},

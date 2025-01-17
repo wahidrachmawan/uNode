@@ -380,6 +380,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Will make element to hide.
+		/// position will be set to <see cref="Position.Absolute"/>
+		/// width and height will be 0
+		/// <see cref="VisualElement.visible"/> will be false
+		/// </summary>
+		/// <param name="visualElement"></param>
 		public static void HideElement(this VisualElement visualElement) {
 			if(visualElement != null) {
 				visualElement.style.position = Position.Absolute;
@@ -389,6 +396,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Will make element to hide.
+		/// position will be restored to default
+		/// width and height will be restored to default
+		/// <see cref="VisualElement.visible"/> will be true
+		/// </summary>
+		/// <param name="visualElement"></param>
 		public static void ShowElement(this VisualElement visualElement) {
 			if(visualElement != null) {
 				visualElement.style.position = new StyleEnum<Position>(StyleKeyword.Null);

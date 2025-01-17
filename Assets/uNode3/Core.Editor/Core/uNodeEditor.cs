@@ -1474,7 +1474,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public static void Open(IScriptGraph scriptGraph) {
+		public static uNodeEditor Open(IScriptGraph scriptGraph) {
 			if(scriptGraph == null)
 				throw new ArgumentNullException(nameof(scriptGraph));
 			if(window == null) {
@@ -1494,7 +1494,7 @@ namespace MaxyGames.UNode.Editors {
 					window.ChangeEditorSelection(null);
 					window.Refresh();
 					window.UpdatePosition();
-					return;
+					return window;
 				}
 				var ED = new GraphEditorData();
 				cachedGraph.graphDatas.Add(ED);
@@ -1503,7 +1503,7 @@ namespace MaxyGames.UNode.Editors {
 				window.ChangeEditorSelection(null);
 				window.Refresh();
 				window.UpdatePosition();
-				return;
+				return window;
 			}
 			var tabData = new TabData(scriptGraph as UnityEngine.Object);
 			window.tabDatas.Add(tabData);
@@ -1511,9 +1511,10 @@ namespace MaxyGames.UNode.Editors {
 			window.ChangeEditorSelection(null);
 			window.Refresh();
 			window.UpdatePosition();
+			return window;
 		}
 
-		public static void Open(IScriptGraphType scriptGraphType) {
+		public static uNodeEditor Open(IScriptGraphType scriptGraphType) {
 			if(scriptGraphType == null)
 				throw new ArgumentNullException(nameof(scriptGraphType));
 			if(window == null) {
@@ -1538,7 +1539,7 @@ namespace MaxyGames.UNode.Editors {
 						window.ChangeEditorSelection(null);
 						window.Refresh();
 						window.UpdatePosition();
-						return;
+						return window;
 					}
 				}
 				var ED = new GraphEditorData(scriptGraphType as UnityEngine.Object);
@@ -1551,7 +1552,7 @@ namespace MaxyGames.UNode.Editors {
 				window.ChangeEditorSelection(null);
 				window.Refresh();
 				window.UpdatePosition();
-				return;
+				return window;
 			}
 			var tabData = new TabData(owner);
 			window.tabDatas.Add(tabData);
@@ -1562,9 +1563,10 @@ namespace MaxyGames.UNode.Editors {
 			window.ChangeEditorSelection(null);
 			window.Refresh();
 			window.UpdatePosition();
+			return window;
 		}
 
-		public static void Open(IGraph graph, UGraphElement canvas = null) {
+		public static uNodeEditor Open(IGraph graph, UGraphElement canvas = null) {
 			if(graph == null)
 				throw new ArgumentNullException(nameof(graph));
 			if(window == null) {
@@ -1629,7 +1631,7 @@ namespace MaxyGames.UNode.Editors {
 						window.ChangeEditorSelection(selection);
 						window.Refresh();
 						window.UpdatePosition();
-						return;
+						return window;
 					}
 				}
 				var ED = new GraphEditorData(graph as UnityEngine.Object);
@@ -1642,7 +1644,7 @@ namespace MaxyGames.UNode.Editors {
 				window.ChangeEditorSelection(selection);
 				window.Refresh();
 				window.UpdatePosition();
-				return;
+				return window;
 			}
 			var tabData = new TabData(owner);
 			window.tabDatas.Add(tabData);
@@ -1653,6 +1655,7 @@ namespace MaxyGames.UNode.Editors {
 			window.ChangeEditorSelection(selection);
 			window.Refresh();
 			window.UpdatePosition();
+			return window;
 		}
 
 		static TabData FindCachedGraph(UnityEngine.Object owner) {

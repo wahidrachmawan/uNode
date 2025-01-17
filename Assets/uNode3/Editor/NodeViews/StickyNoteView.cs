@@ -29,7 +29,7 @@ namespace MaxyGames.UNode.Editors {
 
 			titleContainer.RegisterCallback<MouseDownEvent>((e) => {
 				if(e.clickCount == 2) {
-					ActionPopupWindow.ShowWindow(Vector2.zero, node.name,
+					ActionPopupWindow.Show(Vector2.zero, node.name,
 						(ref object obj) => {
 							object str = EditorGUILayout.TextField(obj as string);
 							if(obj != str) {
@@ -43,7 +43,7 @@ namespace MaxyGames.UNode.Editors {
 			});
 			comment.RegisterCallback<MouseDownEvent>((e) => {
 				if(e.clickCount == 2) {
-					ActionPopupWindow.ShowWindow(Vector2.zero, node.comment,
+					ActionPopupWindow.Show(Vector2.zero, node.comment,
 						(ref object obj) => {
 							object str = EditorGUILayout.TextArea(obj as string);
 							if(obj != str) {
@@ -51,7 +51,7 @@ namespace MaxyGames.UNode.Editors {
 								node.comment = obj as string;
 								uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 							}
-						}, 300, 200).ChangePosition(owner.GetScreenMousePosition(e)).headerName = "Edit description";
+						}).ChangePosition(owner.GetScreenMousePosition(e)).headerName = "Edit description";
 					e.StopImmediatePropagation();
 				}
 			});

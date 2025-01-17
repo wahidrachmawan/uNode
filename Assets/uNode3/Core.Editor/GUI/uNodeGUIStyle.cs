@@ -20,6 +20,18 @@ namespace MaxyGames.UNode.Editors {
 		public static readonly GUIStyle itemSelect = new GUIStyle("flow varPin in");
 		public static readonly GUIStyle itemNext = new GUIStyle("AC RightArrow");
 
+		public static class Colors {
+			public static Color BorderColor {
+				get {
+					if(EditorGUIUtility.isProSkin) {
+						return new Color(200 / 255f, 200 / 255f, 200 / 255f, 0.1f);
+					}
+
+					return new Color(65 / 255f, 65 / 255f, 65 / 255f, 0.07f);
+				}
+			}
+		}
+
 		static uNodeGUIStyle() {
 			itemNormal = EditorStyles.label;
 			itemNormal.richText = true;

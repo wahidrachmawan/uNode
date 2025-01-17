@@ -422,9 +422,7 @@ namespace MaxyGames.UNode.Editors {
 							});
 						}
 						else if(evt.shiftKey) {
-							ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-								CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-							}, 300, 300).ChangePosition(mPos);
+							CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 						}
 					}
 				};
@@ -437,9 +435,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 					});
 					evt.menu.AppendAction("Inspect...", act => {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, 300, 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					});
 					evt.menu.AppendAction("Create Group", act => {
 						if(graphData.owner)
@@ -530,9 +526,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 					}
 					else if(evt.button == 0 && evt.shiftKey) {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, width: 300, height: 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					}
 				};
 				data.contextMenuEvent = evt => {
@@ -544,9 +538,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 					});
 					evt.menu.AppendAction("Inspect...", act => {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, 300, 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					});
 					evt.menu.AppendAction("Create Group", act => {
 						if(graphData.owner)
@@ -708,9 +700,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 					}
 					else if(evt.button == 0 && evt.shiftKey) {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, 300, 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					}
 				};
 				data.contextMenuEvent = evt => {
@@ -722,9 +712,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 					});
 					evt.menu.AppendAction("Inspect...", (act) => {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, 300, 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					});
 					evt.menu.AppendAction("Create Group", act => {
 						if(graphData.owner)
@@ -810,17 +798,13 @@ namespace MaxyGames.UNode.Editors {
 				data.clickEvent = evt => {
 					var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 					if(evt.button == 0 && (evt.clickCount == 2 || evt.shiftKey)) {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, 300, 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					}
 				};
 				data.contextMenuEvent = evt => {
 					var mPos = UIElementUtility.GetScreenMousePosition(evt.currentTarget as VisualElement, evt.localMousePosition, graphEditor.window);
 					evt.menu.AppendAction("Inspect...", (act) => {
-						ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-							CustomInspector.ShowInspector(new GraphEditorData(graphData, current));
-						}, 300, 300).ChangePosition(mPos);
+						CustomInspector.Inspect(mPos, new GraphEditorData(graphData, current));
 					});
 					evt.menu.AppendAction("Create Group", act => {
 						if(graphData.owner)
@@ -1146,17 +1130,13 @@ namespace MaxyGames.UNode.Editors {
 								data.clickEvent = (evt) => {
 									var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 									if(evt.button == 0 && (evt.clickCount == 2 || evt.shiftKey)) {
-										ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-											CustomInspector.ShowInspector(new GraphEditorData(unityObject));
-										}, 300, 300).ChangePosition(mPos);
+										CustomInspector.Inspect(mPos, new GraphEditorData(unityObject));
 									}
 								};
 								data.contextMenuEvent = (evt) => {
 									var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 									evt.menu.AppendAction("Inspect...", act => {
-										ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-											CustomInspector.ShowInspector(new GraphEditorData(unityObject));
-										}, 300, 300).ChangePosition(mPos);
+										CustomInspector.Inspect(mPos, new GraphEditorData(unityObject));
 									});
 									if(unityObject is IReflectionType) {
 										var rType = (unityObject as IReflectionType).ReflectionType;
@@ -1433,17 +1413,13 @@ namespace MaxyGames.UNode.Editors {
 								data.clickEvent = (evt) => {
 									var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 									if(evt.button == 0 && (evt.clickCount == 2 || evt.shiftKey)) {
-										ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-											CustomInspector.ShowInspector(new GraphEditorData(eventNode));
-										}, 300, 300).ChangePosition(mPos);
+										CustomInspector.Inspect(mPos, new GraphEditorData(eventNode));
 									}
 								};
 								data.contextMenuEvent = (evt) => {
 									var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 									evt.menu.AppendAction("Inspect...", act => {
-										ActionPopupWindow.ShowWindow(Vector2.zero, () => {
-											CustomInspector.ShowInspector(new GraphEditorData(eventNode));
-										}, 300, 300).ChangePosition(mPos);
+										CustomInspector.Inspect(mPos, new GraphEditorData(eventNode));
 									});
 									evt.menu.AppendSeparator("");
 

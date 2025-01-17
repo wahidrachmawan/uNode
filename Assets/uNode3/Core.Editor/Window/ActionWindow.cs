@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
 	/// <summary>
@@ -17,6 +18,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// The user variable.
 		/// </summary>
+		[SerializeReference]
 		public object variable;
 		/// <summary>
 		/// Called in OnGUI in the Top.
@@ -38,14 +40,14 @@ namespace MaxyGames.UNode.Editors {
 		private Vector2 scrollPos;
 
 		#region ShowWindow
-		public static ActionWindow ShowWindow(object startValue) {
+		public static ActionWindow Show(object startValue) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
 			window.variable = startValue;
 			window.Init();
 			return window;
 		}
 
-		public static ActionWindow ShowWindow(object startValue, ActionRef<object> onGUI) {
+		public static ActionWindow Show(object startValue, ActionRef<object> onGUI) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
 			window.variable = startValue;
 			window.onGUI = onGUI;
@@ -53,7 +55,7 @@ namespace MaxyGames.UNode.Editors {
 			return window;
 		}
 
-		public static ActionWindow ShowWindow(object startValue, ActionRef<object> onGUI,
+		public static ActionWindow Show(object startValue, ActionRef<object> onGUI,
 			ActionRef<object> onGUITop, ActionRef<object> onGUIBottom) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
 			window.variable = startValue;
@@ -64,7 +66,7 @@ namespace MaxyGames.UNode.Editors {
 			return window;
 		}
 
-		public static ActionWindow ShowWindow(object startValue, ActionRef<object> onGUI,
+		public static ActionWindow Show(object startValue, ActionRef<object> onGUI,
 			Action onGUITop, Action onGUIBottom) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
 			window.variable = startValue;
@@ -77,7 +79,7 @@ namespace MaxyGames.UNode.Editors {
 			return window;
 		}
 
-		public static ActionWindow ShowWindow(Action onGUI,
+		public static ActionWindow Show(Action onGUI,
 			Action onGUITop = null, 
 			Action onGUIBottom = null) {
 			ActionWindow window = GetWindow(typeof(ActionWindow), true) as ActionWindow;
@@ -148,15 +150,30 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		void OnGUI() {
+		private void OnEnable() {
+			var container = new IMGUIContainer(DrawGUI);
+			rootVisualElement.Add(container);
+		}
+
+		[SerializeField]
+		bool _hasFocus = false;
+
+		void DrawGUI() {
 			HandleKeyboard();
 			EditorGUILayout.BeginVertical();
 			if(!string.IsNullOrEmpty(headerName))
 				EditorGUILayout.LabelField(headerName, EditorStyles.toolbarButton);
+			if(!_hasFocus) {
+				EditorGUI.FocusTextInControl("act");
+				if(Event.current.type == EventType.Repaint) {
+					_hasFocus = true;
+				}
+			}
 			if(onGUITop != null) {
 				onGUITop(ref variable);
 			}
 			scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+			GUI.SetNextControlName("act");
 			if(onGUI != null) {
 				onGUI(ref variable);
 			}

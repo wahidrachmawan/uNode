@@ -279,6 +279,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Return the zoom scale
+		/// </summary>
 		public float zoomScale {
 			get {
 				return graphData.GetCurrentCanvasData().zoomScale;
@@ -288,6 +291,18 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Return the canvas position
+		/// </summary>
+		public Vector2 position {
+			get {
+				return graphData.position;
+			}
+		}
+
+		/// <summary>
+		/// True if the canvas is currently zooming
+		/// </summary>
 		public bool isZoom {
 			get {
 				return zoomScale != 1;
@@ -296,8 +311,14 @@ namespace MaxyGames.UNode.Editors {
 
 		public float loadingProgress { get; set; }
 
+		/// <summary>
+		/// Return the graph data
+		/// </summary>
 		public GraphEditorData graphData => window?.graphData;
 
+		/// <summary>
+		/// Return the tab data
+		/// </summary>
 		public uNodeEditor.TabData tabData => window?.selectedTab;
 
 		public IEnumerable<NodeObject> nodes {
@@ -723,6 +744,14 @@ namespace MaxyGames.UNode.Editors {
 			if(graphData == null)
 				return;
 			graphData.position = position;
+		}
+
+		/// <summary>
+		/// Set zoom scale of the graph
+		/// </summary>
+		/// <param name="zoom"></param>
+		public virtual void SetZoomScale(float zoom) {
+			zoomScale = zoom;
 		}
 
 		public void PasteNode(Vector2 position, bool removeOtherConnections = false) {

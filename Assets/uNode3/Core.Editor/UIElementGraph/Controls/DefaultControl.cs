@@ -117,7 +117,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					}
 				}
 			} else {
-				ActionPopupWindow.ShowWindow(Vector2.zero, () => {
+				ActionPopupWindow.Show(Vector2.zero, () => {
 					uNodeGUIUtility.EditValueLayouted(GUIContent.none, val, config.type, (obj) => {
 						config.owner.RegisterUndo();
 						val = obj;
@@ -127,7 +127,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 						attributes = new object[] { config.filter },
 						unityObject = config.owner.targetNode.GetUnityObject()
 					});
-				}, 300, 300).ChangePosition(mPos);
+				}).ChangePosition(mPos);
 			}
 		}
 

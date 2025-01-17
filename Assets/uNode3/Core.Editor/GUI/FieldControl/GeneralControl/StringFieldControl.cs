@@ -60,7 +60,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					position.width = 16;
 					if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
 						GUI.changed = false;
-						ActionPopupWindow.ShowWindow(position, () => {
+						ActionPopupWindow.Show(position.ToScreenRect(), () => {
 							if(settings.nullable) {
 								EditorGUILayout.BeginHorizontal();
 								EditorGUILayout.BeginVertical();
@@ -196,7 +196,7 @@ namespace MaxyGames.UNode.Editors.Control {
 						var pos = uNodeGUIUtility.GetRect(GUILayout.Width(18));
 						if(EditorGUI.DropdownButton(pos, GUIContent.none, FocusType.Keyboard)) {
 							GUI.changed = false;
-							ActionPopupWindow.ShowWindow(pos, () => {
+							ActionPopupWindow.Show(pos.ToScreenRect(), () => {
 								if(settings.nullable) {
 									EditorGUILayout.BeginHorizontal();
 									EditorGUILayout.BeginVertical();

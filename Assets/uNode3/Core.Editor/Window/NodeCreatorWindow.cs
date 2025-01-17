@@ -97,7 +97,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static NodeCreatorWindow window;
-		[MenuItem("Tools/uNode/Node Creator Wizard", false, 1)]
+		[MenuItem("Tools/uNode/Node Creator Wizard", false, 104)]
 		public static NodeCreatorWindow ShowWindow() {
 			window = GetWindow<NodeCreatorWindow>(true);
 			window.minSize = new Vector2(300, 350);

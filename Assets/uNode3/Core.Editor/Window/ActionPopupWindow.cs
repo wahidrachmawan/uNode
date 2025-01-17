@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
 	public delegate void ActionRef<T>(ref T obj);
@@ -35,18 +36,16 @@ namespace MaxyGames.UNode.Editors {
 		/// Called when performing Undo or Redo.
 		/// </summary>
 		public Action onUndoOrRedo;
-		public float width = 250, height = 100;
-		public bool autoSize;
+		public float width = 350, height = 200, maxWidth = 400, maxHeight = 600;
+		public bool autoSize = true;
 
 		private Vector2 scrollPos;
 
 		#region ShowWindow
-		public static ActionPopupWindow ShowWindow(
+		public static ActionPopupWindow Show(
 			Rect position, 
 			object startValue, 
 			ActionRef<object> onGUI,
-			float width = 250,
-			float height = 100,
 			ActionRef<object> onGUITop = null, 
 			ActionRef<object> onGUIBottom = null) {
 			ActionPopupWindow window = CreateInstance(typeof(ActionPopupWindow)) as ActionPopupWindow;
@@ -54,17 +53,13 @@ namespace MaxyGames.UNode.Editors {
 			window.onGUI = onGUI;
 			window.onGUITop = onGUITop;
 			window.onGUIBottom = onGUIBottom;
-			window.width = width;
-			window.height = height;
 			window.Init(position);
 			return window;
 		}
 
-		public static ActionPopupWindow ShowWindow(
+		public static ActionPopupWindow Show(
 			Rect position, 
 			Action onGUI,
-			float width = 250,
-			float height = 100,
 			Action onGUITop = null, 
 			Action onGUIBottom = null) {
 			ActionPopupWindow window = CreateInstance(typeof(ActionPopupWindow)) as ActionPopupWindow;
@@ -74,18 +69,14 @@ namespace MaxyGames.UNode.Editors {
 				window.onGUITop = delegate(ref object obj) { onGUITop(); };
 			if(onGUIBottom != null)
 				window.onGUIBottom = delegate(ref object obj) { onGUIBottom(); };
-			window.width = width;
-			window.height = height;
 			window.Init(position);
 			return window;
 		}
 
-		public static ActionPopupWindow ShowWindow(
+		public static ActionPopupWindow Show(
 			Vector2 position,
 			object startValue,
 			ActionRef<object> onGUI,
-			float width = 250,
-			float height = 100,
 			ActionRef<object> onGUITop = null,
 			ActionRef<object> onGUIBottom = null) {
 			ActionPopupWindow window = CreateInstance(typeof(ActionPopupWindow)) as ActionPopupWindow;
@@ -93,17 +84,13 @@ namespace MaxyGames.UNode.Editors {
 			window.onGUI = onGUI;
 			window.onGUITop = onGUITop;
 			window.onGUIBottom = onGUIBottom;
-			window.width = width;
-			window.height = height;
 			window.Init(position);
 			return window;
 		}
 
-		public static ActionPopupWindow ShowWindow(
+		public static ActionPopupWindow Show(
 			Vector2 position,
 			Action onGUI,
-			float width = 250,
-			float height = 100,
 			Action onGUITop = null,
 			Action onGUIBottom = null) {
 			ActionPopupWindow window = CreateInstance(typeof(ActionPopupWindow)) as ActionPopupWindow;
@@ -113,8 +100,6 @@ namespace MaxyGames.UNode.Editors {
 				window.onGUITop = delegate (ref object obj) { onGUITop(); };
 			if(onGUIBottom != null)
 				window.onGUIBottom = delegate (ref object obj) { onGUIBottom(); };
-			window.width = width;
-			window.height = height;
 			window.Init(position);
 			return window;
 		}
@@ -163,7 +148,6 @@ namespace MaxyGames.UNode.Editors {
 
 		private void Init(Rect rect) {
 			windows.Add(this);
-			rect = uNodeGUIUtility.GUIToScreenRect(rect);
 			rect.width = width;
 			ShowAsDropDown(rect, new Vector2(rect.width, height));
 			wantsMouseMove = true;
@@ -185,7 +169,61 @@ namespace MaxyGames.UNode.Editors {
 
 		bool _hasFocus = false;
 
-		void OnGUI() {
+		private void OnEnable() {
+			var container = new IMGUIContainer(DrawGUI);
+			container.style.borderLeftWidth = 1;
+			container.style.borderRightWidth = 1;
+			container.style.borderTopWidth = 1;
+			container.style.borderBottomWidth = 1;
+			container.style.top = 2;
+			container.style.borderLeftColor = uNodeGUIStyle.Colors.BorderColor;
+			container.style.borderRightColor = uNodeGUIStyle.Colors.BorderColor;
+			container.style.borderTopColor = uNodeGUIStyle.Colors.BorderColor;
+			container.style.borderBottomColor = uNodeGUIStyle.Colors.BorderColor;
+			rootVisualElement.Add(container);
+			var layout = container.layout;
+			var oldAutosize = !autoSize;
+
+			Vector2 startPosition = position.position;
+			container.ExecuteAndScheduleAction(() => {
+				if(autoSize && layout != container.layout) {
+					if(startPosition == Vector2.zero) {
+						startPosition = position.position;
+					}
+					layout = container.layout;
+					if(float.IsNaN(layout.width) || float.IsNaN(layout.height)) {
+						return;
+					}
+					var pos = position;
+					pos.width = Mathf.Min(maxWidth, layout.width);
+					pos.height = Mathf.Min(maxHeight, layout.height) + 4;
+					if(pos.width > position.width || pos.height > position.height) {
+						pos.width = maxWidth;
+						pos.height = maxHeight;
+					}
+					position = pos;
+					pos.x = startPosition.x;
+					pos.y = startPosition.y;
+					this.ChangePosition(pos);
+				}
+				if(oldAutosize != autoSize) {
+					oldAutosize = autoSize;
+					if(autoSize) {
+						IStyle style = container.style;
+						style.position = new(StyleKeyword.Null);
+						style.left = new(StyleKeyword.Null);
+						style.top = new(StyleKeyword.Null);
+						style.right = new(StyleKeyword.Null);
+						style.bottom = new(StyleKeyword.Null);
+					}
+					else {
+						container.StretchToParentSize();
+					}
+				}
+			}, 1);
+		}
+
+		void DrawGUI() {
 			HandleKeyboard();
 			if(!string.IsNullOrEmpty(headerName))
 				EditorGUILayout.LabelField(headerName, EditorStyles.toolbarButton);

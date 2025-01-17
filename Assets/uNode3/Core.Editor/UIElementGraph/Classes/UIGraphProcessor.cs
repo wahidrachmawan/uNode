@@ -21,29 +21,32 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public virtual UNodeView RepaintNode(UGraphView graph, NodeObject node, bool fullReload) {
-			return null;
-		}
+		public virtual bool RepaintNode(UGraphView graph, UNodeView view, NodeObject node, bool fullReload) => false;
 
-		public virtual EdgeView InitializeEdge(UGraphView graph, EdgeData edgeData) {
-			return null;
-		}
+		public virtual UNodeView InitializeView(UGraphView graph, NodeObject node) => null;
+
+		public virtual EdgeView InitializeEdge(UGraphView graph, EdgeData edgeData) => null;
 	}
 
 	class DefaultUIGraphProcessor : UIGraphProcessor {
 		public override int order => int.MaxValue;
 
-		public override UNodeView RepaintNode(UGraphView graph, NodeObject node, bool fullReload) {
+		public override UNodeView InitializeView(UGraphView graph, NodeObject node) {
+			return null;
+		}
+
+		public override bool RepaintNode(UGraphView graph, UNodeView view, NodeObject node, bool fullReload) {
 			if(node.node is Nodes.NodeValueConverter) {
 				var n = node.node as Nodes.NodeValueConverter;
 				n.EnsureRegistered();
 				if(n.input.isAssigned && !n.input.UseDefaultValue && n.output.hasValidConnections) {
-					return null;
+					return true;
 				} else {
 					node.Destroy();
 				}
+				return true;
 			}
-			return null;
+			return false;
 		}
 
 		public override EdgeView InitializeEdge(UGraphView graph, EdgeData edgeData) {
