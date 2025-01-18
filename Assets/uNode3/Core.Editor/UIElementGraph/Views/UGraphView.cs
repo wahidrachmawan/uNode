@@ -1358,6 +1358,32 @@ namespace MaxyGames.UNode.Editors {
 				}
 				#endregion
 
+				#region Graph Commands
+				evt.menu.AppendSeparator("");
+				var commands = NodeEditorUtility.FindGraphCommands();
+				if(commands != null && commands.Count > 0) {
+					bool addSeparator = false;
+					foreach(var c in commands) {
+						c.graphEditor = graph;
+						c.mousePositionOnCanvas = clickedPos;
+						if(c.IsValid()) {
+							if(c.name == "") {
+								evt.menu.AppendSeparator("");
+							}
+							else {
+								evt.menu.AppendAction(c.name, (e) => {
+									c.OnClick(position);
+								}, DropdownMenuAction.AlwaysEnabled);
+							}
+							addSeparator = true;
+						}
+					}
+					if(addSeparator) {
+						evt.menu.AppendSeparator("");
+					}
+				}
+				#endregion
+
 				#region Goto
 				{//Goto
 					int index = 0;
@@ -1450,32 +1476,6 @@ namespace MaxyGames.UNode.Editors {
 				evt.menu.AppendAction("Take Screenshot", (e) => {
 					CaptureGraphScreenshot();
 				}, DropdownMenuAction.AlwaysEnabled);
-
-				#region Graph Commands
-				evt.menu.AppendSeparator("");
-				var commands = NodeEditorUtility.FindGraphCommands();
-				if(commands != null && commands.Count > 0) {
-					bool addSeparator = false;
-					foreach(var c in commands) {
-						c.graphEditor = graph;
-						c.mousePositionOnCanvas = clickedPos;
-						if(c.IsValid()) {
-							if(c.name == "") {
-								evt.menu.AppendSeparator("");
-							}
-							else {
-								evt.menu.AppendAction(c.name, (e) => {
-									c.OnClick(position);
-								}, DropdownMenuAction.AlwaysEnabled);
-							}
-							addSeparator = true;
-						}
-					}
-					if(addSeparator) {
-						evt.menu.AppendSeparator("");
-					}
-				}
-				#endregion
 
 				evt.menu.AppendSeparator("");
 				if(graphData.selectedNodes.Any()) {
@@ -1616,32 +1616,6 @@ namespace MaxyGames.UNode.Editors {
 							}), DropdownMenuAction.AlwaysEnabled, eventObject);
 						}
 						evt.menu.AppendSeparator("");
-					}
-					#endregion
-
-					#region Node commands
-					evt.menu.AppendSeparator("");
-					var commands = NodeEditorUtility.FindNodeCommands();
-					if(commands != null && commands.Count > 0) {
-						bool addSeparator = false;
-						foreach(var c in commands) {
-							c.graphEditor = graph;
-							c.mousePositionOnCanvas = clickedPos;
-							if(c.IsValidNode(node)) {
-								if(c.name == "") {
-									evt.menu.AppendSeparator("");
-								}
-								else {
-									evt.menu.AppendAction(c.name, (e) => {
-										c.OnClick(node, position);
-									}, DropdownMenuAction.AlwaysEnabled);
-								}
-								addSeparator = true;
-							}
-						}
-						if(addSeparator) {
-							evt.menu.AppendSeparator("");
-						}
 					}
 					#endregion
 
@@ -1904,6 +1878,8 @@ namespace MaxyGames.UNode.Editors {
 					}
 					#endregion
 
+
+					#region Add Breakpoint
 					if(!GraphDebug.Breakpoint.HasBreakpoint(uNodeUtility.GetObjectID(node.GetUnityObject()), node.id)) {
 						evt.menu.AppendAction("Add Breakpoint", (e) => {
 							GraphDebug.Breakpoint.AddBreakpoint(uNodeUtility.GetObjectID(node.GetUnityObject()), node.id);
@@ -1918,6 +1894,35 @@ namespace MaxyGames.UNode.Editors {
 							uNodeGUIUtility.GUIChanged(node);
 						}, DropdownMenuAction.AlwaysEnabled);
 					}
+					#endregion
+
+					#region Node commands
+					evt.menu.AppendSeparator("");
+					var commands = NodeEditorUtility.FindNodeCommands();
+					if(commands != null && commands.Count > 0) {
+						bool addSeparator = false;
+						foreach(var c in commands) {
+							c.graphEditor = graph;
+							c.mousePositionOnCanvas = clickedPos;
+							if(c.IsValidNode(node)) {
+								if(c.name == "") {
+									evt.menu.AppendSeparator("");
+								}
+								else {
+									evt.menu.AppendAction(c.name, (e) => {
+										c.OnClick(node, position);
+									}, DropdownMenuAction.AlwaysEnabled);
+								}
+								addSeparator = true;
+							}
+						}
+						if(addSeparator) {
+							evt.menu.AppendSeparator("");
+						}
+					}
+					#endregion
+
+
 					evt.menu.AppendSeparator("");
 					if(nodeView.inputPorts.Any(p => p.connected && !p.IsProxy()) || nodeView.outputPorts.Any(p => p.connected && !p.IsProxy())) {
 						evt.menu.AppendAction("Place fit nodes", (e) => {

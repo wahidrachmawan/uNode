@@ -76,7 +76,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						catch(System.Threading.ThreadAbortException) { }
 						catch(Exception ex) {
-							Debug.Log(ex.Message + "\n" + ex.GetType());
+							Debug.Log(ex.ToString() + "\n" + ex.GetType());
 						}
 						finally {
 							uNodeThreadUtility.Queue(() => {

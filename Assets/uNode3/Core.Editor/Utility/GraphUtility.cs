@@ -1518,9 +1518,10 @@ namespace MaxyGames.UNode.Editors {
 				return root;
 			}
 
-			public static void DrawReferencePath(Rect position, List<(string, Texture)> paths) {
+			public static float DrawReferencePath(Rect position, List<(string, Texture)> paths) {
 				var style = uNodeGUIStyle.itemNormal;
 				bool flag = false;
+				float oldX = position.x;
 				foreach(var (path, icon) in paths) {
 					if(flag) {
 						uNodeGUIStyle.itemNext.Draw(new Rect(position.x, position.y, 13, 16), GUIContent.none, false, false, false, false);
@@ -1537,6 +1538,7 @@ namespace MaxyGames.UNode.Editors {
 					style.Draw(position, content, false, false, false, false);
 					position.x += style.CalcSize(content).x;
 				}
+				return position.x - oldX;
 			}
 
 			protected override void RowGUI(RowGUIArgs args) {

@@ -177,13 +177,13 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
+					if(root is BaseFunction) {
+						m_scopes.Add(NodeScope.Function);
+						m_scopes.Add(NodeScope.FlowGraph);
+					}
 					if(root.AllowCoroutine()) {
 						m_scopes.Add(NodeScope.Coroutine);
 					}
-				}
-				else if(root is BaseFunction) {
-					m_scopes.Add(NodeScope.Function);
-					m_scopes.Add(NodeScope.FlowGraph);
 				}
 				if(isInMacro) {
 					m_scopes.Add(NodeScope.Macro);

@@ -594,12 +594,20 @@ namespace MaxyGames.UNode.Editors {
 			[Serializable]
 			class DataReference {
 				public string path;
+				public string guid;
 				public int uid;
 
 				public UnityEngine.Object GetObject() {
+					if(string.IsNullOrEmpty(guid) == false) {
+						var tempPath = AssetDatabase.GUIDToAssetPath(guid);
+						if(string.IsNullOrEmpty(tempPath) == false) {
+							path = tempPath;
+						}
+					}
 					var obj = AssetDatabase.LoadAssetAtPath(path, typeof(UnityEngine.Object));
 					if(obj == null)
 						return null;
+					guid = AssetDatabase.AssetPathToGUID(path);
 					if(uNodeUtility.GetObjectID(obj) == uid) {
 						return obj;
 					}
@@ -631,6 +639,7 @@ namespace MaxyGames.UNode.Editors {
 					if(!string.IsNullOrEmpty(path)) {
 						DataReference data = new DataReference();
 						data.path = path;
+						data.guid = AssetDatabase.AssetPathToGUID(path);
 						data.uid = uNodeUtility.GetObjectID(obj);
 						return data;
 					}
@@ -638,16 +647,12 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			public static void Save<T>(T value, string fileName) {
-				Directory.CreateDirectory(uNodePreference.preferenceDirectory);
-				char separator = Path.DirectorySeparatorChar;
-				string path = uNodePreference.preferenceDirectory + separator + fileName + ".json";
-				File.WriteAllText(path, JsonUtility.ToJson(Data.Create(SerializerUtility.SerializeValue(value))));
+			public static void Save<T>(T value, string filePath) {
+				File.WriteAllText(filePath, JsonUtility.ToJson(Data.Create(SerializerUtility.SerializeValue(value))));
 			}
 
-			public static T Load<T>(string fieldName) {
-				char separator = Path.DirectorySeparatorChar;
-				string path = uNodePreference.preferenceDirectory + separator + fieldName + ".json";
+			public static T Load<T>(string filePath) {
+				string path = filePath;
 				try {
 					if(File.Exists(path)) {
 						var data = JsonUtility.FromJson<Data>(File.ReadAllText(path));
@@ -660,6 +665,19 @@ namespace MaxyGames.UNode.Editors {
 					Debug.LogException(ex);
 				}
 				return default;
+			}
+
+			public static void SavePreference<T>(T value, string filePath) {
+				Directory.CreateDirectory(uNodePreference.preferenceDirectory);
+				char separator = Path.DirectorySeparatorChar;
+				string path = uNodePreference.preferenceDirectory + separator + filePath + ".json";
+				Save<T>(value, path);
+			}
+
+			public static T LoadPreference<T>(string filePath) {
+				char separator = Path.DirectorySeparatorChar;
+				string path = uNodePreference.preferenceDirectory + separator + filePath + ".json";
+				return Load<T>(path);
 			}
 		}
 		#endregion
@@ -795,11 +813,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void SaveOptions() {
-			EditorDataSerializer.Save(_savedData, "EditorData");
+			EditorDataSerializer.SavePreference(_savedData, "EditorData");
 		}
 
 		public static void LoadOptions() {
-			_savedData = EditorDataSerializer.Load<uNodeEditorData>("EditorData");
+			_savedData = EditorDataSerializer.LoadPreference<uNodeEditorData>("EditorData");
 			if(_savedData == null) {
 				_savedData = new uNodeEditorData();
 				SaveOptions();
