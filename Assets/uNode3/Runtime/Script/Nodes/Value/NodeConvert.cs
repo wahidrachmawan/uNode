@@ -134,6 +134,37 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override string GetRichName() {
+			if(target.isAssigned && type.type != null) {
+				System.Type t = type.type;
+				System.Type targetType = target.ValueType;
+				if(t != null && targetType != null) {
+					if(!targetType.IsCastableTo(t) && !t.IsCastableTo(targetType)) {
+						if(t == typeof(string)) {
+							return target.GetRichName().CGInvoke(nameof(ToString));
+						}
+						else if(t == typeof(GameObject)) {
+							if(targetType.IsCastableTo(typeof(Component))) {
+								return target.GetRichName().CGAccess(nameof(Component.gameObject));
+							}
+						}
+						else if(t.IsCastableTo(typeof(Component))) {
+							if(targetType.IsCastableTo(typeof(Component)) || targetType == typeof(GameObject)) {
+								if(t == typeof(Transform)) {
+									return target.GetRichName().CGAccess(nameof(Component.transform));
+								}
+								return target.GetRichName().CGAccess(nameof(Component.GetComponent)) + $"<{type.typeName}>()";
+							}
+						}
+					}
+				}
+				else if(t == null) {
+					return CG.Convert(target.CGValue(), CG.Type(type.type));
+				}
+				if(useASWhenPossible == false || t.IsValueType) {
+					return $"({type.typeName})" + target.GetRichName();
+				}
+				return (target.GetRichName() + " as " + type.typeName).Wrap();
+			}
 			return $"({type.GetRichName()})" + target.GetRichName();
 		}
 

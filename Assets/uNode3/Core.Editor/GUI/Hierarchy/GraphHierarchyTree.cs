@@ -478,6 +478,20 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
+		public float GetContentWidth() => lastContentWidth;
+
+		private float contentWidth = 0, lastContentWidth = 0;
+		protected override void BeforeRowsGUI() {
+			base.BeforeRowsGUI();
+			contentWidth = 0;
+		}
+
+		protected override void AfterRowsGUI() {
+			base.AfterRowsGUI();
+			if(contentWidth > 0)
+				lastContentWidth = contentWidth;
+		}
+
 		protected override void RowGUI(RowGUIArgs args) {
 			Event evt = Event.current;
 			if(args.rowRect.Contains(evt.mousePosition)) {
@@ -571,13 +585,19 @@ namespace MaxyGames.UNode.Editors {
 				#region Draw Row
 				Rect labelRect = args.rowRect;
 				labelRect.x += GetContentIndent(args.item);
+				labelRect.width = lastContentWidth;
 				//if(args.selected) {
 				//	uNodeGUIStyle.itemStatic.Draw(labelRect, new GUIContent(args.label, icon), false, false, false, false);
 				//} else {
 				//	uNodeGUIStyle.itemNormal.Draw(labelRect, new GUIContent(args.label, icon), false, false, false, false);
 				//}
 				if(args.item is HierarchySummaryTree) {
-					uNodeGUIStyle.itemNormal.Draw(labelRect, new GUIContent(uNodeUtility.WrapTextWithColor("//" + args.label, uNodeUtility.GetRichTextSetting().summaryColor), args.item.icon), false, false, false, false);
+					var content = new GUIContent(uNodeUtility.WrapTextWithColor("//" + args.label, uNodeUtility.GetRichTextSetting().summaryColor), args.item.icon);
+					uNodeGUIStyle.itemNormal.Draw(labelRect, content, false, false, false, false);
+					var width = uNodeGUIStyle.itemNormal.CalcSize(content).x + GetContentIndent(args.item);
+					if(width > contentWidth) {
+						contentWidth = width;
+					}
 				}
 				else {
 					if(!args.selected && refSelectedTree != null) {
@@ -592,7 +612,12 @@ namespace MaxyGames.UNode.Editors {
 							GUI.color = oldColor;
 						}
 					}
-					uNodeGUIStyle.itemNormal.Draw(labelRect, new GUIContent(args.label, args.item.icon), false, false, false, false);
+					var content = new GUIContent(args.label, args.item.icon);
+					uNodeGUIStyle.itemNormal.Draw(labelRect, content, false, false, false, false);
+					var width = uNodeGUIStyle.itemNormal.CalcSize(content).x + GetContentIndent(args.item);
+					if(width > contentWidth) {
+						contentWidth = width;
+					}
 				}
 				#endregion
 			}

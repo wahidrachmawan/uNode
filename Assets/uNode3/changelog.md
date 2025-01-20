@@ -1,5 +1,7 @@
 # v3.0.6
-- Added `remove unused code` preference to remove unnecessary code for better readable code. can be enable from uNode preference > Code Generation > Analize Script > Remove Unused Code
+- Added Bookmarks feature allowing capture the position and zoom level of the canvas and the active tab you were viewing for later jump it after created the bookmark
+- Added `remove unnecessary code` preference to remove unnecessary code for better readable code. can be enable from uNode preference > Code Generation > Analize Script > Remove Unused Code
+- Improved Code Generation
 - Improved Editor
 - Improved Global Search
 - Fixed some bugs

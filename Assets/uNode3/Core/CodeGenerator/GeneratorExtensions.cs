@@ -417,5 +417,17 @@ namespace MaxyGames {
 		public static string Wrap(this string str) {
 			return CG.Wrap(str);
 		}
+
+		/// <summary>
+		/// Wrap a string value with brackets "( code )" only if the code has a space
+		/// </summary>
+		/// <param name="str"></param>
+		/// <returns></returns>
+		public static string WrapCode(this string str) {
+			if(str.Contains(' ')) {
+				return CG.Wrap(str);
+			}
+			return str;
+		}
 	}
 }

@@ -698,6 +698,12 @@ namespace MaxyGames.UNode.Editors {
 						menu.AddItem(new GUIContent("Node Browser"), false, () => {
 							uNodeEditorUtility.ShowNodeBrowser();
 						});
+						menu.AddItem(new GUIContent("Bookmarks"), false, () => {
+							uNodeEditorUtility.ShowBookmark();
+						});
+						menu.AddItem(new GUIContent("Node Creator Wizard"), false, () => {
+							NodeCreatorWindow.ShowWindow();
+						});
 						//menu.AddSeparator("");
 						//menu.AddItem(new GUIContent("Import"), false, () => {
 						//	ActionWindow.ShowWindow(() => {

@@ -50,22 +50,22 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override string GenerateFlowCode() {
-			return CG.Flow(GenerateValueCode() + CG.FlowFinish(enter, exit));
+			return CG.Flow(GenerateValueCode().AddSemicolon(), CG.FlowFinish(enter, exit));
 		}
 
 		protected override string GenerateValueCode() {
 			if(target.isAssigned) {
 				if(isPrefix) {
 					if(isDecrement) {
-						return "--(" + CG.Value(target) + ")";
+						return "--" + CG.Value(target).WrapCode();
 					}
-					return "++(" + CG.Value(target) + ")";
+					return "++" + CG.Value(target).WrapCode();
 				}
 				else {
 					if(isDecrement) {
-						return "(" + CG.Value(target) + ")--";
+						return CG.Value(target).WrapCode() + "--";
 					}
-					return "(" + CG.Value(target) + ")++";
+					return CG.Value(target).WrapCode() + "++";
 				}
 			}
 			throw new System.Exception("Target is unassigned");

@@ -814,8 +814,15 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override Type GetNodeIcon() {
-			if(m_instance is IIcon) {
-				return (m_instance as IIcon).GetIcon();
+			if(m_instance != null) {
+				if(m_instance is IIcon) {
+					return (m_instance as IIcon).GetIcon();
+				}
+				if(m_instance.GetType().IsDefined(typeof(NodeMenu), true)) {
+					var icon = m_instance.GetType().GetCustomAttribute<NodeMenu>().GetIcon();
+					if(icon != null)
+						return icon;
+				}
 			}
 			return base.GetNodeIcon();
 		}

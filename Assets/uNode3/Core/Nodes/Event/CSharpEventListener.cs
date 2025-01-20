@@ -136,12 +136,12 @@ namespace MaxyGames.UNode.Nodes {
 							}, method.GetParameters().Select(i => i.ParameterType).ToArray());
 							@delegate = ReflectionUtils.ConvertDelegate(@delegate, evt.EventHandlerType);
 							instance.eventData.onEnable += instance => {
-								object obj = this.instance.GetValue(instance.defaultFlow);
+								object obj = this.instance?.GetValue(instance.defaultFlow);
 								target.startTarget = obj;
 								evt.AddEventHandler(instance, @delegate);
 							};
 							instance.eventData.onDisable += instance => {
-								object obj = this.instance.GetValue(instance.defaultFlow);
+								object obj = this.instance?.GetValue(instance.defaultFlow);
 								target.startTarget = obj;
 								evt.RemoveEventHandler(instance, @delegate);
 							};
@@ -162,12 +162,12 @@ namespace MaxyGames.UNode.Nodes {
 						}, types);
 						@delegate = Delegate.CreateDelegate(delegateType, @delegate.Target, @delegate.Method);
 						instance.eventData.onEnable += instance => {
-							object obj = this.instance.GetValue(instance.defaultFlow);
+							object obj = this.instance?.GetValue(instance.defaultFlow);
 							target.startTarget = obj;
 							addListener.InvokeOptimized(target.Get(instance.defaultFlow), @delegate);
 						};
 						instance.eventData.onDisable += instance => {
-							object obj = this.instance.GetValue(instance.defaultFlow);
+							object obj = this.instance?.GetValue(instance.defaultFlow);
 							target.startTarget = obj;
 							removeListener.InvokeOptimized(target.Get(instance.defaultFlow), @delegate);
 						};

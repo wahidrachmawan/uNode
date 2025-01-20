@@ -39,7 +39,8 @@ namespace MaxyGames.UNode.Editors {
 		internal static class ProBinding {
 			public static Action CallbackShowCSharpPreview;
 			public static Action CallbackShowGlobalSearch;
-			public static Action CallbackShowNodeBrowser;
+			public static Action CallbackShowNodeBrowser; 
+			public static Action CallbackShowBookmarks;
 			public static Action CallbackShowGraphHierarchy;
 			public static Action<MemberInfo> CallbackFindInNodeBrowser;
 		}
@@ -58,6 +59,14 @@ namespace MaxyGames.UNode.Editors {
 				return;
 			}
 			ProBinding.CallbackShowNodeBrowser?.Invoke();
+		}
+
+		[MenuItem("Tools/uNode/Bookmarks", false, 103)]
+		public static void ShowBookmark() {
+			if(uNodeEditorUtility.DisplayRequiredProVersion("Bookmarks")) {
+				return;
+			}
+			ProBinding.CallbackShowBookmarks?.Invoke();
 		}
 
 		[MenuItem("Tools/uNode/Graph Hierarchy", false, 102)]
