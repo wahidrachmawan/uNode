@@ -165,6 +165,31 @@
     margin-left: 0px;
 }
 
+.optional-port {
+    position: absolute;
+    left: 0;
+    right: 50%;
+    top: 0;
+    bottom: 0;
+    border-width: 0;
+    border-radius: 8px 0 0 8px;
+    transform-origin: right;
+    rotate: 45deg;
+    opacity: 0.5;
+}
+
+/*PortView:hover > #connector > #cap {
+    visibility: visible;
+}
+
+PortView:hover > #connector > .optional-port {
+    visibility: hidden;
+}*/
+
+.connected > #connector > .optional-port {
+    display: none;
+}
+
 .value-port > #connector {
     border-color: rgb(255, 255, 0);
     background-color: #212121;

@@ -21,6 +21,8 @@ namespace MaxyGames.UNode {
 			public bool IsOut => refKind == RefKind.Out;
 			public bool IsIn => refKind == RefKind.In;
 
+			public bool IsOptional => input != null && input.IsOptional;
+
 			/// <summary>
 			/// Name of the parameter
 			/// </summary>
@@ -178,13 +180,21 @@ namespace MaxyGames.UNode {
 							}
 							else {
 								pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type, out var isNew).SetName(p.name);
-								if(isNew) {
-									pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.Type));
-								}
 								if(pdata.refKind == RefKind.Out) {
 									pdata.input.filter = new FilterAttribute(p.Type) {
 										SetMember = true,
 									};
+								}
+								if(p.IsOptional) {
+									pdata.input.SetOptionalValue(() => p.defaultValue);
+								}
+								if(isNew) {
+									if(p.IsOptional) {
+										pdata.input.AssignToDefault(MemberData.None);
+									}
+									else {
+										pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.Type));
+									}
 								}
 							}
 							datas[0].parameters.Add(pdata);
@@ -265,13 +275,21 @@ namespace MaxyGames.UNode {
 										node,
 										pathID + "-" + i + "-" + x,
 										p.ParameterType, out var isNew).SetName(p.Name);
-									if(isNew) {
-										pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.ParameterType));
-									}
 									if(pdata.refKind == RefKind.Out) {
 										pdata.input.filter = new FilterAttribute(p.ParameterType) {
 											SetMember = true,
 										};
+									}
+									if(p.IsOptional) {
+										pdata.input.SetOptionalValue(() => p.DefaultValue);
+									}
+									if(isNew) {
+										if(p.IsOptional) {
+											pdata.input.AssignToDefault(MemberData.None);
+										}
+										else {
+											pdata.input.AssignToDefault(MemberData.CreateValueFromType(p.ParameterType));
+										}
 									}
 								}
 								data.parameters.Add(pdata);

@@ -740,7 +740,7 @@ namespace MaxyGames.UNode.Editors {
 			var graphType = graph.GetGraphType();
 
 			bool AssignNodePort(ValueInput port, Type type, FilterAttribute filter) {
-				if(port == null || type == null)
+				if(port == null || type == null || port.IsOptional)
 					return false;
 				if(filter == null)
 					filter = FilterAttribute.DefaultTypeFilter;

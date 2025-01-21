@@ -45,6 +45,8 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public bool isValue => !portData.isFlow;
 
+		private VisualElement optionalElement;
+
 		#region Initialization
 		public PortView(Orientation orientation, Direction direction, PortData portData) : base(orientation, direction, Capacity.Multi, typeof(object)) {
 			this.portData = portData;
@@ -67,8 +69,22 @@ namespace MaxyGames.UNode.Editors {
 			m_EdgeConnector = new EdgeConnector<EdgeView>(this);
 			this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
 			this.AddManipulator(m_EdgeConnector);
-			DoUpdate();
 			this.ExecuteAndScheduleAction(DoUpdate, 1000);
+			if(portData.portValue is ValueInput input && input.IsOptional) {
+				optionalElement = new VisualElement {
+					name = "optionalOverlay",
+					pickingMode = PickingMode.Ignore
+				};
+				optionalElement.AddToClassList("optional-port");
+				optionalElement.style.backgroundColor = portColor;
+				m_ConnectorBox.Add(optionalElement);
+				this.RegisterCallback<MouseEnterEvent>(evt => {
+					optionalElement.style.display = DisplayStyle.None;
+				});
+				this.RegisterCallback<MouseLeaveEvent>(evt => {
+					optionalElement.style.display = StyleKeyword.Null;
+				});
+			}
 		}
 
 		public virtual void Initialize(PortData portData) {
@@ -98,6 +114,9 @@ namespace MaxyGames.UNode.Editors {
 				// portIcon.style.width = 16;
 				// portIcon.style.height = 16;
 				portIcon.pickingMode = PickingMode.Ignore;
+				if(optionalElement != null) {
+					optionalElement.style.backgroundColor = portColor;
+				}
 			}
 			else if(owner.flowLayout == Orientation.Horizontal) {
 				if(portIcon == null) {

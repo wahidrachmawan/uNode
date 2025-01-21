@@ -44,6 +44,9 @@ namespace MaxyGames {
 					}
 				}
 				if(port.UseDefaultValue) {
+					if(port.IsOptional && (port.defaultValue == null || port.defaultValue.targetType == MemberData.TargetType.None)) {
+						return Value(port.OptionalValue, setVariable: setVariable, autoConvert: autoConvert);
+					}
 					return Value(port.defaultValue, setVariable: setVariable, autoConvert: autoConvert);
 				}
 				else {

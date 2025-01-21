@@ -214,7 +214,7 @@ namespace MaxyGames.UNode.Editors {
 					var func = CreateObject<Function>(method.Name, graph.GraphData.functionContainer, (val) => {
 						val.name = method.Name;
 						val.returnType = method.ReturnType;
-						val.parameters = method.GetParameters().Select(p => new ParameterData(p.Name, p.ParameterType) { value = p.DefaultValue }).ToList();
+						val.parameters = method.GetParameters().Select(p => new ParameterData(p.Name, p.ParameterType) { defaultValue = p.DefaultValue }).ToList();
 						val.genericParameters = method.GetGenericArguments().Select(p => new GenericParameterData(p.Name)).ToArray();
 					});
 				} else if(member is PropertyInfo property) {
@@ -227,7 +227,7 @@ namespace MaxyGames.UNode.Editors {
 					if(getMethod != null) {
 						var func = CreateObject<Function>("Getter", prop, (val) => {
 							val.returnType = getMethod.ReturnType;
-							val.parameters = getMethod.GetParameters().Select(p => new ParameterData(p.Name, p.ParameterType) { value = p.DefaultValue }).ToList();
+							val.parameters = getMethod.GetParameters().Select(p => new ParameterData(p.Name, p.ParameterType) { defaultValue = p.DefaultValue }).ToList();
 							val.genericParameters = getMethod.GetGenericArguments().Select(p => new GenericParameterData(p.Name)).ToArray();
 						});
 						func.Entry.EnsureRegistered();
@@ -241,7 +241,7 @@ namespace MaxyGames.UNode.Editors {
 					if(setMethod != null) {
 						var func = CreateObject<Function>("Setter", prop, (val) => {
 							val.returnType = setMethod.ReturnType;
-							val.parameters = setMethod.GetParameters().Select(p => new ParameterData(p.Name, p.ParameterType) { value = p.DefaultValue }).ToList();
+							val.parameters = setMethod.GetParameters().Select(p => new ParameterData(p.Name, p.ParameterType) { defaultValue = p.DefaultValue }).ToList();
 							val.genericParameters = setMethod.GetGenericArguments().Select(p => new GenericParameterData(p.Name)).ToArray();
 						});
 						prop.setRoot = func;

@@ -255,7 +255,7 @@ namespace MaxyGames.UNode {
 													type = @ref.Type,
 													refKind = @ref.refKind,
 													useInInitializer = @ref.useInInitializer,
-													value = SerializerUtility.Duplicate(@ref.value)
+													defaultValue = SerializerUtility.Duplicate(@ref.defaultValue)
 												});
 											}
 											else {
@@ -400,6 +400,9 @@ namespace MaxyGames.UNode {
 				var p = port as ValueInput;
 				if(p.UseDefaultValue) {
 					if(p.defaultValue == null || !p.defaultValue.isAssigned) {
+						if(p.IsOptional) {
+							return false;
+						}
 						RegisterError(port.node, new ErrorMessage() {
 							message = "Unassigned port: " + port.GetPrettyName(),
 						});
@@ -1092,13 +1095,23 @@ namespace MaxyGames.UNode {
 		public string name;
 		public SerializedType type;
 		public RefKind refKind;
+		//for constructor
 		public bool useInInitializer;
+		public bool hasDefaultValue;
+
 		public bool isByRef {
 			get {
 				return refKind != RefKind.None;
 			}
 		}
-		public object value;
+		public bool IsOptional => hasDefaultValue == true;
+		public bool IsOut => refKind == RefKind.Out;
+
+		/// <summary>
+		/// This is the default value of the parameter
+		/// </summary>
+		[SerializeReference]
+		public object defaultValue;
 
 		public Type Type {
 			get {

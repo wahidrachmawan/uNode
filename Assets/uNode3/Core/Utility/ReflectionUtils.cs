@@ -2450,5 +2450,34 @@ namespace MaxyGames.UNode {
 			}
 			return false;
 		}
+
+		/// <summary>
+		/// True if the type is compile-time constant type
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static bool IsConstantType(Type type) {
+			if(type == typeof(string) || type.IsEnum)
+				return true;
+			if(type == typeof(bool) ||
+				type == typeof(byte) ||
+				type == typeof(sbyte) ||
+				type == typeof(char) ||
+				type == typeof(decimal) ||
+				type == typeof(double) ||
+				type == typeof(float) ||
+				type == typeof(int) ||
+				type == typeof(uint) ||
+				type == typeof(nint) ||
+				type == typeof(nuint) ||
+				type == typeof(long) ||
+				type == typeof(ulong) ||
+				type == typeof(short) ||
+				type == typeof(ushort)
+			) {
+				return true;
+			}
+			return false;
+		}
 	}
 }

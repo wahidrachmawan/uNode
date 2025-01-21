@@ -1647,6 +1647,7 @@ namespace MaxyGames {
 			public Type type;
 			public RefKind refKind;
 			public List<AData> attributes;
+			public string defaultValue;
 
 			public void RegisterAttribute(Type type, params string[] parameters) {
 				if(attributes == null)
@@ -1678,6 +1679,9 @@ namespace MaxyGames {
 				}
 				else {
 					result += name;
+				}
+				if(string.IsNullOrEmpty(defaultValue) == false) {
+					return result + " = " + defaultValue;
 				}
 				return result;
 			}
@@ -1782,6 +1786,7 @@ namespace MaxyGames {
 				result += "(";
 				if(parameters != null) {
 					int index = 0;
+					bool hasOptional = false;
 					foreach(MPData data in parameters) {
 						if(index != 0) {
 							result += ", ";
@@ -1790,6 +1795,10 @@ namespace MaxyGames {
 							result += "this ";
 						}
 						result += data.GenerateCode();
+						if(hasOptional && string.IsNullOrEmpty(data.defaultValue)) {
+							result += " = default";
+						}
+						hasOptional |= string.IsNullOrEmpty(data.defaultValue) == false;
 						index++;
 					}
 				}

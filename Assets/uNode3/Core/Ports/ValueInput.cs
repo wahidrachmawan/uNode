@@ -22,6 +22,17 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public bool UseDefaultValue => connections.Count == 0;
 
+		private Func<object> optionalValue;
+
+		/// <summary>
+		/// True when the port is optional
+		/// </summary>
+		public bool IsOptional => optionalValue != null;
+		/// <summary>
+		/// Get the optional port value
+		/// </summary>
+		public object OptionalValue => optionalValue?.Invoke();
+
 		/// <summary>
 		/// Get target type of the port
 		/// </summary>
@@ -200,6 +211,10 @@ namespace MaxyGames.UNode {
 			}
 #endif
 			if(UseDefaultValue) {
+				if(IsOptional && (defaultValue == null || defaultValue.targetType == MemberData.TargetType.None)) {
+					//Return the optional value if the port is optional and the inline value is not assigned.
+					return OptionalValue;
+				}
 				return defaultValue.Get(flow);
 			} else {
 				if(connections.Count == 1) {
@@ -284,6 +299,22 @@ namespace MaxyGames.UNode {
 				}
 				throw new System.Exception("Invalid connections.");
 			}
+		}
+
+		/// <summary>
+		/// Set the optional value of the port
+		/// </summary>
+		/// <param name="func"></param>
+		public void SetOptionalValue(Func<object> func) {
+			optionalValue = func;
+		}
+
+		/// <summary>
+		/// Set the optional value of the port
+		/// </summary>
+		/// <param name="value"></param>
+		public void SetOptionalValue(object value) {
+			optionalValue = () => value;
 		}
 
 		public void Restore(ValueInput other) {

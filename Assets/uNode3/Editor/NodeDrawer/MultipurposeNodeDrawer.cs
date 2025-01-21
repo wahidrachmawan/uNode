@@ -383,7 +383,21 @@ namespace MaxyGames.UNode.Editors.Drawer {
 									for(int x = 0; x < parameters.Length; x++) {
 										System.Type PType = parameters[x].ParameterType;
 										if(PType != null) {
-											EditorGUILayout.LabelField(new GUIContent(ObjectNames.NicifyVariableName(parameters[x].Name) + " : " + PType.PrettyName(), uNodeEditorUtility.GetTypeIcon(PType), PType.PrettyName(true)), EditorStyles.boldLabel);
+											var label = ObjectNames.NicifyVariableName(parameters[x].Name) + " : " + PType.PrettyName();
+											if(parameters[x].HasDefaultValue) {
+												if(parameters[x].DefaultValue != null) {
+													if(ReflectionUtils.IsConstantType(PType)) {
+														label += " = " + parameters[x].DefaultValue.ToString() + " (optional)";
+													}
+													else {
+														label += " = " + CG.New(PType.PrettyName()) + " (optional)";
+													}
+												}
+												else {
+													label += " = null (optional)";
+												}
+											}
+											EditorGUILayout.LabelField(new GUIContent(label, uNodeEditorUtility.GetTypeIcon(PType), PType.PrettyName(true)), EditorStyles.boldLabel);
 											EditorGUI.indentLevel++;
 											if(documentation != null && documentation["param"] != null) {
 												XmlNode paramDoc = null;

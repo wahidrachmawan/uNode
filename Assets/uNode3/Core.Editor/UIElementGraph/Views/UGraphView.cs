@@ -2250,19 +2250,25 @@ namespace MaxyGames.UNode.Editors {
 						evt.menu.AppendAction("Reset", (e) => {
 							Undo.SetCurrentGroupName("Reset");
 							port.owner.RegisterUndo();
-							var portFilter = port.GetFilter();
-							var type = portFilter.Types.FirstOrDefault() ?? port.GetPortType();
-							MemberData val = null;
-							if(portFilter.IsValidTypeForValueConstant(type)) {
-								if(type != null && ReflectionUtils.CanCreateInstance(type) && !portFilter.SetMember) {
-									val = MemberData.CreateValueFromType(type);
-								}
-								else if(type is RuntimeType) {
-									val = MemberData.CreateFromValue(null, type);
-								}
+							if(p.IsOptional) {
+								p.AssignToDefault(MemberData.None);
 							}
-							if(val == null) {
-								val = MemberData.None;
+							else {
+								var portFilter = port.GetFilter();
+								var type = portFilter.Types.FirstOrDefault() ?? port.GetPortType();
+								MemberData val = null;
+								if(portFilter.IsValidTypeForValueConstant(type)) {
+									if(type != null && ReflectionUtils.CanCreateInstance(type) && !portFilter.SetMember) {
+										val = MemberData.CreateValueFromType(type);
+									}
+									else if(type is RuntimeType) {
+										val = MemberData.CreateFromValue(null, type);
+									}
+								}
+								if(val == null) {
+									val = MemberData.None;
+								}
+								p.AssignToDefault(val);
 							}
 							MarkRepaint(port.owner);
 							foreach(var edge in port.GetValidEdges()) {
@@ -2270,7 +2276,6 @@ namespace MaxyGames.UNode.Editors {
 									MarkRepaint(edge.connection.Output.node);
 								}
 							}
-							p.AssignToDefault(val);
 						}, DropdownMenuAction.AlwaysEnabled);
 					}
 					else {

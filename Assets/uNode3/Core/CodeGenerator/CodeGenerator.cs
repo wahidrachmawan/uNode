@@ -332,7 +332,7 @@ namespace MaxyGames {
 											if(setting.debugPreprocessor)
 												genData += "\n#if UNITY_EDITOR".AddLineInFirst();
 											genData += DoGenerateInvokeCode(pair.Value + ".Debug", new string[] {
-												Value(graph.GetGraphID()), 
+												Value(graph.GetGraphID()),
 												Value(port.node.id),
 												port.isPrimaryPort ? Null : Value(port.id)
 											}).AddSemicolon().AddLineInFirst();
@@ -586,7 +586,7 @@ namespace MaxyGames {
 							mData = new MData(
 								function.name,
 								function.returnType,
-								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind)).ToArray(),
+								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind) { defaultValue = i.hasDefaultValue ? Value(i.defaultValue) : null }).ToArray(),
 								function.genericParameters.Select(i => new GPData(i.name, i.typeConstraint.type)).ToArray()
 							);
 							generatorData.methodData.Add(mData);
@@ -704,8 +704,7 @@ namespace MaxyGames {
 								if(string.IsNullOrWhiteSpace(strs[x]) == false)
 									lastContent = x;
 							}
-							if(yieldCount == 0 || yieldCount == 1 && (lastYieldIndex == strs.Length - 1 || lastYieldIndex == lastContent)) 
-							{
+							if(yieldCount == 0 || yieldCount == 1 && (lastYieldIndex == strs.Length - 1 || lastYieldIndex == lastContent)) {
 								//Automatically set state initialization ( for performance ) if it's supported.
 								SetStateInitialization(port, CG.Routine(Lambda(generatedCode.Replace("yield ", "").AddTabAfterNewLine())));
 								return;
@@ -1962,7 +1961,8 @@ namespace MaxyGames {
 				if(paramInfo.Length == 0) {
 					if(ctor.owner is RuntimeGraphType runtimeType && runtimeType.target is IClassDefinition definition) {
 						return CG.Invoke(definition.GetModel().GetType(), nameof(ClassObjectModel.Create), Value(definition.FullGraphName));
-					} else {
+					}
+					else {
 						throw new InvalidOperationException($"Unsupported Runtime Type ({ctor.owner}) for creating value at runtime.");
 					}
 				}
@@ -2550,8 +2550,8 @@ namespace MaxyGames {
 				return "null";
 			}
 			else if(obj is LayerMask) {
-                return CG.Convert(CG.Value(((LayerMask)obj).value), typeof(LayerMask));
-            }
+				return CG.Convert(CG.Value(((LayerMask)obj).value), typeof(LayerMask));
+			}
 			else if(obj is ObjectValueData) {
 				return Value((obj as ObjectValueData).value);
 			}
