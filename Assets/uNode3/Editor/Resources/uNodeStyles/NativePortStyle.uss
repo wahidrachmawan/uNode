@@ -167,15 +167,15 @@
 
 .optional-port {
     position: absolute;
-    left: 0;
-    right: 50%;
+    opacity: 0.5;
     top: 0;
     bottom: 0;
+    left: 0;
+    right: 50%;
     border-width: 0;
     border-radius: 8px 0 0 8px;
     transform-origin: right;
     rotate: 45deg;
-    opacity: 0.5;
 }
 
 /*PortView:hover > #connector > #cap {
