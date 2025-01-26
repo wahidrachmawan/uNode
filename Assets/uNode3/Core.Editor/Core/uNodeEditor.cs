@@ -917,12 +917,6 @@ namespace MaxyGames.UNode.Editors {
 					Repaint();
 				}
 			}
-			if(selectedTab != null && selectedTab.graph != null) {
-				if(selectedTab.owner != null) {
-					//
-				}
-			}
-			//InitGraph();
 		}
 
 		void OnSelectionChange() {
@@ -1110,6 +1104,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(!uNodePreference.GetPreference().inspectorIntegration)
 				return;
+			if(HasOpenInstances<GraphInspectorWindow>() && GraphInspectorWindow.window?.hasFocus == true) {
+				if(inspectorWrapper != null && Selection.activeObject == inspectorWrapper) {
+					inspectorWrapper.editorData = null;
+					inspectorWrapper.unserializedEditorData = null;
+				}
+				return;
+			}
 			if(!graphData.hasSelection && Selection.activeObject == inspectorWrapper) {
 				if(inspectorWrapper != null) {
 					inspectorWrapper.unserializedEditorData = graphData;

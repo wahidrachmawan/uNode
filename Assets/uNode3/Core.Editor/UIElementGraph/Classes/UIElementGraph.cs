@@ -689,6 +689,9 @@ namespace MaxyGames.UNode.Editors {
 						//menu.AddItem(new GUIContent("Graph Explorer"), false, () => {
 						//	ExplorerWindow.ShowWindow();
 						//});
+						menu.AddItem(new GUIContent("Graph Inspector"), false, () => {
+							GraphInspectorWindow.ShowWindow();
+						});
 						menu.AddItem(new GUIContent("Global Search"), false, () => {
 							uNodeEditorUtility.ShowGlobalSearch();
 						});

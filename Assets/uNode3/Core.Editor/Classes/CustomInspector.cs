@@ -456,11 +456,13 @@ namespace MaxyGames.UNode.Editors {
 			CustomInspector Target = (CustomInspector)target;
 
 			var data = Target.unserializedEditorData ?? Target.editorData;
-			EditorGUI.BeginChangeCheck();
-			CustomInspector.ShowInspector(data);
-			if(EditorGUI.EndChangeCheck() || UnityEngine.GUI.changed) {
-				//uNodeGUIUtility.GUIChanged(Target);
-				uNodeEditor.ForceRepaint();
+			if(data != null) {
+				EditorGUI.BeginChangeCheck();
+				CustomInspector.ShowInspector(data);
+				if(EditorGUI.EndChangeCheck() || UnityEngine.GUI.changed) {
+					//uNodeGUIUtility.GUIChanged(Target);
+					uNodeEditor.ForceRepaint();
+				}
 			}
 		}
 	}
