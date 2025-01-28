@@ -27,7 +27,7 @@ namespace MaxyGames.UNode.Editors {
 		private void OnGraphEditorChanged(GraphEditorData graphData) {
 			inspectorWrapper.editorData = graphData;
 			inspectorEditor = CustomInspector.GetEditor(inspectorWrapper);
-			inspectorEditor.Repaint();
+			inspectorEditor?.Repaint();
 			Repaint();
 		}
 

@@ -16,8 +16,9 @@ using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	internal static class uNodeEditorMenu {
-		internal class MyCustomBuildProcessor : UnityEditor.Build.IPreprocessBuildWithReport, UnityEditor.Build.IPostprocessBuildWithReport {
-			public int callbackOrder => 0;
+		internal class uNodeBuildProcessor : UnityEditor.Build.IPreprocessBuildWithReport, UnityEditor.Build.IPostprocessBuildWithReport {
+			//this is to make sure uNode build processor is executed first
+			public int callbackOrder => int.MinValue;
 
 			public void OnPreprocessBuild(BuildReport report) {
 				uNodeEditorInitializer.OnPreprocessBuild();

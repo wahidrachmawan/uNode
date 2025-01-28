@@ -570,6 +570,8 @@ namespace MaxyGames.UNode.Editors {
 							foreach(var obj in objs) {
 								if(counts > 250)
 									break;
+								if(obj == null)
+									continue;
 								if(obj is IInstancedGraph instancedGraph) {
 									if(uNodeUtility.IsCastableGraph(instancedGraph.OriginalGraph, graphData.graph)) {
 										menu.AddItem(new GUIContent("Scene/" + counts + "-" + obj.gameObject.name), debugTarget == obj as object, () => {
@@ -581,6 +583,24 @@ namespace MaxyGames.UNode.Editors {
 											//uNodeEditor.Open(instancedGraph.OriginalGraph);
 										});
 										counts++;
+										continue;
+									}
+								}
+								if(graphData.graph is IScriptGraphType scrptGraph) {
+									if(scrptGraph.TypeName == obj.GetType().FullName) {
+										string niceName = uNodeUtility.GetObjectName(obj);
+										var id = ++counts;
+										menu.AddItem(new GUIContent("Scene/" + id + "-" + niceName), debugTarget == obj as object, delegate (object reference) {
+											var weakRef = reference as WeakReference;
+											if(weakRef.IsAlive) {
+												UnityEngine.Object o = weakRef.Target as UnityEngine.Object;
+												if(o != null) {
+													EditorGUIUtility.PingObject(o);
+												}
+												debugTarget = weakRef.Target;
+												GraphDebug.useDebug = true;
+											}
+										}, new WeakReference(obj));
 									}
 								}
 							}
