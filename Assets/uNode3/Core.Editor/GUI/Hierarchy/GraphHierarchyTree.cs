@@ -327,7 +327,7 @@ namespace MaxyGames.UNode.Editors {
 				if(expandStates != null && !expandStates.Contains(childItem.id)) {
 					SetExpanded(childItem.id, true);
 				}
-				if(container.Any()) {
+				if(container.childCount > 0) {
 					if(IsExpanded(childItem.id)) {
 						foreach(var ele in element) {
 							CreateTreeElement(ele, childItem, rows);
@@ -347,7 +347,7 @@ namespace MaxyGames.UNode.Editors {
 				if(expandStates != null && !expandStates.Contains(childItem.id)) {
 					SetExpanded(childItem.id, true);
 				}
-				if(container.Any()) {
+				if(container.childCount > 0) {
 					if(IsExpanded(childItem.id)) {
 						foreach(var ele in element) {
 							CreateTreeElement(ele, childItem, rows);
@@ -367,7 +367,7 @@ namespace MaxyGames.UNode.Editors {
 					SetExpanded(childItem.id, true);
 				}
 
-				if(container.Any()) {
+				if(container.childCount > 0) {
 					if(IsExpanded(childItem.id)) {
 						foreach(var ele in element) {
 							CreateTreeElement(ele, childItem, rows);

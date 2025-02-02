@@ -767,7 +767,7 @@ namespace MaxyGames.UNode {
 
 		public static IEnumerable<MacroPortNode> GetMacroInputFlows(Graph graph) {
 			var container = graph.mainGraphContainer;
-			foreach(var child in container) {
+			foreach(var child in container.GetObjectsInChildren()) {
 				if(child is NodeObject node && node.node is MacroPortNode macroPort && macroPort.kind == PortKind.FlowInput) {
 					yield return macroPort;
 				}
@@ -775,7 +775,7 @@ namespace MaxyGames.UNode {
 		}
 		public static IEnumerable<MacroPortNode> GetMacroInputValues(Graph graph) {
 			var container = graph.mainGraphContainer;
-			foreach(var child in container) {
+			foreach(var child in container.GetObjectsInChildren()) {
 				if(child is NodeObject node && node.node is MacroPortNode macroPort && macroPort.kind == PortKind.ValueInput) {
 					yield return macroPort;
 				}
@@ -783,7 +783,7 @@ namespace MaxyGames.UNode {
 		}
 		public static IEnumerable<MacroPortNode> GetMacroOutputFlows(Graph graph) {
 			var container = graph.mainGraphContainer;
-			foreach(var child in container) {
+			foreach(var child in container.GetObjectsInChildren()) {
 				if(child is NodeObject node && node.node is MacroPortNode macroPort && macroPort.kind == PortKind.FlowOutput) {
 					yield return macroPort;
 				}
@@ -791,7 +791,7 @@ namespace MaxyGames.UNode {
 		}
 		public static IEnumerable<MacroPortNode> GetMacroOutputValues(Graph graph) {
 			var container = graph.mainGraphContainer;
-			foreach(var child in container) {
+			foreach(var child in container.GetObjectsInChildren()) {
 				if(child is NodeObject node && node.node is MacroPortNode macroPort && macroPort.kind == PortKind.ValueOutput) {
 					yield return macroPort;
 				}

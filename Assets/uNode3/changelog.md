@@ -4,6 +4,7 @@
 - Added default value support for parameters
 - Added Graph Inspector window, useful if needed to see both node properties and game object properties on the screen in the same time
 - Improved c# parser
+- Fixed some bugs
 
 ## v3.0.6
 - Added Bookmarks feature allowing capture the position and zoom level of the canvas and the active tab you were viewing for later jump it after created the bookmark

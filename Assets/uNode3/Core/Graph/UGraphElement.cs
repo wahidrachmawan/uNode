@@ -19,7 +19,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	public abstract class UGraphElement : IEnumerable<UGraphElement>, IGraphElement, ISummary {
+	public abstract class UGraphElement : IGraphElement, ISummary {
 		#region Fields
 		[SerializeField]
 		private string _name;
@@ -620,11 +620,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		IEnumerator<UGraphElement> IEnumerable<UGraphElement>.GetEnumerator() {
-			return new Enumerator(this);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator() {
+		public IEnumerator<UGraphElement> GetEnumerator() {
 			return new Enumerator(this);
 		}
 

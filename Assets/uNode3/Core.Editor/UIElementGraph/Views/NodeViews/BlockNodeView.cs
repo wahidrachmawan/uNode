@@ -740,7 +740,7 @@ namespace MaxyGames.UNode.Editors {
 					if(blockIndex >= block.blocks.childCount) {
 						for(int i = 0; i < blockItems.Count; i++) {
 							blockItems[i].SetParent(block.blocks);
-							blockItems[i].PlaceInFront(block.blocks.Last());
+							blockItems[i].PlaceInFront(block.blocks.GetObjectsInChildren().Last());
 						}
 					} else {
 						var slibing = block.blocks.GetChild(blockIndex);
