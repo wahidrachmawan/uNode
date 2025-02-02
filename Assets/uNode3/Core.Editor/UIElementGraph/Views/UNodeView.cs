@@ -134,7 +134,7 @@ namespace MaxyGames.UNode.Editors {
 				flowInputContainer.AddToClassList("flow-container");
 				flowInputContainer.AddToClassList("input");
 				flowInputContainer.pickingMode = PickingMode.Ignore;
-				border.Insert(0, flowInputContainer);
+				Add(flowInputContainer);
 			}
 			{//Flow outputs
 				flowOutputContainer = new VisualElement();

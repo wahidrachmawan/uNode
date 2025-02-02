@@ -29,7 +29,10 @@ PortView > Image {
 }
 
 #flow-inputs {
-    top: -23px;
+    top: -13px;
+    position: absolute;
+    left: 0px;
+    right: 0px;
 }
 
 #flow-outputs {

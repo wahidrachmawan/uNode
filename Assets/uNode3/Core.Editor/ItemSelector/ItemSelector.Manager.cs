@@ -1035,12 +1035,17 @@ namespace MaxyGames.UNode.Editors {
 					F.Types = new List<Type>();
 					TypeItem[] typeItems = new TypeItem[genericType.Length];
 					for(int i = 0; i < genericType.Length; i++) {
-						FilterAttribute fil = new FilterAttribute(genericType[i].BaseType) {
+						FilterAttribute fil = new FilterAttribute() {
 							OnlyGetType = true,
 							//DisplayRuntimeType = false,
 						};
-						fil.ToFilterGenericConstraints(genericType[i]);
-						typeItems[i] = new TypeItem(genericType[i].BaseType, fil);
+						fil.ToFilterGenericConstraints(genericType[i], genericType);
+						int index = i;
+						typeItems[i] = new TypeItem(genericType[i].BaseType, fil) {
+							onChanged = item => {
+								genericType[index] = item.type;
+							}
+						};
 					}
 					if(genericType.Length == 1) {
 						ItemSelector w = null;

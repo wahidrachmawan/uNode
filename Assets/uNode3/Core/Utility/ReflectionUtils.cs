@@ -117,6 +117,11 @@ namespace MaxyGames.UNode {
 			return assemblies;
 		}
 
+		/// <summary>
+		/// Return all assembly attribute in current domain
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public static IEnumerable<T> GetAssemblyAttributes<T>() where T : Attribute {
 			foreach(var ass in GetStaticAssemblies()) {
 				var atts = GetAssemblyAttribute<T>(ass);
@@ -128,6 +133,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Return all assembly attribute in <paramref name="assembly"/>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="assembly"></param>
+		/// <returns></returns>
 		public static IEnumerable<T> GetAssemblyAttribute<T>(Assembly assembly) where T : Attribute {
 			if(assembly.IsDefined(typeof(T), true)) {
 				return assembly.GetCustomAttributes<T>();
@@ -135,6 +146,11 @@ namespace MaxyGames.UNode {
 			return Array.Empty<T>();
 		}
 
+		/// <summary>
+		/// Return all assembly attribute in current domain
+		/// </summary>
+		/// <param name="attributeType"></param>
+		/// <returns></returns>
 		public static IEnumerable<Attribute> GetAssemblyAttributes(Type attributeType) {
 			foreach(var ass in GetStaticAssemblies()) {
 				var atts = GetAssemblyAttribute(attributeType, ass);
@@ -837,7 +853,7 @@ namespace MaxyGames.UNode {
 			FieldInfo fInfo = null;
 			string[] strArray = path.Split('.');
 			for(int i = 0; i < strArray.Length; i++) {
-				fInfo = t.GetField(strArray[i]);
+				fInfo = t.GetField(strArray[i], MemberData.flags);
 				if(fInfo == null)
 					throw new NullReferenceException("could not find field in path : " + path + "\nType:" + t.FullName);
 				t = fInfo.FieldType;
@@ -980,7 +996,7 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
-		/// Get the actual native c# type.
+		/// Get the actual native/CLR c# type.
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns>Return the actual c# type</returns>
@@ -1000,6 +1016,13 @@ namespace MaxyGames.UNode {
 			return type;
 		}
 
+		/// <summary>
+		/// Get the actual native/CLR c# type.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="throwOnError"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
 		public static Type GetNativeType(Type type, bool throwOnError) {
 			if(type is IRuntimeMember) {
 				if(type is INativeMember native) {
@@ -1095,6 +1118,21 @@ namespace MaxyGames.UNode {
 			return true;
 		}
 
+		/// <summary>
+		/// True if the type has default constructor
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static bool HasDefaultConstructor(Type type) {
+			if(type.IsValueType) return true;
+			return type.GetConstructor(publicAndNonPublicFlags, null, Type.EmptyTypes, null) != null;
+		}
+
+		/// <summary>
+		/// Get the default constructor
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
 		public static ConstructorInfo GetDefaultConstructor(Type type) {
 			ConstructorInfo result = type.GetConstructor(publicAndNonPublicFlags, null, Type.EmptyTypes, null);
 			//try {
@@ -1537,6 +1575,42 @@ namespace MaxyGames.UNode {
 				}
 			}
 			return true;
+		}
+
+		/// <summary>
+		/// Determines whether a type is a fully constructed generic type.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static bool IsFullyConstructedGenericType(Type type) {
+			if(type == null) {
+				throw new ArgumentNullException("type");
+			}
+
+			if(type.IsGenericTypeDefinition) {
+				return false;
+			}
+
+			if(type.HasElementType) {
+				Type elementType = type.GetElementType();
+				if(elementType.IsGenericParameter || !IsFullyConstructedGenericType(elementType)) {
+					return false;
+				}
+			}
+
+			Type[] genericArguments = type.GetGenericArguments();
+			foreach(Type type2 in genericArguments) {
+				if(type2.IsGenericParameter) {
+					return false;
+				}
+
+				if(!IsFullyConstructedGenericType(type2)) {
+					return false;
+				}
+			}
+
+			return !type.IsGenericTypeDefinition;
 		}
 
 		public static bool IsValidConstructor(ConstructorInfo ctor, int maxCtorParam = 0, int minCtorParam = 0) {
@@ -2234,6 +2308,14 @@ namespace MaxyGames.UNode {
 					return null;
 				}
 				else if((constraints & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0) {//struct constraint
+					var pType = type.GetGenericParameterConstraints();
+					if(pType.Length > 0) {
+						for(int i = 0; i < pType.Length; i++) {
+							if(pType[i] != typeof(ValueType) && !pType[i].IsInterface) {
+								return pType[i];
+							}
+						}
+					}
 					return null;
 				}
 				else if((constraints & GenericParameterAttributes.DefaultConstructorConstraint) != 0) {//new constraint
@@ -2258,7 +2340,11 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
-		public static Type GetDefaultConstraint(Type type, Type preferedType) {
+		public static bool IsValidGenericConstraint(Type type, Type genericParameter) {
+			return GetDefaultConstraint(genericParameter, type) != null;
+		}
+
+		internal static Type GetDefaultConstraint(Type type, Type preferedType) {
 			if(preferedType == null) return GetDefaultConstraint(type);
 			if(type.IsGenericParameter) {
 				var constraints = type.GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
@@ -2268,7 +2354,7 @@ namespace MaxyGames.UNode {
 						if(pType.Length == 0) {
 							return preferedType;
 						}
-						else if(pType.Length == 1 && preferedType.IsCastableTo(pType[0])) {
+						else if(pType.Length == 1 && !pType[0].IsInterface && preferedType.IsCastableTo(pType[0])) {
 							return preferedType;
 						}
 					}
@@ -2281,16 +2367,19 @@ namespace MaxyGames.UNode {
 						if(pType.Length == 0) {
 							return preferedType;
 						}
-						else if(pType.Length == 1 && preferedType.IsCastableTo(pType[0])) {
-							return preferedType;
-						}
-						else if(pType.Length == 2 && preferedType.IsCastableTo(pType[1])) {
-							return preferedType;
+						else {
+							for(int i = 0; i < pType.Length; i++) {
+								if(pType[i] != typeof(ValueType) && !pType[i].IsInterface && preferedType.IsCastableTo(pType[i])) {
+									return preferedType;
+								}
+							}
 						}
 					}
 					return null;
 				}
 				else if((constraints & GenericParameterAttributes.DefaultConstructorConstraint) != 0) {//new constraint
+					if(GetDefaultConstructor(preferedType) == null)
+						return null;
 					var pType = type.GetGenericParameterConstraints();
 					if(pType.Length == 0) {
 						return preferedType;

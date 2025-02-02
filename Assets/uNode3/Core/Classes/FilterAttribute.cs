@@ -655,6 +655,10 @@ namespace MaxyGames.UNode {
 			if(Types == null || Types.Count == 0) {
 				return true;
 			}
+			return DoIsValidType(t);
+		}
+
+		private bool DoIsValidType(Type t) {
 			bool hasType = false;
 			for(int i = 0; i < Types.Count; i++) {
 				Type type = Types[i];
@@ -752,8 +756,38 @@ namespace MaxyGames.UNode {
 		/// Convert filter to only filter type with generic parameter constraints
 		/// </summary>
 		/// <param name="genericParameterType"></param>
-		public void ToFilterGenericConstraints(Type genericParameterType) {
+		public void ToFilterGenericConstraints(Type genericParameterType, Type[] constructedParameterType = null) {
 			if(genericParameterType.IsGenericParameter) {
+				var pType = genericParameterType.GetGenericParameterConstraints();
+				if(pType != null && pType.Length > 0) {
+					Types.Clear();
+					if(constructedParameterType != null) {
+						foreach(var p in pType) {
+							if(p != null) {
+								if(p.ContainsGenericParameters) {
+									//In case there's a generic parameters
+									ToFilterGenericConstraints2(genericParameterType, constructedParameterType);
+									return;
+								}
+							}
+						}
+					}
+					foreach(var p in pType) {
+						if(p != null) {
+							if(p == typeof(ValueType)) {
+								DisplayValueType = true;
+								DisplayReferenceType = false;
+							}
+							else {
+								Types.Add(p);
+								if(p.IsInterface) {
+									DisplayInterfaceType = true;
+								}
+							}
+						}
+					}
+				}
+
 				var constraints = genericParameterType.GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
 				if((constraints & GenericParameterAttributes.ReferenceTypeConstraint) != 0) {//class constraint
 					DisplayValueType = false;
@@ -768,24 +802,130 @@ namespace MaxyGames.UNode {
 				//else if((constraints & GenericParameterAttributes.DefaultConstructorConstraint) != 0) {//new constraint
 				//	return false;
 				//}
+			}
+		}
+
+		private void ToFilterGenericConstraints2(Type genericParameterType, Type[] constructedParameterType) {
+			Types.Clear();
+			var constraints = genericParameterType.GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
+			if((constraints & GenericParameterAttributes.ReferenceTypeConstraint) != 0) {//class constraint
+				DisplayValueType = false;
+				DisplayInterfaceType = false;
+				DisplayReferenceType = true;
+			}
+			else if((constraints & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0) {//struct constraint
+				DisplayValueType = true;
+				DisplayInterfaceType = false;
+				DisplayReferenceType = false;
+			}
+			//else if((constraints & GenericParameterAttributes.DefaultConstructorConstraint) != 0) {//new constraint
+			//	return false;
+			//}
+			if(genericParameterType.IsGenericParameter) {
 				var pType = genericParameterType.GetGenericParameterConstraints();
-				if(pType != null && pType.Length > 0) {
-					Types.Clear();
-					foreach(var p in pType) {
-						if(p != null) {
-							if(p == typeof(ValueType)) {
-								DisplayValueType = true;
-								DisplayReferenceType = false;
-							} else {
-								Types.Add(p);
-								if(p.IsInterface) {
-									DisplayInterfaceType = true;
-								}
+				for(int i = 0; i < pType.Length; i++) {
+					var p = pType[i];
+					if(p != null) {
+						if(p == typeof(ValueType)) {
+							DisplayValueType = true;
+							DisplayReferenceType = false;
+						}
+						else {
+							Types.Add(p);
+							if(p.IsInterface) {
+								DisplayInterfaceType = true;
+							}
+							if(ReflectionUtils.IsFullyConstructedGenericType(p) == false) {
+								long frame = 0;
+								var desiredType = p;
+								Func<Type, bool> validation = null;
+								ValidateType = (type) => {
+									if(frame != uNodeThreadUtility.frame) {
+										frame = uNodeThreadUtility.frame;
+										AutoConstructGenericTypeDefinition(p, constructedParameterType, out desiredType);
+										if(ReflectionUtils.IsFullyConstructedGenericType(desiredType) == false) {
+											Type GetDesiredConstraint(Type t, Type targetType) {
+												if(t.IsGenericParameter) {
+													if(genericParameterType == t) {
+														return targetType;
+													}
+													else {
+														return constructedParameterType[t.GenericParameterPosition];
+													}
+												}
+												else if(t.IsGenericType) {
+													var args = t.GetGenericArguments();
+													bool flag = false;
+													for(int i = 0; i < args.Length; i++) {
+														var tt = GetDesiredConstraint(args[i], targetType);
+														if(tt != null) {
+															args[i] = tt;
+															flag = true;
+														}
+													}
+													if(flag) {
+														return ReflectionUtils.MakeGenericType(t.GetGenericTypeDefinition(), args);
+													}
+												}
+												return null;
+											}
+											validation = t => {
+												var ty = GetDesiredConstraint(desiredType, t);
+												try {
+													if(t.IsCastableTo(ty)) {
+														return true;
+													}
+												}
+												catch { }
+												return false;
+											};
+										}
+									}
+									if(IsValidTypeSimple(type) == false) return false;
+									if(type.IsCastableTo(desiredType) == false) {
+										if(validation?.Invoke(type) == true) {
+											return true;
+										}
+										return false;
+									}
+									return true;
+								};
 							}
 						}
 					}
 				}
 			}
+		}
+
+		internal static bool AutoConstructGenericTypeDefinition(Type type, Type[] constructedParameters, out Type result) {
+			if(type.IsGenericParameter) {
+				result = constructedParameters[type.GenericParameterPosition];
+				return result.IsGenericParameter == false;
+			}
+			if(type.IsGenericType) {
+				var args = type.GetGenericArguments();
+				bool flag = false;
+				for(int i = 0; i < args.Length; i++) {
+					if(AutoConstructGenericTypeDefinition(args[i], constructedParameters, out var t)) {
+						args[i] = t;
+						flag = true;
+					}
+				}
+				if(flag) {
+					var definition = type.GetGenericTypeDefinition();
+					result = ReflectionUtils.MakeGenericType(definition, args);
+					return true;
+				}
+			}
+			else if(type.IsArray) {
+				var elementType = type.GetElementType();
+				if(AutoConstructGenericTypeDefinition(elementType, constructedParameters, out var t)) {
+					result = t.MakeArrayType(type.GetArrayRank());
+					return true;
+				}
+			}
+			result = type;
+			return false;
 		}
 	}
 }

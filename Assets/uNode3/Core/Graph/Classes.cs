@@ -16,6 +16,8 @@ namespace MaxyGames.UNode {
 		private OdinSerializedData serializedData;
 		[SerializeField]
 		public SerializedType serializedType;
+		[NonSerialized]
+		private bool failedDeserialize;
 
 		public SerializedValue() {
 
@@ -82,6 +84,7 @@ namespace MaxyGames.UNode {
 						serializedType = value.GetType();
 					}
 				}
+				failedDeserialize = false;
 			}
 		}
 
@@ -91,14 +94,22 @@ namespace MaxyGames.UNode {
 
 		public void ChangeValue(object value) {
 			_value = value;
+			failedDeserialize = false;
 			OnBeforeSerialize();
 		}
 
 		public void OnAfterDeserialize() {
-			_value = SerializerUtility.Deserialize(serializedData);
+			try {
+				_value = SerializerUtility.Deserialize(serializedData);
+			}
+			catch (Exception ex) {
+				failedDeserialize = true;
+				Debug.LogException(new Exception($"Error on trying to deserialize value: {serializedType.typeName}", ex));
+			}
 		}
 
 		public void OnBeforeSerialize() {
+			if(failedDeserialize) return;
 			if(_value is Type) {
                 serializedData = SerializerUtility.SerializeValue(new SerializedType(_value as Type));
             }

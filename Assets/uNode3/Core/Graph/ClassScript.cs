@@ -13,7 +13,7 @@ namespace MaxyGames.UNode {
 
 		public List<SerializedType> interfaces = new List<SerializedType>();
 
-		[HideInInspector, SerializeField]
+		[HideInInspector]
 		public GeneratedScriptData scriptData = new GeneratedScriptData();
 
 		public override Type GetIcon() {

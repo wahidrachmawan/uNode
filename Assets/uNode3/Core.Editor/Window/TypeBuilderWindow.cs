@@ -111,6 +111,7 @@ namespace MaxyGames.UNode.Editors {
 					int current = i;
 					EditType(Value[i], (item) => {
 						Value[current] = item;
+						Value[current].onChanged?.Invoke(item);
 						Repaint();
 					});
 				}
@@ -153,14 +154,14 @@ namespace MaxyGames.UNode.Editors {
 			if(item.type != null && item.type.IsGenericType) {
 				var gType = item.type.GetGenericArguments();
 				if(gType.Length > 0) {
-					var filter = new FilterAttribute(item.filter);
-					filter.Types.Clear();
-					filter.OnlyGetType = true;
-					filter.UnityReference = false;
-					//filter.DisplayRuntimeType = false;
+					var constraintTypes = item.type.GetGenericTypeDefinition().GetGenericArguments();
 					for(int i = 0; i < gType.Length; i++) {
 						var current = i;
-						EditType(gType[i], filter, deepLevel, (type) => {
+						var fil = new FilterAttribute();
+						fil.OnlyGetType = true;
+						fil.ToFilterGenericConstraints(constraintTypes[i], gType);
+
+						EditType(gType[i], fil, deepLevel, (type) => {
 							if(type != null) {
 								var typeDefinition = item.type.GetGenericTypeDefinition();
 								gType[current] = type;
@@ -311,6 +312,8 @@ namespace MaxyGames.UNode.Editors {
 
 		public FilterAttribute filter;
 
+		public Action<TypeItem> onChanged;
+
 		private MemberData _value;
 		public MemberData Value {
 			get {
@@ -340,6 +343,9 @@ namespace MaxyGames.UNode.Editors {
 			set {
 				_value = value;
 				type = value.startType;
+				if(onChanged != null) {
+					onChanged(this);
+				}
 			}
 		}
 
@@ -408,6 +414,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 			this.type = type;
 			Name = type.PrettyName();
+			if(onChanged != null) {
+				onChanged(this);
+			}
 		}
 	}
 }
