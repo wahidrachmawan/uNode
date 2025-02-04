@@ -9,9 +9,6 @@ namespace MaxyGames.UNode.Editors {
 	public class CustomInspector : ScriptableObject {
 		public GraphEditorData editorData;
 
-		[NonSerialized]
-		internal GraphEditorData unserializedEditorData;
-
 		private static CustomInspector _default;
 		internal static CustomInspector Default {
 			get {
@@ -455,7 +452,7 @@ namespace MaxyGames.UNode.Editors {
 		public override void OnInspectorGUI() {
 			CustomInspector Target = (CustomInspector)target;
 
-			var data = Target.unserializedEditorData ?? Target.editorData;
+			var data = Target.editorData;
 			if(data != null) {
 				EditorGUI.BeginChangeCheck();
 				CustomInspector.ShowInspector(data);

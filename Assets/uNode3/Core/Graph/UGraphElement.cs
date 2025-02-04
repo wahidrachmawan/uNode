@@ -364,7 +364,7 @@ namespace MaxyGames.UNode {
 			return child;
 		}
 
-		public T InsertChild<T>(T child, int index) where T : UGraphElement {
+		public T InsertChild<T>(int index, T child) where T : UGraphElement {
 			if(!child.CanChangeParent())
 				throw new Exception("Unable to change Add Child because the child is forbidden to Change it's parent");
 			if(index > parent.childs.Count) {

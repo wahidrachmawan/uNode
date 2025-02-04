@@ -191,9 +191,6 @@ namespace MaxyGames.UNode.Editors {
 			});
 
 			uNodeEditor.window?.UndoRedoPerformed();
-			if(Selection.activeObject is CustomInspector customInspector) {
-				customInspector.unserializedEditorData = null;
-			}
 			//Update all graph for live edit
 			RuntimeGraphUtility.GraphRunner.UpdateAllRunners();
 		}

@@ -902,13 +902,13 @@ namespace MaxyGames.UNode.Editors {
 			var tabMainElement = new ClickableElement("\"Main\"") {
 				name = "tab-element",
 				onClick = (_) => {
-					window.ChangeEditorTarget(null);
+					window.ChangeEditorTab(null);
 				},
 			};
 			tabMainElement.AddManipulator(new ContextualMenuManipulator((evt) => {
 				evt.menu.AppendAction("Close All But This", (act) => {
 					window.tabDatas.Clear();
-					window.ChangeEditorTarget(null);
+					window.ChangeEditorTab(null);
 					ReloadTabbar();
 				}, DropdownMenuAction.AlwaysEnabled);
 				evt.menu.AppendSeparator("");
@@ -980,7 +980,7 @@ namespace MaxyGames.UNode.Editors {
 				var tabElement = new ClickableElement(tabData.displayName) {
 					name = "tab-element",
 					onClick = (_) => {
-						window.ChangeEditorTarget(tabData);
+						window.ChangeEditorTab(tabData);
 					},
 				};
 				tabElement.RemoveManipulator(tabElement.clickable);
@@ -1031,13 +1031,13 @@ namespace MaxyGames.UNode.Editors {
 						var oldData = window.selectedTab;
 						window.tabDatas.Remove(tabData);
 						window.SaveEditorData();
-						window.ChangeEditorTarget(oldData);
+						window.ChangeEditorTab(oldData);
 						ReloadTabbar();
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendAction("Close All", (act) => {
 						window.tabDatas.Clear();
 						window.SaveEditorData();
-						window.ChangeEditorTarget(null);
+						window.ChangeEditorTab(null);
 						ReloadTabbar();
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendAction("Close Others", (act) => {
@@ -1045,7 +1045,7 @@ namespace MaxyGames.UNode.Editors {
 						window.tabDatas.Clear();
 						window.tabDatas.Add(current);
 						window.SaveEditorData();
-						window.ChangeEditorTarget(current);
+						window.ChangeEditorTab(current);
 						ReloadTabbar();
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendSeparator("");

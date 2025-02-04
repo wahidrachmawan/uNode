@@ -1064,7 +1064,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public void ChangeEditorTarget(TabData data) {
+		public void ChangeEditorTab(TabData data) {
 			bool needRefresh = data == null || selectedTab != data || selectedTab.selectedGraphData.currentCanvas != data.selectedGraphData.currentCanvas;
 			selectedTab = data;
 			OnMainTargetChange();
@@ -1107,13 +1107,12 @@ namespace MaxyGames.UNode.Editors {
 			if(HasOpenInstances<GraphInspectorWindow>() && GraphInspectorWindow.window?.hasFocus == true) {
 				if(inspectorWrapper != null && Selection.activeObject == inspectorWrapper) {
 					inspectorWrapper.editorData = null;
-					inspectorWrapper.unserializedEditorData = null;
 				}
 				return;
 			}
 			if(!graphData.hasSelection && Selection.activeObject == inspectorWrapper) {
 				if(inspectorWrapper != null) {
-					inspectorWrapper.unserializedEditorData = graphData;
+					inspectorWrapper.editorData = new GraphEditorData(graphData);
 					CustomInspector.GetEditor(inspectorWrapper).Repaint();
 				}
 				return;
@@ -1146,6 +1145,9 @@ namespace MaxyGames.UNode.Editors {
 				inspectorWrapper = ScriptableObject.CreateInstance<CustomInspector>();
 				inspectorWrapper.editorData = new GraphEditorData(graphData);
 				Selection.instanceIDs = new int[] { inspectorWrapper.GetInstanceID() };
+			}
+			else if(inspectorWrapper != null && Selection.activeObject == inspectorWrapper) {
+				inspectorWrapper.editorData = null;
 			}
 		}
 		#endregion

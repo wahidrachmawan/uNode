@@ -76,7 +76,7 @@ namespace MaxyGames.UNode {
 				if(_mainContainer == null) {
 					_mainContainer = functionContainer.GetObjectInChildren<MainGraphContainer>();
 					if(_mainContainer == null) {
-						_mainContainer = functionContainer.InsertChild(new MainGraphContainer(), 0);
+						_mainContainer = functionContainer.InsertChild(0, new MainGraphContainer());
 					}
 				}
 				return _mainContainer;

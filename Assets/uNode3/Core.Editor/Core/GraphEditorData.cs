@@ -28,6 +28,7 @@ namespace MaxyGames.UNode.Editors {
 			_owner = editorData._owner;
 			_graph = editorData._graph;
 			_serializedSelecteds = new List<BaseReference>(editorData.serializedSelecteds);
+			currentCanvas = editorData.currentCanvas;
 		}
 
 		public GraphEditorData(GraphEditorData editorData, params UGraphElement[] selections) {
@@ -39,6 +40,7 @@ namespace MaxyGames.UNode.Editors {
 			foreach(var ele in selections) {
 				serializedSelecteds.Add(new UGraphElementRef(ele));
 			}
+			currentCanvas = editorData.currentCanvas;
 		}
 
 		public GraphEditorData(Object graph) {

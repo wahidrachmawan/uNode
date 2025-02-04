@@ -45,7 +45,9 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void SelectionChanged() {
-			window?.EditorSelectionChanged();
+			uNodeThreadUtility.ExecuteOnce(() => {
+				window?.EditorSelectionChanged();
+			}, "[GRAPH_SELECTION_CHANGED]");
 		}
 
 		public void GUIChanged() {

@@ -1055,6 +1055,7 @@ namespace MaxyGames.UNode.Editors {
 						if(graphItems != null && graphItems.Count > 0) {
 							graphItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 							var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), -1);
+							categTree.expanded = true;
 							graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 							result.Add(categTree);
 						}
@@ -1072,6 +1073,7 @@ namespace MaxyGames.UNode.Editors {
 							if(graphItems != null && graphItems.Count > 0) {
 								graphItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 								var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), -1);
+								categTree.expanded = true;
 								graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 								result.Add(categTree);
 							}
@@ -1086,6 +1088,7 @@ namespace MaxyGames.UNode.Editors {
 								if(graphItems != null && graphItems.Count > 0) {
 									graphItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 									var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), -1);
+									categTree.expanded = true;
 									graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 									result.Add(categTree);
 								}
