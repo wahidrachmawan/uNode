@@ -21,7 +21,9 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void OnGUI() {
-			inspectorEditor?.OnInspectorGUI();
+			if(inspectorEditor != null) {
+				inspectorEditor.OnInspectorGUI();
+			}
 		}
 
 		private void OnGraphEditorChanged(GraphEditorData graphData) {
