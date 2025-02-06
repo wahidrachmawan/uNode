@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Operator", "Bitwise {|} {&} {^}")]
+    [NodeMenu("Operator", "Bitwise {|} {&} {^}", inputs = new[] { typeof(int), typeof(uint), typeof(long), typeof(short), typeof(byte), typeof(ulong), typeof(System.Enum) })]
 	public class BitwiseNode : ValueNode {
 		public BitwiseType operatorType = BitwiseType.Or;
 
@@ -62,6 +62,22 @@ namespace MaxyGames.UNode.Nodes {
 					return typeof(TypeIcons.BitwiseOrIcon);
 			}
 			return base.GetNodeIcon();
+		}
+
+		public override void CheckError(ErrorAnalyzer analyzer) {
+			base.CheckError(analyzer);
+			if(targetA.isAssigned && targetB.isAssigned) {
+				try {
+					var valA = ReflectionUtils.CreateInstance(targetA.ValueType);
+					var valB = ReflectionUtils.CreateInstance(targetB.ValueType);
+					uNodeHelper.BitwiseOperator(
+						valA,
+						valB, operatorType);
+				}
+				catch(System.Exception ex) {
+					analyzer.RegisterError(this, ex.Message);
+				}
+			}
 		}
 	}
 }

@@ -29,6 +29,16 @@ namespace MaxyGames.UNode {
 				}
 			}
 			else {
+				if(leftType.IsEnum || rightType.IsEnum) {
+					if(leftType.IsEnum == false) {
+						rightType = Enum.GetUnderlyingType(rightType);
+					}
+					else if(rightType.IsEnum == false) {
+						leftType = Enum.GetUnderlyingType(leftType);
+					}
+					if(leftType == rightType)
+						return true;
+				}
 				return ReflectionUtils.GetUserDefinedOperator(leftType, rightType, OP_Equality) != null;
 			}
 			return false;
@@ -50,6 +60,16 @@ namespace MaxyGames.UNode {
 				}
 			}
 			else {
+				if(leftType.IsEnum || rightType.IsEnum) {
+					if(leftType.IsEnum == false) {
+						rightType = Enum.GetUnderlyingType(rightType);
+					}
+					else if(rightType.IsEnum == false) {
+						leftType = Enum.GetUnderlyingType(leftType);
+					}
+					if(leftType == rightType)
+						return true;
+				}
 				return ReflectionUtils.GetUserDefinedOperator(leftType, rightType, OP_Inequality) != null;
 			}
 			return false;
@@ -1851,9 +1871,7 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Bitwise
-		static Func<object, object, object> _and, _or, _exclusiveOr;
-		static Func<object, object, object> and, or, exclusiveOr;
-		static Dictionary<Type, Func<object, object, object>> _andEnum, _orEnum, _exclusiveOrEnum;
+		static Dictionary<Type, Func<object, object, object>> _andEnum, _exclusiveOrEnum;
 
 		public static object And(object a, object b) {
 			if(a is Enum) {
@@ -1866,14 +1884,14 @@ namespace MaxyGames.UNode {
 						paramB = Expression.Parameter(typeof(object), "b");
 					_andEnum[t] = Expression.Lambda<Func<object, object, object>>(
 						Expression.Convert(
-							Expression.And(
+							Expression.Convert(Expression.And(
 								Expression.Convert(paramA, Enum.GetUnderlyingType(t)),
-								Expression.Convert(paramB, Enum.GetUnderlyingType(t))),
+								Expression.Convert(paramB, Enum.GetUnderlyingType(t))), t),
 							typeof(object)), paramA, paramB).Compile();
 				}
 				return _andEnum[t](a, b);
 			}
-			else if(typeof(object) == typeof(object)) {
+			else {
 				Type t = a.GetType();
 				if(_andEnum == null) {
 					_andEnum = new Dictionary<Type, Func<object, object, object>>();
@@ -1890,17 +1908,6 @@ namespace MaxyGames.UNode {
 				}
 				return _andEnum[t](a, b);
 			}
-			if(and == null) {
-				ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
-					paramB = Expression.Parameter(typeof(object), "b");
-				and = Expression.Lambda<Func<object, object, object>>(
-					Expression.Convert(
-						Expression.And(
-							Expression.Convert(paramA, typeof(object)),
-							Expression.Convert(paramB, typeof(object))),
-						typeof(object)), paramA, paramB).Compile();
-			}
-			return and(a, b);
 		}
 
 		public static object Or(object a, object b) {
@@ -1914,14 +1921,14 @@ namespace MaxyGames.UNode {
 						paramB = Expression.Parameter(typeof(object), "b");
 					_andEnum[t] = Expression.Lambda<Func<object, object, object>>(
 						Expression.Convert(
-							Expression.Or(
+							Expression.Convert(Expression.Or(
 								Expression.Convert(paramA, Enum.GetUnderlyingType(t)),
-								Expression.Convert(paramB, Enum.GetUnderlyingType(t))),
+								Expression.Convert(paramB, Enum.GetUnderlyingType(t))), t),
 							typeof(object)), paramA, paramB).Compile();
 				}
 				return _andEnum[t](a, b);
 			}
-			else if(typeof(object) == typeof(object)) {
+			else {
 				Type t = a.GetType();
 				if(_andEnum == null) {
 					_andEnum = new Dictionary<Type, Func<object, object, object>>();
@@ -1938,17 +1945,6 @@ namespace MaxyGames.UNode {
 				}
 				return _andEnum[t](a, b);
 			}
-			if(or == null) {
-				ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
-					paramB = Expression.Parameter(typeof(object), "b");
-				or = Expression.Lambda<Func<object, object, object>>(
-					Expression.Convert(
-						Expression.Or(
-							Expression.Convert(paramA, typeof(object)),
-							Expression.Convert(paramB, typeof(object))),
-						typeof(object)), paramA, paramB).Compile();
-			}
-			return or(a, b);
 		}
 
 		public static object ExclusiveOr(object a, object b) {
@@ -1962,14 +1958,14 @@ namespace MaxyGames.UNode {
 						paramB = Expression.Parameter(typeof(object), "b");
 					_exclusiveOrEnum[t] = Expression.Lambda<Func<object, object, object>>(
 						Expression.Convert(
-							Expression.Or(
+							Expression.Convert(Expression.ExclusiveOr(
 								Expression.Convert(paramA, Enum.GetUnderlyingType(t)),
-								Expression.Convert(paramB, Enum.GetUnderlyingType(t))),
+								Expression.Convert(paramB, Enum.GetUnderlyingType(t))), t),
 							typeof(object)), paramA, paramB).Compile();
 				}
 				return _exclusiveOrEnum[t](a, b);
 			}
-			else if(typeof(object) == typeof(object)) {
+			else {
 				Type t = a.GetType();
 				if(_exclusiveOrEnum == null) {
 					_exclusiveOrEnum = new Dictionary<Type, Func<object, object, object>>();
@@ -1979,24 +1975,13 @@ namespace MaxyGames.UNode {
 						paramB = Expression.Parameter(typeof(object), "b");
 					_exclusiveOrEnum[t] = Expression.Lambda<Func<object, object, object>>(
 						Expression.Convert(
-							Expression.Or(
+							Expression.ExclusiveOr(
 								Expression.Convert(paramA, t),
 								Expression.Convert(paramB, t)),
 							typeof(object)), paramA, paramB).Compile();
 				}
 				return _exclusiveOrEnum[t](a, b);
 			}
-			if(exclusiveOr == null) {
-				ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
-					paramB = Expression.Parameter(typeof(object), "b");
-				exclusiveOr = Expression.Lambda<Func<object, object, object>>(
-					Expression.Convert(
-						Expression.ExclusiveOr(
-							Expression.Convert(paramA, typeof(object)),
-							Expression.Convert(paramB, typeof(object))),
-						typeof(object)), paramA, paramB).Compile();
-			}
-			return exclusiveOr(a, b);
 		}
 		#endregion
 

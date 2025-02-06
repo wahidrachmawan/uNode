@@ -31,14 +31,24 @@ namespace MaxyGames.UNode.Nodes {
 			//Initialize Flow Inputs
 			for(int i = 0; i < inputFlows.Count; i++) {
 				var macroPort = inputFlows[i];
-				FlowInput port = null;
-				port = FlowInput(macroPort.id.ToString(), (flow) => flow.Next(macroPort.exit)).SetName(macroPort.GetTitle());
+				var port = FlowInput(macroPort.id.ToString(), (flow) => flow.Next(macroPort.exit)).SetName(macroPort.GetTitle());
+				//port.actionOnExit = flow => {
+				//	if(flow is StateFlow) {
+				//		flow.state = macroPort.exit.GetCurrentState(flow);
+				//	}
+				//};
 				macroPort.enter = port;
+				if(i == 0) {
+					nodeObject.primaryFlowInput = port;
+				}
 			}
 			//Initialize Flow Outputs
 			for(int i = 0; i < outputFlows.Count; i++) {
 				var macroPort = outputFlows[i];
 				macroPort.exit = FlowOutput(macroPort.id.ToString()).SetName(macroPort.GetTitle());
+				if(i == 0) {
+					nodeObject.primaryFlowOutput = macroPort.exit;
+				}
 			}
 			//Initialize Value Inputs
 			for(int i = 0; i < inputValues.Count; i++) {
@@ -51,6 +61,9 @@ namespace MaxyGames.UNode.Nodes {
 				macroPort.output = ValueOutput(macroPort.id.ToString(), macroPort.ReturnType(), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
 				macroPort.output.AssignGetCallback(macroPort.nodeObject.GetPrimaryValue);
 				macroPort.output.AssignSetCallback(macroPort.nodeObject.SetPrimaryValue);
+				if(i == 0) {
+					nodeObject.primaryValueOutput = macroPort.output;
+				}
 			}
 		}
 
@@ -163,6 +176,15 @@ namespace MaxyGames.UNode.Nodes {
 				foreach(var p in inputFlows) {
 					var port = p;
 					CG.RegisterPort(port.enter, () => CG.GeneratePort(port.exit));
+					//if(CG.IsStateFlow(port.enter)) {
+					//	CG.RegisterAsStateFlow(port.exit.GetTargetFlow());
+					//	CG.SetStateInitialization(port.enter, () => {
+					//		var target = port.exit.GetTargetFlow();
+					//		if(target == null)
+					//			return null;
+					//		return CG.GetEvent(port.exit);
+					//	});
+					//}
 				}
 				//Initialize Flow Outputs
 				foreach(var p in outputFlows) {

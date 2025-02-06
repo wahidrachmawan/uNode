@@ -49,31 +49,52 @@ namespace MaxyGames.UNode.Nodes {
 				outputFlows.Clear();
 				outputValues.Clear();
 				//Initialize Flow Inputs
+				bool needSetPrimary = true;
 				foreach(var p in macroAsset.inputFlows) { 
 					var macroPort = p;
-					inputFlows.Add(
-						FlowInput(macroPort.id.ToString(), flow => {
-							var data = flow.GetElementData<LinkedData>(this);
-							if(data == null) {
-								//In case it is live editing.
-								OnRuntimeInitialize(flow);
-								data = flow.GetElementData<LinkedData>(this);
-							}
-							if(data.flowCallback.TryGetValue(macroPort.id, out var exit)) {
-								flow.Next(exit);
-							}
-							else {
-								throw new GraphException("Port not found", this);
-							}
-						}).SetName(macroPort.GetTitle())
-					);
+					var port = FlowInput(macroPort.id.ToString(), flow => {
+						var data = flow.GetElementData<LinkedData>(this);
+						if(data == null) {
+							//In case it is live editing.
+							OnRuntimeInitialize(flow);
+							data = flow.GetElementData<LinkedData>(this);
+						}
+						if(data.flowCallback.TryGetValue(macroPort.id, out var exit)) {
+							flow.Next(exit);
+						}
+						else {
+							throw new GraphException("Port not found", this);
+						}
+					});
+					//port.actionOnExit = flow => {
+					//	if(flow is StateFlow) {
+					//		var data = flow.GetElementData<LinkedData>(this);
+					//		if(data == null) {
+					//			//In case it is live editing.
+					//			data = flow.GetElementData<LinkedData>(this);
+					//		}
+					//		if(data.flowCallback.TryGetValue(macroPort.id, out var exit)) {
+					//			flow.state = exit.GetCurrentState(flow);
+					//		}
+					//	}
+					//};
+					inputFlows.Add(port.SetName(macroPort.GetTitle()));
+					if(needSetPrimary) {
+						needSetPrimary = false;
+						nodeObject.primaryFlowInput = inputFlows[0];
+					}
 				}
+				needSetPrimary = true;
 				//Initialize Flow Outputs
 				foreach(var p in macroAsset.outputFlows) {
 					var macroPort = p;
 					outputFlows.Add(
 						FlowOutput(macroPort.id.ToString()).SetName(macroPort.GetTitle())
 					);
+					if(needSetPrimary) {
+						needSetPrimary = false;
+						nodeObject.primaryFlowOutput = outputFlows[0];
+					}
 				}
 				//Initialize Value Inputs
 				foreach(var p in macroAsset.inputValues) {
@@ -82,6 +103,7 @@ namespace MaxyGames.UNode.Nodes {
 						ValueInput(macroPort.id.ToString(), macroPort.ReturnType()).SetName(macroPort.GetTitle())
 					);
 				}
+				needSetPrimary = true;
 				//Initialize Value Outputs
 				foreach(var p in macroAsset.outputValues) {
 					var macroPort = p;
@@ -115,6 +137,10 @@ namespace MaxyGames.UNode.Nodes {
 						}
 					});
 					outputValues.Add(port);
+					if(needSetPrimary) {
+						needSetPrimary = false;
+						nodeObject.primaryValueOutput = outputValues[0];
+					}
 				}
 			}
 			else {
