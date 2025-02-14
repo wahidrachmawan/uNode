@@ -19,14 +19,6 @@ namespace MaxyGames.UNode.Editors {
 
 		public const string TabDragKEY = "[uNode-Tab]";
 
-		public static HashSet<string> GetOpenedGraphUsingNamespaces() {
-			HashSet<string> ns = null;
-			if(openedGraph != null) {
-				ns = openedGraph.graphData.GetUsingNamespaces();
-			}
-			return ns;
-		}
-
 		/// <summary>
 		/// Refresh opened graph.
 		/// </summary>
@@ -661,10 +653,6 @@ namespace MaxyGames.UNode.Editors {
 
 		}
 
-		public virtual void DrawTabbar(Vector2 position) {
-
-		}
-
 		public virtual void OnErrorUpdated() {
 
 		}
@@ -687,14 +675,25 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Utility
+		/// <summary>
+		/// Get the debug data
+		/// </summary>
+		/// <returns></returns>
 		protected GraphDebug.DebugData GetDebugData() {
 			return uNodeEditor.GetDebugData(graphData);
 		}
 
+		/// <summary>
+		/// Get mouse position on the canvas
+		/// </summary>
+		/// <returns></returns>
 		public Vector2 GetMousePosition() {
 			return topMousePos;
 		}
 
+		/// <summary>
+		/// Clear the selections
+		/// </summary>
 		public void ClearSelection() {
 			window.ChangeEditorSelection(null);
 		}
@@ -718,22 +717,15 @@ namespace MaxyGames.UNode.Editors {
 			SelectionChanged();
 		}
 
-		public void UnselectNode(NodeObject node) {
-			graphData.RemoveFromSelection(node);
+		public void Unselect(UGraphElement element) {
+			graphData.RemoveFromSelection(element);
 		}
 
-		public void SelectNode(IEnumerable<NodeObject> nodes) {
+		public void Select(IEnumerable<UGraphElement> elements) {
 			ClearSelection();
-			foreach(var node in nodes) {
+			foreach(var node in elements) {
 				graphData.AddToSelection(node);
 			}
-			SelectionChanged();
-			Refresh();
-		}
-
-		public void SelectRoot(NodeContainer root) {
-			graphData.GetPosition(root);
-			graphData.AddToSelection(root);
 			SelectionChanged();
 			Refresh();
 		}
@@ -756,6 +748,11 @@ namespace MaxyGames.UNode.Editors {
 			zoomScale = zoom;
 		}
 
+		/// <summary>
+		/// Paste the copied nodes
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="removeOtherConnections"></param>
 		public void PasteNode(Vector2 position, bool removeOtherConnections = false) {
 			if(graphData.currentCanvas != null && GraphUtility.CopyPaste.IsCopiedNodes) {
 				var nodes = GraphUtility.CopyPaste.Paste(graphData.currentCanvas, removeOtherConnections: removeOtherConnections).Select(n => n as NodeObject).ToArray();

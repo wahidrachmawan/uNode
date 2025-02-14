@@ -1188,48 +1188,60 @@ namespace MaxyGames.UNode.Editors {
 				};
 				function.AddToClassList("path-function");
 				{
-					function.menu = new DropdownMenu();
-					if(graphData.isSupportMainGraph) {
-						function.menu.AppendAction($"[{graphData.mainGraphTitle}]", (act) => {
-							if(graphData.selectedRoot != null || graphData.selectedGroup != null) {
-								graphData.ClearSelection();
-								graphData.currentCanvas = null;
-								Refresh();
-								UpdatePosition();
-							}
-							window.ChangeEditorSelection(null);
-						}, (act) => {
-							if(graphData.selectedRoot == null) {
-								return DropdownMenuAction.Status.Checked;
-							}
-							return DropdownMenuAction.Status.Normal;
-						});
-					}
+					function.onClick = evt => {
+						if(graphData.currentCanvas == root) {
+							window.ChangeEditorSelection(root);
+						}
+						else {
+							graphData.currentCanvas = root;
+							SelectionChanged();
+							Refresh();
+							UpdatePosition();
+						}
+					};
+					function.AddManipulator(new ContextualMenuManipulator(evt => {
+						if(graphData.isSupportMainGraph) {
+							evt.menu.AppendAction($"[{graphData.mainGraphTitle}]", (act) => {
+								if(graphData.selectedRoot != null || graphData.selectedGroup != null) {
+									graphData.ClearSelection();
+									graphData.currentCanvas = null;
+									Refresh();
+									UpdatePosition();
+								}
+								window.ChangeEditorSelection(null);
+							}, (act) => {
+								if(graphData.selectedRoot == null) {
+									return DropdownMenuAction.Status.Checked;
+								}
+								return DropdownMenuAction.Status.Normal;
+							});
+						}
 
-					List<NodeContainer> roots = new List<NodeContainer>();
-					roots.AddRange(graphData.graph.GetFunctions());
-					roots.Sort((x, y) => string.Compare(x.name, y.name, StringComparison.OrdinalIgnoreCase));
-					for(int i = 0; i < roots.Count; i++) {
-						var r = roots[i];
-						if(r == null)
-							continue;
-						function.menu.AppendAction(r.name, (act) => {
-							if(graphData.currentCanvas == r) {
-								window.ChangeEditorSelection(r);
-							}
-							else {
-								graphData.currentCanvas = r;
-								SelectionChanged();
-								Refresh();
-								UpdatePosition();
-							}
-						}, (act) => {
-							if(r == graphData.selectedRoot) {
-								return DropdownMenuAction.Status.Checked;
-							}
-							return DropdownMenuAction.Status.Normal;
-						});
-					}
+						List<NodeContainer> roots = new List<NodeContainer>();
+						roots.AddRange(graphData.graph.GetFunctions());
+						roots.Sort((x, y) => string.Compare(x.name, y.name, StringComparison.OrdinalIgnoreCase));
+						for(int i = 0; i < roots.Count; i++) {
+							var r = roots[i];
+							if(r == null)
+								continue;
+							evt.menu.AppendAction(r.name, (act) => {
+								if(graphData.currentCanvas == r) {
+									window.ChangeEditorSelection(r);
+								}
+								else {
+									graphData.currentCanvas = r;
+									SelectionChanged();
+									Refresh();
+									UpdatePosition();
+								}
+							}, (act) => {
+								if(r == graphData.selectedRoot) {
+									return DropdownMenuAction.Status.Checked;
+								}
+								return DropdownMenuAction.Status.Normal;
+							});
+						}
+					}));
 				}
 				function.ShowIcon(uNodeEditorUtility.GetTypeIcon(root == null ? typeof(TypeIcons.StateIcon) : typeof(TypeIcons.MethodIcon)));
 				pathbar.Add(function);

@@ -1075,7 +1075,7 @@ namespace MaxyGames.UNode.Editors {
 		public override void RemoveFromSelection(ISelectable selectable) {
 			base.RemoveFromSelection(selectable);
 			if(selectable is BaseNodeView) {
-				graph.UnselectNode((selectable as BaseNodeView).nodeObject);
+				graph.Unselect((selectable as BaseNodeView).nodeObject);
 				AutoHideGraphElement.UnregisterNodeToIgnore(selectable as NodeView);
 			}
 		}
