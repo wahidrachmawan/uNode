@@ -478,7 +478,7 @@ namespace MaxyGames.UNode.Editors {
 			for (int i = 0; i < outputPorts.Count;i++) {
 				outputPorts[i]?.ReloadView();
 			}
-			MarkDirtyRepaint();
+			//MarkDirtyRepaint();
 		}
 		#endregion
 

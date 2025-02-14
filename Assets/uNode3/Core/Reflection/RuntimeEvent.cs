@@ -30,6 +30,14 @@ namespace MaxyGames.UNode {
 					if(member.eventInfo != null) {
 						return member.eventInfo.EventHandlerType;
 					}
+					else if(member.memberInfo != null) {
+						//In case member is field, property or method
+						var lastMember = member.memberInfo[member.memberInfo.Length - 1];
+						var lastMemberType = ReflectionUtils.GetMemberType(lastMember);
+						if(lastMemberType.IsSubclassOf(typeof(Delegate))) {
+							return lastMemberType;
+						}
+					}
 				}
 				return base.EventHandlerType;
 			}

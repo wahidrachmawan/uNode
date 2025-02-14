@@ -130,7 +130,7 @@ namespace MaxyGames.UNode.Editors {
 									new GUIContent("Flow", uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FlowIcon))));
 							}
 							else {
-								var portType = (input as ValueInput).type;
+								var portType = (output as ValueOutput).type;
 								EditorGUI.LabelField(
 									EditorGUI.PrefixLabel(uNodeGUIUtility.GetRect(), new GUIContent("Type")),
 									new GUIContent(portType.PrettyName(false), uNodeEditorUtility.GetTypeIcon(portType)));
@@ -145,7 +145,7 @@ namespace MaxyGames.UNode.Editors {
 									new GUIContent("Flow", uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FlowIcon))));
 							}
 							else {
-								var portType = (output as ValueOutput).type;
+								var portType = (input as ValueInput).type;
 								EditorGUI.LabelField(
 									EditorGUI.PrefixLabel(uNodeGUIUtility.GetRect(), new GUIContent("Type")),
 									new GUIContent(portType.PrettyName(false), uNodeEditorUtility.GetTypeIcon(portType)));

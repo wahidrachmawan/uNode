@@ -209,6 +209,7 @@ namespace MaxyGames.UNode.Editors {
 			if(ShowExpandButton()) {
 				expanded = nodeObject.nodeExpanded;
 			}
+			UpdateUI();
 		}
 
 		/// <summary>

@@ -175,6 +175,22 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		private MemberData.TargetType tag = MemberData.TargetType.None;
+		public override void UpdateUI() {
+			base.UpdateUI();
+			MultipurposeNode node = nodeObject.node as MultipurposeNode;
+			var nodeTag = node.target.targetType;
+			if(nodeTag != MemberData.TargetType.None) {
+				if(tag != nodeTag) {
+					if(tag != MemberData.TargetType.None) {
+						this.RemoveFromClassList(tag.ToString());
+					}
+					tag = nodeTag;
+					this.AddToClassList(tag.ToString());
+				}
+			}
+		}
+
 		protected override void OnCustomStyleResolved(ICustomStyle style) {
 			base.OnCustomStyleResolved(style);
 			if(isCompact && primaryOutputValue != null) {

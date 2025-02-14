@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.8
+- Improved Editor
+- Fixed some bugs
+
 ## v3.0.7
 - Added default value support for parameters
 - Added Graph Inspector window, useful if needed to see both node properties and game object properties on the screen in the same time

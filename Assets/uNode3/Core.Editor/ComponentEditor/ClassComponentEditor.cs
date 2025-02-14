@@ -110,7 +110,14 @@ namespace MaxyGames.UNode.Editors {
 					EditorGUILayout.EndHorizontal();
 				}
 			} else {
-				EditorGUILayout.HelpBox("Please assign the target graph", MessageType.Error);
+				EditorGUILayout.HelpBox("Please assign the target graph or create a New", MessageType.Error);
+
+				if(GUILayout.Button("New Graph")) {
+					GraphCreatorWindow.ShowWindow(new ClassDefinitionCreator(), true, obj => {
+						var definition = obj as ClassDefinition;
+						asset.target = definition;
+					});
+				}
 			}
 		}
 	}

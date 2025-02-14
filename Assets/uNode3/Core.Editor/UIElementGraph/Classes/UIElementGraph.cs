@@ -1365,6 +1365,7 @@ namespace MaxyGames.UNode.Editors {
 			MarkReloadTabbar();
 			graphPanel?.MarkRepaint();
 			graphView.MarkRepaint(fullReload);
+			needReloadMainTab = true;
 		}
 
 		public override void OnSearchChanged(string search) {
@@ -1681,6 +1682,7 @@ namespace MaxyGames.UNode.Editors {
 		private IMGUIContainer mainGUIContainer;
 		private uNodeEditor.GraphExplorerTree explorerTree;
 		private UnityEditor.IMGUI.Controls.SearchField explorerSearch;
+		private bool needReloadMainTab;
 
 		public override void DrawMainTab(uNodeEditor window) {
 			base.DrawMainTab(window);
@@ -1690,6 +1692,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(explorerTree == null) {
 					explorerTree = new uNodeEditor.GraphExplorerTree();
+				}
+				if(needReloadMainTab) {
+					needReloadMainTab = false;
+					explorerTree.Reload();
 				}
 				mainGUIContainer = new IMGUIContainer(() => {
 					var areaRect = new Rect(0, 0, mainGUIContainer.layout.width, mainGUIContainer.layout.height);

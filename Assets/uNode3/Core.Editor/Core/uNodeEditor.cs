@@ -1501,6 +1501,9 @@ namespace MaxyGames.UNode.Editors {
 			if(window == null) {
 				ShowWindow();
 			}
+			else if(window.hasFocus == false) {
+				window.Focus();
+			}
 			var cachedGraph = FindCachedGraph(scriptGraph as UnityEngine.Object);
 			if(cachedGraph != null) {
 				for(int i = 0; i < cachedGraph.graphDatas.Count; i++) {
@@ -1540,6 +1543,9 @@ namespace MaxyGames.UNode.Editors {
 				throw new ArgumentNullException(nameof(scriptGraphType));
 			if(window == null) {
 				ShowWindow();
+			}
+			else if(window.hasFocus == false) {
+				window.Focus();
 			}
 			var owner = scriptGraphType.ScriptTypeData.scriptGraphReference;
 			var cachedGraph = FindCachedGraph(owner);
@@ -1592,6 +1598,9 @@ namespace MaxyGames.UNode.Editors {
 				throw new ArgumentNullException(nameof(graph));
 			if(window == null) {
 				ShowWindow();
+			}
+			else if(window.hasFocus == false) {
+				window.Focus();
 			}
 			if(canvas != null) {
 				if(canvas.graphContainer != null && canvas.graphContainer != graph)

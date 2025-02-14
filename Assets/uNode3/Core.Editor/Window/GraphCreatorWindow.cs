@@ -5,11 +5,14 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 using Object = UnityEngine.Object;
+using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode.Editors {
 	public class GraphCreatorWindow : EditorWindow {
 		private GraphCreator graphCreator;
 		private Vector2 scrollPos;
+		public Action<Object> onCreate;
+		public bool lockGraphType;
 
 		#region Window
 		private static GraphCreatorWindow window;
@@ -23,11 +26,39 @@ namespace MaxyGames.UNode.Editors {
 			return window;
 		}
 
-		public static GraphCreatorWindow ShowWindow(Type graphType) {
+		public static GraphCreatorWindow ShowWindow(Type graphType, bool lockGraphType = false, Action<Object> onCreate = null) {
 			window = ShowWindow();
-			if(graphType == typeof(ClassDefinition)) {
+			if(graphType == typeof(ClassDefinition) || graphType == typeof(ClassComponent)) {
 				window.graphCreator = FindGraphCreators().First(g => g is ClassDefinitionCreator);
 			}
+			else if(graphType == typeof(ClassAsset)) {
+				window.graphCreator = new ClassDefinitionCreator() {
+					model = new ClassAssetModel(),
+				};
+			}
+			else if(graphType == typeof(GraphSingleton)) {
+				window.graphCreator = FindGraphCreators().First(g => g is GraphSingletonCreator);
+			}
+			else if(graphType == typeof(ClassScript)) {
+				window.graphCreator = FindGraphCreators().First(g => g is ClassScriptGraphCreator);
+			}
+			else {
+				window.graphCreator = FindGraphCreators().FirstOrDefault(g => g.GetType() == graphType);
+			}
+			if(window.graphCreator != null) {
+				window.graphCreator.window = window;
+				window.onCreate = onCreate;
+				window.lockGraphType = lockGraphType;
+			}
+			return window;
+		}
+
+		public static GraphCreatorWindow ShowWindow(GraphCreator graphCreator, bool lockGraphType = false, Action<Object> onCreate = null) {
+			window = ShowWindow();
+			window.graphCreator = graphCreator;
+			window.graphCreator.window = window;
+			window.onCreate = onCreate;
+			window.lockGraphType = lockGraphType;
 			return window;
 		}
 		#endregion
@@ -42,20 +73,25 @@ namespace MaxyGames.UNode.Editors {
 					EditorGUILayout.HelpBox("No Graph Creator found", MessageType.Error);
 					return;
 				}
+				else {
+					graphCreator.window = this;
+				}
 			}
 			scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-			var rect = EditorGUI.PrefixLabel(uNodeGUIUtility.GetRect(), new GUIContent("Graph"));
-			if (GUI.Button(rect, new GUIContent(graphCreator.menuName), EditorStyles.popup)) {
-				var creators = FindGraphCreators();
-				GenericMenu menu = new GenericMenu();
-				for (int i = 0; i < creators.Count; i++) {
-					var creator = creators[i];
-					menu.AddItem(new GUIContent(creator.menuName), graphCreator == creator, () => {
-						graphCreator = creator;
-					});
+			if(lockGraphType == false) {
+				var rect = EditorGUI.PrefixLabel(uNodeGUIUtility.GetRect(), new GUIContent("Graph"));
+				if(GUI.Button(rect, new GUIContent(graphCreator.menuName), EditorStyles.popup)) {
+					var creators = FindGraphCreators();
+					GenericMenu menu = new GenericMenu();
+					for(int i = 0; i < creators.Count; i++) {
+						var creator = creators[i];
+						menu.AddItem(new GUIContent(creator.menuName), graphCreator == creator, () => {
+							graphCreator = creator;
+						});
+					}
+					menu.ShowAsContext();
+					Event.current.Use();
 				}
-				menu.ShowAsContext();
-				Event.current.Use();
 			}
 			graphCreator.OnGUI();
 			EditorGUILayout.EndScrollView();
@@ -80,6 +116,7 @@ namespace MaxyGames.UNode.Editors {
 						startPath);
 					if (path.Length != 0) {
 						PrefabUtility.SaveAsPrefabAsset(gameObject, path);
+						onCreate?.Invoke(obj);
 						Close();
 					}
 					DestroyImmediate(gameObject);
@@ -110,6 +147,7 @@ namespace MaxyGames.UNode.Editors {
 						else if(asset is IScriptGraphType) {
 							uNodeEditor.Open(asset as IScriptGraphType);
 						}
+						onCreate?.Invoke(obj);
 					}
 				} else {
 					throw new InvalidOperationException();
@@ -151,6 +189,7 @@ namespace MaxyGames.UNode.Editors {
 			UnityEventType.Start,
 			UnityEventType.Update,
 		};
+		protected bool createEventInMainGraph = true;
 		protected List<MemberInfo> graphOverrideMembers = new List<MemberInfo>();
 		protected SerializedType graphInheritFrom = typeof(object);
 		protected FilterAttribute graphInheritFilter = FilterAttribute.DefaultInheritFilter;
@@ -158,6 +197,8 @@ namespace MaxyGames.UNode.Editors {
 		protected List<VariableData> graphVariables = new List<VariableData>();
 
 		protected GraphLayout graphLayout = GraphLayout.Vertical;
+
+		public GraphCreatorWindow window;
 		#endregion
 
 		#region Enums
@@ -251,49 +292,201 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected void CreateUnityEvents(IGraph graph) {
-			foreach(var evt in graphUnityEvents) {
-				var func = CreateObject<Function>(evt.ToString(), graph.GraphData.functionContainer, null);
-				func.modifier.SetPrivate();
-				switch(evt) {
-					case UnityEventType.OnAnimatorIK:
-						func.parameters = new List<ParameterData>() {
+			if(createEventInMainGraph) {
+				var container = graph.GraphData.mainGraphContainer;
+				Rect position = new();
+				foreach(var evt in graphUnityEvents) {
+					if(graphLayout == GraphLayout.Vertical) {
+						position.x += 250;
+					}
+					else {
+						position.y += 250;
+					}
+					switch(evt) {
+						case UnityEventType.Awake:
+							container.AddChild(new NodeObject(new AwakeEvent()) {  position = position });
+							break;
+						case UnityEventType.Start:
+							container.AddChild(new NodeObject(new StartEvent()) { position = position });
+							break;
+						case UnityEventType.Update:
+							container.AddChild(new NodeObject(new UpdateEvent()) { position = position });
+							break;
+						case UnityEventType.FixedUpdate:
+							container.AddChild(new NodeObject(new FixedUpdateEvent()) { position = position });
+							break;
+						case UnityEventType.LateUpdate:
+							container.AddChild(new NodeObject(new LateUpdateEvent()) { position = position });
+							break;
+						case UnityEventType.OnAnimatorIK: {
+							var func = CreateObject<Function>(evt.ToString(), graph.GraphData.functionContainer, null);
+							func.modifier.SetPrivate();
+							func.parameters = new List<ParameterData>() {
+								new ParameterData("parameter", typeof(int))
+							};
+							break;
+						}
+						case UnityEventType.OnAnimatorMove: {
+							var func = CreateObject<Function>(evt.ToString(), graph.GraphData.functionContainer, null);
+							func.modifier.SetPrivate();
+							break;
+						}
+						case UnityEventType.OnApplicationFocus:
+							container.AddChild(new NodeObject(new OnApplicationFocusEvent()) { position = position });
+							break;
+						case UnityEventType.OnApplicationPause:
+							container.AddChild(new NodeObject(new OnApplicationPauseEvent()) { position = position });
+							break;
+						case UnityEventType.OnApplicationQuit:
+							container.AddChild(new NodeObject(new OnApplicationQuitEvent()) { position = position });
+							break;
+						case UnityEventType.OnBecameInvisible:
+							container.AddChild(new NodeObject(new OnBecameInvisibleEvent()) { position = position });
+							break;
+						case UnityEventType.OnBecameVisible:
+							container.AddChild(new NodeObject(new OnBecameVisibleEvent()) { position = position });
+							break;
+						case UnityEventType.OnCollisionEnter:
+							container.AddChild(new NodeObject(new OnCollisionEnterEvent()) { position = position });
+							break;
+						case UnityEventType.OnCollisionEnter2D:
+							container.AddChild(new NodeObject(new OnCollisionEnter2DEvent()) { position = position });
+							break;
+						case UnityEventType.OnCollisionExit:
+							container.AddChild(new NodeObject(new OnCollisionExitEvent()) { position = position });
+							break;
+						case UnityEventType.OnCollisionExit2D:
+							container.AddChild(new NodeObject(new OnCollisionExit2DEvent()) { position = position });
+							break;
+						case UnityEventType.OnCollisionStay:
+							container.AddChild(new NodeObject(new OnCollisionStayEvent()) { position = position });
+							break;
+						case UnityEventType.OnCollisionStay2D:
+							container.AddChild(new NodeObject(new OnCollisionStay2DEvent()) { position = position });
+							break;
+						case UnityEventType.OnDestroy:
+							container.AddChild(new NodeObject(new OnDestroyEvent()) { position = position });
+							break;
+						case UnityEventType.OnDisable:
+							container.AddChild(new NodeObject(new OnDisableEvent()) { position = position });
+							break;
+						case UnityEventType.OnEnable:
+							container.AddChild(new NodeObject(new OnEnableEvent()) { position = position });
+							break;
+						case UnityEventType.OnGUI:
+							container.AddChild(new NodeObject(new OnGUIEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseDown:
+							container.AddChild(new NodeObject(new OnMouseDownEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseDrag:
+							container.AddChild(new NodeObject(new OnMouseDragEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseEnter:
+							container.AddChild(new NodeObject(new OnMouseEnterEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseExit:
+							container.AddChild(new NodeObject(new OnMouseExitEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseOver:
+							container.AddChild(new NodeObject(new OnMouseOverEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseUp:
+							container.AddChild(new NodeObject(new OnMouseUpEvent()) { position = position });
+							break;
+						case UnityEventType.OnMouseUpAsButton:
+							container.AddChild(new NodeObject(new OnMouseUpAsButtonEvent()) { position = position });
+							break;
+						case UnityEventType.OnPostRender:
+							container.AddChild(new NodeObject(new OnPostRenderEvent()) { position = position });
+							break;
+						case UnityEventType.OnPreCull:
+							container.AddChild(new NodeObject(new OnPreCullEvent()) { position = position });
+							break;
+						case UnityEventType.OnPreRender:
+							container.AddChild(new NodeObject(new OnPreRenderEvent()) { position = position });
+							break;
+						case UnityEventType.OnRenderObject:
+							container.AddChild(new NodeObject(new OnRenderObjectEvent()) { position = position });
+							break;
+						case UnityEventType.OnTransformChildrenChanged:
+							container.AddChild(new NodeObject(new OnTransformChildrenChangedEvent()) { position = position });
+							break;
+						case UnityEventType.OnTransformParentChanged:
+							container.AddChild(new NodeObject(new OnTransformParentChangedEvent()) { position = position });
+							break;
+						case UnityEventType.OnTriggerEnter:
+							container.AddChild(new NodeObject(new OnTriggerEnterEvent()) { position = position });
+							break;
+						case UnityEventType.OnTriggerEnter2D:
+							container.AddChild(new NodeObject(new OnTriggerEnter2DEvent()) { position = position });
+							break;
+						case UnityEventType.OnTriggerExit:
+							container.AddChild(new NodeObject(new OnTriggerExitEvent()) { position = position });
+							break;
+						case UnityEventType.OnTriggerExit2D:
+							container.AddChild(new NodeObject(new OnTriggerExit2DEvent()) { position = position });
+							break;
+						case UnityEventType.OnTriggerStay:
+							container.AddChild(new NodeObject(new OnTriggerStayEvent()) { position = position });
+							break;
+						case UnityEventType.OnTriggerStay2D:
+							container.AddChild(new NodeObject(new OnTriggerStay2DEvent()) { position = position });
+							break;
+						case UnityEventType.OnWillRenderObject:
+							container.AddChild(new NodeObject(new OnWillRenderObjectEvent()) { position = position });
+							break;
+						default:
+
+							break;
+					}
+				}
+			}
+			else {
+				foreach(var evt in graphUnityEvents) {
+					var func = CreateObject<Function>(evt.ToString(), graph.GraphData.functionContainer, null);
+					func.modifier.SetPrivate();
+					switch(evt) {
+						case UnityEventType.OnAnimatorIK:
+							func.parameters = new List<ParameterData>() {
 							new ParameterData("parameter", typeof(int))
 						};
-						break;
-					case UnityEventType.OnApplicationFocus:
-					case UnityEventType.OnApplicationPause:
-						func.parameters = new List<ParameterData>() {
+							break;
+						case UnityEventType.OnApplicationFocus:
+						case UnityEventType.OnApplicationPause:
+							func.parameters = new List<ParameterData>() {
 							new ParameterData("parameter", typeof(bool))
 						};
-						break;
-					case UnityEventType.OnCollisionEnter:
-					case UnityEventType.OnCollisionExit:
-					case UnityEventType.OnCollisionStay:
-						func.parameters = new List<ParameterData>() {
+							break;
+						case UnityEventType.OnCollisionEnter:
+						case UnityEventType.OnCollisionExit:
+						case UnityEventType.OnCollisionStay:
+							func.parameters = new List<ParameterData>() {
 							new ParameterData("collision", typeof(Collision))
 						};
-						break;
-					case UnityEventType.OnCollisionEnter2D:
-					case UnityEventType.OnCollisionExit2D:
-					case UnityEventType.OnCollisionStay2D:
-						func.parameters = new List<ParameterData>() {
+							break;
+						case UnityEventType.OnCollisionEnter2D:
+						case UnityEventType.OnCollisionExit2D:
+						case UnityEventType.OnCollisionStay2D:
+							func.parameters = new List<ParameterData>() {
 							new ParameterData("collision", typeof(Collision2D))
 						};
-						break;
-					case UnityEventType.OnTriggerEnter:
-					case UnityEventType.OnTriggerExit:
-					case UnityEventType.OnTriggerStay:
-						func.parameters = new List<ParameterData>() {
+							break;
+						case UnityEventType.OnTriggerEnter:
+						case UnityEventType.OnTriggerExit:
+						case UnityEventType.OnTriggerStay:
+							func.parameters = new List<ParameterData>() {
 							new ParameterData("collider", typeof(Collider))
 						};
-						break;
-					case UnityEventType.OnTriggerEnter2D:
-					case UnityEventType.OnTriggerExit2D:
-					case UnityEventType.OnTriggerStay2D:
-						func.parameters = new List<ParameterData>() {
+							break;
+						case UnityEventType.OnTriggerEnter2D:
+						case UnityEventType.OnTriggerExit2D:
+						case UnityEventType.OnTriggerStay2D:
+							func.parameters = new List<ParameterData>() {
 							new ParameterData("collider", typeof(Collider2D))
 						};
-						break;
+							break;
+					}
 				}
 			}
 		}
@@ -617,7 +810,7 @@ namespace MaxyGames.UNode.Editors {
 	class ClassDefinitionCreator : GraphCreator {
 		public override string menuName => "Runtime Graph/Class Definition";
 
-		private ClassDefinitionModel model = new ClassComponentModel();
+		public ClassDefinitionModel model = new ClassComponentModel();
 
 		protected virtual ClassDefinition CreateGraph() {
 			return ScriptableObject.CreateInstance<ClassDefinition>();
@@ -639,7 +832,9 @@ namespace MaxyGames.UNode.Editors {
 
 		public override void OnGUI() {
 			DrawGraphIcon();
-			uNodeGUI.DrawClassDefinitionModel(model, m => model = m);
+			if(window == null || window.lockGraphType == false) {
+				uNodeGUI.DrawClassDefinitionModel(model, m => model = m);
+			}
 			DrawNamespaces();
 			DrawUsingNamespaces();
 			if(model.InheritType.IsCastableTo(typeof(MonoBehaviour))) {
