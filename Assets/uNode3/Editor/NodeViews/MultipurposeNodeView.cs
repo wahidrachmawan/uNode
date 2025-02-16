@@ -35,7 +35,11 @@ namespace MaxyGames.UNode.Editors {
 					GoToDefinition();
 				}
 			});
-			{//Initialize ports
+
+			if(nodeObject.isPreviousPortRestored) {
+				InitializeDefaultPorts();
+			}
+			else {//Initialize ports
 				if(node.target.targetType != MemberData.TargetType.Constructor) {
 					foreach(var port in nodeObject.FlowInputs) {
 						if(port == nodeObject.primaryFlowInput) {

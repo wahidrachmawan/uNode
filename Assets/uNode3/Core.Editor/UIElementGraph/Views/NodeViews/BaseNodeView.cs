@@ -60,6 +60,10 @@ namespace MaxyGames.UNode.Editors {
 					}
 				});
 			}
+			InitializeDefaultPorts();
+		}
+
+		protected virtual void InitializeDefaultPorts() {
 			foreach(var port in nodeObject.FlowInputs) {
 				if(port == nodeObject.primaryFlowInput) {
 					AddPrimaryInputFlow();
@@ -105,7 +109,12 @@ namespace MaxyGames.UNode.Editors {
 				InitializeView();
 			}
 			catch(Exception ex) {
-				Debug.LogException(ex);
+				if(ex is GraphException) {
+					Debug.LogException(ex);
+				}
+				else {
+					Debug.LogException(new GraphException(ex, nodeObject));
+				}
 			}
 			Teleport(nodeObject.position);
 

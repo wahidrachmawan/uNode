@@ -72,7 +72,12 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 					catch(Exception ex) {
-						Debug.LogException(ex);
+						if(ex is GraphException) {
+							Debug.LogException(ex);
+						}
+						else {
+							Debug.LogException(new GraphException(ex, node));
+						}
 					}
 					if(data.needWait) {
 						data.DisplayProgress("Loading graph", "Initialize Node", currentCount / count);

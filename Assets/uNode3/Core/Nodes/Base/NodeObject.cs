@@ -200,6 +200,7 @@ namespace MaxyGames.UNode {
 		/// True if the node has been registered.
 		/// </summary>
 		public bool isRegistered { get; internal set; }
+		public bool isPreviousPortRestored { get; private set; }
 		public Exception exceptionRegister { get; private set; }
 		private NodePreservation preservation;
 
@@ -242,6 +243,7 @@ namespace MaxyGames.UNode {
 			primaryFlowInput = null;
 			primaryFlowOutput = null;
 			primaryValueOutput = null;
+			isPreviousPortRestored = false;
 			preservation = NodePreservation.Preserve(this);
 			Unregister();
 			try {
@@ -251,7 +253,7 @@ namespace MaxyGames.UNode {
 				preservation.RestoreInvalid();
 			}
 			catch(Exception ex) {
-				preservation.RestoreCauseOfErrors();
+				RestorePreviousPort();
 				exceptionRegister = ex;
 				Debug.LogError(new GraphException(ex, this));
 			}
@@ -271,6 +273,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public void RestorePreviousPort() {
 			preservation.RestoreCauseOfErrors();
+			isPreviousPortRestored = true;
 		}
 
 		public ValueInput RegisterPort(ValueInput port) {

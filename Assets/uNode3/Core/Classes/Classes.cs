@@ -270,6 +270,10 @@ namespace MaxyGames.UNode {
 						}
 					}
 					else if(member.IsTargetingReflection) {
+						if(member.startType == null) {
+							RegisterError(owner, $"Missing type: " + member.StartSerializedType.prettyName);
+							return true;
+						}
 						foreach(var item in member.Items) {
 							if(item.reference != null) {
 								if(item.reference is VariableRef) {
@@ -589,7 +593,7 @@ namespace MaxyGames.UNode {
 
 		public override string ToString() {
 			string msg;
-			if(string.IsNullOrEmpty(Message) && InnerException != null) {
+			if(string.IsNullOrEmpty(base.Message) && InnerException != null) {
 				msg = InnerException.ToString();
 			}
 			else {
@@ -599,6 +603,15 @@ namespace MaxyGames.UNode {
 				msg = msg.AddLineInEnd().Add(GetMessage(graphReference));
 			}
 			return msg;
+		}
+
+		public override string Message {
+			get {
+				if(graphReference != null) {
+					return base.Message.AddLineInEnd() + GetMessage(graphReference);
+				}
+				return base.Message;
+			}
 		}
 
 		public static string GetMessage(string message, UGraphElement element) {
