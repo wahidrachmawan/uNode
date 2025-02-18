@@ -1477,6 +1477,13 @@ namespace MaxyGames.UNode.Editors {
 					CaptureGraphScreenshot();
 				}, DropdownMenuAction.AlwaysEnabled);
 
+				evt.menu.AppendAction("Export to JSON", (e) => {
+					var data = SerializedGraph.Serialize(graphData.graphData, OdinSerializer.DataFormat.JSON);
+					var bytes = OdinSerializer.SerializationUtility.SerializeValue(graphData.graphData, OdinSerializer.DataFormat.JSON, out _);
+					Debug.Log(System.Text.Encoding.UTF8.GetString(bytes));
+					uNodeEditorUtility.CopyToClipboard(System.Text.Encoding.UTF8.GetString(bytes));
+				}, DropdownMenuAction.AlwaysEnabled);
+
 				evt.menu.AppendSeparator("");
 				if(graphData.selectedNodes.Any()) {
 					evt.menu.AppendAction("Copy", (e) => {

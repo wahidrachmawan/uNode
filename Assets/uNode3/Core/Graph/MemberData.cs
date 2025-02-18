@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEngine;
 
 namespace MaxyGames.UNode {
-	public class MemberData : IGraphValue, IValueReference {
+	public partial class MemberData : IGraphValue, IValueReference {
 		#region Classes
 		public class ItemData {
 			public string name;

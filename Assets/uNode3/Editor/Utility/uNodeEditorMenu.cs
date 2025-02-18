@@ -31,7 +31,7 @@ namespace MaxyGames.UNode.Editors {
 
 		[MenuItem("Tools/uNode/Advanced/Scan AOT Type", false, 1000010)]
 		public static void ScanAOTType() {
-			uNodeEditorInitializer.AOTScan(out var types);
+			uNodeEditorInitializer.AOTScan(out var types, compileGraphs: true);
 			var db = uNodeUtility.GetDatabase();
 			db.aotTypes.Clear();
 			Debug.Log(types.Count);
@@ -39,6 +39,7 @@ namespace MaxyGames.UNode.Editors {
 				Debug.Log(t);
 				db.aotTypes.Add(t);
 			}
+			AOTSupportUtilities.GenerateDLL("uNode3Data", "OdinAOTSupport", types);
 		}
 
 		[MenuItem("Tools/uNode/Update Graph Database", false, 2)]

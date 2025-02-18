@@ -36,7 +36,7 @@ namespace MaxyGames.UNode {
 				}
 			}
 		}
-		[SerializeField]
+		[NonSerialized]
 		private string _tooltip;
 		/// <summary>
 		/// The port tooltip

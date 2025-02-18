@@ -6,7 +6,9 @@ using System.Collections;
 
 namespace MaxyGames.UNode {
 	public class FlowOutput : FlowPort {
+		[NonSerialized]
 		public bool localFunction;
+		[NonSerialized]
 		public bool isNextFlow;
 
 		/// <summary>

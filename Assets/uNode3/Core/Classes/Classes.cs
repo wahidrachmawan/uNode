@@ -663,7 +663,7 @@ namespace MaxyGames.UNode {
 	}
 
 	[Serializable]
-	public class SerializedType : ISerializationCallbackReceiver, IValueReference, IGetValue {
+	public partial class SerializedType : ISerializationCallbackReceiver, IValueReference, IGetValue {
 		[SerializeField]
 		private SerializedTypeKind kind;
 

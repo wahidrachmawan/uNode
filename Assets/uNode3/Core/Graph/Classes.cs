@@ -907,6 +907,7 @@ namespace MaxyGames.UNode {
 
 	public abstract class ValuePort : UPort {
 		protected Type _type;
+		[NonSerialized]
 		internal Func<Type> dynamicType;
 		public Type type {
 			get {
@@ -920,7 +921,9 @@ namespace MaxyGames.UNode {
 				_type = value;
 			}
 		}
+		[NonSerialized]
 		public Func<bool> canGetValue;
+		[NonSerialized]
 		public Func<bool> canSetValue;
 		public List<ValueConnection> connections = new List<ValueConnection>();
 

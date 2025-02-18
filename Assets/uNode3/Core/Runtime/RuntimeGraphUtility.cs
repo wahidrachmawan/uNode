@@ -30,6 +30,7 @@ namespace MaxyGames.UNode {
 
 			//For live editing
 			public void UpdateGraph() {
+				if(asset == null) return;
 				var version = asset.GraphData.version;
 				if(object.ReferenceEquals(GraphData, null) || GraphData.version != version) {
 					var data = SerializedGraph.Serialize(asset.GraphData);

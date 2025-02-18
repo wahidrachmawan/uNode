@@ -1247,10 +1247,10 @@ namespace MaxyGames.UNode.Editors {
 
 		#region AOT Scans
 		public static bool AOTScan(out List<Type> serializedTypes) {
-			return AOTScan(out serializedTypes, true, true, true, true, null);
+			return AOTScan(out serializedTypes, true);
 		}
 
-		public static bool AOTScan(out List<Type> serializedTypes, bool scanBuildScenes = true, bool scanAllAssetBundles = true, bool scanPreloadedAssets = true, bool scanResources = true, List<string> resourcesToScan = null) {
+		public static bool AOTScan(out List<Type> serializedTypes, bool scanBuildScenes = true, bool scanAllAssetBundles = true, bool scanPreloadedAssets = true, bool scanResources = true, List<string> resourcesToScan = null, bool compileGraphs = true) {
 			using(AOTSupportScanner aOTSupportScanner = new AOTSupportScanner()) {
 				aOTSupportScanner.BeginScan();
 				if(scanBuildScenes && !aOTSupportScanner.ScanBuildScenes(includeSceneDependencies: true, showProgressBar: true)) {
@@ -1278,10 +1278,12 @@ namespace MaxyGames.UNode.Editors {
 				//OnPreprocessBuild();
 				GraphUtility.UpdateDatabase();
 				GraphUtility.SaveAllGraph();
-				if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild) {
-					GenerationUtility.CompileProjectGraphs(true);
-					while(uNodeThreadUtility.IsNeedUpdate()) {
-						uNodeThreadUtility.Update();
+				if(compileGraphs) {
+					if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild) {
+						GenerationUtility.CompileProjectGraphs(true);
+						while(uNodeThreadUtility.IsNeedUpdate()) {
+							uNodeThreadUtility.Update();
+						}
 					}
 				}
 				var types = aOTSupportScanner.EndScan();

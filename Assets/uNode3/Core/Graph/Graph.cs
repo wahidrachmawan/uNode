@@ -131,12 +131,15 @@ namespace MaxyGames.UNode {
 			if(cachedElements.TryGetValue(id, out var e)) {
 				if(e != null)
 					return e as T;
+				//else
+				//	return null;
 			}
-			var ee = GetObjectInChildren<T>(element => element.id == id, true);
-			if(ee != null) {
-				cachedElements[id] = ee;
-			}
-			return ee;
+			//var ee = GetObjectInChildren<T>(element => element.id == id, true);
+			//if(ee != null) {
+			//	cachedElements[id] = ee;
+			//}
+			//return ee;
+			return null;
 		}
 
 		public override bool CanChangeParent() => false;
@@ -156,6 +159,12 @@ namespace MaxyGames.UNode {
 				if(element is NodeObject node) {
 					node.EnsureRegistered();
 				}
+			}, true);
+		}
+
+		internal void OnDeserialized() {
+			this.ForeachInChildrens(element => {
+				cachedElements[element.id] = element;
 			}, true);
 		}
 	}
@@ -235,6 +244,7 @@ namespace MaxyGames.UNode {
 					hasInitialize = false;
 				}
 #endif
+				newGraph.OnDeserialized();
 				graph = newGraph;
 				if(oldGraph != null) {
 					//Mark the old graph to invalid so all reference is redirected to new graph.
@@ -287,6 +297,7 @@ namespace MaxyGames.UNode {
 
 		public void DeserializeGraph() {
 			graph = Deserialize(serializedData);
+			graph?.OnDeserialized();
 		}
 
 		public static void Copy(SerializedGraph source, SerializedGraph destination, IGraph sourceReference = null, IGraph destinationReference = null) {
