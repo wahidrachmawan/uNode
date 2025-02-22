@@ -188,7 +188,7 @@ namespace MaxyGames.UNode.Editors {
 								menus.Add(new MenuData() {
 									menu = $"Highlight Node:{nodeObject.GetTitle()} from {graph.GetFullGraphName()}",
 									action = () => {
-										uNodeEditor.HighlightNode(nodeObject);
+										uNodeEditor.Highlight(nodeObject);
 										if(ids.Length > 2 && uNodeEditor.window != null) {
 											var graphData = uNodeEditor.window.graphData;
 											if(graphData.debugAnyScript) {
@@ -253,10 +253,10 @@ namespace MaxyGames.UNode.Editors {
 						lastData = data;
 					}
 				}
-				if(lastData.info != null && uNodeEditor.CanHighlightNode(lastData.info, line)) {
+				if(lastData.info != null && uNodeEditor.CanHighlight(lastData.info, line)) {
 					menus.Add(new MenuData() {
 						menu = $"{lastData.path.Replace('/', '\\')}:{line + 1}",
-						action = () => uNodeEditor.HighlightNode(lastData.info, line)
+						action = () => uNodeEditor.Highlight(lastData.info, line)
 					});
 					continue;
 				}

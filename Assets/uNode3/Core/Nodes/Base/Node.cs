@@ -6,6 +6,10 @@ using System.Collections;
 using System.Reflection;
 
 namespace MaxyGames.UNode {
+	/// <summary>
+	/// Base class for all nodes.
+	/// This class and sub classes are serialized by the Odin Serializer
+	/// </summary>
 	[GraphElement]
 	public abstract class Node : IErrorCheck {
 		public string name => _nodeObject?.name;

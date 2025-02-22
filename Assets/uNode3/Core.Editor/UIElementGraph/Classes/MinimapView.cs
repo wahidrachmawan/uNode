@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Experimental.GraphView;
 using NodeView = UnityEditor.Experimental.GraphView.Node;
+using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Editors {
 	public class MinimapView : GraphElement, IElementResizable {
@@ -259,29 +260,69 @@ namespace MaxyGames.UNode.Editors {
 			return result;
 		}
 
+		private struct ViewData {
+			public Color color;
+			public Rect position;
+			public UNodeView view;
+		}
+		private List<ViewData> views = new(256);
+
 		private void DrawContent() {
 			var graphView = this.graphView;
 			VisualElement contentViewContainer = graphView.contentViewContainer;
 			UnityEngine.Profiling.Profiler.BeginSample("Draw minimap content");
-			CalculateRects(contentViewContainer);
-			Color color = Handles.color;
 			var editorData = UIElementUtility.Theme;
-			foreach(var elem in graphView.nodeViews) {
-				if(elem == null || elem.isBlock)
-					continue;
-				var c = elem.elementTypeColor;
+			Color color = Handles.color;
+
+			if(hasCalculated == false) {
+				hasCalculated = true;
+				CalculateRects(contentViewContainer);
+				views.Clear();
+				foreach(var elem in graphView.nodeViews) {
+					if(elem == null || elem.isBlock)
+						continue;
+					var c = elem.elementTypeColor;
+					c.a = editorData.minimapOpacity;
+					views.Add(new ViewData() {
+						view = elem,
+						color = c,
+						position = CalculateElementRect(elem)
+					});
+				}
+			}
+			foreach(var view in views) {
+				var c = view.color;
 				c.a = editorData.minimapOpacity;
-				Rect rect = CalculateElementRect(elem);
+				Rect rect = view.position;
 				Handles.color = c;
 				s_CachedRect[0].Set(rect.xMin, rect.yMin, 0f);
 				s_CachedRect[1].Set(rect.xMax, rect.yMin, 0f);
 				s_CachedRect[2].Set(rect.xMax, rect.yMax, 0f);
 				s_CachedRect[3].Set(rect.xMin, rect.yMax, 0f);
 				Handles.DrawSolidRectangleWithOutline(s_CachedRect, c, c);
-				if(elem.selected) {
+				if(view.view.selected) {
 					DrawRectangleOutline(rect, editorData.minimapSelectedNodeColor);
 				}
 			}
+
+			//CalculateRects(contentViewContainer);
+			//foreach(var elem in graphView.nodeViews) {
+			//	if(elem == null || elem.isBlock)
+			//		continue;
+			//	var c = elem.elementTypeColor;
+			//	c.a = editorData.minimapOpacity;
+			//	Rect rect = CalculateElementRect(elem);
+			//	Handles.color = c;
+			//	s_CachedRect[0].Set(rect.xMin, rect.yMin, 0f);
+			//	s_CachedRect[1].Set(rect.xMax, rect.yMin, 0f);
+			//	s_CachedRect[2].Set(rect.xMax, rect.yMax, 0f);
+			//	s_CachedRect[3].Set(rect.xMin, rect.yMax, 0f);
+			//	Handles.DrawSolidRectangleWithOutline(s_CachedRect, c, c);
+			//	if(elem.selected) {
+			//		DrawRectangleOutline(rect, editorData.minimapSelectedNodeColor);
+			//	}
+			//}
+
 			DrawRectangleOutline(m_ViewportRect, editorData.minimapViewportColor);
 			Handles.color = color;
 			{//Layout
@@ -390,6 +431,11 @@ namespace MaxyGames.UNode.Editors {
 
 		public void OnStartResize() {
 
+		}
+
+		bool hasCalculated;
+		public void SetDirty() {
+			hasCalculated = false;
 		}
 	}
 }

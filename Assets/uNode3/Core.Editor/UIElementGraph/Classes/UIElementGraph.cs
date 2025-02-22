@@ -621,6 +621,9 @@ namespace MaxyGames.UNode.Editors {
 			toolbar.Add(frameButton);
 
 			saveButton = new ToolbarButton(() => {
+				if(graphData.owner is Component) {
+					AssetDatabase.SaveAssetIfDirty(graphData.owner);
+				}
 				GraphUtility.SaveAllGraph();
 			}) {
 				text = "Save",

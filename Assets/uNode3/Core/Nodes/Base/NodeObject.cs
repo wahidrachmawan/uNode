@@ -5,9 +5,71 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public sealed class NodeSerializedData {
 		public byte[] data;
 		public List<object> references;
+		public List<object> References {
+			get {
+				if(references == null && serializedReferences != null) {
+					references = new List<object>(serializedReferences.Count);
+					ReloadReferences();
+				}
+				return references;
+			}
+			set {
+				references = value;
+				if(value == null) {
+					serializedReferences = null;
+				}
+				else {
+					if(serializedReferences == null) {
+						serializedReferences = new(value.Count);
+					}
+					else {
+						if(serializedReferences.Capacity < value.Count) {
+							serializedReferences.Capacity = value.Capacity;
+						}
+						serializedReferences.Clear();
+					}
+					for(int i = 0; i < value.Count; i++) {
+						serializedReferences.Add(new USerializedValueWrapper(value[i]));
+					}
+				}
+			}
+		}
+
+		internal void ReloadReferences() {
+			if(references == null) return;
+			if(serializedReferences == null) return;
+			if(serializedReferences.Count == 0) return;
+			if(references.Capacity < serializedReferences.Capacity) {
+				references.Capacity = serializedReferences.Capacity;
+			}
+			//clear the references so we get the newers data
+			references.Clear();
+			for(int i = 0; i < serializedReferences.Count; i++) {
+				if(serializedReferences[i].value != null) {
+					references.Add(serializedReferences[i].value);
+				}
+				else {
+					references.Add(serializedReferences[i].unityObject);
+				}
+			}
+		}
+
+		[SerializeField]
+		private List<USerializedValueWrapper> serializedReferences;
+
+		[SerializeReference, DoNotSerialize]
+		public List<ValueInput> serializedValueInput;
+		[SerializeReference, DoNotSerialize]
+		public List<ValueOutput> serializedValueOutput;
+		[SerializeReference, DoNotSerialize]
+		public List<FlowInput> serializedFlowInput;
+		[SerializeReference, DoNotSerialize]
+		public List<FlowOutput> serializedFlowOutput;
+
 
 		public string serializedType;
 
@@ -145,7 +207,7 @@ namespace MaxyGames.UNode {
 				_flowOutputs.node = this;
 			}
 		}
-		[SerializeField]
+		[SerializeReference]
 		private List<UPort> _invalidPorts;
 		/// <summary>
 		/// The list of all invalid ports
@@ -199,8 +261,11 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// True if the node has been registered.
 		/// </summary>
+		[field: NonSerialized]
 		public bool isRegistered { get; internal set; }
+		[field: NonSerialized]
 		public bool isPreviousPortRestored { get; private set; }
+		[field: NonSerialized]
 		public Exception exceptionRegister { get; private set; }
 		private NodePreservation preservation;
 
@@ -569,21 +634,57 @@ namespace MaxyGames.UNode {
 						cache.Value.IndexReferenceResolver = resolver.Value;
 						var bytes = SerializerUtility.Serialize(_node, cache);
 						_nodeSerializedData.data = bytes;
-						_nodeSerializedData.references = resolver.Value.GetReferencedObjects();
+						_nodeSerializedData.References = resolver.Value.GetReferencedObjects();
 						_nodeSerializedData.serializedType = TypeSerializer.Serialize(_node.GetType());
 					}
 				}
+				foreach(var p in ValueInputs.Data) {
+					if(p.connections.Count > 0) {
+						p.defaultValue = null;
+					}
+				}
+				_nodeSerializedData.serializedFlowInput = FlowInputs.Data;
+				_nodeSerializedData.serializedFlowOutput = FlowOutputs.Data;
+				_nodeSerializedData.serializedValueInput = ValueInputs.Data;
+				_nodeSerializedData.serializedValueOutput = ValueOutputs.Data;
 			}
 		}
 
 		void ISerializationCallbackReceiver.OnAfterDeserialize() {
-			if(_nodeSerializedData != null && _nodeSerializedData.isFilled && _node == null) {
+			if(_nodeSerializedData != null && _nodeSerializedData.isFilled) {
 				using(var cache = SerializerUtility.UNodeDeserializationContext) {
 					using(var resolver = OdinSerializer.Utilities.Cache<SerializerUtility.GraphReferenceResolver>.Claim()) {
-						resolver.Value.SetReferencedObjects(_nodeSerializedData.references);
+						_nodeSerializedData.ReloadReferences();
+						resolver.Value.SetReferencedObjects(_nodeSerializedData.References);
 						cache.Value.IndexReferenceResolver = resolver.Value;
 						node = SerializerUtility.DeserializeWeak(_nodeSerializedData.data, _nodeSerializedData.type, cache) as Node;
+						//Ensure that we need to register it again
+						isRegistered = false;
 					}
+				}
+				if(_nodeSerializedData.serializedFlowInput != null) {
+					if(_flowInputs == null) {
+						foreach(var p in _nodeSerializedData.serializedFlowInput) {
+							p.node = this;
+						}
+						foreach(var p in _nodeSerializedData.serializedFlowOutput) {
+							p.node = this;
+						}
+						foreach(var p in _nodeSerializedData.serializedValueInput) {
+							p.node = this;
+						}
+						foreach(var p in _nodeSerializedData.serializedValueOutput) {
+							p.node = this;
+						}
+					}
+					FlowInputs.node = this;
+					FlowInputs.Data = _nodeSerializedData.serializedFlowInput;
+					FlowOutputs.node = this;
+					FlowOutputs.Data = _nodeSerializedData.serializedFlowOutput;
+					ValueInputs.node = this;
+					ValueInputs.Data = _nodeSerializedData.serializedValueInput;
+					ValueOutputs.node = this;
+					ValueOutputs.Data = _nodeSerializedData.serializedValueOutput;
 				}
 			}
 		}

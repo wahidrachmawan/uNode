@@ -5,8 +5,11 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public class ValueOutput : ValuePort {
+		[NonSerialized]
 		private Func<Flow, object> get;
+		[NonSerialized]
 		private Action<Flow, object> set;
 		[NonSerialized]
 		public bool isVariable;

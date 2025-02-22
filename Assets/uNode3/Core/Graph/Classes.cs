@@ -35,7 +35,7 @@ namespace MaxyGames.UNode {
 
 		public SerializedValue(object value, Type type) {
 			serializedType = type;
-			_value = value;
+			this.value = value;
 		}
 
 		public static SerializedValue CreateFromType(Type type) {
@@ -85,6 +85,7 @@ namespace MaxyGames.UNode {
 					}
 				}
 				failedDeserialize = false;
+				Serialize();
 			}
 		}
 
@@ -95,7 +96,7 @@ namespace MaxyGames.UNode {
 		public void ChangeValue(object value) {
 			_value = value;
 			failedDeserialize = false;
-			OnBeforeSerialize();
+			Serialize();
 		}
 
 		public void OnAfterDeserialize() {
@@ -108,7 +109,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public void OnBeforeSerialize() {
+		private void Serialize() {
 			if(failedDeserialize) return;
 			if(_value is Type) {
                 serializedData = SerializerUtility.SerializeValue(new SerializedType(_value as Type));
@@ -121,7 +122,11 @@ namespace MaxyGames.UNode {
         object IGetValue.Get() {
 			return value;
         }
-    }
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize() {
+
+		}
+	}
 
 	public sealed class JumpStatement {
 		public readonly NodeObject from;
@@ -141,6 +146,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class UReference : BaseGraphReference {
 		protected UReference(IGraph graph) : base(graph) {
 		}
@@ -227,6 +233,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public class ParameterRef : UReference<UGraphElement>, IIcon {
 		[SerializeField]
 		private SerializedType _type = typeof(object);
@@ -241,6 +248,7 @@ namespace MaxyGames.UNode {
 			this._parameter = parameterData;
 		}
 
+		[NonSerialized]
 		private ParameterData _parameter;
 		public ParameterData parameter {
 			get {
@@ -453,15 +461,18 @@ namespace MaxyGames.UNode {
 	}
 
 	public abstract class NodeContainerWithEntry : NodeContainer {
-		[SerializeField]
+		[NonSerialized]
 		protected NodeObject entryObject;
 
 		public virtual Nodes.FunctionEntryNode Entry {
 			get {
 				if(this == null) return null;
 				if(entryObject == null || entryObject.node is not Nodes.FunctionEntryNode) {
-					AddChild(entryObject = new NodeObject(new Nodes.FunctionEntryNode()));
-					entryObject.EnsureRegistered();
+					entryObject = this.GetNodeInChildren<Nodes.FunctionEntryNode>();
+					if(entryObject == null) {
+						AddChild(entryObject = new NodeObject(new Nodes.FunctionEntryNode()));
+						entryObject.EnsureRegistered();
+					}
 				}
 				return entryObject.node as Nodes.FunctionEntryNode;
 			}
@@ -623,14 +634,22 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class UCollection<T> : IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable, IList, ICollection {
 		[SerializeField]
 		private List<T> items = new List<T>();
 
 		protected List<T> Items {
 			get {
+				if(items == null)
+					items = new();
 				return items;
 			}
+		}
+
+		internal List<T> Data {
+			get => items;
+			set => items = value;
 		}
 
 		public T this[int index] {
@@ -925,6 +944,7 @@ namespace MaxyGames.UNode {
 		public Func<bool> canGetValue;
 		[NonSerialized]
 		public Func<bool> canSetValue;
+		[SerializeReference]
 		public List<ValueConnection> connections = new List<ValueConnection>();
 
 		protected ValuePort(NodeObject node) : base(node) {
@@ -934,14 +954,39 @@ namespace MaxyGames.UNode {
 
 		public bool CanSetValue() => canSetValue != null && canSetValue();
 		public bool CanGetValue() => canGetValue == null || canGetValue();
+
+		public override void ClearConnections() {
+			base.ClearConnections();
+			if(connections.Count > 0) {
+				for(int i = 0; i < connections.Count; i++) {
+					if(connections[i] == null) {
+						connections.RemoveAt(i);
+						i--;
+					}
+				}
+			}
+		}
 	}
 
 	public abstract class FlowPort : UPort {
+		[SerializeReference]
 		public List<FlowConnection> connections = new List<FlowConnection>();
 
 		protected FlowPort(NodeObject node) : base(node) { }
 
 		public override IEnumerable<Connection> Connections => connections;
+
+		public override void ClearConnections() {
+			base.ClearConnections();
+			if(connections.Count > 0) {
+				for(int i = 0; i < connections.Count; i++) {
+					if(connections[i] == null) {
+						connections.RemoveAt(i);
+						i--;
+					}
+				}
+			}
+		}
 	}
 
 	//[Serializable]
@@ -988,4 +1033,56 @@ namespace MaxyGames.UNode {
 
 	//	}
 	//}
+
+
+	//[Serializable]
+	//public abstract class UObjectRef : IObjectReference {
+	//	public abstract object ReferenceValue { get; }
+	//}
+
+	//[Serializable]
+	//public class UObjectReference : UObjectRef {
+	//	[SerializeReference]
+	//	public object value;
+
+	//	public override object ReferenceValue => value;
+	//}
+
+	//[Serializable]
+	//public class UObjectReference<T> : UObjectRef {
+	//	public T value;
+
+	//	public override object ReferenceValue => value;
+	//}
+
+	//[Serializable]
+	//public class UObjectUnityReference : UObjectRef {
+	//	[Serializable]
+	//	public class Data {
+	//		public UnityEngine.Object value;
+	//	}
+	//	public Data data;
+
+	//	public override object ReferenceValue => data;
+
+	//	public UObjectUnityReference(UnityEngine.Object obj) {
+	//		data = new Data() { value = obj };
+	//	}
+	//}
+
+	[Serializable]
+	public sealed class USerializedValueWrapper {
+		[SerializeReference]
+		public object value;
+		public UnityEngine.Object unityObject;
+
+		public USerializedValueWrapper(object value) {
+			if(value is UnityEngine.Object obj) {
+				unityObject = obj;
+			}
+			else {
+				this.value = value;
+			}
+		}
+	}
 }

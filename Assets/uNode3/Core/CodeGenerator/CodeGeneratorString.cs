@@ -1001,7 +1001,10 @@ namespace MaxyGames {
 					if(i > 0) {
 						genericData += ", ";
 					}
-					genericData += Type(genericType[i]);
+					var gType = Type(genericType[i]);
+					if(string.IsNullOrEmpty(gType))
+						throw new Exception("Null or Empty generic type at index: " + i + " " + genericType[i]);
+					genericData += gType;
 				}
 				genericData += ">";
 			}
@@ -1032,6 +1035,9 @@ namespace MaxyGames {
 				for(int i = 0; i < genericTypes.Length; i++) {
 					if(i > 0) {
 						genericData += ", ";
+					}
+					if(string.IsNullOrEmpty(genericTypes[i])) {
+						throw new Exception("Null or Empty generic type at index: " + i);
 					}
 					genericData += genericTypes[i];
 				}

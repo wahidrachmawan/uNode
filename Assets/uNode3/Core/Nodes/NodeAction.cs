@@ -56,7 +56,7 @@ namespace MaxyGames.UNode.Nodes {
 
 namespace MaxyGames.UNode {
 	public abstract class BaseNodeContainerData<T> where T : UGraphElement, new() {
-		[SerializeField]
+		[SerializeReference]
 		private T _container;
 
 		public T container => _container;

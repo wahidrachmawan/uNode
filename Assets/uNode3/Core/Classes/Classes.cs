@@ -621,8 +621,11 @@ namespace MaxyGames.UNode {
 		}
 
 		public static string GetMessage(UGraphElement element) {
-			if(object.ReferenceEquals(element, null) || element.graphContainer == null)
+			if(object.ReferenceEquals(element, null))
 				return string.Empty;
+			if(element.graphContainer == null) {
+				return "[Missing_Container]";
+			}
 			return KEY_REFERENCE + element.id + KEY_REFERENCE_SEPARATOR + GetGraphID(element.graphContainer) + KEY_REFERENCE_TAIL;
 		}
 
@@ -824,7 +827,7 @@ namespace MaxyGames.UNode {
 	}
 
 	[Serializable]
-	public abstract class BaseReference {
+	public abstract class BaseReference : IObjectReference {
 		[SerializeField]
 		protected int _id;
 		/// <summary>

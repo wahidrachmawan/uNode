@@ -264,6 +264,10 @@ namespace MaxyGames.UNode {
 		void Set(Flow flow, object value);
 	}
 
+	public interface IObjectReference {
+		object ReferenceValue { get; }
+	}
+
 	internal interface IValueReference { }
 
 	internal interface IGraphElement { }
@@ -546,6 +550,10 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public interface ISummary {
 		string GetSummary();
+	}
+
+	public interface ICustomNodeConnection {
+		IEnumerable<UPort> GetFlowConnections();
 	}
 
 	/// <summary>

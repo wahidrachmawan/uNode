@@ -634,7 +634,7 @@ namespace MaxyGames.UNode.Editors {
 					Inspect(nodeTree, mPOS);
 				});
 				menu.AddItem(new GUIContent("Hightlight Node"), false, () => {
-					uNodeEditor.HighlightNode(node);
+					uNodeEditor.Highlight(node);
 				});
 				MonoScript ms = uNodeEditorUtility.GetMonoScript(node);
 				if(ms != null) {
@@ -688,15 +688,15 @@ namespace MaxyGames.UNode.Editors {
 		private bool HighlightTree(TreeViewItem tree) {
 			if(tree is HierarchyNodeTree) {
 				var node = (tree as HierarchyNodeTree).node;
-				uNodeEditor.HighlightNode(node);
+				uNodeEditor.Highlight(node);
 				return true;
 			}
 			else if(tree is HierarchyPortTree) {
-				uNodeEditor.HighlightNode((tree as HierarchyPortTree).node);
+				uNodeEditor.Highlight((tree as HierarchyPortTree).node);
 				return true;
 			}
 			else if(tree is HierarchyFlowTree) {
-				uNodeEditor.HighlightNode((tree as HierarchyFlowTree).owner);
+				uNodeEditor.Highlight((tree as HierarchyFlowTree).owner);
 				return true;
 			}
 			else if(tree is HierarchyRefNodeTree) {

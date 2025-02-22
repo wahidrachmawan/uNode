@@ -1127,7 +1127,7 @@ namespace MaxyGames.UNode.Editors {
 					if(comp != null) {
 						result.Add(go);
 					} else if(includeChildren) {
-						var comps = go.GetComponentsInChildren(typeof(T));
+						var comps = go.GetComponentsInChildren(typeof(T), true);
 						if(comps.Length > 0) {
 							result.Add(go);
 						}
@@ -1163,7 +1163,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static bool IsPrefab(UnityEngine.Object target) {
 			if(target != null && target) {
-				return PrefabUtility.GetPrefabType(target) == PrefabType.Prefab;
+				return PrefabUtility.IsPartOfPrefabAsset(target);
 			}
 			return false;
 		}
@@ -1175,7 +1175,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static bool IsPrefabInstance(UnityEngine.Object target) {
 			if(target != null && target) {
-				return PrefabUtility.GetPrefabType(target) == PrefabType.PrefabInstance;
+				return PrefabUtility.IsPartOfPrefabInstance(target);
 			}
 			return false;
 		}

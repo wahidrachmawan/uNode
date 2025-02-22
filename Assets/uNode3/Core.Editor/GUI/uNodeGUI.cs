@@ -801,7 +801,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(Event.current.clickCount == 1 && Event.current.button == 0 && position.Contains(Event.current.mousePosition)) {
 					if(element is NodeObject) {
-						uNodeEditor.HighlightNode(element as NodeObject);
+						uNodeEditor.Highlight(element as NodeObject);
 					}
 					else {
 						uNodeEditor.Open(element.graphContainer, element);

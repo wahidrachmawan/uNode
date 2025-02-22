@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public class FlowInput : FlowPort {
 		[NonSerialized]
 		public Action<Flow> action;

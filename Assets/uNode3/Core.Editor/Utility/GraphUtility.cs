@@ -79,9 +79,9 @@ namespace MaxyGames.UNode.Editors {
 				if(data == null)
 					throw new Exception("There's no data to paste.");
 				var guids = data.IDs;
-				data.serializedGraph.DeserializeGraph();
-				data.serializedGraph.Graph.owner = parent.graphContainer;
-				var elements = data.serializedGraph.Graph.GetObjectsInChildren<UGraphElement>(e => guids.Any(guid => e.id == guid), true).ToArray();
+				var graph = data.serializedGraph.MakeCopy();
+				graph.owner = parent.graphContainer;
+				var elements = graph.GetObjectsInChildren<UGraphElement>(e => guids.Any(guid => e.id == guid), true).ToArray();
 
 				//var parentOfNode = elements.FirstOrDefault();
 				//foreach(var element in parentOfNode) {
@@ -92,9 +92,9 @@ namespace MaxyGames.UNode.Editors {
 
 				//Do paste
 				var result = DoPaste(parent, elements, option);
-				data.serializedGraph.Graph.owner = null;
+				graph.owner = null;
 				//Clean-up data.
-				data.serializedGraph.Graph.Destroy();
+				graph.Destroy();
 				//Return the result
 				return result;
 			}
@@ -210,7 +210,7 @@ namespace MaxyGames.UNode.Editors {
 
 						//Pre validate references
 						bool referenceChanged = false;
-						var references = nodeObject.serializedData.references;
+						var references = nodeObject.serializedData.References;
 						for(int i = 0; i < references.Count; i++) {
 							if(references[i] is UGraphElement graphElement) {
 								if(!oldGuids.Contains(graphElement.id) && ValidateReference(graphElement, out var validElement)) {
@@ -286,7 +286,7 @@ namespace MaxyGames.UNode.Editors {
 				foreach(var element in allElements) {
 					if(element is NodeObject nodeObject) {
 						bool referenceChanged = false;
-						var references = nodeObject.serializedData.references;
+						var references = nodeObject.serializedData.References;
 						for(int i = 0; i < references.Count; i++) {
 							if(references[i] is MemberData mData) {
 								if(mData.Items != null) {
@@ -611,7 +611,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				else if(obj is NodeObject) {
 					var nodeObject = obj as NodeObject;
-					var references = nodeObject.serializedData.references;
+					var references = nodeObject.serializedData.References;
 					foreach(var reference in references) {
 						if(ValidateReference(reference))
 							continue;
@@ -1567,10 +1567,10 @@ namespace MaxyGames.UNode.Editors {
 						}
 						else if(evt.button == 0 && evt.clickCount == 2) {
 							if(reference.reference is NodeObject nodeObject) {
-								uNodeEditor.HighlightNode(nodeObject);
+								uNodeEditor.Highlight(nodeObject);
 							}
 							else if(reference.reference is Function function) {
-								uNodeEditor.HighlightNode(function.Entry);
+								uNodeEditor.Highlight(function.Entry);
 							}
 							else if(reference.reference is UGraphElement element) {
 								uNodeEditor.Open(element.graphContainer, element);

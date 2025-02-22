@@ -5,8 +5,11 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public sealed class FlowConnection : Connection {
+		[SerializeReference]
 		public FlowInput input;
+		[SerializeReference]
 		public FlowOutput output;
 
 		public override UPort Input {
@@ -42,8 +45,12 @@ namespace MaxyGames.UNode {
 				throw new NullReferenceException("The input is null");
 			if(output == null)
 				throw new NullReferenceException("The output is null");
-			if(input.node == output.node)
+			if(input.node == output.node) {
+				if(input.node == null) {
+					throw new Exception("Node owner in both input and output is null");
+				}
 				throw new InvalidOperationException("Cannot connect to self node, this can cause stack overflow");
+			}
 			if(!input.connections.Contains(this)) {
 				input.connections.Add(this);
 			}

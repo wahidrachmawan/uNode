@@ -18,7 +18,7 @@ namespace MaxyGames.UNode {
 
 		public PropertyAccessorKind accessor = PropertyAccessorKind.ReadWrite;
 
-		[HideInInspector]
+		[SerializeReference]
 		public Function setRoot, getRoot;
 
 		public bool AutoProperty {

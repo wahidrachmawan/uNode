@@ -343,13 +343,7 @@ namespace MaxyGames.UNode.Editors {
 			if(string.IsNullOrEmpty(name)) {
 				name = "Node";
 			}
-			bool isPrefab = uNodeEditorUtility.IsPrefab(graphData.owner);
-			if(isPrefab) {
-				throw new Exception("Editing graph prefab dirrectly is not supported.");
-			}
-			else {
-				Undo.RegisterCompleteObjectUndo(graphData.owner, "New Node : " + name);
-			}
+			Undo.RegisterCompleteObjectUndo(graphData.owner, "New Node : " + name);
 			AddNewNode<T>(graphData.currentCanvas, name, type, position, action);
 			uNodeEditorUtility.MarkDirty(graphData.owner);
 			graphData.Refresh();

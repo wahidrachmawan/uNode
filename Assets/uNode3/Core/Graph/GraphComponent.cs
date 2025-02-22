@@ -24,6 +24,13 @@ namespace MaxyGames.UNode {
 
 		[SerializeField]
 		protected SerializedGraph m_serializedGraph = new SerializedGraph();
+
+		/// <summary>
+		/// This used for prefab instance to override the variable of the original prefab
+		/// </summary>
+		[SerializeField]
+		public List<VariableData> variableOverrides = new();
+
 		public Graph GraphData => m_serializedGraph.GetGraph(this);
 		public SerializedGraph serializedGraph => m_serializedGraph;
 
@@ -130,13 +137,18 @@ namespace MaxyGames.UNode {
 					var value = var.defaultValue;
 					SetVariable(var.name, value);
 				}
+				if(variableOverrides.Count > 0) {
+					foreach(var v in variableOverrides) {
+						SetVariable(v.name, v.value);
+					}
+				}
 				//Call awake
 				instance.OnAwake();
 				instance.enabled = enabled;
 			}
 			else {
 				//Instance reflection graph
-				m_instance = RuntimeGraphUtility.InitializeComponentGraph(this, this);
+				m_instance = RuntimeGraphUtility.InitializeComponentGraph(this, this, overrideVariables: variableOverrides);
 				m_instance.eventData.onAwake?.Invoke(Instance);
 			}
 		}
@@ -191,7 +203,51 @@ namespace MaxyGames.UNode {
 				RuntimeGraphUtility.DrawGizmosSelected(ref m_instance, this, this, null);
 			}
 		}
-		#endregion
+
+#if UNITY_EDITOR
+		void OnValidate() {
+			if(uNodeThreadUtility.IsInMainThread == false || UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode) return;
+			if(UnityEditor.PrefabUtility.IsPartOfPrefabInstance(this)) {
+				var overrides = UnityEditor.PrefabUtility.GetObjectOverrides(this.gameObject);
+				if(overrides?.Count > 0) {
+					foreach(var m in overrides) {
+						if(m.instanceObject == this) {
+							UnityEditor.SerializedObject serializedObject = new(this);
+							var serializedProperty = serializedObject.FindProperty(nameof(m_serializedGraph));
+							UnityEditor.PrefabUtility.RevertPropertyOverride(serializedProperty, UnityEditor.InteractionMode.AutomatedAction);
+							serializedProperty = serializedObject.FindProperty(nameof(scriptData));
+							UnityEditor.PrefabUtility.RevertPropertyOverride(serializedProperty, UnityEditor.InteractionMode.AutomatedAction);
+							serializedProperty = serializedObject.FindProperty(nameof(graphName));
+							UnityEditor.PrefabUtility.RevertPropertyOverride(serializedProperty, UnityEditor.InteractionMode.AutomatedAction);
+							serializedProperty = serializedObject.FindProperty(nameof(usingNamespaces));
+							UnityEditor.PrefabUtility.RevertPropertyOverride(serializedProperty, UnityEditor.InteractionMode.AutomatedAction);
+							if(variableOverrides.Count == 0) {
+								serializedProperty = serializedObject.FindProperty(nameof(variableOverrides));
+								UnityEditor.PrefabUtility.RevertPropertyOverride(serializedProperty, UnityEditor.InteractionMode.AutomatedAction);
+							}
+							else {
+								var variables = this.GetVariables().Select(v => v.name).ToHashSet();
+								for(int i = 0; i < variableOverrides.Count; i++) {
+									//This is for checking if the overrided variable is exist or not
+									if(variables.Contains(variableOverrides[i].name) == false) {
+										variableOverrides.RemoveAt(i);
+										i--;
+									}
+								}
+							}
+							serializedObject.Dispose();
+							return;
+						}
+					}
+				}
+			}
+			else {
+				if(variableOverrides.Count > 0)
+					variableOverrides.Clear();
+			}
+		}
+#endif
+#endregion
 
 		#region Functions
 		public override object GetProperty(string name) {

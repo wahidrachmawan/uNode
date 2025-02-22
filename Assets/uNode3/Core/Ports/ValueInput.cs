@@ -5,10 +5,12 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public class ValueInput : ValuePort {
 		/// <summary>
 		/// The default value of the port
 		/// </summary>
+		[SerializeReference]
 		public MemberData defaultValue;
 
 		/// <summary>
@@ -20,7 +22,16 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// True if the port is using default value / inline value
 		/// </summary>
-		public bool UseDefaultValue => connections.Count == 0;
+		public bool UseDefaultValue {
+			get {
+				if(connections.Count == 0) {
+					if(defaultValue == null)
+						defaultValue = MemberData.None;
+					return true;
+				}
+				return false;
+			}
+		}
 
 		private Func<object> optionalValue;
 

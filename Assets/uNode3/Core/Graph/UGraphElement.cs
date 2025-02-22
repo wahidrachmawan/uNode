@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public class UGroupElement : UGraphElement, IGroup, IIcon {
 		public Texture2D icon;
 
@@ -19,6 +20,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class UGraphElement : IGraphElement, ISummary {
 		#region Fields
 		[SerializeField]
@@ -27,9 +29,9 @@ namespace MaxyGames.UNode {
 		private int _id;
 		[SerializeField]
 		private string _comment;
-		[SerializeField]
+		[SerializeReference]
 		private UGraphElement _parent;
-		[SerializeField]
+		[SerializeReference]
 		protected List<UGraphElement> childs = new List<UGraphElement>();
 
 		[HideInInspector]
@@ -37,9 +39,16 @@ namespace MaxyGames.UNode {
 
 		/// <summary>
 		/// True when the element is destroyed
+		/// The ID of the element should be -1 if it is destroyed.
 		/// </summary>
-		[field: SerializeField]
-		protected bool isDestroyed { get; private set; }
+		protected bool isDestroyed {
+			get {
+				return _id == -1;
+			}
+			set {
+				_id = -1;
+			}
+		}
 
 		[NonSerialized]
 		private bool m_isMarkedInvalid;
@@ -109,7 +118,7 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
-		/// The unique ID of graph element ( obtained from graph every change the parent, return 0 if no parent )
+		/// The unique ID of graph element ( obtained from graph every change the parent, return 0 if no parent ) and return -1 if the element is destroyed.
 		/// </summary>
 		public int id {
 			get {
@@ -345,7 +354,7 @@ namespace MaxyGames.UNode {
 				parent = parent.parent;
 			}
 			//In case it is linked graph
-			if(graph.linkedOwner != null) {
+			if(graph?.linkedOwner != null) {
 				return graph.linkedOwner.GetObjectInParent<T>();
 			}
 			return default;

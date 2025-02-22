@@ -176,7 +176,7 @@ namespace MaxyGames.UNode.Editors {
 			var selectedObj = obj.FirstOrDefault();
 			if(selectedObj is ErrorData data && data != null) {
 				if(data.element.reference is NodeObject nodeObject && nodeObject != null) {
-					uNodeEditor.HighlightNode(nodeObject);
+					uNodeEditor.Highlight(nodeObject);
 				}
 				else if(data.element.reference != null) {
 					uNodeEditor.Open(data.element.reference.graphContainer);

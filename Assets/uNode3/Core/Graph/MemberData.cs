@@ -6,10 +6,13 @@ using System.Reflection;
 using UnityEngine;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public partial class MemberData : IGraphValue, IValueReference {
 		#region Classes
+		[Serializable]
 		public class ItemData {
 			public string name;
+			[SerializeReference]
 			public BaseReference reference;
 
 			public TypeData[] parameters;
@@ -248,9 +251,9 @@ namespace MaxyGames.UNode {
 		private TargetType _targetType;
 		public TargetType targetType { get => _targetType; set => _targetType = value; }
 
-		[SerializeField]
+		[SerializeReference]
 		private SerializedType startSerializedType;
-		[SerializeField]
+		[SerializeReference]
 		private SerializedType targetSerializedType;
 
 		public SerializedType StartSerializedType {
@@ -304,7 +307,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		[SerializeField]
+		[SerializeReference]
 		private SerializedValue _instance;
 
 		public SerializedValue serializedInstance => _instance;
@@ -2040,26 +2043,32 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The underlying reflected field, or null if the variable is not field.
 		/// </summary>
+		[field: NonSerialized]
 		public FieldInfo fieldInfo { get; private set; }
 		/// <summary>
 		/// The underlying property field, or null if the variable is not property.
 		/// </summary>
+		[field: NonSerialized]
 		public PropertyInfo propertyInfo { get; private set; }
 		/// <summary>
 		/// The underlying constructor field, or null if the variable is not constructor.
 		/// </summary>
+		[field: NonSerialized]
 		public ConstructorInfo constructorInfo { get; private set; }
 		/// <summary>
 		/// The underlying event field, or null if the variable is not event.
 		/// </summary>
+		[field: NonSerialized]
 		public EventInfo eventInfo { get; private set; }
 		/// <summary>
 		/// The underlying method field, or null if the variable is a method.
 		/// </summary>
+		[field: NonSerialized]
 		public MethodInfo methodInfo { get; private set; }
 		/// <summary>
 		/// The list of MemberInfo.
 		/// </summary>
+		[field: NonSerialized]
 		public MemberInfo[] memberInfo { get; private set; }
 
 		[NonSerialized]

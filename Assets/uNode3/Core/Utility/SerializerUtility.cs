@@ -115,13 +115,14 @@ namespace MaxyGames.UNode {
 	}
 
 	public static class SerializerUtility {
-		public static ISerializationPolicy serializationPolicy;
+		public static ISerializationPolicy nodeSerializationPolicy;
+		public static ISerializationPolicy graphSerializationPolicy;
 
 		#region Properties
 		public static Cache<SerializationContext> UnitySerializationContext {
 			get {
 				var context = Cache<SerializationContext>.Claim();
-				context.Value.Config.SerializationPolicy = SerializationPolicies.Unity;
+				context.Value.Config.SerializationPolicy = graphSerializationPolicy;
 				return context;
 			}
 		}
@@ -129,7 +130,7 @@ namespace MaxyGames.UNode {
 		public static Cache<DeserializationContext> UnityDeserializationContext {
 			get {
 				var context = Cache<DeserializationContext>.Claim();
-				context.Value.Config.SerializationPolicy = SerializationPolicies.Unity;
+				context.Value.Config.SerializationPolicy = graphSerializationPolicy;
 				return context;
 			}
 		}
@@ -137,7 +138,7 @@ namespace MaxyGames.UNode {
 		public static Cache<SerializationContext> UNodeSerializationContext {
 			get {
 				var context = Cache<SerializationContext>.Claim();
-				context.Value.Config.SerializationPolicy = serializationPolicy;
+				context.Value.Config.SerializationPolicy = nodeSerializationPolicy;
 				return context;
 			}
 		}
@@ -145,14 +146,14 @@ namespace MaxyGames.UNode {
 		public static Cache<DeserializationContext> UNodeDeserializationContext {
 			get {
 				var context = Cache<DeserializationContext>.Claim();
-				context.Value.Config.SerializationPolicy = serializationPolicy;
+				context.Value.Config.SerializationPolicy = nodeSerializationPolicy;
 				return context;
 			}
 		}
 		#endregion
 
 		static SerializerUtility() {
-			serializationPolicy = new CustomSerializationPolicy("UNodeSerializationPolicy", allowNonSerializableTypes: true, member => {
+			nodeSerializationPolicy = new CustomSerializationPolicy("UNodeSerializationPolicy", allowNonSerializableTypes: true, member => {
 				if(member is FieldInfo field) {
 					if(field.FieldType.IsDefined<GraphElementAttribute>(true)) {
 						return false;
@@ -164,6 +165,13 @@ namespace MaxyGames.UNode {
 				//		return false;
 				//	}
 				//}
+				return SerializationPolicies.Unity.ShouldSerializeMember(member);
+			});
+			graphSerializationPolicy = new CustomSerializationPolicy("UNodeSerializationPolicy", allowNonSerializableTypes: true, member => {
+				if(member.IsDefined(typeof(DoNotSerializeAttribute))) {
+					Debug.Log(member.Name);
+					return false;
+				}
 				return SerializationPolicies.Unity.ShouldSerializeMember(member);
 			});
 		}
@@ -355,7 +363,7 @@ namespace MaxyGames.UNode {
 				return SerializationUtility.DeserializeValue<T>(bytes, format, referencedUnityObjects, context);
 			} else {
 				using(var cache = Cache<DeserializationContext>.Claim()) {
-					cache.Value.Config.SerializationPolicy = serializationPolicy;
+					cache.Value.Config.SerializationPolicy = nodeSerializationPolicy;
 					return SerializationUtility.DeserializeValue<T>(bytes, format, referencedUnityObjects, cache.Value);
 				}
 			}
@@ -367,7 +375,7 @@ namespace MaxyGames.UNode {
 			}
 			else {
 				using(var cache = Cache<DeserializationContext>.Claim()) {
-					cache.Value.Config.SerializationPolicy = serializationPolicy;
+					cache.Value.Config.SerializationPolicy = nodeSerializationPolicy;
 					return OdinSerializer.Unity_Integration.uNodeSerializationUtility.DeserializeValueWeak(serializationNodes, referencedUnityObjects, typeof(T), cache.Value).ConvertTo<T>();
 				}
 			}

@@ -5,8 +5,11 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public sealed class ValueConnection : Connection {
+		[SerializeReference]
 		public ValueInput input;
+		[SerializeReference]
 		public ValueOutput output;
 
 		public override UPort Input {

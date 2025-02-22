@@ -31,7 +31,24 @@ namespace MaxyGames {
 					}
 				}, true);
 				for(int i = 0; i < initializersList.Count; i++) {
-					initializersList[i].OnPreInitializer();
+					try {
+						initializersList[i].OnPreInitializer();
+					}
+					catch(Exception ex) {
+						if(ex is GraphException) {
+							throw;
+						}
+						else {
+							var element = initializersList[i] as UGraphElement;
+							if(initializersList[i] is Node) {
+								element = (initializersList[i] as Node).nodeObject;
+							}
+							if(element == null) {
+								throw;
+							}
+							throw new GraphException(ex, element);
+						}
+					}
 				}
 				if(hasMainGraph) {
 					generatorData.eventNodes.AddRange(graph.GraphData.mainGraphContainer.GetNodesInChildren<BaseGraphEvent>());
@@ -420,101 +437,111 @@ namespace MaxyGames {
 		}
 
 		private static void InitConnect(NodeObject node) {
-			if(node != null && generatorData.connectedNodes.Add(node)) {
-				//Ensure the node is registered.
-				node.EnsureRegistered();
+			try {
+				if(node != null && generatorData.connectedNodes.Add(node)) {
+					//Ensure the node is registered.
+					node.EnsureRegistered();
 
-				if(IsInStateGraph(node)) {
-					foreach(var input in node.FlowInputs) {
-						if(input.IsSelfCoroutine()) {
-							RegisterAsStateFlow(input);
-						}
-					}
-				}
-				foreach (var port in node.FlowOutputs) {
-					if (port.isAssigned) {
-						InitConnect(port.GetTargetNode());
-					}
-				}
-				foreach (var port in node.ValueInputs) {
-					if (port.isAssigned) {
-						InitConnect(port.GetTargetNode());
-					}
-				}
-				if (node.node is ISuperNode) {
-					ISuperNode superNode = node.node as ISuperNode;
-					foreach(var n in superNode.nestedFlowNodes) {
-						if(n != null) {
-							InitConnect(n);
-						}
-					}
-				}
-				if(node.node is UNode.Nodes.StateNode) {
-					UNode.Nodes.StateNode stateNode = node.node as UNode.Nodes.StateNode;
-					foreach(var tr in stateNode.GetTransitions()) {
-						if(tr != null) {
-							InitConnect(tr);
-						}
-					}
-				}
-				if(node.node is IStackedNode) {
-					IStackedNode stackedNode = node.node as IStackedNode;
-					foreach(var n in stackedNode.stackedNodes) {
-						if(n != null) {
-							InitConnect(n);
-						}
-					}
-				}
-				if(node.node is IMacro) {
-					var macro = node.node as IMacro;
-					{
-						var ports = macro.InputFlows;
-						if(ports != null) {
-							foreach(var port in ports) {
-								if(port != null && port.enter.isConnected) {
-									InitConnect(port.exit.GetTargetNode());
-								}
+					if(IsInStateGraph(node)) {
+						foreach(var input in node.FlowInputs) {
+							if(input.IsSelfCoroutine()) {
+								RegisterAsStateFlow(input);
 							}
 						}
 					}
-					{
-						var ports = macro.OutputFlows;
-						if (ports != null) {
-							foreach (var port in ports) {
-								if (port != null && port.exit.isConnected) {
-									foreach(var c in port.enter.GetConnectedPorts()) {
-										if(c.isValid) {
-											InitConnect(c.node);
+					foreach(var port in node.FlowOutputs) {
+						if(port.isAssigned) {
+							InitConnect(port.GetTargetNode());
+						}
+					}
+					foreach(var port in node.ValueInputs) {
+						if(port.isAssigned) {
+							InitConnect(port.GetTargetNode());
+						}
+					}
+					if(node.node is ISuperNode) {
+						ISuperNode superNode = node.node as ISuperNode;
+						foreach(var n in superNode.nestedFlowNodes) {
+							if(n != null) {
+								InitConnect(n);
+							}
+						}
+					}
+					if(node.node is UNode.Nodes.StateNode) {
+						UNode.Nodes.StateNode stateNode = node.node as UNode.Nodes.StateNode;
+						foreach(var tr in stateNode.GetTransitions()) {
+							if(tr != null) {
+								InitConnect(tr);
+							}
+						}
+					}
+					if(node.node is IStackedNode) {
+						IStackedNode stackedNode = node.node as IStackedNode;
+						foreach(var n in stackedNode.stackedNodes) {
+							if(n != null) {
+								InitConnect(n);
+							}
+						}
+					}
+					if(node.node is IMacro) {
+						var macro = node.node as IMacro;
+						{
+							var ports = macro.InputFlows;
+							if(ports != null) {
+								foreach(var port in ports) {
+									if(port != null && port.enter.isConnected) {
+										InitConnect(port.exit.GetTargetNode());
+									}
+								}
+							}
+						}
+						{
+							var ports = macro.OutputFlows;
+							if(ports != null) {
+								foreach(var port in ports) {
+									if(port != null && port.exit.isConnected) {
+										foreach(var c in port.enter.GetConnectedPorts()) {
+											if(c.isValid) {
+												InitConnect(c.node);
+											}
+										}
+									}
+								}
+							}
+						}
+						{
+							var ports = macro.OutputValues;
+							if(ports != null) {
+								foreach(var port in ports) {
+									if(port != null && port.output.isConnected) {
+										InitConnect(port.input.GetTargetNode());
+									}
+								}
+							}
+						}
+						{
+							var ports = macro.InputValues;
+							if(ports != null) {
+								foreach(var port in ports) {
+									if(port != null && port.input.isConnected) {
+										foreach(var c in port.output.GetConnectedPorts()) {
+											if(c.isValid) {
+												InitConnect(c.node);
+											}
 										}
 									}
 								}
 							}
 						}
 					}
-					{
-						var ports = macro.OutputValues;
-						if (ports != null) {
-							foreach (var port in ports) {
-								if (port != null && port.output.isConnected) {
-									InitConnect(port.input.GetTargetNode());
-								}
-							}
-						}
-					}
-					{
-						var ports = macro.InputValues;
-						if (ports != null) {
-							foreach (var port in ports) {
-								if (port != null && port.input.isConnected) {
-									foreach (var c in port.output.GetConnectedPorts()) {
-										if (c.isValid) {
-											InitConnect(c.node);
-										}
-									}
-								}
-							}
-						}
-					}
+				}
+			}
+			catch (Exception ex) {
+				if(ex is GraphException) {
+					throw;
+				}
+				else {
+					throw new GraphException(ex, node);
 				}
 			}
 		}

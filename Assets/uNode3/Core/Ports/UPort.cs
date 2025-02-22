@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace MaxyGames.UNode {
 	[GraphElement]
+	[Serializable]
 	public abstract class UPort : IGraphElement {
 		[SerializeField]
 		private string _id;
@@ -117,7 +118,7 @@ namespace MaxyGames.UNode {
 		public virtual void ClearConnections() {
 			while(Connections.Any()) {
 				var c = Connections.FirstOrDefault();
-				c.Disconnect();
+				c?.Disconnect();
 			}
 		}
 

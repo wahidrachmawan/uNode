@@ -246,6 +246,8 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		void IGeneratorPrePostInitializer.OnPreInitializer() {
+			if(macroAsset == null)
+				throw new Exception("Macro asset is not assigned");
 			var runner = RuntimeGraphUtility.GetOrCreateGraphRunner(macroAsset, this);
 			var graph = runner.GraphData;
 
@@ -259,6 +261,7 @@ namespace MaxyGames.UNode.Nodes {
 			}, true);
 
 			foreach(var port in inputFlows) {
+					CG.RegisterAsRegularNode(port);
 				foreach(var con in port.connections) {
 					if(con.isValid == false) continue;
 					CG.RegisterEntry(con.output.node);
@@ -290,7 +293,19 @@ namespace MaxyGames.UNode.Nodes {
 				foreach(var p in RuntimeGraphUtility.GetMacroInputFlows(graph)) {
 					var linkedPort = p;
 					var port = inputFlows[index];
-					CG.RegisterPort(port, () => CG.GeneratePort(linkedPort.exit));
+					CG.RegisterPort(port, () => CG.Flow(linkedPort.exit, false));
+					if(linkedPort.exit != null && linkedPort.exit.isAssigned) {
+						if(linkedPort.exit.IsSelfCoroutine() && CG.IsStateFlow(linkedPort.exit.GetTargetFlow())) {
+							CG.RegisterAsStateFlow(port);
+							CG.RegisterAsStateFlow(linkedPort.exit.GetTargetFlow());
+							//CG.SetStateInitialization(port, () => {
+							//	var target = linkedPort.exit.GetTargetFlow();
+							//	if(target == null)
+							//		return null;
+							//	return CG.GetEvent(linkedPort.exit);
+							//});
+						}
+					}
 					index++;
 				}
 				//Initialize Flow Outputs

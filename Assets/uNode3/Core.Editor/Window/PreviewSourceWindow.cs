@@ -225,7 +225,7 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUILayout.HelpBox(error.errorMessage, error.isWarning ? MessageType.Warning : MessageType.Error);
 				EditorGUILayout.EndVertical();
 				if(Event.current.type == EventType.MouseDown && position.Contains(Event.current.mousePosition)) {
-					uNodeEditor.HighlightNode(informations, error.errorLine - 1, error.errorColumn - 1);
+					uNodeEditor.Highlight(informations, error.errorLine - 1, error.errorColumn - 1);
 					// Debug.Log(error.errorMessage);
 					// Debug.Log(pureLines[error.errorLine - 1]);
 					// Debug.Log(pureLines[error.errorLine - 1][error.errorColumn - 1]);
@@ -297,10 +297,10 @@ namespace MaxyGames.UNode.Editors {
 							element = graph.GetGraphElement(gID);
 						}
 						if(element is NodeObject) {
-							uNodeEditor.HighlightNode(element as NodeObject);
+							uNodeEditor.Highlight(element as NodeObject);
 						}
 						else if(element is NodeContainerWithEntry nodeContainer && nodeContainer.Entry != null) {
-							uNodeEditor.HighlightNode(nodeContainer.Entry);
+							uNodeEditor.Highlight(nodeContainer.Entry);
 						}
 					}
 				}

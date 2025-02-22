@@ -1266,16 +1266,39 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Highlight the node for a second.
 		/// </summary>
-		/// <param name="node"></param>
-		public static void HighlightNode(NodeObject node) {
-			ShowWindow();
-			UGraphElement canvas = node;
-			if(node.node is ISuperNode)
-				canvas = node.parent;
-			Open(node.graphContainer, canvas);
-			window.Refresh();
-			//window.graphEditor.MoveCanvas(window.editorData.GetPosition(node));
-			window.graphEditor.Highlight(node);
+		/// <param name="element"></param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static void Highlight(UGraphElement element) {
+			if(element == null)
+				throw new ArgumentNullException(nameof(element));
+			if(element.graphContainer is UnityEngine.Object uObject) {
+				//For handling prefab instance
+				if(uNodeEditorUtility.IsPrefabInstance(uObject)) {
+					var source = PrefabUtility.GetCorrespondingObjectFromOriginalSource(uObject);
+					if(source is IGraph container) {
+						var e = container.GetGraphElement(element.id);
+						if(e is NodeObject) {
+							Highlight(e as NodeObject);
+						}
+					}
+					return;
+				}
+			}
+			if(element is NodeObject node) {
+				ShowWindow();
+				UGraphElement canvas = node;
+				if(node.node is ISuperNode)
+					canvas = node.parent;
+				Open(node.graphContainer, canvas);
+				window.Refresh();
+				//window.graphEditor.MoveCanvas(window.editorData.GetPosition(node));
+				window.graphEditor.Highlight(node);
+			}
+			else {
+				ShowWindow();
+				Open(element.graphContainer, element);
+				window.Refresh();
+			}
 		}
 
 		/// <summary>
@@ -1285,7 +1308,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="line"></param>
 		/// <param name="column"></param>
 		/// <returns></returns>
-		public static bool HighlightNode(EditorScriptInfo scriptInfo, int line, int column = -1) {
+		public static bool Highlight(EditorScriptInfo scriptInfo, int line, int column = -1) {
 			if(scriptInfo == null)
 				return false;
 			if(scriptInfo.informations == null)
@@ -1295,13 +1318,13 @@ namespace MaxyGames.UNode.Editors {
 				return false;
 			var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
 			if(asset is IGraph) {
-				return HighlightNode(asset as IGraph, scriptInfo.informations, line, column);
+				return Highlight(asset as IGraph, scriptInfo.informations, line, column);
 			}
 			else if(asset is IScriptGraph scriptGraph) {
 				foreach(var type in scriptGraph.TypeList) {
 					if(type is IGraph) {
-						if(CanHighlightNode(type as IGraph, scriptInfo.informations, line, column)) {
-							return HighlightNode(type as IGraph, scriptInfo.informations, line, column);
+						if(CanHighlight(type as IGraph, scriptInfo.informations, line, column)) {
+							return Highlight(type as IGraph, scriptInfo.informations, line, column);
 						}
 					}
 				}
@@ -1316,8 +1339,8 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="line"></param>
 		/// <param name="column"></param>
 		/// <returns></returns>
-		public static bool HighlightNode(IEnumerable<ScriptInformation> informations, int line, int column = -1) {
-			return HighlightNode(null, informations, line, column);
+		public static bool Highlight(IEnumerable<ScriptInformation> informations, int line, int column = -1) {
+			return Highlight(null, informations, line, column);
 		}
 
 		/// <summary>
@@ -1328,7 +1351,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="line"></param>
 		/// <param name="column"></param>
 		/// <returns></returns>
-		public static bool HighlightNode(IGraph graph, IEnumerable<ScriptInformation> informations, int line, int column = -1) {
+		public static bool Highlight(IGraph graph, IEnumerable<ScriptInformation> informations, int line, int column = -1) {
 			if(informations == null)
 				return false;
 			List<ScriptInformation> information = new List<ScriptInformation>();
@@ -1390,10 +1413,10 @@ namespace MaxyGames.UNode.Editors {
 						}
 						if(element != null) {
 							if(element is NodeObject) {
-								HighlightNode(element as NodeObject);
+								Highlight(element as NodeObject);
 							}
 							else if(element is NodeContainerWithEntry nodeContainer && nodeContainer.Entry != null) {
-								HighlightNode(nodeContainer.Entry);
+								Highlight(nodeContainer.Entry);
 							}
 							else {
 								Open(element.graphContainer, element);
@@ -1406,7 +1429,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public static bool CanHighlightNode(EditorScriptInfo scriptInfo, int line, int column = -1) {
+		public static bool CanHighlight(EditorScriptInfo scriptInfo, int line, int column = -1) {
 			if(scriptInfo == null)
 				return false;
 			if(scriptInfo.informations == null)
@@ -1416,12 +1439,12 @@ namespace MaxyGames.UNode.Editors {
 				return false;
 			var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
 			if(asset is IGraph graph) {
-				return CanHighlightNode(graph, scriptInfo.informations, line, column);
+				return CanHighlight(graph, scriptInfo.informations, line, column);
 			}
 			else if(asset is IScriptGraph scriptGraph) {
 				foreach(var type in scriptGraph.TypeList) {
 					if(type is IGraph) {
-						if(CanHighlightNode(type as IGraph, scriptInfo.informations, line, column)) {
+						if(CanHighlight(type as IGraph, scriptInfo.informations, line, column)) {
 							return true;
 						}
 					}
@@ -1430,7 +1453,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public static bool CanHighlightNode(IGraph graph, IEnumerable<ScriptInformation> informations, int line, int column = -1) {
+		public static bool CanHighlight(IGraph graph, IEnumerable<ScriptInformation> informations, int line, int column = -1) {
 			if(informations == null)
 				return false;
 			List<ScriptInformation> information = new List<ScriptInformation>();
@@ -1636,6 +1659,9 @@ namespace MaxyGames.UNode.Editors {
 			//	return;
 			//}
 			var owner = graph as UnityEngine.Object;
+			if(uNodeEditorUtility.IsPrefabInstance(owner)) {
+				throw new Exception("Cannot edit graph when the graph is PrefabInstance, edit original graph instead.");
+			}
 			if(graph is IScriptGraphType) {
 				owner = (graph as IScriptGraphType).ScriptTypeData.scriptGraph as UnityEngine.Object;
 			}

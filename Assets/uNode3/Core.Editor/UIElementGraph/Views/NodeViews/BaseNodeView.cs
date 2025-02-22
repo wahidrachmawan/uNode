@@ -25,8 +25,18 @@ namespace MaxyGames.UNode.Editors {
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			this.AddStyleSheet("uNodeStyles/NativeNodeStyle");
 			this.AddStyleSheet(UIElementUtility.Theme.nodeStyle);
-			base.Initialize(owner, node);
-			this.ExecuteAndScheduleAction(DoUpdate, 500);
+			try {
+				base.Initialize(owner, node);
+				this.ExecuteAndScheduleAction(DoUpdate, 500);
+			}
+			catch(Exception ex) {
+				if(ex is GraphException) {
+					Debug.LogException(ex);
+				}
+				else {
+					Debug.LogException(new GraphException(ex, nodeObject));
+				}
+			}
 		}
 
 		/// <summary>

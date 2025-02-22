@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 [assembly: RegisterFormatter(typeof(MaxyGames.UNode.MemberData.MemberDataFormatter))]
 [assembly: RegisterFormatter(typeof(MaxyGames.UNode.SerializedType.SerializedTypeFormatter))]
+[assembly: RegisterFormatter(typeof(MaxyGames.UNode.NodeSerializedDataFormatter))]
 
 namespace MaxyGames.UNode {
 	internal abstract class ValueFormatter<TValue> : MinimalBaseFormatter<TValue> {
@@ -40,6 +41,38 @@ namespace MaxyGames.UNode {
 			catch(Exception ex) {
 				writer.Context.Config.DebugContext.LogException(ex);
 			}
+		}
+	}
+
+	internal class NodeSerializedDataFormatter : ValueFormatter<NodeSerializedData> {
+		protected override void Read(ref NodeSerializedData value, IDataReader reader) {
+			EntryType entryType;
+
+			while((entryType = reader.PeekEntry(out var name)) != EntryType.EndOfNode && entryType != EntryType.EndOfArray && entryType != EntryType.EndOfStream) {
+				if(string.IsNullOrEmpty(name)) {
+					reader.Context.Config.DebugContext.LogError("Entry of type \"" + entryType + "\" in node \"" + reader.CurrentNodeName + "\" is missing a name.");
+					reader.SkipEntry();
+					continue;
+				}
+
+				switch(name) {
+					case nameof(value.data):
+						ReadValue(ref value.data, reader);
+						break;
+					case nameof(value.references):
+						ReadValue(ref value.references, reader);
+						break;
+					case nameof(value.serializedType):
+						ReadValue(ref value.serializedType, reader);
+						break;
+				}
+			}
+		}
+
+		protected override void Write(ref NodeSerializedData value, IDataWriter writer) {
+			WriteValue(nameof(value.data), value.data, writer);
+			WriteValue(nameof(value.references), value.references, writer);
+			WriteValue(nameof(value.serializedType), value.serializedType, writer);
 		}
 	}
 

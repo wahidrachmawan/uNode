@@ -1114,6 +1114,7 @@ namespace MaxyGames.UNode.Editors {
 				graphData.GetCurrentCanvasData().zoomScale = scale;
 				graphData.position = -viewTransform.position / scale;
 			}
+			miniMap?.SetDirty();
 		}
 
 		void ElementResizedCallback(VisualElement elem) {
@@ -1477,12 +1478,14 @@ namespace MaxyGames.UNode.Editors {
 					CaptureGraphScreenshot();
 				}, DropdownMenuAction.AlwaysEnabled);
 
+#if UNODE_DEV
 				evt.menu.AppendAction("Export to JSON", (e) => {
 					var data = SerializedGraph.Serialize(graphData.graphData, OdinSerializer.DataFormat.JSON);
 					var bytes = OdinSerializer.SerializationUtility.SerializeValue(graphData.graphData, OdinSerializer.DataFormat.JSON, out _);
 					Debug.Log(System.Text.Encoding.UTF8.GetString(bytes));
 					uNodeEditorUtility.CopyToClipboard(System.Text.Encoding.UTF8.GetString(bytes));
 				}, DropdownMenuAction.AlwaysEnabled);
+#endif
 
 				evt.menu.AppendSeparator("");
 				if(graphData.selectedNodes.Any()) {
@@ -1511,7 +1514,7 @@ namespace MaxyGames.UNode.Editors {
 					evt.menu.AppendAction("Delete", null, DropdownMenuAction.AlwaysDisabled);
 				}
 			}
-			#endregion
+#endregion
 
 			#region Node
 			if(evt.target is BaseNodeView) {
@@ -2829,7 +2832,7 @@ namespace MaxyGames.UNode.Editors {
 			});
 			return contentRect;
 		}
-		#endregion
+#endregion
 	}
 
 	#region Classes

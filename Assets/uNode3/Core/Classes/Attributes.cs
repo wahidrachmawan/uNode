@@ -56,4 +56,12 @@ namespace MaxyGames.UNode {
 	public sealed class AllowAssetReferenceAttribute : Attribute {
 
 	}
+
+	/// <summary>
+	/// Mark field or property to ignore serialiation ( only for Odin Serializer )
+	/// </summary>
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
+	public sealed class DoNotSerializeAttribute : Attribute {
+
+	}
 }

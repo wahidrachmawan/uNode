@@ -3,9 +3,11 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Scripting;
 
 namespace MaxyGames.UNode {
 	[GraphElement]
+	[Serializable]
 	public class Graph : UGraphElement {
 		#region Fields
 		public GraphLayout graphLayout = GraphLayout.Vertical;
@@ -164,6 +166,7 @@ namespace MaxyGames.UNode {
 
 		internal void OnDeserialized() {
 			this.ForeachInChildrens(element => {
+				if(element == null) return;
 				cachedElements[element.id] = element;
 			}, true);
 		}
@@ -171,6 +174,11 @@ namespace MaxyGames.UNode {
 
 	[Serializable]
 	public sealed class SerializedGraph : ISerializationCallbackReceiver {
+		[SerializeReference]
+		private GraphData serializedGraph;
+		[SerializeField]
+		private UnityEngine.Object owner;
+
 		[SerializeField]
 		private OdinSerializedData serializedData;
 		[NonSerialized]
@@ -179,6 +187,20 @@ namespace MaxyGames.UNode {
 		private bool successDeserialize;
 		[NonSerialized]
 		private bool hasInitialize;
+
+		[Serializable]
+		public class PortData {
+			[SerializeReference]
+			public UPort port;
+			[SerializeReference]
+			public NodeObject nodeObject;
+		}
+
+		[Serializable]
+		public class GraphData {
+			[SerializeReference]
+			public Graph graph;
+		}
 
 		public OdinSerializedData SerializedData => serializedData;
 
@@ -208,6 +230,9 @@ namespace MaxyGames.UNode {
 				else {
 					graph.owner = container;
 				}
+				if(object.ReferenceEquals(owner, container) == false) {
+					owner = container as UnityEngine.Object;
+				}
 				if(!hasInitialize) {
 					hasInitialize = true;
 					graph.InitializeElement();
@@ -235,7 +260,7 @@ namespace MaxyGames.UNode {
 			}
 			else {
 				var oldGraph = graph;
-				var newGraph = Deserialize(serializedData);
+				var newGraph = DoDeserialize();
 #if UNITY_EDITOR
 				if(hasInitialize) {
 					if(object.ReferenceEquals(newGraph, null) == false) {
@@ -244,21 +269,21 @@ namespace MaxyGames.UNode {
 					hasInitialize = false;
 				}
 #endif
-				newGraph.OnDeserialized();
+				newGraph?.OnDeserialized();
 				graph = newGraph;
 				if(oldGraph != null) {
-					//Mark the old graph to invalid so all reference is redirected to new graph.
-					oldGraph.MarkInvalid();
+					if(oldGraph != graph) {
+						//Mark the old graph to invalid so all reference is redirected to new graph.
+						oldGraph.MarkInvalid();
+					}
+					//if(oldGraph == graph) {
+					//	oldGraph.ForeachInChildrens(element => {
+					//		if(element is ISerializationCallbackReceiver) {
+					//			(element as ISerializationCallbackReceiver).OnAfterDeserialize();
+					//		}
+					//	}, true);
+					//}
 				}
-
-				//Testing
-				//if(graph != null) {
-				//	var node = graph.GetNodeInChildren<MultipurposeNode>(true);
-				//	if(node != null) {
-				//		node.EnsureRegistered();
-				//		Debug.Log(node.parameters[0].input.defaultValue.GetNicelyDisplayName());
-				//	}
-				//}
 			}
 		}
 
@@ -271,20 +296,28 @@ namespace MaxyGames.UNode {
 			//and checking tries serializing the whole value
 			//TODO: fix error caused by UnityEditor.Selection.activeObject regarding to domain backup
 			try {
-				if(graph.graphContainer != null && uNodeThreadUtility.frame > 3000 && !UnityEditor.EditorApplication.isCompiling && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
-					if(Event.current == null)
+				if(graph.graphContainer != null) {
+					if(uNodeThreadUtility.frame > 3000 && !UnityEditor.EditorApplication.isUpdating && !UnityEditor.EditorApplication.isCompiling && object.ReferenceEquals(UnityEditor.Selection.activeObject, graph.graphContainer)) {
+						if(Event.current == null)
+							return;
+					}
+					if(owner is Component) {
+						//This to prevent Trimming graph when the graph is Component
+						SerializeGraph();
 						return;
+					}
 				}
 			}
 			catch { }
+#if UNODE_TRIM_ON_BUILD && UNODE_PRO
 			if(UnityEditor.BuildPipeline.isBuildingPlayer) {
 				var tempGraph = this.graph;
-#if UNODE_TRIM_ON_BUILD && UNODE_PRO
 				tempGraph = uNodeUtility.ProBinding.GetTrimmedGraph(tempGraph);
-#endif
 				serializedData = Serialize(tempGraph, OdinSerializer.DataFormat.Binary);
+				serializedGraph = null;
 				return;
 			}
+#endif
 #endif
 			SerializeGraph();
 		}
@@ -292,12 +325,49 @@ namespace MaxyGames.UNode {
 		public void SerializeGraph() {
 			if(graph == null)
 				return;
-			serializedData = Serialize(graph);
+#if UNITY_EDITOR
+			try {
+				if(owner is Component) {
+					if(UnityEditor.PrefabUtility.IsPartOfPrefabInstance(owner)) {
+						//This to prevent graph being modified if the graph is from prefab instance.
+						//By preventing it, we can ensure the graph is up to date.
+						return;
+					}
+					//This to serialize the graph using Odin instead when the graph is a Component.
+					//This also prevent trimming features
+					serializedData = Serialize(graph, OdinSerializer.DataFormat.Binary);
+					//Make sure Unity doesn't serialize the graph.
+					serializedGraph = null;
+					return;
+				}
+			}
+			catch(Exception ex) {
+				Debug.LogException(ex);
+			}
+#endif
+			if(serializedGraph == null) {
+				serializedGraph = new GraphData();
+			}
+			serializedGraph.graph = graph;
+			serializedData = null;
+			//serializedData = Serialize(graph);
 		}
 
 		public void DeserializeGraph() {
-			graph = Deserialize(serializedData);
+			graph = DoDeserialize();
 			graph?.OnDeserialized();
+		}
+
+		internal Graph MakeCopy() {
+			var data = Serialize(graph);
+			return Deserialize(data);
+		}
+
+		private Graph DoDeserialize() {
+			if(serializedGraph != null) {
+				return serializedGraph.graph;
+			}
+			return Deserialize(serializedData);
 		}
 
 		public static void Copy(SerializedGraph source, SerializedGraph destination, IGraph sourceReference = null, IGraph destinationReference = null) {

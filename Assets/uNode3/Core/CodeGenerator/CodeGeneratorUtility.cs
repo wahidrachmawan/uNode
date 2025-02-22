@@ -412,7 +412,7 @@ namespace MaxyGames {
 				foreach(var node in flows) {
 					if(node == null)
 						continue;
-					foreach (var r in node.serializedData.references) {
+					foreach (var r in node.serializedData.References) {
 						if (r is MemberData member) {
 							if(Validate(member)) {
 								return true;
@@ -427,7 +427,7 @@ namespace MaxyGames {
 				foreach(var node in allConnection) {
 					if(node == null)
 						continue;
-					foreach(var r in node.serializedData.references) {
+					foreach(var r in node.serializedData.References) {
 						if(r is MemberData member) {
 							if (Validate(member)) {
 								if(node.FlowInputs.Where(p => p.isConnected).SelectMany(p => p.GetConnectedPorts()).Any(p => !flows.Contains(p.node))) {

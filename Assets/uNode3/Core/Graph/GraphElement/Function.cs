@@ -97,12 +97,6 @@ namespace MaxyGames.UNode {
 		/// <param name="parameter"></param>
 		/// <returns></returns>
 		internal object DoInvoke(GraphInstance instance, object[] parameter) {
-			//if((parameter == null || parameter.Length == 0) && owner is uNodeRuntime runtime) {
-			//	//Invoke Custom Event in State Graph
-			//	if(runtime.customMethod.TryGetValue(Name, out var method)) {
-			//		method.Trigger();
-			//	}
-			//}
 			var outPort = Entry.exit;
 			if (outPort.GetTargetFlow() == null) {
 				if(returnType != typeof(void)) {

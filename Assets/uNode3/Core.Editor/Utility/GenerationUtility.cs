@@ -134,6 +134,7 @@ namespace MaxyGames.UNode.Editors {
 		public static string resourcesPath => generatedPath + Path.DirectorySeparatorChar + "Resources";
 		public static string projectScriptPath => generatedPath + Path.DirectorySeparatorChar + "Scripts";
 		public static string projectSceneScriptPath => projectScriptPath + Path.DirectorySeparatorChar + "Scene";
+		public static string projectPrefabScriptPath => projectScriptPath + Path.DirectorySeparatorChar + "Prefab";
 
 		public static uNodeDatabase GetDatabase() {
 			var db = uNodeUtility.GetDatabase();
@@ -153,7 +154,7 @@ namespace MaxyGames.UNode.Editors {
 			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
 				CompileProjectGraphs(false);
 			} else {
-				if(Directory.Exists(projectScriptPath)) {
+				if(IsCompiledScriptExistInProject(true, false, false)) {
 					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");
 				}
 				if(preferenceData.generatorData.compileInBackground && uNodeUtility.IsProVersion) {
@@ -170,7 +171,7 @@ namespace MaxyGames.UNode.Editors {
 				CompileProjectGraphs(true);
 			}
 			else {
-				if(Directory.Exists(projectScriptPath)) {
+				if(IsCompiledScriptExistInProject(true, false, false)) {
 					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");
 				}
 				if(preferenceData.generatorData.compileInBackground && uNodeUtility.IsProVersion) {
@@ -256,6 +257,30 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		private static bool IsCompiledScriptExistInProject(bool checkProjectGraph, bool checkSceneGraph, bool checkPrefabGraph) {
+			if(checkProjectGraph && checkSceneGraph && checkPrefabGraph) {
+				if(Directory.Exists(projectScriptPath)) {
+					return true;
+				}
+			}
+			if(checkPrefabGraph) {
+				if(Directory.Exists(projectScriptPath) && Directory.EnumerateFiles(projectScriptPath).Any(name => name.EndsWith(".cs"))) {
+					return true;
+				}
+			}
+			if(checkSceneGraph) {
+				if(Directory.Exists(projectSceneScriptPath) && Directory.EnumerateFiles(projectSceneScriptPath).Any(name => name.EndsWith(".cs"))) {
+					return true;
+				}
+			}
+			if(checkPrefabGraph) {
+				if(Directory.Exists(projectPrefabScriptPath) && Directory.EnumerateFiles(projectPrefabScriptPath).Any(name => name.EndsWith(".cs"))) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		[MenuItem("Tools/uNode/Generate C# including Scenes", false, 23)]
 		public static void GenerateCSharpScriptIncludingSceneGraphs() {
 			if(!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
@@ -263,73 +288,148 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
 				CompileProjectGraphs();
-				GenerateCSharpScriptForSceneGraphs();
 			} else {
-				if(Directory.Exists(projectScriptPath)) {
+				if(IsCompiledScriptExistInProject(true, false, false)) {
 					Debug.LogWarning($"Warning: You're using Roslyn Compilation method but there's a generated script located on: {projectScriptPath} folder, please delete it to ensure script is working.\nIf the generated script in {projectScriptPath} folder still exist the graph will run with that script.");
 				}
 				CompileProjectGraphs(true, false);
-				GenerateCSharpScriptForSceneGraphs();
 			}
+			GenerateCSharpScriptForPrefabGraphs();
+			GenerateCSharpScriptForSceneGraphs();
 		}
 
 		public static void GenerateCSharpScriptForSceneGraphs() {
-			DeleteGeneratedCSharpScriptForScenes();//Removing previous files so there's no outdated scripts
-			var scenes = EditorBuildSettings.scenes;
-			var dir = projectSceneScriptPath;
-			// uNodeEditorUtility.FindAssetsByType<SceneAsset>();
-			for (int i = 0; i < scenes.Length;i++) {
-				var scene = scenes[i];
-				var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
-				if(sceneAsset == null || !scene.enabled) continue;
-				EditorUtility.DisplayProgressBar($"Loading Scene: {sceneAsset.name} {i+1}-{scenes.Length}", "", 0);
-				while(uNodeThreadUtility.IsNeedUpdate()) {
-					uNodeThreadUtility.Update();
-				}
-				var currentScene = EditorSceneManager.OpenScene(scene.path);
+			try {
+				DeleteGeneratedCSharpScriptForScenes();//Removing previous files so there's no outdated scripts
+				var scenes = EditorBuildSettings.scenes;
+				var dir = projectSceneScriptPath;
+				// uNodeEditorUtility.FindAssetsByType<SceneAsset>();
+				for(int i = 0; i < scenes.Length; i++) {
+					var scene = scenes[i];
+					var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>(scene.path);
+					if(sceneAsset == null || !scene.enabled) continue;
+					EditorUtility.DisplayProgressBar($"Loading Scene: {sceneAsset.name} {i + 1}-{scenes.Length}", "", 0);
+					while(uNodeThreadUtility.IsNeedUpdate()) {
+						uNodeThreadUtility.Update();
+					}
+					var currentScene = EditorSceneManager.OpenScene(scene.path);
 #pragma warning disable
-				var graphs = GameObject.FindObjectsOfType<GraphComponent>();
+					var graphs = GameObject.FindObjectsOfType<GraphComponent>();
 #pragma warning restore
-				var scripts = new List<CG.GeneratedData>();
-				int count = 0;
-				foreach(var graph in graphs) {
-					count++;
-					scripts.Add(GenerationUtility.GenerateCSharpScript(graph, (progress, info) => {
-						EditorUtility.DisplayProgressBar($"Generating C# for: {sceneAsset.name} {i+1}-{scenes.Length} current: {count}-{graphs.Length}", info, progress);
-					}));
-				}
-				while(uNodeThreadUtility.IsNeedUpdate()) {
-					uNodeThreadUtility.Update();
-				}
-				EditorSceneManager.SaveScene(currentScene);
-				EditorUtility.DisplayProgressBar("Saving Scene Scripts", "", 1);
-				Directory.CreateDirectory(dir);
-				var startPath = Path.GetFullPath(dir) + Path.DirectorySeparatorChar;
-				foreach(var script in scripts) {
-					var path = startPath + currentScene.name + "_" + script.fileName + ".cs";
-					int index = 1;
-					while(File.Exists(path)) {//Ensure name to be unique
-						path = startPath + currentScene.name + "_" + script.fileName + index + ".cs";
-						index++;
+					var scripts = new List<CG.GeneratedData>();
+					int count = 0;
+					foreach(var graph in graphs) {
+						if(uNodeEditorUtility.IsPrefabInstance(graph))
+							continue;
+						count++;
+						scripts.Add(GenerationUtility.GenerateCSharpScript(graph, (progress, info) => {
+							EditorUtility.DisplayProgressBar($"Generating C# for: {sceneAsset.name} {i + 1}-{scenes.Length} current: {count}-{graphs.Length}", info, progress);
+						}));
 					}
-					using(StreamWriter sw = new StreamWriter(path)) {
-						List<ScriptInformation> informations;
-						var generatedScript = script.ToScript(out informations, true);
-						if(informations != null) {
-							uNodeEditor.SavedData.RegisterGraphInfos(informations, script.graphOwner, path);
+					while(uNodeThreadUtility.IsNeedUpdate()) {
+						uNodeThreadUtility.Update();
+					}
+					EditorSceneManager.SaveScene(currentScene);
+					EditorUtility.DisplayProgressBar("Saving Scene Scripts", "", 1);
+					Directory.CreateDirectory(dir);
+					var startPath = Path.GetFullPath(dir) + Path.DirectorySeparatorChar;
+					foreach(var script in scripts) {
+						var path = startPath + currentScene.name + "_" + script.fileName + ".cs";
+						int index = 1;
+						while(File.Exists(path)) {//Ensure name to be unique
+							path = startPath + currentScene.name + "_" + script.fileName + index + ".cs";
+							index++;
 						}
-						sw.Write(GenerationUtility.ConvertLineEnding(generatedScript, false));
-						sw.Close();
+						using(StreamWriter sw = new StreamWriter(path)) {
+							List<ScriptInformation> informations;
+							var generatedScript = script.ToScript(out informations, true);
+							if(informations != null) {
+								uNodeEditor.SavedData.RegisterGraphInfos(informations, script.graphOwner, path);
+							}
+							sw.Write(GenerationUtility.ConvertLineEnding(generatedScript, false));
+							sw.Close();
+						}
 					}
+				}
+				AssetDatabase.SaveAssets();
+				AssetDatabase.Refresh();
+				Debug.Log("Successful generating scenes script, existing scenes graphs will run with native c#." +
+					"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." +
+					"\nRemoving generated scripts will makes the graph to run with reflection again." +
+					"\nGenerated scenes script can be found on: " + dir);
+			}
+			finally {
+				EditorUtility.ClearProgressBar();
+			}
+		}
+
+		[MenuItem("Tools/uNode/Advanced/Generate C# for Prefabs", false, 1000011)]
+		public static void GenerateCSharpScriptForPrefabGraphs() {
+			try {
+				DeleteGeneratedCSharpScriptForPrefab();//Removing previous files so there's no outdated scripts
+				var prefabs = uNodeEditorUtility.FindPrefabsOfType<GraphComponent>();
+				var dir = projectPrefabScriptPath;
+				int compiledCount = 0;
+				for(int i = 0; i < prefabs.Count; i++) {
+					var prefab = prefabs[i];
+					var graphs = prefab.GetComponentsInChildren<GraphComponent>();
+					var scripts = new List<CG.GeneratedData>();
+					int count = 0;
+					foreach(var graph in graphs) {
+						count++;
+						scripts.Add(GenerateCSharpScript(graph, (progress, info) => {
+							EditorUtility.DisplayProgressBar($"Generating C# for prefab: {prefab.name} {i + 1}-{graphs.Length} current: {count}-{graphs.Length}", info, progress);
+						}));
+						compiledCount++;
+					}
+					while(uNodeThreadUtility.IsNeedUpdate()) {
+						uNodeThreadUtility.Update();
+					}
+					uNodeEditorUtility.MarkDirty(prefab);
+					Directory.CreateDirectory(dir);
+					var startPath = Path.GetFullPath(dir) + Path.DirectorySeparatorChar;
+					foreach(var script in scripts) {
+						string fileName = script.fileName;
+						if(script.classNames.Count > 0) {
+							var nm = script.classNames.FirstOrDefault(pair => !string.IsNullOrEmpty(pair.Value)).Value;
+							if(!string.IsNullOrEmpty(nm)) {
+								fileName = nm;
+							}
+						}
+
+						var path = startPath + fileName + ".cs";
+						int index = 1;
+						while(File.Exists(path)) {//Ensure name to be unique
+							path = startPath + fileName + index + ".cs";
+							index++;
+						}
+						using(StreamWriter sw = new StreamWriter(path)) {
+							List<ScriptInformation> informations;
+							var generatedScript = script.ToScript(out informations, true);
+							if(informations != null) {
+								uNodeEditor.SavedData.RegisterGraphInfos(informations, script.graphOwner, path);
+							}
+							sw.Write(GenerationUtility.ConvertLineEnding(generatedScript, false));
+							sw.Close();
+						}
+					}
+				}
+				if(compiledCount > 0) {
+					AssetDatabase.SaveAssets();
+					AssetDatabase.Refresh();
+					Debug.Log("Successful generating prefab script, existing prefab graphs will run with native c#." +
+						"\nCompiled graph count: " + compiledCount +
+						"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." +
+						"\nRemoving generated scripts will makes the graph to run with reflection again." +
+						"\nGenerated scenes script can be found on: " + dir);
+				}
+				else {
+					Debug.Log("There's no prefab with GraphComponent exists");
 				}
 			}
-			AssetDatabase.SaveAssets();
-			AssetDatabase.Refresh();
-			EditorUtility.ClearProgressBar();
-			Debug.Log("Successful generating scenes script, existing scenes graphs will run with native c#." +
-				"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." + 
-				"\nRemoving generated scripts will makes the graph to run with reflection again." + 
-				"\nGenerated scenes script can be found on: " + dir);
+			finally {
+				EditorUtility.ClearProgressBar();
+			}
 		}
 
 
@@ -473,7 +573,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 #region Delete Generated Script
-		[MenuItem("Tools/uNode/Delete Generated C# Scripts", false, 24)]
+		[MenuItem("Tools/uNode/Delete Generated C# Scripts", false, 30)]
 		public static void DeleteGeneratedCSharpScript() {
 			EditorUtility.DisplayProgressBar("Deleting Generated C# Scripts", "", 1);
 			if(Directory.Exists(projectScriptPath)) {
@@ -495,19 +595,6 @@ namespace MaxyGames.UNode.Editors {
 			EditorUtility.ClearProgressBar();
 		}
 
-		//public static void DeleteGeneratedCSharpScriptForProjects() {
-		//	EditorUtility.DisplayProgressBar("Deleting Generated C# Scripts", "", 1);
-		//	var dir = projectScriptPath;
-		//	if(Directory.Exists(dir)) {
-		//		Directory.Delete(dir, true);
-		//	}
-		//	if(File.Exists(dir + ".meta")) {
-		//		File.Delete(dir + ".meta");
-		//	}
-		//	AssetDatabase.Refresh();
-		//	EditorUtility.ClearProgressBar();
-		//}
-
 		public static void DeleteGeneratedCSharpScriptForScenes() {
 			EditorUtility.DisplayProgressBar("Deleting Generated C# Scripts", "", 1);
 			var dir = projectSceneScriptPath;
@@ -520,7 +607,20 @@ namespace MaxyGames.UNode.Editors {
 			AssetDatabase.Refresh();
 			EditorUtility.ClearProgressBar();
 		}
-#endregion
+
+		public static void DeleteGeneratedCSharpScriptForPrefab() {
+			EditorUtility.DisplayProgressBar("Deleting Generated C# Scripts for prefab", "", 1);
+			var dir = projectPrefabScriptPath;
+			if(Directory.Exists(dir)) {
+				Directory.Delete(dir, true);
+			}
+			if(File.Exists(dir + ".meta")) {
+				File.Delete(dir + ".meta");
+			}
+			AssetDatabase.Refresh();
+			EditorUtility.ClearProgressBar();
+		}
+		#endregion
 
 		public static void GenerateNativeGraphsInProject(bool enableLogging = true) {
 			GenerateNativeGraphs(GraphUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph).Select(g => g as IScriptGraph), enableLogging);

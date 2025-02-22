@@ -21,6 +21,20 @@ namespace MaxyGames.UNode.Editors {
 			public int callbackOrder => int.MinValue;
 
 			public void OnPreprocessBuild(BuildReport report) {
+				{//Create linker
+					//#if ENABLE_IL2CPP || UNITY_WEBGL || ENABLE_WINMD_SUPPORT || UNITY_WSA || UNITY_IOS || UNITY_TVOS || UNITY_ANDROID
+					const string link = @"<linker>
+       <assembly fullname=""MaxyGames.OdinSerializer"" preserve=""all""/>
+</linker>";
+
+					var dbDir = GenerationUtility.resourcesPath;
+					Directory.CreateDirectory(dbDir);
+					var path = dbDir + Path.DirectorySeparatorChar + "link.xml";
+					File.WriteAllText(path, link);
+					AssetDatabase.Refresh();
+					//#endif
+				}
+
 				uNodeEditorInitializer.OnPreprocessBuild();
 			}
 
@@ -29,7 +43,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[MenuItem("Tools/uNode/Advanced/Scan AOT Type", false, 1000010)]
+		[MenuItem("Tools/uNode/Advanced/Scan AOT Type", false, 1000012)]
 		public static void ScanAOTType() {
 			uNodeEditorInitializer.AOTScan(out var types, compileGraphs: true);
 			var db = uNodeUtility.GetDatabase();
