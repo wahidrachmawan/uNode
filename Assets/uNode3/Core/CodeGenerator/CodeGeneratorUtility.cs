@@ -120,6 +120,14 @@ namespace MaxyGames {
 			}
 		}
 
+		public static void RegisterAsLambdaFlow(FlowOutput flow) {
+			if(generationState.state != State.Classes)
+				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
+			if(!generatorData.lambdaFlows.Contains(flow)) {
+				generatorData.lambdaFlows.Add(flow);
+			}
+		}
+
 		/// <summary>
 		/// Register value output port
 		/// </summary>
@@ -238,10 +246,19 @@ namespace MaxyGames {
 		/// <summary>
 		/// Is the node is regular node?
 		/// </summary>
-		/// <param name="node"></param>
+		/// <param name="port"></param>
 		/// <returns></returns>
-		public static bool IsRegularFlow(FlowInput node) {
-			return generatorData.regularNodes.Contains(node);
+		public static bool IsRegularFlow(FlowInput port) {
+			return generatorData.regularNodes.Contains(port);
+		}
+
+		/// <summary>
+		/// Is the node is registered as Lambda flow?
+		/// </summary>
+		/// <param name="port"></param>
+		/// <returns></returns>
+		public static bool IsLambdaFlow(FlowOutput port) {
+			return generatorData.lambdaFlows.Contains(port);
 		}
 
 		/// <summary>
@@ -252,6 +269,9 @@ namespace MaxyGames {
 		public static bool IsStateFlow(FlowInput port) {
 			if (port == null)
 				return false;
+#if UNODE_DEV
+			
+#endif
 			return generatorData.stateNodes.Contains(port);
 		}
 
@@ -263,7 +283,7 @@ namespace MaxyGames {
 		public static bool IsInStateGraph(NodeObject node) {
 			return node.GetObjectInParent<MainGraphContainer>() != null;
 		}
-		#endregion
+#endregion
 
 		#region Variables
 		/// <summary>

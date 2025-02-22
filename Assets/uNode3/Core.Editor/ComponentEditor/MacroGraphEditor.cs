@@ -23,13 +23,13 @@ namespace MaxyGames.UNode.Editors {
 			});
 
 			inputFlows.Clear();
-			inputFlows.AddRange(asset.inputFlows);
+			inputFlows.AddRange(asset.InputFlows);
 			inputValues.Clear();
-			inputValues.AddRange(asset.inputValues);
+			inputValues.AddRange(asset.InputValues);
 			outputFlows.Clear();
-			outputFlows.AddRange(asset.outputFlows);
+			outputFlows.AddRange(asset.OutputFlows);
 			outputValues.Clear();
-			outputValues.AddRange(asset.outputValues);
+			outputValues.AddRange(asset.OutputValues);
 
 			uNodeGUI.DrawCustomList(
 				inputFlows,

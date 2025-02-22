@@ -3175,7 +3175,16 @@ namespace MaxyGames {
 		/// </summary>
 		/// <param name="action"></param>
 		public static void RegisterPostInitialization(Action action) {
-			generatorData.postInitialization += action;
+			generatorData.postInitialization.Add((action, 0));
+		}
+
+		/// <summary>
+		/// Register post initialization action.
+		/// </summary>
+		/// <param name="action"></param>
+		/// <param name="order"></param>
+		public static void RegisterPostInitialization(Action action, int order) {
+			generatorData.postInitialization.Add((action, order));
 		}
 
 		/// <summary>

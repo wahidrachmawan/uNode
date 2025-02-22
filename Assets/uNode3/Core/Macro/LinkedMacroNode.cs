@@ -5,7 +5,7 @@ using System.Linq;
 using System;
 
 namespace MaxyGames.UNode.Nodes {
-	public class LinkedMacroNode : Node, IMacro, ILocalVariableSystem, IRefreshable, IGeneratorPrePostInitializer {
+	public class LinkedMacroNode : Node, ILinkedMacro, ILocalVariableSystem, IRefreshable, IGeneratorPrePostInitializer {
 		[AllowAssetReference]
 		public MacroGraph macroAsset;
 
@@ -50,7 +50,7 @@ namespace MaxyGames.UNode.Nodes {
 				outputValues.Clear();
 				//Initialize Flow Inputs
 				bool needSetPrimary = true;
-				foreach(var p in macroAsset.inputFlows) { 
+				foreach(var p in macroAsset.InputFlows) { 
 					var macroPort = p;
 					var port = FlowInput(macroPort.id.ToString(), flow => {
 						var data = flow.GetElementData<LinkedData>(this);
@@ -86,7 +86,7 @@ namespace MaxyGames.UNode.Nodes {
 				}
 				needSetPrimary = true;
 				//Initialize Flow Outputs
-				foreach(var p in macroAsset.outputFlows) {
+				foreach(var p in macroAsset.OutputFlows) {
 					var macroPort = p;
 					outputFlows.Add(
 						FlowOutput(macroPort.id.ToString()).SetName(macroPort.GetTitle())
@@ -97,7 +97,7 @@ namespace MaxyGames.UNode.Nodes {
 					}
 				}
 				//Initialize Value Inputs
-				foreach(var p in macroAsset.inputValues) {
+				foreach(var p in macroAsset.InputValues) {
 					var macroPort = p;
 					inputValues.Add(
 						ValueInput(macroPort.id.ToString(), macroPort.ReturnType()).SetName(macroPort.GetTitle())
@@ -105,7 +105,7 @@ namespace MaxyGames.UNode.Nodes {
 				}
 				needSetPrimary = true;
 				//Initialize Value Outputs
-				foreach(var p in macroAsset.outputValues) {
+				foreach(var p in macroAsset.OutputValues) {
 					var macroPort = p;
 					var port = ValueOutput(macroPort.id.ToString(), macroPort.ReturnType(), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
 					port.AssignGetCallback(instance => {
@@ -205,6 +205,8 @@ namespace MaxyGames.UNode.Nodes {
 		IEnumerable<MacroPortNode> IMacro.OutputFlows => (macroAsset as IMacro)?.OutputFlows;
 		IEnumerable<MacroPortNode> IMacro.OutputValues => (macroAsset as IMacro)?.OutputValues;
 
+		public IMacroGraph LinkedMacro => macroAsset;
+
 		public void Refresh() {
 			if(macroAsset != null) {
 				//for(int i = 0; i < variables.Count; i++) {
@@ -261,7 +263,7 @@ namespace MaxyGames.UNode.Nodes {
 			}, true);
 
 			foreach(var port in inputFlows) {
-					CG.RegisterAsRegularNode(port);
+				CG.RegisterAsRegularNode(port);
 				foreach(var con in port.connections) {
 					if(con.isValid == false) continue;
 					CG.RegisterEntry(con.output.node);
@@ -293,19 +295,19 @@ namespace MaxyGames.UNode.Nodes {
 				foreach(var p in RuntimeGraphUtility.GetMacroInputFlows(graph)) {
 					var linkedPort = p;
 					var port = inputFlows[index];
-					CG.RegisterPort(port, () => CG.Flow(linkedPort.exit, false));
-					if(linkedPort.exit != null && linkedPort.exit.isAssigned) {
-						if(linkedPort.exit.IsSelfCoroutine() && CG.IsStateFlow(linkedPort.exit.GetTargetFlow())) {
-							CG.RegisterAsStateFlow(port);
-							CG.RegisterAsStateFlow(linkedPort.exit.GetTargetFlow());
-							//CG.SetStateInitialization(port, () => {
-							//	var target = linkedPort.exit.GetTargetFlow();
-							//	if(target == null)
-							//		return null;
-							//	return CG.GetEvent(linkedPort.exit);
-							//});
-						}
-					}
+					CG.RegisterPort(port, () => CG.Flow(linkedPort.exit));
+					//if(linkedPort.exit != null && linkedPort.exit.isAssigned) {
+					//	if(linkedPort.exit.IsSelfCoroutine() && CG.IsStateFlow(linkedPort.exit.GetTargetFlow())) {
+					//		//CG.RegisterAsStateFlow(port);
+					//		//CG.RegisterAsStateFlow(linkedPort.exit.GetTargetFlow());
+					//		//CG.SetStateInitialization(port, () => {
+					//		//	var target = linkedPort.exit.GetTargetFlow();
+					//		//	if(target == null)
+					//		//		return null;
+					//		//	return CG.GetEvent(linkedPort.exit);
+					//		//});
+					//	}
+					//}
 					index++;
 				}
 				//Initialize Flow Outputs

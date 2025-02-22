@@ -223,22 +223,22 @@ namespace MaxyGames.UNode.Editors {
 				try {
 					switch(nodeFilter) {
 						case NodeFilter.FlowInput:
-							if(m.outputFlows.Any() == false) {
+							if(m.OutputFlows.Any() == false) {
 								continue;
 							}
 							break;
 						case NodeFilter.FlowOutput:
-							if(m.inputFlows.Any() == false) {
+							if(m.InputFlows.Any() == false) {
 								continue;
 							}
 							break;
 						case NodeFilter.ValueInput:
-							if(m.outputValues.Any(p => p.type == typeof(object) || p.type.type.IsCastableTo(type)) == false) {
+							if(m.OutputValues.Any(p => p.type == typeof(object) || p.type.type.IsCastableTo(type)) == false) {
 								continue;
 							}
 							break;
 						case NodeFilter.ValueOutput:
-							if(m.inputValues.Any(p => p.type == typeof(object) || p.type.type.IsCastableTo(type)) == false) {
+							if(m.InputValues.Any(p => p.type == typeof(object) || p.type.type.IsCastableTo(type)) == false) {
 								continue;
 							}
 							break;

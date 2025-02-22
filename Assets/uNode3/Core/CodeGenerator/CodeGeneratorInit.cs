@@ -133,7 +133,20 @@ namespace MaxyGames {
 				for(int i=0;i< initializersList.Count;i++) {
 					initializersList[i].OnPostInitializer();
 				}
-				generatorData.postInitialization?.Invoke();
+				generatorData.postInitialization.Sort((x, y) => CompareUtility.Compare(x.Item2, y.Item2));
+				foreach(var (action, _) in generatorData.postInitialization) {
+					action?.Invoke();
+				}
+				foreach(var port in generatorData.lambdaFlows) {
+					if(port.isAssigned) {
+						var next = port.GetTargetFlow();
+						if(IsStateFlow(next)) continue;
+						if(Nodes.HasCoroutineFlow(next)) {
+							RegisterAsStateFlow(next);
+							continue;
+						}
+					}
+				}
 			}
 		}
 
@@ -200,6 +213,9 @@ namespace MaxyGames {
 						foreach(var flow in eventNode.outputs) {
 							var tFlow = flow?.GetTargetFlow();
 							if(tFlow != null) {
+								if(flow.localFunction) {
+									RegisterAsLambdaFlow(flow);
+								}
 								if(Nodes.HasStateFlowOutput(tFlow) || Nodes.IsStackOverflow(tFlow.node)) {
 									RegisterAsStateFlow(tFlow);
 									break;
@@ -350,6 +366,60 @@ namespace MaxyGames {
 				return false;
 			}
 
+			public static bool HasCoroutineFlow(FlowInput port, HashSet<NodeObject> prevs = null) {
+				if(port == null)
+					return false;
+				if(port.IsSelfCoroutine())
+					return true;
+				if(prevs == null)
+					prevs = new HashSet<NodeObject>();
+				var node = port.node;
+				if(prevs.Contains(node)) {
+					return false;
+				}
+				prevs.Add(node);
+				for(int i = 0; i < node.FlowOutputs.Count; i++) {
+					if(node.FlowOutputs[i].isConnected && node.FlowOutputs[i].localFunction == false) {
+						if(HasCoroutineFlow(node.FlowOutputs[i].GetTargetFlow(), prevs)) {
+							return true;
+						}
+					}
+				}
+				if(node.node is IStackedNode) {
+					var stacked = node.node as IStackedNode;
+					foreach(var n in stacked.stackedNodes) {
+						if(n == null) continue;
+						foreach(var p in n.FlowInputs) {
+							if(p.IsSelfCoroutine()) {
+								return true;
+							}
+						}
+					}
+				}
+				if(port.node.node is IMacro) {
+					var macro = port.node.node as IMacro;
+					if(macro is ILinkedMacro linkedMacro) {
+						foreach(var mport in linkedMacro.LinkedMacro.InputFlows) {
+							if(mport.exit.GetTargetFlow() != null) {
+								if(HasCoroutineFlow(mport.exit.GetTargetFlow(), prevs)) {
+									return true;
+								}
+							}
+						}
+					}
+					else {
+						foreach(var mport in macro.InputFlows) {
+							if(mport.exit.GetTargetFlow() != null) {
+								if(HasCoroutineFlow(mport.exit.GetTargetFlow(), prevs)) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+				return false;
+			}
+
 			/// <summary>
 			/// Is the node has connected to a state flow in node input flow ports.
 			/// </summary>
@@ -452,6 +522,9 @@ namespace MaxyGames {
 					foreach(var port in node.FlowOutputs) {
 						if(port.isAssigned) {
 							InitConnect(port.GetTargetNode());
+							if(port.localFunction) {
+								RegisterAsLambdaFlow(port);
+							}
 						}
 					}
 					foreach(var port in node.ValueInputs) {

@@ -357,6 +357,15 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public interface IMacroGraph : IIndependentGraph {
 		bool HasCoroutineNode { get; }
+
+		IEnumerable<Nodes.MacroPortNode> InputFlows { get; }
+		IEnumerable<Nodes.MacroPortNode> InputValues { get; }
+		IEnumerable<Nodes.MacroPortNode> OutputFlows { get; }
+		IEnumerable<Nodes.MacroPortNode> OutputValues { get; }
+	}
+
+	public interface ILinkedMacro : IMacro {
+		IMacroGraph LinkedMacro { get; }
 	}
 
 	/// <summary>

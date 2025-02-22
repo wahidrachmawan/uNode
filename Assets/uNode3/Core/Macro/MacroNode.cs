@@ -175,20 +175,20 @@ namespace MaxyGames.UNode.Nodes {
 				//Initialize Flow Inputs
 				foreach(var p in inputFlows) {
 					var port = p;
-					CG.RegisterPort(port.enter, () => CG.Flow(port.exit, false));
-					if(port.exit != null && port.exit.isAssigned) {
-						if(port.exit.IsSelfCoroutine() && CG.IsStateFlow(port.exit.GetTargetFlow())) {
-							CG.RegisterAsStateFlow(port.enter);
-							CG.RegisterAsStateFlow(port.exit.GetTargetFlow());
-							//CG.SetStateInitialization(port.enter, () => {
-							//	var target = port.exit.GetTargetFlow();
-							//	if(target == null)
-							//		return null;
-							//	return CG.GetEvent(port.exit);
-							//});
-							//continue;
-						}
-					}
+					CG.RegisterPort(port.enter, () => CG.Flow(port.exit));
+					//if(port.exit != null && port.exit.isAssigned) {
+					//	if(port.exit.IsSelfCoroutine() && CG.IsStateFlow(port.exit.GetTargetFlow())) {
+					//		//CG.RegisterAsStateFlow(port.enter);
+					//		CG.RegisterAsStateFlow(port.exit.GetTargetFlow());
+					//		//CG.SetStateInitialization(port.enter, () => {
+					//		//	var target = port.exit.GetTargetFlow();
+					//		//	if(target == null)
+					//		//		return null;
+					//		//	return CG.GetEvent(port.exit);
+					//		//});
+					//		//continue;
+					//	}
+					//}
 				}
 				//Initialize Flow Outputs
 				foreach(var p in outputFlows) {

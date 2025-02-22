@@ -402,7 +402,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(graph is MacroGraph) {
 						var root = graph as MacroGraph;
-						var flows = root.inputFlows;
+						var flows = root.InputFlows;
 						if(flows != null) {
 							foreach(var flow in flows) {
 								AddNodes(flow, childItem, rows);

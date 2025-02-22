@@ -37,6 +37,7 @@ namespace MaxyGames.UNode.Nodes {
 			register = FlowInput(nameof(register), OnRegisters);
 			unregister = FlowInput(nameof(unregister), OnUnregister);
 			body = FlowOutput(nameof(body));
+			body.localFunction = true;
 			if(target.isAssigned) {
 				var targetType = target.ValueType;
 				if(targetType != null) {

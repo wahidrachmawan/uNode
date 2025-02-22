@@ -11,10 +11,10 @@ namespace MaxyGames.UNode {
 		[SerializeField, HideInInspector]
 		internal List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections.Generic" };
 
-		public IEnumerable<MacroPortNode> inputFlows => RuntimeGraphUtility.GetMacroInputFlows(GraphData);
-		public IEnumerable<MacroPortNode> inputValues => RuntimeGraphUtility.GetMacroInputValues(GraphData);
-		public IEnumerable<MacroPortNode> outputFlows => RuntimeGraphUtility.GetMacroOutputFlows(GraphData);
-		public IEnumerable<MacroPortNode> outputValues => RuntimeGraphUtility.GetMacroOutputValues(GraphData);
+		public IEnumerable<MacroPortNode> InputFlows => RuntimeGraphUtility.GetMacroInputFlows(GraphData);
+		public IEnumerable<MacroPortNode> InputValues => RuntimeGraphUtility.GetMacroInputValues(GraphData);
+		public IEnumerable<MacroPortNode> OutputFlows => RuntimeGraphUtility.GetMacroOutputFlows(GraphData);
+		public IEnumerable<MacroPortNode> OutputValues => RuntimeGraphUtility.GetMacroOutputValues(GraphData);
 
 		[SerializeField, HideInInspector]
 		private bool hasCoroutineNodes;

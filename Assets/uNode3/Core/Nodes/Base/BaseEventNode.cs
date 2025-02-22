@@ -150,6 +150,19 @@ namespace MaxyGames.UNode {
 
 		public virtual void GenerateEventCode() { }
 
+		public override void OnGeneratorInitialize() {
+			base.OnGeneratorInitialize();
+			CG.RegisterPostInitialization(() => {
+				foreach(var selfPort in outputs.Where(p => p.isAssigned).Select(p => p.GetTargetFlow())) {
+					if(CG.IsStateFlow(selfPort)) continue;
+					if(CG.Nodes.HasCoroutineFlow(selfPort)) {
+						CG.RegisterAsStateFlow(selfPort);
+						continue;
+					}
+				}
+			}, int.MaxValue);
+		}
+
 		public bool IsHandledByState() {
 			var parent = nodeObject?.parent as NodeObject;
 			if(parent != null && parent.node is Nodes.StateNode) {

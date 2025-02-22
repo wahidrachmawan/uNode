@@ -169,6 +169,7 @@ namespace MaxyGames {
 			public List<NodeObject> allNode = new List<NodeObject>();
 			public HashSet<FlowInput> regularNodes = new HashSet<FlowInput>();
 			public HashSet<FlowInput> stateNodes = new HashSet<FlowInput>();
+			public HashSet<FlowOutput> lambdaFlows = new HashSet<FlowOutput>();
 			public HashSet<NodeObject> connectedNodes = new HashSet<NodeObject>();
 
 			public List<Exception> errors = new List<Exception>();
@@ -225,7 +226,7 @@ namespace MaxyGames {
 
 			public Action<ClassData> postGeneration;
 			public Action<GData> postManipulator;
-			public Action postInitialization;
+			public List<(Action, int)> postInitialization = new();
 			public Dictionary<NodeObject, Action> initActionForNodes = new Dictionary<NodeObject, Action>();
 			public Dictionary<object, HashSet<int>> initializedUserObject = new Dictionary<object, HashSet<int>>();
 
