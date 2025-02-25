@@ -2158,7 +2158,7 @@ namespace MaxyGames {
 							return GetVariableName(variable);
 						}
 						else {
-							member.startItem.GetActualName();
+							return member.startItem.GetActualName();
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeProperty) {
@@ -2167,7 +2167,7 @@ namespace MaxyGames {
 							return property.name;
 						}
 						else {
-							member.startItem.GetActualName();
+							return member.startItem.GetActualName();
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeFunction) {
@@ -2176,7 +2176,7 @@ namespace MaxyGames {
 							return function.name;
 						}
 						else {
-							member.startItem.GetActualName();
+							return member.startItem.GetActualName();
 						}
 					}
 					else if(member.targetType == MemberData.TargetType.uNodeLocalVariable) {

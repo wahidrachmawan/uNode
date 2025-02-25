@@ -35,6 +35,10 @@ namespace MaxyGames.UNode {
 
 		public override Type BaseType {
 			get {
+				if(target is ISingletonGraph) {
+					//In case singleton, we simply return object type because we don't need to show inherited members
+					return typeof(object);
+				}
 				if (target is IClassGraph classGraph) {
 					return classGraph.InheritType;
 				}

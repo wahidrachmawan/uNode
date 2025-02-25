@@ -1956,7 +1956,13 @@ namespace MaxyGames {
 		}
 
 		public class GeneratedData {
+			/// <summary>
+			/// List of all generated class name
+			/// </summary>
 			public Dictionary<object, string> classNames = new Dictionary<object, string>();
+			/// <summary>
+			/// The file name of the script
+			/// </summary>
 			public string fileName {
 				get {
 					if(graphOwner != null) {
@@ -1965,18 +1971,42 @@ namespace MaxyGames {
 					return setting.fileName;
 				}
 			}
+			/// <summary>
+			/// The namespace of the script
+			/// </summary>
 			public string Namespace => setting.nameSpace;
 
+			/// <summary>
+			/// The object owner that generates the script
+			/// </summary>
 			public UnityEngine.Object graphOwner;
+			/// <summary>
+			/// The list of types
+			/// </summary>
 			public UnityEngine.Object[] types;
+			/// <summary>
+			/// The list of errors
+			/// </summary>
 			public List<Exception> errors;
 
+			/// <summary>
+			/// The graph unique identifier
+			/// </summary>
 			public int graphUID => uNodeUtility.GetObjectID(graphOwner);
 
+			/// <summary>
+			/// True if generator has errors
+			/// </summary>
 			public bool hasError => errors != null && errors.Count > 0;
 
+			/// <summary>
+			/// True if the data is valid
+			/// </summary>
 			public bool isValid => classes.Count > 0 && !hasError;
 
+			/// <summary>
+			/// The callback for post script modifications
+			/// </summary>
 			public event Func<string, string> postScriptModifier;
 
 			private GeneratorSetting setting;

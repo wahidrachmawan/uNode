@@ -5,6 +5,7 @@
 - Improved Editor
 - Improved Graph Component, prevent editing prefab instance but allow to override the variables this will ensure the Graph Component is using same graph with the original prefab.
 - Changes serialization behaviour, the graph will now serialized by Unity instead of Odin Serializer resulting in more fast editing graph, smaller file size, and version control friendly. ( This is breaking changes, make sure to backup your projects )
+- Fixed serialization error in build because of link.xml is not included on IL2CPP backend
 - Fixed some bugs
 
 ## v3.0.8

@@ -157,11 +157,23 @@ namespace MaxyGames.UNode {
 		}
 
 		public void InitializeElement() {
-			this.ForeachInChildrens(element => {
-				if(element is NodeObject node) {
-					node.EnsureRegistered();
-				}
-			}, true);
+			if(cachedElements.Count == 0) {
+				this.ForeachInChildrens(element => {
+					if(element == null) return;
+					if(element is NodeObject node) {
+						node.EnsureRegistered();
+					}
+					cachedElements[element.id] = element;
+				}, true);
+			}
+			else {
+				this.ForeachInChildrens(element => {
+					if(element == null) return;
+					if(element is NodeObject node) {
+						node.EnsureRegistered();
+					}
+				}, true);
+			}
 		}
 
 		internal void OnDeserialized() {

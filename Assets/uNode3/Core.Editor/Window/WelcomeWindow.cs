@@ -86,7 +86,7 @@ namespace MaxyGames.UNode.Editors {
 						"Tutorials",
 						"Watch tutorials on the uNode YouTube channel.",
 						() => {
-							Application.OpenURL("https://www.youtube.com/channel/UCDZo-bRai7LUgJZysBnQeQQ/featured?view_as=subscriber");
+							Application.OpenURL("https://youtube.com/@maxygames1?si=WIOzWhNwnhHvIKDm");
 						});
 					DrawLink(gettingStartedIcon,
 						"Docs",

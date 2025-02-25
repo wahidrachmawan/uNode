@@ -100,7 +100,7 @@ namespace MaxyGames.UNode.Editors {
 
 					EditorGUILayout.Space();
 					if(GUILayout.Button("YouTube Tutorials", EditorStyles.label))
-						Application.OpenURL("https://www.youtube.com/channel/UCDZo-bRai7LUgJZysBnQeQQ?view_as=subscriber");
+						Application.OpenURL("https://youtube.com/@maxygames1?si=WIOzWhNwnhHvIKDm");
 					EditorGUILayout.LabelField("Easy-to-digest tutorial videos and showcases.", GreyText);
 					break;
 
@@ -389,7 +389,7 @@ SOFTWARE.");
 			EditorGUILayout.LabelField(new GUIContent("uNode v" + installedVersion), CenteredVersionLabel);
 			EditorGUILayout.Space();
 			if(GUILayout.Button(new GUIContent("<size=11> Please consider leaving us a review.</size>", Resources.Load<Texture2D>("Icons/award_star_gold_blue"), ""), ReviewBanner, BannerHeight))
-				Application.OpenURL("https://assetstore.unity.com/packages/tools/visual-scripting/unode-visual-scripting-101176");
+				Application.OpenURL("https://assetstore.unity.com/packages/tools/visual-scripting/unode-3-pro-300160");
 		}
 
 		void DrawTPInfo(string title, string url, string license, string licenseDescription) {

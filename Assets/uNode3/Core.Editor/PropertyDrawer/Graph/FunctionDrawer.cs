@@ -19,6 +19,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				UInspector.Draw(option.property[nameof(Function.modifier)]);
 			}
 			uNodeGUIUtility.DrawTypeDrawer(value.ReturnType(), new GUIContent("Return Type"), type => {
+				if(type == null)
+					type = typeof(void);
 				value.returnType = type;
 				uNodeGUIUtility.GUIChangedMajor(value);
 			}, targetObject: option.unityObject, filter: new FilterAttribute() { OnlyGetType = true, VoidType = true });
