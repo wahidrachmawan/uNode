@@ -1746,7 +1746,7 @@ namespace MaxyGames.UNode.Editors {
 										}
 									}
 									foreach(var m in methods) {
-										evt.menu.AppendAction("Change Methods/" + EditorReflectionUtility.GetPrettyMethodName(m), (e) => {
+										evt.menu.AppendAction("Overrides/" + EditorReflectionUtility.GetPrettyMethodName(m), (e) => {
 											object[] objs = e.userData as object[];
 											MultipurposeNode nod = objs[0] as MultipurposeNode;
 											MethodInfo method = objs[1] as MethodInfo;
@@ -1786,7 +1786,7 @@ namespace MaxyGames.UNode.Editors {
 										foreach(var m in ctors) {
 											if(!ReflectionUtils.IsPublicMember(m))
 												continue;
-											evt.menu.AppendAction("Change Constructors/" + EditorReflectionUtility.GetPrettyConstructorName(m), (e) => {
+											evt.menu.AppendAction("Overrides/" + EditorReflectionUtility.GetPrettyConstructorName(m), (e) => {
 												object[] objs = e.userData as object[];
 												MultipurposeNode nod = objs[0] as MultipurposeNode;
 												ConstructorInfo ctor = objs[1] as ConstructorInfo;
@@ -1811,7 +1811,7 @@ namespace MaxyGames.UNode.Editors {
 								if(currMethod != null) {
 									var methods = currMethod.graphContainer.GetFunctions().Where(f => f.name == currMethod.name);
 									foreach(var m in methods) {
-										evt.menu.AppendAction("Change Functions/" + EditorReflectionUtility.GetPrettyFunctionName(m), (e) => {
+										evt.menu.AppendAction("Overrides/" + EditorReflectionUtility.GetPrettyFunctionName(m), (e) => {
 											object[] objs = e.userData as object[];
 											MultipurposeNode nod = objs[0] as MultipurposeNode;
 											Function method = objs[1] as Function;

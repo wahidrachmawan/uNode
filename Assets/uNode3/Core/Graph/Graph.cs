@@ -361,8 +361,9 @@ namespace MaxyGames.UNode {
 				serializedGraph = new GraphData();
 			}
 			serializedGraph.graph = graph;
-			serializedData = null;
-			//serializedData = Serialize(graph);
+
+			//Uncomment to remove old serialization data
+			//serializedData = null;
 		}
 
 		public void DeserializeGraph() {

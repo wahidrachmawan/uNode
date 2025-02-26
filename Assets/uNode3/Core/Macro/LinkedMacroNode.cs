@@ -66,6 +66,7 @@ namespace MaxyGames.UNode.Nodes {
 							throw new GraphException("Port not found", this);
 						}
 					});
+					port.SetTooltip(macroPort.comment);
 					//port.actionOnExit = flow => {
 					//	if(flow is StateFlow) {
 					//		var data = flow.GetElementData<LinkedData>(this);
@@ -89,7 +90,7 @@ namespace MaxyGames.UNode.Nodes {
 				foreach(var p in macroAsset.OutputFlows) {
 					var macroPort = p;
 					outputFlows.Add(
-						FlowOutput(macroPort.id.ToString()).SetName(macroPort.GetTitle())
+						FlowOutput(macroPort.id.ToString()).SetName(macroPort.GetTitle()).SetTooltip(macroPort.comment)
 					);
 					if(needSetPrimary) {
 						needSetPrimary = false;
@@ -100,7 +101,7 @@ namespace MaxyGames.UNode.Nodes {
 				foreach(var p in macroAsset.InputValues) {
 					var macroPort = p;
 					inputValues.Add(
-						ValueInput(macroPort.id.ToString(), macroPort.ReturnType()).SetName(macroPort.GetTitle())
+						ValueInput(macroPort.id.ToString(), macroPort.ReturnType()).SetName(macroPort.GetTitle()).SetTooltip(macroPort.comment)
 					);
 				}
 				needSetPrimary = true;
@@ -122,6 +123,7 @@ namespace MaxyGames.UNode.Nodes {
 							throw new GraphException("Port not found", this);
 						}
 					});
+					port.SetTooltip(macroPort.comment);
 					port.AssignSetCallback((instance, value) => {
 						var data = instance.GetElementData<LinkedData>(this);
 						if(data == null) {

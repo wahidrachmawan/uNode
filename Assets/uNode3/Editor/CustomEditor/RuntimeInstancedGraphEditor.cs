@@ -9,6 +9,11 @@ namespace MaxyGames.UNode.Editors {
     public class RuntimeInstancedGraphEditor : Editor {
 		public override void OnInspectorGUI() {
 			var asset = target as RuntimeInstancedGraph;
+			if(asset.OriginalGraph is UnityEngine.Object owner && owner != null) {
+				EditorGUI.BeginDisabledGroup(true);
+				EditorGUILayout.ObjectField("Graph", owner, typeof(UnityEngine.Object), true);
+				EditorGUI.EndDisabledGroup();
+			}
 			if(asset.nativeInstance != null) {
 				Editor editor = CustomInspector.GetEditor(asset.nativeInstance);
 				if(editor != null) {
