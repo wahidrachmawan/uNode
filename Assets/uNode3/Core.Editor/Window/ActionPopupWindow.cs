@@ -37,7 +37,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public Action onUndoOrRedo;
 		public float width = 350, height = 200, maxWidth = 400, maxHeight = 600;
-		public bool autoSize = true;
+		public bool autoSize = true, autoFocus = true;
 
 		private Vector2 scrollPos;
 
@@ -227,7 +227,7 @@ namespace MaxyGames.UNode.Editors {
 			HandleKeyboard();
 			if(!string.IsNullOrEmpty(headerName))
 				EditorGUILayout.LabelField(headerName, EditorStyles.toolbarButton);
-			if (!_hasFocus) {
+			if (!_hasFocus && autoFocus) {
 				EditorGUI.FocusTextInControl("act");
 				if (Event.current.type == EventType.Repaint) {
 					_hasFocus = true;

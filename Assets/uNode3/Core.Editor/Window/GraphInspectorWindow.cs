@@ -6,6 +6,8 @@ namespace MaxyGames.UNode.Editors {
 		public static GraphInspectorWindow window;
 		CustomInspector inspectorWrapper;
 		Editor inspectorEditor;
+		[SerializeField]
+		Vector2 scrollPos;
 
 		[MenuItem("Tools/uNode/Graph Inspector", false, 100)]
 		public static void ShowWindow() {
@@ -21,9 +23,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void OnGUI() {
+			scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
 			if(inspectorEditor != null) {
 				inspectorEditor.OnInspectorGUI();
 			}
+			EditorGUILayout.EndScrollView();
 		}
 
 		private void OnGraphEditorChanged(GraphEditorData graphData) {
@@ -39,6 +43,11 @@ namespace MaxyGames.UNode.Editors {
 			if(uNodeEditor.window != null) {
 				OnGraphEditorChanged(uNodeEditor.window.graphData);
 			}
+			uNodeEditor.onSelectionChanged -= OnGraphEditorChanged;
+			uNodeEditor.onSelectionChanged += OnGraphEditorChanged;
+		}
+
+		private void OnFocus() {
 			uNodeEditor.onSelectionChanged -= OnGraphEditorChanged;
 			uNodeEditor.onSelectionChanged += OnGraphEditorChanged;
 		}

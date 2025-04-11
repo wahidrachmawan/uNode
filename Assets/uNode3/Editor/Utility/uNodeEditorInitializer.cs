@@ -1490,4 +1490,29 @@ namespace MaxyGames.UNode.Editors {
 			return default;
 		}
 	}
+
+	[InitializeOnLoad]
+	static class uNodeObjectChangeEvents {
+		static uNodeObjectChangeEvents() {
+			ObjectChangeEvents.changesPublished += ChangesPublished;
+		}
+
+		private static void ChangesPublished(ref ObjectChangeEventStream stream) {
+			if(uNodeEditor.window == null) return;
+			var editor = uNodeEditor.window;
+			for(int i = 0; i < stream.length; ++i) {
+				var type = stream.GetEventType(i);
+				switch(type) {
+					case ObjectChangeKind.ChangeGameObjectStructure:
+					case ObjectChangeKind.DestroyAssetObject:
+					case ObjectChangeKind.DestroyGameObjectHierarchy: {
+						if(editor.selectedTab.owner == null) {
+							editor.Refresh();
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
 }

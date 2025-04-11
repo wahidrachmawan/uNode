@@ -30,7 +30,8 @@ namespace MaxyGames.UNode.Editors.Control {
 				EditorGUI.BeginChangeCheck();
 				ValidateValue(ref value);
 				var oldValue = value as UnityEngine.Object;
-				var newValue = EditorGUI.ObjectField(position, label, oldValue, type, uNodeEditorUtility.IsSceneObject(settings.unityObject));
+				position = EditorGUI.PrefixLabel(position, label);
+				var newValue = EditorGUI.ObjectField(position, oldValue, type, uNodeEditorUtility.IsSceneObject(settings.unityObject));
 				if(EditorGUI.EndChangeCheck()) {
 					onChanged(newValue);
 				}

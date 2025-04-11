@@ -1076,7 +1076,7 @@ namespace MaxyGames.UNode.Editors {
 				{
 					plusElement.menu = new DropdownMenu();
 					plusElement.menu.AppendAction("Open...", (act) => {
-						//window.OpenNewGraphTab();
+						uNodeEditor.OpenFilePanel();
 						ReloadTabbar();
 					});
 
@@ -1729,7 +1729,7 @@ namespace MaxyGames.UNode.Editors {
 							Event.current.Use();
 						}
 						if(GUILayout.Button(new GUIContent("Open Graph"))) {
-							//OpenNewGraphTab();
+							uNodeEditor.OpenFilePanel();
 						}
 						if(Selection.activeGameObject == null) {
 							EditorGUILayout.HelpBox("Double Click a uNode Graph Assets to edit the graph or click 'New Graph' to create a new graph.\n" +

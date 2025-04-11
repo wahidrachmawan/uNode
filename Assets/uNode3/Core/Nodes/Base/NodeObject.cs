@@ -640,7 +640,7 @@ namespace MaxyGames.UNode {
 				}
 				foreach(var p in ValueInputs.Data) {
 					if(p.connections.Count > 0) {
-						p.defaultValue = null;
+						p.DefaultValue = null;
 					}
 				}
 				_nodeSerializedData.serializedFlowInput = FlowInputs.Data;

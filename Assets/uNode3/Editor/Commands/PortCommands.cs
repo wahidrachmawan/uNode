@@ -302,7 +302,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				Undo.SetCurrentGroupName("Promote to node");
 				Undo.RegisterCompleteObjectUndo(unityObject, "Promote to node");
 			}
-			MemberData m = (data.port as ValueInput).defaultValue;
+			MemberData m = (data.port as ValueInput).DefaultValue;
 			if(data.portType != null && (!m.isAssigned || m.type == null)) {
 				m.CopyFrom(MemberData.Default(data.portType));
 			}
@@ -577,7 +577,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var port = data.port as ValueInput;
 			if(type != null) {
 				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, port != null ? port.name : "", type.IsByRef ? type.GetElementType() : type, (variable) => {
-					var m = port.defaultValue;
+					var m = port.DefaultValue;
 					if(m.isAssigned && !type.IsByRef) {
 						variable.defaultValue = m.Get(null);
 					} else if(type.IsByRef) {
@@ -622,7 +622,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var port = data.port as ValueInput;
 			if(type != null) {
 				NodeEditorUtility.AddNewVariable(source.nodeObject.graph.variableContainer, port != null ? port.name : "", type.IsByRef ? type.GetElementType() : type, (variable) => {
-					var m = port.defaultValue;
+					var m = port.DefaultValue;
 					if(m.isAssigned && !type.IsByRef) {
 						variable.defaultValue = m.Get(null);
 					} else if(type.IsByRef) {
@@ -810,7 +810,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var port = data.port as ValueInput;
 			if(type != null) {
 				NodeEditorUtility.AddNewVariable(graph.graphData.selectedRoot.variableContainer, "", type.IsByRef ? type.GetElementType() : type, (variable) => {
-					var m = port.defaultValue;
+					var m = port.DefaultValue;
 					if(m.isAssigned && !type.IsByRef) {
 						variable.defaultValue = m.Get(null);
 					}

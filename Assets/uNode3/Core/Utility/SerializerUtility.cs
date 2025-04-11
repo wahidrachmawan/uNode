@@ -105,7 +105,12 @@ namespace MaxyGames.UNode {
 			if(serializedData.serializationNodes != null) {
 				serializationNodes = new List<SerializationNode>(serializedData.serializationNodes);
 			}
-			references = new List<Object>(serializedData.references);
+			if(serializedData.references != null) {
+				references = new List<Object>(serializedData.references);
+			}
+			else {
+				references = new();
+			}
 			serializedType = serializedData.serializedType;
 		}
 

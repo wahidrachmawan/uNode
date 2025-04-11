@@ -371,7 +371,7 @@ namespace MaxyGames.UNode {
 			graph?.OnDeserialized();
 		}
 
-		internal Graph MakeCopy() {
+		public static Graph MakeCopy(Graph graph) {
 			var data = Serialize(graph);
 			return Deserialize(data);
 		}
@@ -384,8 +384,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public static void Copy(SerializedGraph source, SerializedGraph destination, IGraph sourceReference = null, IGraph destinationReference = null) {
-			destination.serializedData = new OdinSerializedData();
-			destination.serializedData.CopyFrom(source.serializedData);
+			destination.serializedData = Serialize(source.Graph);
 			if(sourceReference != null && destinationReference != null) {
 				var references = destination.serializedData.references;
 				for(int i = 0; i < references.Count; i++) {

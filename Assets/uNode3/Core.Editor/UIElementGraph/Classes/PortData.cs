@@ -81,7 +81,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public override object defaultValue => port.defaultValue;
+		public override object defaultValue => port.DefaultValue;
 
 		public override void ConnectTo(UPort port) {
 			if(port is ValueOutput p) {
@@ -94,10 +94,10 @@ namespace MaxyGames.UNode.Editors {
 		public UIControl.MemberControl InstantiateControl(bool autoLayout = false) {
 			ControlConfig config = new ControlConfig() {
 				owner = owner,
-				value = port.defaultValue,
+				value = port.DefaultValue,
 				type = portType,
 				filter = GetFilter(),
-				onValueChanged = (val) => port.defaultValue = val as MemberData,
+				onValueChanged = (val) => port.DefaultValue = val as MemberData,
 			};
 			return new UIControl.MemberControl(config, autoLayout);
 		}

@@ -263,10 +263,10 @@ namespace MaxyGames.UNode {
 			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
 			if(isNew) {
 				if(@default != null) {
-					port.defaultValue = @default;
+					port.DefaultValue = @default;
 				}
 				else {
-					port.defaultValue = MemberData.None;
+					port.DefaultValue = MemberData.None;
 				}
 			}
 			return port;
@@ -279,10 +279,10 @@ namespace MaxyGames.UNode {
 			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
 			if(isNew) {
 				if(@default != null) {
-					port.defaultValue = @default;
+					port.DefaultValue = @default;
 				}
 				else {
-					port.defaultValue = MemberData.None;
+					port.DefaultValue = MemberData.None;
 				}
 			}
 			return port;

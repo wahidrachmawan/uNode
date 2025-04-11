@@ -264,6 +264,10 @@ namespace MaxyGames.UNode {
 				return startSerializedType;
 			}
 			set {
+				if(value != null && startSerializedType != null) {
+					startSerializedType.CopyFrom(value);
+					return;
+				}
 				startSerializedType = value;
 			}
 		}
@@ -276,6 +280,10 @@ namespace MaxyGames.UNode {
 				return targetSerializedType;
 			}
 			set {
+				if(value != null && targetSerializedType != null) {
+					targetSerializedType.CopyFrom(value);
+					return;
+				}
 				targetSerializedType = value;
 			}
 		}
@@ -327,6 +335,10 @@ namespace MaxyGames.UNode {
 				return _instance?.serializedValue;
 			}
 			set {
+				if(_instance != null) {
+					_instance.value = value;
+					return;
+				}
 				_instance = new SerializedValue(value);
 			}
 		}
@@ -1913,7 +1925,7 @@ namespace MaxyGames.UNode {
 			set {
 				if(value == null)
 					return;
-				targetSerializedType = new SerializedType(value);
+				TargetSerializedType = new SerializedType(value);
 				_type = null;
 			}
 		}

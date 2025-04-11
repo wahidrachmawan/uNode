@@ -67,7 +67,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				var data = new CopiedData() {
-					serializedGraph = new SerializedGraph(parent.graph),
+					serializedGraph = new SerializedGraph(SerializedGraph.MakeCopy(parent.graph)),
 					IDs = elementList.Select(e => e.id).ToHashSet(),
 					isAllNodes = elementList.All(e => e is NodeObject),
 				};
@@ -79,7 +79,7 @@ namespace MaxyGames.UNode.Editors {
 				if(data == null)
 					throw new Exception("There's no data to paste.");
 				var guids = data.IDs;
-				var graph = data.serializedGraph.MakeCopy();
+				var graph = SerializedGraph.MakeCopy(data.serializedGraph.Graph);
 				graph.owner = parent.graphContainer;
 				var elements = graph.GetObjectsInChildren<UGraphElement>(e => guids.Any(guid => e.id == guid), true).ToArray();
 
@@ -619,9 +619,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 					foreach(var port in nodeObject.ValueInputs) {
 						if(port != null && port.UseDefaultValue) {
-							if(ValidateReference(port.defaultValue))
+							if(ValidateReference(port.DefaultValue))
 								continue;
-							changed = AnalizeObject(port.defaultValue, validation, doAction) || changed;
+							changed = AnalizeObject(port.DefaultValue, validation, doAction) || changed;
 						}
 					}
 				}

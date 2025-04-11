@@ -47,7 +47,7 @@ namespace MaxyGames {
 			MemberData source = left as MemberData;
 			if(source == null && left is ValueInput valueInput) {
 				if(valueInput.UseDefaultValue) {
-					source = valueInput.defaultValue;
+					source = valueInput.DefaultValue;
 				} else {
 					result = Value(valueInput, setVariable: true);
 				}

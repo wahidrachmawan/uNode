@@ -89,7 +89,7 @@ namespace MaxyGames.UNode.Nodes {
 			if(target.isAssigned) {
 				object val = target.GetValue(flow);
 				if(val == null) {
-					val = new MemberData.Event(target.defaultValue.CreateRuntimeEvent(), null);
+					val = new MemberData.Event(target.DefaultValue.CreateRuntimeEvent(), null);
 				}
 				if(val is MemberData.Event) {
 					MemberData.Event e = val as MemberData.Event;

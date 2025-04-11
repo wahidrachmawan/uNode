@@ -11,7 +11,7 @@ namespace MaxyGames.UNode {
 		/// The default value of the port
 		/// </summary>
 		[SerializeReference]
-		public MemberData defaultValue;
+		private MemberData defaultValue;
 
 		/// <summary>
 		/// The port filter
@@ -19,14 +19,25 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		public FilterAttribute filter;
 
+		public MemberData DefaultValue {
+			get => defaultValue;
+			set {
+				if(value != null && defaultValue != null) {
+					defaultValue.CopyFrom(value);
+					return;
+				}
+				defaultValue = value;
+			}
+		}
+
 		/// <summary>
 		/// True if the port is using default value / inline value
 		/// </summary>
 		public bool UseDefaultValue {
 			get {
 				if(connections.Count == 0) {
-					if(defaultValue == null)
-						defaultValue = MemberData.None;
+					if(DefaultValue == null)
+						DefaultValue = MemberData.None;
 					return true;
 				}
 				return false;
@@ -49,7 +60,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public MemberData.TargetType TargetType {
 			get {
-				if(UseDefaultValue) return defaultValue.targetType;
+				if(UseDefaultValue) return DefaultValue.targetType;
 				if(ValidConnections.Any()) return MemberData.TargetType.NodePort;
 				return MemberData.TargetType.None;
 			}
@@ -61,7 +72,7 @@ namespace MaxyGames.UNode {
 		public bool isAssigned {
 			get {
 				if(UseDefaultValue) {
-					return defaultValue.isAssigned;
+					return DefaultValue.isAssigned;
 				} else {
 					return isConnected && connections[0].isValid;
 				}
@@ -92,7 +103,7 @@ namespace MaxyGames.UNode {
 
 		public override string GetRichName() {
 			if(UseDefaultValue) {
-				return defaultValue.GetNicelyDisplayName(richName: true);
+				return DefaultValue.GetNicelyDisplayName(richName: true);
 			} else {
 				var targetPort = this.GetTargetPort();
 				if(targetPort != null) {
@@ -106,15 +117,15 @@ namespace MaxyGames.UNode {
 		}
 
 		public void Validate() {
-			if(defaultValue != null) {
-				switch(defaultValue.targetType) {
+			if(DefaultValue != null) {
+				switch(DefaultValue.targetType) {
 					case MemberData.TargetType.NodePort:
-						Connection.CreateAndConnect(this, defaultValue.Get<ValueOutput>(null));
-						this.defaultValue = MemberData.None;
+						Connection.CreateAndConnect(this, DefaultValue.Get<ValueOutput>(null));
+						this.DefaultValue = MemberData.None;
 						break;
 					case MemberData.TargetType.Values:
-						if(defaultValue.type.IsCastableTo(type) == false) {
-							defaultValue.CopyFrom(MemberData.CreateValueFromType(type));
+						if(DefaultValue.type.IsCastableTo(type) == false) {
+							DefaultValue.CopyFrom(MemberData.CreateValueFromType(type));
 						}
 						break;
 				}
@@ -129,7 +140,7 @@ namespace MaxyGames.UNode {
 			if(defaultValue == null)
 				defaultValue = MemberData.None;
 			ClearConnections();
-			this.defaultValue = defaultValue;
+			this.DefaultValue = defaultValue;
 			Validate();
 		}
 
@@ -149,7 +160,7 @@ namespace MaxyGames.UNode {
 			else if(defaultValue is ValueOutput) {
 				ClearConnections();
 				Connection.CreateAndConnect(this, defaultValue as ValueOutput);
-				this.defaultValue = MemberData.None;
+				this.DefaultValue = MemberData.None;
 			}
 			else if(defaultValue is ValueInput) {
 				var port = defaultValue as ValueInput;
@@ -157,7 +168,7 @@ namespace MaxyGames.UNode {
 					AssignToDefault(port.GetTargetPort());
 				}
 				else {
-					AssignToDefault(MemberData.Clone(port.defaultValue));
+					AssignToDefault(MemberData.Clone(port.DefaultValue));
 				}
 			}
 			else {
@@ -170,8 +181,8 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public Type ValueType {
 			get {
-				if(UseDefaultValue && defaultValue != null && defaultValue.isAssigned) {
-					return defaultValue.type ?? typeof(object);
+				if(UseDefaultValue && DefaultValue != null && DefaultValue.isAssigned) {
+					return DefaultValue.type ?? typeof(object);
 				} else if(connections.Count == 1) {
 					var output = connections[0].output;
 					//Make sure that the other ports is initialized
@@ -222,11 +233,11 @@ namespace MaxyGames.UNode {
 			}
 #endif
 			if(UseDefaultValue) {
-				if(IsOptional && (defaultValue == null || defaultValue.targetType == MemberData.TargetType.None)) {
+				if(IsOptional && (DefaultValue == null || DefaultValue.targetType == MemberData.TargetType.None)) {
 					//Return the optional value if the port is optional and the inline value is not assigned.
 					return OptionalValue;
 				}
-				return defaultValue.Get(flow);
+				return DefaultValue.Get(flow);
 			} else {
 				if(connections.Count == 1) {
 					return connections[0].GetValue(flow);
@@ -293,9 +304,9 @@ namespace MaxyGames.UNode {
 			}
 #endif
 			if(UseDefaultValue) {
-				if(defaultValue.isAssigned) {
-					if(defaultValue.CanSetValue()) {
-						defaultValue.Set(flow, value);
+				if(DefaultValue.isAssigned) {
+					if(DefaultValue.CanSetValue()) {
+						DefaultValue.Set(flow, value);
 					} else {
 						throw new Exception("Unable to set value for the input because the input cannot be set.");
 					}

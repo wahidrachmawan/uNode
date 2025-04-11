@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.1.1
+- Fixed UI bug when editing list or array
+- Fixed UI bug when Inspecting node
+- Fixed Cut command is not working
+- Fixed Graph Converter is not working
+- Fixed some other reported bugs
+
 ## v3.1.0
 - Improved Code Generation
 - Improved Editor

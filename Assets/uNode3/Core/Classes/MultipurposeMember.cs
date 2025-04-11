@@ -232,7 +232,7 @@ namespace MaxyGames.UNode {
 						instance = Node.Utilities.ValueInput(node, pathID + "-" + nameof(instance), target.startType).SetName("instance");
 						instance.canSetValue = () => {
 							if(instance.UseDefaultValue) {
-								return instance.defaultValue.CanSetValue();
+								return instance.DefaultValue.CanSetValue();
 							}
 							else {
 								var other = instance.GetTargetPort();

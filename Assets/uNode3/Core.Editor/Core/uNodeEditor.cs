@@ -1714,6 +1714,26 @@ namespace MaxyGames.UNode.Editors {
 			return window;
 		}
 
+		public static void OpenFilePanel() {
+			var path = EditorUtility.OpenFilePanel("Open graph", "", "asset");
+			if(string.IsNullOrEmpty(path) == false && File.Exists(path) && path.StartsWith(Application.dataPath)) {
+				path = path.Remove(0, Application.dataPath.Length - "Assets".Length);
+				var obj = AssetDatabase.LoadMainAssetAtPath(path);
+				if(obj is IScriptGraph) {
+					Open(obj as IScriptGraph);
+				}
+				else if(obj is IScriptGraphType) {
+					Open(obj as IScriptGraphType);
+				}
+				else if(obj is IGraph) {
+					Open(obj as IGraph);
+				}
+				else {
+					uNodeEditorUtility.DisplayErrorMessage("Invalid file");
+				}
+			}
+		}
+
 		static TabData FindCachedGraph(UnityEngine.Object owner) {
 			foreach(var data in window.tabDatas) {
 				if(data == null)

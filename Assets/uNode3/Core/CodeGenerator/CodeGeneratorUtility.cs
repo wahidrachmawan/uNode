@@ -42,7 +42,7 @@ namespace MaxyGames {
 
 			public static bool IsEvent(ValueInput port) {
 				if(port.UseDefaultValue) {
-					return IsEvent(port.defaultValue);
+					return IsEvent(port.DefaultValue);
 				}
 				else if(port.isAssigned) {
 					var tNode = port.GetTargetNode();

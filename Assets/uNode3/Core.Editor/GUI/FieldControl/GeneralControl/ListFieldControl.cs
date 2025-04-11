@@ -64,12 +64,17 @@ namespace MaxyGames.UNode.Editors.Control {
 			if(size != 0) {
 				uNodeGUI.DrawCustomList(list, null,
 					drawElement: (position, index, element) => {
-						position.height -= 4;
-						position.y += 2;
-						uNodeGUIUtility.EditValue(position, new GUIContent("Element " + index), element, elementType, obj => {
-							list[index] = obj;
-							onChanged(list);
-						}, new uNodeUtility.EditValueSettings(settings) { parentValue = list });
+						position.height -= 5;
+						position.y += 2.5f;
+						try {
+							uNodeGUIUtility.EditValue(position, new GUIContent("Element " + index), element, elementType, obj => {
+								list[index] = obj;
+								onChanged(list);
+							}, new uNodeUtility.EditValueSettings(settings) { parentValue = list });
+						}
+						catch(ExitGUIException) {
+							Event.current?.Use();
+						}
 					},
 					add: position => {
 						if(list is Array) {

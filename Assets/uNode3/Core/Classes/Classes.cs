@@ -403,7 +403,7 @@ namespace MaxyGames.UNode {
 			if(port is ValueInput) {
 				var p = port as ValueInput;
 				if(p.UseDefaultValue) {
-					if(p.defaultValue == null || !p.defaultValue.isAssigned) {
+					if(p.DefaultValue == null || !p.DefaultValue.isAssigned) {
 						if(p.IsOptional) {
 							return false;
 						}
@@ -413,7 +413,7 @@ namespace MaxyGames.UNode {
 						return true;
 					}
 					else {
-						var member = p.defaultValue;
+						var member = p.DefaultValue;
 						var inputType = member.type;
 						var targetType = p.type;
 						if(member.IsTargetingValue) {
@@ -450,7 +450,7 @@ namespace MaxyGames.UNode {
 						//	}
 						//}
 					}
-					if(CheckValue(p.defaultValue, port.GetPrettyName(), port.node)) {
+					if(CheckValue(p.DefaultValue, port.GetPrettyName(), port.node)) {
 						return true;
 					}
 				}
@@ -797,6 +797,33 @@ namespace MaxyGames.UNode {
 #if UNITY_EDITOR
 			_type = null;
 #endif
+		}
+
+		public void CopyFrom(SerializedType other) {
+			this.kind = other.kind;
+			this.serializedString = other.serializedString;
+			if(other.serializedBytes == null) {
+				this.serializedBytes = Array.Empty<byte>();
+			}
+			else {
+				this.serializedBytes = new byte[other.serializedBytes.Length];
+				Array.Copy(other.serializedBytes, this.serializedBytes, other.serializedBytes.Length);
+			}
+			if(other.references == null) {
+				this.references = null;
+			}
+			else {
+				if(this.references == null)
+					this.references = new();
+				this.references.Clear();
+				if(other.references != null)
+					this.references.AddRange(other.references);
+			}
+			this._type = null;
+		}
+
+		public void CopyFrom(Type type) {
+			this.type = type;
 		}
 
 		public override string ToString() {

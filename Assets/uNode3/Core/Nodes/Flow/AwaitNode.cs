@@ -56,7 +56,7 @@ namespace MaxyGames.UNode.Nodes {
 			analizer.CheckPort(value);
 			if(value.isAssigned) {
 				if(value.UseDefaultValue) {
-					if(value.defaultValue.IsTargetingNull) {
+					if(value.DefaultValue.IsTargetingNull) {
 						analizer.RegisterError(this, $"The value must be assigned.");
 						return;
 					}
