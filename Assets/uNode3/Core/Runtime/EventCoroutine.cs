@@ -408,7 +408,8 @@ namespace MaxyGames.Runtime {
 				}
 #endif
 				Update();
-				if(rawState == 0) {
+				if(rawState == 0 && !hasRegisterUpdate) {
+					hasRegisterUpdate = true;
 					//We use the queue because the Update has called on current frame, therefore we need to call Update in next frame.
 					URuntimeQueue.Queue(() => {
 						UEvent.Unregister(UEventID.Update, owner, Update);
@@ -422,6 +423,7 @@ namespace MaxyGames.Runtime {
 
 		public string id;
 		private int processID;
+		private bool hasRegisterUpdate;
 
 		void Update() {
 			if(run) {

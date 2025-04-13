@@ -1,11 +1,14 @@
 # Changelog
 
 ## v3.1.1
+- Improved C# Parser
+- Improved Editor
+- Fixed Cannot add override property from inherited c# graph
 - Fixed UI bug when editing list or array
 - Fixed UI bug when Inspecting node
 - Fixed Cut command is not working
 - Fixed Graph Converter is not working
-- Fixed some other reported bugs
+- Fixed some bugs
 
 ## v3.1.0
 - Improved Code Generation

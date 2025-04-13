@@ -83,7 +83,15 @@ namespace MaxyGames.UNode {
 				var att = MethodAttributes.Public;
 				var modifier = nativeMember.target.reference?.modifier;
 				if(modifier != null) {
-					if(modifier.Private) {
+					if(modifier.isProtected) {
+						if(modifier.Internal) {
+							att = MethodAttributes.FamORAssem;
+						}
+						else {
+							att = MethodAttributes.Family;
+						}
+					}
+					else if(modifier.isPrivate) {
 						att = MethodAttributes.Private;
 					}
 					if(modifier.Static) {
@@ -91,6 +99,9 @@ namespace MaxyGames.UNode {
 					}
 					if(modifier.Abstract) {
 						att |= MethodAttributes.Abstract;
+					}
+					if(modifier.Virtual) {
+						att |= MethodAttributes.Virtual;
 					}
 				}
 				if(owner.IsAbstract && owner.IsSealed) {
@@ -123,7 +134,15 @@ namespace MaxyGames.UNode {
 				var att = MethodAttributes.Public;
 				var modifier = nativeMember.target.reference?.modifier;
 				if(modifier != null) {
-					if(modifier.Private) {
+					if(modifier.isProtected) {
+						if(modifier.Internal) {
+							att = MethodAttributes.FamORAssem;
+						}
+						else {
+							att = MethodAttributes.Family;
+						}
+					}
+					else if(modifier.isPrivate) {
 						att = MethodAttributes.Private;
 					}
 					if(modifier.Static) {
@@ -131,6 +150,9 @@ namespace MaxyGames.UNode {
 					}
 					if(modifier.Abstract) {
 						att |= MethodAttributes.Abstract;
+					}
+					if(modifier.Virtual) {
+						att |= MethodAttributes.Virtual;
 					}
 				}
 				if(owner.IsAbstract && owner.IsSealed) {

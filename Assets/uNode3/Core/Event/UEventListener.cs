@@ -24,7 +24,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-#region Interfaces
+	#region Interfaces
 	public interface IEventListener {
 		/// <summary>
 		/// The event ID
@@ -63,19 +63,31 @@ namespace MaxyGames.UNode {
 		/// <param name="handler"></param>
 		void Unregister(T handler);
 	}
-#endregion
+	#endregion
 
-#region Base Classes
+	#region Base Classes
 	public abstract class UBaseEventListener<T> : MonoBehaviour, IEventListener<T> where T : Delegate {
 		protected readonly List<KeyValuePair<T, UnityEngine.Object>> events = new List<KeyValuePair<T, UnityEngine.Object>>();
+		private bool dirty;
 
 		readonly List<KeyValuePair<T, UnityEngine.Object>> cachedEvents = new List<KeyValuePair<T, UnityEngine.Object>>();
 		protected List<KeyValuePair<T, UnityEngine.Object>> GetEventsForTrigger() {
-			cachedEvents.Clear();
-			for(int i = 0; i < events.Count; i++) {
-				cachedEvents.Add(events[i]);
+			//Check if the event is dirty, if yes re-created the cached event for trigger
+			if(dirty) {
+				dirty = false;
+				if(cachedEvents.Capacity < events.Count) {
+					cachedEvents.Capacity = events.Count;
+				}
+				cachedEvents.Clear();
+				for(int i = 0; i < events.Count; i++) {
+					cachedEvents.Add(events[i]);
+				}
 			}
 			return cachedEvents;
+		}
+
+		public void SetDirty() {
+			dirty = true;
 		}
 
 		[NonSerialized]
@@ -107,6 +119,7 @@ namespace MaxyGames.UNode {
 
 		public virtual void Register(UnityEngine.Object owner, T handler) {
 			events.Add(new KeyValuePair<T, UnityEngine.Object>(handler, owner));
+			SetDirty();
 		}
 
 		public virtual void Unregister(T handler) {
@@ -116,6 +129,7 @@ namespace MaxyGames.UNode {
 				return;
 			}
 			events.RemoveAt(index);
+			SetDirty();
 		}
 
 		public void UnregisterAll() {
@@ -124,12 +138,14 @@ namespace MaxyGames.UNode {
 			foreach(var pair in map) {
 				Unregister(pair.Key);
 			}
+			SetDirty();
 		}
 
 		void IEventListener.Register(UnityEngine.Object owner, Delegate handler) {
 			if(handler is T del || handler.GetType().IsCastableTo(typeof(T)) && (del = (T)handler) != null) {
 				Register(owner, del);
-			} else {
+			}
+			else {
 				throw new Exception("The handler value is not correct, the value must be: " + typeof(T).FullName);
 			}
 		}
@@ -138,7 +154,8 @@ namespace MaxyGames.UNode {
 			if(handler == null) return;
 			if(handler is T del || handler.GetType().IsCastableTo(typeof(T)) && (del = (T)handler) != null) {
 				Unregister(del);
-			} else {
+			}
+			else {
 				throw new Exception("The handler value is not correct, the value must be: " + typeof(T).FullName);
 			}
 		}
@@ -149,7 +166,12 @@ namespace MaxyGames.UNode {
 			var events = GetEventsForTrigger();
 			for(int i = 0; i < events.Count; i++) {
 				if(events[i].Value != null) {
-					OnTriggered(events[i].Key);
+					try {
+						OnTriggered(events[i].Key);
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
+					}
 				}
 			}
 		}
@@ -162,7 +184,12 @@ namespace MaxyGames.UNode {
 			var events = GetEventsForTrigger();
 			for(int i = 0; i < events.Count; i++) {
 				if(events[i].Value != null) {
-					OnTriggered(value, events[i].Key);
+					try {
+						OnTriggered(value, events[i].Key);
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
+					}
 				}
 			}
 		}
@@ -175,16 +202,21 @@ namespace MaxyGames.UNode {
 			var events = GetEventsForTrigger();
 			for(int i = 0; i < events.Count; i++) {
 				if(events[i].Value != null) {
-					OnTriggered(valueA, valueB, events[i].Key);
+					try {
+						OnTriggered(valueA, valueB, events[i].Key);
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
+					}
 				}
 			}
 		}
 
 		protected abstract void OnTriggered(P1 valueA, P2 valueB, T handler);
 	}
-#endregion
+	#endregion
 
-#region Listeners
+	#region Listeners
 	class UpdateListener : UEventListener<Action> {
 		public override string eventID => UEventID.Update;
 
@@ -196,7 +228,12 @@ namespace MaxyGames.UNode {
 						//Skip when the owner is disabled.
 						continue;
 					}
-					OnTriggered(events[i].Key);
+					try {
+						OnTriggered(events[i].Key);
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
+					}
 				}
 			}
 		}
@@ -237,7 +274,12 @@ namespace MaxyGames.UNode {
 						//Skip when the owner is disabled.
 						continue;
 					}
-					OnTriggered(events[i].Key);
+					try {
+						OnTriggered(events[i].Key);
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
+					}
 				}
 			}
 		}
@@ -278,7 +320,12 @@ namespace MaxyGames.UNode {
 						//Skip when the owner is disabled.
 						continue;
 					}
-					OnTriggered(events[i].Key);
+					try {
+						OnTriggered(events[i].Key);
+					}
+					catch(Exception ex) {
+						Debug.LogException(ex);
+					}
 				}
 			}
 		}
@@ -782,5 +829,5 @@ namespace MaxyGames.UNode {
 			Trigger();
 		}
 	}
-#endregion
+	#endregion
 }
