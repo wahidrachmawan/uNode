@@ -25,7 +25,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			popupElement.AddManipulator(new LeftMouseClickable(PopupClick));
 			popupElement.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
 			if(member == null) {
-				config.OnValueChanged(MemberData.None);
+				config.value = MemberData.None;
 			}
 
 			if(config.filter == null) {
