@@ -8,6 +8,7 @@
 - Fixed UI bug when Inspecting node
 - Fixed Cut command is not working
 - Fixed Graph Converter is not working
+- Fixed sometime undo is not working
 - Fixed some bugs
 
 ## v3.1.0
