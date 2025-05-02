@@ -1136,6 +1136,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 		public string name;
+		public string summary;
 		public SerializedType type;
 		public RefKind refKind;
 		//for constructor

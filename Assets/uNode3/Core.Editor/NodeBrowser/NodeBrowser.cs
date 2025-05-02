@@ -10,6 +10,10 @@ using UnityObject = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	#region TreeViews
+	internal interface IDisplayName {
+		string DisplayName { get; }
+	}
+
 	public class TypeTreeView : MemberTreeView {
 		public Type type;
 		public FilterAttribute filter;
@@ -64,12 +68,28 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	public class MemberTreeView : TreeViewItem {
+	public class MemberTreeView : TreeViewItem, IDisplayName {
 		public MemberInfo member;
 		public object instance;
 
 		public Func<bool> selectValidation;
 		public Func<bool> nextValidation;
+
+		public string DisplayName {
+			get {
+				if(member is MethodInfo method) {
+					if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
+						return EditorReflectionUtility.GetPrettyExtensionMethodName(method);
+					}
+				}
+				if(uNodePreference.preferenceData.coloredItem) {
+					return NodeBrowser.GetRichMemberName(member);
+				}
+				else {
+					return NodeBrowser.GetPrettyMemberName(member);
+				}
+			}
+		}
 
 		public MemberTreeView() {
 
@@ -618,20 +638,10 @@ namespace MaxyGames.UNode.Editors {
 						labelRect.width -= 16;
 					}
 					GUIContent label = null;
-					{
-						var tree = args.item as MemberTreeView;
-						if(tree.member is MethodInfo method) {
-							if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
-								label = new GUIContent(EditorReflectionUtility.GetPrettyExtensionMethodName(method));
-							}
-						}
-						if(label == null) {
-							if(uNodePreference.preferenceData.coloredItem) {
-								label = new GUIContent(NodeBrowser.GetRichMemberName(tree.member));
-							}
-							else {
-								label = new GUIContent(NodeBrowser.GetPrettyMemberName(tree.member));
-							}
+					if(args.item is IDisplayName) {
+						var lbl = (args.item as IDisplayName).DisplayName;
+						if(string.IsNullOrEmpty(lbl) == false) {
+							label = new GUIContent(lbl);
 						}
 					}
 					if(label == null) {

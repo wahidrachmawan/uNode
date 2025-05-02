@@ -99,7 +99,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public void Compile() {
+		public void CompileCurrentGraph() {
+			Compile(false);
+		}
+
+		public void Compile(bool openAdditionalMenu) {
 			if(tabData.owner is IScriptGraph) {
 
 			}
@@ -117,6 +121,11 @@ namespace MaxyGames.UNode.Editors {
 
 			var preferenceData = uNodePreference.preferenceData;
 			if(tabData.owner is IScriptGraph || graphData.graphSystem.isScriptGraph) {
+				if(openAdditionalMenu == false) {
+					window?.GenerateSource();
+					EditorUtility.ClearProgressBar();
+					return;
+				}
 				GenericMenu menu = new GenericMenu();
 				if(Application.isPlaying && EditorBinding.patchType != null) {
 					if(graphData.graph != null) {
@@ -816,7 +825,7 @@ namespace MaxyGames.UNode.Editors {
 					break;
 				}
 				case GraphShortcutType.CompileScript: {
-					Compile();
+					Compile(false);
 					break;
 				}
 				case GraphShortcutType.Refresh: {

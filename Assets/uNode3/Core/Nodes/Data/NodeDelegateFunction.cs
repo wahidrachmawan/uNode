@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Delegate Function", typeof(System.Delegate))]
+	[Description("Create a delegate from c# method or graph function")]
 	public class NodeDelegateFunction : ValueNode {
 		public MultipurposeMember member = new MultipurposeMember();
 

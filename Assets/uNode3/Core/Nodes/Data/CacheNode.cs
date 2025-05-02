@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Cache", hasFlowInput = true, hasFlowOutput = true, icon = typeof(TypeIcons.DatabaseIcon))]
+	[Description("Cache value for later use ( local variable )")]
 	public class CacheNode : FlowAndValueNode {
 		public SerializedType type = SerializedType.None;
 		public bool compactView;

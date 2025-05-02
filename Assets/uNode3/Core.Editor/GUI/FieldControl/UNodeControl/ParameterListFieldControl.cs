@@ -22,6 +22,21 @@ namespace MaxyGames.UNode.Editors.Control {
 							uNodeGUIUtility.GUIChangedMajor(settings?.unityObject);
 						}
 						pos.y += EditorGUIUtility.singleLineHeight;
+
+						{//Summary
+							if(parameter.summary == null)
+								parameter.summary = string.Empty;
+							float summaryHeight = EditorGUIUtility.singleLineHeight * (1 + parameter.summary.Count(c => c == '\n'));
+							var summaryRect = EditorGUI.PrefixLabel(new Rect(pos.x, pos.y, pos.width, summaryHeight), new GUIContent("Summary"));
+							name = EditorGUI.TextArea(summaryRect, parameter.summary);
+							if(name != parameter.summary) {
+								parameter.summary = name;
+								onChanged(fieldValue);
+								uNodeGUIUtility.GUIChanged(settings?.unityObject);
+							}
+							pos.y += summaryHeight;
+						}
+
 						uNodeGUIUtility.DrawTypeDrawer(
 							new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight),
 							parameter.type,
@@ -40,52 +55,57 @@ namespace MaxyGames.UNode.Editors.Control {
 							onChange: (val) => {
 								uNodeEditorUtility.RegisterUndo(settings?.unityObject);
 								parameter.refKind = val;
+								if(parameter.isByRef) {
+									parameter.hasDefaultValue = false;
+								}
 								onChanged(fieldValue);
 							});
 						pos.y += EditorGUIUtility.singleLineHeight;
-						uNodeGUIUtility.EditValue(
-							new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight),
-							new GUIContent("Has Default Value"),
-							parameter.hasDefaultValue,
-							onChange: (val) => {
-								uNodeEditorUtility.RegisterUndo(settings?.unityObject);
-								parameter.hasDefaultValue = val;
-								onChanged(fieldValue);
-							});
-						if(parameter.hasDefaultValue) {
-							var type = parameter.Type;
-							if(ReflectionUtils.IsConstantType(type)) {
-								if(type.IsValueType) {
-									if(parameter.defaultValue == null) {
+						if(parameter.isByRef == false) {
+							uNodeGUIUtility.EditValue(
+								new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight),
+								new GUIContent("Has Default Value"),
+								parameter.hasDefaultValue,
+								onChange: (val) => {
+									uNodeEditorUtility.RegisterUndo(settings?.unityObject);
+									parameter.hasDefaultValue = val;
+									onChanged(fieldValue);
+								});
+							if(parameter.hasDefaultValue) {
+								var type = parameter.Type;
+								if(ReflectionUtils.IsConstantType(type)) {
+									if(type.IsValueType) {
+										if(parameter.defaultValue == null) {
+											parameter.defaultValue = ReflectionUtils.CreateInstance(type);
+											onChanged(fieldValue);
+										}
+									}
+									if(parameter.defaultValue != null && parameter.defaultValue.GetType() != type) {
 										parameter.defaultValue = ReflectionUtils.CreateInstance(type);
 										onChanged(fieldValue);
 									}
+									pos.y += EditorGUIUtility.singleLineHeight;
+									uNodeGUIUtility.EditValue(
+										new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight),
+										new GUIContent("Default Value"),
+										parameter.defaultValue,
+										type,
+										onChange: (val) => {
+											uNodeEditorUtility.RegisterUndo(settings?.unityObject);
+											parameter.defaultValue = val;
+											onChanged(fieldValue);
+										});
 								}
-								if(parameter.defaultValue != null && parameter.defaultValue.GetType() != type) {
-									parameter.defaultValue = ReflectionUtils.CreateInstance(type);
-									onChanged(fieldValue);
-								}
-								pos.y += EditorGUIUtility.singleLineHeight;
-								uNodeGUIUtility.EditValue(
-									new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight),
-									new GUIContent("Default Value"),
-									parameter.defaultValue, 
-									type,
-									onChange: (val) => {
-										uNodeEditorUtility.RegisterUndo(settings?.unityObject);
-										parameter.defaultValue = val;
+								else {
+									if(parameter.defaultValue != null) {
+										parameter.defaultValue = null;
 										onChanged(fieldValue);
-									});
-							}
-							else {
-								if(parameter.defaultValue != null) {
-									parameter.defaultValue = null;
-									onChanged(fieldValue);
+									}
+									pos.y += EditorGUIUtility.singleLineHeight;
+									var position = new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight);
+									position = EditorGUI.PrefixLabel(position, new GUIContent("Default Value"));
+									EditorGUI.HelpBox(position, type.IsValueType ? CG.New(type.PrettyName()) : "null", MessageType.None);
 								}
-								pos.y += EditorGUIUtility.singleLineHeight;
-								var position = new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight);
-								position = EditorGUI.PrefixLabel(position, new GUIContent("Default Value"));
-								EditorGUI.HelpBox(position, type.IsValueType ? CG.New(type.PrettyName()) : "null", MessageType.None);
 							}
 						}
 						if(settings.parentValue is Constructor constructor && constructor.InitializerType != ConstructorInitializer.None) {
@@ -112,12 +132,20 @@ namespace MaxyGames.UNode.Editors.Control {
 						uNodeGUIUtility.GUIChangedMajor(settings?.unityObject);
 					},
 					elementHeight: index => {
-						float heightMultiply = 4;
-						if(fieldValue[index].hasDefaultValue) {
-							heightMultiply++;
+						float heightMultiply = 5;
+						if(fieldValue[index].isByRef) {
+							heightMultiply = 4;
+						}
+						else {
+							if(fieldValue[index].hasDefaultValue) {
+								heightMultiply++;
+							}
 						}
 						if(settings.parentValue is Constructor constructor && constructor.InitializerType != ConstructorInitializer.None) {
 							heightMultiply++;
+						}
+						if(string.IsNullOrEmpty(fieldValue[index].summary) == false) {
+							heightMultiply += fieldValue[index].summary.Count(c => c == '\n');
 						}
 						return EditorGUIUtility.singleLineHeight * heightMultiply;
 					}

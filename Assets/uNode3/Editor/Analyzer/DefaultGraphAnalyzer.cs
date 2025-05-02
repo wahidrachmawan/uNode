@@ -182,12 +182,12 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 								if(baseMember == null) {
 									analyzer.RegisterError(function, $@"Function: {function.name} has no suitable function found to override.");
 								}
-								else if(baseMember.IsVirtual == false) {
+								else if(baseMember.IsVirtual == false && baseMember.IsAbstract == false) {
 									analyzer.RegisterError(function, $@"Function: {function.name} is unable to overriden because the base function is not virtual/abstract.");
 								}
 							}
 							else {
-								if(baseMember != null && baseMember.IsVirtual) {
+								if(baseMember != null && (baseMember.IsVirtual || baseMember.IsAbstract)) {
 									analyzer.RegisterError(function, $@"Function: {function.name} is virtual/overridable but this function is not use override modifier this lead to incorrect behavior please use override modifier or rename this function.", () => {
 										function.modifier.SetOverride();
 									});

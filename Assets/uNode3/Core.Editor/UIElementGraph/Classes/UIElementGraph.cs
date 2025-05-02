@@ -645,7 +645,7 @@ namespace MaxyGames.UNode.Editors {
 			var compileBtn = new ToolbarButton() {
 				text = "Compile",
 				tooltip = "Generate C# Script\nHotkey: F10 ( compile current graph )",
-				clickable = new Clickable(Compile)
+				clickable = new Clickable(CompileCurrentGraph)
 			};
 			toolbar.Add(compileBtn);
 
@@ -1044,11 +1044,22 @@ namespace MaxyGames.UNode.Editors {
 						ReloadTabbar();
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendAction("Close Others", (act) => {
-						var current = window.selectedTab;
+						var current = tabData;
 						window.tabDatas.Clear();
 						window.tabDatas.Add(current);
 						window.SaveEditorData();
 						window.ChangeEditorTab(current);
+						ReloadTabbar();
+					}, DropdownMenuAction.AlwaysEnabled);
+					evt.menu.AppendAction("Close to the Right", (act) => {
+						int index = window.tabDatas.IndexOf(tabData);
+						if(index >= 0) {
+							index++;
+							while(window.tabDatas.Count > index) {
+								window.tabDatas.RemoveAt(index);
+							}
+						}
+						window.SaveEditorData();
 						ReloadTabbar();
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendSeparator("");

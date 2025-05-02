@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "AND {&&}", typeof(bool), inputs = new[] { typeof(bool) })]
+	[Description("Logical and operation, return true value when all inputs is true")]
 	public class MultiANDNode : ValueNode {
 		public class PortData {
 			public string id = uNodeUtility.GenerateUID();
@@ -24,6 +25,7 @@ namespace MaxyGames.UNode.Nodes {
 			for(int i = 0; i < inputs.Count; i++) {
 				inputs[i].port = ValueInput(inputs[i].id, typeof(bool)).SetName("input " + (i + 1));
 			}
+			output.SetTooltip("The output value, return true if all input is true.");
 		}
 
 		public override System.Type ReturnType() {

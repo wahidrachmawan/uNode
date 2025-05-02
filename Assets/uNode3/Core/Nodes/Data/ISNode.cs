@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
     [NodeMenu("Data", "IS", typeof(bool), inputs = new[] { typeof(object) })]
+	[Description("The IS node checks if the value is compatible with a given type")]
 	public class ISNode : ValueNode {
 		[Hide, FieldDrawer("Type"), Filter(OnlyGetType = true, DisplayRuntimeType = true, ArrayManipulator = true)]
 		public SerializedType type = typeof(object);
@@ -14,6 +15,7 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnRegister() {
 			base.OnRegister();
 			target = ValueInput(nameof(target), typeof(object));
+			target.SetTooltip("The target value to evaluate");
 			value = ValueOutput(nameof(value), () => type.type);
 			value.AssignGetCallback(flow => target.GetValue(flow, type.type));
 		}

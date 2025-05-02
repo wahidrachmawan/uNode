@@ -428,7 +428,8 @@ namespace MaxyGames.UNode.Editors {
 			public List<RecentItem> recentItems = new List<RecentItem>();
 
 			public void AddRecentItem(RecentItem recentItem) {
-				while(recentItems.Count >= 50) {
+				//TODO: configurable saved recent items
+				while(recentItems.Count >= 100) {
 					recentItems.RemoveAt(recentItems.Count - 1);
 				}
 				recentItems.RemoveAll(item => item.info == recentItem.info);

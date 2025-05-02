@@ -572,6 +572,10 @@ namespace MaxyGames.UNode {
 		void Execute(object graph);
 	}
 
+	internal interface IHighLevelNode {
+		Type NodeType { get; }
+	}
+
 	/// <summary>
 	/// An interface for implementing data node
 	/// </summary>
@@ -720,6 +724,11 @@ namespace MaxyGames.UNode {
 		/// Assign this to automatic call the flow output when the input is finished ( only for flow input )
 		/// </summary>
 		public string exit;
+
+		/// <summary>
+		/// Assign this to automatic assign the default value of the port, the value is the name of the field, property or method and can be instance or static and public or private. ( only for value input )
+		/// </summary>
+		public string defaultValue;
 
 		public InputAttribute() {
 

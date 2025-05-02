@@ -1158,10 +1158,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void SelectionAddRegion(Vector2 position) {
-			var selectedNodes = graphData.selectedNodes.ToArray();
+			var selectedNodes = selection.Where(obj => obj is UNodeView view && view.nodeObject != null && view.isBlock == false).Select(obj => obj as UNodeView).ToArray();
 			Rect rect;
 			if(selectedNodes.Length > 0) {
-				rect = NodeEditorUtility.GetNodeRect(selectedNodes);
+				rect = UIElementUtility.GetNodeRect(selectedNodes);
 			}
 			else {
 				Vector2 point;

@@ -133,7 +133,7 @@ namespace MaxyGames.UNode.Editors {
 						inputPort = node.inputPorts.FirstOrDefault();
 						outputPort = node.outputPorts.FirstOrDefault();
 						if(inputPort != null && outputPort != null) {
-							if(inputPort.isValue) {
+							if(inputPort.isValue && inputPort.IsProxy() == false) {
 								var inputEdge = inputPort.GetValidEdges().FirstOrDefault();
 								var targetOutput = outputPort.GetConnectedPorts();
 								if(targetOutput.Count > 0 && inputEdge != null) {

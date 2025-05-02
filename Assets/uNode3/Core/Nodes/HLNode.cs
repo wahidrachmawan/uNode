@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class HLNode : Node {
+	public class HLNode : Node, IHighLevelNode {
 		[HideInInspector]
 		public SerializedType type = typeof(object);
 
@@ -47,6 +47,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		private object m_instance;
 		private bool hasRegister;
+
+		Type IHighLevelNode.NodeType => type;
 
 		[System.Runtime.Serialization.OnDeserialized]
 		private void OnDeserialized() {
@@ -92,21 +94,21 @@ namespace MaxyGames.UNode.Nodes {
 			if(m_instance is IInstanceNode) {
 				var members = ReflectionUtils.GetMembersCached(instanceType);
 				foreach(var member in members) {
-					RegisterPort(member);
+					RegisterPort(member, m_instance);
 				}
 				ValidatePorts();
 			}
 			else if(m_instance is IStaticNode) {
 				var members = ReflectionUtils.GetMembers(instanceType, BindingFlags.Public | BindingFlags.Static);
 				foreach(var member in members) {
-					RegisterPort(member);
+					RegisterPort(member, m_instance);
 				}
 				ValidatePorts();
 			}
 			else {
 				var members = ReflectionUtils.GetFieldsCached(instanceType);
 				foreach(var member in members) {
-					RegisterPort(member);
+					RegisterPort(member, m_instance);
 				}
 			}
 		}
@@ -173,7 +175,7 @@ namespace MaxyGames.UNode.Nodes {
 			return type == typeof(bool) || type.IsEnum;
 		}
 
-		public void RegisterPort(MemberInfo member) {
+		private void RegisterPort(MemberInfo member, object instance) {
 			if(member.IsDefinedAttribute<NodePortAttribute>() == false) 
 				return;
 			var att = member.GetAttribute<NodePortAttribute>();
@@ -185,7 +187,22 @@ namespace MaxyGames.UNode.Nodes {
 						if(field.FieldType == typeof(ValuePortDefinition) && att.type == null)
 							throw new Exception($"Please specify the type of Input port for variable: {field.Name}");
 
-						var port = ValueInput(att.id ?? "field:" + member.Name, att.type ?? field.FieldType).SetName(att.name ?? member.Name);
+						var port = ValueInput(att.id ?? "field:" + member.Name, att.type ?? field.FieldType, out var isNew).SetName(att.name ?? member.Name);
+						
+						if(isNew && inputAttribute.defaultValue != null) {
+							var m = member.DeclaringType.GetMemberCached(inputAttribute.defaultValue);
+							if(m is FieldInfo mField) {
+								port.AssignToDefault(mField.GetValueOptimized(mField.IsStatic ? null : instance));
+							}
+							else if(m is PropertyInfo mProperty) {
+								if(mProperty.GetMethod != null) {
+									port.AssignToDefault(mProperty.GetValueOptimized(mProperty.GetMethod.IsStatic ? null : instance));
+								}
+							}
+							else if(m is MethodInfo mMethod) {
+								port.AssignToDefault(mMethod.InvokeOptimized(mMethod.IsStatic ? null : instance));
+							}
+						}
 
 						if(string.IsNullOrEmpty(att.description) == false) {
 							port.SetTooltip(att.description);

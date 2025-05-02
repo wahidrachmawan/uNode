@@ -904,7 +904,7 @@ namespace MaxyGames {
 
 			public string GenerateCode(object owner = null) {
 				var builder = new StringBuilder();
-				builder.Append(GenerateClassSummary().AddLineInEnd());
+				builder.Append(Summary(summary).AddLineInEnd());
 				builder.Append(GenerateClassAttributes().AddLineInEnd());
 
 				string genericParameters = null;
@@ -1167,15 +1167,6 @@ namespace MaxyGames {
 			private string GenerateClassAttributes() {
 				return string.Join('\n', attributes.Select(a => a.GenerateCode()));
 			}
-
-			private string GenerateClassSummary() {
-				if(!string.IsNullOrEmpty(summary)) {
-					return "/// <summary>".AddLineInEnd() +
-						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
-						"/// </summary>";
-				}
-				return null;
-			}
 			#endregion
 		}
 
@@ -1316,13 +1307,10 @@ namespace MaxyGames {
 						result += (m + vType + " " + name + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
 					}
 				}
-				if(!string.IsNullOrEmpty(summary)) {
-					result = "/// <summary>".AddLineInEnd() +
-						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
-						"/// </summary>" +
-						result.AddLineInFirst();
+				if(summary == null && reference is Variable) {
+					summary = (reference as Variable).GetSummary();
 				}
-				return result;
+				return Summary(summary).AddLineInEnd() + result;
 			}
 
 			public bool IsStatic {
@@ -1367,7 +1355,7 @@ namespace MaxyGames {
 				string parameters = null;
 				if(obj.parameters != null && obj.parameters.Count > 0) {
 					int index = 0;
-					var parametersData = obj.parameters.Select(i => new MPData(i.name, i.type, i.refKind));
+					var parametersData = obj.parameters.Select(i => new MPData(i.name, i.type, i.refKind) { summary = i.summary });
 					foreach(MPData data in parametersData) {
 						if(index != 0) {
 							parameters += ", ";
@@ -1379,10 +1367,7 @@ namespace MaxyGames {
 				string localVar = M_GenerateLocalVariable(obj.LocalVariables).AddLineInFirst().AddTabAfterNewLine();
 				result += (m + name + "(" + parameters + $") {(obj.InitializerType != ConstructorInitializer.None ? (": " + (obj.InitializerType == ConstructorInitializer.Base ? "base" : "this") + $"({string.Join(", ", obj.parameters.Where(p => p.useInInitializer).Select(p => p.name))}) ") : string.Empty)}{{" + localVar.Add("\n", string.IsNullOrEmpty(code)) + code.AddTabAfterNewLine().AddLineInEnd() + "}").AddFirst("\n", !string.IsNullOrEmpty(result));
 				if(!string.IsNullOrEmpty(summary)) {
-					result = "/// <summary>".AddLineInEnd() +
-						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
-						"/// </summary>" +
-						result.AddLineInFirst();
+					result = Summary(summary) + result.AddLineInFirst();
 				}
 				return result;
 			}
@@ -1631,10 +1616,7 @@ namespace MaxyGames {
 				}
 				result += (m + DeclareType(type) + " " + name + " " + p).AddFirst("\n", !string.IsNullOrEmpty(result));
 				if(!string.IsNullOrEmpty(summary)) {
-					result = "/// <summary>".AddLineInEnd() +
-						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
-						"/// </summary>" +
-						result.AddLineInFirst();
+					result = Summary(summary) + result.AddLineInFirst();
 				}
 				return result;
 			}
@@ -1645,6 +1627,7 @@ namespace MaxyGames {
 		/// </summary>
 		public class MPData {
 			public string name;
+			public string summary;
 			public Type type;
 			public RefKind refKind;
 			public List<AData> attributes;
@@ -1822,10 +1805,21 @@ namespace MaxyGames {
 					return result;
 				}
 				if(!string.IsNullOrEmpty(summary)) {
-					result = "/// <summary>".AddLineInEnd() +
-						"/// " + summary.Replace("\n", "\n" + "/// ").AddLineInEnd() +
-						"/// </summary>" +
-						result.AddLineInFirst();
+					if(parameters != null) {
+						string paramSummary = null;
+						foreach(var data in parameters) {
+							if(!string.IsNullOrEmpty(data.summary)) {
+								if(data.summary.Contains('\n')) {
+									paramSummary += $"/// <param name=\"{data.name}\">\n/// {data.summary.Replace("\n", "\n/// ")}\n/// </param>";
+								}
+								else {
+									paramSummary += $"/// <param name=\"{data.name}\">{data.summary}</param>";
+								}
+							}
+						}
+						result = Flow(paramSummary, result);
+					}
+					result = Summary(summary) + result.AddLineInFirst();
 				}
 				var codeList = this.codeList.ToList();
 				codeList.Insert(0, (0, code));

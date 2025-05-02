@@ -90,6 +90,9 @@ namespace MaxyGames.UNode {
 		#region Properties
 		[NonSerialized]
 		private Graph _graph;
+		/// <summary>
+		/// The graph that own this element
+		/// </summary>
 		public Graph graph {
 			get {
 				if(object.ReferenceEquals(_graph, null)) {
@@ -99,6 +102,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// The graph container of the element
+		/// </summary>
 		public IGraph graphContainer {
 			get {
 				if(!object.ReferenceEquals(graph, null)) {
@@ -108,6 +114,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// The name of the element
+		/// </summary>
 		public string name {
 			get {
 				return _name;
@@ -126,6 +135,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// The user commentary of the element if any
+		/// </summary>
 		public string comment {
 			get {
 				return _comment;
@@ -135,6 +147,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// The parent of the element
+		/// </summary>
 		public UGraphElement parent {
 			get {
 				return _parent;
@@ -144,6 +159,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// The root parent of the element
+		/// </summary>
 		public UGraphElement root {
 			get {
 				if(!object.ReferenceEquals(parent, null)) {
@@ -160,8 +178,14 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// True if the element is the root element
+		/// </summary>
 		public bool isRoot => root == null;
 
+		/// <summary>
+		/// Get count of the child elements
+		/// </summary>
 		public int childCount => childs.Count;
 
 		[NonSerialized]
@@ -362,10 +386,21 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Functions
+		/// <summary>
+		/// True if the parent can be changed
+		/// </summary>
+		/// <returns></returns>
 		public virtual bool CanChangeParent() {
 			return true;
 		}
 
+		/// <summary>
+		/// Add child to the element
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="child"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
 		public T AddChild<T>(T child) where T : UGraphElement {
 			if(!child.CanChangeParent())
 				throw new Exception("Unable to change Add Child because the child is forbidden to Change it's parent");
@@ -373,6 +408,15 @@ namespace MaxyGames.UNode {
 			return child;
 		}
 
+		/// <summary>
+		/// Insert child to the element
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="index"></param>
+		/// <param name="child"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		public T InsertChild<T>(int index, T child) where T : UGraphElement {
 			if(!child.CanChangeParent())
 				throw new Exception("Unable to change Add Child because the child is forbidden to Change it's parent");
@@ -576,6 +620,11 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// True if the element is child of <paramref name="parent"/>
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <returns></returns>
 		public bool IsChildOf(UGraphElement parent) {
 			if(parent != null) {
 				return parent.childs.Contains(this);
@@ -617,12 +666,21 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Callback whem the child is added
+		/// </summary>
+		/// <param name="element"></param>
 		protected virtual void OnChildAdded(UGraphElement element) {
 			if(parent != null) {
 				parent.OnChildAdded(element);
 			}
 		}
 
+
+		/// <summary>
+		/// Callback when the child is removed
+		/// </summary>
+		/// <param name="element"></param>
 		protected virtual void OnChildRemoved(UGraphElement element) {
 			if(parent != null) {
 				parent.OnChildRemoved(element);

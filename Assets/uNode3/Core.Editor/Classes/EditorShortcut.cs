@@ -50,12 +50,33 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Compile Script", typeof(uNodeEditor), KeyCode.F10)]
+		[Shortcut("uNode/Compile Opened Graph", typeof(uNodeEditor), KeyCode.F10)]
 		static void Shortcut_CompileScript(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
 				window.graphEditor.HandleShortcut(GraphShortcutType.CompileScript);
 			}
+		}
+
+		[Shortcut("uNode/Open uNode Editor")]
+		static void Shortcut_OpenGraphEditor(ShortcutArguments args) {
+			uNodeEditor.ShowWindow();
+		}
+
+		[Shortcut("uNode/Compile Runtime Graphs in Project")]
+		static void Shortcut_CompileRuntimeGraphs(ShortcutArguments args) {
+			uNodeEditor.AutoSaveCurrentGraph();
+			GenerationUtility.GenerateCSharpScript();
+		}
+
+		[Shortcut("uNode/Compile All C# Graphs in Project")]
+		static void Shortcut_CompileCSharpGraphs(ShortcutArguments args) {
+			if(Application.isPlaying) {
+				uNodeEditorUtility.DisplayErrorMessage("Cannot compile all graph on playmode");
+				return;
+			}
+			uNodeEditor.AutoSaveCurrentGraph();
+			GenerationUtility.GenerateNativeGraphsInProject();
 		}
 
 		[Shortcut("uNode/Refresh", typeof(uNodeEditor), KeyCode.F5)]
@@ -162,7 +183,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Paste node ( With Link )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Action)]
+		[Shortcut("uNode/Paste node ( With Link )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
 		static void Shortcut_PasteWithLink(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
@@ -170,7 +191,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		[Shortcut("uNode/Paste node( Clean )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Action | ShortcutModifiers.Shift)]
+		[Shortcut("uNode/Paste node( Clean )", typeof(uNodeEditor), KeyCode.V, ShortcutModifiers.Action)]
 		static void Shortcut_PasteClean(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;
 			if(window != null) {

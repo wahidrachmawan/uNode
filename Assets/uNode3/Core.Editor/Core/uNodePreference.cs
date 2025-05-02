@@ -90,6 +90,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public float itemSelectorWidth = 380;
 			public float itemSelectorHeight = 600;
+			public int maxRecentItemsToShow = 10;
 			public int minDeepTypeSearch = 3;
 
 			public bool itemSelectorShowUnselectedTypes;
@@ -196,6 +197,13 @@ Note: Auto Generate on Buld will always using Unity method.")]
 					version = currentVersion;
 					//Stuff for upgrades
 
+					if(debugTransitionSpeed == 0) {
+						debugTransitionSpeed = 0.5f;
+					}
+					if(maxGraphBackup == 0) {
+						maxGraphBackup = 100;
+					}
+
 					#region Initialization
 					if(includedAssemblies == null) {
 						includedAssemblies = new List<string>() {
@@ -294,11 +302,8 @@ Note: Auto Generate on Buld will always using Unity method.")]
 					#endregion
 
 				}
-				if(debugTransitionSpeed == 0) {
-					debugTransitionSpeed = 0.5f;
-				}
-				if(maxGraphBackup == 0) {
-					maxGraphBackup = 100;
+				if(maxRecentItemsToShow == 0) {
+					maxRecentItemsToShow = 10;
 				}
 			}
 			#endregion
@@ -466,6 +471,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				EditorGUILayout.LabelField("Node Browser", EditorStyles.boldLabel);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.itemSelectorWidth), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.itemSelectorHeight), preferenceData);
+				uNodeGUIUtility.ShowField(nameof(preferenceData.maxRecentItemsToShow), preferenceData);
 				preferenceData.coloredItem = EditorGUILayout.Toggle(new GUIContent("Colored Item"), preferenceData.coloredItem);
 				if(preferenceData.coloredItem) {
 					uNodeGUIUtility.ShowField(new GUIContent("Type Color"), "itemTypeColor", preferenceData);

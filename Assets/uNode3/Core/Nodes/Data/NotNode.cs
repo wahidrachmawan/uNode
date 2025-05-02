@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Not {!}", typeof(bool), inputs = new[] { typeof(bool) })]
+	[Description("Reverse the result, returns False if the result is true")]
 	public class NotNode : ValueNode {
 		public ValueInput target { get; set; }
 

@@ -586,7 +586,10 @@ namespace MaxyGames {
 							mData = new MData(
 								function.name,
 								function.returnType,
-								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind) { defaultValue = i.hasDefaultValue ? Value(i.defaultValue) : null }).ToArray(),
+								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind) { 
+									defaultValue = i.hasDefaultValue && i.isByRef ? Value(i.defaultValue) : null,
+									summary = i.summary,
+								}).ToArray(),
 								function.genericParameters.Select(i => new GPData(i.name, i.typeConstraint.type)).ToArray()
 							);
 							generatorData.methodData.Add(mData);

@@ -132,9 +132,33 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		internal class SelectorCustomTreeView : TreeViewItem {
+		internal class SelectorCustomTreeView : TreeViewItem, IDisplayName {
 			public readonly CustomItem item;
 			public readonly GraphItem graphItem;
+
+			public string DisplayName {
+				get {
+					if(item is ItemReflection ri) {
+						if(ri.item != null) {
+							var member = ri.item.memberInfo;
+							if(member is MethodInfo method) {
+								if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
+									return EditorReflectionUtility.GetPrettyExtensionMethodName(method);
+								}
+							}
+							if(member != null) {
+								if(uNodePreference.preferenceData.coloredItem) {
+									return NodeBrowser.GetRichMemberName(member);
+								}
+								else {
+									return NodeBrowser.GetPrettyMemberName(member);
+								}
+							}
+						}
+					}
+					return displayName;
+				}
+			}
 
 			public SelectorCustomTreeView() {
 
@@ -431,6 +455,7 @@ namespace MaxyGames.UNode.Editors {
 				this.variable = variable;
 				this.targetObject = targetObject as Object;
 				this.DisplayName = this.Name;
+				this.toolTip = variable.GetSummary();
 			}
 
 			public GraphItem(Property property, object targetObject, MemberData.TargetType targetType = MemberData.TargetType.uNodeProperty) {
@@ -441,6 +466,7 @@ namespace MaxyGames.UNode.Editors {
 				this.property = property;
 				this.targetObject = targetObject as Object;
 				this.DisplayName = this.Name;
+				this.toolTip = property.GetSummary();
 			}
 
 			public GraphItem(ParameterData parameter, IParameterSystem system, MemberData.TargetType targetType = MemberData.TargetType.uNodeParameter) {
@@ -452,6 +478,7 @@ namespace MaxyGames.UNode.Editors {
 				this.reference = new ParameterRef(system as UGraphElement, parameter);
 				this.targetObject = system;
 				this.DisplayName = /*parameter.type.DisplayName(false, false) + " " +*/ this.Name;
+				this.toolTip = parameter.summary;
 			}
 
 			public GraphItem(GenericParameterData parameter, object targetObject, MemberData.TargetType targetType = MemberData.TargetType.uNodeGenericParameter) {
@@ -473,6 +500,7 @@ namespace MaxyGames.UNode.Editors {
 				this.haveNextItem = false;
 				this.targetObject = targetObject as Object;
 				this.DisplayName = this.Name;
+				this.toolTip = function.comment;
 				if(type != null) {
 					if(function != null) {
 						string parameterData = "";
@@ -784,29 +812,46 @@ namespace MaxyGames.UNode.Editors {
 					flags |= BindingFlags.DeclaredOnly;
 				}
 				if(type is RuntimeType runtimeType) {
-					runtimeType.Update();
-					MemberInfo[] members = runtimeType.GetMembers(flags);
-					for(int i = 0; i < members.Length; i++) {
-						if(validation == null || validation(members[i])) {
-							var item = CreateItemFromMember(members[i], filter);
-							if(item != null) {
-								result.Add(item);
-							}
-						}
-					}
-					result.Sort((x, y) => {
-						if(x.member != null && y.member != null) {
-							if(x.member.MemberType == MemberTypes.Constructor) {
-								if(y.member.MemberType != MemberTypes.Constructor) {
-									return -1;
+					try {
+						runtimeType.Update();
+						MemberInfo[] members = runtimeType.GetMembers(flags);
+						for(int i = 0; i < members.Length; i++) {
+							if(validation == null || validation(members[i])) {
+								var item = CreateItemFromMember(members[i], filter);
+								if(item != null) {
+									result.Add(item);
 								}
 							}
-							else if(y.member.MemberType == MemberTypes.Constructor) {
-								return 1;
-							}
 						}
-						return string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase);
-					});
+						result.Sort((x, y) => {
+							if(x.member != null && y.member != null) {
+								if(x.member.MemberType == MemberTypes.Constructor) {
+									if(y.member.MemberType != MemberTypes.Constructor) {
+										return -1;
+									}
+								}
+								else if(y.member.MemberType == MemberTypes.Constructor) {
+									return 1;
+								}
+							}
+							return string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase);
+						});
+					}
+					catch(Exception ex) {
+						if(ex is GraphException) {
+							Debug.LogException(ex);
+						}
+						else {
+							if(runtimeType is IRuntimeMemberWithRef withRef) {
+								var reference = withRef.GetReferenceValue();
+								if(reference is UnityEngine.Object) {
+									Debug.LogException(new Exception("Error on type: " + type, ex), reference as UnityEngine.Object);
+									return result;
+								}
+							}
+							Debug.LogException(new Exception("Error on type: " + type, ex));
+						}
+					}
 				}
 				else {
 					var members = EditorReflectionUtility.GetSortedMembers(type, flags);
@@ -831,8 +876,27 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 					for(int i = 0; i < members.Length; i++) {
-						if(members[i].MemberType != MemberTypes.Constructor && (validation == null || validation(members[i]))) {
-							var item = CreateItemFromMember(members[i], filter);
+						var member = members[i];
+						if(member.MemberType != MemberTypes.Constructor && (validation == null || validation(member))) {
+
+							//TODO: implement group method with same names
+							////Grouping same method names
+							//if(member.MemberType == MemberTypes.Method) {
+							//	if(i + 1 < members.Length && members[i + 1].Name == member.Name) {
+							//		int index = i + 1;
+							//		var pool = StaticListPool<MemberInfo>.Allocate();
+							//		pool.Add(member);
+							//		while(index < members.Length && members[index].Name == member.Name) {
+							//			pool.Add(members[index]);
+							//			index++;
+							//		}
+							//		StaticListPool<MemberInfo>.Free(pool);
+							//		i = index - 1;
+							//		continue;
+							//	}
+							//}
+
+							var item = CreateItemFromMember(member, filter);
 							if(item != null) {
 								result.Add(item);
 							}

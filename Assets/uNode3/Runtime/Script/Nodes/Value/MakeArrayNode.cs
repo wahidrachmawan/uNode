@@ -5,6 +5,7 @@ using System;
 
 namespace MaxyGames.UNode.Nodes {
 	//[NodeMenu("Data", "MakeArray", typeof(System.Array))]
+	[Description("A node to create a new array value")]
 	public class MakeArrayNode : ValueNode {
 		public SerializedType elementType = typeof(object);
 

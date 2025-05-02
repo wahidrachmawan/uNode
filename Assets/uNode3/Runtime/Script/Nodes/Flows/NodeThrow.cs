@@ -2,6 +2,7 @@
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow", "Throw", hasFlowInput =true)]
+	[Description("Use this node to throw an exception. Use the try node to catch and handle exceptions that might occur during execution of a flow.")]
 	public class NodeThrow : BaseFlowNode {
 		[System.NonSerialized]
 		public ValueInput value;

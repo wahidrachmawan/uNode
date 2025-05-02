@@ -119,8 +119,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 			if(GUILayout.Button(new GUIContent("Compile"))) {
 				string expression = node.expression;
-				string className = Nodes.FormulaNode.FormulaType;
-				string methodName = Nodes.FormulaNode.FormulaMethod;
+				string className = Nodes.ExpressionNode.ExpressionType;
+				string methodName = Nodes.ExpressionNode.ExpressionMethod;
 				string returnType = node.ReturnType().PrettyName(true);
 				var parameters = node.inputs.Select(p => {
 					if(p.type?.type != null) {

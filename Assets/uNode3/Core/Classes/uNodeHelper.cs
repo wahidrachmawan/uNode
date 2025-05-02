@@ -215,6 +215,11 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Get graph asset from database by unique ID
+		/// </summary>
+		/// <param name="uid"></param>
+		/// <returns></returns>
 		public static GraphAsset GetGraphByID(string uid) {
 			return uNodeDatabase.instance.GetGraphByUID(uid);
 		}

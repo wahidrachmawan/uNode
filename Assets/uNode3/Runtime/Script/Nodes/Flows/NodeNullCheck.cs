@@ -2,6 +2,7 @@
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow", "Null Check", hasFlowInput = true, hasFlowOutput = true, inputs =new[] { typeof(object) })]
+	[Description("Check for null value, and execute flow based on the result")]
 	public class NodeNullCheck : BaseFlowNode {
 		public ValueInput value { get; set; }
 		[Tooltip("Flow to execute when the value is not null")]

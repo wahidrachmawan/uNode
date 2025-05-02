@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
 	public class StickyNote : Node {
+		public bool hideTitle;
 
 		protected override void OnRegister() { }
 

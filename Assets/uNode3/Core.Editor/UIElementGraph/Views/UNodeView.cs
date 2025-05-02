@@ -483,6 +483,9 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Functions
+		/// <summary>
+		/// This will be called by the <see cref="Initialize(UGraphView, NodeObject)"/> or when the UI is incrementally reloaded.
+		/// </summary>
 		public virtual void ReloadView() {
 			base.expanded = true;
 			nodeObject.Register();

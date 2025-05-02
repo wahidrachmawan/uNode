@@ -15,8 +15,11 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override void OnRegister() {
 			condition = ValueInput(nameof(condition), typeof(bool));
+			condition.SetTooltip("The condition to evaluate.");
 			onTrue = FlowOutput(nameof(onTrue));
+			onTrue.SetTooltip("Flow to execute when the condition is true");
 			onFalse = FlowOutput(nameof(onFalse));
+			onFalse.SetTooltip("Flow to execute when the condition is false");
 			base.OnRegister();
 			exit.SetName("Exit");
 		}

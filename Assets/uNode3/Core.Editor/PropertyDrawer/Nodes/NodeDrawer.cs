@@ -29,7 +29,11 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();
 			if(node.node != null) {
-				var monoScript = uNodeEditorUtility.GetMonoScript(node.node.GetType());
+				var nodeType = node.node.GetType();
+				if(node.node is IHighLevelNode hlNode && hlNode.NodeType != null) {
+					nodeType = hlNode.NodeType;
+				}
+				var monoScript = uNodeEditorUtility.GetMonoScript(nodeType);
 				if(monoScript != null) {
 					GUILayout.Space(4);
 					EditorGUI.BeginDisabledGroup(true);
@@ -45,6 +49,8 @@ namespace MaxyGames.UNode.Editors {
 
 		protected virtual void DrawInputs(DrawerOption option) {
 			var node = GetValue<Node>(option.property);
+			if(node.nodeObject.FlowInputs.Count == 0 && node.nodeObject.ValueInputs.Count == 0)
+				return;
 			EditorGUILayout.BeginVertical("Box");
 			EditorGUILayout.LabelField("Inputs", EditorStyles.centeredGreyMiniLabel);
 			foreach(var port in node.nodeObject.FlowInputs) {
@@ -74,6 +80,8 @@ namespace MaxyGames.UNode.Editors {
 
 		protected virtual void DrawOutputs(DrawerOption option) {
 			var node = GetValue<Node>(option.property);
+			if(node.nodeObject.FlowOutputs.Count == 0 && node.nodeObject.ValueOutputs.Count == 0)
+				return;
 			EditorGUILayout.BeginVertical("Box");
 			EditorGUILayout.LabelField("Outputs", EditorStyles.centeredGreyMiniLabel);
 			foreach(var port in node.nodeObject.FlowOutputs) {

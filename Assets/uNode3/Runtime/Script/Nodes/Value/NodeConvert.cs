@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
     [NodeMenu("Data", "Convert", typeof(object), inputs = new[] { typeof(object) })]
+	[Description("Convert value to other type")]
 	public class NodeConvert : ValueNode {
 		[Filter(AllowInterface = true, OnlyGetType = true, ArrayManipulator = true, DisplayRuntimeType = true)]
 		public SerializedType type = typeof(object);
@@ -102,6 +103,7 @@ namespace MaxyGames.UNode.Nodes {
 								}
 								else {
 									if(ReflectionUtils.IsNativeType(t) == false) {
+										CG.RegisterUsingNamespace("MaxyGames.UNode");//Register namespace to make sure Extensions work for GameObject or Component target type.
 										if(CG.generatePureScript) {
 											return CG.Value(target).CGInvoke(nameof(uNodeHelper.GetGeneratedComponent), new[] { t });
 										}

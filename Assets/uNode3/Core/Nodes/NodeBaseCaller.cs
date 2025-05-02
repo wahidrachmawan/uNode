@@ -12,10 +12,22 @@ namespace MaxyGames.UNode {
 			target.instance = null;
 			member.OnGeneratorInitialize(exit);
 			CG.RegisterPort(enter, () => {
+				var members = member.target.GetMembers(false);
+				if(members != null && members.Length > 0) {
+					if(members[0] is IRuntimeMember && members[0] is MethodInfo method && method.IsGenericMethod) {
+						return CG.Flow(CG.This.CGAccess(CG.Value(member)).AddSemicolon(), CG.FlowFinish(enter, exit));
+					}
+				}
 				return CG.Flow("base".CGAccess(CG.Value(member)).AddSemicolon(), CG.FlowFinish(enter, exit));
 			});
 			if (output != null) {
 				CG.RegisterPort(output, () => {
+					var members = member.target.GetMembers(false);
+					if(members != null && members.Length > 0) {
+						if(members[0] is IRuntimeMember && members[0] is MethodInfo method && method.IsGenericMethod) {
+							return CG.This.CGAccess(CG.Value(member, setVariable: CG.generationState.contextState == CG.ContextState.Set));
+						}
+					}
 					return "base".CGAccess(CG.Value(member, setVariable: CG.generationState.contextState == CG.ContextState.Set));
 				});
 			}

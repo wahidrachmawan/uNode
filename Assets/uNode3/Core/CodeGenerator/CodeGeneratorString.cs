@@ -1801,6 +1801,24 @@ namespace MaxyGames {
 		public static string Comment(string contents) {
 			return contents.AddFirst("/*").Add("*/");
 		}
+
+		/// <summary>
+		/// Generate a single/multi line summary
+		/// </summary>
+		/// <param name="contents"></param>
+		/// <returns></returns>
+		public static string Summary(string contents) {
+			if(string.IsNullOrEmpty(contents))
+				return contents;
+			if(contents.Contains('\n')) {
+				return "/// <summary>".AddLineInEnd() +
+						"/// " + contents.Replace("\n", "\n" + "/// ").AddLineInEnd() +
+						"/// </summary>";
+			}
+			else {
+				return $"/// <summary> {contents} </summary>";
+			}
+		}
 		#endregion
 
 		#region Block

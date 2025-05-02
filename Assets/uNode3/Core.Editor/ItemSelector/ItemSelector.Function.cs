@@ -122,12 +122,10 @@ namespace MaxyGames.UNode.Editors {
 													listRecentItems.Add(new MemberTreeView(recent.info, recent.GetHashCode(), -1));
 												}
 											}
+											if(listRecentItems.Count >= preferenceData.maxRecentItemsToShow) break;
 										}
 										catch { }
 									}
-								}
-								while(listRecentItems.Count > 10) {
-									listRecentItems.RemoveAt(listRecentItems.Count - 1);
 								}
 								if(listRecentItems.Count > 0) {
 									foreach(var item in listRecentItems) {
@@ -658,9 +656,12 @@ namespace MaxyGames.UNode.Editors {
 						icon = uNodeEditorUtility.GetIcon(item.type);
 					}
 					contents.Add(new GUIContent(item.displayName, icon));
-					contents.Add(new GUIContent("Target	: Type"));
-					contents.Add(new GUIContent("Static	: True"));
+					//contents.Add(new GUIContent("Target		: Type"));
+					//contents.Add(new GUIContent("Static		: True"));
 					contents.Add(new GUIContent("Type	: " + item.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.type)));
+					if(item.type.Assembly != null) {
+						contents.Add(new GUIContent("Assembly	: " + item.type.Assembly.GetName().Name));
+					}
 					contents.AddRange(LoadDoc(item.type));
 				}
 				else if(tree is MemberTreeView) {
@@ -717,7 +718,7 @@ namespace MaxyGames.UNode.Editors {
 								break;
 						}
 						contents.Add(new GUIContent(item.graphItem.DisplayName, icon));
-						contents.Add(new GUIContent("TargetType : " + item.graphItem.targetType));
+						contents.Add(new GUIContent("Target Kind : " + item.graphItem.targetType));
 						if(item.graphItem.type != null) {
 							contents.Add(new GUIContent("Type : " + item.graphItem.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.graphItem.type)));
 						}

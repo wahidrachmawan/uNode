@@ -307,41 +307,10 @@ namespace MaxyGames.UNode.Editors {
 							labelRect.x += labelRect.height;
 						}
 						GUIContent label = null;
-						if(args.item is MemberTreeView) {
-							var tree = args.item as MemberTreeView;
-							if(tree.member is MethodInfo method) {
-								if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
-									label = new GUIContent(EditorReflectionUtility.GetPrettyExtensionMethodName(method));
-								}
-							}
-							if(label == null) {
-								if(uNodePreference.preferenceData.coloredItem) {
-									label = new GUIContent(NodeBrowser.GetRichMemberName(tree.member));
-								}
-								else {
-									label = new GUIContent(NodeBrowser.GetPrettyMemberName(tree.member));
-								}
-							}
-						}
-						else if(args.item is SelectorCustomTreeView) {
-							var tree = args.item as SelectorCustomTreeView;
-							if(tree.item is ItemReflection ri) {
-								if(ri.item != null) {
-									var member = ri.item.memberInfo;
-									if(member is MethodInfo method) {
-										if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
-											label = new GUIContent(EditorReflectionUtility.GetPrettyExtensionMethodName(method));
-										}
-									}
-									if(label == null && member != null) {
-										if(uNodePreference.preferenceData.coloredItem) {
-											label = new GUIContent(NodeBrowser.GetRichMemberName(member));
-										}
-										else {
-											label = new GUIContent(NodeBrowser.GetPrettyMemberName(member));
-										}
-									}
-								}
+						if(args.item is IDisplayName) {
+							string lbl = (args.item as IDisplayName).DisplayName;
+							if(string.IsNullOrEmpty(lbl) == false) {
+								label = new GUIContent(lbl);
 							}
 						}
 						if(label == null) {

@@ -2,6 +2,7 @@
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Default", typeof(object))]
+	[Description("Return the default value of a type, a reference type will always null")]
 	public class DefaultNode : ValueNode {
 		[Filter(OnlyGetType = true)]
 		public SerializedType type = typeof(object);

@@ -17,7 +17,6 @@ namespace MaxyGames.UNode.Editors {
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			this.owner = owner;
 			this.nodeObject = node;
-			title = targetNode.GetTitle();
 			titleButtonContainer.RemoveFromHierarchy();
 
 			this.AddStyleSheet("uNodeStyles/NativeStickyNote");
@@ -59,11 +58,15 @@ namespace MaxyGames.UNode.Editors {
 			//this.SetSize(new Vector2(node.editorRect.width, node.editorRect.height));
 			SetPosition(targetNode.position);
 			RefreshPorts();
+			UpdateUI();
 		}
 
-		public override void ReloadView() {
+		public override void UpdateUI() {
+			title = targetNode.GetTitle();
 			comment.text = targetNode.comment;
-			base.ReloadView();
+			if(nodeObject.node is Nodes.StickyNote note) {
+				titleContainer.EnableInClassList("ui-hidden", note.hideTitle);
+			}
 		}
 	}
 }

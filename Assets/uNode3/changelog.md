@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.1.2
+- Added option to change max displayed recent items in Item Selector
+- Added option to hide sticky note title
+- Added option to configure summary for function parameters
+- Added new configure shortcut to open uNode Editor, Compile C# Graphs, and Compile Runtime Graphs
+- Improved Code Generation
+- Improved Editor
+- Fixed bug summary in variable is not included in c# output
+- Fixed reported bugs
+
 ## v3.1.1
 - Improved C# Parser
 - Improved Editor
