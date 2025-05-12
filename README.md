@@ -108,8 +108,8 @@ Alternatively, open Packages/manifest.json and add the following to the dependen
 
 ## **Made with uNode**
 
-### [Fine Volleyball](htps://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball/)
-[![Fine Volleyball](https://play-lh.googleusercontent.com/psPUpM7JZK9EqZRBJAL5Oeg4cXfalTtkSZGJ7vwJTvVvuSWxVHPdjAVuK8nrpswUdA=w2560-h1440)](htps://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball/)
+### [Fine Volleyball](https://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball)
+[![Fine Volleyball](https://play-lh.googleusercontent.com/psPUpM7JZK9EqZRBJAL5Oeg4cXfalTtkSZGJ7vwJTvVvuSWxVHPdjAVuK8nrpswUdA=w2560-h1440)](https://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball)
 
 ## **Sponsor**
 
@@ -139,7 +139,7 @@ By sponsoring this project or buying pro version, you'll directly support its on
 
 ### Development Roadmap
 
-- [uNode Roadmap on Trello.com](https://trello.com/b/mlANnBPw/unode/), for a global view of the features that could be added.
+- [uNode Roadmap](https://possible-ant-c4d.notion.site/uNode-v3-Roadmap-354b75489c5c48deacabb1597ba121a0), for a global view of the features that could be added.
 - [GitHub issue page](https://github.com/wahidrachmawan/uNode/issues), for technical issues and bugs.
 
 ## License
