@@ -108,7 +108,7 @@ Alternatively, open Packages/manifest.json and add the following to the dependen
 
 ## **Made with uNode**
 
-### [**Fine Volleyball**](htps://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball/) <br>
+### [Fine Volleyball](htps://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball/) <br>
 [![Fine Volleyball](https://play-lh.googleusercontent.com/psPUpM7JZK9EqZRBJAL5Oeg4cXfalTtkSZGJ7vwJTvVvuSWxVHPdjAVuK8nrpswUdA=w2560-h1440)](htps://play.google.com/store/apps/details?id=com.FineGlassDigital.FineVolleyball/)
 
 ## **Sponsor**
