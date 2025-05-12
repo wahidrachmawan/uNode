@@ -1955,6 +1955,21 @@ namespace MaxyGames.UNode.Editors {
 						evt.menu.AppendAction("Selection to macro", (e) => {
 							SelectionToMacro(clickedPos);
 						}, DropdownMenuAction.AlwaysEnabled);
+
+#if UNODE_DEV
+						if(selection.Count == 1) {
+							evt.menu.AppendAction("Export to JSON", (e) => {
+								var bytes = OdinSerializer.SerializationUtility.SerializeValue(selection[0], OdinSerializer.DataFormat.JSON, out _);
+								var str = System.Text.Encoding.UTF8.GetString(bytes);
+								if(selection[0] is UNodeView view) {
+									bytes = OdinSerializer.SerializationUtility.SerializeValue(view.targetNode, OdinSerializer.DataFormat.JSON, out _);
+									str += "\n" + System.Text.Encoding.UTF8.GetString(bytes);
+								}
+								Debug.Log(str);
+								uNodeEditorUtility.CopyToClipboard(str);
+							}, DropdownMenuAction.AlwaysEnabled);
+						}
+#endif
 					}
 					//TODO: fix me
 					//{

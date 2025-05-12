@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Nodes {
 			public string name;
 			public string displayName;
 			[Filter(DisplayGeneratedRuntimeType = false)]
-			public SerializedType type = new SerializedType(null);
+			public SerializedType type = new SerializedType();
 
 			public ValueInput port { get; set; }
 		}

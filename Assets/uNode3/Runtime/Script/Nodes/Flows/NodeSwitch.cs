@@ -46,12 +46,62 @@ namespace MaxyGames.UNode.Nodes {
 					continue;
 				var dVal = datas[i].value.Get(flow);
 				if(val.Equals(dVal)) {
-					flow.Next(datas[i].flow);
+					flow.Trigger(datas[i].flow, out var js);
+					if(js != null && js.jumpType != JumpStatementType.Break) {
+						flow.jumpStatement = js;
+						return;
+					}
+					flow.Next(exit);
 					return;
 				}
 			}
-			flow.Next(defaultTarget);
+			{
+				flow.Trigger(defaultTarget, out var js);
+				if(js != null && js.jumpType != JumpStatementType.Break) {
+					flow.jumpStatement = js;
+					return;
+				}
+				flow.Next(exit);
+			}
 		}
+
+		protected override IEnumerator OnExecutedCoroutine(Flow flow) {
+			if(target == null || !target.isAssigned)
+				yield break;
+			object val = target.GetValue(flow);
+			if(object.ReferenceEquals(val, null))
+				yield break;
+			for(int i = 0; i < datas.Count; i++) {
+				if(!datas[i].value.isAssigned)
+					continue;
+				var dVal = datas[i].value.Get(flow);
+				if(val.Equals(dVal)) {
+					flow.TriggerCoroutine(datas[i].flow, out var wait, out var jump);
+					if(wait != null)
+						yield return wait;
+					var js = jump();
+					if(js != null && js.jumpType != JumpStatementType.Break) {
+						flow.jumpStatement = js;
+						yield break;
+					}
+					flow.Next(exit);
+					yield break;
+				}
+			}
+			{
+				flow.TriggerCoroutine(defaultTarget, out var wait, out var jump);
+				if(wait != null)
+					yield return wait;
+				var js = jump();
+				if(js != null && js.jumpType != JumpStatementType.Break) {
+					flow.jumpStatement = js;
+					yield break;
+				}
+				flow.Next(exit);
+			}
+		}
+
+		protected override bool AutoExit => false;
 
 		public override void OnGeneratorInitialize() {
 			CG.RegisterPort(enter, () => {

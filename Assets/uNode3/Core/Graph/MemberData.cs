@@ -1338,8 +1338,8 @@ namespace MaxyGames.UNode {
 			targetType = member.targetType;
 			instance = member.instance;
 			isStatic = member.isStatic;
-			StartSerializedType = member.StartSerializedType;
-			targetSerializedType = member.targetSerializedType;
+			StartSerializedType = new(member.StartSerializedType);
+			targetSerializedType = new(member.targetSerializedType);
 			Items = SerializerUtility.Duplicate(member.Items);
 			ResetCache();
 		}

@@ -19,6 +19,10 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		public FilterAttribute filter;
 
+		/// <summary>
+		/// The default value of the input.
+		/// Note: this value changed by copy when input is manipulated.
+		/// </summary>
 		public MemberData DefaultValue {
 			get => defaultValue;
 			set {
@@ -133,7 +137,8 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
-		/// Assign the port
+		/// Assign the port.
+		/// Note: the value is not set to new value but it will be copied to the existing value
 		/// </summary>
 		/// <param name="defaultValue"></param>
 		public void AssignToDefault(MemberData defaultValue) {
@@ -146,6 +151,7 @@ namespace MaxyGames.UNode {
 
 		/// <summary>
 		/// Assign the port
+		/// Note: the value is not set to new value but it will be copied to the existing value
 		/// </summary>
 		/// <param name="defaultValue"></param>
 		public void AssignToDefault(object defaultValue) {

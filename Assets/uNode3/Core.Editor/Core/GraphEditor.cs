@@ -99,8 +99,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public void CompileCurrentGraph() {
-			Compile(false);
+		public void Compile() {
+			Compile(true);
 		}
 
 		public void Compile(bool openAdditionalMenu) {

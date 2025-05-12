@@ -303,22 +303,6 @@ namespace MaxyGames.UNode.Editors {
 					return _bookIcon;
 				}
 			}
-
-			static Dictionary<string, Texture2D> iconMap;
-			public static Texture2D GetIcon(string path) {
-				if(iconMap == null) {
-					iconMap = new Dictionary<string, Texture2D>();
-				}
-				Texture2D tex;
-				if(iconMap.TryGetValue(path, out tex)) {
-					return tex;
-				}
-				tex = Resources.Load<Texture2D>(path);
-				if(tex != null) {
-					iconMap[path] = tex;
-				}
-				return tex;
-			}
 		}
 
 		public static Texture GetIcon(MemberInfo member) {

@@ -685,6 +685,10 @@ namespace MaxyGames.UNode {
 			this.type = type;
 		}
 
+		public SerializedType(SerializedType type) {
+			this.CopyFrom(type);
+		}
+
 		public bool isFilled {
 			get {
 				switch(kind) {
@@ -787,7 +791,7 @@ namespace MaxyGames.UNode {
 			return uNodeUtility.GetRichTypeName(prettyName, withTypeOf);
 		}
 		public static SerializedType Default => new SerializedType(typeof(object));
-		public static SerializedType None => new SerializedType(null);
+		public static SerializedType None => new SerializedType();
 
 		void ISerializationCallbackReceiver.OnBeforeSerialize() {
 
@@ -800,6 +804,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public void CopyFrom(SerializedType other) {
+			if(other == null) return;
 			this.kind = other.kind;
 			this.serializedString = other.serializedString;
 			if(other.serializedBytes == null) {

@@ -8,12 +8,53 @@ namespace MaxyGames.UNode {
 	/// Provides nested class for implementing icon.
 	/// </summary>
 	public static class TypeIcons {
+		/// <summary>
+		/// Custom Icon, path is inside Resources folder.
+		/// </summary>
 		[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, Inherited = false)]
-		public sealed class IconPathAttribute : Attribute {
+		public sealed class IconPathAttribute : Attribute, ICustomIcon {
 			public string path;
+			private Texture texture;
+			private bool hasInitialize;
 
 			public IconPathAttribute(string path) {
 				this.path = path;
+			}
+
+			public Texture GetIcon() {
+				if(hasInitialize == false) {
+					hasInitialize = true;
+					texture = Resources.Load<Texture>(path);
+				}
+				return texture;
+			}
+		}
+
+		/// <summary>
+		/// Custom Icon, guid is the icon asset guid.
+		/// </summary>
+		[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface, Inherited = false)]
+		public sealed class IconGuidAttribute : Attribute, ICustomIcon {
+			public string guid;
+			private Texture texture;
+			private bool hasInitialize;
+
+			public IconGuidAttribute(string guid) {
+				this.guid = guid;
+			}
+
+			public Texture GetIcon() {
+#if UNITY_EDITOR
+				if(hasInitialize == false) {
+					hasInitialize = true;
+					var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+					if(string.IsNullOrEmpty(path) == false) {
+						var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+						texture = asset;
+					}
+				}
+#endif
+				return texture;
 			}
 		}
 

@@ -16,7 +16,10 @@ namespace MaxyGames.UNode.Nodes {
 					var type = func.ReturnType();
 					if(type != null) {
 						if(type.HasImplementInterface(typeof(IEnumerable<>)) || type.HasImplementInterface(typeof(IEnumerator<>))) {
-							return type.GetGenericArguments()[0];
+							var args = type.GetGenericArguments();
+							if(args.Length > 0) {
+								return type.GetGenericArguments()[0];
+							}
 						}
 					}
 				}

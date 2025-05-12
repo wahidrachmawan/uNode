@@ -52,7 +52,7 @@ namespace MaxyGames.UNode.Editors {
 			if(valueOutput && nodeObject.primaryValueOutput != null) {
 				AddPrimaryOutputValue();
 				if(flowLayout == Orientation.Horizontal) {
-					uNodeThreadUtility.Queue(() => primaryOutputValue.BringToFront());
+					uNodeThreadUtility.Queue(() => primaryOutputValue?.BringToFront());
 				}
 			}
 		}

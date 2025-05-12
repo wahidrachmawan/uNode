@@ -68,7 +68,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 				m_EdgeControl.inputColor = color;
 				m_EdgeControl.outputColor = color;
-				m_Dot.style.backgroundColor = color;
+				if(m_Dot != null) {
+					m_Dot.style.backgroundColor = color;
+				}
 				if(UIElementUtility.Theme.coloredPortBorder) {
 					m_Container.style.SetBorderColor(color);
 				}

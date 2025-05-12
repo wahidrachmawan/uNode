@@ -9,9 +9,10 @@ using System.IO;
 
 namespace MaxyGames.UNode.Editors {
 	class NodeCreatorWindow : EditorWindow {
-		public string nodeName;
+		public string nodeName = "MyNode";
 		public string nodeCategory = "Custom Nodes";
 		public string nodeDescription;
+		public Texture2D nodeIcon;
 		public string @namespace = "MaxyGames.UNode.Nodes";
 		public List<string> usingNamespaces = new List<string>() {
 			"System",
@@ -112,6 +113,7 @@ namespace MaxyGames.UNode.Editors {
 			nodeName = EditorGUILayout.TextField("Node Name", nodeName);
 			nodeCategory = EditorGUILayout.TextField("Node Category", nodeCategory);
 			nodeDescription = EditorGUILayout.TextField("Node Description", nodeDescription);
+			nodeIcon = EditorGUILayout.ObjectField("Node Icon", nodeIcon, typeof(Texture2D), false) as Texture2D;
 			@namespace = EditorGUILayout.TextField("Namespace", @namespace);
 			uNodeGUI.DrawNamespace("Using Namespaces", usingNamespaces, null);
 			uNodeGUIUtility.EditValueLayouted(nameof(instanceNode), this);
@@ -379,9 +381,15 @@ namespace MaxyGames.UNode.Editors {
 			classBuilder.SetToPublic();
 
 			var menuAtt = new CG.AData(typeof(NodeMenu), CG.Value(nodeCategory), CG.Value(nodeName));
+			classBuilder.attributes = new List<CG.AData>() { menuAtt };
+
 			menuAtt.namedParameters = new();
 			if(string.IsNullOrWhiteSpace(nodeDescription) == false) {
 				menuAtt.namedParameters.Add(nameof(NodeMenu.tooltip), CG.Value(nodeDescription));
+			}
+			if(nodeIcon != null) {
+				classBuilder.attributes.Add(new CG.AData(typeof(TypeIcons.IconGuidAttribute), CG.Value(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(nodeIcon)))));
+				menuAtt.namedParameters.Add(nameof(NodeMenu.icon), CG.Typeof(className));
 			}
 			if(flowInputs.Count > 0) {
 				menuAtt.namedParameters.Add(nameof(NodeMenu.hasFlowInput), CG.Value(true));
@@ -395,7 +403,6 @@ namespace MaxyGames.UNode.Editors {
 			if(valueOutputs.Count > 0) {
 				menuAtt.namedParameters.Add(nameof(NodeMenu.outputs), CG.MakeArray(typeof(Type), valueOutputs.Select(p => CG.Value(p.type.type)).ToArray()));
 			}
-			classBuilder.attributes = new List<CG.AData>() { menuAtt };
 
 			foreach(var data in valueInputs) {
 				CG.VData variable = new CG.VData(data.name, typeof(ValuePortDefinition));

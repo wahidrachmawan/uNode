@@ -838,6 +838,9 @@ namespace MaxyGames.UNode.Editors {
 						});
 					}
 					catch(Exception ex) {
+						if(ex is ThreadAbortException) {
+							throw;
+						}
 						if(ex is GraphException) {
 							Debug.LogException(ex);
 						}

@@ -902,12 +902,9 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				Cached.iconMap[type] = result;
 				return result;
 			}
-			TypeIcons.IconPathAttribute att = null;
-			if(type.IsDefinedAttribute(typeof(TypeIcons.IconPathAttribute))) {
-				att = type.GetCustomAttributes(typeof(TypeIcons.IconPathAttribute), true)[0] as TypeIcons.IconPathAttribute;
-			}
-			if(att != null) {
-				result = uNodeEditorUtility.Icons.GetIcon(att.path);
+			if(type.IsDefinedAttribute(typeof(ICustomIcon))) {
+				var att = type.GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
+				result = att.GetIcon();
 			}
 			else if(type == typeof(TypeIcons.FlowIcon)) {
 				result = uNodeEditorUtility.Icons.flowIcon;
