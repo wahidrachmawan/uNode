@@ -56,6 +56,7 @@ namespace MaxyGames.UNode.Editors {
 					typeof(GameObject),
 					//typeof(IRuntimeClass),
 					typeof(List<>),
+					typeof(Dictionary<,>),
 				};
 			}
 			if(filter == null) {
