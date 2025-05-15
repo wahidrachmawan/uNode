@@ -1183,7 +1183,7 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string MakeDictionary(Type elementType, ValueInput dicLength, string[] keys, params string[] values) {
 			string length = dicLength.isAssigned ? Value(dicLength) : string.Empty;
-			string elementObject = "";
+			string elementObject = "()";
 			if(values != null && values.Length > 0) {
 				int index = 0;
 				elementObject = "(" + length + ") {";
@@ -1208,7 +1208,7 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string MakeDictionary(Type elementType, MemberData dicLength, string[] keys, params string[] values) {
 			string length = dicLength.isTargeted ? Value((object)dicLength) : string.Empty;
-			string elementObject = "";
+			string elementObject = "()";
 			if(values != null && values.Length > 0) {
 				int index = 0;
 				elementObject = "(" + length + ") {";
