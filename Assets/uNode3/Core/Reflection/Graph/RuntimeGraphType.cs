@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace MaxyGames.UNode {
     public class RuntimeGraphType : RuntimeType, IRuntimeType, ISummary, IIcon, IRuntimeMemberWithRef {
+		/// <summary>
+		/// The target of the graph
+		/// </summary>
 		public GraphAsset target { get; internal set; }
 
 		public RuntimeGraphType(GraphAsset target) {
@@ -54,6 +57,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// True if the type is a singleton type
+		/// </summary>
 		public bool IsSingleton => target is ISingletonGraph;
 
 		#region Build

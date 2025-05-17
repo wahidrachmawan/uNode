@@ -23,6 +23,9 @@ namespace MaxyGames.UNode {
 		new List<string> UsingNamespaces { get; set; }
 	}
 
+	/// <summary>
+	/// A graph container that has <see cref="Graph"/> data.
+	/// </summary>
 	public interface IGraph {
 		Graph GraphData { get; }
 	}
@@ -34,6 +37,9 @@ namespace MaxyGames.UNode {
 		GeneratedScriptData ScriptData { get; }
 	}
 
+	/// <summary>
+	/// A graph container with script data
+	/// </summary>
 	public interface IGraphWithScriptData : IGraph, ITypeWithScriptData { }
 
 	public interface ITypeGraph : IGraphWithScriptData {
@@ -71,7 +77,13 @@ namespace MaxyGames.UNode {
 	}
 
 	public interface IClassGraph : ITypeGraph {
+		/// <summary>
+		/// True if the graph is a struct
+		/// </summary>
 		bool IsStruct => InheritType == typeof(ValueType);
+		/// <summary>
+		/// True if the graph is interface
+		/// </summary>
 		bool IsInterface => InheritType == null;
 		/// <summary>
 		/// The inherit type of the graph.
@@ -558,11 +570,11 @@ namespace MaxyGames.UNode {
 	/// Interface for describing the instance
 	/// </summary>
 	public interface ISummary {
+		/// <summary>
+		/// Get the summary
+		/// </summary>
+		/// <returns></returns>
 		string GetSummary();
-	}
-
-	public interface ICustomNodeConnection {
-		IEnumerable<UPort> GetFlowConnections();
 	}
 
 	/// <summary>
@@ -573,6 +585,9 @@ namespace MaxyGames.UNode {
 	}
 
 	internal interface IHighLevelNode {
+		/// <summary>
+		/// Return the node type
+		/// </summary>
 		Type NodeType { get; }
 	}
 
@@ -668,10 +683,17 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public struct ValuePortDefinition { }
 
+	/// <summary>
+	/// Implement this interface for make node for instanced members.
+	/// </summary>
 	public interface IInstanceNode { 
 		
 	}
 
+	/// <summary>
+	/// Implement this interface to make node for static members, the members must use static keyword.
+	/// Use <see cref="IInstanceNode"/> instead if the node required having to store a value and use later.
+	/// </summary>
 	public interface IStaticNode {
 
 	}
