@@ -1150,6 +1150,81 @@ namespace MaxyGames {
 		}
 		#endregion
 
+		#region Make Dictionary
+		/// <summary>
+		/// Generate a new dictionary creation code.
+		/// </summary>
+		/// <param name="elementType"></param>
+		/// <param name="values"></param>
+		/// <returns></returns>
+		public static string MakeDictionary(Type elementType, string[] keys, params string[] values) {
+			string elementObject = "()";
+			if(values != null && values.Length > 0) {
+				int index = 0;
+				elementObject = "() {";
+				foreach(object key in keys) {
+					if(index != 0) {
+						elementObject += ",";
+					}
+					elementObject += " {" + key + ", " + values[index] + "}";
+					index++;
+				}
+				elementObject += " }";
+			}
+			return "new " + Type(elementType) + elementObject;
+		}
+
+		/// <summary>
+		/// Generate a new dictionary creation code.
+		/// </summary>
+		/// <param name="elementType"></param>
+		/// <param name="dicLength"></param>
+		/// <param name="values"></param>
+		/// <returns></returns>
+		public static string MakeDictionary(Type elementType, ValueInput dicLength, string[] keys, params string[] values) {
+			string length = dicLength.isAssigned ? Value(dicLength) : string.Empty;
+			string elementObject = "()";
+			if(values != null && values.Length > 0) {
+				int index = 0;
+				elementObject = "(" + length + ") {";
+				foreach(object key in keys) {
+					if(index != 0) {
+						elementObject += ",";
+					}
+					elementObject += " {" + key + ", " + values[index] + "}";
+					index++;
+				}
+				elementObject += " }";
+			}
+			return "new " + Type(elementType) + elementObject;
+		}
+
+		/// <summary>
+		/// Generate a new dictionary creation code.
+		/// </summary>
+		/// <param name="elementType"></param>
+		/// <param name="dicLength"></param>
+		/// <param name="values"></param>
+		/// <returns></returns>
+		public static string MakeDictionary(Type elementType, MemberData dicLength, string[] keys, params string[] values) {
+			string length = dicLength.isTargeted ? Value((object)dicLength) : string.Empty;
+			string elementObject = "()";
+			if(values != null && values.Length > 0) {
+				int index = 0;
+				elementObject = "(" + length + ") {";
+				foreach(object key in keys) {
+					if(index != 0) {
+						elementObject += ",";
+					}
+					elementObject += " {" + key + ", " + values[index] + "}";
+					index++;
+				}
+				elementObject += " }";
+			}
+			return "new " + Type(elementType) + elementObject;
+		}
+		#endregion
+
 		#region Lambda
 		/// <summary>
 		/// Generate correct lambda codes for event, eg: `() => { }` or `M_Generated()` based of it's contents.
