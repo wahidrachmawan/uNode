@@ -33,13 +33,13 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					}
 				}
 				if(member.target.targetType == MemberData.TargetType.Constructor) {
-					var type = member.target.type;
 					var initializers = member.initializers;
 					uNodeGUI.DrawCustomList(initializers, "Initialiers",
 							drawElement: (position, index, value) => {
 								EditorGUI.LabelField(position, value.name);
 							},
 							add: _ => {
+								var type = member.target.type;
 								bool hasAddMenu = false;
 								GenericMenu menu = new GenericMenu();
 								if(type.IsArray || type.IsCastableTo(typeof(IList))) {
@@ -171,28 +171,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							});
 					using(new EditorGUILayout.HorizontalScope()) {
 						if(GUILayout.Button(new GUIContent("Refresh", ""), EditorStyles.miniButtonLeft)) {
-							if(type.IsArray || type.IsCastableTo(typeof(IList))) {
-								for(int i = 0; i < initializers.Count; i++) {
-									initializers[i].name = "Element" + i;
-								}
-							}
-							else {
-								var fields = type.GetMembers();
-								for(int x = 0; x < fields.Length; x++) {
-									var field = fields[x];
-									var t = ReflectionUtils.GetMemberType(field);
-									for(int y = 0; y < initializers.Count; y++) {
-										if(field.Name == initializers[y].name) {
-											if(t != initializers[y].type) {
-												initializers[y].name = field.Name;
-												initializers[y].type = t;
-
-											}
-											break;
-										}
-									}
-								}
-							}
+							RefreshInitializers(member);
 							uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 						}
 						if(GUILayout.Button(new GUIContent("Reset", ""), EditorStyles.miniButtonRight)) {
@@ -207,6 +186,48 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				EditorGUILayout.LabelField("Inputs", EditorStyles.centeredGreyMiniLabel);
 
 				DrawMember(node, node.member, showAddButton, filter, customChangeAction);
+			}
+		}
+
+		private static void RefreshInitializers(MultipurposeMember member) {
+			var type = member.target.type;
+			var initializers = member.initializers;
+			if(type.IsArray || type.IsCastableTo(typeof(IList))) {
+				var elementType = type.ElementType();
+				for(int i = 0; i < initializers.Count; i++) {
+					initializers[i].name = "Element" + i;
+					initializers[i].type = elementType;
+				}
+			}
+			else if(type.IsCastableTo(typeof(IDictionary))) {
+				var method = type.GetMethod("Add");
+				var parameters = method.GetParameters();
+				if(parameters.Length > 1) {
+					for(int i = 0; i < initializers.Count; i++) {
+						if(initializers[i].isComplexInitializer) {
+							for(int x = 0; x < parameters.Length; x++) {
+								initializers[i].elementInitializers[x].type = parameters[x].ParameterType;
+							}
+						}
+					}
+				}
+			}
+			else {
+				var fields = type.GetMembers();
+				for(int x = 0; x < fields.Length; x++) {
+					var field = fields[x];
+					var t = ReflectionUtils.GetMemberType(field);
+					for(int y = 0; y < initializers.Count; y++) {
+						if(field.Name == initializers[y].name) {
+							if(t != initializers[y].type) {
+								initializers[y].name = field.Name;
+								initializers[y].type = t;
+
+							}
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -375,6 +396,46 @@ namespace MaxyGames.UNode.Editors.Drawer {
 								}
 								if(method is MethodInfo && method.IsGenericMethod) {
 									DrawChangeGenericArguments(node, member, method as MethodInfo, members);
+								}
+								else if(method is ConstructorInfo && members.Length == 1) {
+									var type = member.target.type;
+									if(type.IsGenericType) {
+										var typeRaw = type.GetGenericTypeDefinition();
+										var rawGenericArguments = typeRaw.GetGenericArguments();
+										var genericArguments = type.GetGenericArguments();
+										for(int x = 0; x < genericArguments.Length; x++) {
+											var index = x;
+											var arg = genericArguments[index];
+
+											uNodeGUIUtility.DrawTypeDrawer(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
+												genericArguments[index] = type;
+												var changedType = ReflectionUtils.MakeGenericType(typeRaw, genericArguments);
+
+												var members = member.target.GetMembers(false);
+												if(members[0] is ConstructorInfo ctor) {
+													var parameters = ctor.GetParameters();
+
+													var ctors = changedType.GetConstructors(MemberData.flags);
+													for(int i = 0; i < ctors.Length; i++) {
+														var tParameter = ctors[i].GetParameters();
+														if(tParameter.Length == parameters.Length) {
+															for(int ii = 0; ii < parameters.Length; ii++) {
+																if(parameters[ii] != tParameter[ii]) {
+																	return;
+																}
+															}
+															members[0] = ctors[i];
+															uNodeEditorUtility.RegisterUndo(node.GetUnityObject());
+															member.target = MemberData.CreateFromMembers(members);
+															node.Register();
+															RefreshInitializers(member);
+															uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+														}
+													}
+												}
+											}, targetObject: node.GetUnityObject());
+										}
+									}
 								}
 								EditorGUI.indentLevel--;
 								var parameters = method.GetParameters();
