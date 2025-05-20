@@ -94,7 +94,7 @@ namespace MaxyGames.UNode {
 		private GameObject _gameObject;
 		public new GameObject gameObject {
 			get {
-				if(object.ReferenceEquals(_gameObject, null)) {
+				if(object.ReferenceEquals(_gameObject, null) && this != null) {
 					_gameObject = base.gameObject;
 				}
 				return _gameObject;

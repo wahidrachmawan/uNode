@@ -233,7 +233,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 		public static void DrawMember(NodeObject node, MultipurposeMember member, bool showAddButton = true, FilterAttribute filter = null, Action customChangeAction = null) {
 			{
-				EditorGUILayout.BeginHorizontal("Box");
+				EditorGUILayout.BeginVertical("Box");
 				if(GUILayout.Button(new GUIContent(member.target.GetDisplayName().Split('.').FirstOrDefault()), EditorStyles.popup)) {
 					GUI.changed = false;
 					if(customChangeAction != null) {
@@ -301,6 +301,80 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							}).ChangePosition(Event.current.mousePosition.ToScreenPoint());
 					}
 				}
+
+				if(member.target.startType?.IsGenericType == true && member.target.IsTargetingReflection && member.target.targetType != MemberData.TargetType.Constructor) {
+					var members = member.target.GetMembers(false);
+					if(members != null && members.Length > 0) {
+						var type = member.target.startType;
+
+						var typeRaw = type.GetGenericTypeDefinition();
+						var rawGenericArguments = typeRaw.GetGenericArguments();
+						var genericArguments = type.GetGenericArguments();
+						for(int x = 0; x < genericArguments.Length; x++) {
+							var index = x;
+							var arg = genericArguments[index];
+
+							uNodeGUIUtility.DrawTypeDrawer(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
+								genericArguments[index] = type;
+								var changedType = ReflectionUtils.MakeGenericType(typeRaw, genericArguments);
+
+								var newMembers = new List<MemberInfo>(members.Length);
+								for(int y = 0; y < members.Length; y++) {
+									MemberInfo[] mem = null;
+									if(y == 0) {
+										mem = changedType.GetMember(members[0].Name, MemberData.flags);
+										
+									}
+									else {
+										mem = ReflectionUtils.GetMemberType(members[y - 1]).GetMember(members[y].Name, MemberData.flags);
+									}
+									if(mem.Length > 0) {
+										if(mem.Length == 1) {
+											//Field, Property and Event should not have other same names
+											newMembers.Add(mem[0]);
+										}
+										else if(y > 0 && ReflectionUtils.GetMemberType(newMembers[y - 1]) == ReflectionUtils.GetMemberType(members[y - 1])) {
+											//In case it is not first members and the declaring type is same with the old
+											newMembers.Add(members[y]);
+										}
+										else {
+											var oldMethod = members[y] as MethodBase;
+											var oldParam = oldMethod.GetParameters();
+											for(int i = 0; i < mem.Length; i++) {
+												if(mem[i] is MethodBase method) {
+													var newParam = method.GetParameters();
+													if(newParam.Length == oldParam.Length) {
+														for(int q = 0; q < newParam.Length; q++) {
+															if(newParam[q].ParameterType != oldParam[q].ParameterType) {
+																return;
+															}
+														}
+														newMembers.Add(mem[y]);
+													}
+												}
+												else {
+													return;
+												}
+											}
+										}
+									}
+									else {
+										return;
+									}
+								}
+
+								if(newMembers.Count > 0) {
+									uNodeEditorUtility.RegisterUndo(node.GetUnityObject());
+									member.target = MemberData.CreateFromMembers(newMembers);
+									node.Register();
+									//RefreshInitializers(member);
+									uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+								}
+							}, targetObject: node.GetUnityObject());
+						}
+					}
+				}
+
 				EditorGUILayout.EndHorizontal();
 			}
 

@@ -2,6 +2,7 @@
 
 ## v3.1.4
 - Improved Editor
+- Fixed some bugs
 
 ## v3.1.3
 - Added option to configure node icon in Node Creator Wizard
