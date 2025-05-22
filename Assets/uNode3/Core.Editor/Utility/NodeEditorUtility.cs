@@ -1249,9 +1249,6 @@ namespace MaxyGames.UNode.Editors {
 			//		return false;
 			//	}
 			//}
-			if(menuItem.IsCoroutine && !graphData.supportCoroutine) {
-				return false;
-			}
 			if(menuItem.hasAllScope == false) {
 				if(menuItem.IsCoroutine) {
 					if(graphData.scopes.Contains(NodeScope.Coroutine) == false) {
@@ -1272,6 +1269,11 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(hasSupportedScope == false) {
+					return false;
+				}
+			}
+			else {
+				if(menuItem.IsCoroutine && !graphData.supportCoroutine) {
 					return false;
 				}
 			}

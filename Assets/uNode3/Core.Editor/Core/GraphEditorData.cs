@@ -265,14 +265,23 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public bool supportCoroutine {
 			get {
-				if(selectedRoot == graphData.mainGraphContainer && (graph is IMacroGraph || graph is IStateGraph state && state.CanCreateStateGraph)) {
-					return true;
-				} else if(selectedGroup?.node is ISuperNode superNode) {
-					if(superNode.AllowCoroutine()) {
-						return true;
+				if(selectedGroup != null) {
+					if(selectedGroup?.node is ISuperNode superNode) {
+						if(superNode.AllowCoroutine()) {
+							return true;
+						}
 					}
+					return false;
 				}
 				if(selectedRoot.IsValidElement()) {
+					if(selectedRoot is MainGraphContainer) {
+						if(graph is IStateGraph) {
+							return true;
+						}
+						if(graph is ICustomMainGraph mainGraph) {
+							return mainGraph.AllowCoroutine;
+						}
+					}
 					return selectedRoot.AllowCoroutine();
 				}
 				return false;
