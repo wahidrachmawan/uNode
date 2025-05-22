@@ -1,7 +1,9 @@
 # Changelog
 
 ## v3.1.4
+- Improved Code Generation
 - Improved Editor
+- Fixed obselete warnings on unity 6
 - Fixed some bugs
 
 ## v3.1.3

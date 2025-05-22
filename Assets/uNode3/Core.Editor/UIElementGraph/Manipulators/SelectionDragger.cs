@@ -444,8 +444,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void Pan(TimerState ts) {
-			Vector3 position = m_GraphView.contentViewContainer.resolvedStyle.translate;
-			m_GraphView.contentViewContainer.style.translate = position - m_PanDiff;
+			Vector3 position = m_GraphView.contentViewContainer.resolvedStyle.translate - m_PanDiff;
+			m_GraphView.contentViewContainer.style.translate = new Translate(position.x, position.y, position.z);
 			m_ItemPanDiff += m_PanDiff;
 
 			// Handle the selected element

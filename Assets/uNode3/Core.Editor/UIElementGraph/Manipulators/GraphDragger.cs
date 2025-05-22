@@ -123,7 +123,7 @@ namespace MaxyGames.UNode.Editors {
 					Vector2 v = graphView.ChangeCoordinatesTo(graphView.contentViewContainer, e.localMousePosition) - m_Start;
 					Vector3 scale = graphView.contentViewContainer.resolvedStyle.scale.value;
 					Vector3 position = graphView.contentViewContainer.resolvedStyle.translate + Vector3.Scale(v, scale);
-					graphView.contentViewContainer.style.translate = position;
+					graphView.contentViewContainer.style.translate = new Translate(position.x, position.y, position.z);
 					graphView.UpdateViewTransform(position, scale);
 					e.StopPropagation();
 				}
