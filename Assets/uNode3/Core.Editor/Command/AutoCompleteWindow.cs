@@ -256,7 +256,8 @@ namespace MaxyGames.UNode.Editors {
 				element.Add(root);
 
 				if(completion == selectedCompletion) {
-					root.style.backgroundColor = textField.textSelection.selectionColor;
+					GUISkin guiSkin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
+					root.style.backgroundColor = guiSkin.settings.selectionColor;
 				}
 				Texture icon = null;
 				var label = new Label();

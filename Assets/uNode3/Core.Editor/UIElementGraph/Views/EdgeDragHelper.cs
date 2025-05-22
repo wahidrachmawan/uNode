@@ -54,8 +54,8 @@ namespace MaxyGames.UNode.Editors {
 
 			if(m_WasPanned) {
 				if(!resetPositionOnPan || didConnect) {
-					Vector3 p = m_GraphView.contentViewContainer.transform.position;
-					Vector3 s = m_GraphView.contentViewContainer.transform.scale;
+					Vector3 p = m_GraphView.contentViewContainer.resolvedStyle.translate;
+					Vector3 s = m_GraphView.contentViewContainer.resolvedStyle.scale.value;
 					m_GraphView.UpdateViewTransform(p, s);
 				}
 			}
@@ -235,7 +235,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void Pan(TimerState ts) {
-			m_GraphView.viewTransform.position -= m_PanDiff;
+			Vector3 position = m_GraphView.contentViewContainer.resolvedStyle.translate;
+			m_GraphView.contentViewContainer.style.translate = position - m_PanDiff;
 			edgeCandidate.output = edgeCandidate.output;
 			edgeCandidate.input = edgeCandidate.input;
 

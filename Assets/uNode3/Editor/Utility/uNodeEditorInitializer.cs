@@ -1448,6 +1448,10 @@ namespace MaxyGames.UNode.Editors {
 #endif
 			});
 #endif
+			if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild
+			&& uNodePreference.preferenceData.generatorData.compilationMethod == CompilationMethod.Roslyn) {
+				GenerationUtility.DeleteGeneratedCSharpScript();
+			}
 		}
 		#endregion
 	}

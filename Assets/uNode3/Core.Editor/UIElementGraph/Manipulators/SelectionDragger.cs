@@ -444,7 +444,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void Pan(TimerState ts) {
-			m_GraphView.viewTransform.position -= m_PanDiff;
+			Vector3 position = m_GraphView.contentViewContainer.resolvedStyle.translate;
+			m_GraphView.contentViewContainer.style.translate = position - m_PanDiff;
 			m_ItemPanDiff += m_PanDiff;
 
 			// Handle the selected element
@@ -475,8 +476,8 @@ namespace MaxyGames.UNode.Editors {
 			Rect newPos = new Rect(0, 0, originalPos.width, originalPos.height);
 
 			// Compute the new position of the selected element using the mouse delta position and panning info
-			newPos.x = originalPos.x - (m_MouseDiff.x - m_ItemPanDiff.x) * panSpeed.x / scale.x * element.transform.scale.x;
-			newPos.y = originalPos.y - (m_MouseDiff.y - m_ItemPanDiff.y) * panSpeed.y / scale.y * element.transform.scale.y;
+			newPos.x = originalPos.x - (m_MouseDiff.x - m_ItemPanDiff.x) * panSpeed.x / scale.x * element.resolvedStyle.scale.value.x;
+			newPos.y = originalPos.y - (m_MouseDiff.y - m_ItemPanDiff.y) * panSpeed.y / scale.y * element.resolvedStyle.scale.value.y;
 
 			element.SetPosition(m_GraphView.contentViewContainer.ChangeCoordinatesTo(element.hierarchy.parent, newPos));
 		}
@@ -524,8 +525,8 @@ namespace MaxyGames.UNode.Editors {
 					m_PanSchedule.Pause();
 
 					if (m_ItemPanDiff != Vector3.zero) {
-						Vector3 p = m_GraphView.contentViewContainer.transform.position;
-						Vector3 s = m_GraphView.contentViewContainer.transform.scale;
+						Vector3 p = m_GraphView.contentViewContainer.resolvedStyle.translate;
+						Vector3 s = m_GraphView.contentViewContainer.resolvedStyle.scale.value;
 						m_GraphView.UpdateViewTransform(p, s);
 					}
 
@@ -609,8 +610,8 @@ namespace MaxyGames.UNode.Editors {
 			m_PanSchedule.Pause();
 
 			if (m_ItemPanDiff != Vector3.zero) {
-				Vector3 p = m_GraphView.contentViewContainer.transform.position;
-				Vector3 s = m_GraphView.contentViewContainer.transform.scale;
+				Vector3 p = m_GraphView.contentViewContainer.resolvedStyle.translate;
+				Vector3 s = m_GraphView.contentViewContainer.resolvedStyle.scale.value;
 				m_GraphView.UpdateViewTransform(p, s);
 			}
 
