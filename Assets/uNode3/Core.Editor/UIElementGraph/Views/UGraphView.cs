@@ -91,8 +91,8 @@ namespace MaxyGames.UNode.Editors {
 			RegisterCallback<DragUpdatedEvent>(OnDragUpdatedEvent);
 			RegisterCallback<DragPerformEvent>(OnDragPerformEvent);
 			this.RegisterRepaintAction(() => {
-				if(autoHideNodes && _viewPosition != viewTransform.position && uNodeThreadUtility.frame % 2 == 0) {
-					_viewPosition = viewTransform.position;
+				if(autoHideNodes && _viewPosition != contentViewContainer.resolvedStyle.translate && uNodeThreadUtility.frame % 2 == 0) {
+					_viewPosition = contentViewContainer.resolvedStyle.translate;
 					AutoHideGraphElement.UpdateVisibility(this);
 				}
 			});
@@ -1112,7 +1112,7 @@ namespace MaxyGames.UNode.Editors {
 			gridBackground?.MarkDirtyRepaint();
 			if(graph != null && hasInitialize) {
 				graphData.GetCurrentCanvasData().zoomScale = scale;
-				graphData.position = -viewTransform.position / scale;
+				graphData.position = -contentViewContainer.resolvedStyle.translate / scale;
 			}
 			miniMap?.SetDirty();
 		}
@@ -2958,10 +2958,8 @@ namespace MaxyGames.UNode.Editors {
 			clientRect.x = 0;
 			clientRect.y = 0;
 
-			var containerScale = new Vector3(m_Container.transform.matrix.GetColumn(0).magnitude,
-				m_Container.transform.matrix.GetColumn(1).magnitude,
-				m_Container.transform.matrix.GetColumn(2).magnitude);
-			var containerTranslation = m_Container.transform.matrix.GetColumn(3);
+			var containerScale = m_Container.resolvedStyle.scale.value;
+			var containerTranslation = m_Container.resolvedStyle.translate;
 			var containerPosition = m_Container.layout;
 
 			var painter = mgc.painter2D;
