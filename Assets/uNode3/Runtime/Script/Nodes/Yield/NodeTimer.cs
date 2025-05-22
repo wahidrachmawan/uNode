@@ -16,6 +16,8 @@ namespace MaxyGames.UNode.Nodes {
 		[NonSerialized]
 		public ValueInput waitTime;
 		[NonSerialized]
+		public ValueInput unscaledTime;
+		[NonSerialized]
 		public FlowOutput onStart;
 		[NonSerialized]
 		public FlowOutput onUpdate;
@@ -46,6 +48,7 @@ namespace MaxyGames.UNode.Nodes {
 			onFinished = FlowOutput(nameof(onFinished));
 
 			waitTime = ValueInput<float>(nameof(waitTime), 1);
+			unscaledTime = ValueInput<bool>(nameof(unscaledTime), false);
 
 			start = FlowInput(nameof(start), (flow) => {
 				var data = flow.GetOrCreateElementData<RuntimeData>(this);
@@ -103,7 +106,11 @@ namespace MaxyGames.UNode.Nodes {
 
 		void DoUpdate(Flow flow, RuntimeData data) {
 			if(data.timerOn && !data.paused) {
-				data.elapsed += Time.deltaTime;
+				if(unscaledTime.GetValue<bool>(flow)) {
+					data.elapsed += Time.unscaledDeltaTime;
+				} else {
+					data.elapsed += Time.deltaTime;
+				}
 				if(data.elapsed >= data.duration) {
 					Reset(flow);
 					flow.TriggerParallel(onFinished);

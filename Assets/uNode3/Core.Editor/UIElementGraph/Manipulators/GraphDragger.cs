@@ -121,9 +121,10 @@ namespace MaxyGames.UNode.Editors {
 				GraphView graphView = target as GraphView;
 				if(graphView != null) {
 					Vector2 v = graphView.ChangeCoordinatesTo(graphView.contentViewContainer, e.localMousePosition) - m_Start;
-					Vector3 scale = graphView.contentViewContainer.transform.scale;
-					graphView.viewTransform.position += Vector3.Scale(v, scale);
-					graphView.UpdateViewTransform(graphView.viewTransform.position, graphView.viewTransform.scale);
+					Vector3 scale = graphView.contentViewContainer.resolvedStyle.scale.value;
+					Vector3 position = graphView.contentViewContainer.resolvedStyle.translate + Vector3.Scale(v, scale);
+					graphView.contentViewContainer.style.translate = position;
+					graphView.UpdateViewTransform(position, scale);
 					e.StopPropagation();
 				}
 			}
@@ -134,8 +135,8 @@ namespace MaxyGames.UNode.Editors {
 				if(m_hasMove) {
 					GraphView graphView = target as GraphView;
 					if(graphView != null) {
-						Vector3 position = graphView.contentViewContainer.transform.position;
-						Vector3 scale = graphView.contentViewContainer.transform.scale;
+						Vector3 position = graphView.contentViewContainer.resolvedStyle.translate;
+						Vector3 scale = graphView.contentViewContainer.resolvedStyle.scale.value;
 						graphView.UpdateViewTransform(position, scale);
 					}
 				}

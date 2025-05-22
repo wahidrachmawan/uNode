@@ -950,14 +950,14 @@ namespace MaxyGames.UNode.Editors {
 				float time = 0;
 				this.ScheduleActionUntil(t => {
 					time += t.deltaTime / 1000f;
-					Vector3 position = Vector3.Lerp(contentViewContainer.transform.position, frameTranslation, time);
-					Vector3 scale = Vector3.Lerp(contentViewContainer.transform.scale, frameScaling, time);
+					Vector3 position = Vector3.Lerp(contentViewContainer.resolvedStyle.translate, frameTranslation, time);
+					Vector3 scale = Vector3.Lerp(contentViewContainer.resolvedStyle.scale.value, frameScaling, time);
 					UpdateViewTransform(position, scale);
 					contentViewContainer.MarkDirtyRepaint();
 				}, () => {
 					bool result = currentAnimateFrame != frame ||
-						Vector3.Distance(contentViewContainer.transform.position, frameTranslation) < 5 &&
-						Vector3.Distance(contentViewContainer.transform.scale, frameScaling) < 5;
+						Vector3.Distance(contentViewContainer.resolvedStyle.translate, frameTranslation) < 5 &&
+						Vector3.Distance(contentViewContainer.resolvedStyle.scale.value, frameScaling) < 5;
 					if(result) {
 						SetPixelCachedOnBoundChanged(false);
 					}

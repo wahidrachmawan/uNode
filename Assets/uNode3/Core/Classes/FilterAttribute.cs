@@ -864,7 +864,10 @@ namespace MaxyGames.UNode {
 														}
 													}
 													if(flag) {
-														return ReflectionUtils.MakeGenericType(t.GetGenericTypeDefinition(), args);
+														try {
+															return ReflectionUtils.MakeGenericType(t.GetGenericTypeDefinition(), args);
+														}
+														catch { }
 													}
 												}
 												return null;
