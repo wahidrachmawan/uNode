@@ -25,6 +25,8 @@ namespace MaxyGames.UNode.Editors {
 
 			[Tooltip("The default access modifier for new variable")]
 			public DefaultAccessor newVariableAccessor;
+			[Tooltip("The default access modifier for new property")]
+			public DefaultAccessor newPropertyAccessor;
 			[Tooltip("The default access modifier for new function")]
 			public DefaultAccessor newFunctionAccessor;
 
@@ -456,6 +458,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.maxGraphBackup), preferenceData);
 				// preferenceData.isLocked = EditorGUILayout.Toggle(new GUIContent("Lock Selection"), preferenceData.isLocked);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newVariableAccessor), preferenceData);
+				uNodeGUIUtility.ShowField(nameof(preferenceData.newPropertyAccessor), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newFunctionAccessor), preferenceData);
 
 				using(new EditorGUILayout.HorizontalScope()) {
