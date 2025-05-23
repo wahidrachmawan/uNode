@@ -62,14 +62,14 @@ namespace MaxyGames.UNode.Editors {
 			if(filter == null) {
 				filter = FilterAttribute.DefaultTypeFilter;
 			}
-			var customItmes = ItemSelector.MakeCustomTypeItems(generalTypes, "General");
+			var customItems = ItemSelector.MakeCustomTypeItems(generalTypes, "General");
 			var window = ItemSelector.ShowType(
 				graphData.graph,
 				filter, 
 				(m) => {
 					onClick(m.startType);
 				},
-				customItmes).ChangePosition(position);
+				customItems).ChangePosition(position);
 			window.displayNoneOption = false;
 			window.displayGeneralType = false;
 		}
@@ -103,7 +103,10 @@ namespace MaxyGames.UNode.Editors {
 			menu.AddItem(new GUIContent("Add new"), false, () => {
 				ShowTypeMenu(mousePosition, type => {
 					uNodeEditorUtility.RegisterUndo(graph);
-					NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, "newProperty", type, _ => {
+					NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, "newProperty", type, p => {
+						if(uNodePreference.preferenceData.newPropertyAccessor == uNodePreference.DefaultAccessor.Private) {
+							p.modifier.SetPrivate();
+						}
 						postAction?.Invoke();
 						GraphChanged();
 					});
@@ -207,7 +210,7 @@ namespace MaxyGames.UNode.Editors {
 			menu.AddItem(new GUIContent("Add new"), false, () => {
 				uNodeEditorUtility.RegisterUndo(base.graph);
 				NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "NewFunction", typeof(void), f => {
-					if(uNodePreference.preferenceData.newVariableAccessor == uNodePreference.DefaultAccessor.Private) {
+					if(uNodePreference.preferenceData.newFunctionAccessor == uNodePreference.DefaultAccessor.Private) {
 						f.modifier.SetPrivate();
 					}
 				});
@@ -216,7 +219,7 @@ namespace MaxyGames.UNode.Editors {
 			menu.AddItem(new GUIContent("Add new coroutine"), false, () => {
 				uNodeEditorUtility.RegisterUndo(base.graph);
 				NodeEditorUtility.AddNewFunction(graphData.graph.GraphData.functionContainer, "NewFunction", typeof(IEnumerator), f => {
-					if(uNodePreference.preferenceData.newVariableAccessor == uNodePreference.DefaultAccessor.Private) {
+					if(uNodePreference.preferenceData.newFunctionAccessor == uNodePreference.DefaultAccessor.Private) {
 						f.modifier.SetPrivate();
 					}
 				});
