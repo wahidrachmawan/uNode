@@ -17,6 +17,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			EditorGUI.MultiFloatField(position, option.label, contents, arr);
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = new Rect(arr[0], arr[1], arr[2], arr[3]);
+				GUI.changed = true;
 			}
 		}
 	}

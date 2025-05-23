@@ -14,6 +14,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			fieldValue = Quaternion.Euler(EditorGUI.Vector3Field(position, option.label, fieldValue.eulerAngles));
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
+				GUI.changed = true;
 			}
 		}
 
@@ -23,6 +24,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			fieldValue = Quaternion.Euler(EditorGUILayout.Vector3Field(option.label, fieldValue.eulerAngles));
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
+				GUI.changed = true;
 			}
 		}
 	}

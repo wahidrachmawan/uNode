@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.StickyNote))]
 	public class StickyNoteView : BaseNodeView {
 		protected Label comment;
+		protected Label titleLabel;
 
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			this.owner = owner;
@@ -25,6 +26,7 @@ namespace MaxyGames.UNode.Editors {
 			comment = new Label(node.comment);
 			inputContainer.Add(comment);
 			elementTypeColor = Color.yellow;
+			titleLabel = titleContainer.Q<Label>("title-label");
 
 			titleContainer.RegisterCallback<MouseDownEvent>((e) => {
 				if(e.clickCount == 2) {
@@ -66,6 +68,33 @@ namespace MaxyGames.UNode.Editors {
 			comment.text = targetNode.comment;
 			if(nodeObject.node is Nodes.StickyNote note) {
 				titleContainer.EnableInClassList("ui-hidden", note.hideTitle);
+				if(note.backgroundColor != Color.clear) {
+					this.style.backgroundColor = note.backgroundColor;
+				}
+				else {
+					this.style.backgroundColor = StyleKeyword.Null;
+				}
+				if(note.textColor != Color.clear) {
+					titleLabel.style.color = note.textColor;
+					comment.style.color = note.textColor;
+				}
+				else {
+					titleLabel.style.color = StyleKeyword.Null;
+					comment.style.color = StyleKeyword.Null;
+				}
+				if(note.titleSize > 0) {
+					titleLabel.style.fontSize = note.titleSize;
+					titleContainer.style.height = StyleKeyword.Auto;
+				}
+				if(note.descriptionSize > 0) {
+					comment.style.fontSize = note.descriptionSize;
+				}
+				if(note.titleFont != null) {
+					titleLabel.style.unityFontDefinition = FontDefinition.FromFont(note.titleFont);
+				}
+				if(note.descriptionFont != null) {
+					comment.style.unityFontDefinition = FontDefinition.FromFont(note.descriptionFont);
+				}
 			}
 		}
 	}

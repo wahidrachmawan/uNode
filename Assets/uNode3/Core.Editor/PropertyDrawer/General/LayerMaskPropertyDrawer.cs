@@ -24,6 +24,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				else {
 					option.value = UnityEditorInternal.InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(fieldValue);
 				}
+				GUI.changed = true;
 			}
 		}
 	}

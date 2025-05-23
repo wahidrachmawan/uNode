@@ -88,6 +88,10 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
+		public override string GetTitle() {
+			return string.IsNullOrEmpty(name) ? base.GetTitle() : name;
+		}
+
 		public override Type GetNodeIcon() {
 			return typeof(TypeIcons.ValidationIcon);
 		}

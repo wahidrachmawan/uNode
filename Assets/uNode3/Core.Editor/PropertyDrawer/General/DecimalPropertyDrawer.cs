@@ -14,6 +14,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			fieldValue = (decimal)EditorGUI.DoubleField(position, option.label, (double)fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
+				GUI.changed = true;
 			}
 		}
 	}

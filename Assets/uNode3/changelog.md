@@ -1,6 +1,7 @@
 # Changelog
 
 ## v3.1.4
+- Added setting for default access modifier for new property by @Miftachul-Huda
 - Improved Code Generation
 - Improved Editor
 - Fixed obselete warnings on unity 6

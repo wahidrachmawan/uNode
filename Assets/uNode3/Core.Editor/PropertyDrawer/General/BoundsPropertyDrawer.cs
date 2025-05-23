@@ -14,6 +14,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			fieldValue = EditorGUI.BoundsField(position, option.label, fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
+				GUI.changed = true;
 			}
 		}
 
@@ -23,6 +24,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			fieldValue = EditorGUILayout.BoundsField(option.label, fieldValue);
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
+				GUI.changed = true;
 			}
 		}
 	}

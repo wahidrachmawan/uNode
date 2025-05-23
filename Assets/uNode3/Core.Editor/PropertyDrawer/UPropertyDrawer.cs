@@ -197,7 +197,7 @@ namespace MaxyGames.UNode.Editors {
 						property.value = val;
 					}
 					if(object.ReferenceEquals(value, val) == false) {
-						GUI.changed = value != null;
+						GUI.changed |= value != null;
 					}
 					return val;
 				}
@@ -221,8 +221,8 @@ namespace MaxyGames.UNode.Editors {
 					if(value == null && !nullable && ReflectionUtils.CanCreateInstance(type)) {
 						value = ReflectionUtils.CreateInstance(type);
 						property.value = value;
+						GUI.changed |= value != null;
 					}
-					GUI.changed = value != null;
 				}
 			}
 			return value;

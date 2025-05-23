@@ -126,6 +126,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = value;
+				GUI.changed = true;
 			}
 		}
 	}
