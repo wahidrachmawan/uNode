@@ -1,10 +1,13 @@
 # Changelog
 
 ## v3.1.4
+- Added more option to configure sticky note style
 - Added setting for default access modifier for new property by @Miftachul-Huda
+- Added unscaled time on NodeTimer by @Miftachul-Huda
 - Improved Code Generation
 - Improved Editor
-- Fixed obselete warnings on unity 6
+- Remove generated script after build by @Miftachul-Huda
+- Fixed obselete warnings on unity 6 by @Miftachul-Huda
 - Fixed some bugs
 
 ## v3.1.3
