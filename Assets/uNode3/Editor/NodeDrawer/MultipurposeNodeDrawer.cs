@@ -34,7 +34,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 				if(member.target.targetType == MemberData.TargetType.Constructor) {
 					var initializers = member.initializers;
-					uNodeGUI.DrawCustomList(initializers, "Initialiers",
+					uNodeGUI.DrawCustomList(initializers, "Initializers",
 							drawElement: (position, index, value) => {
 								EditorGUI.LabelField(position, value.name);
 							},
