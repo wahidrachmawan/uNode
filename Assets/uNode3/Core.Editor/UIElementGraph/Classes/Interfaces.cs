@@ -4,8 +4,18 @@ using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
 	public interface IElementResizable {
-		void OnStartResize();
-		void OnResized();
+		/// <summary>
+		/// Start of the resize
+		/// </summary>
+		void OnStartResize() { }
+		/// <summary>
+		/// Apply resize element
+		/// </summary>
+		void OnResized() { }
+		/// <summary>
+		/// Update each time element is resized
+		/// </summary>
+		void OnResizeUpdate() { }
 	}
 
 	public interface IDragableElement {

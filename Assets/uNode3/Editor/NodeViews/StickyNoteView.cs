@@ -11,7 +11,7 @@ using NodeView = UnityEditor.Experimental.GraphView.Node;
 
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.StickyNote))]
-	public class StickyNoteView : BaseNodeView {
+	public class StickyNoteView : BaseNodeView, IElementResizable {
 		protected Label comment;
 		protected Label titleLabel;
 
@@ -24,6 +24,7 @@ namespace MaxyGames.UNode.Editors {
 			AddToClassList("sticky-note");
 
 			comment = new Label(node.comment);
+			comment.style.whiteSpace = WhiteSpace.Normal;
 			inputContainer.Add(comment);
 			elementTypeColor = Color.yellow;
 			titleLabel = titleContainer.Q<Label>("title-label");
@@ -57,16 +58,36 @@ namespace MaxyGames.UNode.Editors {
 				}
 			});
 
+			Add(new ResizableElement());
 			//this.SetSize(new Vector2(node.editorRect.width, node.editorRect.height));
 			SetPosition(targetNode.position);
 			RefreshPorts();
 			UpdateUI();
 		}
 
+		public void OnResized() {
+			Teleport(layout);
+			(nodeObject.node as Nodes.StickyNote).customNodeSize = true;
+		}
+
+		void IElementResizable.OnResizeUpdate() {
+			Teleport(layout);
+			(nodeObject.node as Nodes.StickyNote).customNodeSize = true;
+		}
+
 		public override void UpdateUI() {
 			title = targetNode.GetTitle();
 			comment.text = targetNode.comment;
 			if(nodeObject.node is Nodes.StickyNote note) {
+
+				if(note.customNodeSize) {
+					this.SetSize(new Vector2(nodeObject.position.width, nodeObject.position.height));
+				}
+				else {
+					style.width = StyleKeyword.Null;
+					style.height = StyleKeyword.Null;
+				}
+
 				titleContainer.EnableInClassList("ui-hidden", note.hideTitle);
 				if(note.backgroundColor != Color.clear) {
 					this.style.backgroundColor = note.backgroundColor;
@@ -86,15 +107,21 @@ namespace MaxyGames.UNode.Editors {
 					titleLabel.style.fontSize = note.titleSize;
 					titleContainer.style.height = StyleKeyword.Auto;
 				}
+				else {
+					titleLabel.style.fontSize = StyleKeyword.Null;
+				}
 				if(note.descriptionSize > 0) {
 					comment.style.fontSize = note.descriptionSize;
 				}
-				if(note.titleFont != null) {
-					titleLabel.style.unityFontDefinition = FontDefinition.FromFont(note.titleFont);
+				else {
+					comment.style.fontSize = StyleKeyword.Null;
 				}
-				if(note.descriptionFont != null) {
-					comment.style.unityFontDefinition = FontDefinition.FromFont(note.descriptionFont);
-				}
+				//if(note.titleFont != null) {
+				//	titleLabel.style.unityFontDefinition = FontDefinition.FromFont(note.titleFont);
+				//}
+				//if(note.descriptionFont != null) {
+				//	comment.style.unityFontDefinition = FontDefinition.FromFont(note.descriptionFont);
+				//}
 			}
 		}
 	}

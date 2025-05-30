@@ -155,31 +155,26 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		#region Drag Handler
-		private void DragHandleVariable(Variable variable, Vector2 position) {
+		private void DragHandleVariable(Variable variable, Vector2 position, Vector2 menuPosition) {
 			if(variable.graphContainer != graphData.graph) {
 				EditorUtility.DisplayDialog("Error", "The graph of the variable must same with the current graph", "Ok");
 				return;
 			}
 			GenericMenu menu = new GenericMenu();
-			menu.AddItem(new GUIContent("Get"), false, (() => {
-				NodeEditorUtility.AddNewNode(graphData, variable.name, null, position, delegate (MultipurposeNode n) {
-					var mData = MemberData.CreateFromValue(variable);
-					n.target = mData;
-					n.Register();
-				});
-				graph.Refresh();
-			}));
-			menu.AddItem(new GUIContent("Set"), false, (() => {
-				NodeEditorUtility.AddNewNode(graphData, variable.name, null, position, delegate (Nodes.NodeSetValue n) {
-					var mData = MemberData.CreateFromValue(variable);
-					n.Register();
-					n.target.AssignToDefault(mData);
-					if(mData.type != null) {
-						n.value.AssignToDefault(MemberData.Default(mData.type));
-					}
-				});
-				graph.Refresh();
-			}));
+			var dragData = new DragHandlerDataForGraphElement() {
+				draggedValue = variable,
+				droppedTarget = graphData.currentCanvas,
+				graphEditor = graph,
+				mousePositionOnCanvas = position,
+				mousePositionOnScreen = menuPosition,
+			};
+			DragHandlerMenu.Instances.ForEach(handler => {
+				if(handler.IsValid(dragData)) {
+					menu.AddItem(new GUIContent(handler.name), false, () => {
+						handler.OnClick(dragData);
+					});
+				}
+			});
 			menu.ShowAsContext();
 		}
 
@@ -303,75 +298,69 @@ namespace MaxyGames.UNode.Editors {
 					action(comp, comp.GetType().Name + "/");
 				}
 			}
+
+			var dragData = new DragHandlerDataForGraphElement() {
+				draggedValue = obj,
+				droppedTarget = graphData.currentCanvas,
+				graphEditor = graph,
+				mousePositionOnCanvas = position,
+				mousePositionOnScreen = menuPosition,
+			};
+			DragHandlerMenu.Instances.ForEach(handler => {
+				if(handler.IsValid(dragData)) {
+					menu.AddItem(new GUIContent(handler.name), false, () => {
+						handler.OnClick(dragData);
+					});
+				}
+			});
+
 			menu.ShowAsContext();
 		}
 
-		private void DragHandleProperty(Property property, Vector2 position) {
+		private void DragHandleProperty(Property property, Vector2 position, Vector2 menuPosition) {
 			if(property.graphContainer != graphData.graph) {
 				EditorUtility.DisplayDialog("Error", "The graph of the property must same with the current graph", "Ok");
 				return;
 			}
 			GenericMenu menu = new GenericMenu();
-			if(property.CanGetValue()) {
-				menu.AddItem(new GUIContent("Get"), false, () => {
-					NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, property.name, null, position, delegate (MultipurposeNode n) {
-						var mData = MemberData.CreateFromValue(property);
-						n.target = mData;
-						n.EnsureRegistered();
+			var dragData = new DragHandlerDataForGraphElement() {
+				draggedValue = property,
+				droppedTarget = graphData.currentCanvas,
+				graphEditor = graph,
+				mousePositionOnCanvas = position,
+				mousePositionOnScreen = menuPosition,
+			};
+			DragHandlerMenu.Instances.ForEach(handler => {
+				if(handler.IsValid(dragData)) {
+					menu.AddItem(new GUIContent(handler.name), false, () => {
+						handler.OnClick(dragData);
 					});
-					graph.Refresh();
-				});
-			}
-			if(property.CanSetValue()) {
-				menu.AddItem(new GUIContent("Set"), false, () => {
-					NodeEditorUtility.AddNewNode(graphData, property.name, null, position, delegate (Nodes.NodeSetValue n) {
-						n.EnsureRegistered();
-						var mData = MemberData.CreateFromValue(property);
-						n.target.AssignToDefault(mData);
-						if(mData.type != null) {
-							n.value.AssignToDefault(MemberData.Default(mData.type));
-						}
-					});
-					graph.Refresh();
-				});
-			}
+				}
+			});
 			menu.ShowAsContext();
 		}
 
-		private void DragHandleFunction(Function function, Vector2 position) {
+		private void DragHandleFunction(Function function, Vector2 position, Vector2 menuPosition) {
 			if(function.graphContainer != graphData.graph) {
 				EditorUtility.DisplayDialog("Error", "The graph of the function must same with the current graph", "Ok");
 				return;
 			}
-			if(function.ReturnType().IsCastableTo(typeof(System.Collections.IEnumerator)) && graphData.graph.GetGraphInheritType().IsCastableTo(typeof(MonoBehaviour))) {
-				GenericMenu menu = new GenericMenu();
-				menu.AddItem(new GUIContent("Invoke"), false, (() => {
-					NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, position, (n) => {
-						n.target = MemberData.CreateFromValue(function);
+			GenericMenu menu = new GenericMenu();
+			var dragData = new DragHandlerDataForGraphElement() {
+				draggedValue = function,
+				droppedTarget = graphData.currentCanvas,
+				graphEditor = graph,
+				mousePositionOnCanvas = position,
+				mousePositionOnScreen = menuPosition,
+			};
+			DragHandlerMenu.Instances.ForEach(handler => {
+				if(handler.IsValid(dragData)) {
+					menu.AddItem(new GUIContent(handler.name), false, () => {
+						handler.OnClick(dragData);
 					});
-					graph.Refresh();
-				}));
-				menu.AddItem(new GUIContent("Start Coroutine"), false, (() => {
-					NodeEditorUtility.AddNewNode(graphData, position, delegate (NodeBaseCaller node) {
-						node.target = MemberData.CreateFromMember(typeof(MonoBehaviour).GetMethod(nameof(MonoBehaviour.StartCoroutine), new[] { typeof(System.Collections.IEnumerator) }));
-						node.Register();
-
-						NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, new Vector2(position.x - 200, position.y), (n) => {
-							n.target = MemberData.CreateFromValue(function);
-
-							node.parameters[0].input.ConnectTo(n.output);
-						});
-					});
-					graph.Refresh();
-				}));
-				menu.ShowAsContext();
-			}
-			else {
-				NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, function.name, null, position, (n) => {
-					n.target = MemberData.CreateFromValue(function);
-				});
-				graph.Refresh();
-			}
+				}
+			});
+			menu.ShowAsContext();
 			DragAndDrop.SetGenericData("uNode", null);
 		}
 
@@ -559,8 +548,8 @@ namespace MaxyGames.UNode.Editors {
 			if(graphData.canAddNode == false) {
 				return;
 			}
-			Vector2 topMPos;
-			Vector2 mPos = GetMousePosition(evt, out topMPos);
+			Vector2 mPos = GetMousePosition(evt, out var topMPos);
+			var iPOS = graph.window.GetMousePositionForMenu(topMPos);
 			if(DragAndDrop.GetGenericData("uNode") != null) {
 				var generic = DragAndDrop.GetGenericData("uNode");
 
@@ -581,7 +570,7 @@ namespace MaxyGames.UNode.Editors {
 				#region Function
 				if(generic is Function) {//Drag functions.
 					var function = generic as Function;
-					DragHandleFunction(function, mPos);
+					DragHandleFunction(function, mPos, iPOS);
 				}
 				else
 				#endregion
@@ -589,7 +578,7 @@ namespace MaxyGames.UNode.Editors {
 				#region Property
 				if(generic is Property) {//Drag property
 					var property = generic as Property;
-					DragHandleProperty(property, mPos);
+					DragHandleProperty(property, mPos, iPOS);
 				}
 				else
 				#endregion
@@ -597,7 +586,7 @@ namespace MaxyGames.UNode.Editors {
 				#region Variable
 				if(generic is Variable) {//Drag variable.
 					var varData = generic as Variable;
-					DragHandleVariable(varData, mPos);
+					DragHandleVariable(varData, mPos, iPOS);
 				}
 				else
 				#endregion
@@ -805,11 +794,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(DragAndDrop.objectReferences.Length == 1) {//Dragging UnityObject
 				var dragObject = DragAndDrop.objectReferences[0];
-				var iPOS = graph.window.GetMousePositionForMenu(topMPos);
 				DragHandleObject(dragObject, mPos, iPOS);
 			}
 			else if(DragAndDrop.objectReferences.Length > 1) {
-				var iPOS = graph.window.GetMousePositionForMenu(topMPos);
 				GenericMenu menu = new GenericMenu();
 				foreach(var o in DragAndDrop.objectReferences) {
 					menu.AddItem(new GUIContent("Get/" + o.name), false, (dOBJ) => {

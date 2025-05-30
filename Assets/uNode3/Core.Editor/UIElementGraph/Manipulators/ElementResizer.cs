@@ -135,15 +135,23 @@ namespace MaxyGames.UNode.Editors {
 				}
 				m_DragStarted = true;
 			}
+			else {
+
+				if(resizedTarget is IElementResizable) {
+					(resizedTarget as IElementResizable).OnResizeUpdate();
+				}
+			}
 
 			if((direction & ResizableElement.Resizer.Right) != 0) {
 				resizedTarget.style.width = Mathf.Min(m_MaxSize.x, Mathf.Max(m_MinSize.x, m_StartSize.x + mousePos.x - m_StartMouse.x));
-			} else if((direction & ResizableElement.Resizer.Left) != 0) {
+			}
+			else if((direction & ResizableElement.Resizer.Left) != 0) {
 				float delta = mousePos.x - m_StartMouse.x;
 
 				if(m_StartSize.x - delta < m_MinSize.x) {
 					delta = -m_MinSize.x + m_StartSize.x;
-				} else if(m_StartSize.x - delta > m_MaxSize.x) {
+				}
+				else if(m_StartSize.x - delta > m_MaxSize.x) {
 					delta = -m_MaxSize.x + m_StartSize.x;
 				}
 

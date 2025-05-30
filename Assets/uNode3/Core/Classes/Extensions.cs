@@ -270,6 +270,56 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// Return the member info if any.
+		/// </summary>
+		/// <param name="variable"></param>
+		/// <returns></returns>
+		public static FieldInfo GetMemberInfo(this Variable variable) {
+			var type = variable.graphContainer.GetGraphType();
+			if(type != null) {
+				var member = type.GetField(variable.name, MemberData.flags);
+				if(member != null && member is IRuntimeMemberWithRef withRef && object.ReferenceEquals(withRef.GetReferenceValue(), variable)) {
+					return member;
+				}
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Return the member info if any.
+		/// </summary>
+		/// <param name="property"></param>
+		/// <returns></returns>
+		public static PropertyInfo GetMemberInfo(this Property property) {
+			var type = property.graphContainer.GetGraphType();
+			if(type != null) {
+				var member = type.GetProperty(property.name, MemberData.flags);
+				if(member != null && member is IRuntimeMemberWithRef withRef && object.ReferenceEquals(withRef.GetReferenceValue(), property)) {
+					return member;
+				}
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Return the member info if any.
+		/// </summary>
+		/// <param name="property"></param>
+		/// <returns></returns>
+		public static MethodInfo GetMemberInfo(this Function function) {
+			var type = function.graphContainer.GetGraphType();
+			if(type != null) {
+				var members = type.GetMethods(MemberData.flags);
+				foreach(var member in members) {
+					if(member != null && member is IRuntimeMemberWithRef withRef && object.ReferenceEquals(withRef.GetReferenceValue(), function)) {
+						return member;
+					}
+				}
+			}
+			return null;
+		}
+
+		/// <summary>
 		/// Get the name of the graph
 		/// </summary>
 		/// <param name="graph"></param>
