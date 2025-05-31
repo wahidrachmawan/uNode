@@ -1148,6 +1148,9 @@ namespace MaxyGames.UNode {
 											continue;
 										break;
 									}
+									if(member.IsExtension) {
+										continue;
+									}
 									if(member.isStatic) {
 										result += member.startName.WrapWithColor(editorColor.typeColor);
 									}

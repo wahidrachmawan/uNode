@@ -65,6 +65,10 @@ namespace MaxyGames.UNode {
 				case MemberData.TargetType.Null:
 					return typeof(TypeIcons.NullTypeIcon);
 				case MemberData.TargetType.Method:
+					if(target.IsExtension) {
+						return typeof(TypeIcons.ExtensionMethodIcon);
+					}
+					return target.startType;
 				case MemberData.TargetType.Field:
 				case MemberData.TargetType.Property:
 				case MemberData.TargetType.Event:

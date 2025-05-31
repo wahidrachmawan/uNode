@@ -685,6 +685,7 @@ namespace MaxyGames.UNode.Editors {
 				customItems = onlySet ? new List<ItemSelector.CustomItem>() : ItemSelector.MakeCustomItems(type, FA, "Data Members", "Data Members ( Inherited )");
 				if(type.IsByRefLike == false) {
 					var usingNamespaces = GetNodeObject().graphContainer.GetUsingNamespaces();
+					FA.Static = true;
 					customItems.AddRange(ItemSelector.MakeExtensionItems(type, usingNamespaces, FA, "Extensions"));
 				}
 

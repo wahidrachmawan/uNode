@@ -765,6 +765,25 @@ namespace MaxyGames.UNode {
 				return Utilities.GetGenericTypes(this);
 			}
 		}
+
+		private bool? m_isExtension;
+		/// <summary>
+		/// Return true if the member is targeting extension method.
+		/// </summary>
+		public bool IsExtension {
+			get {
+				if(m_isExtension == null) {
+					m_isExtension = false;
+					if(isDeepTarget == false && targetType == TargetType.Method) {
+						GetMembers(false);
+						if(methodInfo != null) {
+							m_isExtension = ReflectionUtils.IsExtensionMethod(methodInfo);
+						}
+					}
+				}
+				return m_isExtension.Value;
+			}
+		}
 		#endregion
 
 		#region Constructors
@@ -1046,6 +1065,7 @@ namespace MaxyGames.UNode {
 				targetType == TargetType.Values) {
 				instance = null;
 			}
+			ResetCache();
 		}
 
 		/// <summary>
@@ -1053,7 +1073,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <returns></returns>
 		public MemberInfo[] GetMembers(bool throwOnFail = true) {
-			if(_hasInitializeMembers)
+			if(m_hasInitializeMembers)
 				return memberInfo;
 			switch(targetType) {
 				case TargetType.uNodeVariable: {
@@ -1168,7 +1188,7 @@ namespace MaxyGames.UNode {
 				case TargetType.uNodeFunction: {
 					var function = startItem.GetReferenceValue() as Function;
 					if(function != null) {
-						_hasRefOrOut = function.HasRefOrOut;
+						m_hasRefOrOut = function.HasRefOrOut;
 					}
 					return null;
 				}
@@ -1200,7 +1220,7 @@ namespace MaxyGames.UNode {
 			methodInfo = memberInfo[memberInfo.Length - 1] as MethodInfo;
 			constructorInfo = memberInfo[memberInfo.Length - 1] as ConstructorInfo;
 			eventInfo = memberInfo[memberInfo.Length - 1] as EventInfo;
-			_hasInitializeMembers = true;
+			m_hasInitializeMembers = true;
 			return memberInfo;
 		}
 
@@ -1380,12 +1400,12 @@ namespace MaxyGames.UNode {
 					case TargetType.uNodeGenericParameter:
 						if(Items == null || Items.Length == 0) {
 							if(startTarget is IGenericParameterSystem) {
-								_genericParameterData = new GenericParameterData[1];
+								m_genericParameterData = new GenericParameterData[1];
 								if(name.Contains('[')) {
-									_genericParameterData[0] = (startTarget as IGenericParameterSystem).GetGenericParameter(name.Replace("[]", ""));
+									m_genericParameterData[0] = (startTarget as IGenericParameterSystem).GetGenericParameter(name.Replace("[]", ""));
 								}
 								else {
-									_genericParameterData[0] = (startTarget as IGenericParameterSystem).GetGenericParameter(name);
+									m_genericParameterData[0] = (startTarget as IGenericParameterSystem).GetGenericParameter(name);
 								}
 							}
 						}
@@ -1467,7 +1487,7 @@ namespace MaxyGames.UNode {
 					for(int x = 0; x < paramsLength; x++) {
 						obj[x] = paramValues[(paramValues.Length - paramsLength) + x];
 					}
-					if(_hasRefOrOut) {
+					if(m_hasRefOrOut) {
 						object retVal = methodInfo.InvokeOptimized(reflectionTarget, obj);
 						for(int x = 0; x < paramsLength; x++) {
 							paramValues[(paramValues.Length - paramsLength) + x] = obj[x];
@@ -1487,7 +1507,7 @@ namespace MaxyGames.UNode {
 					for(int x = 0; x < paramsLength; x++) {
 						obj[x] = paramValues[(paramValues.Length - paramsLength) + x];
 					}
-					if(_hasRefOrOut) {
+					if(m_hasRefOrOut) {
 						object retVal = constructorInfo.Invoke(obj);
 						for(int x = 0; x < paramsLength; x++) {
 							paramValues[(paramValues.Length - paramsLength) + x] = obj[x];
@@ -1635,11 +1655,11 @@ namespace MaxyGames.UNode {
 
 						}
 					}
-					if(_genericParameterData != null) {
+					if(m_genericParameterData != null) {
 						//if(type != null && type.IsGenericTypeDefinition) {
 						//	return type.MakeGenericType(_genericParameterData.Select(item => item.value).ToArray());
 						//}
-						if(_genericParameterData.Length == 1 && _genericParameterData[0] != null) {
+						if(m_genericParameterData.Length == 1 && m_genericParameterData[0] != null) {
 							if(name.Contains('[')) {
 								int arrayCount = 0;
 								foreach(var n in name) {
@@ -1647,13 +1667,13 @@ namespace MaxyGames.UNode {
 										arrayCount++;
 									}
 								}
-								Type t = _genericParameterData[0].value;
+								Type t = m_genericParameterData[0].value;
 								for(int i = 0; i < arrayCount; i++) {
 									t = ReflectionUtils.MakeArrayType(t);
 								}
 								return t;
 							}
-							return _genericParameterData[0].value;
+							return m_genericParameterData[0].value;
 						}
 					}
 					return type;
@@ -2033,16 +2053,13 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public void ResetCache() {
 			isReflected = false;
-			_hasRefOrOut = false;
 			fieldInfo = null;
 			propertyInfo = null;
 			constructorInfo = null;
 			eventInfo = null;
 			methodInfo = null;
 			memberInfo = null;
-			_genericParameterData = null;
 			genericData = null;
-			_hasInitializeMembers = false;
 			_type = null;
 			_startType = null;
 			_startTarget = null;
@@ -2050,6 +2067,10 @@ namespace MaxyGames.UNode {
 			_parameterTypes = null;
 			_genericTypes = null;
 			_name = null;
+			m_isExtension = null;
+			m_hasRefOrOut = false;
+			m_genericParameterData = null;
+			m_hasInitializeMembers = false;
 		}
 
 		/// <summary>
@@ -2087,28 +2108,28 @@ namespace MaxyGames.UNode {
 		private string _name;
 
 		[NonSerialized]
-		private bool _hasRefOrOut;
+		private bool m_hasRefOrOut;
 		public bool HasRefOrOut {
 			get {
-				if(_hasInitializeMembers == false) {
+				if(m_hasInitializeMembers == false) {
 					GetMembers(false);
 				}
-				return _hasRefOrOut;
+				return m_hasRefOrOut;
 			}
 			set {
-				_hasRefOrOut = value;
+				m_hasRefOrOut = value;
 			}
 		}
 		[NonSerialized]
 		public TypeData genericData;
 		[NonSerialized]
-		private GenericParameterData[] _genericParameterData;
+		private GenericParameterData[] m_genericParameterData;
 		[NonSerialized]
 		private object _startTarget;
 		[NonSerialized]
 		private string _displayName;
 		[NonSerialized]
-		private bool _hasInitializeMembers;
+		private bool m_hasInitializeMembers;
 		[NonSerialized]
 		private Type _type;
 		[NonSerialized]

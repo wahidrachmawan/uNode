@@ -164,6 +164,9 @@ namespace MaxyGames.UNode {
 		[IconPath("VSIcons/Method_32x")]
 		public class MethodIcon { }
 
+		[IconPath("VSIcons/ExtensionMethod_32x")]
+		public class ExtensionMethodIcon { }
+
 		[IconPath("VSIcons/Void_32x")]
 		public class VoidIcon { }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
+using System.Reflection;
 
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(MultipurposeNode))]
