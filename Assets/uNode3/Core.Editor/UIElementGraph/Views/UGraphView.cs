@@ -170,9 +170,7 @@ namespace MaxyGames.UNode.Editors {
 			};
 			DragHandlerMenu.Instances.ForEach(handler => {
 				if(handler.IsValid(dragData)) {
-					menu.AddItem(new GUIContent(handler.name), false, () => {
-						handler.OnClick(dragData);
-					});
+					menu.AppendMenu(handler.GetMenuItems(dragData));
 				}
 			});
 			menu.ShowAsContext();
@@ -308,9 +306,7 @@ namespace MaxyGames.UNode.Editors {
 			};
 			DragHandlerMenu.Instances.ForEach(handler => {
 				if(handler.IsValid(dragData)) {
-					menu.AddItem(new GUIContent(handler.name), false, () => {
-						handler.OnClick(dragData);
-					});
+					menu.AppendMenu(handler.GetMenuItems(dragData));
 				}
 			});
 
@@ -332,9 +328,7 @@ namespace MaxyGames.UNode.Editors {
 			};
 			DragHandlerMenu.Instances.ForEach(handler => {
 				if(handler.IsValid(dragData)) {
-					menu.AddItem(new GUIContent(handler.name), false, () => {
-						handler.OnClick(dragData);
-					});
+					menu.AppendMenu(handler.GetMenuItems(dragData));
 				}
 			});
 			menu.ShowAsContext();
@@ -355,9 +349,7 @@ namespace MaxyGames.UNode.Editors {
 			};
 			DragHandlerMenu.Instances.ForEach(handler => {
 				if(handler.IsValid(dragData)) {
-					menu.AddItem(new GUIContent(handler.name), false, () => {
-						handler.OnClick(dragData);
-					});
+					menu.AppendMenu(handler.GetMenuItems(dragData));
 				}
 			});
 			menu.ShowAsContext();

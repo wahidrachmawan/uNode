@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using MaxyGames.UNode.Nodes;
+using UnityEngine.UIElements;
+using UnityEditor;
 
 namespace MaxyGames.UNode.Editors {
 	public class DragHandlerData {
@@ -81,19 +83,15 @@ namespace MaxyGames.UNode.Editors {
 	/// </summary>
 	public abstract class DragHandlerMenu {
 		/// <summary>
-		/// The name of the handler
-		/// </summary>
-		public abstract string name { get; }
-		/// <summary>
 		/// The order of the command
 		/// </summary>
 		public virtual int order { get { return 0; } }
 		/// <summary>
-		/// Callback when the command is clicked
+		/// Get the list of menu items
 		/// </summary>
-		/// <param name="source"></param>
-		/// <param name="mousePosition"></param>
-		public abstract void OnClick(DragHandlerData data);
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public abstract IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data);
 		/// <summary>
 		/// Is the handler is valid for execute/show?
 		/// </summary>
@@ -112,19 +110,52 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	#region Menus
-	class DragHandlerMenuForFunction_Invoke : DragHandlerMenu {
-		public override string name => "Invoke";
+	/// <summary>
+	/// Drag handler for single menu item
+	/// </summary>
+	public abstract class DragHandleMenuAction : DragHandlerMenu {
+		public abstract string name { get; }
 
+		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
+			yield return new DropdownMenuAction(name, evt => {
+				OnClick(data);
+			}, DropdownMenuAction.AlwaysEnabled);
+		}
+
+		public abstract void OnClick(DragHandlerData data);
+	}
+
+	#region Menus
+	class DragHandlerMenuForFunction : DragHandlerMenu {
 		public override int order => int.MinValue;
 
-		public override void OnClick(DragHandlerData data) {
+		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, (d.draggedValue as Function).name, null, d.mousePositionOnCanvas, (n) => {
-					n.target = MemberData.CreateFromValue((d.draggedValue as Function));
-				});
-				d.graphEditor.Refresh();
+				var obj = d.draggedValue as Function;
+				yield return new DropdownMenuAction("Invoke", evt => {
+					NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, (n) => {
+						n.target = MemberData.CreateFromValue(obj);
+					});
+					d.graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+
+				if(obj.ReturnType().IsCastableTo(typeof(System.Collections.IEnumerator)) && d.graphData.graph.GetGraphInheritType().IsCastableTo(typeof(MonoBehaviour))) {
+					yield return new DropdownMenuAction("Start Coroutine", evt => {
+						NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (NodeBaseCaller node) {
+							node.target = MemberData.CreateFromMember(typeof(MonoBehaviour).GetMethod(nameof(MonoBehaviour.StartCoroutine), new[] { typeof(System.Collections.IEnumerator) }));
+							node.Register();
+
+							NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, new Vector2(d.mousePositionOnCanvas.x - 200, d.mousePositionOnCanvas.y), (n) => {
+								n.target = MemberData.CreateFromValue(obj);
+
+								node.parameters[0].input.ConnectTo(n.output);
+							});
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
 			}
+			yield break;
 		}
 
 		public override bool IsValid(DragHandlerData data) {
@@ -135,106 +166,74 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	class DragHandlerMenuForFunction_StartCoroutine : DragHandlerMenu {
-		public override string name => "Start Coroutine";
-
+	class DragHandlerMenuForProperty : DragHandlerMenu {
 		public override int order => int.MinValue;
 
-		public override void OnClick(DragHandlerData data) {
-			var obj = (data.draggedValue as Function);
+		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (NodeBaseCaller node) {
-					node.target = MemberData.CreateFromMember(typeof(MonoBehaviour).GetMethod(nameof(MonoBehaviour.StartCoroutine), new[] { typeof(System.Collections.IEnumerator) }));
-					node.Register();
-
-					NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, new Vector2(d.mousePositionOnCanvas.x - 200, d.mousePositionOnCanvas.y), (n) => {
-						n.target = MemberData.CreateFromValue(obj);
-
-						node.parameters[0].input.ConnectTo(n.output);
-					});
-				});
-				d.graphEditor.Refresh();
-			}
-		}
-
-		public override bool IsValid(DragHandlerData data) {
-			if(data is DragHandlerDataForGraphElement d) {
-				if(d.draggedValue is Function function) {
-					return function.ReturnType().IsCastableTo(typeof(System.Collections.IEnumerator)) && d.graphData.graph.GetGraphInheritType().IsCastableTo(typeof(MonoBehaviour));
+				var obj = d.draggedValue as Property;
+				if(obj.CanGetValue()) {
+					yield return new DropdownMenuAction("Get", evt => {
+						NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
+							var mData = MemberData.CreateFromValue(obj);
+							n.target = mData;
+							n.EnsureRegistered();
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
+				if(obj.CanSetValue()) {
+					yield return new DropdownMenuAction("Set", evt => {
+						NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (Nodes.NodeSetValue n) {
+							n.EnsureRegistered();
+							var mData = MemberData.CreateFromValue(obj);
+							n.target.AssignToDefault(mData);
+							if(mData.type != null) {
+								n.value.AssignToDefault(MemberData.Default(mData.type));
+							}
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
 				}
 			}
-			return false;
-		}
-	}
-
-	class DragHandlerMenuForProperty_Get : DragHandlerMenu {
-		public override string name => "Get";
-
-		public override int order => int.MinValue;
-
-		public override void OnClick(DragHandlerData data) {
-			var obj = (data.draggedValue as Property);
-			if(data is DragHandlerDataForGraphElement d) {
-				NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
-					var mData = MemberData.CreateFromValue(obj);
-					n.target = mData;
-					n.EnsureRegistered();
-				});
-				d.graphEditor.Refresh();
-			}
+			yield break;
 		}
 
 		public override bool IsValid(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				return d.draggedValue is Property prop && prop.CanGetValue();
+				return d.draggedValue is Property prop && (prop.CanGetValue() || prop.CanSetValue());
 			}
 			return false;
 		}
 	}
 
-	class DragHandlerMenuForProperty_Set : DragHandlerMenu {
-		public override string name => "Set";
-
+	class DragHandlerMenuForVariable : DragHandlerMenu {
 		public override int order => int.MinValue;
 
-		public override void OnClick(DragHandlerData data) {
-			var obj = (data.draggedValue as Property);
+		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (Nodes.NodeSetValue n) {
-					n.EnsureRegistered();
-					var mData = MemberData.CreateFromValue(obj);
-					n.target.AssignToDefault(mData);
-					if(mData.type != null) {
-						n.value.AssignToDefault(MemberData.Default(mData.type));
-					}
-				});
-				d.graphEditor.Refresh();
+				var obj = d.draggedValue as Variable;
+				yield return new DropdownMenuAction("Get", evt => {
+					NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
+						var mData = MemberData.CreateFromValue(obj);
+						n.target = mData;
+						n.EnsureRegistered();
+					});
+					d.graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+				yield return new DropdownMenuAction("Set", evt => {
+					NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (Nodes.NodeSetValue n) {
+						n.EnsureRegistered();
+						var mData = MemberData.CreateFromValue(obj);
+						n.target.AssignToDefault(mData);
+						if(mData.type != null) {
+							n.value.AssignToDefault(MemberData.Default(mData.type));
+						}
+					});
+					d.graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
 			}
-		}
-
-		public override bool IsValid(DragHandlerData data) {
-			if(data is DragHandlerDataForGraphElement d) {
-				return d.draggedValue is Property prop && prop.CanSetValue();
-			}
-			return false;
-		}
-	}
-
-	class DragHandlerMenuForVariable_Get : DragHandlerMenu {
-		public override string name => "Get";
-
-		public override int order => int.MinValue;
-
-		public override void OnClick(DragHandlerData data) {
-			var obj = (data.draggedValue as Variable);
-			if(data is DragHandlerDataForGraphElement d) {
-				NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
-					var mData = MemberData.CreateFromValue(obj);
-					n.target = mData;
-					n.EnsureRegistered();
-				});
-				d.graphEditor.Refresh();
-			}
+			yield break;
 		}
 
 		public override bool IsValid(DragHandlerData data) {
@@ -245,35 +244,37 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	class DragHandlerMenuForVariable_Set : DragHandlerMenu {
-		public override string name => "Set";
-
+	class DragHandlerMenuForUnityObject : DragHandlerMenu {
 		public override int order => int.MinValue;
 
-		public override void OnClick(DragHandlerData data) {
-			var obj = (data.draggedValue as Variable);
+		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (Nodes.NodeSetValue n) {
-					n.EnsureRegistered();
-					var mData = MemberData.CreateFromValue(obj);
-					n.target.AssignToDefault(mData);
-					if(mData.type != null) {
-						n.value.AssignToDefault(MemberData.Default(mData.type));
-					}
-				});
-				d.graphEditor.Refresh();
+				var obj = d.draggedValue as UnityEngine.Object;
+				if(d.graphData.graph is IGraphWithVariables && obj.GetType() != typeof(MonoScript)) {
+					yield return new DropdownMenuAction("Create variable with type: " + obj.GetType().PrettyName(true), evt => {
+						var variable = d.graphData.graphData.variableContainer.AddVariable("newVariable", obj.GetType());
+						if(uNodeEditorUtility.IsSceneObject(obj) == false) {
+							variable.defaultValue = obj;
+						}
+						NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, (n) => {
+							n.target = MemberData.CreateFromValue(variable);
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
 			}
+			yield break;
 		}
 
 		public override bool IsValid(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				return d.draggedValue is Variable;
+				return d.draggedValue is UnityEngine.Object;
 			}
 			return false;
 		}
 	}
 
-	class DragHandlerMenuFor_CreateDelegate : DragHandlerMenu {
+	class DragHandlerMenuFor_CreateDelegate : DragHandleMenuAction {
 		public override string name => "Create Delegate";
 
 		public override int order => int.MinValue;
@@ -299,7 +300,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	class DragHandlerMenuFor_CreateEvent : DragHandlerMenu {
+	class DragHandlerMenuFor_CreateEvent : DragHandleMenuAction {
 		public override string name => "Create Event Listener";
 
 		public override int order => int.MinValue;
@@ -344,7 +345,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	class DragHandlerMenuFor_CreateEventHook : DragHandlerMenu {
+	class DragHandlerMenuFor_CreateEventHook : DragHandleMenuAction {
 		public override string name => "Create Event Hook";
 
 		public override int order => int.MinValue;
