@@ -250,17 +250,130 @@ namespace MaxyGames.UNode.Editors {
 		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
 				var obj = d.draggedValue as UnityEngine.Object;
-				if(d.graphData.graph is IGraphWithVariables && obj.GetType() != typeof(MonoScript)) {
-					yield return new DropdownMenuAction("Create variable with type: " + obj.GetType().PrettyName(true), evt => {
-						var variable = d.graphData.graphData.variableContainer.AddVariable("newVariable", obj.GetType());
-						if(uNodeEditorUtility.IsSceneObject(obj) == false) {
-							variable.defaultValue = obj;
+
+				IEnumerable<DropdownMenuItem> action(UnityEngine.Object dOBJ, string startName) {
+					yield return new DropdownMenuAction(startName + "Get", evt => {
+						FilterAttribute filter = new FilterAttribute();
+						filter.MaxMethodParam = int.MaxValue;
+						filter.VoidType = true;
+						filter.Public = true;
+						filter.Instance = true;
+						filter.Static = false;
+						filter.DisplayDefaultStaticType = false;
+						var type = dOBJ.GetType();
+						if(dOBJ is IRuntimeClass || dOBJ is IReflectionType || dOBJ is IInstancedGraph) {
+							type = ReflectionUtils.GetRuntimeType(dOBJ);
 						}
-						NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, (n) => {
-							n.target = MemberData.CreateFromValue(variable);
-						});
-						d.graphEditor.Refresh();
+						string category = type.PrettyName();
+						var customItems = ItemSelector.MakeCustomItems(type, filter, category, ItemSelector.CategoryInherited);
+						if(customItems != null) {
+							if(type.IsInterface == false) {
+								customItems.Insert(0, ItemSelector.CustomItem.Create("this", () => {
+									var value = new MemberData(dOBJ, MemberData.TargetType.Values);
+									value.startType = type;
+									NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
+										n.target = MemberData.CreateFromValue(dOBJ);
+									});
+									d.graphEditor.Refresh();
+								}, category));
+							}
+							ItemSelector w = ItemSelector.ShowWindow(dOBJ, filter, delegate (MemberData value) {
+								if(type.IsInterface) {
+									dOBJ = null;//Will make the instance null for graph interface
+								}
+								var mData = new MemberData(dOBJ, MemberData.TargetType.Values);
+								mData.startType = type;
+								value.startType = type;
+								value.instance = mData;
+								NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
+									n.target = value;
+								});
+								d.graphEditor.Refresh();
+							}, customItems).ChangePosition(d.mousePositionOnScreen);
+							w.displayDefaultItem = false;
+						}
 					}, DropdownMenuAction.AlwaysEnabled);
+
+					yield return new DropdownMenuAction(startName + "Set", evt => {
+						FilterAttribute filter = new FilterAttribute();
+						filter.SetMember = true;
+						filter.MaxMethodParam = int.MaxValue;
+						//filter.VoidType = true;
+						filter.Public = true;
+						filter.Instance = true;
+						filter.Static = false;
+						filter.DisplayDefaultStaticType = false;
+						var type = dOBJ.GetType();
+						if(dOBJ is IRuntimeClass || dOBJ is IReflectionType || dOBJ is IInstancedGraph) {
+							type = ReflectionUtils.GetRuntimeType(dOBJ);
+						}
+						var customItems = ItemSelector.MakeCustomItems(type, filter, type.PrettyName(), ItemSelector.CategoryInherited);
+						if(customItems != null) {
+							ItemSelector w = ItemSelector.ShowWindow(dOBJ, filter, delegate (MemberData value) {
+								//if(dOBJ is uNodeInterface) {
+								//	dOBJ = null;//Will make the instance null for graph interface
+								//}
+								value.instance = dOBJ;
+								value.startType = type;
+								NodeEditorUtility.AddNewNode<Nodes.NodeSetValue>(d.graphData, d.mousePositionOnCanvas, (n) => {
+									n.target.AssignToDefault(value);
+								});
+								d.graphEditor.Refresh();
+							}, customItems).ChangePosition(d.mousePositionOnScreen);
+							w.displayDefaultItem = false;
+						}
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
+				{
+					foreach(var menu in action(obj, "")) {
+						yield return menu;
+					}
+				}
+				if(obj is GameObject) {
+					yield return new DropdownMenuSeparator("");
+					foreach(var comp in (obj as GameObject).GetComponents<Component>()) {
+						foreach(var menu in action(comp, comp.GetType().Name + "/")) {
+							yield return menu;
+						}
+					}
+				}
+				else if(obj is Component) {
+					yield return new DropdownMenuSeparator("");
+					foreach(var comp in (obj as Component).GetComponents<Component>()) {
+						if(comp == obj) continue;
+						foreach(var menu in action(comp, comp.GetType().Name + "/")) {
+							yield return menu;
+						}
+					}
+				}
+
+				if(d.graphData.graph is IGraphWithVariables && obj.GetType() != typeof(MonoScript)) {
+					DropdownMenuAction GetMenu(UnityEngine.Object obj, string subMenu) {
+						return new DropdownMenuAction(subMenu + "Create variable with type: " + obj.GetType().PrettyName(true), evt => {
+							var variable = d.graphData.graphData.variableContainer.AddVariable("newVariable", obj.GetType());
+							if(uNodeEditorUtility.IsSceneObject(obj) == false) {
+								variable.defaultValue = obj;
+							}
+							NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, (n) => {
+								n.target = MemberData.CreateFromValue(variable);
+							});
+							d.graphEditor.Refresh();
+						}, DropdownMenuAction.AlwaysEnabled);
+					}
+					yield return GetMenu(obj, "");
+					if(obj is Component comp) {
+						yield return GetMenu(comp.gameObject, typeof(GameObject).Name + "/");
+						foreach(var c in comp.GetComponents<Component>()) {
+							if(c == obj) continue;
+							yield return GetMenu(c, c.GetType().Name + "/");
+						}
+					}
+					else if(obj is GameObject go) {
+						foreach(var c in go.GetComponents<Component>()) {
+							if(c == obj) continue;
+							yield return GetMenu(c, c.GetType().Name + "/");
+						}
+					}
 				}
 			}
 			yield break;
