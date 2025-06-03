@@ -38,8 +38,8 @@ namespace MaxyGames.UNode.Editors {
 					EditorGUI.LabelField(position, new GUIContent(element.GetTitle(), uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FlowIcon))));
 				}, null, null,
 				reorder: (ReorderableList list, int oldIndex, int newIndex) => {
-					var Old = inputFlows[oldIndex];
-					var New = inputFlows[newIndex];
+					var Old = inputFlows[newIndex];
+					var New = inputFlows[newIndex + (oldIndex < newIndex ? -1 : 1)];
 					Old.nodeObject.SetSiblingIndex(New.nodeObject.GetSiblingIndex());
 				});
 
@@ -50,8 +50,8 @@ namespace MaxyGames.UNode.Editors {
 					EditorGUI.LabelField(position, new GUIContent(element.GetTitle(), uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FlowIcon))));
 				}, null, null,
 				reorder: (ReorderableList list, int oldIndex, int newIndex) => {
-					var Old = outputFlows[oldIndex];
-					var New = outputFlows[newIndex];
+					var Old = outputFlows[newIndex];
+					var New = outputFlows[newIndex + (oldIndex < newIndex ? -1 : 1)];
 					Old.nodeObject.SetSiblingIndex(New.nodeObject.GetSiblingIndex());
 				});
 
@@ -68,8 +68,8 @@ namespace MaxyGames.UNode.Editors {
 					}, null, asset);
 				}, null, null,
 				reorder: (ReorderableList list, int oldIndex, int newIndex) => {
-					var Old = inputValues[oldIndex];
-					var New = inputValues[newIndex];
+					var Old = inputValues[newIndex];
+					var New = inputValues[newIndex + (oldIndex < newIndex ? -1 : 1)];
 					Old.nodeObject.SetSiblingIndex(New.nodeObject.GetSiblingIndex());
 				});
 
@@ -86,8 +86,8 @@ namespace MaxyGames.UNode.Editors {
 					}, null, asset);
 				}, null, null,
 				reorder: (ReorderableList list, int oldIndex, int newIndex) => {
-					var Old = outputValues[oldIndex];
-					var New = outputValues[newIndex];
+					var Old = outputValues[newIndex];
+					var New = outputValues[newIndex + (oldIndex < newIndex ? -1 : 1)];
 					Old.nodeObject.SetSiblingIndex(New.nodeObject.GetSiblingIndex());
 				});
 
