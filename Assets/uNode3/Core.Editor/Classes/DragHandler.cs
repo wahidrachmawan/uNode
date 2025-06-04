@@ -410,7 +410,7 @@ namespace MaxyGames.UNode.Editors {
 								}
 							}, DropdownMenuAction.AlwaysEnabled);
 
-							if(d.graphData.currentCanvas is MainGraphContainer && d.graphData.graph is IStateGraph && d.graphData.graph is IReflectionType) {
+							if(d.graphData.currentCanvas is MainGraphContainer && d.graphData.graph is IStateGraph) {
 								yield return new DropdownMenuAction(startName + "Members/" + info.Name + " - Create event listener", evt => {
 									NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (CSharpEventListener node) {
 										node.target = MemberData.CreateFromMember(info);
@@ -535,7 +535,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool IsValid(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				if(d.graphData.currentCanvas is not MainGraphContainer || d.graphData.graph is not IStateGraph || d.graphData.graph is not IReflectionType)
+				if(d.graphData.currentCanvas is not MainGraphContainer || d.graphData.graph is not IStateGraph)
 					return false;
 				if(d.draggedValue is Variable variable) {
 					return variable.type.IsSubclassOf(typeof(System.Delegate));
