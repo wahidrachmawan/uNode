@@ -138,17 +138,17 @@ namespace MaxyGames.UNode.Editors {
 								return;
 							}
 						}
-						if(generic is UnityEngine.Object && uNodeEditorUtility.IsSceneObject(generic as UnityEngine.Object)) {
-							DragAndDrop.visualMode = DragAndDropVisualMode.None;
-							return;
-						}
+						//if(generic is UnityEngine.Object && uNodeEditorUtility.IsSceneObject(generic as UnityEngine.Object)) {
+						//	DragAndDrop.visualMode = DragAndDropVisualMode.None;
+						//	return;
+						//}
 					}
-					else if(DragAndDrop.objectReferences.Length > 0) {
-						if(uNodeEditorUtility.IsSceneObject(DragAndDrop.objectReferences[0])) {
-							DragAndDrop.visualMode = DragAndDropVisualMode.None;
-							return;
-						}
-					}
+					//else if(DragAndDrop.objectReferences.Length > 0) {
+					//	if(uNodeEditorUtility.IsSceneObject(DragAndDrop.objectReferences[0])) {
+					//		DragAndDrop.visualMode = DragAndDropVisualMode.None;
+					//		return;
+					//	}
+					//}
 				}
 				DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
 			}
@@ -189,18 +189,6 @@ namespace MaxyGames.UNode.Editors {
 					return;
 				}
 			}
-			if(!(graphData.graph is IIndependentGraph)) {
-				EditorUtility.DisplayDialog("Error", "The c# graph cannot reference project and scene object.", "Ok");
-				return;
-			}
-			else if(!EditorUtility.IsPersistent(obj) && !uNodeEditorUtility.IsSceneObject(graphData.owner)) {
-				EditorUtility.DisplayDialog("Error", "The project graph cannot reference scene object.", "Ok");
-				return;
-			}
-			else if(graphData.graph.GetGraphType().IsSubclassOf(typeof(UnityEngine.Object)) == false) {
-				EditorUtility.DisplayDialog("Error", "The graph that's not inherited from UnityEngine.Object cannot reference project and scene object.", "Ok");
-				return;
-			}
 			GenericMenu menu = new GenericMenu();
 
 			var dragData = new DragHandlerDataForGraphElement() {
@@ -215,6 +203,21 @@ namespace MaxyGames.UNode.Editors {
 					menu.AppendMenu(handler.GetMenuItems(dragData));
 				}
 			});
+
+			if(menu.GetItemCount() == 0) {
+				if(!(graphData.graph is IIndependentGraph)) {
+					EditorUtility.DisplayDialog("Error", "The c# graph cannot reference project and scene object.", "Ok");
+					return;
+				}
+				else if(!EditorUtility.IsPersistent(obj) && !uNodeEditorUtility.IsSceneObject(graphData.owner)) {
+					EditorUtility.DisplayDialog("Error", "The project graph cannot reference scene object.", "Ok");
+					return;
+				}
+				else if(graphData.graph.GetGraphType().IsSubclassOf(typeof(UnityEngine.Object)) == false) {
+					EditorUtility.DisplayDialog("Error", "The graph that's not inherited from UnityEngine.Object cannot reference project and scene object.", "Ok");
+					return;
+				}
+			}
 
 			menu.ShowAsContext();
 		}

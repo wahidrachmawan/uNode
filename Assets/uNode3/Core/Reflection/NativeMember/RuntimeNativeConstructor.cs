@@ -45,6 +45,9 @@ namespace MaxyGames.UNode {
 				var type = (owner as RuntimeNativeType).GetNativeType();
 				if(type != null) {
 					_nativeMember = type.GetConstructor(MemberData.flags, null, GetParamTypes(), null);
+					if(_nativeMember == null && type.IsValueType && GetParamTypes().Length == 0) {
+						_nativeMember = ReflectionUtils.GetDefaultConstructor(type);
+					}
 				}
 			}
 			return _nativeMember;
@@ -55,17 +58,17 @@ namespace MaxyGames.UNode {
 		}
 
 		public override object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
-			var type = GetNativeConstructor();
-			if(type == null)
+			var ctor = GetNativeConstructor();
+			if(ctor == null)
 				throw throwIfNotCompile;
-			return type.Invoke(invokeAttr, binder, parameters, culture);
+			return ctor.Invoke(invokeAttr, binder, parameters, culture);
 		}
 
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture) {
-			var type = GetNativeConstructor();
-			if(type == null)
+			var ctor = GetNativeConstructor();
+			if(ctor == null)
 				throw throwIfNotCompile;
-			return type.Invoke(obj, invokeAttr, binder, parameters, culture);
+			return ctor.Invoke(obj, invokeAttr, binder, parameters, culture);
 		}
 	}
 

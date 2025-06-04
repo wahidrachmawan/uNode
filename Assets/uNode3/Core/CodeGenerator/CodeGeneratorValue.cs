@@ -178,16 +178,17 @@ namespace MaxyGames {
 						int firstIndex = lastStr.IndexOf("\"");
 						string vName = lastStr.Substring(firstIndex, lastStr.LastIndexOf("\"") - firstIndex + 1);
 						if(code != '=') {
-							strs[strs.Count - 1] = DoGenerateInvokeCode(setCode, new string[] { vName, set, code.CGValue() }).AddSemicolon();
+							strs[strs.Count - 1] = DoGenerateInvokeCode(setCode, new string[] { vName, set, code.CGValue() });
 						} else {
-							strs[strs.Count - 1] = DoGenerateInvokeCode(setCode, new string[] { vName, set }).AddSemicolon();
+							strs[strs.Count - 1] = DoGenerateInvokeCode(setCode, new string[] { vName, set });
 						}
 					}
 					result = string.Join(".", strs);
-					if(debugScript && setting.debugValueNode && firstVal is ValueInput) {
-						return Debug(firstVal as ValueInput, result, true).AddSemicolon().AddLineInFirst();
-					}
-					return result;
+					//TODO: add support for debugging set value
+					//if(debugScript && setting.debugValueNode && firstVal is ValueInput) {
+					//	return Debug(firstVal as ValueInput, result, true).AddSemicolon().AddLineInFirst();
+					//}
+					return result.AddSemicolon();
 				}
 			}
 			switch(setType) {

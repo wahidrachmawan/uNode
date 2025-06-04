@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using MaxyGames.UNode.Nodes;
 using UnityEngine.UIElements;
 using UnityEditor;
+using System.Linq;
+using System.Reflection;
+using UnityEngine.Events;
 
 namespace MaxyGames.UNode.Editors {
 	public class DragHandlerData {
@@ -251,7 +254,20 @@ namespace MaxyGames.UNode.Editors {
 			if(data is DragHandlerDataForGraphElement d) {
 				var obj = d.draggedValue as UnityEngine.Object;
 
-				IEnumerable<DropdownMenuItem> action(UnityEngine.Object dOBJ, string startName) {
+				bool valid = true;
+				if(uNodeEditorUtility.IsSceneObject(obj)) {
+					if(!(d.graphData.graph is IIndependentGraph)) {
+						valid = false;
+					}
+					else if(!EditorUtility.IsPersistent(obj) && !uNodeEditorUtility.IsSceneObject(d.graphData.owner)) {
+						valid = false;
+					}
+					else if(d.graphData.graph.GetGraphType().IsSubclassOf(typeof(UnityEngine.Object)) == false) {
+						valid = false;
+					}
+				}
+
+				IEnumerable<DropdownMenuItem> action(UnityEngine.Object obj, string startName) {
 					yield return new DropdownMenuAction(startName + "Get", evt => {
 						FilterAttribute filter = new FilterAttribute();
 						filter.MaxMethodParam = int.MaxValue;
@@ -260,32 +276,35 @@ namespace MaxyGames.UNode.Editors {
 						filter.Instance = true;
 						filter.Static = false;
 						filter.DisplayDefaultStaticType = false;
-						var type = dOBJ.GetType();
-						if(dOBJ is IRuntimeClass || dOBJ is IReflectionType || dOBJ is IInstancedGraph) {
-							type = ReflectionUtils.GetRuntimeType(dOBJ);
+						var type = obj.GetType();
+						if(obj is IRuntimeClass || obj is IReflectionType || obj is IInstancedGraph) {
+							type = ReflectionUtils.GetRuntimeType(obj);
 						}
 						string category = type.PrettyName();
 						var customItems = ItemSelector.MakeCustomItems(type, filter, category, ItemSelector.CategoryInherited);
 						if(customItems != null) {
-							if(type.IsInterface == false) {
+							if(type.IsInterface == false && valid) {
 								customItems.Insert(0, ItemSelector.CustomItem.Create("this", () => {
-									var value = new MemberData(dOBJ, MemberData.TargetType.Values);
+									var value = new MemberData(obj, MemberData.TargetType.Values);
 									value.startType = type;
 									NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
-										n.target = MemberData.CreateFromValue(dOBJ);
+										n.target = MemberData.CreateFromValue(obj);
 									});
 									d.graphEditor.Refresh();
 								}, category));
 							}
-							ItemSelector w = ItemSelector.ShowWindow(dOBJ, filter, delegate (MemberData value) {
-								if(type.IsInterface) {
-									dOBJ = null;//Will make the instance null for graph interface
+							ItemSelector w = ItemSelector.ShowWindow(obj, filter, delegate (MemberData value) {
+								if(!valid) {
+									ShowInvalidReference(obj, d.graphData);
 								}
-								var mData = new MemberData(dOBJ, MemberData.TargetType.Values);
+								if(type.IsInterface || !valid) {
+									obj = null;
+								}
+								var mData = new MemberData(obj, MemberData.TargetType.Values);
 								mData.startType = type;
 								value.startType = type;
 								value.instance = mData;
-								NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
+								NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode n) {
 									n.target = value;
 								});
 								d.graphEditor.Refresh();
@@ -303,26 +322,111 @@ namespace MaxyGames.UNode.Editors {
 						filter.Instance = true;
 						filter.Static = false;
 						filter.DisplayDefaultStaticType = false;
-						var type = dOBJ.GetType();
-						if(dOBJ is IRuntimeClass || dOBJ is IReflectionType || dOBJ is IInstancedGraph) {
-							type = ReflectionUtils.GetRuntimeType(dOBJ);
+						var type = obj.GetType();
+						if(obj is IRuntimeClass || obj is IReflectionType || obj is IInstancedGraph) {
+							type = ReflectionUtils.GetRuntimeType(obj);
 						}
 						var customItems = ItemSelector.MakeCustomItems(type, filter, type.PrettyName(), ItemSelector.CategoryInherited);
 						if(customItems != null) {
-							ItemSelector w = ItemSelector.ShowWindow(dOBJ, filter, delegate (MemberData value) {
-								//if(dOBJ is uNodeInterface) {
-								//	dOBJ = null;//Will make the instance null for graph interface
-								//}
-								value.instance = dOBJ;
+							ItemSelector w = ItemSelector.ShowWindow(obj, filter, delegate (MemberData value) {
+								if(!valid) {
+									ShowInvalidReference(obj, d.graphData);
+								}
+								if(type.IsInterface || !valid) {
+									obj = null;
+								}
+								value.instance = obj;
 								value.startType = type;
-								NodeEditorUtility.AddNewNode<Nodes.NodeSetValue>(d.graphData, d.mousePositionOnCanvas, (n) => {
-									n.target.AssignToDefault(value);
+								NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode mNode) {
+									mNode.target = value;
+									mNode.Register();
+									NodeEditorUtility.AddNewNode<Nodes.NodeSetValue>(d.graphData, d.mousePositionOnCanvas, (n) => {
+										n.target.AssignToDefault(mNode.output);
+									});
 								});
 								d.graphEditor.Refresh();
 							}, customItems).ChangePosition(d.mousePositionOnScreen);
 							w.displayDefaultItem = false;
 						}
 					}, DropdownMenuAction.AlwaysEnabled);
+
+					if(d.graphData.graph is IGraphWithVariables && obj.GetType() != typeof(MonoScript)) {
+						yield return new DropdownMenuAction(startName + "Create variable with type: " + obj.GetType().PrettyName(true), evt => {
+							var variable = d.graphData.graphData.variableContainer.AddVariable("newVariable", obj.GetType());
+							if(valid) {
+								variable.defaultValue = obj;
+							}
+							NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, d.mousePositionOnCanvas, (n) => {
+								n.target = MemberData.CreateFromValue(variable);
+							});
+							d.graphEditor.Refresh();
+							if(!valid) {
+								ShowInvalidReference(obj, d.graphData);
+							}
+						}, DropdownMenuAction.AlwaysEnabled);
+					}
+
+					var members = obj.GetType().GetMembers().Where(m => m.MemberType.HasFlags(MemberTypes.Field | MemberTypes.Event | MemberTypes.Property) && ReflectionUtils.CanGetMember(m));
+
+					foreach(var m in members) {
+						var info = m;
+						var mType = ReflectionUtils.GetMemberType(m);
+						if(mType.IsSubclassOf(typeof(System.Delegate)) || mType.IsCastableTo(typeof(UnityEventBase))) {
+							yield return new DropdownMenuAction(startName + "Members/" + info.Name + " - Create callback", evt => {
+								NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (MultipurposeNode mNode) {
+									mNode.target = MemberData.CreateFromMember(info);
+									mNode.Register();
+									if(mType.IsSubclassOf(typeof(System.Delegate))) {
+										NodeEditorUtility.AddNewNode<Nodes.NodeSetValue>(d.graphData, d.mousePositionOnCanvas + new Vector2(100, 0), (n) => {
+											n.setType = SetType.Add;
+											n.target.AssignToDefault(mNode.output);
+											NodeEditorUtility.AddNewNode<Nodes.NodeLambda>(d.graphData, d.mousePositionOnCanvas + new Vector2(0, 100), (lambda) => {
+												lambda.delegateType = mType;
+												lambda.Register();
+												lambda.output.ConnectTo(n.value);
+											});
+										});
+									}
+									else if(mType.IsCastableTo(typeof(UnityEventBase))) {
+										var listener = mType.GetMethod(nameof(UnityEvent.AddListener));
+										if(listener != null) {
+											var dType = listener.GetParameters()[0].ParameterType;
+											NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, d.mousePositionOnCanvas + new Vector2(100, 0), (n) => {
+												n.target = MemberData.CreateFromMember(listener);
+												n.Register();
+												n.instance.ConnectTo(mNode.output);
+												NodeEditorUtility.AddNewNode<Nodes.NodeLambda>(d.graphData, d.mousePositionOnCanvas + new Vector2(0, 100), (lambda) => {
+													lambda.delegateType = mType;
+													lambda.Register();
+													lambda.output.ConnectTo(n.parameters[0].input);
+												});
+											});
+										}
+									}
+								});
+								d.graphEditor.Refresh();
+								if(!valid) {
+									ShowInvalidReference(obj, d.graphData);
+								}
+							}, DropdownMenuAction.AlwaysEnabled);
+
+							if(d.graphData.currentCanvas is MainGraphContainer && d.graphData.graph is IStateGraph && d.graphData.graph is IReflectionType) {
+								yield return new DropdownMenuAction(startName + "Members/" + info.Name + " - Create event listener", evt => {
+									NodeEditorUtility.AddNewNode(d.graphData, d.mousePositionOnCanvas, delegate (CSharpEventListener node) {
+										node.target = MemberData.CreateFromMember(info);
+										node.Register();
+										if(valid) {
+											node.instance.AssignToDefault(MemberData.CreateFromValue(obj));
+										}
+									});
+									d.graphEditor.Refresh();
+									if(!valid) {
+										ShowInvalidReference(obj, d.graphData);
+									}
+								}, DropdownMenuAction.AlwaysEnabled);
+							}
+						}
+					}
 				}
 				{
 					foreach(var menu in action(obj, "")) {
@@ -346,35 +450,6 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-
-				if(d.graphData.graph is IGraphWithVariables && obj.GetType() != typeof(MonoScript)) {
-					DropdownMenuAction GetMenu(UnityEngine.Object obj, string subMenu) {
-						return new DropdownMenuAction(subMenu + "Create variable with type: " + obj.GetType().PrettyName(true), evt => {
-							var variable = d.graphData.graphData.variableContainer.AddVariable("newVariable", obj.GetType());
-							if(uNodeEditorUtility.IsSceneObject(obj) == false) {
-								variable.defaultValue = obj;
-							}
-							NodeEditorUtility.AddNewNode<MultipurposeNode>(d.graphData, obj.name, null, d.mousePositionOnCanvas, (n) => {
-								n.target = MemberData.CreateFromValue(variable);
-							});
-							d.graphEditor.Refresh();
-						}, DropdownMenuAction.AlwaysEnabled);
-					}
-					yield return GetMenu(obj, "");
-					if(obj is Component comp) {
-						yield return GetMenu(comp.gameObject, typeof(GameObject).Name + "/");
-						foreach(var c in comp.GetComponents<Component>()) {
-							if(c == obj) continue;
-							yield return GetMenu(c, c.GetType().Name + "/");
-						}
-					}
-					else if(obj is GameObject go) {
-						foreach(var c in go.GetComponents<Component>()) {
-							if(c == obj) continue;
-							yield return GetMenu(c, c.GetType().Name + "/");
-						}
-					}
-				}
 			}
 			yield break;
 		}
@@ -384,6 +459,21 @@ namespace MaxyGames.UNode.Editors {
 				return d.draggedValue is UnityEngine.Object;
 			}
 			return false;
+		}
+
+		void ShowInvalidReference(UnityEngine.Object obj, GraphEditorData graphData) {
+			if(!(graphData.graph is IIndependentGraph)) {
+				EditorUtility.DisplayDialog("", "The c# graph cannot reference project and scene object, the reference will be null.", "Ok");
+				return;
+			}
+			else if(!EditorUtility.IsPersistent(obj) && !uNodeEditorUtility.IsSceneObject(graphData.owner)) {
+				EditorUtility.DisplayDialog("", "The project graph cannot reference scene object, the reference will be null.", "Ok");
+				return;
+			}
+			else if(graphData.graph.GetGraphType().IsSubclassOf(typeof(UnityEngine.Object)) == false) {
+				EditorUtility.DisplayDialog("", "The graph that's not inherited from UnityEngine.Object cannot reference project and scene object, the reference will be null.", "Ok");
+				return;
+			}
 		}
 	}
 

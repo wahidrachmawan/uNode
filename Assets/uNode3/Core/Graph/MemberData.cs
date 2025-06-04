@@ -1518,7 +1518,7 @@ namespace MaxyGames.UNode {
 				}
 				else {
 					if((paramValues == null || paramValues.Length == 0) && constructorInfo.DeclaringType.IsValueType) {
-						return Activator.CreateInstance(constructorInfo.DeclaringType);
+						return constructorInfo.Invoke(Array.Empty<object>());
 					}
 					return constructorInfo.Invoke(paramValues);
 				}
