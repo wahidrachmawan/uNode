@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.1.5
+- Added more drag & drop menu items
+- Improved Code Generation
+- Improved Editor
+- Fixed some bugs
+
 ## v3.1.4
 - Added more option to configure sticky note style
 - Added setting for default access modifier for new property by @Miftachul-Huda
