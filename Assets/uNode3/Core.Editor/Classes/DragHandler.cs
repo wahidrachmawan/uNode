@@ -352,7 +352,16 @@ namespace MaxyGames.UNode.Editors {
 
 					if(d.graphData.graph is IGraphWithVariables && obj.GetType() != typeof(MonoScript)) {
 						yield return new DropdownMenuAction(startName + "Create variable with type: " + obj.GetType().PrettyName(true), evt => {
-							var variable = d.graphData.graphData.variableContainer.AddVariable("newVariable", obj.GetType());
+							string name = "newVariable";
+							if(obj is GameObject gameObject) {
+								name = uNodeUtility.AutoCorrectName(gameObject.name);
+							}
+							else if(obj is Component component) {
+								name = uNodeUtility.AutoCorrectName(component.gameObject.name);
+							}
+							if(name.Length > 1)
+								name = char.ToLower(name[0]) + name.Substring(1);
+							var variable = d.graphData.graphData.variableContainer.AddVariable(name, obj.GetType());
 							if(valid) {
 								variable.defaultValue = obj;
 							}
