@@ -464,7 +464,7 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		protected NodeObject entryObject;
 
-		public virtual Nodes.FunctionEntryNode Entry {
+		public virtual BaseEntryNode Entry {
 			get {
 				if(this == null) return null;
 				if(entryObject == null || entryObject.node is not Nodes.FunctionEntryNode) {
@@ -474,11 +474,11 @@ namespace MaxyGames.UNode {
 						entryObject.EnsureRegistered();
 					}
 				}
-				return entryObject.node as Nodes.FunctionEntryNode;
+				return entryObject.node as BaseEntryNode;
 			}
 		}
 
-		public virtual void RegisterEntry(Nodes.FunctionEntryNode node) { }
+		public virtual void RegisterEntry(BaseEntryNode node) { }
 	}
 
 	public sealed class VariableContainer : URoot<Variable> {
@@ -544,6 +544,8 @@ namespace MaxyGames.UNode {
 			base.OnChildrenChanged();
 		}
 	}
+
+	public sealed class EventGraphContainer : URoot<NodeContainer> { }
 
 	public sealed class MainGraphContainer : NodeContainer, IPrettyName, IIcon {
 		public const string StateGraph = "State Graph";

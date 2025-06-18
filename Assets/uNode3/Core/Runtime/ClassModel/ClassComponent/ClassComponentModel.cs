@@ -14,5 +14,10 @@ namespace MaxyGames.UNode {
 		public override Type ScriptInheritType => typeof(RuntimeBehaviour);
 
 		public override Type ProxyScriptType => typeof(BaseRuntimeBehaviour);
+
+		private static readonly HashSet<string> m_supportedEventGraph = new() {
+			"StateMachine",
+		};
+		public override HashSet<string> SupportedEventGraphs => m_supportedEventGraph;
 	}
 }

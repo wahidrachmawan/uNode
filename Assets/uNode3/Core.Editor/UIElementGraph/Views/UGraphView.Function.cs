@@ -32,7 +32,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void Initialize(UIElementGraph graph) {
-			this.graph = graph;
+			this.graphEditor = graph;
 
 			ToggleMinimap(UIElementUtility.Theme.enableMinimap);
 			ToogleGrid(uNodePreference.GetPreference().showGrid);
@@ -60,7 +60,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			var nodes = graph.graphData.nodes.ToArray();
+			var nodes = graphEditor.graphData.nodes.ToArray();
 			float count = nodes.Length;
 			float currentCount = 0;
 			foreach(var node in nodes) {
@@ -223,7 +223,7 @@ namespace MaxyGames.UNode.Editors {
 					requiredReload = false;
 					autoHideNodes = false;
 					AutoHideGraphElement.ResetVisibility(this);
-					float currentZoom = graph.zoomScale;
+					float currentZoom = graphEditor.zoomScale;
 					SetZoomScale(1, true);
 					contentViewContainer.SetOpacity(0);
 					DisplayProgressBar("Loading graph", "", 0);

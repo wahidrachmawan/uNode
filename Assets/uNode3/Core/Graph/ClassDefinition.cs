@@ -22,6 +22,10 @@ namespace MaxyGames.UNode {
 		/// The base proxy type for generated c# script.
 		/// </summary>
 		public abstract Type ProxyScriptType { get; }
+		/// <summary>
+		/// The supported event graphs
+		/// </summary>
+		public virtual HashSet<string> SupportedEventGraphs => null;
 
 		public virtual object CreateInstance(string graphUID) => null;
 		public virtual object CreateWrapperInstance(string graphUID) => null;
@@ -36,6 +40,8 @@ namespace MaxyGames.UNode {
 		public override Type InheritType => inheritFrom?.ReflectionType ?? typeof(object);
 
 		public override Type ScriptInheritType => InheritType;
+
+		public override HashSet<string> SupportedEventGraphs => inheritFrom?.SupportedEventGraphs;
 
 		public override Type ProxyScriptType {
 			get {
@@ -58,7 +64,7 @@ namespace MaxyGames.UNode {
 		allowAutoCompile = true,
 		isScriptGraph = false,
 		generationKind = GenerationKind.Performance)]
-	public class ClassDefinition : GraphAsset, IClassDefinition, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IStateGraph, IIndependentGraph, IClassIdentifier, IReflectionType, IInterfaceSystem {
+	public class ClassDefinition : GraphAsset, IClassDefinition, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IStateGraph, IIndependentGraph, IClassIdentifier, IReflectionType, IInterfaceSystem, IGraphWithEventGraph {
 		public string @namespace;
 		public List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections", "System.Collections.Generic" };
 
@@ -138,6 +144,8 @@ namespace MaxyGames.UNode {
 		}
 
 		List<SerializedType> IInterfaceSystem.Interfaces => interfaces;
+
+		public HashSet<string> SupportedEventGraphs => GetModel().SupportedEventGraphs;
 		#endregion
 
 		private void OnValidate() {

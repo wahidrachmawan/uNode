@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode {
 	public abstract class BaseFunction : NodeContainerWithEntry, IParameterSystem, ILocalVariableSystem, IGeneratorPrePostInitializer {
@@ -33,9 +34,11 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public new FunctionEntryNode Entry => entryObject?.node as FunctionEntryNode ?? base.Entry as FunctionEntryNode;
+
 		public abstract Type ReturnType();
 
-		public override void RegisterEntry(Nodes.FunctionEntryNode node) {
+		public override void RegisterEntry(BaseEntryNode node) {
 			for(int i = 0; i < parameters.Count; i++) {
 				var param = parameters[i];
 				var port = Node.Utilities.ValueOutput(node, param.id, () => param.Type, PortAccessibility.ReadWrite).SetName(param.name);

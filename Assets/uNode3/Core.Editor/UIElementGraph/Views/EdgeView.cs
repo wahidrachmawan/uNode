@@ -55,7 +55,7 @@ namespace MaxyGames.UNode.Editors {
 						if(e.button == 0 && e.clickCount == 2) {
 							var owner = data.input?.owner?.owner ?? data.output?.owner?.owner;
 							if(owner != null) {
-								var graph = owner.graph;
+								var graph = owner.graphEditor;
 								var mPos = this.ChangeCoordinatesTo(owner.contentViewContainer, e.localMousePosition);
 								Undo.SetCurrentGroupName("Create Reroute");
 								NodeEditorUtility.AddNewNode<Nodes.NodeReroute>(graph.graphData, null, null, new Vector2(mPos.x, mPos.y), (node) => {
@@ -166,7 +166,7 @@ namespace MaxyGames.UNode.Editors {
 			if(Application.isPlaying && GraphDebug.useDebug) {
 				PortView port = input as PortView ?? output as PortView;
 				if(port != null && edgeControl.controlPoints != null && edgeControl.controlPoints.Length == 4) {
-					GraphDebug.DebugData debugData = port.owner.owner.graph.GetDebugInfo();
+					GraphDebug.DebugData debugData = port.owner.owner.graphEditor.GetDebugInfo();
 					if(debugData != null) {
 						//This to make sure to the UI is always repaint.
 						iMGUIContainer.MarkDirtyRepaint();

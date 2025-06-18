@@ -64,9 +64,9 @@ namespace MaxyGames.UNode.Editors {
 			if(nodeObject.node is ISuperNode) {
 				titleContainer.RegisterCallback<MouseDownEvent>(e => {
 					if(e.button == 0 && e.clickCount == 2) {
-						owner.graph.graphData.currentCanvas = targetNode.nodeObject;
-						owner.graph.Refresh();
-						owner.graph.UpdatePosition();
+						owner.graphEditor.graphData.currentCanvas = targetNode.nodeObject;
+						owner.graphEditor.Refresh();
+						owner.graphEditor.UpdatePosition();
 					}
 				});
 			}
@@ -139,7 +139,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(Application.isPlaying && primaryInputFlow != null) {
 				this.RegisterRepaintAction(() => {
-					var debugData = owner.graph.GetDebugInfo();
+					var debugData = owner.graphEditor.GetDebugInfo();
 					if(debugData != null) {
 						var nodeDebug = debugData.GetDebugValue(primaryInputFlow.GetPortValue<FlowInput>());
 						if(nodeDebug != null) {

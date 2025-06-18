@@ -51,7 +51,7 @@ namespace MaxyGames.UNode.Editors {
 			RegisterCallback<MouseDownEvent>((e) => {
 				if(e.button == 0) {
 					nodes = new List<NodeObject>();
-					foreach(var n in owner.graph.nodes) {
+					foreach(var n in owner.graphEditor.nodes) {
 						if(n == null) continue;
 						nodes.Add(n);
 						if(n.node is Nodes.StateNode state) {

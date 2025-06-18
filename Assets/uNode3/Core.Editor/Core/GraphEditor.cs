@@ -779,6 +779,37 @@ namespace MaxyGames.UNode.Editors {
 			}
 			Refresh();
 		}
+
+		public virtual void CreateLinkedMacro(MacroGraph macro, Vector2 position) {
+			NodeEditorUtility.AddNewNode<Nodes.LinkedMacroNode>(graphData, null, null, position, (node) => {
+				node.macroAsset = macro;
+				node.Refresh();
+				node.Register();
+				NodeEditorUtility.AutoAssignNodePorts(node);
+			});
+			Refresh();
+		}
+
+		public virtual void SelectionAddRegion(Vector2 position) {
+			var nodes = graphData.selectedNodes.ToArray();
+			Rect rect;
+			if(nodes.Length > 0) {
+				rect = NodeEditorUtility.GetNodeRect(nodes);
+			}
+			else {
+				rect = new Rect(position.x, position.y, 200, 130);
+			}
+			uNodeEditorUtility.RegisterUndo(graphData.owner, "Create region");
+			NodeEditorUtility.AddNewNode<Nodes.NodeRegion>(graphData, default, (node) => {
+				rect.x -= 30;
+				rect.y -= 50;
+				rect.width += 60;
+				rect.height += 70;
+				node.position = rect;
+				node.nodeColor = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+			});
+			Refresh();
+		}
 		#endregion
 
 		#region Shortcut

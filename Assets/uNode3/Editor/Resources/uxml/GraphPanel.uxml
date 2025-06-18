@@ -35,6 +35,18 @@
     </ui:VisualElement>
   </ui:VisualElement>
 
+  <ui:VisualElement name="graph" class="header">
+    <ui:VisualElement name="title" style="flex-direction: row;">
+      <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />
+      <ui:Image name="title-icon" class="unity-image" />
+      <ui:Label name="title-label" class="unity-text-element unity-label" text="Graphs"/>
+    </ui:VisualElement>
+
+    <ui:VisualElement name="contents">
+
+    </ui:VisualElement>
+  </ui:VisualElement>
+
   <ui:VisualElement name="function" class="header">
     <ui:VisualElement name="title" style="flex-direction: row;">
       <ui:Foldout name="expanded" class="unity-foldout unity-foldout--depth-0" />

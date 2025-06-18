@@ -78,7 +78,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public UIElementGraph graph {
 			get {
-				return owner.graph;
+				return owner.graphEditor;
 			}
 		}
 
@@ -553,9 +553,9 @@ namespace MaxyGames.UNode.Editors {
 		public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
 			if(nodeObject.node is ISuperNode) {
 				evt.menu.AppendAction("Open...", (e) => {
-					owner.graph.graphData.currentCanvas = targetNode.nodeObject;
-					owner.graph.Refresh();
-					owner.graph.UpdatePosition();
+					owner.graphEditor.graphData.currentCanvas = targetNode.nodeObject;
+					owner.graphEditor.Refresh();
+					owner.graphEditor.UpdatePosition();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 		}

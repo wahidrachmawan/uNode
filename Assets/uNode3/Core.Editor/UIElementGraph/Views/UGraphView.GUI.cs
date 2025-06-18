@@ -34,7 +34,7 @@ namespace MaxyGames.UNode.Editors {
 		public void UpdatePosition() {
 			//UpdateViewTransform(graphData.position * -graph.zoomScale, new Vector3(graph.zoomScale, graph.zoomScale, 1));
 			UpdateViewTransform(graphData.position * -1, new Vector3(1, 1, 1));
-			SetZoomScale(graph.zoomScale);
+			SetZoomScale(graphEditor.zoomScale);
 		}
 
 		public void UpdatePosition(Vector2 position) {
@@ -64,7 +64,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="zoomScale"></param>
 		public void SetZoomScale(float zoomScale) {
-			if(scale != zoomScale && graph != null) {
+			if(scale != zoomScale && graphEditor != null) {
 				UpdatePosition(graphData.position, zoomScale);
 			}
 		}
@@ -75,7 +75,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="zoomScale"></param>
 		/// <param name="cachedPixel"></param>
 		public void SetZoomScale(float zoomScale, bool cachedPixel) {
-			if(scale != zoomScale && graph != null) {
+			if(scale != zoomScale && graphEditor != null) {
 				UpdatePosition(graphData.position, zoomScale);
 			}
 			SetPixelCachedOnBoundChanged(cachedPixel);
@@ -118,10 +118,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public Vector2 GetTopMousePosition(Vector2 mPos) {
-			var screenRect = graph.window.GetMousePositionForMenu(mPos);
-			Vector2 position = graph.window.rootVisualElement.ChangeCoordinatesTo(
-				graph.window.rootVisualElement.parent,
-				screenRect - graph.window.position.position);
+			var screenRect = graphEditor.window.GetMousePositionForMenu(mPos);
+			Vector2 position = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+				graphEditor.window.rootVisualElement.parent,
+				screenRect - graphEditor.window.position.position);
 			return position;
 		}
 
@@ -140,19 +140,19 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public Vector2 GetTopMousePosition(IMouseEvent evt) {
-			var screenRect = graph.window.GetMousePositionForMenu(evt.mousePosition);
-			Vector2 position = graph.window.rootVisualElement.ChangeCoordinatesTo(
-				graph.window.rootVisualElement.parent,
-				screenRect - graph.window.position.position);
+			var screenRect = graphEditor.window.GetMousePositionForMenu(evt.mousePosition);
+			Vector2 position = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+				graphEditor.window.rootVisualElement.parent,
+				screenRect - graphEditor.window.position.position);
 			return position;
 		}
 
 		public Vector2 GetScreenMousePosition(IMouseEvent evt) {
-			return graph.window.GetMousePositionForMenu(evt.mousePosition);
+			return graphEditor.window.GetMousePositionForMenu(evt.mousePosition);
 		}
 
 		public Vector2 GetScreenMousePosition(Vector2 mousePosition) {
-			return graph.window.GetMousePositionForMenu(mousePosition);
+			return graphEditor.window.GetMousePositionForMenu(mousePosition);
 		}
 
 		public Vector2 GetMousePosition(IMouseEvent evt) {
@@ -307,7 +307,7 @@ namespace MaxyGames.UNode.Editors {
 						if(!con.isProxy && con is ValueConnection valueConnection) {
 							if(outPort.GetGlobalCenter().x > inPort.GetGlobalCenter().x) {
 								var inPortPosition = inPort.ChangeCoordinatesTo(this.contentViewContainer, Vector2.zero);
-								NodeEditorUtility.AddNewNode(graph.graphData,
+								NodeEditorUtility.AddNewNode(graphEditor.graphData,
 									new Vector2(
 										inPortPosition.x - 100,
 										inPortPosition.y),
@@ -984,11 +984,11 @@ namespace MaxyGames.UNode.Editors {
 			window.rootVisualElement.Add(blockElement);
 
 			Vector2 offset = new Vector2(2, 2);//The offset from position to capture
-			Vector2 position = graph.window.rootVisualElement.ChangeCoordinatesTo(
-				graph.window.rootVisualElement.parent,
-				graph.window.position.position);
+			Vector2 position = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+				graphEditor.window.rootVisualElement.parent,
+				graphEditor.window.position.position);
 			position.x += worldBound.x;
-			position.y += worldBound.y - graph.window.rootVisualElement.layout.y;
+			position.y += worldBound.y - graphEditor.window.rootVisualElement.layout.y;
 			position += offset;
 			SetZoomScale(zoomScale, true);
 			int layoutWidth = (int)layout.width - 10;
@@ -1010,7 +1010,7 @@ namespace MaxyGames.UNode.Editors {
 			if(miniMap != null)
 				miniMap.SetDisplay(false);
 			uNodeThreadUtility.CreateThread(() => {
-				graph.loadingProgress = 1;
+				graphEditor.loadingProgress = 1;
 				autoHideNodes = false;
 				uNodeThreadUtility.WaitFrame(100);
 				SetPixelCachedOnBoundChanged(false);
@@ -1033,7 +1033,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 						currentCount++;
 						progress = currentCount / (yCount * xCount);
-						graph.loadingProgress = progress;
+						graphEditor.loadingProgress = progress;
 						//GC.KeepAlive(textures);
 					}
 				}
@@ -1059,7 +1059,7 @@ namespace MaxyGames.UNode.Editors {
 						miniMap.SetDisplay(true);
 					SetZoomScale(1, false);
 					blockElement.RemoveFromHierarchy();
-					graph.loadingProgress = 0;
+					graphEditor.loadingProgress = 0;
 
 					string path = EditorUtility.SaveFilePanel("Save Screenshot", "", "Capture", "png");
 					File.WriteAllBytes(path, bytes);
@@ -1147,53 +1147,11 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Private Functions
-		private void CreateLinkedMacro(MacroGraph macro, Vector2 position) {
-			NodeEditorUtility.AddNewNode<Nodes.LinkedMacroNode>(graphData, null, null, position, (node) => {
-				node.macroAsset = macro;
-				node.Refresh();
-				node.Register();
-				NodeEditorUtility.AutoAssignNodePorts(node);
-			});
-			graph.Refresh();
-		}
-
-		private void SelectionAddRegion(Vector2 position) {
-			var selectedNodes = selection.Where(obj => obj is UNodeView view && view.nodeObject != null && view.isBlock == false).Select(obj => obj as UNodeView).ToArray();
-			Rect rect;
-			if(selectedNodes.Length > 0) {
-				rect = UIElementUtility.GetNodeRect(selectedNodes);
-			}
-			else {
-				Vector2 point;
-				if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, position))) {
-					point = graph.window.rootVisualElement.ChangeCoordinatesTo(
-						contentViewContainer,
-						position);
-				}
-				else {
-					point = graph.window.rootVisualElement.ChangeCoordinatesTo(
-						contentViewContainer,
-						new Vector2(300, 200));
-				}
-				rect = new Rect(point.x, point.y, 200, 130);
-			}
-			uNodeEditorUtility.RegisterUndo(graphData.owner, "Create region");
-			NodeEditorUtility.AddNewNode<Nodes.NodeRegion>(graphData, default, (node) => {
-				rect.x -= 30;
-				rect.y -= 50;
-				rect.width += 60;
-				rect.height += 70;
-				node.position = rect;
-				node.nodeColor = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-			});
-			graph.Refresh();
-		}
-
 		private void SelectionToMacro(Vector2 mousePosition) {
-			uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Selection to Macro");
-			NodeEditorUtility.AddNewNode<Nodes.MacroNode>(graph.graphData, "Macro", null, mousePosition, (node) => {
+			uNodeEditorUtility.RegisterUndo(graphEditor.graphData.owner, "Selection to Macro");
+			NodeEditorUtility.AddNewNode<Nodes.MacroNode>(graphEditor.graphData, "Macro", null, mousePosition, (node) => {
 				HashSet<UNodeView> nodeViews = new HashSet<UNodeView>();
-				foreach(var n in graph.graphData.selectedNodes) {
+				foreach(var n in graphEditor.graphData.selectedNodes) {
 					var view = GetNodeView(n);
 					if(view.isBlock)
 						continue;
@@ -1233,7 +1191,7 @@ namespace MaxyGames.UNode.Editors {
 										if(port.isFlow) {
 											if(!portMacros.TryGetValue(port, out var mNode)) {
 												NodeEditorUtility.AddNewNode<Nodes.MacroPortNode>(
-													graph.graphData, port.GetName(),
+													graphEditor.graphData, port.GetName(),
 													null,
 													new Vector2(
 														view.targetNode.position.x, view.targetNode.position.y +
@@ -1257,7 +1215,7 @@ namespace MaxyGames.UNode.Editors {
 										} else {
 											if(!portMacros.TryGetValue(port, out var mNode)) {
 												NodeEditorUtility.AddNewNode<Nodes.MacroPortNode>(
-												graph.graphData,
+												graphEditor.graphData,
 												null,
 												null,
 												new Vector2(
@@ -1287,7 +1245,7 @@ namespace MaxyGames.UNode.Editors {
 									if(ePort != null && !nodeViews.Contains(ePort.owner)) {
 										if(port.isFlow) {
 											if(!portMacros.TryGetValue(port, out var mNode)) {
-												NodeEditorUtility.AddNewNode<Nodes.MacroPortNode>(graph.graphData, null, null,
+												NodeEditorUtility.AddNewNode<Nodes.MacroPortNode>(graphEditor.graphData, null, null,
 												new Vector2(view.targetNode.position.x, view.targetNode.position.y - 150),
 												(macro) => {
 													macro.nodeObject.name = port.GetName();
@@ -1307,7 +1265,7 @@ namespace MaxyGames.UNode.Editors {
 											}
 										} else {
 											if(!portMacros.TryGetValue(ePort, out var mNode)) {
-												NodeEditorUtility.AddNewNode<Nodes.MacroPortNode>(graph.graphData, null, null,
+												NodeEditorUtility.AddNewNode<Nodes.MacroPortNode>(graphEditor.graphData, null, null,
 												new Vector2(view.targetNode.position.x - 150, view.targetNode.position.y),
 												(macro) => {
 													macro.nodeObject.name = port.GetName();

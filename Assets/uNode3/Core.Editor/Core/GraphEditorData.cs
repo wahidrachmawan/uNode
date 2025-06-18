@@ -340,7 +340,7 @@ namespace MaxyGames.UNode.Editors {
 		public string mainGraphTitle {
 			get {
 				if(graph is IStateGraph) {
-					return "STATE GRAPH";
+					return "EVENT GRAPH";
 				}
 				else if(graph is IMacroGraph) {
 					return "MACRO";

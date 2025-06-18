@@ -211,6 +211,7 @@ namespace MaxyGames.UNode {
 		public void ForeachInChildrens(Action<UGraphElement> action, bool recursive = false) {
 			if(recursive) {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					action(child);
 					child.ForeachInChildrens(action, recursive);
 				}
@@ -229,17 +230,21 @@ namespace MaxyGames.UNode {
 		public IEnumerable<UGraphElement> GetObjectsInChildren(bool recursive = false, bool findInsideGroup = false) {
 			if(recursive) {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					yield return child;
 					foreach(var cc in child.GetObjectsInChildren(recursive)) {
+						if(object.ReferenceEquals(cc, null)) continue;
 						yield return cc;
 					}
 				}
 			}
 			else {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					yield return child;
 					if(findInsideGroup && child is UGroupElement) {
 						foreach(var cc in child.GetObjectsInChildren(recursive, findInsideGroup)) {
+							if(object.ReferenceEquals(cc, null)) continue;
 							yield return cc;
 						}
 					}
@@ -250,20 +255,24 @@ namespace MaxyGames.UNode {
 		public IEnumerable<T> GetObjectsInChildren<T>(bool recursive = false, bool findInsideGroup = false) {
 			if(recursive) {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c) {
 						yield return c;
 					}
 					foreach(var cc in child.GetObjectsInChildren<T>(recursive)) {
+						if(object.ReferenceEquals(cc, null)) continue;
 						yield return cc;
 					}
 				}
 			} else {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c) {
 						yield return c;
 					}
 					if(findInsideGroup && child is UGroupElement) {
 						foreach(var cc in child.GetObjectsInChildren<T>(recursive, findInsideGroup)) {
+							if(object.ReferenceEquals(cc, null)) continue;
 							yield return cc;
 						}
 					}
@@ -274,20 +283,24 @@ namespace MaxyGames.UNode {
 		public IEnumerable<T> GetObjectsInChildren<T>(Predicate<T> predicate, bool recursive = false, bool findInsideGroup = false) {
 			if(recursive) {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c && predicate(c)) {
 						yield return c;
 					}
 					foreach(var cc in child.GetObjectsInChildren<T>(predicate, recursive)) {
+						if(object.ReferenceEquals(cc, null)) continue;
 						yield return cc;
 					}
 				}
 			} else {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c && predicate(c)) {
 						yield return c;
 					}
 					if(findInsideGroup && child is UGroupElement) {
 						foreach(var cc in child.GetObjectsInChildren<T>(predicate, recursive, findInsideGroup)) {
+							if(object.ReferenceEquals(cc, null)) continue;
 							yield return cc;
 						}
 					}
@@ -298,6 +311,7 @@ namespace MaxyGames.UNode {
 		public T GetObjectInChildren<T>(bool recursive = false, bool findInsideGroup = false) {
 			if(recursive) {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c) {
 						return c;
 					}
@@ -308,6 +322,7 @@ namespace MaxyGames.UNode {
 				}
 			} else {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c) {
 						return c;
 					}
@@ -325,6 +340,7 @@ namespace MaxyGames.UNode {
 		public T GetObjectInChildren<T>(Predicate<T> predicate, bool recursive = false, bool findInsideGroup = false) {
 			if(recursive) {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c && predicate(c)) {
 						return c;
 					}
@@ -335,6 +351,7 @@ namespace MaxyGames.UNode {
 				}
 			} else {
 				foreach(var child in childs) {
+					if(object.ReferenceEquals(child, null)) continue;
 					if(child is T c && predicate(c)) {
 						return c;
 					}

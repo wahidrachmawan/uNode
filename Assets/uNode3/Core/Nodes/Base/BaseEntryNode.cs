@@ -10,6 +10,12 @@ namespace MaxyGames.UNode {
 	/// Base class for all entry node.
 	/// </summary>
 	public abstract class BaseEntryNode : Node {
+		public override string GetTitle() {
+			return "Entry";
+		}
 
+		public override Type GetNodeIcon() {
+			return typeof(TypeIcons.FlowIcon);
+		}
 	}
 }

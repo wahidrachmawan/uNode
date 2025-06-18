@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
-using UnityEngine.Scripting;
 
 namespace MaxyGames.UNode {
 	[GraphElement]
@@ -72,13 +71,34 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		private EventGraphContainer _eventGraphContainer;
+		public EventGraphContainer eventGraphContainer {
+			get {
+				if(_eventGraphContainer == null) {
+					_eventGraphContainer = GetObjectInChildren<EventGraphContainer>();
+					if(_eventGraphContainer == null) {
+						_eventGraphContainer = AddChild(new EventGraphContainer());
+					}
+				}
+				return _eventGraphContainer;
+			}
+		}
+
 		private MainGraphContainer _mainContainer;
 		public MainGraphContainer mainGraphContainer {
 			get {
 				if(_mainContainer == null) {
-					_mainContainer = functionContainer.GetObjectInChildren<MainGraphContainer>();
+					{//For old data migration
+						_mainContainer = functionContainer.GetObjectInChildren<MainGraphContainer>();
+						if(_mainContainer != null) {
+							_mainContainer.SetParent(eventGraphContainer);
+							_mainContainer.SetSiblingIndex(0);
+							return _mainContainer;
+						}
+					}
+					_mainContainer = eventGraphContainer.GetObjectInChildren<MainGraphContainer>();
 					if(_mainContainer == null) {
-						_mainContainer = functionContainer.InsertChild(0, new MainGraphContainer());
+						_mainContainer = eventGraphContainer.InsertChild(0, new MainGraphContainer());
 					}
 				}
 				return _mainContainer;

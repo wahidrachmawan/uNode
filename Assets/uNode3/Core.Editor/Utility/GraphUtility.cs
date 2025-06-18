@@ -1971,6 +1971,25 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		public static void RefactorElementName(Vector2 mousePosition, UGraphElement element, Action onRenamed) {
+			string tempName = element.name;
+			ActionPopupWindow.Show(Vector2.zero,
+				() => {
+					tempName = EditorGUILayout.TextField("Name", tempName);
+				},
+				onGUIBottom: () => {
+					if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
+						if(tempName != element.name) {
+							uNodeEditorUtility.RegisterUndo(element, "Rename: " + element.name);
+							element.name = GetUniqueName(tempName, element.graph);
+							uNodeGUIUtility.GUIChangedMajor(element);
+							onRenamed?.Invoke();
+						}
+						ActionPopupWindow.CloseLast();
+					}
+				}).ChangePosition(mousePosition).headerName = "Rename Element";
+		}
+
 		public static void RefactorFunctionName(Vector2 mousePosition, Function function, Action onRenamed) {
 			string tempName = function.name;
 			ActionPopupWindow.Show(Vector2.zero,

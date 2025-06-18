@@ -443,8 +443,24 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static IEnumerable<Type> GetSubClassesOfType<T>() where T : class {
 			foreach(var assembly in GetAssemblies()) {
-				foreach(var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && (typeof(T).IsAssignableFrom(t)))) {
+				foreach(var type in GetAssemblyTypes(assembly).Where(t => t.IsClass && !t.IsAbstract && (typeof(T).IsAssignableFrom(t)))) {
 					yield return type;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Return all type that defined attribute <typeparamref name="T"/>
+		/// </summary>
+		/// <typeparam name="T">The attribute type</typeparam>
+		/// <param name="inherit"></param>
+		/// <returns></returns>
+		public static IEnumerable<Type> GetDefinedTypes<T>(bool inherit = false) where T : Attribute {
+			foreach(var assembly in GetAssemblies()) {
+				foreach(var type in GetAssemblyTypes(assembly)) {
+					if(type.IsDefined(typeof(T), inherit)) {
+						yield return type;
+					}
 				}
 			}
 		}

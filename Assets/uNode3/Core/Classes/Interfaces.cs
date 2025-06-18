@@ -359,9 +359,25 @@ namespace MaxyGames.UNode {
 
 	public interface ICustomMainGraph {
 		string MainGraphTitle => "Event Graph";
+		/// <summary>
+		/// The main graph scope, separated by comma
+		/// </summary>
 		string MainGraphScope => NodeScope.All;
 		bool AllowCoroutine => false;
 		bool CanCreateOnMainGraph => true;
+	}
+
+	public interface IGraphWithEventGraph {
+		/// <summary>
+		/// The list of supported event graph type
+		/// </summary>
+		HashSet<string> SupportedEventGraphs { get; }
+	}
+
+	public interface IEventGraph {
+		string Title { get; }
+		string Scope => NodeScope.All;
+		bool AllowCoroutine => false;
 	}
 
 	/// <summary>

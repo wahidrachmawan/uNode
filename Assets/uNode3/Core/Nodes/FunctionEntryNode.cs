@@ -27,13 +27,5 @@ namespace MaxyGames.UNode.Nodes {
 				analizer.RegisterError(this, "Multiple entry node is not supported.");
 			}
 		}
-
-		public override string GetTitle() {
-			return "Entry";
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.FlowIcon);
-		}
 	}
 }

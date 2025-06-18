@@ -383,7 +383,7 @@ namespace MaxyGames.UNode.Editors {
 		#region Debug
 		void DebugGUI() {
 			if(Application.isPlaying && GraphDebug.useDebug && proxyContainer != null) {
-				GraphDebug.DebugData debugData = owner.owner.graph.GetDebugInfo();
+				GraphDebug.DebugData debugData = owner.owner.graphEditor.GetDebugInfo();
 				if(debugData != null) {
 					if(isValue && direction == Direction.Input) {
 						var port = GetPortValue<ValueInput>();
@@ -448,7 +448,7 @@ namespace MaxyGames.UNode.Editors {
 		#region Drop Port
 
 		private void OnDropOutsidePortFromFlowOutput(Vector2 position, PortView portView, PortView sidePort) {
-			owner.owner.graph.ShowNodeMenu(position, null, (n) => {
+			owner.owner.graphEditor.ShowNodeMenu(position, null, (n) => {
 				FlowInput flow = null;
 				if(n.nodeObject.primaryFlowInput != null) {
 					flow = n.nodeObject.primaryFlowInput;
@@ -490,7 +490,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void OnDropOutsidePortFromFlowInput(Vector2 position, PortView portView, PortView sidePort) {
-			owner.owner.graph.ShowNodeMenu(position, null, (n) => {
+			owner.owner.graphEditor.ShowNodeMenu(position, null, (n) => {
 				n.EnsureRegistered();
 				if(n is MultipurposeNode mNode && !mNode.IsFlowNode() && mNode.CanSetValue()) {
 					var rType = mNode.ReturnType();
@@ -601,7 +601,7 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var command in portCommands) {
 						if(command.onlyContextMenu)
 							continue;
-						command.graph = owner.owner.graph;
+						command.graph = owner.owner.graphEditor;
 						command.mousePositionOnCanvas = position;
 						command.filter = portData.GetFilter();
 						if(command.IsValidPort(owner.targetNode, commandData)) {
@@ -614,7 +614,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
-			owner.owner.graph.ShowNodeMenu(position, FA, (n) => {
+			owner.owner.graphEditor.ShowNodeMenu(position, FA, (n) => {
 				if(n.CanGetValue()) {
 					if(n is MultipurposeNode mNode) {
 						var type = mNode.ReturnType();
@@ -693,7 +693,7 @@ namespace MaxyGames.UNode.Editors {
 				if(customInputItems != null && customInputItems.Count > 0) {
 					var source = portView.GetPortValue() as ValueOutput;
 					foreach(var c in customInputItems) {
-						c.graphEditor = owner.owner.graph;
+						c.graphEditor = owner.owner.graphEditor;
 						c.mousePositionOnCanvas = position;
 						if(c.IsValidPort(source,
 							canSetValue && canGetValue ?
@@ -717,7 +717,7 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var command in portCommands) {
 						if(command.onlyContextMenu)
 							continue;
-						command.graph = owner.owner.graph;
+						command.graph = owner.owner.graphEditor;
 						command.mousePositionOnCanvas = position;
 						command.filter = portData.GetFilter();
 						if(command.IsValidPort(owner.targetNode, commandData)) {
@@ -752,7 +752,7 @@ namespace MaxyGames.UNode.Editors {
 				FA.Static = true;
 				ItemSelector.SortCustomItems(customItems);
 				ItemSelector w = ItemSelector.ShowWindow(portView.owner.nodeObject, FA, (MemberData mData) => {
-					GraphEditor.CreateNodeProcessor(mData, owner.owner.graph.graphData, position, (n) => {
+					GraphEditor.CreateNodeProcessor(mData, owner.owner.graphEditor.graphData, position, (n) => {
 						bool needAutoConnect = true;
 						if(n is MultipurposeNode multipurposeNode && multipurposeNode.instance != null) {//For auto connect to parameter ports
 							if(type.IsCastableTo(mData.startType)) {
@@ -776,7 +776,7 @@ namespace MaxyGames.UNode.Editors {
 							sidePort.ResetPortValue();
 						}
 					});
-				}, customItems: customItems).ChangePosition(owner.owner.graph.GetMenuPosition());
+				}, customItems: customItems).ChangePosition(owner.owner.graphEditor.GetMenuPosition());
 				w.displayRecentItem = false;
 				w.displayNoneOption = false;
 				if(type == typeof(bool)) {
@@ -794,10 +794,10 @@ namespace MaxyGames.UNode.Editors {
 		public void OnDropOutsidePort(Edge edge, Vector2 position) {
 			var input = edge.input as PortView;
 			var output = edge.output as PortView;
-			var screenRect = owner.owner.graph.window.GetMousePositionForMenu(position);
-			Vector2 pos = owner.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
-				owner.owner.graph.window.rootVisualElement.parent,
-				screenRect - owner.owner.graph.window.position.position);
+			var screenRect = owner.owner.graphEditor.window.GetMousePositionForMenu(position);
+			Vector2 pos = owner.owner.graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+				owner.owner.graphEditor.window.rootVisualElement.parent,
+				screenRect - owner.owner.graphEditor.window.position.position);
 			position = owner.owner.contentViewContainer.WorldToLocal(pos);
 			PortView sidePort = null;
 			if(input != null && output != null) {
