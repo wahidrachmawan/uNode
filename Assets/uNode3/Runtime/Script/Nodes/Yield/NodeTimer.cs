@@ -173,7 +173,11 @@ namespace MaxyGames.UNode.Nodes {
 							isActive,
 							paused.CGNot()),
 						CG.Flow(
-							elapsed.CGSet(typeof(Time).CGAccess(unscaledTime ? nameof(Time.unscaledDeltaTime) : nameof(Time.deltaTime)), SetType.Add),
+							elapsed.CGSet(typeof(Time).CGAccess(
+								unscaledTime
+								? (fixedTime ? nameof(Time.fixedUnscaledDeltaTime) : nameof(Time.unscaledDeltaTime))
+								: (fixedTime ? nameof(Time.fixedDeltaTime) : nameof(Time.deltaTime))
+							), SetType.Add),
 							CG.If(
 								elapsed.CGCompare(duration, ComparisonType.GreaterThanOrEqual),
 								CG.Flow(
