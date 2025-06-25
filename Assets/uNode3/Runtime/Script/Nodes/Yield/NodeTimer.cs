@@ -4,8 +4,8 @@ using System;
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Yield", "Timer", IsCoroutine = true, scope = NodeScope.StateGraph, icon = typeof(TypeIcons.ClockIcon))]
 	public class NodeTimer : Node {
+		public bool fixedTime;
 		public bool unscaledTime;
-
 
 		[NonSerialized]
 		public FlowInput start;
@@ -60,7 +60,7 @@ namespace MaxyGames.UNode.Nodes {
 						flow.Next(onStart);
 					}
 					data.updateAction = () => DoUpdate(flow, data);
-					UEvent.Register(UEventID.Update, flow.target as Component, data.updateAction);
+					UEvent.Register(fixedTime ? UEventID.FixedUpdate : UEventID.Update, flow.target as Component, data.updateAction);
 				}
 			});
 			pause = FlowInput(nameof(pause), (flow) => {
@@ -100,15 +100,15 @@ namespace MaxyGames.UNode.Nodes {
 			data.timerOn = false;
 			data.paused = false;
 			data.elapsed = 0;
-			UEvent.Unregister(UEventID.Update, flow.target as Component, data.updateAction);
+			UEvent.Unregister(fixedTime ? UEventID.FixedUpdate : UEventID.Update, flow.target as Component, data.updateAction);
 		}
 
 		void DoUpdate(Flow flow, RuntimeData data) {
 			if(data.timerOn && !data.paused) {
 				if(unscaledTime) {
-					data.elapsed += Time.unscaledDeltaTime;
+					data.elapsed += fixedTime ? Time.fixedUnscaledDeltaTime : Time.unscaledDeltaTime;
 				} else {
-					data.elapsed += Time.deltaTime;
+					data.elapsed += fixedTime ? Time.fixedDeltaTime : Time.deltaTime;
 				}
 				if(data.elapsed >= data.duration) {
 					Reset(flow);
@@ -173,7 +173,11 @@ namespace MaxyGames.UNode.Nodes {
 							isActive,
 							paused.CGNot()),
 						CG.Flow(
-							elapsed.CGSet(typeof(Time).CGAccess(unscaledTime ? nameof(Time.unscaledDeltaTime) : nameof(Time.deltaTime)), SetType.Add),
+							elapsed.CGSet(typeof(Time).CGAccess(
+								unscaledTime
+								? (fixedTime ? nameof(Time.fixedUnscaledDeltaTime) : nameof(Time.unscaledDeltaTime))
+								: (fixedTime ? nameof(Time.fixedDeltaTime) : nameof(Time.deltaTime))
+							), SetType.Add),
 							CG.If(
 								elapsed.CGCompare(duration, ComparisonType.GreaterThanOrEqual),
 								CG.Flow(
@@ -188,7 +192,7 @@ namespace MaxyGames.UNode.Nodes {
 					//Wrap the update contents with information of this node.
 					updateContents = CG.WrapWithInformation(updateContents, this);
 				}
-				CG.InsertCodeToFunction("Update", typeof(void), updateContents);
+				CG.InsertCodeToFunction(fixedTime ? "FixedUpdate" : "Update", typeof(void), updateContents);
 			});
 		}
 	}
