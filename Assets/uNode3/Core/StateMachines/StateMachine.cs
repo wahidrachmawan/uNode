@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace MaxyGames.StateMachines {
 	public class StateMachine : IStateMachine {
@@ -245,7 +247,7 @@ namespace MaxyGames.StateMachines {
 		[NonSerialized]
 		public List<ITransition> transitions = new();
 
-		public virtual bool IsActive => FSM.ActiveState == this;
+		public virtual bool IsActive => FSM?.ActiveState == this;
 
 		public IStateMachine FSM { get; set; }
 
@@ -359,6 +361,15 @@ namespace MaxyGames.UNode {
 				return entryObject.node as BaseEntryNode;
 			}
 		}
+
+		public override void OnRuntimeInitialize(GraphInstance instance) {
+			base.OnRuntimeInitialize(instance);
+			var fsm = new StateMachines.StateMachine();
+			instance.SetUserData(this, fsm);
+			UEvent.Register(UEventID.Update, instance.target as Component, () => {
+				fsm.Tick();
+			});
+		}
 	}
 
 	[AttributeUsage(AttributeTargets.Class)]
@@ -398,6 +409,93 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override Type GetNodeIcon() {
 			return typeof(TypeIcons.FlowIcon);
+		}
+	}
+
+	public class ScriptState : Node, ISuperNode, IGraphEventHandler {
+		[HideInInspector]
+		public TransitionData transitions = new TransitionData();
+
+		public bool CanTrigger(GraphInstance instance) {
+			var state = instance.GetUserData(this) as StateMachines.IState;
+			return state.IsActive;
+		}
+
+		public IEnumerable<NodeObject> nestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
+
+		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph;
+
+		public IEnumerable<TransitionEvent> GetTransitions() {
+			return transitions.GetFlowNodes<TransitionEvent>();
+		}
+
+		private event System.Action<Flow> m_onEnter;
+		public event System.Action<Flow> onEnter {
+			add {
+				m_onEnter -= value;
+				m_onEnter += value;
+			}
+			remove {
+				m_onEnter -= value;
+			}
+		}
+		private event System.Action<Flow> m_onExit;
+		public event System.Action<Flow> onExit {
+			add {
+				m_onExit -= value;
+				m_onExit += value;
+			}
+			remove {
+				m_onExit -= value;
+			}
+		}
+
+		protected override void OnRegister() {
+			transitions.Register(this);
+			//enter.Next(new RuntimeFlow(OnExit));
+		}
+
+		public override void OnRuntimeInitialize(GraphInstance instance) {
+			base.OnRuntimeInitialize(instance);
+			var state = new StateMachines.State(
+				onEnter: () => {
+					m_onEnter?.Invoke(instance.defaultFlow);
+				},
+				onExit: () => {
+					m_onExit?.Invoke(instance.defaultFlow);
+				});
+			instance.SetUserData(this, state);
+		}
+
+		public void OnExit(Flow flow) {
+			foreach(var element in nodeObject.GetObjectsInChildren(true)) {
+				if(element is NodeObject node && node.node is not BaseEventNode) {
+					foreach(var port in node.FlowInputs) {
+						flow.instance.StopState(port);
+					}
+				}
+			}
+			foreach(BaseEventNode node in nestedFlowNodes) {
+				node.Stop(flow.instance);
+			}
+			if(m_onExit != null) {
+				m_onExit(flow);
+			}
+			foreach(var tr in GetTransitions()) {
+				tr.OnExit(flow);
+			}
+		}
+
+		public override string GetTitle() {
+			return name;
+		}
+
+		public override Type GetNodeIcon() {
+			return typeof(TypeIcons.StateIcon);
+		}
+
+		public bool AllowCoroutine() {
+			return true;
 		}
 	}
 }

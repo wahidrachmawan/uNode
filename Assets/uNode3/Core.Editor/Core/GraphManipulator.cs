@@ -103,6 +103,7 @@ namespace MaxyGames.UNode.Editors {
 		public virtual IEnumerable<DropdownMenuItem> ContextMenuForEventGraph(Vector2 mousePosition, NodeContainer variable) => null;
 		public virtual IEnumerable<DropdownMenuItem> ContextMenuForFunction(Vector2 mousePosition, Function variable) => null;
 		public virtual IEnumerable<DropdownMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) => null;
+		public virtual IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) => null;
 
 		/// <summary>
 		/// Call this to mark that the graph has been changed
@@ -1391,6 +1392,241 @@ namespace MaxyGames.UNode.Editors {
 			}
 			#endregion
 
+		}
+
+		public override IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
+			#region Transition
+			if(node is Nodes.StateNode) {
+				yield return new DropdownMenuSeparator("");
+				foreach(TransitionMenu menuItem in NodeEditorUtility.FindTransitionMenu()) {
+					object[] eventObject = new object[]{
+								menuItem.type,
+								menuItem.name,
+							};
+					yield return new DropdownMenuAction("Add Transition/" + menuItem.path, ((e) => {
+						object[] objToArray = e.userData as object[];
+						System.Type type = (System.Type)objToArray[0];
+						if(node is Nodes.StateNode stateNode) {
+							var transition = new NodeObject();
+							NodeEditorUtility.AddNewNode<TransitionEvent>(
+								stateNode.transitions.container,
+								objToArray[1] as string,
+								type,
+								new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
+								(transition) => {
+									graphEditor.Refresh();
+								});
+						}
+					}), DropdownMenuAction.AlwaysEnabled, eventObject);
+				}
+				yield return new DropdownMenuSeparator("");
+			}
+			#endregion
+
+			#region MultipurposeNode
+			if(node is MultipurposeNode) {
+				MultipurposeNode mNode = node as MultipurposeNode;
+				if(mNode.target.isAssigned) {
+					if(mNode.target.isDeepTarget) {
+						var members = mNode.target.GetMembers(false);
+						if(members != null && members.Length > 0) {
+							yield return new DropdownMenuAction("Split Nodes", (e) => {
+								int choice = EditorUtility.DisplayDialogComplex("", "Did you want to replace the node?", "Yes", "No", "Cancel");
+								if(choice != 2) {
+									uNodeEditorUtility.RegisterUndo(mNode, "Split nodes: " + mNode.GetTitle());
+
+									List<NodeObject> nodes = new List<NodeObject>();
+									var member = mNode.target;
+									int index = 0;
+
+									void AssignParameters(MultipurposeNode n) {
+										if(n.parameters != null && n.parameters.Count > 0) {
+											for(int x = 0; x < n.parameters.Count; x++) {
+												var param = mNode.parameters[x + index];
+												if(param.input != null) {
+													n.parameters[x].input.AssignToDefault(param.input);
+												}
+												else if(param.output != null) {
+													foreach(var port in param.output.GetConnectedPorts().ToArray()) {
+														if(port == null) continue;
+														n.parameters[x].output.ConnectTo(port);
+													}
+												}
+												else {
+													throw null;
+												}
+											}
+											index += n.parameters.Count;
+										}
+									}
+
+									if(member.IsTargetingUNode) {
+										NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, mousePosition, n => {
+											var val = member.startItem.GetReferenceValue();
+											if(val is Variable) {
+												n.target = MemberData.CreateFromValue(val as Variable);
+											}
+											else if(val is Function) {
+												n.target = MemberData.CreateFromValue(val as Function);
+											}
+											else if(val is Property) {
+												n.target = MemberData.CreateFromValue(val as Property);
+											}
+											n.useOutputParameters = mNode.useOutputParameters;
+											n.Register();
+											AssignParameters(n);
+											nodes.Add(n);
+										});
+									}
+									for(int i = 0; i < members.Length; i++) {
+										NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, mousePosition, n => {
+											n.target = MemberData.CreateFromMember(members[i]);
+											n.Register();
+											AssignParameters(n);
+											if(nodes.Count > 0) {
+												n.instance?.ConnectTo(nodes.Last().primaryValueOutput);
+												if(i == members.Length - 1) {
+													if(mNode.exit != null && mNode.exit.GetTargetFlow() != null) {
+														n.exit.ConnectTo(mNode.exit.GetTargetFlow());
+													}
+												}
+											}
+											else {
+												n.instance?.AssignToDefault(mNode.instance);
+											}
+											nodes.Add(n);
+										});
+									}
+									for(int i = 0; i < nodes.Count; i++) {
+										nodes[(nodes.Count - i - 1)].position = node.position;
+										nodes[(nodes.Count - i - 1)].position.x -= i * (nodes[i].position.width + 50);
+										nodes[(nodes.Count - i - 1)].position.y += i * (nodes[i].position.height + 50);
+									}
+									if(choice == 0) {
+										if(mNode.output != null) {
+											foreach(var port in mNode.output.GetConnectedPorts().ToArray()) {
+												port.ConnectTo(nodes.Last().primaryValueOutput);
+											}
+										}
+										if(mNode.enter != null) {
+											foreach(var port in mNode.enter.GetConnectedPorts().ToArray()) {
+												port.ConnectTo(nodes.Last().primaryFlowInput);
+											}
+										}
+										mNode.nodeObject.Destroy();
+									}
+									graphEditor.Refresh();
+								}
+							}, DropdownMenuAction.AlwaysEnabled);
+						}
+					}
+					if(mNode.target.targetType == MemberData.TargetType.Method) {
+						var members = mNode.target.GetMembers(false);
+						if(members != null && members.Length == 1) {
+							var member = members[members.Length - 1];
+							BindingFlags flag = BindingFlags.Public;
+							if(mNode.target.isStatic) {
+								flag |= BindingFlags.Static;
+							}
+							else {
+								flag |= BindingFlags.Instance;
+							}
+							var memberName = member.Name;
+							var mets = member.ReflectedType.GetMember(memberName, flag);
+							List<MethodInfo> methods = new List<MethodInfo>();
+							foreach(var m in mets) {
+								if(m is MethodInfo) {
+									methods.Add(m as MethodInfo);
+								}
+							}
+							foreach(var m in methods) {
+								yield return new DropdownMenuAction("Overrides/" + EditorReflectionUtility.GetPrettyMethodName(m), (e) => {
+									object[] objs = e.userData as object[];
+									MultipurposeNode nod = objs[0] as MultipurposeNode;
+									MethodInfo method = objs[1] as MethodInfo;
+									if(member != m) {
+										if(method.IsGenericMethodDefinition) {
+											TypeBuilderWindow.Show(graphEditor.topMousePos, graphData.currentCanvas, new FilterAttribute() { UnityReference = false }, delegate (MemberData[] types) {
+												uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
+												method = ReflectionUtils.MakeGenericMethod(method, types.Select(i => i.Get<Type>(null)).ToArray());
+												MemberData d = new MemberData(method);
+												nod.target.CopyFrom(d);
+												uNodeGUIUtility.GUIChanged(nod, UIChangeType.Average);
+											}, new TypeItem[method.GetGenericArguments().Length]);
+										}
+										else {
+											uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
+											MemberData d = new MemberData(method);
+											nod.target.CopyFrom(d);
+											uNodeGUIUtility.GUIChanged(nod, UIChangeType.Important);
+										}
+									}
+								}, (e) => {
+									if(member == m) {
+										return DropdownMenuAction.Status.Checked;
+									}
+									return DropdownMenuAction.Status.Normal;
+								}, new object[] { node, m });
+							}
+						}
+					}
+					else if(mNode.target.targetType == MemberData.TargetType.Constructor) {
+						var members = mNode.target.GetMembers(false);
+						if(members != null && members.Length == 1) {
+							var member = members[members.Length - 1];
+							if(member != null) {
+								BindingFlags flag = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
+								var ctors = member.ReflectedType.GetConstructors(flag);
+								foreach(var m in ctors) {
+									if(!ReflectionUtils.IsPublicMember(m))
+										continue;
+									yield return new DropdownMenuAction("Overrides/" + EditorReflectionUtility.GetPrettyConstructorName(m), (e) => {
+										object[] objs = e.userData as object[];
+										MultipurposeNode nod = objs[0] as MultipurposeNode;
+										ConstructorInfo ctor = objs[1] as ConstructorInfo;
+										if(member != m) {
+											uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
+											MemberData d = new MemberData(ctor);
+											nod.target.CopyFrom(d);
+											uNodeGUIUtility.GUIChanged(nod, UIChangeType.Important);
+										}
+									}, (e) => {
+										if(member == m) {
+											return DropdownMenuAction.Status.Checked;
+										}
+										return DropdownMenuAction.Status.Normal;
+									}, new object[] { node, m });
+								}
+							}
+						}
+					}
+					else if(mNode.target.targetType == MemberData.TargetType.uNodeFunction) {
+						var currMethod = mNode.target.startItem.reference?.ReferenceValue as Function;
+						if(currMethod != null) {
+							var methods = currMethod.graphContainer.GetFunctions().Where(f => f.name == currMethod.name);
+							foreach(var m in methods) {
+								yield return new DropdownMenuAction("Overrides/" + EditorReflectionUtility.GetPrettyFunctionName(m), (e) => {
+									object[] objs = e.userData as object[];
+									MultipurposeNode nod = objs[0] as MultipurposeNode;
+									Function method = objs[1] as Function;
+									uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
+									MemberData d = MemberData.CreateFromValue(method);
+									nod.target.CopyFrom(d);
+									uNodeGUIUtility.GUIChanged(nod, UIChangeType.Important);
+								}, (e) => {
+									if(currMethod == m) {
+										return DropdownMenuAction.Status.Checked;
+									}
+									return DropdownMenuAction.Status.Normal;
+								}, new object[] { node, m });
+							}
+						}
+					}
+				}
+			}
+			#endregion
+
+			yield break;
 		}
 	}
 
