@@ -17,6 +17,8 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool fullReload => true;
 
+		public override UGraphElement GetSelectableObject() => transition;
+
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			nodeObject = node;
 			this.transition = node.node as TransitionEvent;

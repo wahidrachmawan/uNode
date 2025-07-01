@@ -66,9 +66,7 @@ namespace MaxyGames.UNode.Editors {
 				AddToClassList("value-port");
 			}
 
-			m_EdgeConnector = new EdgeConnector<EdgeView>(this);
 			this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));
-			this.AddManipulator(m_EdgeConnector);
 			this.ExecuteAndScheduleAction(DoUpdate, 1000);
 			if(portData.portValue is ValueInput input && input.IsOptional) {
 				optionalElement = new VisualElement {
@@ -93,6 +91,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 			this.portData = portData;
 			ReloadView(true);
+
+			if(m_EdgeConnector == null) {
+				SetEdgeConnector<EdgeView>();
+			}
 		}
 
 		public virtual void ReloadView(bool refreshName = false) {
@@ -1103,7 +1105,42 @@ namespace MaxyGames.UNode.Editors {
 				graph.Connect(edgeView, true);
 			}
 		}
-#endregion
+		#endregion
+
+		#region Edges
+		public void SetEdgeConnector(EdgeConnector connector) {
+			if(m_EdgeConnector != null) {
+				this.RemoveManipulator(m_EdgeConnector);
+			}
+			m_EdgeConnector = connector;
+			this.AddManipulator(m_EdgeConnector);
+		}
+
+		public void SetEdgeConnector<TEdge>() where TEdge : EdgeView, new() {
+			SetEdgeConnector(new EdgeConnector<TEdge>(this));
+		}
+
+		public void SetEdgeConnector<TEdge>(IEdgeConnectorListener listener) where TEdge : EdgeView, new() {
+			SetEdgeConnector(new EdgeConnector<TEdge>(listener));
+		}
+
+		//public void SetEdgeConnector<TEdge>(Action<GraphView, Edge> onDrop = null, Action<Edge, Vector2> onDropOutsidePort = null) where TEdge : EdgeView, new() {
+		//	SetEdgeConnector(new EdgeConnector<TEdge>(new CustomEdgeListener() { onDrop = onDrop, onDropOutsidePort = onDropOutsidePort }));
+		//}
+
+		//class CustomEdgeListener : IEdgeConnectorListener {
+		//	public Action<GraphView, Edge> onDrop;
+		//	public Action<Edge, Vector2> onDropOutsidePort;
+
+		//	public void OnDrop(GraphView graphView, Edge edge) {
+		//		onDrop?.Invoke(graphView, edge);
+		//	}
+
+		//	public void OnDropOutsidePort(Edge edge, Vector2 position) {
+		//		onDropOutsidePort?.Invoke(edge, position);
+		//	}
+		//}
+		#endregion
 
 		#region Functions
 		public void SetControl(VisualElement visualElement, bool autoLayout = false) {

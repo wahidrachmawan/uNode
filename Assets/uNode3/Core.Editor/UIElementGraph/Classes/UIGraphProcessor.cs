@@ -31,10 +31,6 @@ namespace MaxyGames.UNode.Editors {
 	class DefaultUIGraphProcessor : UIGraphProcessor {
 		public override int order => int.MaxValue;
 
-		public override UNodeView InitializeView(UGraphView graph, NodeObject node) {
-			return null;
-		}
-
 		public override bool RepaintNode(UGraphView graph, UNodeView view, NodeObject node, bool fullReload) {
 			if(node.node is Nodes.NodeValueConverter) {
 				var n = node.node as Nodes.NodeValueConverter;
@@ -50,20 +46,25 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override EdgeView InitializeEdge(UGraphView graph, EdgeData edgeData) {
-			var tNode = edgeData.output.GetNode() as Nodes.NodeValueConverter;
-			if(tNode != null) {
-				tNode.type = edgeData.input.GetPortType();
-				var nView = graph.GetNodeView(tNode);
-				if(nView != null) {
-					tNode.position = edgeData.input.owner.GetPosition();
-					tNode.nodeObject.position.x -= 50;
-					nView.HideElement();
-					nView.SetDisplay(false);
+			var outNode = edgeData.output.GetNode();
+			if(outNode != null) {
+				if(outNode is Nodes.NodeValueConverter valueConverter) {
+					valueConverter.type = edgeData.input.GetPortType();
+					var nView = graph.GetNodeView(valueConverter);
+					if(nView != null) {
+						valueConverter.position = edgeData.input.owner.GetPosition();
+						valueConverter.nodeObject.position.x -= 50;
+						nView.HideElement();
+						nView.SetDisplay(false);
+					}
+					return new ConversionEdgeView(valueConverter, new EdgeData(null, edgeData.input, PortUtility.GetPort(valueConverter.input.connections[0].output, graph)));
 				}
-				return new ConversionEdgeView(tNode, new EdgeData(null, edgeData.input, PortUtility.GetPort(tNode.input.connections[0].output, graph)));
 			}
 			if(edgeData.input.GetNode() is Nodes.NodeValueConverter vc && vc.output.isConnected) {
 				return null;
+			}
+			if(graph.graphData.currentCanvas is StateGraphContainer) {
+				return new TransitionEdgeView(edgeData);
 			}
 			return new EdgeView(edgeData);
 		}

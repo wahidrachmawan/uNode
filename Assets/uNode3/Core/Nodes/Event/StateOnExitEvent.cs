@@ -8,9 +8,9 @@ namespace MaxyGames.UNode.Nodes {
 	[Description("On Exit is called once when the state becomes inactive.")]
 	public class StateOnExitEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
-			var stateNode = nodeObject.GetNodeInParent<StateNode>();
-			if(stateNode != null) {
-				stateNode.onExit += flow => Trigger(flow);
+			var state = nodeObject.GetNodeInParent<IScriptState>();
+			if(state != null) {
+				state.OnExitState += flow => Trigger(flow);
 			}
 		}
 
@@ -22,8 +22,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override void CheckError(ErrorAnalyzer analizer) {
 			base.CheckError(analizer);
-			if(nodeObject.parent is not NodeObject parentNode || parentNode.node is not StateNode) {
-				analizer.RegisterError(this, "On Exit event can only be placed inside State node.");
+			if(nodeObject.parent is not NodeObject parentNode || parentNode.node is not IScriptState) {
+				analizer.RegisterError(this, "On Exit event can only be placed inside State.");
 			}
 		}
 	}

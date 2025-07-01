@@ -569,6 +569,8 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
+		public virtual UGraphElement GetSelectableObject() => nodeObject;
+
 		public void UpdateError(string message) {
 			if(!string.IsNullOrEmpty(message)) {//Has error
 				if(errorBadge == null) {

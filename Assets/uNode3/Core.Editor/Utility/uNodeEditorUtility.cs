@@ -985,7 +985,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static IEnumerable<T> FindAssetsByType<T>(Func<Type, bool> validation) where T : UnityEngine.Object {
+		public static IEnumerable<T> FindAssetsByType<T>(Func<string, bool> validation) where T : UnityEngine.Object {
 			string[] guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T)), new[] { "Assets" });
 			if(guids.Length == 0) {
 				guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T).Name), new[] { "Assets" });
@@ -993,7 +993,35 @@ namespace MaxyGames.UNode.Editors {
 			for(int i = 0; i < guids.Length; i++) {
 				string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
 				if(validation != null) {
-					if(validation(AssetDatabase.GetMainAssetTypeAtPath(assetPath)) == false) {
+					if(validation(assetPath) == false) {
+						continue;
+					}
+				}
+				T asset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+				if(asset != null) {
+					yield return asset;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Find all loaded asset of type T in project
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="validation"></param>
+		/// <returns></returns>
+		public static IEnumerable<T> FindLoadedAssetsByType<T>(Func<string, bool> validation) where T : UnityEngine.Object {
+			string[] guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T)), new[] { "Assets" });
+			if(guids.Length == 0) {
+				guids = AssetDatabase.FindAssets(string.Format("t:{0}", typeof(T).Name), new[] { "Assets" });
+			}
+			for(int i = 0; i < guids.Length; i++) {
+				string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+				if(AssetDatabase.IsMainAssetAtPathLoaded(assetPath) == false) {
+					continue;
+				}
+				if(validation != null) {
+					if(validation(assetPath) == false) {
 						continue;
 					}
 				}
@@ -1031,6 +1059,26 @@ namespace MaxyGames.UNode.Editors {
 				string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
 				var asset = AssetDatabase.LoadAssetAtPath(assetPath, type);
 				if (asset != null) {
+					yield return asset;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Find all loaded asset of type `type` in project
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static IEnumerable<UnityEngine.Object> FindLoadedAssetsByType(Type type) {
+			string[] guids = AssetDatabase.FindAssets(string.Format("t:{0}", type), new[] { "Assets" });
+			if(guids.Length == 0) {
+				guids = AssetDatabase.FindAssets(string.Format("t:{0}", type.Name), new[] { "Assets" });
+			}
+			for(int i = 0; i < guids.Length; i++) {
+				string assetPath = AssetDatabase.GUIDToAssetPath(guids[i]);
+				if(AssetDatabase.IsMainAssetAtPathLoaded(assetPath) == false) continue;
+				var asset = AssetDatabase.LoadAssetAtPath(assetPath, type);
+				if(asset != null) {
 					yield return asset;
 				}
 			}

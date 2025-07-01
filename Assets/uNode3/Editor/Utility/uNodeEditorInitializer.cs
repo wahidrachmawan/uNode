@@ -196,13 +196,12 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static void ResetGraphAssets() {
-			var assets = uNodeEditorUtility.FindAssetsByType(typeof(ScriptableObject));
+			var assets = uNodeEditorUtility.FindLoadedAssetsByType(typeof(ScriptableObject));
 			foreach(var asset in assets) {
 				if(asset is IRefreshable refreshable) {
 					refreshable.Refresh();
 				}
 			}
-
 		}
 
 		[InitializeOnEnterPlayMode]

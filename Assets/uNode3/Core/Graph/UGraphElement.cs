@@ -538,6 +538,10 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		protected virtual void OnDestroy() {
 			while(childs.Count > 0) {
+				if(object.ReferenceEquals(childs[0], null)) {
+					childs.RemoveAt(0);
+					continue;
+				}
 				childs[0].Destroy();
 			}
 		}

@@ -6,19 +6,23 @@ using UnityEngine;
 namespace MaxyGames.StateMachines {
 	public class StateMachine : IStateMachine {
 		private IState m_activeState;
+		private IState m_transitionState;
 		public IState ActiveState {
 			get => m_activeState;
 			set {
 				if(value != null) {
 					value.FSM = this;
 				}
-				m_activeState = value;
+				if(m_transitionState == null) {
+					m_activeState?.Exit();
+					m_activeState = null;
+					m_transitionState = value;
+				}
 			}
 		}
 		public AnyState AnyState { get; set; } = new();
 
 		public void ChangeState(IState state) {
-			ActiveState?.Exit();
 			ActiveState = state;
 			//Tick();
 		}
@@ -42,6 +46,11 @@ namespace MaxyGames.StateMachines {
 						}
 					}
 				}
+			}
+			if(m_transitionState != null) {
+				m_activeState = m_transitionState;
+				m_transitionState = null;
+				m_activeState.Enter();
 			}
 			if(AnyState != null) {
 				foreach(var tr in AnyState.transitions) {
@@ -171,7 +180,10 @@ namespace MaxyGames.StateMachines {
 		/// Do the transition
 		/// </summary>
 		void Transition() {
-			StateMachine.ChangeState(TargetState);
+			if(State.IsActive) {
+				//Do change state only when the original state is active
+				StateMachine.ChangeState(TargetState);
+			}
 		}
 	}
 
@@ -363,8 +375,22 @@ namespace MaxyGames.UNode {
 		}
 
 		public override void OnRuntimeInitialize(GraphInstance instance) {
-			base.OnRuntimeInitialize(instance);
 			var fsm = new StateMachines.StateMachine();
+			instance.eventData.postInitialize += val => {
+				if(Entry is Nodes.StateEntryNode entry) {
+					var startStateNode = entry.exit.GetTargetNode();
+					if(startStateNode == null) {
+						throw new GraphException("The entry is not connected", entry);
+					}
+					var startState = val.GetUserData(startStateNode) as StateMachines.BaseState;
+					fsm.ActiveState = startState;
+				}
+				else {
+					var node = this.GetNodeInChildren<Nodes.ScriptState>();
+					var startState = val.GetUserData(node) as StateMachines.BaseState;
+					fsm.ActiveState = startState;
+				}
+			};
 			instance.SetUserData(this, fsm);
 			UEvent.Register(UEventID.Update, instance.target as Component, () => {
 				fsm.Tick();
@@ -412,9 +438,14 @@ namespace MaxyGames.UNode.Nodes {
 		}
 	}
 
-	public class ScriptState : Node, ISuperNode, IGraphEventHandler {
+	public interface IScriptState {
+		public event System.Action<Flow> OnEnterState;
+		public event System.Action<Flow> OnExitState;
+	}
+
+	public class ScriptState : Node, IScriptState, ISuperNode, IGraphEventHandler {
 		[HideInInspector]
-		public TransitionData transitions = new TransitionData();
+		public StateTranstionData transitions = new StateTranstionData();
 
 		public bool CanTrigger(GraphInstance instance) {
 			var state = instance.GetUserData(this) as StateMachines.IState;
@@ -425,12 +456,12 @@ namespace MaxyGames.UNode.Nodes {
 
 		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph;
 
-		public IEnumerable<TransitionEvent> GetTransitions() {
-			return transitions.GetFlowNodes<TransitionEvent>();
+		public IEnumerable<StateTransition> GetTransitions() {
+			return transitions.GetFlowNodes<StateTransition>();
 		}
 
 		private event System.Action<Flow> m_onEnter;
-		public event System.Action<Flow> onEnter {
+		public event System.Action<Flow> OnEnterState {
 			add {
 				m_onEnter -= value;
 				m_onEnter += value;
@@ -440,7 +471,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 		private event System.Action<Flow> m_onExit;
-		public event System.Action<Flow> onExit {
+		public event System.Action<Flow> OnExitState {
 			add {
 				m_onExit -= value;
 				m_onExit += value;
@@ -450,8 +481,13 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
+		[NonSerialized]
+		public FlowInput enter;
+
 		protected override void OnRegister() {
+			if(transitions == null) transitions = new();
 			transitions.Register(this);
+			enter = PrimaryFlowInput(nameof(enter), flow => throw new Exception("State can be changed only from transition"));
 			//enter.Next(new RuntimeFlow(OnExit));
 		}
 
@@ -496,6 +532,163 @@ namespace MaxyGames.UNode.Nodes {
 
 		public bool AllowCoroutine() {
 			return true;
+		}
+	}
+
+	public class StateTranstionData : BaseNodeContainerData<TransitionContainer> {
+		protected override bool IsValidFlowNode(NodeObject node) {
+			return node.node is StateTransition;
+		}
+	}
+
+	public class TriggerStateTransition : Node {
+		[NonSerialized]
+		public FlowInput trigger;
+		[NonSerialized]
+		public StateTransition transition;
+
+		protected override void OnRegister() {
+			trigger = PrimaryFlowInput(nameof(trigger), OnTrigger);
+		}
+
+		private void OnTrigger(Flow flow) {
+			if(transition == null)
+				transition = nodeObject.GetNodeInParent<StateTransition>();
+			transition.Finish(flow);
+		}
+
+		public override void CheckError(ErrorAnalyzer analyzer) {
+			base.CheckError(analyzer);
+			if(transition == null)
+				transition = nodeObject.GetNodeInParent<StateTransition>();
+
+			if(transition == null) {
+				analyzer.RegisterError(this, "The node is not valid in current context");
+			}
+		}
+	}
+
+	public class StateTransition : Node, ISuperNode, IGraphEventHandler {
+		public ScriptState node {
+			get {
+				return nodeObject.GetNodeInParent<ScriptState>();
+			}
+		}
+
+		public IEnumerable<NodeObject> nestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
+
+		[System.NonSerialized]
+		public FlowInput enter;
+		[System.NonSerialized]
+		public FlowOutput exit;
+		[System.NonSerialized]
+		private TriggerStateTransition triggerState;
+
+		protected override void OnRegister() {
+			exit = FlowOutput(nameof(exit)).SetName("");
+			enter = FlowInput(nameof(enter), (flow) => throw new System.InvalidOperationException()).SetName("");
+			if(triggerState == null) {
+				triggerState = nodeObject.GetNodeInChildren<TriggerStateTransition>();
+				if(triggerState == null) {
+					triggerState = nodeObject.AddChildNode(new TriggerStateTransition());
+				}
+			}
+		}
+
+		protected ScriptState GetStateNode() {
+			return node;
+		}
+
+		public override string GetTitle() {
+			var type = GetType();
+			//if(type.IsDefined(typeof(TransitionMenu), true)) {
+			//	return type.GetCustomAttribute<TransitionMenu>().name;
+			//}
+			//else 
+			if(!string.IsNullOrEmpty(name)) {
+				return name;
+			}
+			else {
+				return type.PrettyName();
+			}
+		}
+
+		/// <summary>
+		/// Called once after state Enter, generally used for Setup.
+		/// </summary>
+		public virtual void OnEnter(Flow flow) {
+			
+		}
+
+		/// <summary>
+		/// Called every frame when state is running.
+		/// </summary>
+		public virtual void OnUpdate(Flow flow) {
+
+		}
+
+		/// <summary>
+		/// Called once after state exit, generally used for reset.
+		/// </summary>
+		public virtual void OnExit(Flow flow) {
+
+		}
+
+		/// <summary>
+		/// Call to finish the transition.
+		/// </summary>
+		public void Finish(Flow flow) {
+			var stateNode = GetStateNode();
+			var state = flow.GetUserData(stateNode) as StateMachines.State;
+			if(state.IsActive) {
+				var targetState = exit.GetTargetNode().node as ScriptState;
+				state.FSM.ChangeState(flow.GetUserData(targetState) as StateMachines.IState);
+#if UNITY_EDITOR
+				if(GraphDebug.useDebug) {
+					GraphDebug.Flow(flow.instance.target, nodeObject.graphContainer.GetGraphID(), id, nameof(exit));
+				}
+#endif
+			}
+		}
+
+		/// <summary>
+		/// Used to generating OnEnter code.
+		/// </summary>
+		/// <returns></returns>
+		public virtual string GenerateOnEnterCode() {
+			return null;
+		}
+
+		/// <summary>
+		/// Used to generating OnUpdate code
+		/// </summary>
+		/// <returns></returns>
+		public virtual string GenerateOnUpdateCode() {
+			return null;
+		}
+
+		/// <summary>
+		/// Used to generating OnExit code
+		/// </summary>
+		/// <returns></returns>
+		public virtual string GenerateOnExitCode() {
+			return null;
+		}
+
+		public override Type GetNodeIcon() {
+			return null;
+		}
+
+		public override void CheckError(ErrorAnalyzer analyzer) {
+			if(exit.isConnected == false) {
+				analyzer.RegisterError(this, "No target");
+			}
+		}
+
+		public bool AllowCoroutine() => false;
+
+		public bool CanTrigger(GraphInstance instance) {
+			return GetStateNode().CanTrigger(instance);
 		}
 	}
 }

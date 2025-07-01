@@ -8,8 +8,8 @@ namespace MaxyGames.UNode.Nodes {
 	[Description("On Enter is called once when the state becomes active.")]
 	public class StateOnEnterEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
-			if(nodeObject.parent is NodeObject parentNode && parentNode.node is StateNode stateNode) {
-				stateNode.onEnter += (flow) => {
+			if(nodeObject.parent is NodeObject parentNode && parentNode.node is IScriptState state) {
+				state.OnEnterState += (flow) => {
 					Trigger(flow);
 				};
 			}
@@ -23,8 +23,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override void CheckError(ErrorAnalyzer analizer) {
 			base.CheckError(analizer);
-			if(nodeObject.parent is not NodeObject parentNode || parentNode.node is not StateNode) {
-				analizer.RegisterError(this, "On Enter event can only be placed inside State node.");
+			if(nodeObject.parent is not NodeObject parentNode || parentNode.node is not IScriptState) {
+				analizer.RegisterError(this, "On Enter event can only be placed inside Script State.");
 			}
 		}
 	}

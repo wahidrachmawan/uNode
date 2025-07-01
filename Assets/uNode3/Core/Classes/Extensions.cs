@@ -664,6 +664,18 @@ namespace MaxyGames.UNode {
 			return default;
 		}
 
+		/// <summary>
+		/// Add a new child node to the <paramref name="parent"/>
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="parent"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static T AddChildNode<T>(this UGraphElement parent, T value) where T : Node {
+			parent.AddChild(new NodeObject(value));
+			return value;
+		}
+
 		public static IEnumerable<T> GetNodesInChildren<T>(this UGraphElement element, bool recursive = false) {
 			if(recursive) {
 				foreach(var child in element) {

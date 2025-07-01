@@ -9,7 +9,21 @@ using System.Collections;
 using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
+	public enum GraphManipulationResult {
+		Continue,
+		Prevent,
+		Accept,
+	}
+
 	public abstract class GraphManipulator {
+		/// <summary>
+		/// The list of manipulation command
+		/// </summary>
+		public class Command {
+			public const string Paste = nameof(Paste);
+			public const string Copy = nameof(Copy);
+		}
+
 		private uNodeEditor.TabData m_tabData;
 		/// <summary>
 		/// The tab reference data
@@ -54,6 +68,16 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="action"></param>
 		/// <returns></returns>
 		public virtual bool IsValid(string action) => false;
+
+		/// <summary>
+		/// Manipulate the command for allow/disallow some command to be executed.
+		/// If result is <see cref="GraphManipulationResult.Continue"/> The command will be leaved to be manipulated by others.
+		/// If result is <see cref="GraphManipulationResult.Prevent"/> The command will be prevented to execute.
+		/// If result is <see cref="GraphManipulationResult.Accept"/> The command will be executed because of this manipulator.
+		/// </summary>
+		/// <param name="command"></param>
+		/// <returns></returns>
+		public virtual GraphManipulationResult CanExecuteCommand(string command) => GraphManipulationResult.Continue;
 
 		/// <summary>
 		/// Callback for create a new variable
@@ -1300,7 +1324,15 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
-			else if(graphData.currentCanvas is NodeObject superNode && superNode.node is Nodes.StateNode) {
+			else if(graphData.currentCanvas is StateGraphContainer) {
+				yield return new DropdownMenuAction("Add Script State", evt => {
+					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphData,
+						"State",
+						mousePosition);
+					graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+			}
+			else if(graphData.currentCanvas is NodeObject superNode && superNode.node is IGraphEventHandler) {
 				yield return new DropdownMenuSeparator("");
 
 				#region Add Event
@@ -1419,6 +1451,24 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}), DropdownMenuAction.AlwaysEnabled, eventObject);
 				}
+				yield return new DropdownMenuSeparator("");
+			}
+			else if(node is Nodes.ScriptState) {
+				yield return new DropdownMenuSeparator(""); yield return new DropdownMenuAction("Add Transition", ((e) => {
+					if(node is Nodes.ScriptState stateNode) {
+						var transition = new NodeObject();
+						NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
+							stateNode.transitions.container,
+							"Transition",
+							new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
+							(transition) => {
+
+
+
+								graphEditor.Refresh();
+							});
+					}
+				}), DropdownMenuAction.AlwaysEnabled);
 				yield return new DropdownMenuSeparator("");
 			}
 			#endregion

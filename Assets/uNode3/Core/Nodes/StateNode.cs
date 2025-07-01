@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	//[NodeMenu("Flow", "State", IsCoroutine = true, order = 1, HideOnFlow = true)]
-	public class StateNode : BaseCoroutineNode, ISuperNode, IGraphEventHandler {
+	public class StateNode : BaseCoroutineNode, IScriptState, ISuperNode, IGraphEventHandler {
 		[HideInInspector]
 		public TransitionData transitions = new TransitionData();
 
@@ -23,7 +23,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		private event System.Action<Flow> m_onEnter;
-		public event System.Action<Flow> onEnter {
+		public event System.Action<Flow> OnEnterState {
 			add {
 				m_onEnter -= value;
 				m_onEnter += value;
@@ -33,7 +33,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 		private event System.Action<Flow> m_onExit;
-		public event System.Action<Flow> onExit {
+		public event System.Action<Flow> OnExitState {
 			add {
 				m_onExit -= value;
 				m_onExit += value;

@@ -952,8 +952,8 @@ namespace MaxyGames.UNode.Editors {
 							graphEditor.Select(new UPortRef(edge.Input?.GetPortValue() ?? edge.Output?.GetPortValue()));
 						}
 					}
-					else if(selectable is TransitionView) {
-						graphEditor.Select((selectable as TransitionView).transition);
+					else if(selectable is UNodeView) {
+						graphEditor.Select((selectable as UNodeView).GetSelectableObject());
 						AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
 					}
 				}
@@ -1014,7 +1014,7 @@ namespace MaxyGames.UNode.Editors {
 			var startPortView = startPort as PortView;
 
 			compatiblePorts.AddRange(ports.ToList().Select(p => p as PortView).Where(p => {
-				if(!p.enabledSelf || p.direction == startPort.direction || p.isFlow != startPortView.isFlow /*|| !startPortView.IsValidTarget(p)*/)
+				if(p == null || !p.enabledSelf || p.direction == startPort.direction || p.isFlow != startPortView.isFlow /*|| !startPortView.IsValidTarget(p)*/)
 					return false;
 				return startPortView.CanConnect(p);
 			}));

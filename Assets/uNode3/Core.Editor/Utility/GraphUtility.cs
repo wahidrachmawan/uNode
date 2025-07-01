@@ -1741,7 +1741,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="destroyRoot"></param>
 		public static void SaveAllGraph() {
 			//AssetDatabase.SaveAssets();
-			var assets = FindAllGraphAssets().ToArray();
+			var assets = FindAllGraphAssets(path => AssetDatabase.IsMainAssetAtPathLoaded(path)).ToArray();
 			List<string> assetPath = new List<string>();
 			foreach(var asset in assets) {
 				if(EditorUtility.IsDirty(asset)) {
@@ -2070,15 +2070,13 @@ namespace MaxyGames.UNode.Editors {
 		/// Find all graphs assets ( <see cref="IGraph"/>, <see cref="IScriptGraph"/> )
 		/// </summary>
 		/// <returns></returns>
-		public static IEnumerable<Object> FindAllGraphAssets() {
-			var assets = uNodeEditorUtility.FindAssetsByType<ScriptableObject>(type => {
-				return type.IsCastableTo(typeof(IGraph)) || type.IsCastableTo(typeof(IScriptGraph));
+		public static IEnumerable<Object> FindAllGraphAssets(Func<string, bool> validation = null) {
+			var assets = uNodeEditorUtility.FindAssetsByType<ScriptableObject>(path => {
+				var type = AssetDatabase.GetMainAssetTypeAtPath(path);
+				return type.IsCastableTo(typeof(IGraph)) || type.IsCastableTo(typeof(IScriptGraph)) && (validation == null || validation(path));
 			});
 			foreach(var asset in assets) {
 				yield return asset;
-				//if(asset is IGraph || asset is IScriptGraph) {
-				//	yield return asset;
-				//}
 			}
 		}
 
@@ -2089,9 +2087,10 @@ namespace MaxyGames.UNode.Editors {
 		/// This will including <see cref="IGraph"/>, <see cref="IScriptGraph"/> and all nested graphs.
 		/// </remarks>
 		/// <returns></returns>
-		public static IEnumerable<UnityEngine.Object> FindAllGraphIncludingNestedGraphs() {
-			var assets = uNodeEditorUtility.FindAssetsByType<ScriptableObject>(type => {
-				return type.IsCastableTo(typeof(IGraph)) || type.IsCastableTo(typeof(IScriptGraph));
+		public static IEnumerable<UnityEngine.Object> FindAllGraphIncludingNestedGraphs(Func<string, bool> validation = null) {
+			var assets = uNodeEditorUtility.FindAssetsByType<ScriptableObject>(path => {
+				var type = AssetDatabase.GetMainAssetTypeAtPath(path);
+				return type.IsCastableTo(typeof(IGraph)) || type.IsCastableTo(typeof(IScriptGraph)) && (validation == null || validation(path));
 			});
 			foreach(var asset in assets) {
 				if(asset is IGraph) {
