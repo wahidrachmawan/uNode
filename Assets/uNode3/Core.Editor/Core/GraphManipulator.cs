@@ -15,10 +15,14 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public static class Command {
 			public const string Paste = nameof(Paste);
+			public const string PasteWithLink = nameof(PasteWithLink);
 			public const string Copy = nameof(Copy);
 
 			public const string CanCopy = nameof(CanCopy);
 			public const string CanPaste = nameof(CanPaste);
+
+			public const string OpenItemSelector = nameof(OpenItemSelector);
+			public const string OpenCommand = nameof(OpenCommand);
 		}
 
 		/// <summary>
@@ -26,8 +30,9 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public static class Feature {
 			public const string SurroundWith = nameof(SurroundWith);
-			public const string Macro = nameof(Macro);
+			public const string Macro = nameof(Macro); 
 			public const string PlaceFit = nameof(PlaceFit);
+			public const string ShowAddNodeContextMenu = nameof(ShowAddNodeContextMenu);
 		}
 
 		private uNodeEditor.TabData m_tabData;
@@ -77,29 +82,24 @@ namespace MaxyGames.UNode.Editors {
 
 		/// <summary>
 		/// Manipulate the command for allow/disallow some command to be executed.
-		/// If result is `null` The command will be leaved to be manipulated by others manipulator.
-		/// If result is `false` The command will be prevented to execute.
-		/// If result is `true` The command will be executed because of this manipulator.
+		/// If result is `false` The command will be leaved to be manipulated by others manipulator.
+		/// If result is `true` The command will be handled by this manipulator.
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public virtual bool? CanExecuteCommand(string command) => null;
+		public virtual bool HandleCommand(string command) => false;
 
 		/// <summary>
-		/// It will get supported features, this will be called once at first time load or when the canvas is changed.
-		/// If result is `null` The feature will be leaved to be manipulated by others manipulator.
-		/// If result is `false` The feature will be prevented to use.
-		/// If result is `true` The feature will be allowed to use.
+		/// Finalize manipulate all canvas features
 		/// </summary>
-		/// <param name="feature"></param>
-		/// <returns></returns>
-		public virtual bool? IsSupportedFeature(string feature) => null;
+		/// <param name="features"></param>
+		public virtual void ManipulateCanvasFeatures(HashSet<string> features) { }
 
 		/// <summary>
-		/// Get the additional features
+		/// Get the current canvas features
 		/// </summary>
 		/// <returns></returns>
-		public virtual IEnumerable<string> GetAdditionalFeatures() => null;
+		public virtual IEnumerable<string> GetCanvasFeatures() => null;
 
 		/// <summary>
 		/// Callback for create a new variable
@@ -187,6 +187,21 @@ namespace MaxyGames.UNode.Editors {
 				customItems).ChangePosition(position);
 			window.displayNoneOption = false;
 			window.displayGeneralType = false;
+		}
+	}
+
+	public static class GraphManipulatorUtility {
+		public static bool HandleCommand(GraphEditor graphEditor, string command) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.HandleCommand))) {
+					if(manipulator.HandleCommand(command)) {
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 	}
 
@@ -1272,24 +1287,26 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override IEnumerable<DropdownMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) {
-			yield return new DropdownMenuAction("Add Node", evt => {
-				graphEditor.ShowNodeMenu(mousePosition);
-			}, DropdownMenuAction.AlwaysEnabled);
+			if(graphEditor.canvasData.ShowAddNodeContextMenu) {
+				yield return new DropdownMenuAction("Add Node", evt => {
+					graphEditor.ShowNodeMenu(mousePosition);
+				}, DropdownMenuAction.AlwaysEnabled);
 
-			yield return new DropdownMenuAction("Add Node (Set)", evt => {
-				graphEditor.ShowNodeMenu(mousePosition, new FilterAttribute() { SetMember = true, VoidType = false }, (node) => {
-					node.EnsureRegistered();
-					NodeEditorUtility.AddNewNode(graphData, new Vector2(node.nodeObject.position.x, node.position.y), delegate (Nodes.NodeSetValue n) {
-						n.EnsureRegistered();
-						NodeEditorUtility.ConnectPort(n.target, node.nodeObject.primaryValueOutput);
-						n.value.AssignToDefault(MemberData.Default(n.target.type));
+				yield return new DropdownMenuAction("Add Node (Set)", evt => {
+					graphEditor.ShowNodeMenu(mousePosition, new FilterAttribute() { SetMember = true, VoidType = false }, (node) => {
+						node.EnsureRegistered();
+						NodeEditorUtility.AddNewNode(graphData, new Vector2(node.nodeObject.position.x, node.position.y), delegate (Nodes.NodeSetValue n) {
+							n.EnsureRegistered();
+							NodeEditorUtility.ConnectPort(n.target, node.nodeObject.primaryValueOutput);
+							n.value.AssignToDefault(MemberData.Default(n.target.type));
+						});
+						node.nodeObject.SetPosition(new Vector2(node.position.x - 150, node.position.y - 100));
 					});
-					node.nodeObject.SetPosition(new Vector2(node.position.x - 150, node.position.y - 100));
-				});
-			}, DropdownMenuAction.AlwaysEnabled);
-			yield return new DropdownMenuAction("Add Node (Favorites)", evt => {
-				graphEditor.ShowFavoriteMenu(mousePosition);
-			}, DropdownMenuAction.AlwaysEnabled);
+				}, DropdownMenuAction.AlwaysEnabled);
+				yield return new DropdownMenuAction("Add Node (Favorites)", evt => {
+					graphEditor.ShowFavoriteMenu(mousePosition);
+				}, DropdownMenuAction.AlwaysEnabled);
+			}
 
 			if(graphEditor.canvasData.SupportMacro) {
 				yield return new DropdownMenuAction("Add Linked Macro", evt => {
@@ -1415,7 +1432,7 @@ namespace MaxyGames.UNode.Editors {
 			#endregion
 
 			#region Return & Jump
-			if(!(graphData.selectedRoot is MainGraphContainer)) {
+			if(graphData.selectedRoot is BaseFunction) {
 				yield return new DropdownMenuAction("Jump Statement/Add Return", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);
@@ -1458,71 +1475,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
-			#region Transition
-			if(node is Nodes.StateNode) {
-				yield return new DropdownMenuSeparator("");
-				foreach(TransitionMenu menuItem in NodeEditorUtility.FindTransitionMenu()) {
-					object[] eventObject = new object[]{
-								menuItem.type,
-								menuItem.name,
-							};
-					yield return new DropdownMenuAction("Add Transition/" + menuItem.path, ((e) => {
-						object[] objToArray = e.userData as object[];
-						System.Type type = (System.Type)objToArray[0];
-						if(node is Nodes.StateNode stateNode) {
-							var transition = new NodeObject();
-							NodeEditorUtility.AddNewNode<TransitionEvent>(
-								stateNode.transitions.container,
-								objToArray[1] as string,
-								type,
-								new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
-								(transition) => {
-									graphEditor.Refresh();
-								});
-						}
-					}), DropdownMenuAction.AlwaysEnabled, eventObject);
-				}
-				yield return new DropdownMenuSeparator("");
-			}
-			else if(node is Nodes.IStateNodeWithTransition stateNode) {
-				yield return new DropdownMenuAction("Add Transition/Empty", ((e) => {
-					NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
-						stateNode.TransitionContainer, "Transition",
-						new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
-						(transition) => {
-							transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
-
-							graphEditor.Refresh();
-						});
-				}), DropdownMenuAction.AlwaysEnabled);
-
-				var eventMenus = NodeEditorUtility.FindEventMenu();
-				foreach(var menu in eventMenus) {
-					if(menu.type == typeof(Nodes.StateOnEnterEvent)) continue;
-					if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
-					if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
-						yield return new DropdownMenuAction("Add Transition/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
-							NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
-								stateNode.TransitionContainer, menu.nodeName,
-								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
-								(transition) => {
-									var trigger = transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
-									trigger.Register();
-									NodeEditorUtility.AddNewNode<Node>(transition, menu.nodeName, menu.type, new(0, -100), evt => {
-										var output = evt.nodeObject.FlowOutputs.FirstOrDefault();
-										if(output != null) {
-											output.ConnectTo(trigger.trigger);
-										}
-									});
-								});
-							graphEditor.Refresh();
-						}, DropdownMenuAction.AlwaysEnabled);
-					}
-				}
-				yield return new DropdownMenuSeparator("");
-			}
-			#endregion
-
 			#region MultipurposeNode
 			if(node is MultipurposeNode) {
 				MultipurposeNode mNode = node as MultipurposeNode;
@@ -1728,22 +1680,6 @@ namespace MaxyGames.UNode.Editors {
 
 			yield break;
 		}
-
-		public override bool? IsSupportedFeature(string feature) {
-			if(feature == nameof(Feature.Macro)) {
-				if(graphData.currentCanvas is StateGraphContainer) return false;
-				return true;
-			}
-			if(feature == nameof(Feature.PlaceFit)) {
-				if(graphData.currentCanvas is StateGraphContainer) return false;
-				return true;
-			}
-			if(feature == nameof(Feature.SurroundWith)) {
-				if(graphData.currentCanvas is StateGraphContainer) return false;
-				return true;
-			}
-			return null;
-		}
 	}
 
 	class StateGraphManipulator : GraphManipulator {
@@ -1751,6 +1687,107 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool IsValid(string action) {
 			return true;
+		}
+
+		public override IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
+			#region Transition
+			if(node is Nodes.StateNode) {
+				yield return new DropdownMenuSeparator("");
+				foreach(TransitionMenu menuItem in NodeEditorUtility.FindTransitionMenu()) {
+					object[] eventObject = new object[]{
+								menuItem.type,
+								menuItem.name,
+							};
+					yield return new DropdownMenuAction("Add Transition/" + menuItem.path, ((e) => {
+						object[] objToArray = e.userData as object[];
+						System.Type type = (System.Type)objToArray[0];
+						if(node is Nodes.StateNode stateNode) {
+							var transition = new NodeObject();
+							NodeEditorUtility.AddNewNode<TransitionEvent>(
+								stateNode.transitions.container,
+								objToArray[1] as string,
+								type,
+								new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
+								(transition) => {
+									graphEditor.Refresh();
+								});
+						}
+					}), DropdownMenuAction.AlwaysEnabled, eventObject);
+				}
+				yield return new DropdownMenuSeparator("");
+			}
+			else if(node is Nodes.IStateNodeWithTransition stateNode) {
+				yield return new DropdownMenuAction("Add Transition/Empty", ((e) => {
+					NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
+						stateNode.TransitionContainer, "Transition",
+						new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
+						(transition) => {
+							transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
+							NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State", 
+								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150), 
+								state => {
+									state.enter.ConnectTo(transition.exit);
+								});
+							graphEditor.Refresh();
+						});
+				}), DropdownMenuAction.AlwaysEnabled);
+
+				var eventMenus = NodeEditorUtility.FindEventMenu();
+				foreach(var menu in eventMenus) {
+					if(menu.type == typeof(Nodes.StateOnEnterEvent)) continue;
+					if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
+					if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
+						yield return new DropdownMenuAction("Add Transition/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+							NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
+								stateNode.TransitionContainer, menu.nodeName,
+								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
+								(transition) => {
+									var trigger = transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
+									trigger.Register();
+									NodeEditorUtility.AddNewNode<Node>(transition, menu.nodeName, menu.type, new(0, -100), evt => {
+										var output = evt.nodeObject.FlowOutputs.FirstOrDefault();
+										if(output != null) {
+											output.ConnectTo(trigger.trigger);
+										}
+									});
+									NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State",
+										new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150),
+										state => {
+											state.enter.ConnectTo(transition.exit);
+										});
+								});
+							graphEditor.Refresh();
+						}, DropdownMenuAction.AlwaysEnabled);
+					}
+				}
+				yield return new DropdownMenuSeparator("");
+			}
+			#endregion
+
+			yield break;
+		}
+
+		public override bool HandleCommand(string command) {
+			if(graphData.currentCanvas is StateGraphContainer) {
+				switch(command) {
+					case nameof(Command.OpenCommand):
+						//Skip
+						return true;
+					case nameof(Command.OpenItemSelector):
+
+						return true;
+				}
+			}
+			return false;
+		}
+
+		public override void ManipulateCanvasFeatures(HashSet<string> features) {
+			if(graphData.currentCanvas is StateGraphContainer) {
+				features.Remove(nameof(Feature.Macro));
+				features.Remove(nameof(Feature.PlaceFit));
+				features.Remove(nameof(Feature.SurroundWith));
+				features.Remove(nameof(Feature.ShowAddNodeContextMenu));
+			}
 		}
 	}
 }

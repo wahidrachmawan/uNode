@@ -2146,6 +2146,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			else {
+				if(GraphManipulatorUtility.HandleCommand(graphEditor, nameof(GraphManipulator.Command.OpenItemSelector))) {
+					return;
+				}
+
 				var nodeView = nodeViews.Where(view => !(view is RegionNodeView)).FirstOrDefault(view => view != null && view.GetPosition().Contains(point));
 				if(nodeView == null && graphData.canAddNode) {
 					graphEditor.ShowNodeMenu(point);
@@ -2168,6 +2172,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(type == GraphShortcutType.OpenCommand) {
 				if(graphData.canAddNode) {
+					if(GraphManipulatorUtility.HandleCommand(graphEditor, nameof(GraphManipulator.Command.OpenCommand))) {
+						return true;
+					}
 					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
 						Vector2 point = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
 							contentViewContainer,
@@ -2208,6 +2215,9 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 			else if(type == GraphShortcutType.PasteNodesClean) {
+				if(GraphManipulatorUtility.HandleCommand(graphEditor, nameof(GraphManipulator.Command.Paste))) {
+					return true;
+				}
 				if(graphData.canAddNode) {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
 					var clickedPos = GetMousePosition(graphEditor.topMousePos);
@@ -2217,6 +2227,9 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 			else if(type == GraphShortcutType.PasteNodesWithLink) {
+				if(GraphManipulatorUtility.HandleCommand(graphEditor, nameof(GraphManipulator.Command.PasteWithLink))) {
+					return true;
+				}
 				if(graphData.canAddNode) {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
 					var clickedPos = GetMousePosition(graphEditor.topMousePos);
@@ -2255,16 +2268,18 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 			else if(type == GraphShortcutType.PlaceFitNodes) {
-				if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
-					if(graphData.selectedCount == 1) {
-						var selected = graphData.selecteds.First() as NodeObject;
-						if(selected != null) {
-							if(nodeViewsPerNode.TryGetValue(selected, out var view)) {
-								UIElementUtility.PlaceFitNodes(view);
+				if(graphEditor.canvasData.SupportPlaceFit) {
+					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
+						if(graphData.selectedCount == 1) {
+							var selected = graphData.selecteds.First() as NodeObject;
+							if(selected != null) {
+								if(nodeViewsPerNode.TryGetValue(selected, out var view)) {
+									UIElementUtility.PlaceFitNodes(view);
+								}
 							}
 						}
+						return true;
 					}
-					return true;
 				}
 
 			}

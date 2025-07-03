@@ -28,6 +28,22 @@ namespace MaxyGames.UNode.Editors {
 		public virtual EdgeView InitializeEdge(UGraphView graph, EdgeData edgeData) => null;
 
 		public virtual IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, UNodeView view) => null;
+
+		/// <summary>
+		/// Handle the default port on drop event
+		/// </summary>
+		/// <param name="graphView"></param>
+		/// <param name="edge"></param>
+		/// <returns></returns>
+		public virtual bool HandlePortOnDrop(UGraphView graphView, EdgeView edge) => false;
+
+		/// <summary>
+		/// Handle the default port on drop event
+		/// </summary>
+		/// <param name="edge"></param>
+		/// <param name="position"></param>
+		/// <returns></returns>
+		public virtual bool HandlePortOnDropOutsidePort(UGraphView graphView, EdgeView edge, Vector2 position) => false;
 	}
 
 	class DefaultUIGraphProcessor : UIGraphProcessor {
@@ -180,6 +196,19 @@ namespace MaxyGames.UNode.Editors {
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			yield break;
+		}
+
+		public override bool HandlePortOnDropOutsidePort(UGraphView graphView, EdgeView edge, Vector2 position) {
+			if(graphView.graphData.currentCanvas is StateGraphContainer) {
+				if(edge.Output != null) {
+					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphView.graphData, position, node => {
+						node.enter.ConnectTo(edge.Output.GetPortValue());
+						graphView.graphEditor.Refresh();
+					});
+				}
+				return true;
+			}
+			return false;
 		}
 	}
 }

@@ -17,20 +17,6 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool fullReload => true;
 
-		class TransitionEdgeListener : IEdgeConnectorListener {
-			public static TransitionEdgeListener Default { get; private set; } = new TransitionEdgeListener();
-
-			public void OnDrop(GraphView graphView, Edge edge) {
-				var edgeView = edge as TransitionEdgeView;
-				var graph = graphView as UGraphView;
-				graph.Connect(edgeView, true);
-			}
-
-			public void OnDropOutsidePort(Edge edge, Vector2 position) {
-
-			}
-		}
-
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			nodeObject = node;
 			this.transition = node.node as Nodes.StateTransition;
@@ -102,14 +88,21 @@ namespace MaxyGames.UNode.Editors {
 
 			{
 				inputPort = AddInputFlowPort(new FlowInputData(transition.enter));
-				inputPort.SetEdgeConnector<TransitionEdgeView>(TransitionEdgeListener.Default);
+				inputPort.SetEdgeConnector<TransitionEdgeView>();
 				inputPort.pickingMode = PickingMode.Ignore;
 				inputPort.SetEnabled(false);
 				outputPort = AddOutputFlowPort(new FlowOutputData(transition.exit));
-				outputPort.SetEdgeConnector<TransitionEdgeView>(TransitionEdgeListener.Default);
+				outputPort.SetEdgeConnector<TransitionEdgeView>();
 				outputPort.pickingMode = PickingMode.Ignore;
 				//outputPort.SetEnabled(false);
 			}
+			titleContainer.RegisterCallback<MouseDownEvent>(e => {
+				if(e.button == 0 && e.clickCount == 2) {
+					owner.graphEditor.graphData.currentCanvas = targetNode.nodeObject;
+					owner.graphEditor.Refresh();
+					owner.graphEditor.UpdatePosition();
+				}
+			});
 
 			RefreshPorts();
 		}

@@ -801,6 +801,13 @@ namespace MaxyGames.UNode.Editors {
 				owner.owner.graphEditor.window.rootVisualElement.parent,
 				screenRect - owner.owner.graphEditor.window.position.position);
 			position = owner.owner.contentViewContainer.WorldToLocal(pos);
+
+			foreach(var p in UGraphView.GraphProcessor) {
+				if(p.HandlePortOnDropOutsidePort(owner.owner, edge as EdgeView, position)) {
+					return;
+				}
+			}
+
 			PortView sidePort = null;
 			if(input != null && output != null) {
 				var draggedPort = input.edgeConnector?.edgeDragHelper?.draggedPort ?? output.edgeConnector?.edgeDragHelper?.draggedPort;
@@ -1089,20 +1096,26 @@ namespace MaxyGames.UNode.Editors {
 
 		public void OnDrop(GraphView graphView, Edge edge) {
 			var edgeView = edge as EdgeView;
-			var graph = graphView as UGraphView;
-			if(graph == null || edgeView == null || edgeView.input == null || edgeView.output == null)
+			var ugraphView = graphView as UGraphView;
+			foreach(var p in UGraphView.GraphProcessor) {
+				if(p.HandlePortOnDrop(ugraphView, edgeView)) {
+					return;
+				}
+			}
+
+			if(ugraphView == null || edgeView == null || edgeView.input == null || edgeView.output == null)
 				return;
 			if(edgeView.Input.isValue) {
 				if(edgeView.input == this) {
-					OnDropInsideValueOutput(graph, edgeView);
+					OnDropInsideValueOutput(ugraphView, edgeView);
 				}
 				else {
-					OnDropInsideValueInput(graph, edgeView);
+					OnDropInsideValueInput(ugraphView, edgeView);
 				}
 			}
 			else {
-				uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
-				graph.Connect(edgeView, true);
+				uNodeEditorUtility.RegisterUndo(ugraphView.graphData.owner, "Connect port");
+				ugraphView.Connect(edgeView, true);
 			}
 		}
 		#endregion

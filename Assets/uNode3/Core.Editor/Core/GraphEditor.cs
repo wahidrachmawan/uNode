@@ -14,6 +14,7 @@ namespace MaxyGames.UNode.Editors {
 			public bool SupportSurroundWith => features.Contains(nameof(GraphManipulator.Feature.SurroundWith));
 			public bool SupportMacro => features.Contains(nameof(GraphManipulator.Feature.Macro));
 			public bool SupportPlaceFit => features.Contains(nameof(GraphManipulator.Feature.PlaceFit));
+			public bool ShowAddNodeContextMenu => features.Contains(nameof(GraphManipulator.Feature.ShowAddNodeContextMenu));
 
 			public bool IsFeatureSupported(string feature) => feature.Contains(feature);
 
@@ -692,33 +693,27 @@ namespace MaxyGames.UNode.Editors {
 		protected virtual void OnCanvasChanged() {
 			var data = canvasData;
 			data.Reset();
-			var list = StaticListPool<string>.Allocate();
 
-			list.Add(nameof(GraphManipulator.Feature.Macro));
-			list.Add(nameof(GraphManipulator.Feature.PlaceFit));
-			list.Add(nameof(GraphManipulator.Feature.SurroundWith));
+			data.features.Add(nameof(GraphManipulator.Feature.Macro));
+			data.features.Add(nameof(GraphManipulator.Feature.PlaceFit));
+			data.features.Add(nameof(GraphManipulator.Feature.SurroundWith));
+			data.features.Add(nameof(GraphManipulator.Feature.ShowAddNodeContextMenu));
 
 			var manipulators = NodeEditorUtility.FindGraphManipulators();
 			foreach(var manipulator in manipulators) {
 				manipulator.graphEditor = this;
-				if(manipulator.IsValid(nameof(manipulator.GetAdditionalFeatures))) {
-					var obj = manipulator.GetAdditionalFeatures();
+				if(manipulator.IsValid(nameof(manipulator.GetCanvasFeatures))) {
+					var obj = manipulator.GetCanvasFeatures();
 					if(obj != null) {
-						list.AddRange(obj);
+						data.features.AddRange(obj);
 					}
 				}
 			}
-			data.features.AddRange(list);
-			foreach(var feature in list) {
-				foreach(var manipulator in manipulators) {
-					if(manipulator.IsValid(nameof(manipulator.IsSupportedFeature))) {
-						if(manipulator.IsSupportedFeature(feature) == false) {
-							data.features.Remove(feature);
-						}
-					}
+			foreach(var manipulator in manipulators) {
+				if(manipulator.IsValid(nameof(manipulator.ManipulateCanvasFeatures))) {
+					manipulator.ManipulateCanvasFeatures(data.features);
 				}
 			}
-			StaticListPool<string>.Free(list);
 		}
 
 		/// <summary>

@@ -11,6 +11,15 @@ using NodeView = UnityEditor.Experimental.GraphView.Node;
 using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode.Editors {
+	[NodeCustomEditor(typeof(StateEntryNode))]
+	class StateEntryView : BaseNodeView {
+		protected override void InitializeDefaultPorts() {
+			var port = AddPrimaryOutputFlow();
+			port.SetEdgeConnector<TransitionEdgeView>();
+			port.pickingMode = PickingMode.Ignore;
+		}
+	}
+
 	[NodeCustomEditor(typeof(ScriptState))]
 	[NodeCustomEditor(typeof(AnyStateNode))]
 	public class ScriptStateView : BaseNodeView {
@@ -25,8 +34,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected override void InitializeDefaultPorts() {
-			if(nodeObject.node is ScriptState node) {
-				var port = AddInputFlowPort(new FlowInputData((nodeObject.node as ScriptState).enter));
+			if(nodeObject.node is ScriptState) {
+				var port = AddPrimaryInputFlow();
 				port.SetEdgeConnector<TransitionEdgeView>();
 				port.pickingMode = PickingMode.Ignore;
 			}

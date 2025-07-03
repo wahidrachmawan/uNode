@@ -466,8 +466,8 @@ namespace MaxyGames.UNode.Nodes {
 		public UGraphElement TransitionContainer => transitions.container;
 
 		public bool CanTrigger(GraphInstance instance) {
-			var state = instance.GetUserData(this) as StateMachines.IState;
-			return state.IsActive;
+			var state = instance.GetUserData(nodeObject.parent) as StateMachines.IState;
+			return state == null || state.IsActive;
 		}
 
 		public IEnumerable<StateTransition> GetTransitions() {
@@ -482,6 +482,8 @@ namespace MaxyGames.UNode.Nodes {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);
 			var state = new StateMachines.AnyState();
+			var fsm = instance.GetUserData(nodeObject.parent) as StateMachines.IStateMachine;
+			state.FSM = fsm;
 			instance.SetUserData(this, state);
 		}
 
@@ -555,9 +557,19 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRuntimeInitialize(instance);
 			var state = new StateMachines.State(
 				onEnter: () => {
+#if UNITY_EDITOR
+					if(GraphDebug.useDebug) {
+						GraphDebug.FlowNode(instance.target, nodeObject.graphContainer.GetGraphID(), id, null);
+					}
+#endif
 					m_onEnter?.Invoke(instance.defaultFlow);
 				},
 				onExit: () => {
+#if UNITY_EDITOR
+					if(GraphDebug.useDebug) {
+						GraphDebug.FlowNode(instance.target, nodeObject.graphContainer.GetGraphID(), id, true);
+					}
+#endif
 					m_onExit?.Invoke(instance.defaultFlow);
 				});
 			instance.SetUserData(this, state);
@@ -689,10 +701,9 @@ namespace MaxyGames.UNode.Nodes {
 		/// Call to finish the transition.
 		/// </summary>
 		public void Finish(Flow flow) {
-			var state = flow.GetUserData(node as UGraphElement) as StateMachines.IState;
+			var state = flow.GetUserData(node as Node) as StateMachines.IState;
 			if(state.IsActive) {
-				var targetState = exit.GetTargetNode().node as ScriptState;
-				state.FSM.ChangeState(flow.GetUserData(targetState) as StateMachines.IState);
+				state.FSM.ChangeState(flow.GetUserData(exit.GetTargetNode()) as StateMachines.IState);
 #if UNITY_EDITOR
 				if(GraphDebug.useDebug) {
 					GraphDebug.Flow(flow.instance.target, nodeObject.graphContainer.GetGraphID(), id, nameof(exit));

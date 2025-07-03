@@ -12,7 +12,6 @@ namespace MaxyGames.UNode.Editors {
 	public class BaseNodeView : UNodeView {
 
 		protected VisualElement debugView;
-		protected VisualElement debugStateView;
 
 		private Image compactIcon = null;
 
