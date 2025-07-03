@@ -737,7 +737,7 @@ namespace MaxyGames.UNode.Editors {
 					customItems.Add(ItemSelector.CustomItem.Create(
 						menuItem,
 						() => {
-							NodeEditorUtility.AddNewNode<Node>(owner.graphData, menuItem.nodeName ?? menuItem.name.Split(' ')[0], menuItem.type, position, n => {
+							NodeEditorUtility.AddNewNode<Node>(owner.graphData, menuItem.nodeName, menuItem.type, position, n => {
 								NodeEditorUtility.AutoConnectPortToTarget(portView.GetPortValue(), n, owner.graphData.currentCanvas);
 								owner.MarkRepaint();
 							});
@@ -1459,6 +1459,17 @@ namespace MaxyGames.UNode.Editors {
 			}
 			for(int i = m_depths.Count - 1; i >= 0; i--) {
 				Insert(1, m_depths[i]);
+			}
+		}
+
+		public void SendMakeConnectionEvent() {
+			SendEvent(new DragEvent(GetGlobalCenter(), this));
+		}
+
+		class DragEvent : MouseDownEvent {
+			public DragEvent(Vector2 mousePosition, VisualElement target) {
+				this.mousePosition = mousePosition;
+				this.target = target;
 			}
 		}
 		#endregion

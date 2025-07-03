@@ -9,19 +9,25 @@ using System.Collections;
 using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
-	public enum GraphManipulationResult {
-		Continue,
-		Prevent,
-		Accept,
-	}
-
 	public abstract class GraphManipulator {
 		/// <summary>
 		/// The list of manipulation command
 		/// </summary>
-		public class Command {
+		public static class Command {
 			public const string Paste = nameof(Paste);
 			public const string Copy = nameof(Copy);
+
+			public const string CanCopy = nameof(CanCopy);
+			public const string CanPaste = nameof(CanPaste);
+		}
+
+		/// <summary>
+		/// The list of build-in canvas feature
+		/// </summary>
+		public static class Feature {
+			public const string SurroundWith = nameof(SurroundWith);
+			public const string Macro = nameof(Macro);
+			public const string PlaceFit = nameof(PlaceFit);
 		}
 
 		private uNodeEditor.TabData m_tabData;
@@ -71,13 +77,29 @@ namespace MaxyGames.UNode.Editors {
 
 		/// <summary>
 		/// Manipulate the command for allow/disallow some command to be executed.
-		/// If result is <see cref="GraphManipulationResult.Continue"/> The command will be leaved to be manipulated by others.
-		/// If result is <see cref="GraphManipulationResult.Prevent"/> The command will be prevented to execute.
-		/// If result is <see cref="GraphManipulationResult.Accept"/> The command will be executed because of this manipulator.
+		/// If result is `null` The command will be leaved to be manipulated by others manipulator.
+		/// If result is `false` The command will be prevented to execute.
+		/// If result is `true` The command will be executed because of this manipulator.
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public virtual GraphManipulationResult CanExecuteCommand(string command) => GraphManipulationResult.Continue;
+		public virtual bool? CanExecuteCommand(string command) => null;
+
+		/// <summary>
+		/// It will get supported features, this will be called once at first time load or when the canvas is changed.
+		/// If result is `null` The feature will be leaved to be manipulated by others manipulator.
+		/// If result is `false` The feature will be prevented to use.
+		/// If result is `true` The feature will be allowed to use.
+		/// </summary>
+		/// <param name="feature"></param>
+		/// <returns></returns>
+		public virtual bool? IsSupportedFeature(string feature) => null;
+
+		/// <summary>
+		/// Get the additional features
+		/// </summary>
+		/// <returns></returns>
+		public virtual IEnumerable<string> GetAdditionalFeatures() => null;
 
 		/// <summary>
 		/// Callback for create a new variable
@@ -1268,22 +1290,25 @@ namespace MaxyGames.UNode.Editors {
 			yield return new DropdownMenuAction("Add Node (Favorites)", evt => {
 				graphEditor.ShowFavoriteMenu(mousePosition);
 			}, DropdownMenuAction.AlwaysEnabled);
-			yield return new DropdownMenuAction("Add Linked Macro", evt => {
-				var macros = GraphUtility.FindGraphs<MacroGraph>();
-				List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
-				foreach(var macro in macros) {
-					var m = macro;
-					customItems.Add(ItemSelector.CustomItem.Create(
-						m.GetGraphName(),
-						() => {
-							graphEditor.CreateLinkedMacro(m, mousePosition);
-						},
-						m.category,
-						icon: uNodeEditorUtility.GetTypeIcon(m.GetIcon()),
-						tooltip: new GUIContent(m.GraphData.comment)));
-				}
-				ItemSelector.ShowWindow(null, null, null, customItems).ChangePosition(graphEditor.GetMenuPosition()).displayDefaultItem = false;
-			}, DropdownMenuAction.AlwaysEnabled);
+
+			if(graphEditor.canvasData.SupportMacro) {
+				yield return new DropdownMenuAction("Add Linked Macro", evt => {
+					var macros = GraphUtility.FindGraphs<MacroGraph>();
+					List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
+					foreach(var macro in macros) {
+						var m = macro;
+						customItems.Add(ItemSelector.CustomItem.Create(
+							m.GetGraphName(),
+							() => {
+								graphEditor.CreateLinkedMacro(m, mousePosition);
+							},
+							m.category,
+							icon: uNodeEditorUtility.GetTypeIcon(m.GetIcon()),
+							tooltip: new GUIContent(m.GraphData.comment)));
+					}
+					ItemSelector.ShowWindow(null, null, null, customItems).ChangePosition(graphEditor.GetMenuPosition()).displayDefaultItem = false;
+				}, DropdownMenuAction.AlwaysEnabled);
+			}
 
 
 			#region Event & State
@@ -1328,6 +1353,12 @@ namespace MaxyGames.UNode.Editors {
 				yield return new DropdownMenuAction("Add Script State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphData,
 						"State",
+						mousePosition);
+					graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+				yield return new DropdownMenuAction("Add Any State", evt => {
+					NodeEditorUtility.AddNewNode<Nodes.AnyStateNode>(graphData,
+						"AnyState",
 						mousePosition);
 					graphEditor.Refresh();
 				}, DropdownMenuAction.AlwaysEnabled);
@@ -1453,22 +1484,41 @@ namespace MaxyGames.UNode.Editors {
 				}
 				yield return new DropdownMenuSeparator("");
 			}
-			else if(node is Nodes.ScriptState) {
-				yield return new DropdownMenuSeparator(""); yield return new DropdownMenuAction("Add Transition", ((e) => {
-					if(node is Nodes.ScriptState stateNode) {
-						var transition = new NodeObject();
-						NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
-							stateNode.transitions.container,
-							"Transition",
-							new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
-							(transition) => {
+			else if(node is Nodes.IStateNodeWithTransition stateNode) {
+				yield return new DropdownMenuAction("Add Transition/Empty", ((e) => {
+					NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
+						stateNode.TransitionContainer, "Transition",
+						new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
+						(transition) => {
+							transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
 
-
-
-								graphEditor.Refresh();
-							});
-					}
+							graphEditor.Refresh();
+						});
 				}), DropdownMenuAction.AlwaysEnabled);
+
+				var eventMenus = NodeEditorUtility.FindEventMenu();
+				foreach(var menu in eventMenus) {
+					if(menu.type == typeof(Nodes.StateOnEnterEvent)) continue;
+					if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
+					if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
+						yield return new DropdownMenuAction("Add Transition/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+							NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
+								stateNode.TransitionContainer, menu.nodeName,
+								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
+								(transition) => {
+									var trigger = transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
+									trigger.Register();
+									NodeEditorUtility.AddNewNode<Node>(transition, menu.nodeName, menu.type, new(0, -100), evt => {
+										var output = evt.nodeObject.FlowOutputs.FirstOrDefault();
+										if(output != null) {
+											output.ConnectTo(trigger.trigger);
+										}
+									});
+								});
+							graphEditor.Refresh();
+						}, DropdownMenuAction.AlwaysEnabled);
+					}
+				}
 				yield return new DropdownMenuSeparator("");
 			}
 			#endregion
@@ -1677,6 +1727,22 @@ namespace MaxyGames.UNode.Editors {
 			#endregion
 
 			yield break;
+		}
+
+		public override bool? IsSupportedFeature(string feature) {
+			if(feature == nameof(Feature.Macro)) {
+				if(graphData.currentCanvas is StateGraphContainer) return false;
+				return true;
+			}
+			if(feature == nameof(Feature.PlaceFit)) {
+				if(graphData.currentCanvas is StateGraphContainer) return false;
+				return true;
+			}
+			if(feature == nameof(Feature.SurroundWith)) {
+				if(graphData.currentCanvas is StateGraphContainer) return false;
+				return true;
+			}
+			return null;
 		}
 	}
 

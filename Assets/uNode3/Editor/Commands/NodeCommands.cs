@@ -180,6 +180,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override bool IsValidNode(Node source) {
+			if(graphEditor.canvasData.SupportSurroundWith == false) return false;
 			return source.nodeObject.FlowInputs.Any(input => input.hasValidConnections);
 		}
 	}

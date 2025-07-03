@@ -26,6 +26,8 @@ namespace MaxyGames.UNode.Editors {
 		public virtual UNodeView InitializeView(UGraphView graph, NodeObject node) => null;
 
 		public virtual EdgeView InitializeEdge(UGraphView graph, EdgeData edgeData) => null;
+
+		public virtual IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, UNodeView view) => null;
 	}
 
 	class DefaultUIGraphProcessor : UIGraphProcessor {
@@ -169,6 +171,15 @@ namespace MaxyGames.UNode.Editors {
 				action?.Invoke();
 			}
 			return false;
+		}
+
+		public override IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, UNodeView view) {
+			if(view.targetNode is Nodes.StateEntryNode || view.targetNode is Nodes.StateTransition) {
+				yield return new DropdownMenuAction("Make Connection", (e) => {
+					view.outputPorts.First().SendMakeConnectionEvent();
+				}, DropdownMenuAction.AlwaysEnabled);
+			}
+			yield break;
 		}
 	}
 }

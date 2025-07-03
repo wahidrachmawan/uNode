@@ -15,6 +15,7 @@ namespace MaxyGames.UNode {
 		public string name => _nodeObject?.name;
 		public int id => _nodeObject?.id ?? 0;
 		public string comment => _nodeObject?.comment;
+
 		/// <summary>
 		/// The node position in graph.
 		/// </summary>
@@ -37,6 +38,11 @@ namespace MaxyGames.UNode {
 				_nodeObject = value;
 			}
 		}
+
+		/// <summary>
+		/// The node styles
+		/// </summary>
+		public virtual string[] Styles => null;
 
 		protected GraphException exceptionInvalidFlow => new GraphException("Live editing: trying to execute flow on invalid node." + "Node: " + GetTitle() + " - id:" + id, this);
 		protected GraphException exceptionInvalidValue => new GraphException("Live editing: trying to get / set on invalid node." + "Node: " + GetTitle() + " - id:" + id, this);

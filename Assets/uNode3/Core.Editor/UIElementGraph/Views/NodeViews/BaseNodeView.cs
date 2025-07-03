@@ -430,30 +430,6 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 		}
-
-		/// <summary>
-		/// Do update every 0.5 second.
-		/// </summary>
-		protected virtual void DoUpdate() {
-			if(!this.IsVisible())
-				return;
-			#region Errors
-			var errors = GraphUtility.ErrorChecker.GetErrorMessages(nodeObject, InfoType.Error);
-			if(errors != null && errors.Any()) {
-				System.Text.StringBuilder sb = new System.Text.StringBuilder();
-				foreach(var error in errors) { 
-					if(sb.Length > 0) {
-						sb.AppendLine();
-						sb.AppendLine();
-					}
-					sb.Append("-" + uNodeEditorUtility.RemoveHTMLTag(error.message));
-				}
-				UpdateError(sb.ToString());
-			} else {
-				UpdateError(string.Empty);
-			}
-			#endregion
-		}
 		#endregion
 	}
 

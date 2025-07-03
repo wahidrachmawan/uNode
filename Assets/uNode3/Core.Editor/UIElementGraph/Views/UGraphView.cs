@@ -1157,56 +1157,58 @@ namespace MaxyGames.UNode.Editors {
 				#endregion
 
 				#region Place Fit
-				if(graphData.selectedGroup != null) {
-					//TODO: fix this
-					//if(editorData.selectedGroup is ISuperNode) {
-					//	ISuperNode superNode = editorData.selectedGroup as ISuperNode;
-					//	foreach(var n in superNode.nestedFlowNodes) {
-					//		if(n == null)
-					//			continue;
-					//		UNodeView view;
-					//		if(nodeViewsPerNode.TryGetValue(n, out view)) {
-					//			evt.menu.AppendAction("Place fit nodes", (e) => {
-					//				foreach(var node in superNode.nestedFlowNodes) {
-					//					if(node == null)
-					//						continue;
-					//					UNodeView nView;
-					//					if(nodeViewsPerNode.TryGetValue(node, out nView)) {
-					//						UIElementUtility.PlaceFitNodes(nView);
-					//					}
-					//				}
-					//			}, DropdownMenuAction.AlwaysEnabled);
-					//		}
-					//	}
-					//}
-				}
-				else if(graphData.currentCanvas is MainGraphContainer) {
-					var events = graphEditor.nodes.Where(n => n.node is BaseEventNode);
-					List<UNodeView> views = new List<UNodeView>();
-					foreach(var n in events) {
-						if(nodeViewsPerNode.TryGetValue(n, out var nView)) {
-							views.Add(nView);
+				if(graphEditor.canvasData.SupportPlaceFit) {
+					if(graphData.selectedGroup != null) {
+						//TODO: fix this
+						//if(editorData.selectedGroup is ISuperNode) {
+						//	ISuperNode superNode = editorData.selectedGroup as ISuperNode;
+						//	foreach(var n in superNode.nestedFlowNodes) {
+						//		if(n == null)
+						//			continue;
+						//		UNodeView view;
+						//		if(nodeViewsPerNode.TryGetValue(n, out view)) {
+						//			evt.menu.AppendAction("Place fit nodes", (e) => {
+						//				foreach(var node in superNode.nestedFlowNodes) {
+						//					if(node == null)
+						//						continue;
+						//					UNodeView nView;
+						//					if(nodeViewsPerNode.TryGetValue(node, out nView)) {
+						//						UIElementUtility.PlaceFitNodes(nView);
+						//					}
+						//				}
+						//			}, DropdownMenuAction.AlwaysEnabled);
+						//		}
+						//	}
+						//}
+					}
+					else if(graphData.currentCanvas is MainGraphContainer) {
+						var events = graphEditor.nodes.Where(n => n.node is BaseEventNode);
+						List<UNodeView> views = new List<UNodeView>();
+						foreach(var n in events) {
+							if(nodeViewsPerNode.TryGetValue(n, out var nView)) {
+								views.Add(nView);
+							}
+						}
+						if(views.Count > 0) {
+							evt.menu.AppendAction("Place fit nodes", (e) => {
+								for(int i = 0; i < views.Count; i++) {
+									UIElementUtility.PlaceFitNodes(views[i]);
+								}
+							}, DropdownMenuAction.AlwaysEnabled);
 						}
 					}
-					if(views.Count > 0) {
-						evt.menu.AppendAction("Place fit nodes", (e) => {
-							for(int i = 0; i < views.Count; i++) {
-								UIElementUtility.PlaceFitNodes(views[i]);
-							}
-						}, DropdownMenuAction.AlwaysEnabled);
-					}
-				}
-				else if(graphData.selectedRoot is NodeContainerWithEntry nodeContainerWithEntry && nodeContainerWithEntry.Entry != null) {
-					UNodeView view;
-					if(nodeViewsPerNode.TryGetValue(nodeContainerWithEntry.Entry, out view)) {
-						evt.menu.AppendAction("Place fit nodes", (e) => {
-							UIElementUtility.PlaceFitNodes(view);
-						}, DropdownMenuAction.AlwaysEnabled);
+					else if(graphData.selectedRoot is NodeContainerWithEntry nodeContainerWithEntry && nodeContainerWithEntry.Entry != null) {
+						UNodeView view;
+						if(nodeViewsPerNode.TryGetValue(nodeContainerWithEntry.Entry, out view)) {
+							evt.menu.AppendAction("Place fit nodes", (e) => {
+								UIElementUtility.PlaceFitNodes(view);
+							}, DropdownMenuAction.AlwaysEnabled);
+						}
 					}
 				}
 				#endregion
 
-				if(selection.Count > 0 && selection.Any(s => (s is UNodeView nodeView) && !nodeView.isBlock)) {
+				if(graphEditor.canvasData.SupportMacro && selection.Count > 0 && selection.Any(s => (s is UNodeView nodeView) && !nodeView.isBlock)) {
 					evt.menu.AppendAction("Selection to macro", (e) => {
 						SelectionToMacro(clickedPos);
 					}, DropdownMenuAction.AlwaysEnabled);
@@ -1255,12 +1257,22 @@ namespace MaxyGames.UNode.Editors {
 #endregion
 
 			#region Node
-			if(evt.target is BaseNodeView) {
-				var nodeView = evt.target as BaseNodeView;
+			if(evt.target is UNodeView) {
+				var nodeView = evt.target as UNodeView;
 				if(nodeView.targetNode != null) {
 					Node node = nodeView.targetNode;
 					if(node == null)
 						return;
+
+					foreach(var proc in GraphProcessor) {
+						var menus = proc.ContextMenuForNode(clickedPos, nodeView);
+						if(menus != null) {
+							foreach(var menu in menus) {
+								if(menu == null) continue;
+								evt.menu.MenuItems().Add(menu);
+							}
+						}
+					}
 
 					var manipulators = NodeEditorUtility.FindGraphManipulators();
 					foreach(var manipulator in manipulators) {
@@ -1454,27 +1466,31 @@ namespace MaxyGames.UNode.Editors {
 
 
 					evt.menu.AppendSeparator("");
-					if(nodeView.inputPorts.Any(p => p.connected && !p.IsProxy()) || nodeView.outputPorts.Any(p => p.connected && !p.IsProxy())) {
-						evt.menu.AppendAction("Place fit nodes", (e) => {
-							UIElementUtility.PlaceFitNodes(nodeView);
-						}, DropdownMenuAction.AlwaysEnabled);
-						//if(nodeView.outputPorts.Any(p => p.connected && p.orientation == Orientation.Vertical)) {
-						//	evt.menu.AppendAction("Place fit flow nodes", (e) => {
-						//		UIElementUtility.PlaceFitNodes(nodeView);
-						//	}, DropdownMenuAction.AlwaysEnabled);
-						//}
-						//if(nodeView.inputPorts.Any(p => p.connected && p.orientation == Orientation.Horizontal && !p.IsProxy()) ||
-						//	nodeView.outputPorts.Any(p => p.connected && p.orientation == Orientation.Horizontal && !p.IsProxy())) {
-						//	evt.menu.AppendAction("Place fit value nodes", (e) => {
-						//		UIElementUtility.PlaceFitNodes(nodeView);
-						//	}, DropdownMenuAction.AlwaysEnabled);
-						//}
+					if(graphEditor.canvasData.SupportPlaceFit) {
+						if(nodeView.inputPorts.Any(p => p.connected && !p.IsProxy()) || nodeView.outputPorts.Any(p => p.connected && !p.IsProxy())) {
+							evt.menu.AppendAction("Place fit nodes", (e) => {
+								UIElementUtility.PlaceFitNodes(nodeView);
+							}, DropdownMenuAction.AlwaysEnabled);
+							//if(nodeView.outputPorts.Any(p => p.connected && p.orientation == Orientation.Vertical)) {
+							//	evt.menu.AppendAction("Place fit flow nodes", (e) => {
+							//		UIElementUtility.PlaceFitNodes(nodeView);
+							//	}, DropdownMenuAction.AlwaysEnabled);
+							//}
+							//if(nodeView.inputPorts.Any(p => p.connected && p.orientation == Orientation.Horizontal && !p.IsProxy()) ||
+							//	nodeView.outputPorts.Any(p => p.connected && p.orientation == Orientation.Horizontal && !p.IsProxy())) {
+							//	evt.menu.AppendAction("Place fit value nodes", (e) => {
+							//		UIElementUtility.PlaceFitNodes(nodeView);
+							//	}, DropdownMenuAction.AlwaysEnabled);
+							//}
+						}
 					}
 					if(selection.Count > 0 && selection.Any(s => (s is UNodeView nodeView) && !nodeView.isBlock)) {
 
-						evt.menu.AppendAction("Selection to macro", (e) => {
-							SelectionToMacro(clickedPos);
-						}, DropdownMenuAction.AlwaysEnabled);
+						if(graphEditor.canvasData.SupportMacro) {
+							evt.menu.AppendAction("Selection to macro", (e) => {
+								SelectionToMacro(clickedPos);
+							}, DropdownMenuAction.AlwaysEnabled);
+						}
 
 #if UNODE_DEV
 						if(selection.Count == 1) {

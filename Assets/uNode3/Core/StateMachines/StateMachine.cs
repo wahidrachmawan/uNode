@@ -357,7 +357,7 @@ namespace MaxyGames.StateMachines {
 
 namespace MaxyGames.UNode {
 	[EventGraph("StateMachine")]
-	public class StateGraphContainer : NodeContainerWithEntry, IEventGraph {
+	public class StateGraphContainer : NodeContainerWithEntry, IEventGraph, IIcon {
 		public string Title => name;
 
 		public override BaseEntryNode Entry {
@@ -372,6 +372,10 @@ namespace MaxyGames.UNode {
 				}
 				return entryObject.node as BaseEntryNode;
 			}
+		}
+
+		public Type GetIcon() {
+			return typeof(TypeIcons.StateIcon);
 		}
 
 		public override void OnRuntimeInitialize(GraphInstance instance) {
@@ -417,6 +421,10 @@ namespace MaxyGames.UNode.Nodes {
 		[NonSerialized]
 		public NodeContainerWithEntry container;
 
+
+		private static readonly string[] m_styles = new[] { "state-node", "state-entry" };
+		public override string[] Styles => m_styles;
+
 		protected override void OnRegister() {
 			enter = new FlowInput(this, nameof(enter), flow => flow.Next(exit));
 			exit = PrimaryFlowOutput(nameof(exit));
@@ -443,9 +451,61 @@ namespace MaxyGames.UNode.Nodes {
 		public event System.Action<Flow> OnExitState;
 	}
 
-	public class ScriptState : Node, IScriptState, ISuperNode, IGraphEventHandler {
+	public interface IStateNodeWithTransition {
+		UGraphElement TransitionContainer { get; }
+		IEnumerable<StateTransition> GetTransitions();
+		bool CanTrigger(GraphInstance instance);
+	}
+
+	public class AnyStateNode : Node, IStateNodeWithTransition {
 		[HideInInspector]
 		public StateTranstionData transitions = new StateTranstionData();
+
+		private static readonly string[] m_styles = new[] { "state-node", "state-any" };
+		public override string[] Styles => m_styles;
+		public UGraphElement TransitionContainer => transitions.container;
+
+		public bool CanTrigger(GraphInstance instance) {
+			var state = instance.GetUserData(this) as StateMachines.IState;
+			return state.IsActive;
+		}
+
+		public IEnumerable<StateTransition> GetTransitions() {
+			return transitions.GetFlowNodes<StateTransition>();
+		}
+
+		protected override void OnRegister() {
+			if(transitions == null) transitions = new();
+			transitions.Register(this);
+		}
+
+		public override void OnRuntimeInitialize(GraphInstance instance) {
+			base.OnRuntimeInitialize(instance);
+			var state = new StateMachines.AnyState();
+			instance.SetUserData(this, state);
+		}
+
+		public override string GetTitle() {
+			return "Any";
+		}
+
+		public override Type GetNodeIcon() {
+			return typeof(TypeIcons.StateIcon);
+		}
+
+		public bool AllowCoroutine() {
+			return false;
+		}
+	}
+
+	public class ScriptState : Node, IScriptState, ISuperNode, IGraphEventHandler, IStateNodeWithTransition {
+		[HideInInspector]
+		public StateTranstionData transitions = new StateTranstionData();
+
+
+		private static readonly string[] m_styles = new[] { "state-node", "state-script" };
+		public override string[] Styles => m_styles;
+		public UGraphElement TransitionContainer => transitions.container;
 
 		public bool CanTrigger(GraphInstance instance) {
 			var state = instance.GetUserData(this) as StateMachines.IState;
@@ -569,11 +629,14 @@ namespace MaxyGames.UNode.Nodes {
 	}
 
 	public class StateTransition : Node, ISuperNode, IGraphEventHandler {
-		public ScriptState node {
+		public IStateNodeWithTransition node {
 			get {
-				return nodeObject.GetNodeInParent<ScriptState>();
+				return nodeObject.GetNodeInParent<IStateNodeWithTransition>();
 			}
 		}
+
+		private static readonly string[] m_styles = new[] { "state-node", "state-transition" };
+		public override string[] Styles => m_styles;
 
 		public IEnumerable<NodeObject> nestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
@@ -581,22 +644,10 @@ namespace MaxyGames.UNode.Nodes {
 		public FlowInput enter;
 		[System.NonSerialized]
 		public FlowOutput exit;
-		[System.NonSerialized]
-		private TriggerStateTransition triggerState;
 
 		protected override void OnRegister() {
 			exit = FlowOutput(nameof(exit)).SetName("");
 			enter = FlowInput(nameof(enter), (flow) => throw new System.InvalidOperationException()).SetName("");
-			if(triggerState == null) {
-				triggerState = nodeObject.GetNodeInChildren<TriggerStateTransition>();
-				if(triggerState == null) {
-					triggerState = nodeObject.AddChildNode(new TriggerStateTransition());
-				}
-			}
-		}
-
-		protected ScriptState GetStateNode() {
-			return node;
 		}
 
 		public override string GetTitle() {
@@ -638,8 +689,7 @@ namespace MaxyGames.UNode.Nodes {
 		/// Call to finish the transition.
 		/// </summary>
 		public void Finish(Flow flow) {
-			var stateNode = GetStateNode();
-			var state = flow.GetUserData(stateNode) as StateMachines.State;
+			var state = flow.GetUserData(node as UGraphElement) as StateMachines.IState;
 			if(state.IsActive) {
 				var targetState = exit.GetTargetNode().node as ScriptState;
 				state.FSM.ChangeState(flow.GetUserData(targetState) as StateMachines.IState);
@@ -688,7 +738,7 @@ namespace MaxyGames.UNode.Nodes {
 		public bool AllowCoroutine() => false;
 
 		public bool CanTrigger(GraphInstance instance) {
-			return GetStateNode().CanTrigger(instance);
+			return node.CanTrigger(instance);
 		}
 	}
 }

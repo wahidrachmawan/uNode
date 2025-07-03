@@ -34,8 +34,6 @@ namespace MaxyGames.UNode.Editors {
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			nodeObject = node;
 			this.transition = node.node as Nodes.StateTransition;
-			AddToClassList("state-node");
-			AddToClassList("state-transition");
 			this.AddStyleSheet("uNodeStyles/NativeNodeStyle");
 			this.AddStyleSheet(UIElementUtility.Theme.nodeStyle);
 			Initialize(owner);
@@ -46,6 +44,8 @@ namespace MaxyGames.UNode.Editors {
 
 			titleIcon.RemoveFromHierarchy();
 			m_CollapseButton.RemoveFromHierarchy();
+
+			this.ExecuteAndScheduleAction(DoUpdate, 500);
 		}
 
 		public override void SetPosition(Rect newPos) {
@@ -108,7 +108,7 @@ namespace MaxyGames.UNode.Editors {
 				outputPort = AddOutputFlowPort(new FlowOutputData(transition.exit));
 				outputPort.SetEdgeConnector<TransitionEdgeView>(TransitionEdgeListener.Default);
 				outputPort.pickingMode = PickingMode.Ignore;
-				outputPort.SetEnabled(false);
+				//outputPort.SetEnabled(false);
 			}
 
 			RefreshPorts();

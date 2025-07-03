@@ -682,3 +682,21 @@ NodeRerouteView .port {
 .state-node > #node-border > #title > #title-label {
     -unity-text-align: middle-center;
 }
+
+.state-node.state-any > #node-border {
+    background-color: rgb(72, 129, 118);
+    border-color: rgb(86, 170, 154);
+    min-width: 100px;
+}
+
+.state-node.state-any > #node-border > #title > #title-label,
+.state-node.state-entry > #node-border > #title > #title-label {
+    -unity-font-style: bold;
+    min-width: 80px;
+    font-size: 14px;
+}
+
+.state-node.state-any > #node-border > #title > #title-icon,
+.state-node.state-entry > #node-border > #title > #title-icon{
+    display: none;
+}

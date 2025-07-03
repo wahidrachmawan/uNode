@@ -237,7 +237,14 @@ namespace MaxyGames.UNode.Editors {
 		/// Called once on node created.
 		/// </summary>
 		protected virtual void OnSetup() {
-
+			{//Add styles
+				var styles = nodeObject.Styles;
+				if(styles != null) {
+					for(int i = 0; i < styles.Length; i++) {
+						AddToClassList(styles[i]);
+					}
+				}
+			}
 			if(nodeObject.node is BaseEntryNode) {
 				this.AddToClassList(ussClassEntryNode);
 			}
@@ -587,6 +594,31 @@ namespace MaxyGames.UNode.Editors {
 					errorBadge = null;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Do update the node
+		/// </summary>
+		protected virtual void DoUpdate() {
+			if(!this.IsVisible())
+				return;
+			#region Errors
+			var errors = GraphUtility.ErrorChecker.GetErrorMessages(nodeObject, InfoType.Error);
+			if(errors != null && errors.Any()) {
+				System.Text.StringBuilder sb = new System.Text.StringBuilder();
+				foreach(var error in errors) {
+					if(sb.Length > 0) {
+						sb.AppendLine();
+						sb.AppendLine();
+					}
+					sb.Append("-" + uNodeEditorUtility.RemoveHTMLTag(error.message));
+				}
+				UpdateError(sb.ToString());
+			}
+			else {
+				UpdateError(string.Empty);
+			}
+			#endregion
 		}
 
 		public virtual void Teleport(Rect position) {

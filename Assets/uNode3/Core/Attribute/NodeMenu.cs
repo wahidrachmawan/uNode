@@ -47,10 +47,18 @@ namespace MaxyGames.UNode {
 		/// The menu name
 		/// </summary>
 		public string name;
+		private string m_nodeName;
 		/// <summary>
 		/// The name used for create the new node
 		/// </summary>
-		public string nodeName;
+		public string nodeName {
+			get {
+				return m_nodeName ?? name;
+			}
+			set {
+				m_nodeName = value;
+			}
+		}
 		/// <summary>
 		/// The category of menu
 		/// </summary>

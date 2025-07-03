@@ -880,7 +880,7 @@ namespace MaxyGames.UNode.Editors {
 			else if(graphElement is MainGraphContainer mainContainer) {
 				if(desiredGraph is IMacroGraph || desiredGraph is IStateGraph state && state.CanCreateStateGraph || desiredGraph is ICustomMainGraph) {
 					content.label.text = $"[{graphData.mainGraphTitle}]";
-					Texture icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.StateIcon));
+					Texture icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.EventIcon));
 					content.ShowIcon(icon);
 					content.onClick = (_) => {
 						graphData.ClearSelection();

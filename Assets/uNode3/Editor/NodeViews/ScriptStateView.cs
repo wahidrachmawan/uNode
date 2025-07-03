@@ -12,6 +12,7 @@ using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(ScriptState))]
+	[NodeCustomEditor(typeof(AnyStateNode))]
 	public class ScriptStateView : BaseNodeView {
 		//To ensure the node always reload when the graph changed
 		public override bool autoReload => true;
@@ -20,14 +21,15 @@ namespace MaxyGames.UNode.Editors {
 
 		protected override void InitializeView() {
 			base.InitializeView();
-			AddToClassList("state-node");
 			BuildTransitions();
 		}
 
 		protected override void InitializeDefaultPorts() {
-			var port = AddInputFlowPort(new FlowInputData((nodeObject.node as ScriptState).enter));
-			port.SetEdgeConnector<TransitionEdgeView>();
-			port.pickingMode = PickingMode.Ignore;
+			if(nodeObject.node is ScriptState node) {
+				var port = AddInputFlowPort(new FlowInputData((nodeObject.node as ScriptState).enter));
+				port.SetEdgeConnector<TransitionEdgeView>();
+				port.pickingMode = PickingMode.Ignore;
+			}
 		}
 
 		protected void BuildTransitions() {
@@ -35,7 +37,7 @@ namespace MaxyGames.UNode.Editors {
 				owner.RemoveView(view);
 			}
 			transitionViews.Clear();
-			var node = targetNode as ScriptState;
+			var node = targetNode as IStateNodeWithTransition;
 			var transitions = node.GetTransitions();
 			int index = 0;
 			foreach(var tr in transitions) {
@@ -45,7 +47,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				var transition = owner.AddNodeView(tr.nodeObject, typeof(StateTransitionView));
 				transitionViews.Add(transition);
-				var flow = new FlowOutput(node, "[Transition]" + index).SetName("");
+				var flow = new FlowOutput(node as Node, "[Transition]" + index).SetName("");
 				var port = AddOutputFlowPort(new FlowOutputData(flow) { userData = transition });
 				port.pickingMode = PickingMode.Ignore;
 				port.SetEnabled(false);
