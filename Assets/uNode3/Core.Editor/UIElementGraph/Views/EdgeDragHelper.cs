@@ -237,6 +237,7 @@ namespace MaxyGames.UNode.Editors {
 		private void Pan(TimerState ts) {
 			Vector3 position = m_GraphView.contentViewContainer.resolvedStyle.translate - m_PanDiff;
 			m_GraphView.contentViewContainer.style.translate = new Translate(position.x, position.y, position.z);
+			m_GraphView.viewTransformChanged?.Invoke(m_GraphView);
 			edgeCandidate.output = edgeCandidate.output;
 			edgeCandidate.input = edgeCandidate.input;
 

@@ -1742,6 +1742,7 @@ namespace MaxyGames.UNode.Editors {
 								stateNode.TransitionContainer, menu.nodeName,
 								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
 								(transition) => {
+									transition.nodeObject.name = menu.nodeName;
 									var trigger = transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
 									trigger.Register();
 									NodeEditorUtility.AddNewNode<Node>(transition, menu.nodeName, menu.type, new(0, -100), evt => {

@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Editors {
 		Edge m_EdgeCandidate;
 		private bool m_Active;
 		Vector2 m_MouseDownPosition;
+		float m_clickedTime;
 
 		internal const float k_ConnectionDistanceTreshold = 10f;
 
@@ -55,6 +56,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			m_MouseDownPosition = e.localMousePosition;
+			m_clickedTime = Time.realtimeSinceStartup;
 
 			m_EdgeCandidate = new TEdge();
 			m_EdgeDragHelper.draggedPort = graphElement;
@@ -100,6 +102,13 @@ namespace MaxyGames.UNode.Editors {
 				m_EdgeDragHelper.HandleMouseUp(evt);
 			} else {
 				Abort();
+			}
+
+			if(Time.realtimeSinceStartup - m_clickedTime < 0.2f) {
+				//Debug.Log(Time.realtimeSinceStartup - m_clickedTime);
+				if(target is PortView port) {
+					uNodeThreadUtility.Queue(port.SendMakeConnectionEvent);
+				}
 			}
 
 			m_Active = false;
