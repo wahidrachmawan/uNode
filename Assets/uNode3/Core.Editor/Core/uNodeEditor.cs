@@ -1103,6 +1103,7 @@ namespace MaxyGames.UNode.Editors {
 			if(onSelectionChanged != null) {
 				onSelectionChanged(graphData);
 			}
+			
 			if(!uNodePreference.GetPreference().inspectorIntegration)
 				return;
 			if(HasOpenInstances<GraphInspectorWindow>() && GraphInspectorWindow.window?.hasFocus == true) {
@@ -1168,6 +1169,7 @@ namespace MaxyGames.UNode.Editors {
 			graphEditor.window = this;
 			graphData.Refresh();
 			graphEditor.ReloadView(fullRefresh);
+			graphEditor.CanvasChanged();
 			GUIChanged();
 		}
 
@@ -1784,7 +1786,7 @@ namespace MaxyGames.UNode.Editors {
 				previewWindow.informations = informations?.ToArray();
 				previewWindow.OnChanged(graphData);
 				EditorUtility.ClearProgressBar();
-#if UNODE_DEBUG
+#if UNODE_DEBUG || UNODE_DEV
 				uNodeEditorUtility.CopyToClipboard(script.ToRawScript());
 #endif
 			}

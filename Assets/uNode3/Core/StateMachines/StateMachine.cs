@@ -21,6 +21,11 @@ namespace MaxyGames.StateMachines {
 		/// </summary>
 		/// <param name="state"></param>
 		void ChangeState(IState state);
+		/// <summary>
+		/// Register any state to the fsm
+		/// </summary>
+		/// <param name="state"></param>
+		void RegisterAnyState(IState state);
 	}
 
 	public class StateMachine : IStateMachine {
@@ -39,7 +44,7 @@ namespace MaxyGames.StateMachines {
 				}
 			}
 		}
-		public AnyState AnyState { get; set; } = new();
+		public readonly List<BaseState> AnyStates = new();
 
 		public void ChangeState(IState state) {
 			ActiveState = state;
@@ -55,13 +60,14 @@ namespace MaxyGames.StateMachines {
 		public void Tick() {
 			if(m_hasInitialize == false) {
 				m_hasInitialize = true;
-				AnyState.FSM = this;
-				if(AnyState != null) {
-					foreach(var tr in AnyState.transitions) {
-						tr.OnEnter();
-						if(tr.ShouldTransition()) {
-							tr.Transition();
-							return;
+				foreach(var any in AnyStates) {
+					if(any != null) {
+						foreach(var tr in any.transitions) {
+							tr.OnEnter();
+							if(tr.ShouldTransition()) {
+								tr.Transition();
+								return;
+							}
 						}
 					}
 				}
@@ -71,15 +77,23 @@ namespace MaxyGames.StateMachines {
 				m_transitionState = null;
 				m_activeState.Enter();
 			}
-			if(AnyState != null) {
-				foreach(var tr in AnyState.transitions) {
-					if(tr.ShouldTransition()) {
-						tr.Transition();
-						return;
+			foreach(var any in AnyStates) {
+				if(any != null) {
+					foreach(var tr in any.transitions) {
+						if(tr.ShouldTransition()) {
+							tr.Transition();
+							return;
+						}
 					}
 				}
 			}
 			ActiveState?.Tick();
+		}
+
+		public void RegisterAnyState(IState state) {
+			if(state is not BaseState any) throw null;
+			any.FSM = this;
+			AnyStates.Add(any);
 		}
 	}
 }
@@ -130,11 +144,30 @@ namespace MaxyGames.UNode {
 			});
 		}
 
-		void IGeneratorPrePostInitializer.OnPostInitializer() {
-		}
+		void IGeneratorPrePostInitializer.OnPostInitializer() {}
 
 		void IGeneratorPrePostInitializer.OnPreInitializer() {
+			var fsm = CG.RegisterPrivateVariable("m_FSM", typeof(StateMachines.StateMachine), null, this);
+			var nodes = this.GetNodesInChildren<Nodes.AnyStateNode>();
+			foreach(var node in nodes) {
+				CG.RegisterEntry(node);
+			}
+			CG.RegisterEntry(Entry);
 
+			CG.RegisterPostInitialization(() => {
+				string code = null;
+				code = CG.Set(fsm, CG.New(typeof(StateMachines.StateMachine)));
+				CG.InsertCodeToFunction("Awake", code, int.MinValue);
+				if(Entry is Nodes.StateEntryNode entry) {
+					var start = entry.exit.GetTargetNode();
+					if(start != null) {
+						var state = CG.GetVariableNameByReference(start);
+						CG.InsertCodeToFunction("Awake", CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state), int.MaxValue);
+					}
+				}
+
+				CG.InsertCodeToFunction("Update", CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.Tick)));
+			});
 		}
 	}
 

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	//[NodeMenu("Flow", "State", IsCoroutine = true, order = 1, HideOnFlow = true)]
-	public class StateNode : BaseCoroutineNode, IScriptState, ISuperNode, IGraphEventHandler {
+	public class StateNode : BaseCoroutineNode, IScriptState, ISuperNode, IGraphEventHandler, INodeWithConnection {
 		[HideInInspector]
 		public TransitionData transitions = new TransitionData();
 
@@ -14,9 +14,11 @@ namespace MaxyGames.UNode.Nodes {
 			return flow.state == StateType.Running;
 		}
 
-		public IEnumerable<NodeObject> nestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
+		public IEnumerable<NodeObject> NestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
 		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph;
+
+		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Concat(GetTransitions().Select(t => t.nodeObject));
 
 		public IEnumerable<TransitionEvent> GetTransitions() {
 			return transitions.GetFlowNodes<TransitionEvent>();
@@ -77,7 +79,7 @@ namespace MaxyGames.UNode.Nodes {
 					}
 				}
 			}
-			foreach(BaseEventNode node in nestedFlowNodes) {
+			foreach(BaseEventNode node in NestedFlowNodes) {
 				node.Stop(flow.instance);
 			}
 			if(m_onExit != null) {
@@ -160,6 +162,10 @@ namespace MaxyGames.UNode.Nodes {
 
 		public bool AllowCoroutine() {
 			return true;
+		}
+
+		string IGraphEventHandler.GenerateTriggerCode(string contents) {
+			return CG.If(CG.CompareEventState(enter, null), contents);
 		}
 	}
 }

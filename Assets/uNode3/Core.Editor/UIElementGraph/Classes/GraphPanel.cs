@@ -1468,10 +1468,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			//Graphs
-			if(graphData.graph != null && (graphData.graph is IStateGraph || graphData.graph is IMacroGraph || graphData.graph is ICustomMainGraph || graphData.graph is IGraphWithEventGraph)) {
-				graphContainer.parent.SetDisplay(true);
+			if(graphData.graph != null && (graphData.graph is IStateGraph state && state.CanCreateStateGraph || graphData.graph is IMacroGraph || graphData.graph is ICustomMainGraph || graphData.graph is IGraphWithEventGraph evtGraph && evtGraph.SupportedEventGraphs?.Count > 0)) {
 				if(showGraphs) {
-					if(graphData.graph is IGraphWithEventGraph eventGraph && eventGraph.SupportedEventGraphs.Count > 0) {
+					graphContainer.parent.SetDisplay(true);
+					if(graphData.graph is IGraphWithEventGraph eventGraph && eventGraph.SupportedEventGraphs?.Count > 0) {
 						graphAddButton.SetDisplay(true);
 					}
 					else {

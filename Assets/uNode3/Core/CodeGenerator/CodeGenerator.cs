@@ -523,6 +523,14 @@ namespace MaxyGames {
 
 			#region Generate Nodes
 			generationState.isStatic = false;
+			if(generatorData.setupActions.Count > 0) {//Setup before generations
+				generatorData.setupActions.Sort((x, y) => CompareUtility.Compare(x.Item2, y.Item2));
+				ThreadingUtil.Queue(() => {
+					foreach(var (action, _) in generatorData.setupActions) {
+						action?.Invoke();
+					}
+				});
+			}
 			for(int i = 0; i < generatorData.allNode.Count; i++) {
 				var node = generatorData.allNode[i];
 				if(node == null)
@@ -2985,6 +2993,9 @@ namespace MaxyGames {
 		/// <param name="variable"></param>
 		/// <returns></returns>
 		public static VData GetVariableData(object reference) {
+			if(reference is Node) {
+				reference = (reference as Node).nodeObject;
+			}
 			foreach(VData vdata in generatorData.GetVariables()) {
 				if(object.ReferenceEquals(vdata.reference, reference)) {
 					return vdata;
@@ -3100,6 +3111,9 @@ namespace MaxyGames {
 		/// <param name="value"></param>
 		/// <returns></returns>
 		public static string RegisterPrivateVariable(string name, Type type, object value = null, object reference = null) {
+			if(reference is Node) {
+				reference = (reference as Node).nodeObject;
+			}
 			if(reference != null) {
 				foreach(VData vdata in generatorData.GetVariables()) {
 					if(reference == vdata.reference) {
@@ -3161,6 +3175,15 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
+		/// Register pre generation process, this is normally called after initialization but before node generation.
+		/// </summary>
+		/// <param name="action"></param>
+		/// <param name="order"></param>
+		public static void RegisterSetup(Action action, int order = 0) {
+			generatorData.setupActions.Add((action, order));
+		}
+
+		/// <summary>
 		/// Register pre node generation process, this is normally called after initialization but before node generation.
 		/// Note: call only from RegisterPort.
 		/// </summary>
@@ -3177,16 +3200,8 @@ namespace MaxyGames {
 		/// Register post initialization action.
 		/// </summary>
 		/// <param name="action"></param>
-		public static void RegisterPostInitialization(Action action) {
-			generatorData.postInitialization.Add((action, 0));
-		}
-
-		/// <summary>
-		/// Register post initialization action.
-		/// </summary>
-		/// <param name="action"></param>
 		/// <param name="order"></param>
-		public static void RegisterPostInitialization(Action action, int order) {
+		public static void RegisterPostInitialization(Action action, int order = 0) {
 			generatorData.postInitialization.Add((action, order));
 		}
 
@@ -3322,6 +3337,23 @@ namespace MaxyGames {
 		#endregion
 
 		#region InsertMethod
+		/// <summary>
+		/// Insert code to function with name <paramref name="functionName"/> that return void and has no parameters
+		/// </summary>
+		/// <param name="functionName"></param>
+		/// <param name="code"></param>
+		/// <param name="priority"></param>
+		public static void InsertCodeToFunction(string functionName, string code, int priority = 0) {
+			InsertCodeToFunction(functionName, typeof(void), code, priority);
+		}
+
+		/// <summary>
+		/// Insert code to function with name <paramref name="functionName"/> that return <paramref name="returnType"/> and has no parameters
+		/// </summary>
+		/// <param name="functionName"></param>
+		/// <param name="returnType"></param>
+		/// <param name="code"></param>
+		/// <param name="priority"></param>
 		public static void InsertCodeToFunction(string functionName, Type returnType, string code, int priority = 0) {
 			var mData = generatorData.GetMethodData(functionName);
 			if(mData == null) {
@@ -3330,6 +3362,25 @@ namespace MaxyGames {
 			mData.AddCode(code, priority);
 		}
 
+		/// <summary>
+		/// Insert code to function with name <paramref name="functionName"/> that return void and has parameters equal to <paramref name="parameterTypes"/>
+		/// </summary>
+		/// <param name="functionName"></param>
+		/// <param name="parameterTypes"></param>
+		/// <param name="code"></param>
+		/// <param name="priority"></param>
+		public static void InsertCodeToFunction(string functionName, Type[] parameterTypes, string code, int priority = 0) {
+			InsertCodeToFunction(functionName, typeof(void), code, priority);
+		}
+
+		/// <summary>
+		/// Insert code to function with name <paramref name="functionName"/>
+		/// </summary>
+		/// <param name="functionName"></param>
+		/// <param name="returnType"></param>
+		/// <param name="parameterTypes"></param>
+		/// <param name="code"></param>
+		/// <param name="priority"></param>
 		public static void InsertCodeToFunction(string functionName, Type returnType, Type[] parameterTypes, string code, int priority = 0) {
 			var mData = generatorData.GetMethodData(functionName, parameterTypes.Select((item) => item).ToArray());
 			if(mData == null) {

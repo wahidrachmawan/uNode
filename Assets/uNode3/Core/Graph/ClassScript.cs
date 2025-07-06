@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace MaxyGames.UNode {
 	[GraphSystem(isScriptGraph = true, supportGeneric = true, generationKind = GenerationKind.Compatibility)]
-	public class ClassScript : GraphAsset, IScriptGraphType, IClassGraph, IClassSystem, IStateGraph, IReflectionType, IClassModifier, IInterfaceSystem {
+	public class ClassScript : GraphAsset, IScriptGraphType, IClassGraph, IClassSystem, IStateGraph, IGraphWithEventGraph, IReflectionType, IClassModifier, IInterfaceSystem {
 		public ScriptTypeData scriptTypeData = new ScriptTypeData();
 		public SerializedType inheritType = typeof(object);
 		public ClassModifier modifier = new ClassModifier();
@@ -93,6 +93,17 @@ namespace MaxyGames.UNode {
 
 		List<SerializedType> IInterfaceSystem.Interfaces {
 			get => interfaces;
+		}
+		private static readonly HashSet<string> m_supportedEventGraph = new() {
+			"StateMachine",
+		};
+		public HashSet<string> SupportedEventGraphs {
+			get {
+				if(inheritType == typeof(MonoBehaviour)) {
+					return m_supportedEventGraph;
+				}
+				return null;
+			}
 		}
 
 		private void OnValidate() {

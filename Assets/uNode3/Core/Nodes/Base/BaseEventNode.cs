@@ -140,8 +140,8 @@ namespace MaxyGames.UNode {
 		}
 
 		protected string GenerateRunFlows() {
-			if(IsHandledByState()) {
-				return CG.WrapWithInformation(CG.If(CG.CompareEventState(nodeObject.GetNodeInParent<Nodes.StateNode>().enter, null), GenerateFlows()), this);
+			if(IsHandledByEventHandler()) {
+				return CG.WrapWithInformation(((nodeObject.parent as NodeObject).node as IGraphEventHandler).GenerateTriggerCode(GenerateFlows()), this);
 			}
 			else {
 				return CG.WrapWithInformation(GenerateFlows(), this);
@@ -163,9 +163,9 @@ namespace MaxyGames.UNode {
 			}, int.MaxValue);
 		}
 
-		public bool IsHandledByState() {
+		public bool IsHandledByEventHandler() {
 			var parent = nodeObject?.parent as NodeObject;
-			if(parent != null && parent.node is Nodes.StateNode) {
+			if(parent != null && parent.node is IGraphEventHandler) {
 				return true;
 			}
 			return false;

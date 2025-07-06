@@ -227,6 +227,7 @@ namespace MaxyGames {
 			public Action<ClassData> postGeneration;
 			public Action<GData> postManipulator;
 			public List<(Action, int)> postInitialization = new();
+			public List<(Action, int)> setupActions = new();
 			public Dictionary<NodeObject, Action> initActionForNodes = new Dictionary<NodeObject, Action>();
 			public Dictionary<object, HashSet<int>> initializedUserObject = new Dictionary<object, HashSet<int>>();
 
@@ -421,6 +422,12 @@ namespace MaxyGames {
 				return null;
 			}
 
+			/// <summary>
+			/// Insert code to the method, if no method found then it will create a new method with return void and no parameter.
+			/// </summary>
+			/// <param name="methodName"></param>
+			/// <param name="code"></param>
+			/// <param name="priority"></param>
 			public void InsertMethodCode(string methodName, string code, int priority = 0) {
 				foreach(MData m in methodData) {
 					if(m.name == methodName) {
@@ -428,7 +435,9 @@ namespace MaxyGames {
 						return;
 					}
 				}
-				throw new System.Exception("No Method data found to insert code");
+				var mData = new MData(methodName, typeof(void));
+				mData.AddCode(code, priority);
+				methodData.Add(mData);
 			}
 
 			public MData AddMethod(string methodName, Type returnType, params Type[] parametersType) {

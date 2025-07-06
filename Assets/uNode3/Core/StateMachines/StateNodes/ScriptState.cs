@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
@@ -9,7 +10,7 @@ namespace MaxyGames.UNode.Nodes {
 		public event System.Action<Flow> OnExitState;
 	}
 
-	public class ScriptState : Node, IScriptState, ISuperNode, IGraphEventHandler, IStateNodeWithTransition {
+	public class ScriptState : Node, IScriptState, ISuperNode, IGraphEventHandler, IStateNodeWithTransition, INodeWithConnection {
 		[HideInInspector]
 		public StateTranstionData transitions = new StateTranstionData();
 
@@ -23,9 +24,11 @@ namespace MaxyGames.UNode.Nodes {
 			return state.IsActive;
 		}
 
-		public IEnumerable<NodeObject> nestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
+		public IEnumerable<NodeObject> NestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
 		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph;
+
+		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Concat(GetTransitions().Select(tr => tr.nodeObject));
 
 		public IEnumerable<StateTransition> GetTransitions() {
 			return transitions.GetFlowNodes<StateTransition>();
@@ -72,6 +75,9 @@ namespace MaxyGames.UNode.Nodes {
 					}
 #endif
 					m_onEnter?.Invoke(instance.defaultFlow);
+					foreach(var tr in GetTransitions()) {
+						tr.OnEnter(instance.defaultFlow);
+					}
 				},
 				onExit: () => {
 #if UNITY_EDITOR
@@ -80,8 +86,57 @@ namespace MaxyGames.UNode.Nodes {
 					}
 #endif
 					m_onExit?.Invoke(instance.defaultFlow);
+					foreach(var tr in GetTransitions()) {
+						tr.OnExit(instance.defaultFlow);
+					}
 				});
 			instance.SetUserData(this, state);
+		}
+
+		public override void OnGeneratorInitialize() {
+			base.OnGeneratorInitialize();
+			var state = CG.RegisterPrivateVariable("m_state_" + uNodeUtility.AutoCorrectName(name), typeof(StateMachines.State), null, this);
+
+			CG.RegisterNodeSetup(this, () => {
+				string onEnter = null;
+				string onExit = null;
+				foreach(var evt in nodeObject.GetNodesInChildren<BaseGraphEvent>()) {
+					if(evt != null) {
+						if(evt is StateOnEnterEvent) {
+							onEnter += evt.GenerateFlows().AddLineInFirst().Replace("yield ", "");
+						}
+						else if(evt is StateOnExitEvent) {
+							onExit += evt.GenerateFlows().AddLineInFirst();
+						}
+						else {
+
+						}
+					}
+				}
+				if(onEnter != null) {
+					onEnter = CG.SetValue(nameof(StateMachines.State.onEnter), CG.Lambda(onEnter));
+				}
+				if(onExit != null) {
+					onExit = CG.SetValue(nameof(StateMachines.State.onExit), CG.Lambda(onExit));
+			}
+				if(onEnter != null || onExit != null) {
+					CG.InsertCodeToFunction("Awake", CG.Flow(
+						state.CGSet(CG.New(typeof(StateMachines.State), null, new[] { onEnter, onExit })),
+						state.CGAccess(nameof(StateMachines.IState.FSM)).CGSet(CG.GetVariableNameByReference(nodeObject.parent))
+					));
+				}
+			});
+		}
+
+		protected override string GenerateFlowCode() {
+			var state = CG.GetVariableNameByReference(this);
+			var fsm = CG.GetVariableNameByReference(nodeObject.parent);
+			return CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
+		}
+
+		string IGraphEventHandler.GenerateTriggerCode(string contents) {
+			var state = CG.GetVariableNameByReference(this);
+			return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), contents);
 		}
 
 		public void OnExit(Flow flow) {
@@ -92,7 +147,7 @@ namespace MaxyGames.UNode.Nodes {
 					}
 				}
 			}
-			foreach(BaseEventNode node in nestedFlowNodes) {
+			foreach(BaseEventNode node in NestedFlowNodes) {
 				node.Stop(flow.instance);
 			}
 			if(m_onExit != null) {

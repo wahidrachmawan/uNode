@@ -8,7 +8,7 @@ namespace MaxyGames.UNode.Nodes {
 	public class NodeWaitUntil : CoroutineNode, IStackedNode {
 		public BlockData data = new BlockData();
 
-		public IEnumerable<NodeObject> stackedNodes => data.GetNodes();
+		public IEnumerable<NodeObject> StackedNodes => data.GetNodes();
 
 		protected override void OnRegister() {
 			base.OnRegister();

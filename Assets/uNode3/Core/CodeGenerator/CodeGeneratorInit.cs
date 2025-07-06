@@ -387,7 +387,7 @@ namespace MaxyGames {
 				}
 				if(node.node is IStackedNode) {
 					var stacked = node.node as IStackedNode;
-					foreach(var n in stacked.stackedNodes) {
+					foreach(var n in stacked.StackedNodes) {
 						if(n == null) continue;
 						foreach(var p in n.FlowInputs) {
 							if(p.IsSelfCoroutine()) {
@@ -464,7 +464,7 @@ namespace MaxyGames {
 					}
 					if (includeSuperNode && node.node is ISuperNode) {
 						ISuperNode superNode = node.node as ISuperNode;
-						foreach(var n in superNode.nestedFlowNodes) {
+						foreach(var n in superNode.NestedFlowNodes) {
 							FindAllFlowConnection(n, ref allNode, includeSuperNode);
 						}
 					}
@@ -497,7 +497,7 @@ namespace MaxyGames {
 					}
 					if (includeSuperNode && node.node is ISuperNode) {
 						ISuperNode superNode = node.node as ISuperNode;
-						foreach(var n in superNode.nestedFlowNodes) {
+						foreach(var n in superNode.NestedFlowNodes) {
 							FindFlowConnectionAfterCoroutineNode(n, ref allNode, includeSuperNode, includeCoroutineEvent, passCoroutine);
 						}
 					}
@@ -532,25 +532,9 @@ namespace MaxyGames {
 							InitConnect(port.GetTargetNode());
 						}
 					}
-					if(node.node is ISuperNode) {
-						ISuperNode superNode = node.node as ISuperNode;
-						foreach(var n in superNode.nestedFlowNodes) {
-							if(n != null) {
-								InitConnect(n);
-							}
-						}
-					}
-					if(node.node is UNode.Nodes.StateNode) {
-						UNode.Nodes.StateNode stateNode = node.node as UNode.Nodes.StateNode;
-						foreach(var tr in stateNode.GetTransitions()) {
-							if(tr != null) {
-								InitConnect(tr);
-							}
-						}
-					}
-					if(node.node is IStackedNode) {
-						IStackedNode stackedNode = node.node as IStackedNode;
-						foreach(var n in stackedNode.stackedNodes) {
+					if(node.node is INodeWithConnection) {
+						INodeWithConnection nod = node.node as INodeWithConnection;
+						foreach(var n in nod.Connections) {
 							if(n != null) {
 								InitConnect(n);
 							}

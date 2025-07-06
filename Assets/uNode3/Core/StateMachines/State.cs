@@ -201,5 +201,9 @@ namespace MaxyGames.StateMachines {
 			}
 			ActiveState?.Tick();
 		}
+
+		public void RegisterAnyState(IState state) {
+			throw new NotImplementedException();
+		}
 	}
 }

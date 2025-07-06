@@ -49,15 +49,19 @@ namespace MaxyGames.UNode.Editors {
 		#region Event
 		public abstract void Highlight(UGraphElement element);
 
-		private UGraphElement m_prevCanvas;
 		public void UpdatePosition() {
+			window?.UpdatePosition();
+		}
+
+		[NonSerialized]
+		private UGraphElement m_prevCanvas;
+		public void CanvasChanged() {
 			if(graphData != null) {
 				if(m_prevCanvas != graphData.currentCanvas) {
 					m_prevCanvas = graphData.currentCanvas;
 					OnCanvasChanged();
 				}
 			}
-			window?.UpdatePosition();
 		}
 
 		public void SelectionChanged() {
@@ -797,6 +801,7 @@ namespace MaxyGames.UNode.Editors {
 			if(graphData == null)
 				return;
 			graphData.position = position;
+			CanvasChanged();
 		}
 
 		/// <summary>

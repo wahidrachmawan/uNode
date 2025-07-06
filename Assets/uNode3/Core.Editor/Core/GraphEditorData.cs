@@ -507,7 +507,7 @@ namespace MaxyGames.UNode.Editors {
 			} else if(obj is NodeObject nodeObject) {
 				if(nodeObject.node is ISuperNode) {
 					ISuperNode superNode = nodeObject.node as ISuperNode;
-					foreach(var n in superNode.nestedFlowNodes) {
+					foreach(var n in superNode.NestedFlowNodes) {
 						if(n != null) {
 							graphCanvas.position = new Vector2(n.position.x - 200, n.position.y - 200);
 							break;

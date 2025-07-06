@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Nodes {
 		private List<MacroPortNode> outputFlows;
 		private List<MacroPortNode> outputValues;
 
-		public IEnumerable<NodeObject> nestedFlowNodes {
+		public IEnumerable<NodeObject> NestedFlowNodes {
 			get {
 				Refresh();
 				foreach(var n in inputFlows) {

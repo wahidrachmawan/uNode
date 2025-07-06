@@ -7,7 +7,7 @@ namespace MaxyGames.UNode.Nodes {
 		[Hide]
 		public BlockData data = new BlockData();
 
-		public IEnumerable<NodeObject> stackedNodes => data.GetNodes();
+		public IEnumerable<NodeObject> StackedNodes => data.GetNodes();
 
 		protected override void OnRegister() {
 			data.Register(this);

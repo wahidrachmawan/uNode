@@ -595,7 +595,7 @@ namespace MaxyGames.UNode {
 
 		public override string ToString() {
 			if(!object.ReferenceEquals(_node, null)) {
-				return _node.GetTitle() + $" ({_node.GetType()})";
+				return _node.GetTitle() + $" ({_node.GetType()}) (id:{id})";
 			}
 			return base.ToString();
 		}

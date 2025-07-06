@@ -30,5 +30,9 @@ namespace MaxyGames.UNode.Nodes {
 				analyzer.RegisterError(this, "The node is not valid in current context");
 			}
 		}
+
+		protected override string GenerateFlowCode() {
+			return CG.GeneratePort(transition.exit);
+		}
 	}
 }

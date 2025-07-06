@@ -200,11 +200,13 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool HandlePortOnDropOutsidePort(UGraphView graphView, EdgeView edge, Vector2 position) {
 			if(graphView.graphData.currentCanvas is StateGraphContainer) {
-				if(edge.Output != null) {
-					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphView.graphData, position, node => {
-						node.enter.ConnectTo(edge.Output.GetPortValue());
-						graphView.graphEditor.Refresh();
-					});
+				if(edge.isFlow) {
+					if(edge.Output != null) {
+						NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphView.graphData, position, node => {
+							node.enter.ConnectTo(edge.Output.GetPortValue());
+							graphView.graphEditor.Refresh();
+						});
+					}
 				}
 				return true;
 			}

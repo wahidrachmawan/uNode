@@ -193,6 +193,18 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
+		/// Register new user object data.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="value"></param>
+		/// <param name="owner"></param>
+		/// <returns></returns>
+		public static T RegisterUserObject<T>(T value, object owner, string key) {
+			generatorData.userObjectMap[(owner, key)] = value;
+			return value;
+		}
+
+		/// <summary>
 		/// Get user object data.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
@@ -203,6 +215,31 @@ namespace MaxyGames {
 				return (T)result;
 			}
 			return default(T);
+		}
+
+		/// <summary>
+		/// Get user object data.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="owner"></param>
+		/// <returns></returns>
+		public static T GetUserObject<T>(object owner, string key) {
+			if(generatorData.userObjectMap.TryGetValue((owner, key), out var result)) {
+				return (T)result;
+			}
+			return default(T);
+		}
+
+		/// <summary>
+		/// Get user object data.
+		/// </summary>
+		/// <param name="owner"></param>
+		/// <returns></returns>
+		public static object GetUserObject(object owner, string key) {
+			if(generatorData.userObjectMap.TryGetValue((owner, key), out var result)) {
+				return result;
+			}
+			return null;
 		}
 
 		/// <summary>
@@ -220,12 +257,35 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
+		/// Get user object data if exist otherwise register new user object.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="value"></param>
+		/// <param name="owner"></param>
+		/// <returns></returns>
+		public static T GetOrRegisterUserObject<T>(T value, object owner, string key) {
+			if(generatorData.userObjectMap.ContainsKey((owner, key))) {
+				return (T)generatorData.userObjectMap[(owner, key)];
+			}
+			return RegisterUserObject(value, owner);
+		}
+
+		/// <summary>
 		/// Are the owner has user object data.
 		/// </summary>
 		/// <param name="owner"></param>
 		/// <returns></returns>
 		public static bool HasUserObject(object owner) {
 			return generatorData.userObjectMap.ContainsKey(owner);
+		}
+
+		/// <summary>
+		/// Are the owner has user object data.
+		/// </summary>
+		/// <param name="owner"></param>
+		/// <returns></returns>
+		public static bool HasUserObject(object owner, string key) {
+			return generatorData.userObjectMap.ContainsKey((owner, key));
 		}
 		#endregion
 

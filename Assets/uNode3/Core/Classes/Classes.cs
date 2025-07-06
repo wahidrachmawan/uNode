@@ -398,6 +398,11 @@ namespace MaxyGames.UNode {
 			return flag;
 		}
 
+		/// <summary>
+		/// Check common error for port like unassigned, invalid cast, etc...
+		/// </summary>
+		/// <param name="port"></param>
+		/// <returns></returns>
 		public virtual bool CheckPort(UPort port) {
 			if(port == null || port.node == null) return false;
 			if(port is ValueInput) {

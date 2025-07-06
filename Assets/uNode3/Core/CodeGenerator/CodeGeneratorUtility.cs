@@ -409,7 +409,7 @@ namespace MaxyGames {
 		public static bool CanDeclareLocal(ISuperNode superNode) {
 			if(superNode != null) {
 				var flows = new HashSet<NodeObject>();
-				foreach(var n in superNode.nestedFlowNodes) {
+				foreach(var n in superNode.NestedFlowNodes) {
 					Nodes.FindFlowConnectionAfterCoroutineNode(n, ref flows);
 				}
 				bool Validate(object obj) {
@@ -441,7 +441,7 @@ namespace MaxyGames {
 					}
 				}
 				var allConnection = new HashSet<NodeObject>();
-				foreach(var n in superNode.nestedFlowNodes) {
+				foreach(var n in superNode.NestedFlowNodes) {
 					Nodes.FindAllFlowConnection(n, ref allConnection);
 				}
 				foreach(var node in allConnection) {

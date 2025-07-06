@@ -11,7 +11,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		public FlowOutput onTrue { get; set; }
 		public FlowOutput onFalse { get; set; }
-		public IEnumerable<NodeObject> stackedNodes => data.GetNodes();
+		public IEnumerable<NodeObject> StackedNodes => data.GetNodes();
 
 		protected override void OnRegister() {
 			data.Register(this);
@@ -36,7 +36,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override string GenerateFlowCode() {
-			if(!stackedNodes.Any()) {
+			if(!StackedNodes.Any()) {
 				return null;
 			}
 			if(CG.IsStateFlow(enter)) {

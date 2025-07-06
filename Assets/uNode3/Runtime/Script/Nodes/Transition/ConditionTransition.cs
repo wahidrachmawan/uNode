@@ -5,7 +5,7 @@ namespace MaxyGames.UNode.Transition {
 	public class ConditionTransition : TransitionEvent, IStackedNode {
 		public BlockData data = new BlockData();
 
-		public IEnumerable<NodeObject> stackedNodes => data.GetNodes();
+		public IEnumerable<NodeObject> StackedNodes => data.GetNodes();
 
 		protected override void OnRegister() {
 			data.Register(this);

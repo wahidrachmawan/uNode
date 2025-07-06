@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Reflection;
 using System;
 using System.Collections;
+using System.Linq;
 
 namespace MaxyGames.UNode {
 	public interface INamespace {
@@ -97,6 +98,7 @@ namespace MaxyGames.UNode {
 
 	public interface IGraphEventHandler {
 		bool CanTrigger(GraphInstance instance);
+		string GenerateTriggerCode(string contents) => contents;
 	}
 
 	/// <summary>
@@ -443,11 +445,11 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// Called before code generator is initialized
 		/// </summary>
-		void OnPreInitializer();
+		void OnPreInitializer() { }
 		/// <summary>
 		/// Called after code generator is initialized
 		/// </summary>
-		void OnPostInitializer();
+		void OnPostInitializer() { }
 	}
 
 	/// <summary>
@@ -463,10 +465,21 @@ namespace MaxyGames.UNode {
 	/// <summary>
 	/// An interface for SuperNode / Group Node
 	/// </summary>
-	public interface ISuperNode {
-		IEnumerable<NodeObject> nestedFlowNodes { get; }
+	public interface ISuperNode : INodeWithConnection {
+		/// <summary>
+		/// The nested flow node, usually this is a entry points
+		/// </summary>
+		IEnumerable<NodeObject> NestedFlowNodes { get; }
+		/// <summary>
+		/// The supported scope
+		/// </summary>
 		string SupportedScope => NodeScope.FlowGraph;
+		/// <summary>
+		/// Are coroutine is supported inside this node?
+		/// </summary>
+		/// <returns></returns>
 		bool AllowCoroutine();
+		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes;
 	}
 
 	public interface ISuperNodeWithEntry : ISuperNode {
@@ -474,10 +487,16 @@ namespace MaxyGames.UNode {
 		public string EntryName => "Entry";
 
 		void RegisterEntry(Nodes.NestedEntryNode node);
+		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Append(Entry);
 	}
 
-	public interface IStackedNode {
-		IEnumerable<NodeObject> stackedNodes { get; }
+	public interface INodeWithConnection {
+		IEnumerable<NodeObject> Connections { get; }
+	}
+
+	public interface IStackedNode : INodeWithConnection {
+		IEnumerable<NodeObject> StackedNodes { get; }
+		IEnumerable<NodeObject> INodeWithConnection.Connections => StackedNodes;
 	}
 
 	public interface IRerouteNode {

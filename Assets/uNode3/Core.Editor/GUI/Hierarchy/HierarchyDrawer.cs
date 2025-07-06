@@ -107,7 +107,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentItem, IList<TreeViewItem> rows) {
 			var node = nodeComponent.node as Nodes.StateNode;
-			var flows = node.nestedFlowNodes;
+			var flows = node.NestedFlowNodes;
 			if(flows.Any()) {
 				//var tree = new HierarchyFlowTree(nodeComponent, MemberData.none, uNodeEditorUtility.GetUIDFromString(nodeComponent.GetInstanceID() + "[EVENTS]"), -1, "Events");
 				//parentItem.AddChild(tree);

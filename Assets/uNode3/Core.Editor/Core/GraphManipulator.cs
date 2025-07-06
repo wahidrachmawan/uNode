@@ -329,27 +329,29 @@ namespace MaxyGames.UNode.Editors {
 			var graph = graphData.graph;
 			if(graph is IGraphWithEventGraph eventGraph) {
 				var supportedEventGraph = eventGraph.SupportedEventGraphs;
-				GenericMenu menu = new GenericMenu();
-				foreach(var type in EditorReflectionUtility.GetDefinedTypes<EventGraphAttribute>()) {
-					var att = type.GetCustomAttribute<EventGraphAttribute>();
-					if(supportedEventGraph.Contains(att.name)) {
-						menu.AddItem(new GUIContent("Add new: " + att.name), false, () => {
-							var value = ReflectionUtils.CreateInstance(type);
-							if(value is NodeContainer container) {
-								uNodeEditorUtility.RegisterUndo(graph);
-								container.name = att.name;
-								container.SetParent(graphData.graphData.eventGraphContainer);
-								postAction?.Invoke();
-								GraphChanged();
-							}
-							else {
-								throw null;
-							}
-						});
+				if(supportedEventGraph != null) {
+					GenericMenu menu = new GenericMenu();
+					foreach(var type in EditorReflectionUtility.GetDefinedTypes<EventGraphAttribute>()) {
+						var att = type.GetCustomAttribute<EventGraphAttribute>();
+						if(supportedEventGraph.Contains(att.name)) {
+							menu.AddItem(new GUIContent("Add new: " + att.name), false, () => {
+								var value = ReflectionUtils.CreateInstance(type);
+								if(value is NodeContainer container) {
+									uNodeEditorUtility.RegisterUndo(graph);
+									container.name = att.name;
+									container.SetParent(graphData.graphData.eventGraphContainer);
+									postAction?.Invoke();
+									GraphChanged();
+								}
+								else {
+									throw null;
+								}
+							});
+						}
 					}
-				}
-				if(menu.GetItemCount() > 0) {
-					menu.ShowAsContext();
+					if(menu.GetItemCount() > 0) {
+						menu.ShowAsContext();
+					}
 				}
 			}
 			return true;
