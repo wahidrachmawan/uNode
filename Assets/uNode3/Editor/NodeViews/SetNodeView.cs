@@ -6,7 +6,7 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeSetValue))]
 	public class SetNodeView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			var node = targetNode as Nodes.NodeSetValue;
 			InitializePrimaryPort();
 			AddInputValuePort(new ValueInputData(node.target));

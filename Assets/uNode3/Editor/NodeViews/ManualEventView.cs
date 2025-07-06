@@ -11,8 +11,8 @@ using UnityEditor.Experimental.GraphView;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.ManualEvent))]
 	public class ManualEventView : BaseNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.ManualEvent node = targetNode as Nodes.ManualEvent;
 			ControlView control = new ControlView();
 			control.style.alignSelf = Align.Center;

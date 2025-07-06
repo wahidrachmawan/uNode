@@ -6,7 +6,7 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
     [NodeCustomEditor(typeof(Nodes.ComparisonNode))]
 	public class ComparisonNodeView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			var node = nodeObject.node as Nodes.ComparisonNode;
 			AddPrimaryOutputValue();
 			AddInputValuePort(new ValueInputData(node.inputA));

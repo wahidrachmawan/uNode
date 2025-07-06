@@ -28,8 +28,8 @@ namespace MaxyGames.UNode.Editors {
 
 		private List<UNodeView> transitionViews = new List<UNodeView>();
 
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			BuildTransitions();
 		}
 

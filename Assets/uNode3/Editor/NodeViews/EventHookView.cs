@@ -6,8 +6,8 @@ using UnityEngine.Events;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.EventHook))]
 	public class EventHookView : BaseNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 		}
 
 		public override void OnValueChanged() {

@@ -1290,8 +1290,12 @@ namespace MaxyGames.UNode.Editors {
 			if(element is NodeObject node) {
 				ShowWindow();
 				UGraphElement canvas = node;
-				if(node.node is ISuperNode)
+				if(node.node is INodeWithCustomCanvas) {
+					canvas = (node.node as INodeWithCustomCanvas).ParentCanvas;
+				}
+				else if(node.node is ISuperNode) {
 					canvas = node.parent;
+				}
 				Open(node.graphContainer, canvas);
 				window.Refresh();
 				//window.graphEditor.MoveCanvas(window.editorData.GetPosition(node));

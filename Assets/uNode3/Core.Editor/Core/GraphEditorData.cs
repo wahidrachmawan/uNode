@@ -156,8 +156,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 			m_scopes.Clear();
 			if(canvas is NodeObject) {
-				if(canvas is ISuperNode) {
-					NodeScope.ApplyScopes((canvas as ISuperNode).SupportedScope, m_scopes, null, out _);
+				if((canvas as NodeObject).node is ISuperNode superNode) {
+					NodeScope.ApplyScopes(superNode.SupportedScope, m_scopes, null, out _);
 				}
 				else {
 					m_scopes.Add(NodeScope.FlowGraph);
@@ -179,6 +179,10 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
+					else if(root is IEventGraphCanvas) {
+						var canvass = root as IEventGraphCanvas;
+						NodeScope.ApplyScopes(canvass.Scope, m_scopes, null, out _);
+					}
 					if(root is BaseFunction) {
 						m_scopes.Add(NodeScope.Function);
 						m_scopes.Add(NodeScope.FlowGraph);
@@ -192,6 +196,8 @@ namespace MaxyGames.UNode.Editors {
 					m_scopes.Add(NodeScope.FlowGraph);
 				}
 			}
+			//For in case entry was deleted.
+			if(canvas is NodeContainerWithEntry containerWithEntry && containerWithEntry.Entry != null) { }
 		}
 
 		[System.NonSerialized]

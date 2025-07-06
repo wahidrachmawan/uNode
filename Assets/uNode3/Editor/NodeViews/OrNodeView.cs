@@ -6,7 +6,7 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.MultiORNode))]
 	public class OrNodeView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			InitializePrimaryPort();
 			var node = targetNode as Nodes.MultiORNode;
 			for(int x = 0; x < node.inputs.Count; x++) {

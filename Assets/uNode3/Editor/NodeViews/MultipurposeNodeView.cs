@@ -28,7 +28,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			MultipurposeNode node = nodeObject.node as MultipurposeNode;
 			titleContainer.RegisterCallback<MouseDownEvent>(e => {
 				if(e.button == 0 && e.clickCount == 2) {

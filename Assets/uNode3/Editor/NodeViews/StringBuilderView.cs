@@ -12,8 +12,8 @@ using NodeView = UnityEditor.Experimental.GraphView.Node;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.StringBuilderNode))]
 	public class StringBuilderView : BaseNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.StringBuilderNode node = targetNode as Nodes.StringBuilderNode;
 			ControlView control = new ControlView();
 			control.Add(new Button(() => {

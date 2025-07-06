@@ -17,4 +17,14 @@ namespace MaxyGames.UNode.Editors.Control {
 			uNodeGUI.DrawReference(position, value, type);
 		}
 	}
+	class UGraphElementRefFieldControl : FieldControl {
+		public override bool IsValidControl(Type type, bool layouted) {
+			return type == typeof(UGraphElementRef);
+		}
+
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+			position = EditorGUI.PrefixLabel(position, label);
+			uNodeGUI.DrawReference(position, value, type);
+		}
+	}
 }

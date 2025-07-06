@@ -6,7 +6,7 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeReroute))]
 	public class NodeRerouteView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			var node = targetNode as Nodes.NodeReroute;
 			InitializePrimaryPort();
 			if(node.IsFlowNode()) {

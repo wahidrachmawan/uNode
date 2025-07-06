@@ -141,7 +141,7 @@ namespace MaxyGames.UNode {
 
 		protected string GenerateRunFlows() {
 			if(IsHandledByEventHandler()) {
-				return CG.WrapWithInformation(((nodeObject.parent as NodeObject).node as IGraphEventHandler).GenerateTriggerCode(GenerateFlows()), this);
+				return CG.WrapWithInformation(((nodeObject.parent as NodeObject).node as INodeWithEventHandler).GenerateTriggerCode(GenerateFlows()), this);
 			}
 			else {
 				return CG.WrapWithInformation(GenerateFlows(), this);
@@ -165,7 +165,7 @@ namespace MaxyGames.UNode {
 
 		public bool IsHandledByEventHandler() {
 			var parent = nodeObject?.parent as NodeObject;
-			if(parent != null && parent.node is IGraphEventHandler) {
+			if(parent != null && parent.node is INodeWithEventHandler) {
 				return true;
 			}
 			return false;
@@ -173,14 +173,14 @@ namespace MaxyGames.UNode {
 	}
 
 	public abstract class BaseComponentEvent : BaseGraphEvent {
-		protected IGraphEventHandler eventHandler;
+		protected INodeWithEventHandler eventHandler;
 
 		/// <summary>
 		/// Required.
 		/// </summary>
 		/// <param name="instance"></param>
 		public override void OnRuntimeInitialize(GraphInstance instance) {
-			eventHandler = nodeObject.GetObjectOrNodeInParent<IGraphEventHandler>();
+			eventHandler = nodeObject.GetObjectOrNodeInParent<INodeWithEventHandler>();
 		}
 
 		protected override void OnTrigger(GraphInstance instance) {

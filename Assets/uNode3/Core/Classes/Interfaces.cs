@@ -96,7 +96,10 @@ namespace MaxyGames.UNode {
 		object ReferenceValue { get; }
 	}
 
-	public interface IGraphEventHandler {
+	/// <summary>
+	/// Implement in node to handle childs event nodes
+	/// </summary>
+	public interface INodeWithEventHandler {
 		bool CanTrigger(GraphInstance instance);
 		string GenerateTriggerCode(string contents) => contents;
 	}
@@ -366,6 +369,9 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		string MainGraphScope => NodeScope.All;
 		bool AllowCoroutine => false;
+		/// <summary>
+		/// If true, user are allowed to create a node, etc.
+		/// </summary>
 		bool CanCreateOnMainGraph => true;
 	}
 
@@ -376,9 +382,9 @@ namespace MaxyGames.UNode {
 		HashSet<string> SupportedEventGraphs { get; }
 	}
 
-	public interface IEventGraph {
+	public interface IEventGraphCanvas {
 		string Title { get; }
-		string Scope => NodeScope.All;
+		string Scope => NodeScope.FlowGraph;
 		bool AllowCoroutine => false;
 	}
 
@@ -471,7 +477,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		IEnumerable<NodeObject> NestedFlowNodes { get; }
 		/// <summary>
-		/// The supported scope
+		/// The supported scope, multiple scope is supported separated by `,` or `|`.
 		/// </summary>
 		string SupportedScope => NodeScope.FlowGraph;
 		/// <summary>

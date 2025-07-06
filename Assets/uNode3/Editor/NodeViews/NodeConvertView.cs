@@ -6,10 +6,10 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeConvert))]
 	public class NodeConvertView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			var node = targetNode as Nodes.NodeConvert;
 			if(!node.compactDisplay) {
-				base.InitializeView();
+				base.OnReloadView();
 				return;
 			}
 			InitializePrimaryPort();

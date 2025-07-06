@@ -472,7 +472,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Increment update the UI
+		/// Increment update the UI, this also called after ReloadView
 		/// </summary>
 		public virtual void UpdateUI() {
 			RefreshPortTypes();

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	//[NodeMenu("Flow", "State", IsCoroutine = true, order = 1, HideOnFlow = true)]
-	public class StateNode : BaseCoroutineNode, IScriptState, ISuperNode, IGraphEventHandler, INodeWithConnection {
+	public class StateNode : BaseCoroutineNode, IScriptState, ISuperNode, INodeWithEventHandler, INodeWithConnection {
 		[HideInInspector]
 		public TransitionData transitions = new TransitionData();
 
@@ -164,7 +164,7 @@ namespace MaxyGames.UNode.Nodes {
 			return true;
 		}
 
-		string IGraphEventHandler.GenerateTriggerCode(string contents) {
+		string INodeWithEventHandler.GenerateTriggerCode(string contents) {
 			return CG.If(CG.CompareEventState(enter, null), contents);
 		}
 	}

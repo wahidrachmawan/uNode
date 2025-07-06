@@ -814,6 +814,15 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUI.ObjectField(position, GUIContent.none, reference as Object, objectType, true);
 				EditorGUI.EndDisabledGroup();
 			}
+			else if(reference is UReference) {
+				var val = (reference as UReference).ReferenceValue;
+				if(val != null) {
+					DrawReference(position, val, val.GetType());
+				}
+				else {
+					EditorGUI.DropdownButton(position, new GUIContent("null", uNodeEditorUtility.GetTypeIcon(objectType)), FocusType.Keyboard, EditorStyles.objectField);
+				}
+			}
 			else if(reference == null) {
 				EditorGUI.DropdownButton(position, new GUIContent("null", uNodeEditorUtility.GetTypeIcon(objectType)), FocusType.Keyboard, EditorStyles.objectField);
 			}

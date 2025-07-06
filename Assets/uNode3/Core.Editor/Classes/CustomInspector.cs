@@ -51,7 +51,7 @@ namespace MaxyGames.UNode.Editors {
 					DrawGraphInspector(editorData.graph);
 					if(editorData.currentCanvas is not MainGraphContainer) {
 						EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-						EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Edited Canvas");
+						EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Canvas");
 						EditorGUILayout.Space();
 						var bind = UBind.FromGraphElement(editorData.currentCanvas);
 						if(editorData.currentCanvas is NodeObject nodeObject && nodeObject.node != null) {

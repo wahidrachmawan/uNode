@@ -28,6 +28,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();
+			EditorGUI.BeginDisabledGroup(true);
 			if(node.node != null) {
 				var nodeType = node.node.GetType();
 				if(node.node is IHighLevelNode hlNode && hlNode.NodeType != null) {
@@ -36,12 +37,9 @@ namespace MaxyGames.UNode.Editors {
 				var monoScript = uNodeEditorUtility.GetMonoScript(nodeType);
 				if(monoScript != null) {
 					GUILayout.Space(4);
-					EditorGUI.BeginDisabledGroup(true);
 					EditorGUILayout.ObjectField(new GUIContent("Script"), monoScript, typeof(MonoScript), false);
-					EditorGUI.EndDisabledGroup();
 				}
 			}
-			EditorGUI.BeginDisabledGroup(true);
 			EditorGUILayout.IntField(new GUIContent("ID"), node.id);
 			EditorGUI.EndDisabledGroup();
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);

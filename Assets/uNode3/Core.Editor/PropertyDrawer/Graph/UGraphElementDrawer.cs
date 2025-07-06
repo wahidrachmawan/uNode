@@ -29,7 +29,7 @@ namespace MaxyGames.UNode.Editors {
 			var name = uNodeGUI.TextInput(value.name, "(Title)", false);
 			if(!string.IsNullOrEmpty(name) && name != value.name) {
 				option.RegisterUndo();
-				if(value is Variable || value is Property || value is Function) {
+				if(value is Variable || value is Property || value is Function || value is IEventGraphCanvas) {
 					value.name = uNodeUtility.AutoCorrectName(name);
 					uNodeGUIUtility.GUIChangedMajor(value);
 				}
@@ -46,6 +46,13 @@ namespace MaxyGames.UNode.Editors {
 				value.comment = comment;
 			}
 			EditorGUI.BeginDisabledGroup(true);
+			if(type != null) {
+				var monoScript = uNodeEditorUtility.GetMonoScript(type);
+				if(monoScript != null) {
+					GUILayout.Space(4);
+					EditorGUILayout.ObjectField(new GUIContent("Script"), monoScript, typeof(MonoScript), false);
+				}
+			}
 			EditorGUILayout.IntField(new GUIContent("ID"), value.id);
 			EditorGUI.EndDisabledGroup();
 			EditorGUILayout.EndVertical();

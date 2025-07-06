@@ -10,7 +10,7 @@ namespace MaxyGames.UNode.Nodes {
 		public event System.Action<Flow> OnExitState;
 	}
 
-	public class ScriptState : Node, IScriptState, ISuperNode, IGraphEventHandler, IStateNodeWithTransition, INodeWithConnection {
+	public class ScriptState : Node, IScriptState, ISuperNode, INodeWithEventHandler, IStateNodeWithTransition, INodeWithConnection {
 		[HideInInspector]
 		public StateTranstionData transitions = new StateTranstionData();
 
@@ -26,7 +26,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		public IEnumerable<NodeObject> NestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
-		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph;
+		string ISuperNode.SupportedScope => NodeScope.State + "|" + NodeScope.FlowGraph + "|" + NodeScope.Coroutine;
 
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Concat(GetTransitions().Select(tr => tr.nodeObject));
 
@@ -89,6 +89,14 @@ namespace MaxyGames.UNode.Nodes {
 					foreach(var tr in GetTransitions()) {
 						tr.OnExit(instance.defaultFlow);
 					}
+					//Stop all running coroutine flows
+					foreach(var element in nodeObject.GetObjectsInChildren(true)) {
+						if(element is NodeObject node && node.node is not BaseEventNode) {
+							foreach(var port in node.FlowInputs) {
+								instance.StopState(port);
+							}
+						}
+					}
 				});
 			instance.SetUserData(this, state);
 		}
@@ -113,6 +121,15 @@ namespace MaxyGames.UNode.Nodes {
 						}
 					}
 				}
+				nodeObject.ForeachInChildrens(element => {
+					if(element is NodeObject nodeObject) {
+						foreach(var flow in nodeObject.FlowInputs) {
+							if(/*flow.IsSelfCoroutine() &&*/ CG.IsStateFlow(flow)) {
+								onExit += CG.StopEvent(flow).AddLineInFirst();
+							}
+						}
+					}
+				});
 				if(onEnter != null) {
 					onEnter = CG.SetValue(nameof(StateMachines.State.onEnter), CG.Lambda(onEnter));
 				}
@@ -134,7 +151,7 @@ namespace MaxyGames.UNode.Nodes {
 			return CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
 		}
 
-		string IGraphEventHandler.GenerateTriggerCode(string contents) {
+		string INodeWithEventHandler.GenerateTriggerCode(string contents) {
 			var state = CG.GetVariableNameByReference(this);
 			return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), contents);
 		}

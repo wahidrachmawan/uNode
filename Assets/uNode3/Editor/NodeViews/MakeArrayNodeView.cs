@@ -7,8 +7,8 @@ using UnityEditor.Experimental.GraphView;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.MakeArrayNode))]
 	public class MakeArrayNodeView : BaseNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.MakeArrayNode node = targetNode as Nodes.MakeArrayNode;
 			ControlView control = new ControlView();
 			control.Add(new Button(() => {

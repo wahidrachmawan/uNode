@@ -11,8 +11,8 @@ using UnityEditor.Experimental.GraphView;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.ISNode))]
 	public class IsNodeView : BaseNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			if (uNodeUtility.preferredDisplay != DisplayKind.Full) {
 				var control = UIElementUtility.CreateControl(
 					this, 

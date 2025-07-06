@@ -9,8 +9,8 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.ConditionNode))]
 	public class ConditionNodeView : BlockNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.ConditionNode node = targetNode as Nodes.ConditionNode;
 			InitializeBlocks(node.data.container, BlockType.Condition);
 			EnableInClassList(ussClassCompact, true);

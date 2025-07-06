@@ -6,7 +6,7 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.CacheNode))]
 	public class CacheNodeView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			var node = targetNode as Nodes.CacheNode;
 			InitializePrimaryPort();
 			if(node.compactView) {

@@ -1382,20 +1382,31 @@ namespace MaxyGames.UNode.Editors {
 					graphEditor.Refresh();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
-			else if(graphData.currentCanvas is NodeObject superNode && superNode.node is IGraphEventHandler) {
-				yield return new DropdownMenuSeparator("");
+			else if(graphData.currentCanvas is NodeObject superNode) {
 
-				#region Add Event
-				var eventMenus = NodeEditorUtility.FindEventMenu();
-				foreach(var menu in eventMenus) {
-					if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
-						yield return new DropdownMenuAction("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
-							NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
-							graphEditor.Refresh();
-						}, DropdownMenuAction.AlwaysEnabled);
+				if(superNode.node is INodeWithEventHandler) {
+					yield return new DropdownMenuSeparator("");
+
+					#region Add Event
+					var eventMenus = NodeEditorUtility.FindEventMenu();
+					foreach(var menu in eventMenus) {
+						if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
+							yield return new DropdownMenuAction("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
+								graphEditor.Refresh();
+							}, DropdownMenuAction.AlwaysEnabled);
+						}
 					}
+					#endregion
 				}
-				#endregion
+				if(superNode.node is Nodes.ScriptState) {
+					yield return new DropdownMenuAction("Add Trigger Transition", evt => {
+						NodeEditorUtility.AddNewNode<Nodes.TriggerStateTransition>(graphData,
+							"Trigger",
+							mousePosition);
+						graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
 			}
 			#endregion
 
@@ -1718,7 +1729,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				yield return new DropdownMenuSeparator("");
 			}
-			else if(node is Nodes.IStateNodeWithTransition stateNode) {
+			else if(node is IStateNodeWithTransition stateNode) {
 				yield return new DropdownMenuAction("Add Transition/Empty", ((e) => {
 					NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
 						stateNode.TransitionContainer, "Transition",

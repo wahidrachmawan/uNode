@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Trigger Global Event", icon = typeof(TypeIcons.FlowIcon))]
+	[NodeMenu("Flow", "Trigger Global Event", hasFlowInput =true)]
 	[Description("Used for trigger global event")]
 	public class NodeTriggerGlobalEvent : FlowNode {
 		[AllowAssetReference]

@@ -31,8 +31,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			titleContainer.RegisterCallback<MouseDownEvent>(e => {
 				if(e.button == 0 && e.clickCount == 2) {
 					OpenMacro();

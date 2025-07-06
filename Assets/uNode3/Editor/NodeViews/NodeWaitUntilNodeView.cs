@@ -9,8 +9,8 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeWaitUntil))]
 	public class NodeWaitUntilNodeView : BlockNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.NodeWaitUntil node = targetNode as Nodes.NodeWaitUntil;
 			InitializeBlocks(node.data.container, BlockType.Condition);
 		}

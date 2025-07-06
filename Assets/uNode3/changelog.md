@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.2.0
+- Added new State Machine graph and support for Class Component & C# Graph that inherit from MonoBehaviour
+- Added ability to make connection by single click on the port ( no need to hold down left button )
+- Renamed State Graph to Event Graph
+- Improved Code Generation
+- Improved Editor
+- Fixed some bugs
+
 ## v3.1.5
 - Added more drag & drop menu items
 - Improved Code Generation

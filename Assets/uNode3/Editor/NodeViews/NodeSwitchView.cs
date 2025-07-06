@@ -23,7 +23,7 @@ namespace MaxyGames.UNode.Editors {
 			return true;
 		}
 
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			InitializePrimaryPort(flowOutput: false);
 			Nodes.NodeSwitch node = targetNode as Nodes.NodeSwitch;
 			AddInputValuePort(new ValueInputData(node.target));

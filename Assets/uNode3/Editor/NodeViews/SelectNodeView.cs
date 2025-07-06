@@ -12,7 +12,7 @@ using NodeView = UnityEditor.Experimental.GraphView.Node;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.SelectNode))]
 	public class SelectNodeView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			InitializePrimaryPort();
 			Nodes.SelectNode node = targetNode as Nodes.SelectNode;
 			AddInputValuePort(new ValueInputData(node.target));

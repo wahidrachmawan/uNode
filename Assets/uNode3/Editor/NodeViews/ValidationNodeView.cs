@@ -9,8 +9,8 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeValidation))]
 	public class ValidationNodeView : BlockNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.NodeValidation node = targetNode as Nodes.NodeValidation;
 			InitializeBlocks(node.data.container, BlockType.Condition);
 		}

@@ -6,7 +6,7 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NegateNode))]
 	public class NegateNodeView : BaseNodeView {
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			var node = targetNode as Nodes.NegateNode;
 			InitializePrimaryPort();
 			AddInputValuePort(new ValueInputData(node.target));

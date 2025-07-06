@@ -9,8 +9,8 @@ using UnityEditor.UIElements;
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeAction))]
 	public class ActionNodeView : BlockNodeView {
-		protected override void InitializeView() {
-			base.InitializeView();
+		protected override void OnReloadView() {
+			base.OnReloadView();
 			Nodes.NodeAction node = nodeObject.node as Nodes.NodeAction;
 			InitializeBlocks(node.data.container, BlockType.Action);
 		}

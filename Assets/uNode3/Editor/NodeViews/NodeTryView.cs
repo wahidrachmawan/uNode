@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Editors {
 			ArrayManipulator = false
 		};
 
-		protected override void InitializeView() {
+		protected override void OnReloadView() {
 			InitializePrimaryPort(flowOutput: false);
 			Nodes.NodeTry node = targetNode as Nodes.NodeTry;
 			AddOutputFlowPort(new FlowOutputData(node.Try));

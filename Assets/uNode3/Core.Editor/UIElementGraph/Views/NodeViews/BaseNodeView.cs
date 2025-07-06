@@ -59,16 +59,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Called inside ReloadView
 		/// </summary>
-		protected virtual void InitializeView() {
-			if(nodeObject.node is ISuperNode) {
-				titleContainer.RegisterCallback<MouseDownEvent>(e => {
-					if(e.button == 0 && e.clickCount == 2) {
-						owner.graphEditor.graphData.currentCanvas = targetNode.nodeObject;
-						owner.graphEditor.Refresh();
-						owner.graphEditor.UpdatePosition();
-					}
-				});
-			}
+		protected virtual void OnReloadView() {
 			InitializeDefaultPorts();
 		}
 
@@ -104,6 +95,20 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Functions
+		protected override void OnSetup() {
+			base.OnSetup();
+			
+			if(nodeObject.node is ISuperNode) {
+				titleContainer.RegisterCallback<MouseDownEvent>(e => {
+					if(e.button == 0 && e.clickCount == 2) {
+						owner.graphEditor.graphData.currentCanvas = targetNode.nodeObject;
+						owner.graphEditor.Refresh();
+						owner.graphEditor.UpdatePosition();
+					}
+				});
+			}
+		}
+
 		public override void ReloadView() {
 			try {
 				base.ReloadView();
@@ -115,7 +120,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(titleIcon != null)
 					titleIcon.image = uNodeEditorUtility.GetTypeIcon(nodeObject.GetNodeIcon());
-				InitializeView();
+				OnReloadView();
 			}
 			catch(Exception ex) {
 				if(ex is GraphException) {
