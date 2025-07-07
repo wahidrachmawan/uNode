@@ -107,8 +107,11 @@ namespace MaxyGames.UNode.Nodes {
 				if(startStateNode == null) {
 					throw new GraphException("The entry is not connected", entry);
 				}
-				string onEnter = CG.FlowInvoke(state, nameof(StateMachines.IStateMachine.ChangeState), CG.GetVariableNameByReference(startStateNode));
-				string onExit = CG.FlowInvoke(state, nameof(StateMachines.IStateMachine.ChangeState), CG.Null);
+				string onEnter = CG.debugScript ? CG.Debug(enter, StateType.Running).AddLineInEnd() : null;
+				string onExit = CG.debugScript ? CG.Debug(enter, StateType.Success).AddLineInEnd() : null;
+
+				onEnter += CG.FlowInvoke(state, nameof(StateMachines.IStateMachine.ChangeState), CG.GetVariableNameByReference(startStateNode));
+				onExit += CG.FlowInvoke(state, nameof(StateMachines.IStateMachine.ChangeState), CG.Null);
 
 				if(onEnter != null) {
 					onEnter = CG.SetValue(nameof(StateMachines.NestedState.onEnter), CG.Lambda(onEnter));
@@ -116,10 +119,10 @@ namespace MaxyGames.UNode.Nodes {
 				if(onExit != null) {
 					onExit = CG.SetValue(nameof(StateMachines.NestedState.onExit), CG.Lambda(onExit));
 				}
-				CG.InsertCodeToFunction("Awake", CG.Flow(
+				CG.InsertCodeToFunction("Awake", CG.WrapWithInformation(CG.Flow(
 					state.CGSet(CG.New(typeof(StateMachines.NestedState), null, new[] { onEnter, onExit })),
 					state.CGAccess(nameof(StateMachines.IState.FSM)).CGSet(CG.GetVariableNameByReference(nodeObject.parent))
-				));
+				), this));
 			});
 		}
 

@@ -96,6 +96,41 @@ PortView > Image {
     border-color: rgba(255,255,0,0.8);
 }
 
+.highlight-debug-running,
+.highlight-debug-success,
+.highlight-debug-failure {
+    position: Absolute;
+    left: -2px;
+    right: -2px;
+    top: -2px;
+    bottom: -2px;
+    border-width: 4px;
+    border-radius: 6px;
+}
+
+
+.highlight-debug-success {
+    border-color: rgba(54, 255, 83, 0.80);
+}
+
+.highlight-debug-failure {
+    border-color: rgba(255, 54, 54, 0.80);
+}
+
+.highlight-debug-success,
+.highlight-debug-failure {
+    scale: 1.1 1.1;
+    opacity: 0.5;
+    transition: opacity 0.2s ease-in-out, scale 0.2s ease-in-out;
+}
+
+.highlight-debug-running {
+    scale: 1.05 1.05;
+    opacity: 0.8;
+    border-color: rgba(54, 193, 255, 0.80);
+    transition: opacity 0.1s ease-in-out, scale 0.1s ease-in-out;
+}
+
 .compact-value-minimalize .port {
     height: 18px;
 }

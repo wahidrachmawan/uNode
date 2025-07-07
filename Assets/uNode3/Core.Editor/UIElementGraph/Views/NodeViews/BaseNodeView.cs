@@ -142,7 +142,52 @@ namespace MaxyGames.UNode.Editors {
 				this.Add(debugView);
 			}
 			if(Application.isPlaying && primaryInputFlow != null) {
+
+				bool? lastState = null;
+				VisualElement debugElement = null;
+				void UpdateState(bool? state) {
+					if(lastState != state || debugElement == null) {
+						if(debugElement == null) {
+							debugElement = new VisualElement() {
+								name = "node-running-status",
+								pickingMode = PickingMode.Ignore,
+							};
+							this.Add(debugElement);
+						}
+						else {
+							if(lastState == null) {
+								//Running
+								this.RemoveFromClassList("node-debug-running");
+								debugElement.RemoveFromClassList("highlight-debug-running");
+							}
+							else if(lastState == true) {
+								this.RemoveFromClassList("node-debug-success");
+								debugElement.RemoveFromClassList("highlight-debug-success");
+							}
+							else {
+								this.RemoveFromClassList("node-debug-failure");
+								debugElement.RemoveFromClassList("highlight-debug-failure");
+							}
+						}
+						if(state == null) {
+							//Running
+							this.AddToClassList("node-debug-running");
+							debugElement.AddToClassList("highlight-debug-running");
+						}
+						else if(state == true) {
+							this.AddToClassList("node-debug-success");
+							debugElement.AddToClassList("highlight-debug-success");
+						}
+						else {
+							this.AddToClassList("node-debug-failure");
+							debugElement.AddToClassList("highlight-debug-failure");
+						}
+						lastState = state;
+					}
+				}
+
 				this.RegisterRepaintAction(() => {
+					if(Event.current.type != EventType.Repaint) return;
 					var debugData = owner.graphEditor.GetDebugInfo();
 					if(debugData != null) {
 						var nodeDebug = debugData.GetDebugValue(primaryInputFlow.GetPortValue<FlowInput>());
@@ -150,22 +195,35 @@ namespace MaxyGames.UNode.Editors {
 							var layout = new Rect(5, -8, 8, 8);
 							switch(nodeDebug.nodeState) {
 								case StateType.Success:
-									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0, 
-										Color.Lerp(
-											UIElementUtility.Theme.nodeRunningColor,
-											UIElementUtility.Theme.nodeSuccessColor,
-											(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
+									if(GraphDebug.debugTime - nodeDebug.time > 0.1f) {
+										UpdateState(true);
+									}
+									else {
+										UpdateState(null);
+									}
+									//GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0, 
+									//	Color.Lerp(
+									//		UIElementUtility.Theme.nodeRunningColor,
+									//		UIElementUtility.Theme.nodeSuccessColor,
+									//		(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Failure:
-									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
-										Color.Lerp(
-											UIElementUtility.Theme.nodeRunningColor,
-											UIElementUtility.Theme.nodeFailureColor,
-											(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
+									if(GraphDebug.debugTime - nodeDebug.time > 0.2f) {
+										UpdateState(false);
+									}
+									else {
+										UpdateState(null);
+									}
+									//GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
+									//	Color.Lerp(
+									//		UIElementUtility.Theme.nodeRunningColor,
+									//		UIElementUtility.Theme.nodeFailureColor,
+									//		(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Running:
-									GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
-										UIElementUtility.Theme.nodeRunningColor, 0, 0);
+									UpdateState(null);
+									//GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
+									//	UIElementUtility.Theme.nodeRunningColor, 0, 0);
 									break;
 							}
 						}

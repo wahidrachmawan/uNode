@@ -106,8 +106,8 @@ namespace MaxyGames.UNode.Nodes {
 			var state = CG.RegisterPrivateVariable("m_state_" + uNodeUtility.AutoCorrectName(name), typeof(StateMachines.State), null, this);
 
 			CG.RegisterNodeSetup(this, () => {
-				string onEnter = null;
-				string onExit = null;
+				string onEnter = CG.debugScript ? CG.Debug(enter, StateType.Running) : null;
+				string onExit = CG.debugScript ? CG.Debug(enter, StateType.Success) : null;
 				foreach(var evt in nodeObject.GetNodesInChildren<BaseGraphEvent>()) {
 					if(evt != null) {
 						if(evt is StateOnEnterEvent) {
@@ -136,10 +136,10 @@ namespace MaxyGames.UNode.Nodes {
 				if(onExit != null) {
 					onExit = CG.SetValue(nameof(StateMachines.State.onExit), CG.Lambda(onExit));
 				}
-				CG.InsertCodeToFunction("Awake", CG.Flow(
-					state.CGSet(CG.New(typeof(StateMachines.State), null, new[] { onEnter, onExit })),
-					state.CGAccess(nameof(StateMachines.IState.FSM)).CGSet(CG.GetVariableNameByReference(nodeObject.parent))
-				));
+				CG.InsertCodeToFunction("Awake", CG.WrapWithInformation(CG.Flow(
+						state.CGSet(CG.New(typeof(StateMachines.State), null, new[] { onEnter, onExit })),
+						state.CGAccess(nameof(StateMachines.IState.FSM)).CGSet(CG.GetVariableNameByReference(nodeObject.parent))
+				), this));
 			});
 		}
 
