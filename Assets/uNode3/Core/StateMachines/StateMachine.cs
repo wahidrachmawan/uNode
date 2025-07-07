@@ -13,8 +13,14 @@ namespace MaxyGames.StateMachines {
 		/// </summary>
 		IState ActiveState { get; }
 		/// <summary>
-		/// Update the state machines
+		/// Gets a value indicating whether the FSM is active.
 		/// </summary>
+		bool IsActive => true;
+		/// <summary>
+		/// Advances the state of the object by performing a single update cycle.
+		/// </summary>
+		/// <remarks>This method is typically called at regular intervals to update the object's state. Ensure that
+		/// the object is in a valid state before calling this method.</remarks>
 		void Tick();
 		/// <summary>
 		/// Change the active state
@@ -22,14 +28,19 @@ namespace MaxyGames.StateMachines {
 		/// <param name="state"></param>
 		void ChangeState(IState state);
 		/// <summary>
-		/// Register any state to the fsm
+		/// Registers a state to be used as an "Any State" in the state machine.
 		/// </summary>
-		/// <param name="state"></param>
+		/// <remarks>An "Any State" represents a state that can transition to other states regardless of the current
+		/// state. This method allows the specified state to be treated as an "Any State" within the state machine. Ensure
+		/// that the provided state is properly configured for transitions.</remarks>
+		/// <param name="state">The state to register as an "Any State". Cannot be null.</param>
 		void RegisterAnyState(IState state);
 	}
 
 	public class StateMachine : IStateMachine {
+		[NonSerialized]
 		private IState m_activeState;
+		[NonSerialized]
 		private IState m_transitionState;
 		public IState ActiveState {
 			get => m_activeState;
@@ -44,7 +55,27 @@ namespace MaxyGames.StateMachines {
 				}
 			}
 		}
+		/// <summary>
+		/// Represents a collection of states that can be entered from any other state.
+		/// </summary>
 		public readonly List<BaseState> AnyStates = new();
+
+		[NonSerialized]
+		private bool m_isPaused;
+		public bool IsActive => m_isPaused == false;
+
+		/// <summary>
+		/// Pauses the current operation or process.
+		/// </summary>
+		/// <remarks>This method sets the internal state to indicate that the operation is paused.  While paused, the
+		/// operation will not proceed until resumed.</remarks>
+		public void Pause() => m_isPaused = true;
+		/// <summary>
+		/// Resumes the operation by clearing the paused state.
+		/// </summary>
+		/// <remarks>This method sets the internal state to indicate that the operation is no longer paused. Call this
+		/// method to continue processing after a pause.</remarks>
+		public void Resume() => m_isPaused = false;
 
 		public void ChangeState(IState state) {
 			ActiveState = state;
@@ -54,9 +85,6 @@ namespace MaxyGames.StateMachines {
 		[NonSerialized]
 		bool m_hasInitialize;
 
-		/// <summary>
-		/// Update the state machines
-		/// </summary>
 		public void Tick() {
 			if(m_hasInitialize == false) {
 				m_hasInitialize = true;
@@ -90,6 +118,14 @@ namespace MaxyGames.StateMachines {
 			ActiveState?.Tick();
 		}
 
+		/// <summary>
+		/// Registers a state as an "Any State" in the finite state machine.
+		/// </summary>
+		/// <remarks>"Any States" are special states that can transition from any other state in the finite state
+		/// machine. This method associates the provided state with the finite state machine and adds it to the collection of
+		/// "Any States".</remarks>
+		/// <param name="state">The state to register as an "Any State". Must be of type <see cref="BaseState"/>.</param>
+		/// <exception cref="NullReferenceException"></exception>
 		public void RegisterAnyState(IState state) {
 			if(state is not BaseState any) throw null;
 			any.FSM = this;

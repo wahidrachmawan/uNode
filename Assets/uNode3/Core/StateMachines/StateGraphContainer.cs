@@ -8,6 +8,8 @@ namespace MaxyGames.UNode {
 	public class StateGraphContainer : NodeContainerWithEntry, IEventGraphCanvas, IIcon, IGeneratorPrePostInitializer {
 		public string Title => name;
 
+		public const string Scope = "StateMachine";
+
 		public override BaseEntryNode Entry {
 			get {
 				if(this == null) return null;
@@ -22,7 +24,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		string IEventGraphCanvas.Scope => null;
+		string IEventGraphCanvas.Scope => Scope;
 
 		public Type GetIcon() {
 			return typeof(TypeIcons.StateIcon);

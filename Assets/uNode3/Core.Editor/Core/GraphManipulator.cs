@@ -1368,20 +1368,6 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
-			else if(graphData.currentCanvas is StateGraphContainer) {
-				yield return new DropdownMenuAction("Add Script State", evt => {
-					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphData,
-						"State",
-						mousePosition);
-					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Add Any State", evt => {
-					NodeEditorUtility.AddNewNode<Nodes.AnyStateNode>(graphData,
-						"AnyState",
-						mousePosition);
-					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
-			}
 			else if(graphData.currentCanvas is NodeObject superNode) {
 
 				if(superNode.node is INodeWithEventHandler) {
@@ -1407,6 +1393,20 @@ namespace MaxyGames.UNode.Editors {
 						graphEditor.Refresh();
 					}, DropdownMenuAction.AlwaysEnabled);
 				}
+			}
+			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
+				yield return new DropdownMenuAction("Add Script State", evt => {
+					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphData,
+						"State",
+						mousePosition);
+					graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+				yield return new DropdownMenuAction("Add Any State", evt => {
+					NodeEditorUtility.AddNewNode<Nodes.AnyStateNode>(graphData,
+						"AnyState",
+						mousePosition);
+					graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			#endregion
 
@@ -1782,7 +1782,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override bool HandleCommand(string command) {
-			if(graphData.currentCanvas is StateGraphContainer) {
+			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
 				switch(command) {
 					case nameof(Command.OpenCommand):
 						//Skip
@@ -1796,7 +1796,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override void ManipulateCanvasFeatures(HashSet<string> features) {
-			if(graphData.currentCanvas is StateGraphContainer) {
+			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
 				features.Remove(nameof(Feature.Macro));
 				features.Remove(nameof(Feature.PlaceFit));
 				features.Remove(nameof(Feature.SurroundWith));

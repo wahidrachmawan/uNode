@@ -57,23 +57,31 @@ namespace MaxyGames.StateMachines {
 		[NonSerialized]
 		public List<ITransition> transitions = new();
 
-		public virtual bool IsActive => FSM?.ActiveState == this;
+		public virtual bool IsActive => FSM != null && FSM.ActiveState == this && FSM.IsActive;
 
 		public IStateMachine FSM { get; set; }
 
 		/// <summary>
-		/// Called when state is entered
+		/// Executes custom logic when entering a state
 		/// </summary>
+		/// <remarks>This method is intended to be overridden in derived classes to provide behavior specific to
+		/// entering a state or context. It is called automatically during the transition process and should not be invoked
+		/// directly.</remarks>
 		protected virtual void OnEnter() { }
 
 		/// <summary>
-		/// Called when state is exited
+		/// Performs cleanup or finalization tasks when the state is exiting.
 		/// </summary>
+		/// <remarks>This method is called during the state exit. Override this method in a
+		/// derived class to implement custom logic that should be executed when the state exits.</remarks>
 		protected virtual void OnExit() { }
 
 		/// <summary>
-		/// Called every state is updated
+		/// Invoked periodically to perform operations or updates during a timed interval.
 		/// </summary>
+		/// <remarks>This method is intended to be overridden in derived classes to implement custom behavior  that
+		/// should occur on each tick of a timer or similar periodic mechanism. The base implementation  does
+		/// nothing.</remarks>
 		protected virtual void OnTick() { }
 
 		public void Enter() {
@@ -104,6 +112,14 @@ namespace MaxyGames.StateMachines {
 			OnTick();
 		}
 
+		/// <summary>
+		/// Adds a transition to the current state, specifying the target state.
+		/// </summary>
+		/// <remarks>This method associates the provided transition with the current state and sets its target state.
+		/// The transition is added to the internal collection of transitions for the current state.</remarks>
+		/// <param name="transition">The transition to add. Must not be null.</param>
+		/// <param name="target">The target state for the transition. Must not be the same as the current state.</param>
+		/// <exception cref="Exception">Thrown if <paramref name="target"/> is the same as the current state.</exception>
 		public void AddTransition(ITransition transition, IState target) {
 			if(target == this)
 				throw new Exception("The target state must not same with the self state");
@@ -112,6 +128,10 @@ namespace MaxyGames.StateMachines {
 			transitions.Add(transition);
 		}
 
+		/// <summary>
+		/// Clears all transitions from the current collection.
+		/// </summary>
+		/// <remarks>This method removes all transitions, leaving the collection empty.</remarks>
 		public void ClearTransition() {
 			transitions.Clear();
 		}
@@ -147,29 +167,38 @@ namespace MaxyGames.StateMachines {
 	/// </summary>
 	public class AnyState : BaseState {
 		/// <summary>
-		/// Any state is always active
+		/// Any state is always active when FSM is active
 		/// </summary>
-		public override bool IsActive => true;
+		public override bool IsActive => FSM != null && FSM.IsActive;
 	}
 
 	/// <summary>
 	/// The nested state that can have state inside of it
 	/// </summary>
 	public class NestedState : BaseState, IStateMachine {
+		[NonSerialized]
 		private IState m_activeState;
+		[NonSerialized]
+		private IState m_transitionState;
 		public IState ActiveState {
 			get => m_activeState;
 			set {
 				if(value != null) {
 					value.FSM = this;
 				}
-				m_activeState = value;
+				if(m_transitionState == null) {
+					m_activeState?.Exit();
+					m_activeState = null;
+					m_transitionState = value;
+				}
 			}
 		}
-		public AnyState AnyState { get; set; } = new();
+		/// <summary>
+		/// Represents a collection of states that can be entered from any other state.
+		/// </summary>
+		public readonly List<BaseState> AnyStates = new();
 
 		public void ChangeState(IState state) {
-			ActiveState?.Exit();
 			ActiveState = state;
 			//Tick();
 		}
@@ -180,10 +209,26 @@ namespace MaxyGames.StateMachines {
 		protected override void OnTick() {
 			if(m_hasInitialize == false) {
 				m_hasInitialize = true;
-				AnyState.FSM = this;
-				if(AnyState != null) {
-					foreach(var tr in AnyState.transitions) {
-						tr.OnEnter();
+				foreach(var any in AnyStates) {
+					if(any != null) {
+						foreach(var tr in any.transitions) {
+							tr.OnEnter();
+							if(tr.ShouldTransition()) {
+								tr.Transition();
+								return;
+							}
+						}
+					}
+				}
+			}
+			if(m_transitionState != null) {
+				m_activeState = m_transitionState;
+				m_transitionState = null;
+				m_activeState.Enter();
+			}
+			foreach(var any in AnyStates) {
+				if(any != null) {
+					foreach(var tr in any.transitions) {
 						if(tr.ShouldTransition()) {
 							tr.Transition();
 							return;
@@ -191,19 +236,13 @@ namespace MaxyGames.StateMachines {
 					}
 				}
 			}
-			if(AnyState != null) {
-				foreach(var tr in AnyState.transitions) {
-					if(tr.ShouldTransition()) {
-						tr.Transition();
-						return;
-					}
-				}
-			}
 			ActiveState?.Tick();
 		}
 
 		public void RegisterAnyState(IState state) {
-			throw new NotImplementedException();
+			if(state is not BaseState any) throw null;
+			any.FSM = this;
+			AnyStates.Add(any);
 		}
 	}
 }

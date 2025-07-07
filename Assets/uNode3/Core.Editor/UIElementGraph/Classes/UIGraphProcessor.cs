@@ -81,7 +81,7 @@ namespace MaxyGames.UNode.Editors {
 			if(edgeData.input.GetNode() is Nodes.NodeValueConverter vc && vc.output.isConnected) {
 				return null;
 			}
-			if(graph.graphData.currentCanvas is StateGraphContainer) {
+			if(graph.graphData.scopes.Contains(StateGraphContainer.Scope)) {
 				return new TransitionEdgeView(edgeData);
 			}
 			return new EdgeView(edgeData);
@@ -199,7 +199,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override bool HandlePortOnDropOutsidePort(UGraphView graphView, EdgeView edge, Vector2 position) {
-			if(graphView.graphData.currentCanvas is StateGraphContainer) {
+			if(graphView.graphData.scopes.Contains(StateGraphContainer.Scope)) {
 				if(edge.isFlow) {
 					if(edge.Output != null) {
 						NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphView.graphData, position, node => {
