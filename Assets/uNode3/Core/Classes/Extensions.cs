@@ -839,6 +839,42 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// Is the obj is instance of type of T
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public static bool IsElementTypeOf<T>(this UGraphElement obj) {
+			if(obj is T) return true;
+			if(obj is NodeObject node) {
+				return node.node is T;
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// Is the obj is instance of type of T
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="obj"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static bool IsElementTypeOf<T>(this UGraphElement obj, out T value) {
+			if(obj is T val) {
+				value = val;
+				return true;
+			}
+			if(obj is NodeObject node) {
+				if(node.node is T v) {
+					value = v;
+					return true;
+				}
+			}
+			value = default;
+			return false;
+		}
+
+		/// <summary>
 		/// Is the obj is instance of type of 'type'
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

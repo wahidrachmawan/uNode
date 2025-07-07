@@ -599,7 +599,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="evt">The event data containing information about the geometry change.</param>
 		void OnEdgeGeometryChanged(GeometryChangedEvent evt) {
-			if(Mathf.RoundToInt(PointsAndTangents[0].x) != Mathf.RoundToInt(PointsAndTangents[3].x)) {
+			if(Mathf.Abs(Mathf.RoundToInt(PointsAndTangents[0].x) - Mathf.RoundToInt(PointsAndTangents[3].x)) > 2) {
 				PointsAndTangents[1] = PointsAndTangents[0];
 				PointsAndTangents[2] = PointsAndTangents[3];
 			}

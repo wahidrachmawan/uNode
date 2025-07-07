@@ -22,6 +22,7 @@ namespace MaxyGames.UNode.Editors {
 
 	[NodeCustomEditor(typeof(ScriptState))]
 	[NodeCustomEditor(typeof(AnyStateNode))]
+	[NodeCustomEditor(typeof(NestedStateNode))]
 	public class ScriptStateView : BaseNodeView {
 		//To ensure the node always reload when the graph changed
 		public override bool autoReload => true;
@@ -34,7 +35,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected override void InitializeDefaultPorts() {
-			if(nodeObject.node is ScriptState) {
+			if(nodeObject.primaryFlowInput != null) {
 				var port = AddPrimaryInputFlow();
 				port.SetEdgeConnector<TransitionEdgeView>();
 				port.pickingMode = PickingMode.Ignore;

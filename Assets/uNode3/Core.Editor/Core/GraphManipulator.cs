@@ -1395,7 +1395,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
-				yield return new DropdownMenuAction("Add Script State", evt => {
+				yield return new DropdownMenuAction("Add State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphData,
 						"State",
 						mousePosition);
@@ -1404,6 +1404,12 @@ namespace MaxyGames.UNode.Editors {
 				yield return new DropdownMenuAction("Add Any State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.AnyStateNode>(graphData,
 						"AnyState",
+						mousePosition);
+					graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+				yield return new DropdownMenuAction("Add Nested State", evt => {
+					NodeEditorUtility.AddNewNode<Nodes.NestedStateNode>(graphData,
+						"NestedState",
 						mousePosition);
 					graphEditor.Refresh();
 				}, DropdownMenuAction.AlwaysEnabled);
@@ -1736,11 +1742,11 @@ namespace MaxyGames.UNode.Editors {
 						new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
 						(transition) => {
 							transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
-							NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State", 
-								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150), 
-								state => {
-									state.enter.ConnectTo(transition.exit);
-								});
+							//NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State", 
+							//	new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150), 
+							//	state => {
+							//		state.enter.ConnectTo(transition.exit);
+							//	});
 							graphEditor.Refresh();
 						});
 				}), DropdownMenuAction.AlwaysEnabled);
@@ -1764,11 +1770,11 @@ namespace MaxyGames.UNode.Editors {
 											output.ConnectTo(trigger.trigger);
 										}
 									});
-									NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State",
-										new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150),
-										state => {
-											state.enter.ConnectTo(transition.exit);
-										});
+									//NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State",
+									//	new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150),
+									//	state => {
+									//		state.enter.ConnectTo(transition.exit);
+									//	});
 								});
 							graphEditor.Refresh();
 						}, DropdownMenuAction.AlwaysEnabled);

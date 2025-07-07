@@ -488,11 +488,12 @@ namespace MaxyGames.UNode {
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes;
 	}
 
-	public interface ISuperNodeWithEntry : ISuperNode {
-		public Nodes.NestedEntryNode Entry { get; }
-		public string EntryName => "Entry";
+	public interface IElementWithEntry {
+		public BaseEntryNode Entry { get; }
+		public void RegisterEntry(BaseEntryNode node) { }
+	}
 
-		void RegisterEntry(Nodes.NestedEntryNode node);
+	public interface ISuperNodeWithEntry : ISuperNode, IElementWithEntry {
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Append(Entry);
 	}
 

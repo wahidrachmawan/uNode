@@ -176,6 +176,7 @@ namespace MaxyGames.StateMachines {
 	/// The nested state that can have state inside of it
 	/// </summary>
 	public class NestedState : BaseState, IStateMachine {
+		public Action onEnter, onExit;
 		[NonSerialized]
 		private IState m_activeState;
 		[NonSerialized]
@@ -237,6 +238,14 @@ namespace MaxyGames.StateMachines {
 				}
 			}
 			ActiveState?.Tick();
+		}
+
+		protected override void OnEnter() {
+			onEnter?.Invoke();
+		}
+
+		protected override void OnExit() {
+			onExit?.Invoke();
 		}
 
 		public void RegisterAnyState(IState state) {

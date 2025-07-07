@@ -10,8 +10,7 @@ namespace MaxyGames.UNode.Nodes {
 		public FlowOutput exit;
 
 		[NonSerialized]
-		public NodeContainerWithEntry container;
-
+		private IElementWithEntry container;
 
 		private static readonly string[] m_styles = new[] { "state-node", "state-entry" };
 		public override string[] Styles => m_styles;
@@ -19,9 +18,11 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnRegister() {
 			enter = new FlowInput(this, nameof(enter), flow => flow.Next(exit));
 			exit = PrimaryFlowOutput(nameof(exit));
-			container = nodeObject.GetObjectInParent<NodeContainerWithEntry>();
-			if(container != null && container.Entry == this) {
-				container.RegisterEntry(this);
+			if(container == null) {
+				container = nodeObject.GetObjectOrNodeInParent<IElementWithEntry>();
+				if(container != null && container.Entry == this) {
+					container.RegisterEntry(this);
+				}
 			}
 		}
 

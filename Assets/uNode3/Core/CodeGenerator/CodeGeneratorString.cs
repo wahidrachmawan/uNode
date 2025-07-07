@@ -489,7 +489,16 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string New(string type, IEnumerable<string> parameters, IEnumerable<string> initializers) {
 			string paramName = parameters != null ? string.Join(", ", parameters.Where(item => !string.IsNullOrEmpty(item))) : null;
-			string initName = initializers != null ? string.Join(", ", initializers) : null;
+			string initName = null;
+			if(initializers != null) {
+				if(initializers.Any(item => item != null && item.Contains('\n'))) {
+					initName = string.Join(", \n", initializers.Where(item => !string.IsNullOrEmpty(item)));
+					initName = initName.AddLineInFirst().AddLineInEnd().AddTabAfterNewLine();
+				}
+				else {
+					initName = string.Join(", ", initializers.Where(item => !string.IsNullOrEmpty(item)));
+				}
+			}
 			var result = $"new {type}({paramName})";
 			if(string.IsNullOrEmpty(initName) == false) {
 				result += " { " + initName + " }";

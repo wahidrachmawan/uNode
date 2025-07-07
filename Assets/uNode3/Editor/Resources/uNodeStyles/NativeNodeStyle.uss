@@ -624,6 +624,11 @@ NodeRerouteView .port {
     /*visibility: hidden;*/
 }
 
+.state-node.state-nested > #node-border {
+    background-color: rgb(55, 55, 55);
+    border-color: rgb(0, 137, 28);
+}
+
 .state-node > #node-border {
     background-color: rgb(55, 55, 55);
     border-color: rgb(88, 88, 88);

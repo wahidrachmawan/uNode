@@ -460,7 +460,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	public abstract class NodeContainerWithEntry : NodeContainer {
+	public abstract class NodeContainerWithEntry : NodeContainer, IElementWithEntry {
 		[NonSerialized]
 		protected NodeObject entryObject;
 
