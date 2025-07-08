@@ -224,6 +224,10 @@ TextField .unity-text-element {
 	margin-left: 3px;
 }
 
+.unity-base-text-field__multiline-container {
+	flex-grow: 0;
+}
+
 PopupElement{
 	flex-shrink: 1;
 	flex-grow: 0;

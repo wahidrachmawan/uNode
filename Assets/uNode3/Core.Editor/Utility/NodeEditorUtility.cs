@@ -525,6 +525,9 @@ namespace MaxyGames.UNode.Editors {
 				var ports = target.ValueInputs;
 				foreach(var port in ports) {
 					if(type.IsCastableTo(port.type)) {
+						if(port.filter != null && port.filter.SetMember && valueOutput.CanSetValue() == false) {
+							continue;
+						}
 						var con = Connection.CreateAndConnect(port, valueOutput);
 						AutoRerouteAndProxy(con, canvas);
 						return true;

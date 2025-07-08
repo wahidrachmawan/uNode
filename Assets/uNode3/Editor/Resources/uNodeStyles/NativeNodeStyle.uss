@@ -233,13 +233,30 @@ PortView > Image {
     visibility: hidden;
 }
 
+#node-border {
+    overflow: visible;
+}
+/*
 #contents > #top > #input {
     flex-shrink: 1;
+    border-bottom-left-radius: 6px;
+}
+
+#contents > #top > #output {
+    border-bottom-right-radius: 6px;
+}
+
+.compact-value #contents > #top > #input {
+    border-top-left-radius: 6px;
+}
+
+.compact-value #contents > #top > #output {
+    border-top-right-radius: 6px;
 }
 
 .compact-title > #node-border > #title {
     height: 22px;
-}
+}*/
 
 #node-border > #title {
     justify-content: flex-start;
@@ -421,6 +438,7 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 
 .compact-node > #node-border > #title > #title-icon {
     margin-left: 0;
+    height: 18px;
 }
 
 .compact-node > #node-border > #title > #title-label {

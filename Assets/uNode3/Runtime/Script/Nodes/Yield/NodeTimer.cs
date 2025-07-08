@@ -2,7 +2,7 @@
 using System;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Yield", "Timer", IsCoroutine = true, scope = NodeScope.StateGraph, icon = typeof(TypeIcons.ClockIcon))]
+	[NodeMenu("Yield", "Timer", IsCoroutine = true, scope = NodeScope.StateGraph, icon = typeof(TypeIcons.ClockIcon), hasFlowInput = true, hasFlowOutput = true)]
 	public class NodeTimer : Node {
 		public bool fixedTime;
 		public bool unscaledTime;

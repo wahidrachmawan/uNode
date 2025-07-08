@@ -1239,7 +1239,11 @@ namespace MaxyGames.UNode.Editors {
 
 				if(GraphUtility.CopyPaste.IsCopiedNodes) {
 					evt.menu.AppendAction("Paste", (e) => {
-						graphEditor.PasteNode(clickedPos);
+						var pastedNodes = graphEditor.PasteNode(clickedPos);
+						ClearSelection();
+						graphData.ClearSelection();
+						graphData.AddToSelection(pastedNodes);
+						graphEditor.SelectionChanged();
 					}, DropdownMenuAction.AlwaysEnabled);
 				}
 				else {
@@ -2221,8 +2225,11 @@ namespace MaxyGames.UNode.Editors {
 				if(graphData.canAddNode) {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
 					var clickedPos = GetMousePosition(graphEditor.topMousePos);
-					graphEditor.PasteNode(clickedPos, true);
-					graphEditor.Refresh();
+					var pastedNodes = graphEditor.PasteNode(clickedPos, true);
+					ClearSelection();
+					graphData.ClearSelection();
+					graphData.AddToSelection(pastedNodes);
+					graphEditor.SelectionChanged();
 				}
 				return true;
 			}
@@ -2233,8 +2240,11 @@ namespace MaxyGames.UNode.Editors {
 				if(graphData.canAddNode) {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
 					var clickedPos = GetMousePosition(graphEditor.topMousePos);
-					graphEditor.PasteNode(clickedPos, false);
-					graphEditor.Refresh();
+					var pastedNodes = graphEditor.PasteNode(clickedPos, false);
+					ClearSelection();
+					graphData.ClearSelection();
+					graphData.AddToSelection(pastedNodes);
+					graphEditor.SelectionChanged();
 				}
 				return true;
 			}

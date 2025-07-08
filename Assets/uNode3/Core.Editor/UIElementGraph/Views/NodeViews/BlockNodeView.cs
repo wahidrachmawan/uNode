@@ -920,7 +920,7 @@ namespace MaxyGames.UNode.Editors {
 			if(blocks != null) {
 				this.blocks = blocks;
 				this.blockType = blockType;
-				border.SetToNoClipping();
+				//border.SetToNoClipping();
 				for(int i = 0; i < blocks.childCount; i++) {
 					var obj = blocks.GetChild(i) as NodeObject;
 					if(obj == null)

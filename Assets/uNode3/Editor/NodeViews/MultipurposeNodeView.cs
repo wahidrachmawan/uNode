@@ -124,8 +124,8 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(config.type == typeof(string)) {
 						control.AddToClassList("multiline");
-						control.style.height = new StyleLength(StyleKeyword.Auto);
-						control.style.flexGrow = 1;
+						//control.style.height = new StyleLength(StyleKeyword.Auto);
+						//control.style.flexGrow = 1;
 					}
 					control.UpdateControl();
 					if(inputControls.Count == 1) {

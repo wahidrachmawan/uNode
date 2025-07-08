@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Collections.List", "Remove Item", icon = typeof(IList))]
+    [NodeMenu("Collections.List", "Remove Item", icon = typeof(IList), hasFlowInput = true, hasFlowOutput = true, inputs = new[] { typeof(IList) })]
 	public class RemoveListItem : FlowNode {
 		public ValueInput target { get; set; }
 		public ValueInput value { get; set; }

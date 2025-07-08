@@ -645,7 +645,7 @@ namespace MaxyGames.UNode.Editors {
 						sidePort.ResetPortValue();
 					}
 				}
-			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@" });
+			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@", "Data" });
 		}
 
 		private void OnDropOutsidePortFromValueOutput(Vector2 position, PortView portView, PortView sidePort) {
@@ -785,10 +785,10 @@ namespace MaxyGames.UNode.Editors {
 					w.defaultExpandedItems = new[] { "@", "Operator", "Data", "Flow" };
 				}
 				else if(type == typeof(int) || type == typeof(float) || type == typeof(byte) || type == typeof(sbyte) || type == typeof(double) || type == typeof(long)) {
-					w.defaultExpandedItems = new[] { "@", "Operator", "Flow" };
+					w.defaultExpandedItems = new[] { "@", "Operator", "Data", "Flow" };
 				}
 				else {
-					w.defaultExpandedItems = new[] { "@", "Operator", "Data Members", "Flow" };
+					w.defaultExpandedItems = new[] { "@", "Operator", "Data", "Data Members", "Flow" };
 				}
 			}
 		}

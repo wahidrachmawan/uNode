@@ -398,6 +398,19 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Add element to selection
+		/// </summary>
+		/// <param name="element"></param>
+		public void AddToSelection(IEnumerable<UGraphElement> elements) {
+			if(elements != null) {
+				foreach(var e in elements) {
+					if(e == null) continue;
+					AddToSelection(e);
+				}
+			}
+		}
+
+		/// <summary>
 		/// Remove element from selection
 		/// </summary>
 		/// <param name="element"></param>

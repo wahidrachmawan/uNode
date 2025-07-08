@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Yield", "WaitUntil", IsCoroutine = true)]
+	[NodeMenu("Yield", "WaitUntil", IsCoroutine = true, hasFlowOutput = true, hasFlowInput = true)]
 	[Description("Waits until condition evaluate to true.")]
 	public class NodeWaitUntil : CoroutineNode, IStackedNode {
 		public BlockData data = new BlockData();

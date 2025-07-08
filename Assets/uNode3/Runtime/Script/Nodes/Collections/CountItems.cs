@@ -3,7 +3,7 @@ using System.Collections;
 using System.Linq;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Collections", "Count Items", typeof(int), icon = typeof(IList))]
+    [NodeMenu("Collections", "Count Items", typeof(int), icon = typeof(IList), inputs = new[] { typeof(IList) })]
 	public class CountItems : ValueNode {
 		public ValueInput target { get; set; }
 

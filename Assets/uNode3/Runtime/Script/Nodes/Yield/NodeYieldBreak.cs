@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Yield", "Yield Break", IsCoroutine = true, scope = NodeScope.Coroutine)]
+	[NodeMenu("Yield", "Yield Break", IsCoroutine = true, scope = NodeScope.Coroutine, hasFlowInput =true)]
 	public class NodeYieldBreak : BaseFlowNode {
 		protected override void OnExecuted(Flow flow) {
 			flow.jumpStatement = new JumpStatement(this, JumpStatementType.Return);

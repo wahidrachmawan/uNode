@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Yield", "Yield Return", IsCoroutine=true)]
+	[NodeMenu("Yield", "Yield Return", IsCoroutine = true, hasFlowInput = true, hasFlowOutput = true)]
 	public class NodeYieldReturn : CoroutineNode {
 		[System.NonSerialized]
 		public ValueInput value;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class StateTransition : Node, ISuperNode, IScriptState, INodeWithEventHandler, INodeWithCustomCanvas {
+	public class StateTransition : Node, ISuperNode, INodeWithEnterExitEvent, INodeWithEventHandler, INodeWithCustomCanvas {
 		public IStateNodeWithTransition StateNode {
 			get {
 				return nodeObject.GetNodeInParent<IStateNodeWithTransition>();

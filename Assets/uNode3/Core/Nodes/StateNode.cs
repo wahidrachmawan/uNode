@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	//[NodeMenu("Flow", "State", IsCoroutine = true, order = 1, HideOnFlow = true)]
-	public class StateNode : BaseCoroutineNode, IScriptState, ISuperNode, INodeWithEventHandler, INodeWithConnection {
+	public class StateNode : BaseCoroutineNode, INodeWithEnterExitEvent, ISuperNode, INodeWithEventHandler, INodeWithConnection {
 		[HideInInspector]
 		public TransitionData transitions = new TransitionData();
 

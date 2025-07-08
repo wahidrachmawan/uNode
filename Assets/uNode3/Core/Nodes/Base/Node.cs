@@ -255,11 +255,27 @@ namespace MaxyGames.UNode {
 		}
 
 		protected ValueInput ValueInput(string id, Type type) {
-			return ValueInput(id, type, null);
+			return ValueInput(id, type, default(MemberData));
 		}
 
 		protected ValueInput ValueInput(string id, Type type, object @default) {
 			return ValueInput(id, type, MemberData.CreateFromValue(@default, type));
+		}
+
+		protected ValueInput ValueInput(string id, Type type, Func<object> @default) {
+			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
+			}
+			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
+			if(isNew) {
+				if(@default != null) {
+					port.DefaultValue = MemberData.CreateFromValue(@default.Invoke(), type);
+				}
+				else {
+					port.DefaultValue = MemberData.None;
+				}
+			}
+			return port;
 		}
 
 		protected ValueInput ValueInput(string id, Type type, MemberData @default) {
@@ -278,6 +294,22 @@ namespace MaxyGames.UNode {
 			return port;
 		}
 
+		protected ValueInput ValueInput(string id, Type type, Func<MemberData> @default) {
+			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
+			}
+			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
+			if(isNew) {
+				if(@default != null) {
+					port.DefaultValue = @default.Invoke();
+				}
+				else {
+					port.DefaultValue = MemberData.None;
+				}
+			}
+			return port;
+		}
+
 		protected ValueInput ValueInput(string id, Func<Type> type, MemberData @default = null) {
 			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
 				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
@@ -286,6 +318,22 @@ namespace MaxyGames.UNode {
 			if(isNew) {
 				if(@default != null) {
 					port.DefaultValue = @default;
+				}
+				else {
+					port.DefaultValue = MemberData.None;
+				}
+			}
+			return port;
+		}
+
+		protected ValueInput ValueInput(string id, Func<Type> type, Func<MemberData> @default) {
+			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
+			}
+			var port = nodeObject.RegisterPort(new ValueInput(this, id, type), out var isNew);
+			if(isNew) {
+				if(@default != null) {
+					port.DefaultValue = @default.Invoke();
 				}
 				else {
 					port.DefaultValue = MemberData.None;

@@ -5,12 +5,12 @@ using System.Linq;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public interface IScriptState {
+	public interface INodeWithEnterExitEvent {
 		public event System.Action<Flow> OnEnterState;
 		public event System.Action<Flow> OnExitState;
 	}
 
-	public class ScriptState : Node, IScriptState, ISuperNode, INodeWithEventHandler, IStateNodeWithTransition, INodeWithConnection {
+	public class ScriptState : Node, ISuperNode, INodeWithEventHandler, INodeWithEnterExitEvent, IStateNodeWithTransition, INodeWithConnection {
 		[HideInInspector]
 		public StateTranstionData transitions = new StateTranstionData();
 

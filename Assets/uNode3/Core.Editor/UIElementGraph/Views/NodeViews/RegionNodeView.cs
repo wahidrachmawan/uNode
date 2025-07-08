@@ -28,7 +28,7 @@ namespace MaxyGames.UNode.Editors {
 			titleButtonContainer.RemoveFromHierarchy();
 			this.AddStyleSheet("uNodeStyles/NativeRegionStyle");
 			var border = this.Q("node-border");
-			border.style.overflow = Overflow.Visible;
+			//border.style.overflow = Overflow.Visible;
 			horizontalDivider = border.Q("contents").Q("divider");
 
 			comment = new Label(node.comment);

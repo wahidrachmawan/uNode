@@ -208,7 +208,7 @@ namespace MaxyGames.UNode.Editors {
 									//		(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Failure:
-									if(GraphDebug.debugTime - nodeDebug.time > 0.2f) {
+									if(GraphDebug.debugTime - nodeDebug.time > 0.1f) {
 										UpdateState(false);
 									}
 									else {
@@ -255,28 +255,32 @@ namespace MaxyGames.UNode.Editors {
 
 			#region Node Styles
 			if(border != null) {
-				border.SetToNoClipping();
+				//border.SetToNoClipping();
+				border.style.overflow = StyleKeyword.Null;
 				if(!isBlock) {
-					int flowInputCount = inputPorts.Count((p) => p.isFlow);
-					int flowOutputCount = outputPorts.Count((p) => p.isFlow);
-					if(flowInputCount + flowOutputCount > 0) {
+					var anyFlowInput = inputPorts.Any((p) => p.isFlow);
+					var anyFlowOutput = outputPorts.Any((p) => p.isFlow);
+					if(anyFlowInput || anyFlowOutput) {
 						bool flag = outputPorts.Count((p) => p.isFlow && !string.IsNullOrEmpty(p.GetName())) == 0;
 						border.EnableInClassList(ussClassBorderFlowNode, true);
-						if(flowOutputCount == 0 || flag) {
+						if(anyFlowOutput == false || flag) {
 							border.EnableInClassList(ussClassBorderOnlyInput, true);
 							border.EnableInClassList(ussClassBorderOnlyOutput, false);
-						} else if(flowInputCount == 0) {
+						} else if(anyFlowInput == false) {
 							border.EnableInClassList(ussClassBorderOnlyInput, false);
 							border.EnableInClassList(ussClassBorderOnlyOutput, true);
 						} else {
 							border.EnableInClassList(ussClassBorderOnlyInput, false);
 							border.EnableInClassList(ussClassBorderOnlyOutput, false);
 						}
-						portInputContainer.EnableInClassList("flow", flowInputCount > 0);
+						portInputContainer.EnableInClassList("flow", anyFlowInput);
 					} else {
 						border.EnableInClassList(ussClassBorderFlowNode, false);
 					}
-				} else {
+					border.EnableInClassList(ussClassBorderHasInputValue, inputPorts.Any(p => p.isValue));
+					border.EnableInClassList(ussClassBorderHasOutputValue, outputPorts.Any(p => p.isValue));
+				}
+				else {
 					border.EnableInClassList(ussClassBorderFlowNode, false);
 				}
 			}

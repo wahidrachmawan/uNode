@@ -817,7 +817,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="position"></param>
 		/// <param name="removeOtherConnections"></param>
-		public void PasteNode(Vector2 position, bool removeOtherConnections = false) {
+		public NodeObject[] PasteNode(Vector2 position, bool removeOtherConnections = false) {
 			if(graphData.currentCanvas != null && GraphUtility.CopyPaste.IsCopiedNodes) {
 				var nodes = GraphUtility.CopyPaste.Paste(graphData.currentCanvas, removeOtherConnections: removeOtherConnections).Select(n => n as NodeObject).ToArray();
 
@@ -831,8 +831,10 @@ namespace MaxyGames.UNode.Editors {
 					node.position.x = node.position.x - center.x + position.x;
 					node.position.y = node.position.y - center.y + position.y;
 				}
+				Refresh();
+				return nodes;
 			}
-			Refresh();
+			return Array.Empty<NodeObject>();
 		}
 
 		public virtual void CreateLinkedMacro(MacroGraph macro, Vector2 position) {

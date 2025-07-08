@@ -29,7 +29,7 @@ namespace MaxyGames.UNode.Editors {
 			node.Register();
 			ReloadView();
 
-			border.style.overflow = Overflow.Visible;
+			//border.style.overflow = Overflow.Visible;
 
 			titleIcon.RemoveFromHierarchy();
 			m_CollapseButton.RemoveFromHierarchy();
@@ -185,7 +185,7 @@ namespace MaxyGames.UNode.Editors {
 			if(blocks != null) {
 				this.blocks = blocks;
 				this.blockType = blockType;
-				border.SetToNoClipping();
+				//border.SetToNoClipping();
 				for(int i = 0; i < blocks.childCount; i++) {
 					var obj = blocks.GetChild(i) as NodeObject;
 					if(obj == null)

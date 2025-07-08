@@ -430,7 +430,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public virtual void Disconnect() {
 			PortView port;
-			if(Input.isValue) {
+			if(Input?.isValue == true) {
 				port = Input;
 			}
 			else {

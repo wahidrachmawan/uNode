@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Yield", "WaitForSecond", IsCoroutine = true)]
+	[NodeMenu("Yield", "WaitForSecond", IsCoroutine = true, hasFlowInput = true, hasFlowOutput = true, inputs = new[] { typeof(float) })]
 	public class NodeWaitForSecond : CoroutineNode {
 		public ValueInput waitTime { get; set; }
 

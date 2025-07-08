@@ -21,6 +21,8 @@ namespace MaxyGames.UNode.Editors {
 		public const string ussClassBorderFlowNode = "flowNodeBorder";
 		public const string ussClassBorderOnlyInput = "onlyInput";
 		public const string ussClassBorderOnlyOutput = "onlyOutput";
+		public const string ussClassBorderHasInputValue = "hasInputValue";
+		public const string ussClassBorderHasOutputValue = "hasOutputValue";
 		public const string ussClassEntryNode = "entry-node";
 
 		public const string ussClassAutoHideControl = "autohide";

@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Set Value")]
+	[NodeMenu("Flow", "Set Value",hasFlowInput = true, hasFlowOutput = true, inputs = new[] { typeof(object)})]
 	[Description("Change a value")]
 	public class NodeSetValue : FlowNode {
 		public SetType setType;

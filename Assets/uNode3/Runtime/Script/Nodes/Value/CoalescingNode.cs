@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Operator", "Coalescing {??}")]
+	[NodeMenu("Operator", "Coalescing {??}", inputs = new[] { typeof(object) })]
 	public class CoalescingNode : ValueNode {
 		public ValueInput input { get; set; }
 		public ValueInput fallback { get; set; }
@@ -18,7 +18,8 @@ namespace MaxyGames.UNode.Nodes {
 				try {
 					if(input.isAssigned) {
 						return input.ValueType;
-					} else {
+					}
+					else {
 						return fallback.ValueType;
 					}
 				}

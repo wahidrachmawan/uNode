@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Action", order = -1, icon = typeof(TypeIcons.ActionIcon))]
+	[NodeMenu("Flow", "Action", order = -1, icon = typeof(TypeIcons.ActionIcon), hasFlowInput = true, hasFlowOutput = true)]
 	public class NodeAction : FlowNode, IStackedNode {
 		[HideInInspector]
 		public BlockData data = new BlockData();
