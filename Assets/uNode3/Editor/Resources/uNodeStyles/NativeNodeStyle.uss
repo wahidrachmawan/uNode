@@ -131,6 +131,17 @@ PortView > Image {
     transition: opacity 0.1s ease-in-out, scale 0.1s ease-in-out;
 }
 
+.node-debug-success,
+.node-debug-failure {
+    scale: 1.1 1.1;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out, scale 0.2s ease-in-out;
+}
+
+.node-debug-running {
+    transition: scale 0.1s ease-in-out;
+}
+
 .compact-value-minimalize .port {
     height: 18px;
 }
