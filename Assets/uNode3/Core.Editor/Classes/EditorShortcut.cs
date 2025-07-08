@@ -79,6 +79,16 @@ namespace MaxyGames.UNode.Editors {
 			GenerationUtility.GenerateNativeGraphsInProject();
 		}
 
+		[Shortcut("uNode/Delete Generated C# Scripts")]
+		static void Shortcut_DeleteGeneratedScript(ShortcutArguments args) {
+			if(Application.isPlaying) {
+				uNodeEditorUtility.DisplayErrorMessage("Cannot delete generated scripts in play mode");
+				return;
+			}
+			GenerationUtility.DeleteGeneratedCSharpScript();
+			Debug.Log("Deleting Generated Script success");
+		}
+
 		[Shortcut("uNode/Refresh", typeof(uNodeEditor), KeyCode.F5)]
 		static void Shortcut_Refresh(ShortcutArguments args) {
 			var window = args.context as uNodeEditor;

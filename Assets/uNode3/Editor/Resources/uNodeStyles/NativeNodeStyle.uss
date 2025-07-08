@@ -119,13 +119,13 @@ PortView > Image {
 
 .highlight-debug-success,
 .highlight-debug-failure {
-    scale: 1.1 1.1;
+    scale: 1.05 1.05;
     opacity: 0.5;
-    transition: opacity 0.2s ease-in-out, scale 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out, scale 0.5s ease-in-out;
 }
 
 .highlight-debug-running {
-    scale: 1.05 1.05;
+    scale: 1.1 1.1;
     opacity: 0.8;
     border-color: rgba(54, 193, 255, 0.80);
     transition: opacity 0.1s ease-in-out, scale 0.1s ease-in-out;
@@ -133,12 +133,11 @@ PortView > Image {
 
 .node-debug-success,
 .node-debug-failure {
-    scale: 1.1 1.1;
-    opacity: 1;
-    transition: opacity 0.2s ease-in-out, scale 0.2s ease-in-out;
+    transition: scale 0.5s ease-in-out;
 }
 
 .node-debug-running {
+    scale: 1.1 1.1;
     transition: scale 0.1s ease-in-out;
 }
 

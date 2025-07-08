@@ -267,6 +267,8 @@ namespace MaxyGames.UNode {
 			/// </summary>
 			internal static event Action onBreakpointChanged;
 
+			internal static Action<object, int, int> onBreakPointHit;
+
 			/// <summary>
 			/// Get all breakpoints
 			/// </summary>
@@ -504,6 +506,7 @@ namespace MaxyGames.UNode {
 				if(Breakpoint.HasBreakpoint(objectUID, nodeUID)) {
 					nodeDebug.breakpointTimes = debugTime;
 					Debug.Break();
+					Breakpoint.onBreakPointHit?.Invoke(owner, objectUID, nodeUID);
 				}
 			} else {
 				if(!data.flowDebug.TryGetValue(nodeUID, out var flowData)) {
@@ -519,6 +522,7 @@ namespace MaxyGames.UNode {
 				if(Breakpoint.HasBreakpoint(objectUID, nodeUID)) {
 					nodeDebug.breakpointTimes = debugTime;
 					Debug.Break();
+					Breakpoint.onBreakPointHit?.Invoke(owner, objectUID, nodeUID);
 				}
 			}
 		}

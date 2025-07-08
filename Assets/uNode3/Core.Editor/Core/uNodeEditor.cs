@@ -770,6 +770,25 @@ namespace MaxyGames.UNode.Editors {
 			}
 			uNodeEditor.RefreshEditor(true);
 		}
+
+		private void OnBreakPointHit(object owner, int graphID, int nodeID) {
+			var obj = EditorUtility.InstanceIDToObject(graphID);
+			if(obj == null) {
+				foreach(var g in GraphUtility.FindAllGraphAssets()) {
+					if(g is IGraph && uNodeUtility.GetObjectID(g) == graphID) {
+						obj = g;
+					}
+				}
+			}
+			var graph = obj as IGraph;
+			if(graph != null) {
+				var element = graph.GraphData.GetElementByID(nodeID);
+				if(element != null) {
+					Highlight(element);
+					graphData.SetAutoDebugTarget(owner);
+				}
+			}
+		}
 		#endregion
 
 		#region Save & Load Setting
@@ -865,7 +884,10 @@ namespace MaxyGames.UNode.Editors {
 			window = this;
 			uNodeGUIUtility.onGUIChanged -= GUIChanged;
 			uNodeGUIUtility.onGUIChanged += GUIChanged;
+			EditorApplication.playModeStateChanged -= OnPlaymodeStateChanged;
 			EditorApplication.playModeStateChanged += OnPlaymodeStateChanged;
+			GraphDebug.Breakpoint.onBreakPointHit -= OnBreakPointHit;
+			GraphDebug.Breakpoint.onBreakPointHit += OnBreakPointHit;
 			LoadEditorData();
 			if(!hasLoad) {
 				LoadOptions();
