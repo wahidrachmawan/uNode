@@ -599,5 +599,52 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 	}
+
+	class DragHandlerMenuForStateMachine : DragHandlerMenu {
+		public override int order => int.MinValue;
+
+		public override IEnumerable<DropdownMenuItem> GetMenuItems(DragHandlerData data) {
+			if(data is DragHandlerDataForGraphElement d) {
+				var obj = d.draggedValue as StateGraphContainer;
+				yield return new DropdownMenuAction("Get State Machine", evt => {
+					NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (GetStateMachineNode n) {
+						n.kind = GetStateMachineNode.Kind.StateMachine;
+						n.reference = obj;
+						n.EnsureRegistered();
+					});
+					d.graphEditor.Refresh();
+				}, DropdownMenuAction.AlwaysEnabled);
+				foreach(var state in obj.GetNodesInChildren<IStateNodeWithTransition>()) {
+					if(state is AnyStateNode) continue;
+					yield return new DropdownMenuAction($"{(state as Node).GetTitle()}/Set State", evt => {
+						NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (GetStateMachineNode n) {
+							n.kind = GetStateMachineNode.Kind.SetState;
+							n.reference = obj;
+							n.stateReference = (state as Node).nodeObject;
+							n.EnsureRegistered();
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+					yield return new DropdownMenuAction($"{(state as Node).GetTitle()}/Get State Is Active", evt => {
+						NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (GetStateMachineNode n) {
+							n.kind = GetStateMachineNode.Kind.GetState;
+							n.reference = obj;
+							n.stateReference = (state as Node).nodeObject;
+							n.EnsureRegistered();
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
+			}
+			yield break;
+		}
+
+		public override bool IsValid(DragHandlerData data) {
+			if(data is DragHandlerDataForGraphElement d) {
+				return d.draggedValue is StateGraphContainer;
+			}
+			return false;
+		}
+	}
 	#endregion
 }

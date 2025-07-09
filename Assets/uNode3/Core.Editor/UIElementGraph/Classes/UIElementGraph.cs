@@ -662,6 +662,7 @@ namespace MaxyGames.UNode.Editors {
 
 			var refreshBtn = new ToolbarButton(() => {
 				window?.Refresh(true);
+				window?.graphEditor.Validate();
 			}) {
 				text = "Refresh",
 				tooltip = "Refresh the graph.\nHotkey: F5",

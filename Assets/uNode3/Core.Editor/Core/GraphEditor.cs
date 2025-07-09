@@ -694,6 +694,15 @@ namespace MaxyGames.UNode.Editors {
 
 		}
 
+		public void Validate() {
+			if(graphData.isSupportMainGraph == false) {
+				var container = graphData.graphData.mainGraphContainer;
+				if(container.childCount > 0) {
+					container.Destroy();
+				}
+			}
+		}
+
 		protected virtual void OnCanvasChanged() {
 			var data = canvasData;
 			data.Reset();

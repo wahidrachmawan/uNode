@@ -67,7 +67,10 @@ namespace MaxyGames.UNode.Editors {
 			var outNode = edgeData.output.GetNode();
 			if(outNode != null) {
 				if(outNode is Nodes.NodeValueConverter valueConverter) {
-					valueConverter.type = edgeData.input.GetPortType();
+					var type = edgeData.input.GetPortType();
+					if(type != typeof(object)) {
+						valueConverter.type = type;
+					}
 					var nView = graph.GetNodeView(valueConverter);
 					if(nView != null) {
 						valueConverter.position = edgeData.input.owner.GetPosition();

@@ -1254,6 +1254,8 @@ namespace MaxyGames.UNode.Editors {
 			return portType;
 		}
 
+		public bool IsDynamicType => portData.portValue is ValuePort port && port.IsDynamicType;
+
 		public string GetPortID() {
 			return portData.portID;
 		}

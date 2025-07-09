@@ -350,6 +350,12 @@ namespace MaxyGames.UNode {
 
 		public UGraphElementRef(UGraphElement graphObject) : base(graphObject, graphObject?.graphContainer) {
 		}
+
+		public static implicit operator UGraphElementRef(UGraphElement element) {
+			if(element == null)
+				return null;
+			return new(element);
+		}
 	}
 
 	[Serializable]
@@ -930,6 +936,9 @@ namespace MaxyGames.UNode {
 		protected Type _type;
 		[NonSerialized]
 		internal Func<Type> dynamicType;
+		/// <summary>
+		/// The port type
+		/// </summary>
 		public Type type {
 			get {
 				if(_type != null)
@@ -948,6 +957,11 @@ namespace MaxyGames.UNode {
 		public Func<bool> canSetValue;
 		[SerializeReference]
 		public List<ValueConnection> connections = new List<ValueConnection>();
+
+		/// <summary>
+		/// True if the port type is dynamic
+		/// </summary>
+		public bool IsDynamicType => dynamicType != null;
 
 		protected ValuePort(NodeObject node) : base(node) {
 		}

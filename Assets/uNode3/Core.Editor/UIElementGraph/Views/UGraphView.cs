@@ -155,27 +155,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		#region Drag Handler
-		private void DragHandleVariable(Variable variable, Vector2 position, Vector2 menuPosition) {
-			if(variable.graphContainer != graphData.graph) {
-				EditorUtility.DisplayDialog("Error", "The graph of the variable must same with the current graph", "Ok");
-				return;
-			}
-			GenericMenu menu = new GenericMenu();
-			var dragData = new DragHandlerDataForGraphElement() {
-				draggedValue = variable,
-				droppedTarget = graphData.currentCanvas,
-				graphEditor = graphEditor,
-				mousePositionOnCanvas = position,
-				mousePositionOnScreen = menuPosition,
-			};
-			DragHandlerMenu.Instances.ForEach(handler => {
-				if(handler.IsValid(dragData)) {
-					menu.AppendMenu(handler.GetMenuItems(dragData));
-				}
-			});
-			menu.ShowAsContext();
-		}
-
 		private void DragHandleObject(Object obj, Vector2 position, Vector2 menuPosition) {
 			if(obj is GraphAsset graphAsset) {
 				//Create Liked macro from dragable macros.
@@ -220,49 +199,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			menu.ShowAsContext();
-		}
-
-		private void DragHandleProperty(Property property, Vector2 position, Vector2 menuPosition) {
-			if(property.graphContainer != graphData.graph) {
-				EditorUtility.DisplayDialog("Error", "The graph of the property must same with the current graph", "Ok");
-				return;
-			}
-			GenericMenu menu = new GenericMenu();
-			var dragData = new DragHandlerDataForGraphElement() {
-				draggedValue = property,
-				droppedTarget = graphData.currentCanvas,
-				graphEditor = graphEditor,
-				mousePositionOnCanvas = position,
-				mousePositionOnScreen = menuPosition,
-			};
-			DragHandlerMenu.Instances.ForEach(handler => {
-				if(handler.IsValid(dragData)) {
-					menu.AppendMenu(handler.GetMenuItems(dragData));
-				}
-			});
-			menu.ShowAsContext();
-		}
-
-		private void DragHandleFunction(Function function, Vector2 position, Vector2 menuPosition) {
-			if(function.graphContainer != graphData.graph) {
-				EditorUtility.DisplayDialog("Error", "The graph of the function must same with the current graph", "Ok");
-				return;
-			}
-			GenericMenu menu = new GenericMenu();
-			var dragData = new DragHandlerDataForGraphElement() {
-				draggedValue = function,
-				droppedTarget = graphData.currentCanvas,
-				graphEditor = graphEditor,
-				mousePositionOnCanvas = position,
-				mousePositionOnScreen = menuPosition,
-			};
-			DragHandlerMenu.Instances.ForEach(handler => {
-				if(handler.IsValid(dragData)) {
-					menu.AppendMenu(handler.GetMenuItems(dragData));
-				}
-			});
-			menu.ShowAsContext();
-			DragAndDrop.SetGenericData("uNode", null);
 		}
 
 		private void DragHandleMember(FieldInfo member, Vector2 position) {
@@ -468,26 +404,31 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 
-				#region Function
-				if(generic is Function) {//Drag functions.
-					var function = generic as Function;
-					DragHandleFunction(function, mPos, iPOS);
+				#region Element
+				if(generic is Node) {
+					generic = (generic as Node).nodeObject;
 				}
-				else
-				#endregion
-
-				#region Property
-				if(generic is Property) {//Drag property
-					var property = generic as Property;
-					DragHandleProperty(property, mPos, iPOS);
-				}
-				else
-				#endregion
-
-				#region Variable
-				if(generic is Variable) {//Drag variable.
-					var varData = generic as Variable;
-					DragHandleVariable(varData, mPos, iPOS);
+				if(generic is UGraphElement) {
+					var element = generic as UGraphElement;
+					if(element.graphContainer != graphData.graph) {
+						EditorUtility.DisplayDialog("Error", $"The graph of the {element.GetType()} must same with the current graph", "Ok");
+						return;
+					}
+					GenericMenu menu = new GenericMenu();
+					var dragData = new DragHandlerDataForGraphElement() {
+						draggedValue = element,
+						droppedTarget = graphData.currentCanvas,
+						graphEditor = graphEditor,
+						mousePositionOnCanvas = mPos,
+						mousePositionOnScreen = iPOS,
+					};
+					DragHandlerMenu.Instances.ForEach(handler => {
+						if(handler.IsValid(dragData)) {
+							menu.AppendMenu(handler.GetMenuItems(dragData));
+						}
+					});
+					menu.ShowAsContext();
+					DragAndDrop.SetGenericData("uNode", null);
 				}
 				else
 				#endregion

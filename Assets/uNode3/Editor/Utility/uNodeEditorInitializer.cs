@@ -28,6 +28,7 @@ namespace MaxyGames.UNode.Editors {
 			SceneView.duringSceneGui += OnSceneGUI;
 			EditorApplication.update += Update;
 			EditorApplication.update += ShowWelcomeScreen;
+			EditorApplication.quitting += CreateFullBackup;
 			Undo.undoRedoPerformed += UndoRedoPerformed;
 			// Setup();
 			uNodeUtility.Init();
@@ -202,6 +203,10 @@ namespace MaxyGames.UNode.Editors {
 					refreshable.Refresh();
 				}
 			}
+		}
+
+		private static void CreateFullBackup() {
+			GraphUtility.CreateFullBackup();
 		}
 
 		[InitializeOnEnterPlayMode]

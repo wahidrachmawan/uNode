@@ -529,7 +529,7 @@ namespace MaxyGames.UNode {
 
 		private void MarkInvalidChilds() {
 			for(int i = 0; i < childs.Count; i++) {
-				childs[i].MarkInvalid();
+				childs[i]?.MarkInvalid();
 			}
 		}
 

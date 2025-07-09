@@ -1757,7 +1757,15 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		internal static void CreateBackup(IEnumerable<string> assets, string directory = "Graphs") {
+		/// <summary>
+		/// Create a backup for all graphs
+		/// </summary>
+		/// <param name="directory"></param>
+		internal static void CreateFullBackup(string directory = "Graphs-FullBackup") {
+			CreateBackup(FindAllGraphAssets().Where(obj => AssetDatabase.IsMainAsset(obj)).Select(obj => AssetDatabase.GetAssetPath(obj)), directory, 10);
+		}
+
+		internal static void CreateBackup(IEnumerable<string> assets, string directory = "Graphs", int maxBackup = -1) {
 			var dic = uNodePreference.backupPath + Path.DirectorySeparatorChar + directory;
 			Directory.CreateDirectory(dic);
 			string fileName = DateTime.Now.ToString("yyyy-dd-M--HH-mm-ss") + "---" + Path.GetRandomFileName() + ".zip";
@@ -1769,7 +1777,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-				RemoveBackup(directory, uNodePreference.preferenceData.maxGraphBackup);
+				RemoveBackup(directory, maxBackup > 0 ? maxBackup : uNodePreference.preferenceData.maxGraphBackup);
 			}
 			catch(Exception ex) {
 				Debug.LogError("Create backup error: " + ex.ToString());
