@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class GetStateMachineNode : Node {
+	public class GetStateMachineNode : Node, IGeneratorPrePostInitializer {
 		public enum Kind {
 			StateMachine,
 			GetState,
@@ -98,6 +98,14 @@ namespace MaxyGames.UNode.Nodes {
 				}
 			}
 			return base.GetTitle();
+		}
+
+		void IGeneratorPrePostInitializer.OnPreInitializer() {
+			if(kind == Kind.GetState || kind == Kind.SetState) {
+				if(stateReference?.reference is NodeObject node) {
+					CG.RegisterEntry(node);
+				}
+			}
 		}
 
 		public override void OnGeneratorInitialize() {

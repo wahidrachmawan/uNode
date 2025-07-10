@@ -39,9 +39,9 @@ namespace MaxyGames.StateMachines {
 
 	public class StateMachine : IStateMachine {
 		[NonSerialized]
-		private IState m_activeState;
+		private BaseState m_activeState;
 		[NonSerialized]
-		private IState m_transitionState;
+		private BaseState m_transitionState;
 		public IState ActiveState {
 			get => m_activeState;
 			set {
@@ -51,7 +51,7 @@ namespace MaxyGames.StateMachines {
 				if(m_transitionState == null) {
 					m_activeState?.Exit();
 					m_activeState = null;
-					m_transitionState = value;
+					m_transitionState = (BaseState)value;
 				}
 			}
 		}
@@ -115,7 +115,7 @@ namespace MaxyGames.StateMachines {
 					}
 				}
 			}
-			ActiveState?.Tick();
+			m_activeState?.Tick();
 		}
 
 		/// <summary>

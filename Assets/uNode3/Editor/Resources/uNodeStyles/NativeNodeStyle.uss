@@ -53,7 +53,7 @@ PortView > Image {
 }
 
 #node-border.flowNodeBorder {
-    background-color: rgba(29,29,29,0.8);
+    background-color: rgb(29,29,29);
     border-color: rgba(23,171,106,0.8);
     border-left-width: 2px;
     border-right-width: 2px;
@@ -688,7 +688,6 @@ NodeRerouteView .port {
 }
 
 .state-node.state-nested > #node-border {
-    background-color: rgb(55, 55, 55);
     border-color: rgb(0, 137, 28);
 }
 
@@ -726,7 +725,6 @@ NodeRerouteView .port {
 }
 
 .state-transition > #node-border {
-    background-color: rgb(51, 51, 51);
     border-color: rgb(88, 88, 88);
     border-radius: 128px;
     border-left-width: 1px;

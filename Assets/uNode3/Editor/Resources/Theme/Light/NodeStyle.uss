@@ -10,13 +10,11 @@
 }
 
 #contents > #top > #input {
-	background-color: rgba(0, 0, 0, 0);
-	border-top-left-radius: 6px;
-	border-bottom-left-radius: 6px;
+	background-color: rgb(208, 208, 208);
 }
 
 #contents > #top > #output {
-	background-color: rgba(0, 0, 0, 0);
+	background-color: rgb(199, 199, 199);
 	border-top-right-radius: 6px;
 	border-bottom-right-radius: 6px;
 }
@@ -35,7 +33,7 @@
 }
 
 #node-border.flowNodeBorder {
-	background-color: #c8c8c8;
+	background-color: #b7b7b7;
 	border-color: #098d20
 }
 
@@ -65,4 +63,11 @@
 	background-color: #e2e2e2;
 	border-color: rgba(147,147,147,0.8);
 	border-radius: 14px 6px 14px 6px;
+}
+
+.state-node > #node-border {
+	background-color: rgb(200, 200, 200);
+}
+.state-transition > #node-border {
+	border-color: rgb(234, 234, 234);
 }
