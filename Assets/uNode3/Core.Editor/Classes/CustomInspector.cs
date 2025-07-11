@@ -355,7 +355,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				EditorGUILayout.EndHorizontal();
 				GUILayout.Space(2);
-				var comment = uNodeGUI.TextInput(graphData.comment, "(Summary)", true);
+				var comment = uNodeGUI.TextInput(graphData.comment, "(Summary)", true, false, EditorStyles.textArea);
 				if(comment != graphData.comment) {
 					if(graph is UnityEngine.Object)
 						uNodeEditorUtility.RegisterUndo(graph as UnityEngine.Object);

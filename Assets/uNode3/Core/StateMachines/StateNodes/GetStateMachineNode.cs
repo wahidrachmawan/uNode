@@ -103,7 +103,7 @@ namespace MaxyGames.UNode.Nodes {
 		void IGeneratorPrePostInitializer.OnPreInitializer() {
 			if(kind == Kind.GetState || kind == Kind.SetState) {
 				if(stateReference?.reference is NodeObject node) {
-					CG.RegisterEntry(node);
+					CG.RegisterDependency(node);
 				}
 			}
 		}

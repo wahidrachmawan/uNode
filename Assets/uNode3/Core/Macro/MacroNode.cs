@@ -169,7 +169,7 @@ namespace MaxyGames.UNode.Nodes {
 			//	CG.RegisterVariable(variable);
 			//}
 			foreach(var p in inputFlows) {
-				CG.RegisterEntry(p);
+				CG.RegisterDependency(p);
 			}
 			CG.RegisterPostInitialization(() => {
 				//Initialize Flow Inputs

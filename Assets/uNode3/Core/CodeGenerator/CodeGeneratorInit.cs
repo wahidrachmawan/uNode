@@ -153,8 +153,18 @@ namespace MaxyGames {
 		/// <summary>
 		/// Call only on pre initialization phrase using <see cref="IGeneratorPrePostInitializer"/>
 		/// </summary>
+		/// <param name="element"></param>
+		public static void RegisterDependency(UGraphElement element) {
+			if(element is NodeObject node) {
+				InitConnect(node);
+			}
+		}
+
+		/// <summary>
+		/// Call only on pre initialization phrase using <see cref="IGeneratorPrePostInitializer"/>
+		/// </summary>
 		/// <param name="entry"></param>
-		public static void RegisterEntry(NodeObject entry) {
+		public static void RegisterDependency(NodeObject entry) {
 			InitConnect(entry);
 		}
 

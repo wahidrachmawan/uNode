@@ -67,7 +67,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		void IGeneratorPrePostInitializer.OnPreInitializer() {
 			foreach(var tr in GetTransitions()) {
-				CG.RegisterEntry(tr);
+				CG.RegisterDependency(tr);
 			}
 		}
 	}

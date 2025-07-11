@@ -4,37 +4,6 @@ using UnityEngine;
 using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode.Editors.Commands {
-	class CustomSetItem : CustomInputPortItem {
-		public override IList<ItemSelector.CustomItem> GetItems(ValueOutput source) {
-			var items = new List<ItemSelector.CustomItem>();
-			items.Add(ItemSelector.CustomItem.Create("Set Value", () => {
-				NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas, (NodeSetValue n) => {
-					n.Register();
-					n.target.ConnectTo(source);
-					var type = source.type;
-					if(type != null) {
-						if(type.IsSubclassOf(typeof(System.MulticastDelegate))) {
-							NodeEditorUtility.AddNewNode(graphEditor.graphData, null, null, mousePositionOnCanvas - new Vector2(100, 0), delegate (NodeLambda node) {
-								node.Register();
-								Connection.Connect(n.value, node.output);
-								n.setType = SetType.Add;
-								node.delegateType = type;
-							});
-						} else {
-							n.value.AssignToDefault(MemberData.Default(type));
-						}
-					}
-					graphEditor.Refresh();
-				});
-			}, "Flow", icon: uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FlowIcon))));
-			return items;
-		}
-
-		public override bool IsValidPort(ValueOutput source, PortAccessibility accessibility) {
-			return accessibility.CanSet();
-		}
-	}
-
 	class CustomInputArithmaticItem : CustomInputPortItem {
 		public override IList<ItemSelector.CustomItem> GetItems(ValueOutput source) {
 			var type = source.type;

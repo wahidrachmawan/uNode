@@ -47,7 +47,7 @@ PortView.port > #type,
     -unity-background-image-tint-color: #5A5A5A;
 }
 
-ControlView .unity-button,
+.unity-button,
 .unity-enum-field__input,
 .unity-object-field__input,
 .unity-toolbar-button,
@@ -56,11 +56,20 @@ ControlView .unity-button,
     background-color: #C8C8C8;
 }
 
-ControlView .unity-button:hover,
+.unity-button:hover,
 .unity-toolbar-button:hover,
 .unity-toolbar-toggle:hover,
 .unity-toolbar-menu:hover {
     background-color: #AEAEAE;
+}
+
+.unity-label.edgeBubble {
+    background-color: #a4a4a4;
+    color: #2E2E2E;
+}
+
+#collapse-button > #icon {
+    -unity-background-image-tint-color: #000000;
 }
 
 .unity-toolbar-menu.toggle-on,

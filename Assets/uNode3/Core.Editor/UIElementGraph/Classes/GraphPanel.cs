@@ -36,14 +36,12 @@ namespace MaxyGames.UNode.Editors {
 
 		private uNodeEditor.TabData tabData => graphEditor.tabData;
 
-		VisualElement classContainer, variableContainer, propertyContainer, graphContainer, functionContainer, eventContainer, constructorContainer, namespaceElement, interfaceContainer, enumContainer, localContainer, nestedContainer;
+		VisualElement classContainer, variableContainer, propertyContainer, graphContainer, functionContainer, eventContainer, constructorContainer, namespaceElement, localContainer, nestedContainer;
 		ClickableElement namespaceButton, classAddButton, functionAddButton, graphAddButton;
 		Dictionary<object, ClickableElement> contentMap = new Dictionary<object, ClickableElement>();
 
 		[SerializeField]
 		bool showClasses = true, showVariables = true, showProperties = true, showFunctions = true, showGraphs = true, showEvents = true, showConstructors = true, showInterfaces = true, showEnums = true, showLocal = true, showNested = true;
-
-		private TreeView treeView;
 
 		public GraphPanel(UIElementGraph graph) {
 			try {
@@ -298,48 +296,6 @@ namespace MaxyGames.UNode.Editors {
 				var toggle = header.Q("expanded") as Foldout;
 				toggle.RegisterValueChangedCallback(evt => {
 					showNested = evt.newValue;
-					ReloadView();
-				});
-			}
-			{//Interfaces
-				VisualElement header = scroll.Q("interface");
-				header.SetDisplay(false);
-				interfaceContainer = header.Q("contents");
-				var icon = header.Q("title-icon") as Image;
-				icon.image = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.InterfaceIcon));
-				icon.parent.Add(new VisualElement() { name = "spacer" });
-				var plusElement = new ClickableElement("+") {
-					name = "title-button-add",
-				};
-				plusElement.onClick = (_) => {
-
-					ReloadView();
-				};
-				icon.parent.Add(plusElement);
-				var toggle = header.Q("expanded") as Foldout;
-				toggle.RegisterValueChangedCallback(evt => {
-					showInterfaces = evt.newValue;
-					ReloadView();
-				});
-			}
-			{//Enums
-				VisualElement header = scroll.Q("enum");
-				header.SetDisplay(false);
-				enumContainer = header.Q("contents");
-				var icon = header.Q("title-icon") as Image;
-				icon.image = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.EnumIcon));
-				icon.parent.Add(new VisualElement() { name = "spacer" });
-				var plusElement = new ClickableElement("+") {
-					name = "title-button-add",
-				};
-				plusElement.onClick = (_) => {
-
-					ReloadView();
-				};
-				icon.parent.Add(plusElement);
-				var toggle = header.Q("expanded") as Foldout;
-				toggle.RegisterValueChangedCallback(evt => {
-					showEnums = evt.newValue;
 					ReloadView();
 				});
 			}
@@ -1047,7 +1003,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		void DrawElements(UGraphElement container, VisualElement viewContainer) {
-			TreeView treeView = viewContainer.Q<TreeView>();
+			var treeView = viewContainer.Q<TreeView>();
 			if(treeView == null) {
 				treeView = new TreeView(
 					makeItem: () => {
@@ -1707,7 +1663,7 @@ namespace MaxyGames.UNode.Editors {
 				constructorContainer.parent.SetDisplay(false);
 			}
 			//Local Variable
-			if(graphData.graph != null && graphData.selectedRoot != null && !(graphData.selectedRoot is MainGraphContainer)) {
+			if(graphData.graph != null && graphData.selectedRoot is ILocalVariableSystem) {
 				localContainer.parent.SetDisplay(true);
 				if(showLocal) {
 					var container = graphData.selectedRoot.variableContainer;

@@ -261,7 +261,7 @@ namespace MaxyGames.UNode.Nodes {
 			graph.ForeachInChildrens(element => {
 				if(element is NodeObject nodeObject) {
 					if(nodeObject.node is MacroPortNode) {
-						CG.RegisterEntry(nodeObject);
+						CG.RegisterDependency(nodeObject);
 					}
 				}
 			}, true);
@@ -270,25 +270,25 @@ namespace MaxyGames.UNode.Nodes {
 				CG.RegisterAsRegularNode(port);
 				foreach(var con in port.connections) {
 					if(con.isValid == false) continue;
-					CG.RegisterEntry(con.output.node);
+					CG.RegisterDependency(con.output.node);
 				}
 			}
 			foreach(var port in outputFlows) {
 				foreach(var con in port.connections) {
 					if(con.isValid == false) continue;
-					CG.RegisterEntry(con.input.node);
+					CG.RegisterDependency(con.input.node);
 				}
 			}
 			foreach(var port in inputValues) {
 				foreach(var con in port.connections) {
 					if(con.isValid == false) continue;
-					CG.RegisterEntry(con.output.node);
+					CG.RegisterDependency(con.output.node);
 				}
 			}
 			foreach(var port in outputValues) {
 				foreach(var con in port.connections) {
 					if(con.isValid == false) continue;
-					CG.RegisterEntry(con.input.node);
+					CG.RegisterDependency(con.input.node);
 				}
 			}
 

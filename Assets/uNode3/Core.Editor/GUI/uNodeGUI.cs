@@ -904,8 +904,11 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Layout Version
-		public static string TextInput(string text, string placeholder, bool area = false, bool delayedField = true, params GUILayoutOption[] options) {
-			var newText = area ? EditorGUILayout.TextArea(text, options) : delayedField ? EditorGUILayout.DelayedTextField(text, options) : EditorGUILayout.TextField(text, options);
+		public static string TextInput(string text, string placeholder, bool area = false, bool delayedField = true, GUIStyle style = null, params GUILayoutOption[] options) {
+			if(style == null) {
+				style = EditorStyles.textField;
+			}
+			var newText = area ? EditorGUILayout.TextArea(text, style, options) : delayedField ? EditorGUILayout.DelayedTextField(text, style, options) : EditorGUILayout.TextField(text, style, options);
 			if(string.IsNullOrEmpty(text)) {
 				const int textMargin = 2;
 				var guiColor = GUI.color;

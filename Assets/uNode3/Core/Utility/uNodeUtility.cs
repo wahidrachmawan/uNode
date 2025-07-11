@@ -1908,11 +1908,11 @@ namespace MaxyGames.UNode {
 			if(type == null) return null;
 			foreach(var data in typeIcons) {
 				if(type == data.Type) {
-					return data.icon;
+					return data.Icon;
 				}
 				else if(data.includingSubTypes) {
 					if(type.IsSubclassOf(data.Type)) {
-						return data.icon;
+						return data.Icon;
 					}
 				}
 			}
@@ -1933,9 +1933,56 @@ namespace MaxyGames.UNode {
 	public class EditorTypeIcon {
 		public SerializedType type = new SerializedType(typeof(object));
 		public Texture2D icon;
+		public Color colorTint;
 		public bool includingSubTypes;
 
+		[NonSerialized]
+		private Texture2D m_icon, m_prevIcon;
+		[NonSerialized]
+		private Color m_prevColor;
+		public Texture2D Icon {
+			get {
+				if(m_prevIcon != icon || m_prevColor != colorTint) {
+					m_prevIcon = icon;
+					m_icon = icon;
+					m_prevColor = colorTint;
+					if(colorTint.a != 0) {
+						if(icon.isReadable == false) {
+							Debug.LogError($"Attempt to tint texture: {icon} which is not readable, please make the texture readable in the Texture Import Settings", icon);
+						}
+						else {
+							m_icon = TintTexture(icon, colorTint);
+						}
+					}
+				}
+				return m_icon;
+			}
+		}
+
 		public Type Type => type.type;
+
+		private static Texture2D TintTexture(Texture2D texture2D, Color tint) {
+			// cache variables
+			int width = texture2D.width;
+			int height = texture2D.height;
+			Color[] pixels = new Color[width * height];
+			int pixelIndex = 0;
+
+			// iterate through each pixel
+			for(int i = 0; i < width; i++) {
+				for(int j = 0; j < height; j++) {
+					pixels[pixelIndex] = texture2D.GetPixel(j, i) * tint;
+					pixelIndex++;
+				}
+			}
+
+			// build a new texture from the pixels
+			Texture2D result = new Texture2D(width, height);
+			result.SetPixels(pixels);
+			result.Apply();
+
+			return result;
+		}
 	}
 
 	/// <summary>

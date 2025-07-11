@@ -84,9 +84,9 @@ namespace MaxyGames.UNode {
 			var fsm = CG.RegisterPrivateVariable("m_FSM", typeof(StateMachines.StateMachine), null, this);
 			var nodes = this.GetNodesInChildren<Nodes.AnyStateNode>();
 			foreach(var node in nodes) {
-				CG.RegisterEntry(node);
+				CG.RegisterDependency(node);
 			}
-			CG.RegisterEntry(Entry);
+			CG.RegisterDependency(Entry);
 
 			CG.RegisterPostInitialization(() => {
 				string code = null;
