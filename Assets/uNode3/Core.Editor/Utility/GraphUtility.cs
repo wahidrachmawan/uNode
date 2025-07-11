@@ -1995,7 +1995,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						ActionPopupWindow.CloseLast();
 					}
-				}).ChangePosition(mousePosition).headerName = "Rename Element";
+				}).ChangePosition(mousePosition).headerName = "Rename";
 		}
 
 		public static void RefactorFunctionName(Vector2 mousePosition, Function function, Action onRenamed) {

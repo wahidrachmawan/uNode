@@ -222,6 +222,9 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 					postAction?.Invoke();
+					uNodeThreadUtility.Queue(() => {
+						GraphUtility.RefactorElementName(mousePosition, variable, null);
+					});
 				});
 			});
 			return true;
@@ -238,7 +241,9 @@ namespace MaxyGames.UNode.Editors {
 							p.modifier.SetPrivate();
 						}
 						postAction?.Invoke();
-						GraphChanged();
+						uNodeThreadUtility.Queue(() => {
+							GraphUtility.RefactorElementName(mousePosition, p, GraphChanged);
+						});
 					});
 				});
 			});
@@ -360,8 +365,11 @@ namespace MaxyGames.UNode.Editors {
 		public override bool CreateNewLocalVariable(Vector2 mousePosition, Action postAction) {
 			ShowTypeMenu(mousePosition, type => {
 				uNodeEditorUtility.RegisterUndo(graph);
-				graphData.selectedRoot.variableContainer.AddVariable("localVariable", type);
+				var variable = graphData.selectedRoot.variableContainer.AddVariable("localVariable", type);
 				postAction?.Invoke();
+				uNodeThreadUtility.Queue(() => {
+					GraphUtility.RefactorElementName(mousePosition, variable, null);
+				});
 			});
 			return true;
 		}
@@ -375,6 +383,9 @@ namespace MaxyGames.UNode.Editors {
 					if(uNodePreference.preferenceData.newFunctionAccessor == uNodePreference.DefaultAccessor.Private) {
 						f.modifier.SetPrivate();
 					}
+					uNodeThreadUtility.Queue(() => {
+						GraphUtility.RefactorElementName(mousePosition, f, null);
+					});
 				});
 				GraphChanged();
 			});
@@ -384,6 +395,9 @@ namespace MaxyGames.UNode.Editors {
 					if(uNodePreference.preferenceData.newFunctionAccessor == uNodePreference.DefaultAccessor.Private) {
 						f.modifier.SetPrivate();
 					}
+					uNodeThreadUtility.Queue(() => {
+						GraphUtility.RefactorElementName(mousePosition, f, null);
+					});
 				});
 				GraphChanged();
 			});
