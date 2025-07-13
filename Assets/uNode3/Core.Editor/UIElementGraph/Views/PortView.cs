@@ -369,6 +369,7 @@ namespace MaxyGames.UNode.Editors {
 						proxyDebug.style.position = Position.Absolute;
 						proxyDebug.style.overflow = Overflow.Visible;
 						proxyDebug.pickingMode = PickingMode.Ignore;
+						proxyDebug.cullingEnabled = true;
 						proxyContainer.Add(proxyDebug);
 					}
 					connector.Add(proxyContainer);

@@ -105,6 +105,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public GUIStyle textStyle;
+		private float time;
 
 		public RichLabel() {
 			Init();
@@ -126,17 +127,14 @@ namespace MaxyGames.UNode.Editors {
 			AddToClassList("unity-text-element");
 			AddToClassList("unity-label");
 			onGUIHandler = () => {
-				if(textStyle == null) {
+				if(textStyle == null || Time.realtimeSinceStartup - time >= 1) {
 					UpdateStyle();
+					time = Time.realtimeSinceStartup;
 				}
 				Rect rect = uNodeGUIUtility.GetRect(layout.width, layout.height);
 				EditorGUI.LabelField(rect, text, textStyle);
 			};
-			this.ScheduleAction(() => {
-				if(textStyle != null) {
-					UpdateStyle();
-				}
-			}, 1000);
+			cullingEnabled = true;
 		}
 
 		void UpdateStyle() {

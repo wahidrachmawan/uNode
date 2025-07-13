@@ -143,9 +143,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(Application.isPlaying && primaryInputFlow != null) {
 
-				bool? lastState = null;
+				int lastState = -1;
 				VisualElement debugElement = null;
-				void UpdateState(bool? state) {
+				void UpdateState(int state) {
 					if(lastState != state || debugElement == null) {
 						if(debugElement == null) {
 							debugElement = new VisualElement() {
@@ -155,30 +155,30 @@ namespace MaxyGames.UNode.Editors {
 							this.Add(debugElement);
 						}
 						else {
-							if(lastState == null) {
+							if(lastState == 0) {
 								//Running
 								this.RemoveFromClassList("node-debug-running");
 								debugElement.RemoveFromClassList("highlight-debug-running");
 							}
-							else if(lastState == true) {
+							else if(lastState == 1) {
 								this.RemoveFromClassList("node-debug-success");
 								debugElement.RemoveFromClassList("highlight-debug-success");
 							}
-							else {
+							else if(lastState == 2) {
 								this.RemoveFromClassList("node-debug-failure");
 								debugElement.RemoveFromClassList("highlight-debug-failure");
 							}
 						}
-						if(state == null) {
+						if(state == 0) {
 							//Running
 							this.AddToClassList("node-debug-running");
 							debugElement.AddToClassList("highlight-debug-running");
 						}
-						else if(state == true) {
+						else if(state == 1) {
 							this.AddToClassList("node-debug-success");
 							debugElement.AddToClassList("highlight-debug-success");
 						}
-						else {
+						else if(state == 2) {
 							this.AddToClassList("node-debug-failure");
 							debugElement.AddToClassList("highlight-debug-failure");
 						}
@@ -186,8 +186,8 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 
-				this.RegisterRepaintAction(() => {
-					if(Event.current.type != EventType.Repaint) return;
+				this.ScheduleActionUntil(() => {
+					if(isHidden || this.IsVisible() == false) return;
 					var debugData = owner.graphEditor.GetDebugInfo();
 					if(debugData != null) {
 						var nodeDebug = debugData.GetDebugValue(primaryInputFlow.GetPortValue<FlowInput>());
@@ -196,10 +196,10 @@ namespace MaxyGames.UNode.Editors {
 							switch(nodeDebug.nodeState) {
 								case StateType.Success:
 									if(GraphDebug.debugTime - nodeDebug.time > 0.1f) {
-										UpdateState(true);
+										UpdateState(1);
 									}
 									else {
-										UpdateState(null);
+										UpdateState(0);
 									}
 									//GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0, 
 									//	Color.Lerp(
@@ -209,10 +209,10 @@ namespace MaxyGames.UNode.Editors {
 									break;
 								case StateType.Failure:
 									if(GraphDebug.debugTime - nodeDebug.time > 0.1f) {
-										UpdateState(false);
+										UpdateState(2);
 									}
 									else {
-										UpdateState(null);
+										UpdateState(0);
 									}
 									//GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
 									//	Color.Lerp(
@@ -221,14 +221,20 @@ namespace MaxyGames.UNode.Editors {
 									//		(GraphDebug.debugTime - nodeDebug.time) * GraphDebug.transitionSpeed * 4), 0, 0);
 									break;
 								case StateType.Running:
-									UpdateState(null);
+									UpdateState(0);
 									//GUI.DrawTexture(layout, Texture2D.whiteTexture, ScaleMode.ScaleAndCrop, true, 0,
 									//	UIElementUtility.Theme.nodeRunningColor, 0, 0);
 									break;
 							}
 						}
+						else {
+							UpdateState(-1);
+						}
 					}
-				});
+					else {
+						UpdateState(-1);
+					}
+				}, static () => false);
 			}
 			if(debugView != null) {
 				this.ExecuteAndScheduleAction(() => {

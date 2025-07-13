@@ -60,15 +60,15 @@ namespace MaxyGames.UNode {
 		}
 
 		private static object lockObject = new object();
-		private static List<Action> actions = new List<Action>();
-		private static List<AsyncData> asyncActions = new List<AsyncData>();
-		private static Queue<Action> actionFrames = new Queue<Action>();
-		private static List<KeyValuePair<long, Action>> actionAfterFrames = new List<KeyValuePair<long, Action>>();
-		private static List<KeyValuePair<float, Action>> actionAfterDurations = new List<KeyValuePair<float, Action>>();
-		private static List<KeyValuePair<float, Action>> actionWhileDurations = new List<KeyValuePair<float, Action>>();
-		private static List<KeyValuePair<Func<bool>, Action>> actionWhile = new List<KeyValuePair<Func<bool>, Action>>();
-		private static List<KeyValuePair<Func<bool>, Action>> actionAfterCondition = new List<KeyValuePair<Func<bool>, Action>>();
-		private static ConcurrentDictionary<object, Action> actionExecutedOnce = new ConcurrentDictionary<object, Action>();
+		private static readonly List<Action> actions = new List<Action>();
+		private static readonly List<AsyncData> asyncActions = new List<AsyncData>();
+		private static readonly Queue<Action> actionFrames = new Queue<Action>();
+		private static readonly List<KeyValuePair<long, Action>> actionAfterFrames = new List<KeyValuePair<long, Action>>();
+		private static readonly List<KeyValuePair<float, Action>> actionAfterDurations = new List<KeyValuePair<float, Action>>();
+		private static readonly List<KeyValuePair<float, Action>> actionWhileDurations = new List<KeyValuePair<float, Action>>();
+		private static readonly List<KeyValuePair<Func<bool>, Action>> actionWhile = new List<KeyValuePair<Func<bool>, Action>>();
+		private static readonly List<KeyValuePair<Func<bool>, Action>> actionAfterCondition = new List<KeyValuePair<Func<bool>, Action>>();
+		private static readonly Dictionary<object, Action> actionExecutedOnce = new Dictionary<object, Action>();
 		private static int queueCount;
 
 		[DefaultExecutionOrder(int.MinValue)]
@@ -140,6 +140,11 @@ namespace MaxyGames.UNode {
 #endif
 				time = UnityEngine.Time.realtimeSinceStartup;
 				GraphDebug.debugTimeAsDouble += deltaTime;
+
+				foreach(var pair in actionExecutedOnce) {
+					actions.Add(pair.Value);
+				}
+				actionExecutedOnce.Clear();
 				for(int i = 0; i < actions.Count; i++) {
 					try {
 						if(actions[i] != null) {
@@ -209,19 +214,6 @@ namespace MaxyGames.UNode {
 							actionWhileDurations.RemoveAt(i);
 							i--;
 						}
-					}
-				}
-				List<Action> actionExecutedOnce = new List<Action>(uNodeThreadUtility.actionExecutedOnce.Count);
-				foreach(var pair in uNodeThreadUtility.actionExecutedOnce) {
-					actions.Add(pair.Value);
-				}
-				uNodeThreadUtility.actionExecutedOnce.Clear();
-				for(int i = 0; i < actionExecutedOnce.Count; i++) {
-					try {
-						actionExecutedOnce[i]();
-					}
-					catch(System.Exception ex) {
-						UnityEngine.Debug.LogException(ex);
 					}
 				}
 				if(actionWhile.Count > 0) {

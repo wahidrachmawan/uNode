@@ -120,5 +120,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 		}
+
+		public override bool RequiresConstantRepaint() {
+			return Application.isPlaying;
+		}
 	}
 }

@@ -111,5 +111,9 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUILayout.HelpBox("Please assign the target graph", MessageType.Error);
 			}
 		}
+
+		public override bool RequiresConstantRepaint() {
+			return Application.isPlaying;
+		}
 	}
 }

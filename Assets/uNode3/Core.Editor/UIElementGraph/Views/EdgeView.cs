@@ -123,6 +123,7 @@ namespace MaxyGames.UNode.Editors {
 					iMGUIContainer.style.flexGrow = 1;
 					iMGUIContainer.style.flexShrink = 0;
 					iMGUIContainer.pickingMode = PickingMode.Ignore;
+					iMGUIContainer.cullingEnabled = true;
 					edgeControl.Add(iMGUIContainer);
 				}
 			}
@@ -168,8 +169,7 @@ namespace MaxyGames.UNode.Editors {
 				if(port != null && edgeControl.controlPoints != null && edgeControl.controlPoints.Length == 4) {
 					GraphDebug.DebugData debugData = port.owner.owner.graphEditor.GetDebugInfo();
 					if(debugData != null) {
-						//This to make sure to the UI is always repaint.
-						iMGUIContainer.MarkDirtyRepaint();
+						bool needUpdate = false;
 
 						if(port.isFlow) {
 							PortView portView = output as PortView;
@@ -196,6 +196,9 @@ namespace MaxyGames.UNode.Editors {
 										Vector2 v4 = this.ChangeCoordinatesTo(iMGUIContainer, edgeControl.controlPoints[3]);
 										DrawDebug(new Vector2[] { v1, v2, v3, v4 }, edgeControl.inputColor, edgeControl.outputColor, times, true);
 									}
+									if(times <= 1) {
+										needUpdate = true;
+									}
 								}
 							}
 						}
@@ -220,6 +223,9 @@ namespace MaxyGames.UNode.Editors {
 									}
 									else {
 										DrawDebug(v1, v4, edgeControl.inputColor, edgeControl.outputColor, times, true);
+									}
+									if(times <= .5f) {
+										needUpdate = true;
 									}
 									if(showLabel) {//Debug label
 										GUIContent debugContent;
@@ -252,6 +258,9 @@ namespace MaxyGames.UNode.Editors {
 									else {
 										DrawDebug(new Vector2[] { v1, v2, v3, v4 }, edgeControl.inputColor, edgeControl.outputColor, times, true);
 									}
+									if(times <= .5f) {
+										needUpdate = true;
+									}
 									if(showLabel) {//Debug label
 										GUIContent debugContent;
 										if(debug.value != null) {
@@ -273,6 +282,10 @@ namespace MaxyGames.UNode.Editors {
 									}
 								}
 							}
+						}
+						if(needUpdate) {
+							//This to make sure to the UI is always repaint.
+							iMGUIContainer.MarkDirtyRepaint();
 						}
 					}
 				}

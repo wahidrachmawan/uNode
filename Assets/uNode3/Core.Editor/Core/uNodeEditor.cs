@@ -924,9 +924,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void Update() {
-			if(!EditorApplication.isPaused) {
-				//GraphDebug.debugLinesTimer = Mathf.Repeat(GraphDebug.debugLinesTimer += 0.03f, 1f);
-			}
 			if(Selection.activeGameObject != null && (cached.oldTarget != Selection.activeGameObject)) {
 				OnSelectionChange();
 				cached.oldTarget = Selection.activeGameObject;
@@ -937,7 +934,7 @@ namespace MaxyGames.UNode.Editors {
 				if(nowSecond != cached.errorRefreshTime) {
 					CheckErrors();
 					cached.errorRefreshTime = nowSecond;
-					Repaint();
+					//Repaint();
 				}
 			}
 		}
@@ -1037,7 +1034,7 @@ namespace MaxyGames.UNode.Editors {
 		public static void ShowWindow() {
 			window = (uNodeEditor)GetWindow(typeof(uNodeEditor), false);
 			window.minSize = new Vector2(300, 250);
-			window.autoRepaintOnSceneChange = true;
+			window.autoRepaintOnSceneChange = false;
 			window.wantsMouseMove = true;
 			window.titleContent = new GUIContent("uNode Editor"/*, Resources.Load<Texture2D>("uNODE_Logo")*/);
 			window.Show();
@@ -1046,7 +1043,6 @@ namespace MaxyGames.UNode.Editors {
 		public static void ForceRepaint() {
 			if(window != null) {
 				window.Repaint();
-				EditorApplication.RepaintHierarchyWindow();
 				GUIChanged();
 			}
 		}
