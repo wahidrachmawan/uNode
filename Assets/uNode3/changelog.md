@@ -2,6 +2,7 @@
 
 ## v3.2.0
 - Added new State Machine graph and support for Class Component & C# Graph that inherit from MonoBehaviour
+- Added new Call Stack window, auto open when breakpoint is hit in playmode allowing for see the execution flows and has ability to highlight node, ping object, and open script.
 - Added ability to make connection by single click on the port ( no need to hold down left button )
 - Renamed State Graph to Event Graph
 - Improved Code Generation
