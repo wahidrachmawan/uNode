@@ -471,11 +471,11 @@ namespace MaxyGames.UNode {
 		}
 
 		public bool CanSetValue() {
-			return node?.CanSetValue() ?? false;
+			return primaryValueOutput?.CanSetValue() ?? false;
 		}
 
 		public bool CanGetValue() {
-			return node?.CanGetValue() ?? false;
+			return primaryValueOutput?.CanGetValue() ?? false;
 		}
 
 		/// <summary>
@@ -483,7 +483,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <returns></returns>
 		public Type ReturnType() {
-			return node?.ReturnType();
+			return primaryValueOutput?.type;
 		}
 
 		/// <summary>

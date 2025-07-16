@@ -289,6 +289,10 @@ namespace MaxyGames.UNode {
 
 	internal interface IGraphElement { }
 
+	internal interface IDebugableDisplay {
+		internal string DebugDisplay { get; }
+	}
+
 	public interface IGetValue {
 		object Get();
 	}

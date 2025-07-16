@@ -2012,11 +2012,11 @@ namespace MaxyGames.UNode.Editors {
 						break;
 					case BlockType.Condition:
 						graphEditor.ShowNodeMenu(screenMousePosition, new FilterAttribute(typeof(object)), onAddNode: node => {
-							if(node is not MultipurposeNode && node.ReturnType() == typeof(bool)) {
+							if(node is not MultipurposeNode && node.nodeObject.ReturnType() == typeof(bool)) {
 								node.nodeObject.SetParent(blockView.blocks);
 							}
 							else {
-								var nodeType = node.ReturnType();
+								var nodeType = node.nodeObject.ReturnType();
 								node.position = blockView.nodeView.GetPosition();
 								node.nodeObject.position.x -= 200;
 
@@ -2107,10 +2107,22 @@ namespace MaxyGames.UNode.Editors {
 			screenMousePosition.y -= 20;
 			graphEditor.topMousePos = screenMousePosition;
 
+			Vector2 mousePosition = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+							contentViewContainer,
+							screenMousePosition);
+
 			if(type == GraphShortcutType.AddNode) {
 				if(graphData.canAddNode) {
 					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
 						OnCreateNode(screenMousePosition);
+					}
+				}
+				return true;
+			}
+			else if(type == GraphShortcutType.AddNodeFromFavorites) {
+				if(graphData.canAddNode) {
+					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
+						graphEditor.ShowFavoriteMenu(mousePosition);
 					}
 				}
 				return true;
@@ -2121,16 +2133,12 @@ namespace MaxyGames.UNode.Editors {
 						return true;
 					}
 					if(ContainsPoint(window.rootVisualElement.ChangeCoordinatesTo(this, screenMousePosition))) {
-						Vector2 point = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
-							contentViewContainer,
-							screenMousePosition);
-
 						IEnumerable<string> namespaces = null;
 						if(graphData.graph != null) {
 							namespaces = graphData.graph.GetUsingNamespaces();
 						}
 						AutoCompleteWindow.CreateWindow(Vector2.zero, (items) => {
-							var nodes = CompletionEvaluator.CompletionsToGraphs(CompletionEvaluator.SimplifyCompletions(items), graphData, point);
+							var nodes = CompletionEvaluator.CompletionsToGraphs(CompletionEvaluator.SimplifyCompletions(items), graphData, mousePosition);
 							if(nodes != null && nodes.Count > 0) {
 								graphEditor.Refresh();
 								return true;
@@ -2211,10 +2219,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(type == GraphShortcutType.CreateRegion) {
 				if(graphData.canAddNode) {
-					Vector2 point = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
-						contentViewContainer,
-						screenMousePosition);
-					graphEditor.SelectionAddRegion(point);
+					graphEditor.SelectionAddRegion(mousePosition);
 				}
 				return true;
 			}

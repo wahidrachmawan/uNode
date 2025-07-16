@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Nodes {
 			input = ValueInput(nameof(input), typeof(object));
 		}
 
-		public override Type ReturnType() {
+		protected override Type ReturnType() {
 			return type.type;
 		}
 
@@ -119,11 +119,11 @@ namespace MaxyGames.UNode.Nodes {
 			throw new System.Exception();
 		}
 
-		public override bool CanGetValue() {
+		protected override bool CanGetValue() {
 			return true;
 		}
 
-		public override bool CanSetValue() {
+		protected override bool CanSetValue() {
 			return false;
 		}
 

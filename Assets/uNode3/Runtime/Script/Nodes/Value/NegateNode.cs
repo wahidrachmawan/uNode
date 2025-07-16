@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Nodes {
 			target = ValueInput(nameof(target), typeof(object), MemberData.None);
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(target.isAssigned) {
 				try {
 					object obj = Operator.Negate(ReflectionUtils.CreateInstance(target.ValueType));

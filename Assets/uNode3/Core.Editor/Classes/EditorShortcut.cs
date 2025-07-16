@@ -10,6 +10,7 @@ namespace MaxyGames.UNode.Editors {
 		Refresh,
 		Rename,
 		AddNode,
+		AddNodeFromFavorites,
 		CreateRegion,
 		FrameGraph,
 		OpenCommand,
@@ -110,6 +111,14 @@ namespace MaxyGames.UNode.Editors {
 			var window = args.context as uNodeEditor;
 			if(window != null) {
 				window.graphEditor.HandleShortcut(GraphShortcutType.AddNode);
+			}
+		}
+
+		[Shortcut("uNode/Add Node From Favorites", typeof(uNodeEditor))]
+		static void Shortcut_AddNodeFromFavorites(ShortcutArguments args) {
+			var window = args.context as uNodeEditor;
+			if(window != null) {
+				window.graphEditor.HandleShortcut(GraphShortcutType.AddNodeFromFavorites);
 			}
 		}
 

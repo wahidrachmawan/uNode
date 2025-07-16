@@ -68,6 +68,9 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(node);
+
 		/// <summary>
 		/// The node that own this port
 		/// </summary>

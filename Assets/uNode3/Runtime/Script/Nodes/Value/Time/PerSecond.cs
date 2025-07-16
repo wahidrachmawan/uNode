@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Nodes {
 			input.filter = new FilterAttribute(typeof(float), typeof(Vector2), typeof(Vector3), typeof(Vector4));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(input.isAssigned) {
 				return input.ValueType;
 			}

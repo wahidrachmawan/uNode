@@ -201,6 +201,9 @@ namespace MaxyGames.UNode {
 				m_runtimeID = value;
 			}
 		}
+
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(this);
 		#endregion
 
 		#region Utility

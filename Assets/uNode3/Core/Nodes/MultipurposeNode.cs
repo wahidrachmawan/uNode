@@ -106,18 +106,18 @@ namespace MaxyGames.UNode {
 		}
 
 		#region Runtime
-		public override Type ReturnType() {
+		protected override Type ReturnType() {
 			if(output != null && target != null && target.isAssigned) {
 				return target.type;
 			}
 			return typeof(object);
 		}
 
-		public override bool CanGetValue() {
+		protected override bool CanGetValue() {
 			return member.CanGetValue();
 		}
 
-		public override bool CanSetValue() {
+		protected override bool CanSetValue() {
 			return member.CanSetValue();
 		}
 

@@ -434,6 +434,9 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		private List<FlowPort> nextFlows;
 
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(node, instance.target);
+
 		public bool IsCoroutine => port != null ? port.IsCoroutine() : false;
 
 		public void Run() {
@@ -861,6 +864,9 @@ namespace MaxyGames.UNode {
 		public readonly FlowInput port;
 		public readonly CoroutineGraphRunner runner;
 
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(port?.node, instance.target);
+
 		public CoroutineFlow(FlowInput port, CoroutineGraphRunner runner) : base(runner.instance) {
 			this.port = port;
 			this.runner = runner;
@@ -1146,6 +1152,9 @@ FINISH:
 	public class CoroutineGraphRunner : GraphRunner {
 		public readonly FlowInput port;
 
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(port?.node, instance.target);
+
 		public CoroutineGraphRunner(GraphInstance instance, FlowInput port) : base(instance) {
 			this.port = port;
 		}
@@ -1155,6 +1164,9 @@ FINISH:
 
 	public class RegularGraphRunner : GraphRunner {
 		public readonly FlowInput port;
+
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(port?.node, instance.target);
 
 		public RegularGraphRunner(GraphInstance instance, FlowInput port) : base(instance) {
 			this.port = port;
@@ -1175,6 +1187,9 @@ FINISH:
 		public override GraphRunner graphRunner => runner;
 
 		private Queue<FlowPort> nextFlows = new Queue<FlowPort>(4);
+
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(port?.node, instance.target);
 
 		public override void Next(FlowPort port) {
 			nextFlows.Enqueue(port);

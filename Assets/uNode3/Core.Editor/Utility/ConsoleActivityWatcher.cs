@@ -141,83 +141,42 @@ namespace MaxyGames.UNode.Editors {
 			var strs = text.Split('\n');
 			List<MenuData> menus = new List<MenuData>();
 			Action postMenuAction = null;
-
+			
 			foreach(var txt in strs) {
-				var idx = txt.IndexOf(GraphException.KEY_REFERENCE);
-				if(idx >= 0) {
-					string str = null;
-					for(int i = idx + GraphException.KEY_REFERENCE.Length; i < txt.Length; i++) {
-						if(txt[i] == GraphException.KEY_REFERENCE_TAIL) {
-							break;
-						} else {
-							str += txt[i];
-						}
-					}
-					var ids = str.Split(GraphException.KEY_REFERENCE_SEPARATOR);
-					if(ids.Length >= 2) {
-						UnityEngine.Object reference = null;
-						if(int.TryParse(ids[0], out var id) && int.TryParse(ids[1], out var graphID)) {
-							reference = EditorUtility.InstanceIDToObject(graphID);
-							if(reference == null) {
-								var db = uNodeDatabase.instance?.graphDatabases;
-								if(db != null) {
-									foreach(var data in db) {
-										if(data.fileUniqueID == graphID) {
-											reference = data.asset;
-											break;
+				if(GraphException.ParseMessage(text, out var obj, out var element, out var debugTargetId)) {
+					var reference = obj as UnityEngine.Object;
+					if(reference != null && reference is IGraph graph) {
+						if(element is NodeObject nodeObject) {
+							menus.Add(new MenuData() {
+								menu = $"Highlight Node:{nodeObject.GetTitle()} from {graph.GetFullGraphName()}",
+								action = () => {
+									uNodeEditor.Highlight(nodeObject);
+									if(string.IsNullOrEmpty(debugTargetId) == false && uNodeEditor.window != null) {
+										var graphData = uNodeEditor.window.graphData;
+										if(graphData.debugAnyScript) {
+											graphData.SetAutoDebugTarget(GraphDebug.GetDebugObject(debugTargetId));
 										}
 									}
 								}
-							}
+							});
+						}
+						else if(element != null) {
+							menus.Add(new MenuData() {
+								menu = $"Highlight Element: {element.name} with id: {element.id} from {(reference as IGraph).GetFullGraphName()}",
+								action = () => uNodeEditor.Open(reference as IGraph, element)
+							});
 						}
 						else {
-							var db = uNodeDatabase.instance?.graphDatabases;
-							if(db != null) {
-								foreach(var data in db) {
-									if(data.assetGuid == ids[1]) {
-										reference = data.asset;
-										break;
-									}
+							postMenuAction += () => {
+								if(menus.Any(menu => menu.menu.Contains((reference as IGraph).GetFullGraphName())) == false) {
+									menus.Add(new MenuData() {
+										menu = $"Highlight Graph: {(reference as IGraph).GetFullGraphName()}",
+										action = () => uNodeEditor.Open(reference as IGraph)
+									});
 								}
-							}
-						}
-
-						if(reference != null && reference is IGraph graph) {
-							UGraphElement element = graph.GetGraphElement(id);
-							if(element is NodeObject nodeObject) {
-								menus.Add(new MenuData() {
-									menu = $"Highlight Node:{nodeObject.GetTitle()} from {graph.GetFullGraphName()}",
-									action = () => {
-										uNodeEditor.Highlight(nodeObject);
-										if(ids.Length > 2 && uNodeEditor.window != null) {
-											var graphData = uNodeEditor.window.graphData;
-											if(graphData.debugAnyScript) {
-												graphData.SetAutoDebugTarget(GraphDebug.GetDebugObject(ids[2]));
-											}
-										}
-									}
-								});
-							}
-							else if(element != null) {
-								menus.Add(new MenuData() {
-									menu = $"Highlight Element: {element.name} with id: {element.id} from {(reference as IGraph).GetFullGraphName()}",
-									action = () => uNodeEditor.Open(reference as IGraph, element)
-								});
-							}
-							else {
-								postMenuAction += () => {
-									if(menus.Any(menu => menu.menu.Contains((reference as IGraph).GetFullGraphName())) == false) {
-										menus.Add(new MenuData() {
-											menu = $"Highlight Graph: {(reference as IGraph).GetFullGraphName()}",
-											action = () => uNodeEditor.Open(reference as IGraph)
-										});
-									}
-								};
-							}
-							continue;
+							};
 						}
 					}
-					continue;
 				}
 				postMenuAction?.Invoke();
 				List<ActivityData> datas = new List<ActivityData>();
@@ -253,7 +212,7 @@ namespace MaxyGames.UNode.Editors {
 						lastData = data;
 					}
 				}
-				if(lastData.info != null && uNodeEditor.CanHighlight(lastData.info, line)) {
+				if(lastData.info != null && uNodeEditor.GetElementFromScript(lastData.info, line)) {
 					menus.Add(new MenuData() {
 						menu = $"{lastData.path.Replace('/', '\\')}:{line + 1}",
 						action = () => uNodeEditor.Highlight(lastData.info, line)

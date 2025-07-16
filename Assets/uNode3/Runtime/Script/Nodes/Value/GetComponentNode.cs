@@ -25,7 +25,7 @@ namespace MaxyGames.UNode.Nodes {
 			target.filter = new FilterAttribute(typeof(Component), typeof(GameObject));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(type.isFilled) {
 				try {
 					System.Type t = type.type;

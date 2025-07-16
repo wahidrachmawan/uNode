@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Nodes {
 			target = ValueInput(nameof(target), typeof(IEnumerable));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			return typeof(int);
 		}
 

@@ -20,7 +20,7 @@ namespace MaxyGames.UNode.Nodes {
 			value.AssignGetCallback(flow => target.GetValue(flow, type.type));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			return typeof(bool);
 		}
 

@@ -16,7 +16,7 @@ namespace MaxyGames.UNode.Nodes {
 			targetB.filter = new FilterAttribute(typeof(int), typeof(uint), typeof(long), typeof(short), typeof(byte), typeof(ulong), typeof(System.Enum));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(targetA.isAssigned && targetB.isAssigned) {
 				try {
 					var val = ReflectionUtils.CreateInstance(targetA.ValueType);

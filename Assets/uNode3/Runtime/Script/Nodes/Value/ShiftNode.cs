@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Nodes {
 			targetB = ValueInput(nameof(targetB), typeof(int));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(targetA.isAssigned && targetB.isAssigned) {
 				try {
 					object obj = uNodeHelper.ShiftOperator(

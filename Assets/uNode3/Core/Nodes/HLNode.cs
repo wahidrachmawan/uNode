@@ -800,7 +800,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 		#endregion
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(m_instance is IDataNode) {
 				return (m_instance as IDataNode).ReturnType();
 			}

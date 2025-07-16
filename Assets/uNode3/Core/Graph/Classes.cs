@@ -936,16 +936,39 @@ namespace MaxyGames.UNode {
 		protected Type _type;
 		[NonSerialized]
 		internal Func<Type> dynamicType;
+		[NonSerialized]
+		private Func<bool> autoType;
 		/// <summary>
 		/// The port type
 		/// </summary>
 		public Type type {
 			get {
-				if(_type != null)
-					return _type;
-				if(dynamicType != null)
-					return dynamicType();
-				return typeof(object);
+				if(IsAutoType && connections.Count > 0) {
+					for(int i = 0; i < connections.Count; i++) {
+						if(connections[i].isValid) {
+							if(connections[i].input != this) {
+								if(connections[i].input.IsAutoType == false) {
+									//var other = connections[i].input;
+									//Type actualType = null;
+									//if(other.filter != null) {
+									//	actualType = other.filter.GetActualType();
+									//}
+									//if(actualType == null) {
+									//	actualType = other.type;
+									//}
+									return connections[i].input.type;
+								}
+							}
+							else {
+								if(connections[i].output.IsAutoType == false) {
+									return connections[i].output.type;
+								}
+							}
+							break;
+						}
+					}
+				}
+				return _type ?? dynamicType?.Invoke() ?? typeof(object);
 			}
 			set {
 				_type = value;
@@ -958,10 +981,50 @@ namespace MaxyGames.UNode {
 		[SerializeReference]
 		public List<ValueConnection> connections = new List<ValueConnection>();
 
+		public Type StaticType {
+			get => _type;
+			set => _type = value;
+		}
+
 		/// <summary>
 		/// True if the port type is dynamic
 		/// </summary>
-		public bool IsDynamicType => dynamicType != null;
+		public bool IsDynamicType => dynamicType != null || IsAutoType;
+		/// <summary>
+		/// If true, the <see cref="type"/> will be auto based on connected port, if there's no connection fallback to default.
+		/// </summary>
+		public bool IsAutoType => autoType?.Invoke() == true;
+
+		/// <summary>
+		/// Set the type of the port
+		/// </summary>
+		/// <param name="func"></param>
+		public void SetType(Func<Type> func) {
+			dynamicType = func;
+			_type = null;
+		}
+
+		/// <summary>
+		/// Set the auto type. If true, the <see cref="type"/> will be auto based on connected port, if there's no connection fallback to default.
+		/// </summary>
+		/// <param name="value"></param>
+		public void SetAutoType(bool value) {
+			static bool FUNC() => true;
+			if(value) {
+				autoType = FUNC;
+			}
+			else {
+				autoType = null;
+			}
+		}
+
+		/// <summary>
+		/// Set the auto type. If true, the <see cref="type"/> will be auto based on connected port, if there's no connection fallback to default.
+		/// </summary>
+		/// <param name="func"></param>
+		public void SetAutoType(Func<bool> func) {
+			autoType = func;
+		}
 
 		protected ValuePort(NodeObject node) : base(node) {
 		}

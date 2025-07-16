@@ -121,7 +121,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				string expression = node.expression;
 				string className = Nodes.ExpressionNode.ExpressionType;
 				string methodName = Nodes.ExpressionNode.ExpressionMethod;
-				string returnType = node.ReturnType().PrettyName(true);
+				string returnType = node.nodeObject.ReturnType().PrettyName(true);
 				var parameters = node.inputs.Select(p => {
 					if(p.type?.type != null) {
 						return p.type.type.PrettyName(true) + " " + p.name;

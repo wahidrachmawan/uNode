@@ -14,7 +14,7 @@ namespace MaxyGames.UNode.Nodes {
 			onFalse = ValueInput(nameof(onFalse), typeof(object), MemberData.Null);
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(onTrue.isAssigned || onFalse.isAssigned) {
 				try {
 					if(onTrue.isAssigned) {

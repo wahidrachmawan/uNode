@@ -14,7 +14,7 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRegister();
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			return typeof(bool);
 		}
 

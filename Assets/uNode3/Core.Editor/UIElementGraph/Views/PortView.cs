@@ -463,8 +463,8 @@ namespace MaxyGames.UNode.Editors {
 					Connection.CreateAndConnect(flow, portView.GetPortValue());
 				}
 				else {
-					if(n is MultipurposeNode mNode && mNode.CanSetValue()) {
-						var rType = mNode.ReturnType();
+					if(n is MultipurposeNode mNode && mNode.nodeObject.CanSetValue()) {
+						var rType = mNode.nodeObject.ReturnType();
 						if(rType.IsCastableTo(typeof(Delegate)) || rType.IsCastableTo(typeof(UnityEngine.Events.UnityEventBase))) {
 							NodeEditorUtility.AddNewNode(owner.owner.graphData, null, null, position, (Nodes.EventHook nod) => {
 								nod.EnsureRegistered();
@@ -476,8 +476,8 @@ namespace MaxyGames.UNode.Editors {
 							NodeEditorUtility.AddNewNode(owner.owner.graphData, null, null, position, (Nodes.NodeSetValue nod) => {
 								nod.EnsureRegistered();
 								Connection.CreateAndConnect(nod.target, n.nodeObject.primaryValueOutput);
-								if(n.ReturnType() != typeof(void)) {
-									nod.value.AssignToDefault(MemberData.Default(n.ReturnType()));
+								if(n.nodeObject.ReturnType() != typeof(void)) {
+									nod.value.AssignToDefault(MemberData.Default(n.nodeObject.ReturnType()));
 								}
 								Connection.CreateAndConnect(portView.GetPortValue(), nod.nodeObject.primaryFlowInput);
 							});
@@ -495,8 +495,8 @@ namespace MaxyGames.UNode.Editors {
 		private void OnDropOutsidePortFromFlowInput(Vector2 position, PortView portView, PortView sidePort) {
 			owner.owner.graphEditor.ShowNodeMenu(position, null, (n) => {
 				n.EnsureRegistered();
-				if(n is MultipurposeNode mNode && !mNode.IsFlowNode() && mNode.CanSetValue()) {
-					var rType = mNode.ReturnType();
+				if(n is MultipurposeNode mNode && !mNode.IsFlowNode() && mNode.nodeObject.CanSetValue()) {
+					var rType = mNode.nodeObject.ReturnType();
 					if(rType.IsCastableTo(typeof(Delegate)) || rType.IsCastableTo(typeof(UnityEngine.Events.UnityEventBase))) {
 						NodeEditorUtility.AddNewNode(owner.owner.graphData, null, null, position, (Nodes.EventHook nod) => {
 							nod.EnsureRegistered();
@@ -508,8 +508,8 @@ namespace MaxyGames.UNode.Editors {
 						NodeEditorUtility.AddNewNode(owner.owner.graphData, null, null, position, (Nodes.NodeSetValue nod) => {
 							nod.EnsureRegistered();
 							nod.target.ConnectTo(n.nodeObject.primaryValueOutput);
-							if(n.ReturnType() != typeof(void)) {
-								nod.value.AssignToDefault(MemberData.CreateValueFromType(n.ReturnType()));
+							if(n.nodeObject.ReturnType() != typeof(void)) {
+								nod.value.AssignToDefault(MemberData.CreateValueFromType(n.nodeObject.ReturnType()));
 							}
 							n = nod;
 						});
@@ -618,9 +618,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			owner.owner.graphEditor.ShowNodeMenu(position, FA, (n) => {
-				if(n.CanGetValue()) {
+				if(n.nodeObject.CanGetValue()) {
 					if(n is MultipurposeNode mNode) {
-						var type = mNode.ReturnType();
+						var type = mNode.nodeObject.ReturnType();
 						Type rightType = type;
 						for(int i = 0; i < types.Count; i++) {
 							if(NodeEditorUtility.CanAutoConvertType(type, types[i])) {
@@ -1396,6 +1396,9 @@ namespace MaxyGames.UNode.Editors {
 				if(isValue) {
 					var inputPort = portView.direction == Direction.Input ? portView : this;
 					var outputPort = portView.direction == Direction.Output ? portView : this;
+					if(inputPort.GetPortValue<ValuePort>().IsAutoType || outputPort.GetPortValue<ValuePort>().IsAutoType) {
+						return true;
+					}
 
 					var filter = inputPort.portData.GetFilter();
 					var outputType = outputPort.portData.portType;

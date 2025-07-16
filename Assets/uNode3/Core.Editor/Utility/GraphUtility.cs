@@ -1180,7 +1180,7 @@ namespace MaxyGames.UNode.Editors {
 			ShowReferencesInWindow(references);
 		}
 
-		public static void GoToDefinition(MemberInfo info) {
+		public static void GoToDefinition(MemberInfo info, string path = null) {
 			if(info is IRuntimeMember) {
 				var reference = info as IRuntimeMemberWithRef;
 				if(reference == null) {
@@ -1236,19 +1236,19 @@ namespace MaxyGames.UNode.Editors {
 				foreach(var t in runtimeTypes) {
 					if(t is INativeType nativeType && nativeType.GetNativeType() == type) {
 						if(info is Type) {
-							GoToDefinition(t);
+							GoToDefinition(t, path);
 							return;
 						}
 						var members = t.GetMember(info.Name);
 						if(members.Length == 1) {
-							GoToDefinition(members[0]);
+							GoToDefinition(members[0], path);
 						}
 						else {
 							foreach(var m in members) {
 								if(m is INativeMember member) {
 									var nativeMember = member.GetNativeMember();
 									if(nativeMember == info) {
-										GoToDefinition(m);
+										GoToDefinition(m, path);
 										return;
 									}
 								}
@@ -1258,6 +1258,17 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 
+				if(!string.IsNullOrEmpty(path) && File.Exists(path)) {
+					int line = 0;
+					try {
+						line = RoslynUtility.GetLineForMember(info, path);
+					}
+					catch { }
+					if(line >= 0) {
+						UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, line);
+					}
+					return;
+				}
 				MonoScript mono = uNodeEditorUtility.GetMonoScript(type);
 				if(mono != null) {
 					//AssetDatabase.OpenAsset(mono);

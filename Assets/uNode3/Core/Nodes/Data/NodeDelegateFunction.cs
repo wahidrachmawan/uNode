@@ -69,11 +69,11 @@ namespace MaxyGames.UNode.Nodes {
 			return null;
 		}
 
-		public override bool CanGetValue() {
+		protected override bool CanGetValue() {
 			return true;
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(target.isAssigned) {
 				if(target.targetType == MemberData.TargetType.uNodeFunction) {
 					var function = target.startItem.GetReferenceValue() as Function;

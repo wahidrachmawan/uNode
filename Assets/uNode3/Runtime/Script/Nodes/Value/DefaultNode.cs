@@ -1,13 +1,19 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "Default", typeof(object))]
 	[Description("Return the default value of a type, a reference type will always null")]
 	public class DefaultNode : ValueNode {
 		[Filter(OnlyGetType = true)]
-		public SerializedType type = typeof(object);
+		public SerializedType type = SerializedType.None;
 
-		public override System.Type ReturnType() {
+		protected override void OnRegister() {
+			base.OnRegister();
+			output.SetAutoType(true);
+		}
+
+		protected override System.Type ReturnType() {
 			if(type.isFilled) {
 				try {
 					System.Type t = type.type;

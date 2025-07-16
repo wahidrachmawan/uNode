@@ -193,12 +193,12 @@ namespace MaxyGames.UNode {
 					var output = connections[0].output;
 					//Make sure that the other ports is initialized
 					output.node?.EnsureRegistered();
-					//return the result
-					return output.type;
+					if(!output.IsAutoType) {
+						//return the result
+						return output.type;
+					}
 				}
-				if(_type != null)
-					return _type;
-				return typeof(object);
+				return _type ?? typeof(object);
 			}
 		}
 

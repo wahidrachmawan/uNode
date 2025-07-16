@@ -6,7 +6,7 @@ namespace MaxyGames.UNode.Nodes {
 	[Description("Convert value to other type")]
 	public class NodeConvert : ValueNode {
 		[Filter(AllowInterface = true, OnlyGetType = true, ArrayManipulator = true, DisplayRuntimeType = true)]
-		public SerializedType type = typeof(object);
+		public SerializedType type = SerializedType.None;
 		public bool useASWhenPossible = true;
 		public bool compactDisplay = true;
 
@@ -15,9 +15,10 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnRegister() {
 			base.OnRegister();
 			target = ValueInput(nameof(target), typeof(object)).SetName("Value");
+			output.SetAutoType(() => type.isFilled == false);
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(type.isFilled) {
 				try {
 					System.Type t = type.type;
@@ -33,6 +34,9 @@ namespace MaxyGames.UNode.Nodes {
 		public override object GetValue(Flow flow) {
 			var value = target.GetValue(flow);
 			System.Type t = type.nativeType;
+			if(type.isFilled == false) {
+				t = output.type;
+			}
 			if(value != null) {
 				if(value.GetType() == t)
 					return value;
@@ -85,6 +89,9 @@ namespace MaxyGames.UNode.Nodes {
 		protected override string GenerateValueCode() {
 			if(target.isAssigned && type.isAssigned) {
 				System.Type t = type.type;
+				if(type.isFilled == false) {
+					t = output.type;
+				}
 				System.Type targetType = target.ValueType;
 				if(t != null && targetType != null) {
 					if(!targetType.IsCastableTo(t) && !t.IsCastableTo(targetType)) {
@@ -129,9 +136,6 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override string GetTitle() {
-			//if(useASWhenPossible && type.isFilled && !type.type.IsValueType) {
-			//	return "AS";
-			//}
 			return "Convert";
 		}
 
@@ -154,7 +158,7 @@ namespace MaxyGames.UNode.Nodes {
 								if(t == typeof(Transform)) {
 									return target.GetRichName().CGAccess(nameof(Component.transform));
 								}
-								return target.GetRichName().CGAccess(nameof(Component.GetComponent)) + $"<{type.typeName}>()";
+								return target.GetRichName().CGAccess(nameof(Component.GetComponent)) + $"<{TypeName}>()";
 							}
 						}
 					}
@@ -163,20 +167,22 @@ namespace MaxyGames.UNode.Nodes {
 					return CG.Convert(target.CGValue(), CG.Type(type.type));
 				}
 				if(useASWhenPossible == false || t.IsValueType) {
-					return $"({type.typeName})" + target.GetRichName();
+					return $"({TypeName})" + target.GetRichName();
 				}
-				return (target.GetRichName() + " as " + type.typeName).Wrap();
+				return (target.GetRichName() + " as " + TypeName).Wrap();
 			}
 			return $"({type.GetRichName()})" + target.GetRichName();
 		}
 
+		private string TypeName => type.isFilled ? type.GetRichName() : output.type.PrettyName();
+
 		public override string GetRichTitle() {
-			return $"Convert to: {type.GetRichName()}";
+			return $"Convert to: {TypeName}";
 		}
 
 		public override void CheckError(ErrorAnalyzer analizer) {
 			analizer.CheckPort(target);
-			analizer.CheckValue(type, nameof(type), this);
+			//analizer.CheckValue(type, nameof(type), this);
 			if(target.isAssigned && type.isAssigned) {
 				var inputType = target.ValueType;
 				var targetType = type.type;

@@ -173,7 +173,7 @@ namespace MaxyGames.UNode.Nodes {
 			throw new System.Exception("Return Type is missing or unassigned.");
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			System.Type rType = null;
 			if(returnType.isFilled) {
 				rType = returnType.type;

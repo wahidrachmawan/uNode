@@ -197,7 +197,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueOutput)
 				return false;
-			return data.port == source.nodeObject.primaryValueOutput || source is Node node && node.CanGetValue();
+			return data.port == source.nodeObject.primaryValueOutput || source is Node node && node.nodeObject.CanGetValue();
 		}
 	}
 
@@ -945,6 +945,31 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
 			NodeEditorUtility.AddNewNode(graph.graphData, mousePositionOnCanvas, (CacheNode n) => {
 				n.target.ConnectTo(data.port);
+			});
+			graph.Refresh();
+		}
+
+		public override bool IsValidPort(Node source, PortCommandData data) {
+			if(data.portKind != PortKind.ValueOutput)
+				return false;
+			return (data.port as ValueOutput).CanGetValue();
+		}
+	}
+
+	class CreateDebugLogPortCommand : PortMenuCommand {
+		public override string name {
+			get {
+				return "Create Debug node";
+			}
+		}
+
+		public override int order => 100;
+
+		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
+			NodeEditorUtility.AddNewNode(graph.graphData, mousePositionOnCanvas, (MultipurposeNode n) => {
+				n.target = MemberData.CreateFromMember(typeof(Debug).GetMethod(nameof(Debug.Log), new[] { typeof(object) }));
+				n.Register();
+				n.parameters[0].input.ConnectTo(data.port);
 			});
 			graph.Refresh();
 		}

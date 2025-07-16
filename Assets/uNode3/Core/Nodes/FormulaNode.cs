@@ -65,7 +65,7 @@ namespace MaxyGames.UNode.Nodes {
 			return formula;
 		}
 
-		public override Type ReturnType() => outputType.type;
+		protected override Type ReturnType() => outputType.type;
 
 		#region Runtime
 		private MethodInfo method;

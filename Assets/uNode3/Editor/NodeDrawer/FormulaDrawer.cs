@@ -89,7 +89,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				string formula = node.formula;
 				string className = Nodes.FormulaNode.FormulaType;
 				string methodName = Nodes.FormulaNode.FormulaMethod;
-				string returnType = node.ReturnType().PrettyName(true);
+				string returnType = node.nodeObject.ReturnType().PrettyName(true);
 				var usingNamespaces = node.nodeObject.graphContainer.GetUsingNamespaces();
 				var parameters = node.inputs.Select(p => p.type.type.PrettyName(true) + " " + p.name);
 				string namespaces = null;
@@ -98,7 +98,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 				string contents;
 				if(node.kind == Nodes.FormulaNode.FormulaKind.Simple) {
-					if(node.ReturnType() == typeof(void)) {
+					if(node.nodeObject.ReturnType() == typeof(void)) {
 						contents = $"{formula};";
 					}
 					else {

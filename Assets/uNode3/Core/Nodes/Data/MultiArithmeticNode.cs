@@ -30,7 +30,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			try {
 				bool isDivide = operatorKind == ArithmeticType.Divide || operatorKind == ArithmeticType.Modulo;
 				object obj = ReflectionUtils.CreateInstance(inputs[0].type.type);

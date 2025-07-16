@@ -22,7 +22,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			return typeof(string);
 		}
 

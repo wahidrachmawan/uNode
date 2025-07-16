@@ -147,7 +147,7 @@ namespace MaxyGames.UNode.Editors {
 			return path ?? string.Empty;
 		}
 
-		internal static List<(string, Texture)> GetElementPathWithIcon(UGraphElement element, bool richText = false, bool fullPath = false) {
+		internal static List<(string name, Texture icon)> GetElementPathWithIcon(UGraphElement element, bool richText = false, bool fullPath = false) {
 			var result = new List<(string, Texture)>();
 			if(element != null) {
 				var current = element;

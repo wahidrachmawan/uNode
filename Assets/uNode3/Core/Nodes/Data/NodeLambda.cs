@@ -214,11 +214,11 @@ namespace MaxyGames.UNode.Nodes {
 			return m_Delegate;
 		}
 
-		public override bool CanGetValue() {
+		protected override bool CanGetValue() {
 			return true;
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(autoDelegateType) {
 				var firstConnection = output.ValidConnections.FirstOrDefault();
 				if(firstConnection != null) {

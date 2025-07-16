@@ -33,9 +33,10 @@ namespace MaxyGames.UNode.Nodes {
 				var index = i;
 				datas[i].port = ValueInput(datas[index].id, ReturnType).SetName(i.ToString());
 			}
+			//output.SetAutoType(targetType.isFilled == false);
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(targetType.isFilled) {
 				try {
 					return targetType.type;

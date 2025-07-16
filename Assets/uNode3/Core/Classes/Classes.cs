@@ -656,6 +656,86 @@ namespace MaxyGames.UNode {
 			return message.AddLineInEnd() + KEY_REFERENCE + elementID + KEY_REFERENCE_SEPARATOR + graphID + KEY_REFERENCE_SEPARATOR + GraphDebug.GetDebugID(debugObject) + KEY_REFERENCE_TAIL;
 		}
 
+		/// <summary>
+		/// Parse message back to reference
+		/// </summary>
+		/// <param name="message"></param>
+		/// <param name="reference"></param>
+		/// <param name="element"></param>
+		/// <returns></returns>
+		public static bool ParseMessage(string message, out object reference, out UGraphElement element) {
+			return ParseMessage(message, out reference, out element, out _);
+		}
+
+		/// <summary>
+		/// Parse message back to reference
+		/// </summary>
+		/// <param name="message"></param>
+		/// <param name="reference"></param>
+		/// <param name="element"></param>
+		/// <param name="debugObjectId"></param>
+		/// <returns></returns>
+		public static bool ParseMessage(string message, out object reference, out UGraphElement element, out string debugObjectId) {
+			reference = null;
+			element = null;
+			debugObjectId = null;
+			if(message == null)
+				return false;
+			var idx = message.IndexOf(KEY_REFERENCE);
+			if(idx >= 0) {
+				string str = null;
+				for(int i = idx + KEY_REFERENCE.Length; i < message.Length; i++) {
+					if(message[i] == KEY_REFERENCE_TAIL) {
+						break;
+					}
+					else {
+						str += message[i];
+					}
+				}
+				var ids = str.Split(KEY_REFERENCE_SEPARATOR);
+				if(ids.Length >= 2) {
+					UnityEngine.Object ureference = null;
+					if(int.TryParse(ids[0], out var id) && int.TryParse(ids[1], out var graphID)) {
+#if UNITY_EDITOR
+						ureference = UnityEditor.EditorUtility.InstanceIDToObject(graphID);
+#endif
+						if(ureference == null) {
+							var db = uNodeDatabase.instance?.graphDatabases;
+							if(db != null) {
+								foreach(var data in db) {
+									if(data.fileUniqueID == graphID) {
+										ureference = data.asset;
+										break;
+									}
+								}
+							}
+						}
+					}
+					else {
+						var db = uNodeDatabase.instance?.graphDatabases;
+						if(db != null) {
+							foreach(var data in db) {
+								if(data.assetGuid == ids[1]) {
+									ureference = data.asset;
+									break;
+								}
+							}
+						}
+					}
+
+					if(ureference != null && ureference is IGraph graph) {
+						element = graph.GetGraphElement(id);
+					}
+					reference = ureference;
+					if(ids.Length > 2) {
+						debugObjectId = ids[2];
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private static string GetGraphID(IGraph graph) {
 #if !UNITY_EDITOR
 			var db = uNodeDatabase.instance;

@@ -60,7 +60,7 @@ namespace MaxyGames.UNode.Editors {
 				"Input Values",
 				(position, index, element) => {//Draw Element
 					position.width -= EditorGUIUtility.labelWidth;
-					EditorGUI.LabelField(position, new GUIContent(element.GetTitle(), uNodeEditorUtility.GetTypeIcon(element.ReturnType())));
+					EditorGUI.LabelField(position, new GUIContent(element.GetTitle(), uNodeEditorUtility.GetTypeIcon(element.nodeObject.ReturnType())));
 					position.x += EditorGUIUtility.labelWidth;
 					uNodeGUIUtility.DrawTypeDrawer(position, element.type, GUIContent.none, type => {
 						element.type = type;
@@ -78,7 +78,7 @@ namespace MaxyGames.UNode.Editors {
 				"Output Values",
 				(position, index, element) => {//Draw Element
 					position.width -= EditorGUIUtility.labelWidth;
-					EditorGUI.LabelField(position, new GUIContent(element.GetTitle(), uNodeEditorUtility.GetTypeIcon(element.ReturnType())));
+					EditorGUI.LabelField(position, new GUIContent(element.GetTitle(), uNodeEditorUtility.GetTypeIcon(element.nodeObject.ReturnType())));
 					position.x += EditorGUIUtility.labelWidth;
 					uNodeGUIUtility.DrawTypeDrawer(position, element.type, GUIContent.none, type => {
 						element.type = type;

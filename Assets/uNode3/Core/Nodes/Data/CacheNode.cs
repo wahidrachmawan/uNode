@@ -21,11 +21,11 @@ namespace MaxyGames.UNode.Nodes {
 			output.SetTitle(() => name);
 		}
 
-		public override Type ReturnType() {
+		protected override Type ReturnType() {
 			return target.ValueType;
 		}
 
-		public override bool CanSetValue() {
+		protected override bool CanSetValue() {
 			return true;
 		}
 

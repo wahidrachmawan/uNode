@@ -173,6 +173,9 @@ namespace MaxyGames.UNode {
 
 		public int version;
 
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(graph.GraphData.graph, target);
+
 		public GraphInstance(object target, IGraph graph, RuntimeGraphEventData eventData) {
             this.target = target;
 			this.graph = graph;

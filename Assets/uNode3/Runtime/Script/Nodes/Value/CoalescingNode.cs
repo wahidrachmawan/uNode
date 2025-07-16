@@ -13,7 +13,7 @@ namespace MaxyGames.UNode.Nodes {
 			fallback = ValueInput(nameof(fallback), () => input.ValueType);
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(input.isAssigned || fallback.isAssigned) {
 				try {
 					if(input.isAssigned) {

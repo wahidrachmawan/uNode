@@ -73,20 +73,8 @@ namespace MaxyGames.UNode.Nodes {
 							}
 						}
 						else {
-							if(node is NodeLambda lambda) {
-								var result = lambda.ReturnType();
-								if(result == null)
-									result = typeof(void);
-								else {
-									if(result.IsCastableTo(typeof(Delegate))) {
-										var methodInfo = result.GetMethod("Invoke");
-										return methodInfo.ReturnType;
-									}
-								}
-								return result;
-							}
-							else if(node is NodeAnonymousFunction anon) {
-								var result = anon.ReturnType();
+							if(node is NodeLambda || node is NodeAnonymousFunction) {
+								var result = node.nodeObject.ReturnType();
 								if(result == null)
 									result = typeof(void);
 								else {

@@ -16,7 +16,7 @@ namespace MaxyGames.UNode.Nodes {
 			target = ValueInput(nameof(target), typeof(object));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			return typeof(bool);
 		}
 

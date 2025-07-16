@@ -19,7 +19,7 @@ namespace MaxyGames.UNode.Nodes {
 			nodeObject.GetPrimaryValue(flow);
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(target.isAssigned) {
 				try {
 					return target.ValueType;

@@ -14,7 +14,7 @@ namespace MaxyGames.UNode.Nodes {
 			index = ValueInput(nameof(index), typeof(int));
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(target.isAssigned) {
 				return target.ValueType.ElementType();
 			}

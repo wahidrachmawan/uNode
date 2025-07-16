@@ -99,7 +99,7 @@ namespace MaxyGames.UNode {
 		};
 		public HashSet<string> SupportedEventGraphs {
 			get {
-				if(inheritType == typeof(MonoBehaviour)) {
+				if(inheritType.type.IsCastableTo(typeof(MonoBehaviour))) {
 					return m_supportedEventGraph;
 				}
 				return null;

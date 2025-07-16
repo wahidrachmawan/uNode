@@ -267,7 +267,7 @@ namespace MaxyGames.UNode {
 			/// </summary>
 			internal static event Action onBreakpointChanged;
 
-			internal static Action<object, int, int> onBreakPointHit;
+			public static Action<object, int, int> onBreakPointHit;
 
 			/// <summary>
 			/// Get all breakpoints

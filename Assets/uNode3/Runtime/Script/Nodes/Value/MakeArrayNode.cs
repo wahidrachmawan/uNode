@@ -31,7 +31,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			if(elementType.isFilled) {
 				System.Type type = elementType.type;
 				if(type != null) {

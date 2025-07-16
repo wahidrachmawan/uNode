@@ -122,7 +122,7 @@ namespace MaxyGames.UNode.Nodes {
 			return false;
 		}
 
-		public override Type ReturnType() {
+		protected override Type ReturnType() {
 			if(collection != null) {
 				var type = collection.ValueType;
 				return type.ElementType() ?? typeof(object);

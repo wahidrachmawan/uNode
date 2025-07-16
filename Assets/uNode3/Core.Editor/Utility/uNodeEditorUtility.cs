@@ -575,7 +575,7 @@ namespace MaxyGames.UNode.Editors {
 			var type = info as Type ?? info.DeclaringType;
 			var assemblyLocation = type.Assembly.Location;
 			if(string.IsNullOrEmpty(assemblyLocation)) {
-				throw new Exception("Cannot open dynamic assembly");
+				throw new Exception("Cannot open dynamic assembly\n" + info);
 			}
 			var arguments = "\"" + assemblyLocation + "\" ";
 			switch(info.MemberType) {

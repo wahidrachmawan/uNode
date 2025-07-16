@@ -71,17 +71,17 @@ namespace MaxyGames.UNode.Nodes {
 			});
 		}
 
-		public override Type ReturnType() {
+		protected override Type ReturnType() {
 			if(input == null)
 				return typeof(object);
 			return input.ValueType;
 		}
 
-		public override bool CanGetValue() {
+		protected override bool CanGetValue() {
 			return input.CanGetValue();
 		}
 
-		public override bool CanSetValue() {
+		protected override bool CanSetValue() {
 			return input.CanSetValue();
 		}
 

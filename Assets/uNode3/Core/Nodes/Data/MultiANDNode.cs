@@ -28,7 +28,7 @@ namespace MaxyGames.UNode.Nodes {
 			output.SetTooltip("The output value, return true if all input is true.");
 		}
 
-		public override System.Type ReturnType() {
+		protected override System.Type ReturnType() {
 			return typeof(bool);
 		}
 

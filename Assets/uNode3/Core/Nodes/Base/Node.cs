@@ -62,6 +62,9 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public void Register() => nodeObject.Register();
 
+		//For debugging purpose, don't remove this
+		internal string DebugDisplay => GraphException.GetMessage(this);
+
 		/// <summary>
 		/// The node registration.
 		/// Note: called on Editor and Runtime and may called multiple times in Editor.
@@ -169,10 +172,10 @@ namespace MaxyGames.UNode {
 		/// The type port of the primary value output.
 		/// </summary>
 		/// <returns></returns>
-		public virtual Type ReturnType() => typeof(object);
+		protected virtual Type ReturnType() => typeof(object);
 
-		public virtual bool CanGetValue() => nodeObject.primaryValueOutput != null;
-		public virtual bool CanSetValue() => false;
+		protected virtual bool CanGetValue() => nodeObject.primaryValueOutput != null;
+		protected virtual bool CanSetValue() => false;
 
 		/// <summary>
 		/// Initialization for code generation.

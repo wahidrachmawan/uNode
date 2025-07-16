@@ -52,11 +52,11 @@ namespace MaxyGames.UNode.Nodes {
 			flow.GetElementData<ValueInput>(this).SetValue(flow, value);
 		}
 
-		public override bool CanGetValue() {
+		protected override bool CanGetValue() {
 			return kind == PortKind.ValueInput;
 		}
 
-		public override bool CanSetValue() {
+		protected override bool CanSetValue() {
 			return kind == PortKind.ValueInput;
 		}
 
@@ -71,7 +71,7 @@ namespace MaxyGames.UNode.Nodes {
 			return typeof(TypeIcons.OutputIcon);
 		}
 
-		public override Type ReturnType() {
+		protected override Type ReturnType() {
 			if(kind == PortKind.ValueInput || kind == PortKind.ValueOutput) {
 				if(type.isAssigned) {
 					return type.type;
