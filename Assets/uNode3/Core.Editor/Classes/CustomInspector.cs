@@ -198,20 +198,20 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void Inspect(Vector2 position, GraphEditorData editorData, int limitMultiEdit = 5) {
-			ActionPopupWindow.Show(Vector2.zero, () => {
+			ActionPopupWindow.Show(() => {
 				ShowInspector(editorData);
 			}).ChangePosition(position).autoFocus = false;
 		}
 
-		public static void Inspect(Vector2 position, object value, UnityEngine.Object unityObject = null) {
-			ActionPopupWindow.Show(Vector2.zero, () => {
-				uNodeGUIUtility.ShowFields(value, unityObject);
+		public static void Inspect(Vector2 position, object value, UnityEngine.Object unityObject = null, BindingFlags flags = BindingFlags.Public | BindingFlags.Instance) {
+			ActionPopupWindow.Show(() => {
+				uNodeGUIUtility.ShowFields(value, unityObject, flags);
 			}).ChangePosition(position).autoFocus = false;
 		}
 
 		private static void RenameObject(UnityEngine.Object obj, Rect rect) {
 			string name = obj.name;
-			ActionPopupWindow.Show(rect.ToScreenRect(),
+			ActionPopupWindow.Show(
 				onGUI: () => {
 					name = EditorGUILayout.TextField("Name", name);
 				},
@@ -231,12 +231,12 @@ namespace MaxyGames.UNode.Editors {
 						ActionPopupWindow.CloseLast();
 						uNodeGUIUtility.GUIChangedMajor(obj);
 					}
-				});
+				}).ChangePosition(rect.ToScreenRect());
 		}
 
 		private static void RenameNode(NodeObject node, Rect rect) {
 			string name = node.name;
-			ActionPopupWindow.Show(rect.ToScreenRect(),
+			ActionPopupWindow.Show(
 				onGUI: () => {
 					name = EditorGUILayout.TextField("Name", name);
 				},
@@ -247,7 +247,7 @@ namespace MaxyGames.UNode.Editors {
 						ActionPopupWindow.CloseLast();
 						uNodeGUIUtility.GUIChanged(node);
 					}
-				});
+				}).ChangePosition(rect.ToScreenRect());
 		}
 
 		// private static void DrawLine(float height = 1, float expandingWidth = 15) {

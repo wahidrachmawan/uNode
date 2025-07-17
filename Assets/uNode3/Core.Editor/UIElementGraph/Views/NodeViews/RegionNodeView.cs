@@ -36,7 +36,8 @@ namespace MaxyGames.UNode.Editors {
 
 			titleContainer.RegisterCallback<MouseDownEvent>((e) => {
 				if(e.clickCount == 2 && e.button == 0) {
-					ActionPopupWindow.Show(Vector2.zero, node.name,
+					ActionPopupWindow.Show(
+						node.name,
 						(ref object obj) => {
 							object str = EditorGUILayout.TextField(obj as string);
 							if(obj != str) {

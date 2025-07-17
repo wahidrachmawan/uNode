@@ -40,7 +40,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void Draw(UBind property, bool nullable = false, bool acceptUnityObject = true, GUIContent label = null, Type type = null) {
+		public static void Draw(UBind property, bool nullable = false, bool acceptUnityObject = true, GUIContent label = null, Type type = null, BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy) {
 			if(property == null) return;
 			if(type == null) {
 				Draw(new DrawerOption() {
@@ -48,6 +48,7 @@ namespace MaxyGames.UNode.Editors {
 					nullable = nullable,
 					acceptUnityObject = acceptUnityObject,
 					label = label,
+					flags = flags,
 				});
 			} else {
 				Draw(new DrawerOption() {
@@ -55,6 +56,7 @@ namespace MaxyGames.UNode.Editors {
 					nullable = nullable,
 					acceptUnityObject = acceptUnityObject,
 					label = label,
+					flags = flags,
 				}, type);
 			}
 		}
@@ -63,11 +65,12 @@ namespace MaxyGames.UNode.Editors {
 			UPropertyDrawer.DrawChilds(option);
 		}
 
-		public static void DrawChilds(UBind property, bool nullable = false, bool acceptUnityObject = true) {
+		public static void DrawChilds(UBind property, bool nullable = false, bool acceptUnityObject = true, BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy) {
 			UPropertyDrawer.DrawChilds(new DrawerOption() {
 				property = property,
 				nullable = nullable,
 				acceptUnityObject = acceptUnityObject,
+				flags = flags,
 			});
 		}
 	}

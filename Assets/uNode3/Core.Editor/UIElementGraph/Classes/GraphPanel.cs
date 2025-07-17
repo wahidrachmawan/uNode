@@ -41,7 +41,7 @@ namespace MaxyGames.UNode.Editors {
 		Dictionary<object, ClickableElement> contentMap = new Dictionary<object, ClickableElement>();
 
 		[SerializeField]
-		bool showClasses = true, showVariables = true, showProperties = true, showFunctions = true, showGraphs = true, showEvents = true, showConstructors = true, showInterfaces = true, showEnums = true, showLocal = true, showNested = true;
+		bool showClasses = true, showVariables = true, showProperties = true, showFunctions = true, showGraphs = true, showEvents = true, showConstructors = true, showLocal = true, showNested = true;
 
 		public GraphPanel(UIElementGraph graph) {
 			try {

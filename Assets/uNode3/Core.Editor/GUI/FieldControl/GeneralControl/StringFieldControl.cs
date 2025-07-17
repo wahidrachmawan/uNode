@@ -60,7 +60,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					position.width = 16;
 					if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
 						GUI.changed = false;
-						ActionPopupWindow.Show(position.ToScreenRect(), () => {
+						ActionPopupWindow.Show(() => {
 							if(settings.nullable) {
 								EditorGUILayout.BeginHorizontal();
 								EditorGUILayout.BeginVertical();
@@ -83,7 +83,7 @@ namespace MaxyGames.UNode.Editors.Control {
 								}
 								EditorGUILayout.EndHorizontal();
 							}
-						});
+						}).ChangePosition(position.ToScreenRect());
 					}
 					if(EditorGUI.EndChangeCheck()) {
 						onChanged(fieldValue);
@@ -196,7 +196,7 @@ namespace MaxyGames.UNode.Editors.Control {
 						var pos = uNodeGUIUtility.GetRect(GUILayout.Width(18));
 						if(EditorGUI.DropdownButton(pos, GUIContent.none, FocusType.Keyboard)) {
 							GUI.changed = false;
-							ActionPopupWindow.Show(pos.ToScreenRect(), () => {
+							ActionPopupWindow.Show(() => {
 								if(settings.nullable) {
 									EditorGUILayout.BeginHorizontal();
 									EditorGUILayout.BeginVertical();
@@ -219,7 +219,7 @@ namespace MaxyGames.UNode.Editors.Control {
 									}
 									EditorGUILayout.EndHorizontal();
 								}
-							});
+							}).ChangePosition(pos.ToScreenRect());
 						}
 						EditorGUILayout.EndHorizontal();
 						if(EditorGUI.EndChangeCheck()) {

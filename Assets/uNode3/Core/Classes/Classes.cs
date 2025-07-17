@@ -21,9 +21,21 @@ namespace MaxyGames.UNode {
 		public string id;
 		public string ghostID;
 		public int ownerID;
+		/// <summary>
+		/// The start line, first line from file is 0 so actual line should be + 1
+		/// </summary>
 		public int startLine;
+		/// <summary>
+		/// value start from 0
+		/// </summary>
 		public int startColumn;
+		/// <summary>
+		/// The end line, first line from file is 0 so actual line should be + 1
+		/// </summary>
 		public int endLine;
+		/// <summary>
+		/// value start from 0
+		/// </summary>
 		public int endColumn;
 
 		public int lineRange => endLine - startLine;

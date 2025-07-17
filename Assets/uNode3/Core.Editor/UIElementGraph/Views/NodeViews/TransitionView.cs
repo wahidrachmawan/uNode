@@ -36,7 +36,7 @@ namespace MaxyGames.UNode.Editors {
 
 			RegisterCallback<MouseDownEvent>((e) => {
 				if(e.button == 0 && e.clickCount == 2) {
-					ActionPopupWindow.Show(owner.GetScreenMousePosition(e), transition.name,
+					ActionPopupWindow.Show(transition.name,
 						(ref object obj) => {
 							object str = EditorGUILayout.TextField(obj as string);
 							if(obj != str) {
@@ -46,7 +46,7 @@ namespace MaxyGames.UNode.Editors {
 									uNodeGUIUtility.GUIChanged(transition, UIChangeType.Average);
 								}
 							}
-						}).headerName = "Edit name";
+						}).ChangePosition(owner.GetScreenMousePosition(e)).headerName = "Edit name";
 					e.StopImmediatePropagation();
 				}
 			});

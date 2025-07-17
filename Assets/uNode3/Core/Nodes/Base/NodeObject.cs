@@ -94,13 +94,14 @@ namespace MaxyGames.UNode {
 	}
 
 	public sealed class NodeObject : UGraphElement, ISerializationCallbackReceiver, IErrorCheck, IPrettyName, IRichName, IIcon {
+		[Hide]
 		public bool nodeExpanded = true;
 		/// <summary>
 		/// The node position in graph.
 		/// </summary>
 		public Rect position;
 
-		[SerializeField]
+		[SerializeField, Hide]
 		private NodeSerializedData _nodeSerializedData;
 
 		public NodeSerializedData serializedData => _nodeSerializedData;
@@ -272,6 +273,7 @@ namespace MaxyGames.UNode {
 		public bool isPreviousPortRestored { get; private set; }
 		[field: NonSerialized]
 		public Exception exceptionRegister { get; private set; }
+		[Hide]
 		private NodePreservation preservation;
 
 		internal void OnGeneratorInitialize() {

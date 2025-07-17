@@ -20,7 +20,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public virtual float GetControlHeight(GUIContent label, object value, Type type, uNodeUtility.EditValueSettings settings) {
-			return 18f;
+			return 20f;
 		}
 		
 		public virtual void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
@@ -172,6 +172,33 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			return false;
+		}
+
+		protected T GetValue(object value, bool nullable = false) {
+			if(!(value is T)) {
+				if(value != null && value.GetType().IsCastableTo(typeof(T))) {
+					value = Operator.Convert<T>(value);
+					GUI.changed = true;
+					return (T)value;
+				}
+				else {
+					T val = default(T);
+					if(value == null && !nullable && ReflectionUtils.CanCreateInstance(typeof(T))) {
+						val = (T)ReflectionUtils.CreateInstance(typeof(T));
+						value = val;
+					}
+					if(object.ReferenceEquals(value, val) == false) {
+						GUI.changed |= value != null;
+					}
+					return val;
+				}
+			}
+			if(value != null) {
+				return (T)value;
+			}
+			else {
+				return default;
+			}
 		}
 	}
 }

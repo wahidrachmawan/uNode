@@ -11,8 +11,14 @@ namespace MaxyGames.UNode.Editors {
 		public UBind property;
 		public bool nullable;
 		public bool acceptUnityObject;
+		public BindingFlags flags;
 		public Action<object> onChanged;
 		private GUIContent _label;
+
+		public bool isExpanded {
+			get => property.isExpanded;
+			set => property.isExpanded = value;
+		}
 
 		public GUIContent label {
 			get {
@@ -35,6 +41,12 @@ namespace MaxyGames.UNode.Editors {
 		public Attribute[] attributes => property.GetCustomAttributes();
 		public UnityEngine.Object unityObject => property.root.value as UnityEngine.Object;
 		public void RegisterUndo(string name = "") => property.RegisterUndo(name);
+		public BindingFlags GetFlags() {
+			if(flags == BindingFlags.Default) {
+				return BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy;
+			}
+			return flags;
+		}
 
 		#region Constructors
 		public DrawerOption(UBind property, bool nullable, bool acceptUnityObject, GUIContent label = null, Action<object> onChanged = null) {
@@ -43,6 +55,7 @@ namespace MaxyGames.UNode.Editors {
 			this.acceptUnityObject = acceptUnityObject;
 			this._label = label;
 			this.onChanged = onChanged;
+			this.flags = BindingFlags.Default;
 		}
 		#endregion
 	}
@@ -66,7 +79,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void DrawChilds(DrawerOption option) {
-			var fields = EditorReflectionUtility.GetFields(option.property.valueType);
+			var fields = EditorReflectionUtility.GetFields(option.property.valueType, option.GetFlags());
 			for(int i = 0; i < fields.Length; i++) {
 				if(fields[i].IsDefined(typeof(HideInInspector), true) || 
 					fields[i].IsPrivate && fields[i].IsNotSerialized && !fields[i].IsDefined(typeof(SerializeField), true))
@@ -178,6 +191,7 @@ namespace MaxyGames.UNode.Editors {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[fields[i].Name],
 					nullable = option.nullable,
+					flags = option.flags,
 					acceptUnityObject = option.acceptUnityObject,
 				});
 			}

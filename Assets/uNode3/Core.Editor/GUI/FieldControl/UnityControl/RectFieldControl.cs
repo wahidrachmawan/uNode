@@ -20,5 +20,9 @@ namespace MaxyGames.UNode.Editors.Control {
 				onChanged(new Rect(arr[0], arr[1], arr[2], arr[3]));
 			}
 		}
+
+		public override float GetControlHeight(GUIContent label, object value, Type type, uNodeUtility.EditValueSettings settings) {
+			return base.GetControlHeight(label, value, type, settings) * 2;
+		}
 	}
 }

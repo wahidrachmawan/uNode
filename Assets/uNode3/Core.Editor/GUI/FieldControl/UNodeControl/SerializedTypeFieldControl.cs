@@ -7,13 +7,13 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
-	class SerializedTypePropertyDrawer : UPropertyDrawer<SerializedType> {
-		public override void Draw(Rect position, DrawerOption option) {
-			var attributes = option.attributes;
+	class SerializedTypeFieldControl : FieldControl<SerializedType> {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+			var attributes = settings.attributes;
 			EditorGUI.BeginChangeCheck();
-			var fieldValue = GetValue(option.property, false);
+			var fieldValue = GetValue(value, false);
 			if(fieldValue != null) {
-				if(option.nullable)
+				if(settings.nullable)
 					position.width -= 16;
 				FilterAttribute filter = ReflectionUtils.GetAttribute<FilterAttribute>(attributes);
 				if(filter == null) {
@@ -23,17 +23,19 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							if(OTA.type != null) {
 								filter = new FilterAttribute(OTA.type.ElementType());
 							}
-						} else {
+						}
+						else {
 							filter = new FilterAttribute(OTA.type);
 						}
 					}
 				}
-				uNodeGUIUtility.DrawTypeDrawer(position, fieldValue, option.label, (type) => {
-					option.value = new SerializedType(type);
-				}, filter, option.unityObject);
+				uNodeGUIUtility.DrawTypeDrawer(position, fieldValue, label, (type) => {
+					fieldValue = new SerializedType(type);
+					onChanged?.Invoke(fieldValue);
+				}, filter, settings.unityObject);
 			}
 			if(EditorGUI.EndChangeCheck()) {
-				option.value = fieldValue;
+				onChanged?.Invoke(fieldValue);
 			}
 		}
 	}

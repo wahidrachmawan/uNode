@@ -9,6 +9,7 @@ using UnityEditor;
 namespace MaxyGames.UNode.Editors.Control {
 	class BoolFieldControl : FieldControl<bool> {
 		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+			position.height = Mathf.Min(18f, position.height);
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var oldValue = (bool)value;

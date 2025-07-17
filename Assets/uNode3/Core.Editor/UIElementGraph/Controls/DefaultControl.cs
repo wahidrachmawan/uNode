@@ -117,7 +117,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					}
 				}
 			} else {
-				ActionPopupWindow.Show(Vector2.zero, () => {
+				ActionPopupWindow.Show(() => {
 					uNodeGUIUtility.EditValueLayouted(GUIContent.none, val, config.type, (obj) => {
 						config.owner.RegisterUndo();
 						val = obj;

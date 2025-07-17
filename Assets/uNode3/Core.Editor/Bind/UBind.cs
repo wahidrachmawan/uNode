@@ -40,6 +40,7 @@ namespace MaxyGames.UNode.Editors {
 		public virtual bool isRoot => false;
 		protected virtual bool isValid => true;
 		public abstract Type type { get; }
+		public bool isExpanded;
 
 		public Type valueType {
 			get {
@@ -199,19 +200,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 			return null;
 		}
-
-		public static UBind FromNode(UGraphElement graphElement) {
-			var container = graphElement.graphContainer;
-			if(container as Object != null) {
-				var bind = FromObject(container as Object);
-				return bind.GraphElement(graphElement.id);
-			}
-			return null;
-		}
-
-		public static UBind FromStatic(Type type) {
-			throw null;
-		}
 		#endregion
 
 		#region Indexers
@@ -308,6 +296,30 @@ namespace MaxyGames.UNode.Editors {
 
 		public UBindObject(Object target) : base("bind", null) {
 			this.target = target;
+		}
+		public override Attribute[] GetCustomAttributes(bool inherit = true) {
+			return Array.Empty<Attribute>();
+		}
+	}
+
+	public sealed class UBindValue : UBind {
+		private object target;
+		private Type m_type;
+
+		public override bool isRoot => true;
+
+		public override Type type => m_type ?? target?.GetType() ?? typeof(object);
+
+		protected override object rawValue {
+			get => target;
+			set {
+				throw new InvalidOperationException();
+			}
+		}
+
+		public UBindValue(object target, Type type = null) : base("bind", null) {
+			this.target = target;
+			m_type = type;
 		}
 		public override Attribute[] GetCustomAttributes(bool inherit = true) {
 			return Array.Empty<Attribute>();

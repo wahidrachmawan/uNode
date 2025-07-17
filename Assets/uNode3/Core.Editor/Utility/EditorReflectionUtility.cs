@@ -9,6 +9,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Editors {
 	public static class EditorReflectionUtility {
 		private static Dictionary<Type, FieldInfo[]> fieldsInfoMap = new Dictionary<Type, FieldInfo[]>();
+		private static Dictionary<(Type, BindingFlags), FieldInfo[]> fieldsInfoMap2 = new();
 		private static Dictionary<MemberInfo, object[]> attributesMap = new Dictionary<MemberInfo, object[]>();
 		private static Dictionary<Assembly, HashSet<string>> assemblyNamespaces = new Dictionary<Assembly, HashSet<string>>();
 		private static Dictionary<Assembly, List<MethodInfo>> extensionsMap = new Dictionary<Assembly, List<MethodInfo>>();
@@ -498,6 +499,26 @@ namespace MaxyGames.UNode.Editors {
 				});
 			}
 			fieldsInfoMap[type] = fields;
+			return fields;
+		}
+
+		public static FieldInfo[] GetFields(Type type, BindingFlags flags) {
+			if(type == null)
+				return null;
+			FieldInfo[] fields;
+			if(fieldsInfoMap2.TryGetValue((type, flags), out fields)) {
+				return fields;
+			}
+			fields = type.GetFields(flags);
+			if(fields.Length > 1) {
+				Array.Sort(fields, (x, y) => {
+					if(x.DeclaringType != y.DeclaringType) {
+						return string.Compare(x.DeclaringType.IsSubclassOf(y.DeclaringType).ToString(), y.DeclaringType.IsSubclassOf(x.DeclaringType).ToString(), StringComparison.OrdinalIgnoreCase);
+					}
+					return string.Compare(x.MetadataToken.ToString(), y.MetadataToken.ToString(), StringComparison.OrdinalIgnoreCase);
+				});
+			}
+			fieldsInfoMap2[(type, flags)] = fields;
 			return fields;
 		}
 
@@ -1430,7 +1451,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				return changed;
 			}
-			FieldInfo[] fieldInfo = ReflectionUtils.GetFields(obj.GetType(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+			FieldInfo[] fieldInfo = GetFields(obj.GetType(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
 			foreach(FieldInfo field in fieldInfo) {
 				Type fieldType = field.FieldType;
 				if(!fieldType.IsClass || !fieldType.IsSerializable)

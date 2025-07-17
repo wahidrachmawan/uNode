@@ -329,7 +329,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(GraphDebug.Breakpoint.getBreakpoints == null) {
 				GraphDebug.Breakpoint.getBreakpoints = () => {
-					return nodeDebugData;
+					return breakpointData;
 				};
 			}
 			#endregion
@@ -1232,21 +1232,21 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		private static Dictionary<int, HashSet<int>> _nodeDebugData;
-		private static Dictionary<int, HashSet<int>> nodeDebugData {
+		private static Dictionary<int, HashSet<int>> m_breakpointData;
+		private static Dictionary<int, HashSet<int>> breakpointData {
 			get {
-				if(_nodeDebugData == null) {
-					_nodeDebugData = uNodeEditorUtility.LoadEditorData<Dictionary<int, HashSet<int>>>("BreakpointsMap");
-					if(_nodeDebugData == null) {
-						_nodeDebugData = new Dictionary<int, HashSet<int>>();
+				if(m_breakpointData == null) {
+					m_breakpointData = uNodeEditorUtility.LoadEditorData<Dictionary<int, HashSet<int>>>("BreakpointsMap");
+					if(m_breakpointData == null) {
+						m_breakpointData = new Dictionary<int, HashSet<int>>();
 					}
 				}
-				return _nodeDebugData;
+				return m_breakpointData;
 			}
 		}
 
 		private static void SaveDebugData() {
-			uNodeEditorUtility.SaveEditorData(_nodeDebugData, "BreakpointsMap");
+			uNodeEditorUtility.SaveEditorData(m_breakpointData, "BreakpointsMap");
 		}
 
 		#region AOT Scans

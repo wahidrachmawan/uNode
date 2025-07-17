@@ -1167,6 +1167,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			public static SelectorCategoryTreeView CreateTargetItem(object targetValue, string category, FilterAttribute filter, Type targetType = null) {
+				if(targetValue == null && targetType == null) return null;
 				if(targetType == null) {
 					targetType = targetValue.GetType();
 					if(targetValue is IClassGraph) {

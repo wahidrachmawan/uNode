@@ -2902,7 +2902,7 @@ namespace MaxyGames {
 					initializers.Add(initializer);
 				}
 				if(includeField) {
-					FieldInfo[] fields = ReflectionUtils.GetFields(value);
+					FieldInfo[] fields = value.GetType().GetFields();
 					foreach(FieldInfo field in fields) {
 						if(field.IsInitOnly)
 							continue;//Skip if the field is `read-only`
@@ -2916,7 +2916,7 @@ namespace MaxyGames {
 					}
 				}
 				if(includeProperty) {
-					PropertyInfo[] properties = ReflectionUtils.GetProperties(value);
+					PropertyInfo[] properties = value.GetType().GetProperties();
 					foreach(PropertyInfo property in properties) {
 						if(property.CanRead && property.CanWrite && !property.IsDefinedAttribute(typeof(ObsoleteAttribute))) {
 							object fieldObj = property.GetValueOptimized(value);

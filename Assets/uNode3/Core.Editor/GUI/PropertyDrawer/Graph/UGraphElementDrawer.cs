@@ -131,7 +131,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 			}
 			else {
-				UInspector.Draw(option.property[nameof(NodeObject.node)], label: GUIContent.none);
+				UInspector.Draw(option.property[nameof(NodeObject.node)], label: GUIContent.none, flags: option.flags);
 			}
 		}
 	}

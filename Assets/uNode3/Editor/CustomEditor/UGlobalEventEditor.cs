@@ -64,10 +64,11 @@ namespace MaxyGames.UNode.Editors {
 			if(target is UGraphElement) {
 				uNodeGUI.DrawReference(uNodeGUIUtility.GetRect(), target, type); 
 			}
-			EditorGUILayout.LabelField(target.GetType().ToString(), EditorStyles.miniBoldLabel);
+			EditorGUILayout.LabelField(target.GetType().ToString(), EditorStyles.centeredGreyMiniLabel);
 
+			EditorGUI.BeginDisabledGroup(true);
 			if(type.IsDefinedAttribute<CompilerGeneratedAttribute>()) {
-				var fields = EditorReflectionUtility.GetFields(type);
+				var fields = EditorReflectionUtility.GetFields(type, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy | System.Reflection.BindingFlags.Instance);
 				foreach(var field in fields) {
 					var val = field.GetValueOptimized(target);
 					if(val is Delegate) {
@@ -84,6 +85,7 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				uNodeGUIUtility.EditValueLayouted(new GUIContent("value"), target, type, null, new uNodeUtility.EditValueSettings() { nullable = true });
 			}
+			EditorGUI.BeginDisabledGroup(false);
 		}
 	}
 

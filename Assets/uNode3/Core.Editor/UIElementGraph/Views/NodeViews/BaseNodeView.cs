@@ -137,6 +137,7 @@ namespace MaxyGames.UNode.Editors {
 				debugView = new VisualElement() {
 					name = "debug-container"
 				};
+				debugView.pickingMode = PickingMode.Ignore;
 				//titleButtonContainer.Add(debugView);
 				
 				this.Add(debugView);

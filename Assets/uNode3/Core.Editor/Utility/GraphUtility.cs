@@ -1992,7 +1992,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorElementName(Vector2 mousePosition, UGraphElement element, Action onRenamed) {
 			string tempName = element.name;
-			ActionPopupWindow.Show(Vector2.zero,
+			ActionPopupWindow.Show(
 				() => {
 					tempName = EditorGUILayout.TextField("Name", tempName);
 				},
@@ -2011,7 +2011,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorFunctionName(Vector2 mousePosition, Function function, Action onRenamed) {
 			string tempName = function.name;
-			ActionPopupWindow.Show(Vector2.zero,
+			ActionPopupWindow.Show(
 				() => {
 					tempName = EditorGUILayout.TextField("Function Name", tempName);
 				},
@@ -2030,7 +2030,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorPropertyName(Vector2 mousePosition, Property property, Action onRenamed) {
 			string tempName = property.name;
-			ActionPopupWindow.Show(Vector2.zero,
+			ActionPopupWindow.Show(
 				() => {
 					tempName = EditorGUILayout.TextField("Property Name", tempName);
 				},
@@ -2049,7 +2049,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void RefactorVariableName(Vector2 mousePosition, Variable variable, Action onRenamed) {
 			string tempName = variable.name;
-			ActionPopupWindow.Show(Vector2.zero,
+			ActionPopupWindow.Show(
 				() => {
 					tempName = EditorGUILayout.TextField("Variable Name", tempName);
 				},

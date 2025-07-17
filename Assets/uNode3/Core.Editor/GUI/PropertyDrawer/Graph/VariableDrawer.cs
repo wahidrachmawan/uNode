@@ -20,7 +20,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					property = option.property[nameof(Variable.serializedValue)],
 					label = new GUIContent("Default Value"),
 					nullable = true,
-				}); ;
+					flags = option.flags,
+				});
 			}
 			uNodeGUIUtility.DrawTypeDrawer(value.type, new GUIContent("Type"), type => {
 				value.type = type;
@@ -30,6 +31,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.modifier)],
 					nullable = false,
+					flags = option.flags,
 					onChanged = _ => {
 						uNodeGUIUtility.GUIChangedMajor(value);
 					}
@@ -41,6 +43,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.resetOnEnter)],
 					nullable = false,
+					flags = option.flags,
 				});
 			}
 			if(uNodeUtility.isPlaying && value.resetOnEnter == false) {//Debug

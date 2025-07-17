@@ -203,7 +203,7 @@ namespace MaxyGames.UNode.Editors {
 							position = EditorGUI.PrefixLabel(position, label);
 							if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ", " + valType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 								GUI.changed = false;
-								ActionPopupWindow.Show(position.ToScreenRect(),
+								ActionPopupWindow.Show(
 									new object[] { ReflectionUtils.CreateInstance(keyType), ReflectionUtils.CreateInstance(valType), map },
 									delegate (ref object val) {
 										object[] o = val as object[];
@@ -225,7 +225,7 @@ namespace MaxyGames.UNode.Editors {
 												GUIChanged(unityObject);
 											}
 										}
-									}).headerName = "Add New Dictonary Value";
+									}).ChangePosition(position.ToScreenRect()).headerName = "Add New Dictonary Value";
 							}
 							IDictionary newMap = map;
 							if(newMap != null) {
@@ -449,7 +449,7 @@ namespace MaxyGames.UNode.Editors {
 				if(EditorGUI.DropdownButton(position, new GUIContent(value != null ? type.PrettyName(true) : "null", type.PrettyName(true)), FocusType.Keyboard) && Event.current.button == 0) {
 					//Make sure don't mark if value changed.
 					GUI.changed = false;
-					var w = ActionPopupWindow.Show(position.ToScreenRect(),
+					var w = ActionPopupWindow.Show(
 						value,
 						delegate (ref object obj) {
 							EditValueLayouted(new GUIContent("Values", type.PrettyName(true)), obj, type, delegate (object val) {
@@ -463,7 +463,7 @@ namespace MaxyGames.UNode.Editors {
 								GUI.changed = false;
 								ActionPopupWindow.CloseLast();
 							}
-						});
+						}).ChangePosition(position.ToScreenRect());
 					w.headerName = "Edit Values";
 					if(type.IsValueType) {
 						//Close Action when editing value type and performing redo or undo to avoid wrong value.
@@ -1357,13 +1357,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void ShowFields(object obj, UnityEngine.Object unityObject = null, BindingFlags flags = BindingFlags.Public | BindingFlags.Instance,
 			uNodeUtility.EditValueSettings setting = null) {
-			FieldInfo[] fieldInfo = ReflectionUtils.GetFields(obj, flags);
-			Array.Sort(fieldInfo, (x, y) => {
-				if(x.DeclaringType != y.DeclaringType) {
-					return string.Compare(x.DeclaringType.IsSubclassOf(y.DeclaringType).ToString(), y.DeclaringType.IsSubclassOf(x.DeclaringType).ToString(), StringComparison.OrdinalIgnoreCase);
-				}
-				return string.Compare(x.MetadataToken.ToString(), y.MetadataToken.ToString(), StringComparison.OrdinalIgnoreCase);
-			});
+			FieldInfo[] fieldInfo = EditorReflectionUtility.GetFields(obj.GetType(), flags);
 			ShowFields(fieldInfo, obj, unityObject);
 		}
 
@@ -1966,15 +1960,10 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 					EditorGUILayout.EndHorizontal();
+					GUILayout.Space(2);
 					if(obj != null) {
-						FieldInfo[] fieldInfo = ReflectionUtils.GetFieldsFromType(type);
+						FieldInfo[] fieldInfo = EditorReflectionUtility.GetFields(type);
 						if(fieldInfo != null && fieldInfo.Length > 0) {
-							Array.Sort(fieldInfo, (x, y) => {
-								if(x.DeclaringType != y.DeclaringType) {
-									return string.Compare(x.DeclaringType.IsSubclassOf(y.DeclaringType).ToString(), y.DeclaringType.IsSubclassOf(x.DeclaringType).ToString(), StringComparison.OrdinalIgnoreCase);
-								}
-								return string.Compare(x.MetadataToken.ToString(), y.MetadataToken.ToString(), StringComparison.OrdinalIgnoreCase);
-							});
 							EditorGUI.indentLevel++;
 							ShowFields(fieldInfo, obj, settings.unityObject, settings);
 							EditorGUI.indentLevel--;
@@ -2002,17 +1991,6 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUILayout.EndHorizontal();
 				EditorGUI.EndChangeCheck();
 			}
-		}
-
-		public static void ShowField(string fieldName,
-			object parentField,
-			UnityEngine.Object unityObject,
-			BindingFlags flags,
-			uNodeUtility.EditValueSettings setting = null) {
-			if(object.ReferenceEquals(parentField, null))
-				return;
-			FieldInfo field = parentField.GetType().GetField(fieldName, flags);
-			ShowField(null, field, parentField, unityObject, null, setting);
 		}
 
 		public static void ShowField(string fieldName, object parentField, UnityEngine.Object unityObject = null,
@@ -2292,7 +2270,7 @@ namespace MaxyGames.UNode.Editors {
 				if(EditorGUI.DropdownButton(position, new GUIContent(fieldValue != null ? type.PrettyName(true) : "null", type.PrettyName(true)), FocusType.Keyboard) && Event.current.button == 0) {
 					//Make sure don't mark if value changed.
 					GUI.changed = false;
-					var w = ActionPopupWindow.Show(position.ToScreenRect(),
+					var w = ActionPopupWindow.Show(
 						fieldValue,
 						delegate (ref object obj) {
 							EditValueLayouted(new GUIContent("Values", type.PrettyName(true)), obj, type, delegate (object val) {
@@ -2306,7 +2284,7 @@ namespace MaxyGames.UNode.Editors {
 								GUI.changed = false;
 								ActionPopupWindow.CloseLast();
 							}
-						});
+						}).ChangePosition(position.ToScreenRect());
 					w.headerName = "Edit Values";
 					if(type.IsValueType) {
 						//Close Action when editing value type and performing redo or undo to avoid wrong value.
@@ -2435,14 +2413,8 @@ namespace MaxyGames.UNode.Editors {
 					oldValue = ReflectionUtils.CreateInstance(type);
 					GUI.changed = true;
 				}
-				FieldInfo[] fieldInfo = ReflectionUtils.GetFieldsFromType(type);
+				FieldInfo[] fieldInfo = EditorReflectionUtility.GetFields(type);
 				if(fieldInfo != null && fieldInfo.Length > 0) {
-					Array.Sort(fieldInfo, (x, y) => {
-						if(x.DeclaringType != y.DeclaringType) {
-							return string.Compare(x.DeclaringType.IsSubclassOf(y.DeclaringType).ToString(), y.DeclaringType.IsSubclassOf(x.DeclaringType).ToString(), StringComparison.OrdinalIgnoreCase);
-						}
-						return string.Compare(x.MetadataToken.ToString(), y.MetadataToken.ToString(), StringComparison.OrdinalIgnoreCase);
-					});
 					EditorGUI.LabelField(GetRect(), label);
 					EditorGUI.indentLevel++;
 					for(int i = 0; i < fieldInfo.Length; i++) {
@@ -2709,7 +2681,7 @@ namespace MaxyGames.UNode.Editors {
 					position = EditorGUI.PrefixLabel(position, label);
 					if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ", " + valType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 						GUI.changed = false;
-						ActionPopupWindow.Show(position.ToScreenRect(),
+						ActionPopupWindow.Show(
 							new object[] { ReflectionUtils.CreateInstance(keyType), ReflectionUtils.CreateInstance(valType), map },
 							delegate (ref object val) {
 								object[] o = val as object[];
@@ -2731,7 +2703,7 @@ namespace MaxyGames.UNode.Editors {
 										GUIChanged(unityObject);
 									}
 								}
-							}).headerName = "Add New Dictonary Value";
+							}).ChangePosition(position.ToScreenRect()).headerName = "Add New Dictonary Value";
 					}
 					if(settings.nullable) {
 						position.x += position.width;
@@ -2913,7 +2885,8 @@ namespace MaxyGames.UNode.Editors {
 					position = EditorGUI.PrefixLabel(position, label);
 					if(EditorGUI.DropdownButton(position, new GUIContent("add new (" + keyType.PrettyName() + ")"), FocusType.Keyboard) && Event.current.button == 0) {
 						GUI.changed = false;
-						ActionPopupWindow.Show(position.ToScreenRect(), new object[] { ReflectionUtils.CreateInstance(keyType), map, type },
+						ActionPopupWindow.Show(
+							new object[] { ReflectionUtils.CreateInstance(keyType), map, type },
 							delegate (ref object val) {
 								object[] o = val as object[];
 								EditValueLayouted(new GUIContent("Value"), o[0], keyType, delegate (object v) {
@@ -2931,7 +2904,7 @@ namespace MaxyGames.UNode.Editors {
 										GUIChanged(unityObject);
 									}
 								}
-							}).headerName = "Add New Collection Value";
+							}).ChangePosition(position.ToScreenRect()).headerName = "Add New Collection Value";
 					}
 					if(settings.nullable) {
 						position.x += position.width;
@@ -3097,14 +3070,8 @@ namespace MaxyGames.UNode.Editors {
 					obj = ReflectionUtils.CreateInstance(type);
 					fieldValue = obj;
 				}
-				FieldInfo[] fieldInfo = ReflectionUtils.GetFieldsFromType(type);
+				FieldInfo[] fieldInfo = EditorReflectionUtility.GetFields(type);
 				if(fieldInfo != null && fieldInfo.Length > 0) {
-					Array.Sort(fieldInfo, (x, y) => {
-						if(x.DeclaringType != y.DeclaringType) {
-							return string.Compare(x.DeclaringType.IsSubclassOf(y.DeclaringType).ToString(), y.DeclaringType.IsSubclassOf(x.DeclaringType).ToString(), StringComparison.OrdinalIgnoreCase);
-						}
-						return string.Compare(x.MetadataToken.ToString(), y.MetadataToken.ToString(), StringComparison.OrdinalIgnoreCase);
-					});
 					if(label != GUIContent.none) {
 						var pos = EditorGUI.PrefixLabel(GetRect(), label);
 						if(uNodeGUI.Button(pos, obj == null ? "null" : "new " + type.PrettyName() + "()", EditorStyles.miniButton)) {

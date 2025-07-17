@@ -785,6 +785,20 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		public static void DrawReference(object reference, Type objectType) {
+			uNodeGUI.DrawReference(uNodeGUIUtility.GetRect(), reference, objectType);
+		}
+
+		public static void DrawReference(GUIContent label, object reference, Type objectType) {
+			var position = EditorGUI.PrefixLabel(uNodeGUIUtility.GetRect(), label);
+			uNodeGUI.DrawReference(position, reference, objectType);
+		}
+
+		public static void DrawReference(Rect position, GUIContent label, object reference, Type objectType) {
+			position = EditorGUI.PrefixLabel(position, label);
+			uNodeGUI.DrawReference(position, reference, objectType);
+		}
+
 		public static void DrawReference(Rect position, object reference, Type objectType) {
 			if(reference is Node) {
 				DrawReference(position, (reference as Node).nodeObject, typeof(NodeObject));
@@ -822,6 +836,27 @@ namespace MaxyGames.UNode.Editors {
 				else {
 					EditorGUI.DropdownButton(position, new GUIContent("null", uNodeEditorUtility.GetTypeIcon(objectType)), FocusType.Keyboard, EditorStyles.objectField);
 				}
+			}
+			else if(reference is UPort) {
+				var port = reference as UPort;
+				var element = port.node;
+				var text = element.name;
+				if(element is IPrettyName) {
+					text = (element as IPrettyName).GetPrettyName();
+				}
+				var icon = objectType;
+				if(element is IIcon) {
+					icon = (element as IIcon).GetIcon() ?? objectType;
+				}
+				if(Event.current.clickCount == 1 && Event.current.button == 0 && position.Contains(Event.current.mousePosition)) {
+					if(element is NodeObject) {
+						uNodeEditor.Highlight(element as NodeObject);
+					}
+					else {
+						uNodeEditor.Open(element.graphContainer, element);
+					}
+				}
+				EditorGUI.DropdownButton(position, new GUIContent(text + " > " + port.GetPrettyName(), uNodeEditorUtility.GetTypeIcon(icon)), FocusType.Keyboard, EditorStyles.objectField);
 			}
 			else if(reference == null) {
 				EditorGUI.DropdownButton(position, new GUIContent("null", uNodeEditorUtility.GetTypeIcon(objectType)), FocusType.Keyboard, EditorStyles.objectField);

@@ -51,6 +51,15 @@ namespace MaxyGames.UNode.Editors {
 			return GUIUtility.GUIToScreenPoint(point);
 		}
 
+		/// <summary>
+		/// Convert point into screen point.
+		/// </summary>
+		/// <param name="point"></param>
+		/// <returns></returns>
+		public static Vector2 ToScreenPoint(this Vector3 point) {
+			return GUIUtility.GUIToScreenPoint(point);
+		}
+
 		public static UnityEngine.Object GetUnityObject(this UGraphElement graphElement) {
 			if(graphElement == null) {
 				throw new ArgumentNullException(nameof(graphElement));

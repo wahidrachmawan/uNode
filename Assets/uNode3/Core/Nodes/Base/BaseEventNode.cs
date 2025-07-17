@@ -173,6 +173,7 @@ namespace MaxyGames.UNode {
 	}
 
 	public abstract class BaseComponentEvent : BaseGraphEvent {
+		[Hide]
 		protected INodeWithEventHandler eventHandler;
 
 		/// <summary>
