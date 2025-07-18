@@ -113,13 +113,7 @@ namespace MaxyGames {
 					//generationState.state = State.Property;
 					foreach(var var in graph.GetProperties()) {
 						propCount++;
-						List<AData> attribute = new List<AData>();
-						if(var.attributes != null && var.attributes.Count > 0) {
-							foreach(var a in var.attributes) {
-								attribute.Add(TryParseAttributeData(a));
-							}
-						}
-						generatorData.properties.Add(new PData(var, attribute) { modifier = var.modifier });
+						generatorData.properties.Add(new PData(var));
 					}
 				}
 				if(graph is IGraphWithConstructors) {

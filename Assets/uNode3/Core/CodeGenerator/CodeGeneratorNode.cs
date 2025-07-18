@@ -148,7 +148,10 @@ namespace MaxyGames {
 				if(!generatorData.generatorForPorts.TryGetValue(port, out var generator)) {
 					throw new GraphException($"The node: {port.node.GetTitle()} with id: {port.node.id}, has unregistered port named: {port.name} with id: {port.id}", port.node);
 				}
+				var ctx = generationState.context;
+				generationState.context = port;
 				data = generator();
+				generationState.context = ctx;
 				if(setting.fullComment && !string.IsNullOrEmpty(data)) {
 					data = data.Insert(0, $"//node: {port.node.GetTitle()}| port: {port.name} | Type: {port.node.GetType()}".AddLineInEnd());
 				}
@@ -206,7 +209,10 @@ namespace MaxyGames {
 				if(!generatorData.generatorForPorts.TryGetValue(port, out var generator)) {
 					throw new GraphException($"The node: {port.node.GetTitle()} with id: {port.node.id}, has unregistered port named: {port.name} with id: {port.id}", port.node);
 				}
+				var ctx = generationState.context;
+				generationState.context = port;
 				data = generator();
+				generationState.context = ctx;
 				if(setting.debugScript && setting.debugValueNode) {
 					if(typeof(Delegate).IsAssignableFrom(port.type)) {
 						data = New(port.type, data);

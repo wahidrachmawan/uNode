@@ -14,6 +14,17 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			return true;
 		}
 
+		public override void Draw(Rect position, DrawerOption option) {
+			uNodeGUIUtility.EditValue(position, option.label, option.value, option.property.valueType, val => {
+				option.value = val;
+			}, new() {
+				acceptUnityObject = option.acceptUnityObject,
+				attributes = option.attributes,
+				nullable = option.nullable,
+				unityObject = option.unityObject,
+			});
+		}
+
 		public override void DrawLayouted(DrawerOption option) {
 			object value = GetValue(option.property, option.property.type, option.nullable);
 			
@@ -32,63 +43,12 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					return;
 				}
 			}
-			EditorGUI.BeginChangeCheck();
 			var type = option.property.valueType;
-			//if(type.IsArray) {
-			//	if(type.GetArrayRank() == 1) {
-			//		Array array = value as Array;
-			//		if(array == null) {
-			//			if(option.nullable) {
-			//				if(value != null)
-			//					GUI.changed = true;
-			//				array = null;
-			//			} else {
-			//				array = Array.CreateInstance(type.GetElementType(), 0);
-			//				GUI.changed = true;
-			//			}
-			//		}
-			//		if(array != null) {
-			//			Rect position = uNodeGUIUtility.GetRect();
-			//			if(option.nullable)
-			//				position.width -= 16;
-			//			int num = EditorGUI.DelayedIntField(position, option.label, array.Length);
-			//			if(option.nullable) {
-			//				position.x += position.width;
-			//				position.width = 16;
-			//				if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard, EditorStyles.miniButton) && Event.current.button == 0) {
-			//					array = null;
-			//					option.value = null;
-			//				}
-			//			}
-			//			Array newArray = array;
-			//			if(newArray != null) {
-			//				if(num != array.Length) {
-			//					newArray = uNodeUtility.ResizeArray(array, type.GetElementType(), num);
-			//					option.value = newArray;
-			//				}
-			//				if(newArray.Length > 0) {
-			//					//Event currentEvent = Event.current;
-			//					EditorGUI.indentLevel++;
-			//					for(int i = 0; i < newArray.Length; i++) {
-			//						//var elementToEdit = newArray.GetValue(i);
-			//						UInspector.Draw(new DrawerOption() {
-			//							property = option.property.Index(i),
-			//							nullable = option.nullable,
-			//							acceptUnityObject = option.acceptUnityObject,
-			//						});
-			//					}
-			//					EditorGUI.indentLevel--;
-			//				}
-			//			}
-			//			if(EditorGUI.EndChangeCheck()) {
-			//				option.value = newArray;
-			//			}
-			//			return;
-			//		}
-			//	} else {
-
-			//	}
-			//} else 
+			if(value is IList && (!type.IsArray || type.GetArrayRank() == 1)) {
+				DrawList(option);
+				return;
+			}
+			EditorGUI.BeginChangeCheck();
 			if(type.IsGenericType || type.IsInterface) {
 				uNodeGUIUtility.EditValueLayouted(option.label, value, type,
 					onChange: (val) => {
@@ -136,9 +96,6 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				GUI.changed = true;
 			}
 		}
-	}
-
-	class ListDrawer : UPropertyDrawer {
 		private readonly HashSet<Type> allowedElementTypes = new HashSet<Type>() {
 			typeof(int),
 			typeof(float),
@@ -166,16 +123,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			typeof(RectInt),
 		};
 
-		public override bool IsValid(Type type, bool layouted) {
-			if(layouted) {
-				if(type.IsGenericType && type.HasImplementInterface(typeof(IList)) || type.IsArray && type.GetArrayRank() == 1) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public override void DrawLayouted(DrawerOption option) {
+		private void DrawList(DrawerOption option) {
 			Rect foldoutRect = EditorGUILayout.GetControlRect();
 			option.isExpanded = EditorGUI.Foldout(new Rect(foldoutRect.x, foldoutRect.y, 100, foldoutRect.height), option.isExpanded, option.label, true);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,10 +14,6 @@ namespace MaxyGames.UNode.Editors {
 			this.minSize = new Vector2(300, 200);
 			this.titleContent = new GUIContent("Editor");
 			ShowUtility();
-		}
-
-		void Update() {
-			Repaint();
 		}
 	}
 
@@ -54,8 +51,17 @@ namespace MaxyGames.UNode.Editors {
 		protected Vector2 scrollPos;
 
 		#region ShowWindow
+		static T Craete(bool createNew) {
+			if(createNew) {
+				return CreateInstance<T>();
+			}
+			else {
+				return windows.FirstOrDefault(f => f != null) as T ?? CreateInstance<T>();
+			}
+		}
+
 		public static T Show(object startValue, ActionRef<object> onGUI) {
-			T window = GetWindow(typeof(T), true) as T;
+			T window = Craete(false);
 			window.variable = startValue;
 			window.onGUI = onGUI;
 			window.Initialize();
@@ -64,7 +70,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static T Show(object startValue, ActionRef<object> onGUI,
 			Action onGUITop, Action onGUIBottom) {
-			T window = GetWindow(typeof(T), true) as T;
+			T window = Craete(false);
 			window.variable = startValue;
 			window.onGUI = onGUI;
 			if(onGUITop != null)
@@ -80,7 +86,7 @@ namespace MaxyGames.UNode.Editors {
 			ActionRef<object> onGUI,
 			ActionRef<object> onGUITop = null,
 			ActionRef<object> onGUIBottom = null) {
-			T window = GetWindow(typeof(T)) as T;
+			T window = Craete(false);
 			window.variable = startValue;
 			window.onGUI = onGUI;
 			window.onGUITop = onGUITop;
@@ -93,7 +99,7 @@ namespace MaxyGames.UNode.Editors {
 			Action onGUI,
 			Action onGUITop = null,
 			Action onGUIBottom = null) {
-			T window = GetWindow(typeof(T)) as T;
+			T window = Craete(false);
 			if(onGUI != null)
 				window.onGUI = delegate (ref object obj) { onGUI(); };
 			if(onGUITop != null)
@@ -105,7 +111,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static T ShowAsNew(object startValue, ActionRef<object> onGUI) {
-			T window = CreateInstance(typeof(T)) as T;
+			T window = Craete(true);
 			window.variable = startValue;
 			window.onGUI = onGUI;
 			window.Initialize();
@@ -114,7 +120,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static T ShowAsNew(object startValue, ActionRef<object> onGUI,
 			Action onGUITop, Action onGUIBottom) {
-			T window = CreateInstance(typeof(T)) as T;
+			T window = Craete(true);
 			window.variable = startValue;
 			window.onGUI = onGUI;
 			if(onGUITop != null)
@@ -130,7 +136,7 @@ namespace MaxyGames.UNode.Editors {
 			ActionRef<object> onGUI,
 			ActionRef<object> onGUITop = null,
 			ActionRef<object> onGUIBottom = null) {
-			T window = CreateInstance(typeof(T)) as T;
+			T window = Craete(true);
 			window.variable = startValue;
 			window.onGUI = onGUI;
 			window.onGUITop = onGUITop;
@@ -143,7 +149,7 @@ namespace MaxyGames.UNode.Editors {
 			Action onGUI,
 			Action onGUITop = null,
 			Action onGUIBottom = null) {
-			T window = CreateInstance(typeof(T)) as T;
+			T window = Craete(true);
 			if(onGUI != null)
 				window.onGUI = delegate (ref object obj) { onGUI(); };
 			if(onGUITop != null)
@@ -201,11 +207,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		protected IMGUIContainer container;
 		public virtual void OnEnable() {
 			windows.Add(this);
 			Undo.undoRedoPerformed -= UndoRedoCallback;
 			Undo.undoRedoPerformed += UndoRedoCallback;
-			var container = new IMGUIContainer(DrawGUI);
+			container = new IMGUIContainer(DrawGUI);
 			container.style.borderLeftWidth = 1;
 			container.style.borderRightWidth = 1;
 			container.style.borderTopWidth = 1;
@@ -215,6 +222,7 @@ namespace MaxyGames.UNode.Editors {
 			container.style.borderRightColor = uNodeGUIStyle.Colors.BorderColor;
 			container.style.borderTopColor = uNodeGUIStyle.Colors.BorderColor;
 			container.style.borderBottomColor = uNodeGUIStyle.Colors.BorderColor;
+			container.StretchToParentSize();
 			rootVisualElement.Add(container);
 		}
 

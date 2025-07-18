@@ -53,12 +53,12 @@ namespace MaxyGames.UNode.Nodes {
 			//Initialize Value Inputs
 			for(int i = 0; i < inputValues.Count; i++) {
 				var macroPort = inputValues[i];
-				macroPort.input = ValueInput(macroPort.id.ToString(), macroPort.nodeObject.ReturnType()).SetName(macroPort.GetTitle());
+				macroPort.input = ValueInput(macroPort.id.ToString(), () => macroPort.type ?? typeof(object)).SetName(macroPort.GetTitle());
 			}
 			//Initialize Value Outputs
 			for(int i = 0; i < outputValues.Count; i++) {
 				var macroPort = outputValues[i];
-				macroPort.output = ValueOutput(macroPort.id.ToString(), macroPort.nodeObject.ReturnType(), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
+				macroPort.output = ValueOutput(macroPort.id.ToString(), () => macroPort.type ?? typeof(object), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
 				macroPort.output.AssignGetCallback(macroPort.nodeObject.GetPrimaryValue);
 				macroPort.output.AssignSetCallback(macroPort.nodeObject.SetPrimaryValue);
 				if(i == 0) {

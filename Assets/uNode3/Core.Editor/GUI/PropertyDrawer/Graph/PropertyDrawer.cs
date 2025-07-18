@@ -43,7 +43,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					value.fieldAttributes = a;
 				}, AttributeTargets.Field, "Field Attributes");
 				uNodeGUI.DrawAttribute(value.getterAttributes, option.unityObject, (a) => {
-					value.attributes = a;
+					value.getterAttributes = a;
 				}, AttributeTargets.Property, "Getter Attributes");
 				uNodeGUI.DrawAttribute(value.setterAttributes, option.unityObject, (a) => {
 					value.setterAttributes = a;

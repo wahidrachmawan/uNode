@@ -537,6 +537,7 @@ namespace MaxyGames {
 					continue;
 				ThreadingUtil.Queue(() => {
 					if(node != null) {
+						generationState.context = node;
 						if(generatorData.initActionForNodes.TryGetValue(node, out var action)) {
 							action();
 						}
@@ -579,6 +580,7 @@ namespace MaxyGames {
 				ThreadingUtil.Queue(() => {
 					try {
 						generationState.isStatic = function.modifier.Static;
+						generationState.context = f;
 						List<AData> attribute = new List<AData>();
 						if(function.attributes != null && function.attributes.Count > 0) {
 							foreach(var a in function.attributes) {
@@ -822,6 +824,7 @@ namespace MaxyGames {
 				if(prop == null || !prop.obj)
 					continue;
 				ThreadingUtil.Queue(() => {
+					generationState.context = prop;
 					generationState.isStatic = prop.modifier != null && prop.modifier.Static;
 					string str = prop.GenerateCode().AddFirst("\n", result != null);
 					if(includeGraphInformation && prop.obj != null) {
@@ -849,6 +852,7 @@ namespace MaxyGames {
 				var ctor = generatorData.constructors[i];
 				if(ctor == null || !ctor.obj)
 					continue;
+				generationState.context = ctor;
 				ThreadingUtil.Queue(() => {
 					string str = ctor.GenerateCode().AddFirst("\n\n", result != null);
 					if(includeGraphInformation && ctor.obj != null) {
@@ -2166,6 +2170,18 @@ namespace MaxyGames {
 					else if(member.targetType == MemberData.TargetType.uNodeVariable) {
 						var variable = member.startItem.GetReferenceValue() as Variable;
 						if(variable != null) {
+							if(generationState.container is BaseFunction function) {
+								var result = GetVariableName(variable);
+								if(function.parameters.Any(p => p.name == result)) {
+									if(generationState.isStatic) {
+										return generatorData.typeName.CGAccess(result);
+									}
+									else {
+										return This.CGAccess(result);
+									}
+								}
+								return result;
+							}
 							return GetVariableName(variable);
 						}
 						else {

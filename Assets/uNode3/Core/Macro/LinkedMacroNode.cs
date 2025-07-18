@@ -101,14 +101,14 @@ namespace MaxyGames.UNode.Nodes {
 				foreach(var p in macroAsset.InputValues) {
 					var macroPort = p;
 					inputValues.Add(
-						ValueInput(macroPort.id.ToString(), macroPort.nodeObject.ReturnType()).SetName(macroPort.GetTitle()).SetTooltip(macroPort.comment)
+						ValueInput(macroPort.id.ToString(), () => macroPort.type ?? typeof(object)).SetName(macroPort.GetTitle()).SetTooltip(macroPort.comment)
 					);
 				}
 				needSetPrimary = true;
 				//Initialize Value Outputs
 				foreach(var p in macroAsset.OutputValues) {
 					var macroPort = p;
-					var port = ValueOutput(macroPort.id.ToString(), macroPort.nodeObject.ReturnType(), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
+					var port = ValueOutput(macroPort.id.ToString(), () => macroPort.type ?? typeof(object), PortAccessibility.ReadWrite).SetName(macroPort.GetTitle());
 					port.AssignGetCallback(instance => {
 						var data = instance.GetElementData<LinkedData>(this);
 						if(data == null) {

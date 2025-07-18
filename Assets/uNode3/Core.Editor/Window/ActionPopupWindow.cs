@@ -26,17 +26,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override void OnEnable() {
-			var container = new IMGUIContainer(DrawGUI);
-			container.style.borderLeftWidth = 1;
-			container.style.borderRightWidth = 1;
-			container.style.borderTopWidth = 1;
-			container.style.borderBottomWidth = 1;
-			container.style.top = 2;
-			container.style.borderLeftColor = uNodeGUIStyle.Colors.BorderColor;
-			container.style.borderRightColor = uNodeGUIStyle.Colors.BorderColor;
-			container.style.borderTopColor = uNodeGUIStyle.Colors.BorderColor;
-			container.style.borderBottomColor = uNodeGUIStyle.Colors.BorderColor;
-			rootVisualElement.Add(container);
+			base.OnEnable();
 			var layout = container.layout;
 			var oldAutosize = !autoSize;
 
@@ -77,10 +67,6 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}, 1);
-		}
-
-		void Update() {
-			Repaint();
 		}
 	}
 }

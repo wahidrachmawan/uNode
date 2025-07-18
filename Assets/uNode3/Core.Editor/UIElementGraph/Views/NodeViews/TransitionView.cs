@@ -29,6 +29,7 @@ namespace MaxyGames.UNode.Editors {
 			node.Register();
 			ReloadView();
 
+			border.style.overflow = StyleKeyword.Null;
 			//border.style.overflow = Overflow.Visible;
 
 			titleIcon.RemoveFromHierarchy();

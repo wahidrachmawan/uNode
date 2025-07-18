@@ -485,7 +485,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		/// <returns></returns>
 		public Type ReturnType() {
-			return primaryValueOutput?.type;
+			return primaryValueOutput?.type ?? typeof(object);
 		}
 
 		/// <summary>
