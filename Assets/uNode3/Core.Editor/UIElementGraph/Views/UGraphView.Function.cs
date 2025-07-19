@@ -437,7 +437,7 @@ namespace MaxyGames.UNode.Editors {
 			nodeViewsPerNode.Clear();
 		}
 
-		internal void RemoveView(UNodeView view) {
+		public void RemoveView(UNodeView view) {
 			if(view == null) return;
 			RemoveElement(view);
 			cachedNodeMap.Remove(view.nodeObject);

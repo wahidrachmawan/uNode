@@ -155,6 +155,9 @@ namespace MaxyGames.UNode {
 				if(type is IRuntimeType prType) {
 					return prType.GetNativeType() ?? typeof(IRuntimeClass);
 				}
+				else if(type is INativeType nType) {
+					return nType.GetNativeType() ?? (type.IsValueType ? typeof(int) : typeof(object));
+				}
 				else {
 					return typeof(IRuntimeClass);
 				}

@@ -516,6 +516,33 @@ namespace MaxyGames.UNode.Editors {
 			uNodeEditorUtility.RegisterUndo(nodeObject.GetUnityObject(), name);
 		}
 
+		public virtual void OnZoomUpdated(float zoom) {
+			if(zoom > 0.2f) {
+				//titleContainer.style.visibility = StyleKeyword.Null;
+				portInputContainer.style.display = StyleKeyword.Null;
+			}
+			else {
+				//titleContainer.style.visibility = Visibility.Hidden;
+				portInputContainer.style.display = DisplayStyle.None;
+			}
+			if(zoom > 0.3f) {
+				foreach(var p in inputPorts) {
+					p.visible = true;
+				}
+				foreach(var p in outputPorts) {
+					p.visible = true;
+				}
+			}
+			else {
+				foreach(var p in inputPorts) {
+					p.visible = false;
+				}
+				foreach(var p in outputPorts) {
+					p.visible = false;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Called on port has been connected
 		/// </summary>

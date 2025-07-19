@@ -545,7 +545,8 @@ namespace MaxyGames.UNode.Editors {
 										break;
 									}
 								}
-							} else if(ReflectionUtils.IsValidRuntimeInstance(dragObj, type)) {
+							}
+							else if(ReflectionUtils.IsValidRuntimeInstance(dragObj, type)) {
 								if(onChange != null) {
 									onChange(dragObj);
 								}
@@ -2500,10 +2501,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(type.IsArray) {
 				Type elementType = type.GetElementType();
-				if(!IsSupportedType(elementType) && !elementType.IsClass) {
-					EditorGUI.EndChangeCheck();
-					return;
-				}
 				Array array = fieldValue as Array;
 				if(array == null) {
 					if(settings.nullable) {
@@ -2543,18 +2540,15 @@ namespace MaxyGames.UNode.Editors {
 							EditorGUI.indentLevel++;
 							for(int i = 0; i < newArray.Length; i++) {
 								var elementToEdit = newArray.GetValue(i);
-								if(IsSupportedType(elementType) || elementType.IsClass && !elementType.IsAbstract ||
-									elementType.IsArray || elementType.IsGenericType) {
-									int a = i;
-									EditValueLayouted(new GUIContent("Element " + i), elementToEdit, elementType, delegate (object val) {
-										uNodeEditorUtility.RegisterUndo(unityObject, "");
-										elementToEdit = val;
-										newArray.SetValue(elementToEdit, a);
-										if(onChange != null)
-											onChange(newArray);
-										GUIChanged(unityObject);
-									}, settings);
-								}
+								int a = i;
+								EditValueLayouted(new GUIContent("Element " + i), elementToEdit, elementType, delegate (object val) {
+									uNodeEditorUtility.RegisterUndo(unityObject, "");
+									elementToEdit = val;
+									newArray.SetValue(elementToEdit, a);
+									if(onChange != null)
+										onChange(newArray);
+									GUIChanged(unityObject);
+								}, settings);
 							}
 							EditorGUI.indentLevel--;
 						}
@@ -2581,10 +2575,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(type.IsGenericType && type.GetGenericArguments().Length == 1 && type.IsCastableTo(typeof(IList))) {
 				Type elementType = type.GetGenericArguments()[0];
-				if(!IsSupportedType(elementType) && !elementType.IsClass) {
-					EditorGUI.EndChangeCheck();
-					return;
-				}
 				IList array = fieldValue as IList;
 				if(array == null) {
 					if(settings.nullable) {
@@ -2619,18 +2609,15 @@ namespace MaxyGames.UNode.Editors {
 							EditorGUI.indentLevel++;
 							for(int i = 0; i < array.Count; i++) {
 								var elementToEdit = array[i];
-								if(IsSupportedType(elementType) || elementType.IsClass && !elementType.IsAbstract ||
-									elementType.IsArray || elementType.IsGenericType) {
-									int a = i;
-									EditValueLayouted(new GUIContent("Element " + i), elementToEdit, elementType, delegate (object val) {
-										uNodeEditorUtility.RegisterUndo(unityObject, "");
-										elementToEdit = val;
-										array[a] = elementToEdit;
-										if(onChange != null)
-											onChange(array);
-										GUIChanged(unityObject);
-									}, settings);
-								}
+								int a = i;
+								EditValueLayouted(new GUIContent("Element " + i), elementToEdit, elementType, delegate (object val) {
+									uNodeEditorUtility.RegisterUndo(unityObject, "");
+									elementToEdit = val;
+									array[a] = elementToEdit;
+									if(onChange != null)
+										onChange(array);
+									GUIChanged(unityObject);
+								}, settings);
 							}
 							EditorGUI.indentLevel--;
 						}
@@ -2658,10 +2645,6 @@ namespace MaxyGames.UNode.Editors {
 			else if(type.IsGenericType && type.IsCastableTo(typeof(IDictionary))) {
 				Type keyType = type.GetGenericArguments()[0];
 				Type valType = type.GetGenericArguments()[1];
-				if(!IsSupportedType(keyType) && !keyType.IsClass || !IsSupportedType(valType) && !valType.IsClass || valType.IsAbstract) {
-					EditorGUI.EndChangeCheck();
-					return;
-				}
 				IDictionary map = fieldValue as IDictionary;
 				if(map == null) {
 					if(settings.nullable) {
@@ -2858,10 +2841,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(type.IsGenericType && type.GetGenericTypeDefinition().IsCastableTo(typeof(HashSet<>))) {
 				Type keyType = type.GetGenericArguments()[0];
-				if(!IsSupportedType(keyType) && !keyType.IsClass) {
-					EditorGUI.EndChangeCheck();
-					return;
-				}
 				IList map = ReflectionUtils.CreateInstance(typeof(List<>).MakeGenericType(keyType)) as IList;
 				if(fieldValue == null) {
 					if(settings.nullable) {
@@ -3207,29 +3186,7 @@ namespace MaxyGames.UNode.Editors {
 						serializedValue.ChangeValue(val);
 					}, uNodeEditorUtility.IsSceneObject(unityObject), unityObject);
 				}
-				else if(type.IsArray) {
-					if(IsSupportedType(type.GetElementType()) || type.GetElementType().IsClass) {
-						EditValueLayouted(label, serializedValue.value, type, (val) => {
-							serializedValue.ChangeValue(val);
-						}, settings: new uNodeUtility.EditValueSettings() {
-							unityObject = unityObject,
-							attributes = attributes,
-							drawDecorator = false,
-							nullable = true,
-						});
-					}
-				}
-				else if(type.IsGenericType) {
-					EditValueLayouted(label, serializedValue.value, type, (val) => {
-						serializedValue.ChangeValue(val);
-					}, settings: new uNodeUtility.EditValueSettings() {
-						unityObject = unityObject,
-						attributes = attributes,
-						drawDecorator = false,
-						nullable = true,
-					});
-				}
-				else if(IsSupportedType(type) || type.IsClass || type.IsInterface || type.IsValueType && type.IsSerializable) {
+				else {
 					if(type == typeof(object) && !object.ReferenceEquals(serializedValue.value, null)) {
 						type = serializedValue.value.GetType();
 					}

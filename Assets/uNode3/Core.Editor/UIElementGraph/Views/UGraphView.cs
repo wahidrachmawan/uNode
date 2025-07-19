@@ -74,9 +74,9 @@ namespace MaxyGames.UNode.Editors {
 		#region Initialization
 		public UGraphView() {
 			//Add(new MiniMap());
-			graphViewChanged = GraphViewChangedCallback;
-			viewTransformChanged = ViewTransformChangedCallback;
-			elementResized = ElementResizedCallback;
+			graphViewChanged = OnGraphViewChanged;
+			viewTransformChanged = OnViewTransformChanged;
+			elementResized = OnElementResized;
 			//unserializeAndPaste += (op, data) => {
 			//	if(op == "Paste") {
 			//		graph.Repaint();
@@ -87,7 +87,7 @@ namespace MaxyGames.UNode.Editors {
 			//};
 
 			InitializeManipulators();
-			RegisterCallback<KeyDownEvent>(KeyDownCallback);
+			RegisterCallback<KeyDownEvent>(OnKeyDown);
 			RegisterCallback<DragUpdatedEvent>(OnDragUpdatedEvent);
 			RegisterCallback<DragPerformEvent>(OnDragPerformEvent);
 			this.RegisterRepaintAction(() => {
@@ -705,6 +705,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private EventPropagation DeleteSelection(List<ISelectable> selection) {
+			miniMap?.SetDirty();
 			var processor = GraphProcessor;
 			var list = new List<ISelectable>();
 			list.AddRange(selection.Distinct());
@@ -914,7 +915,7 @@ namespace MaxyGames.UNode.Editors {
 			graphEditor.ClearSelection();
 		}
 
-		GraphViewChange GraphViewChangedCallback(GraphViewChange changes) {
+		GraphViewChange OnGraphViewChanged(GraphViewChange changes) {
 			if(changes.elementsToRemove != null) {
 
 				//Handle ourselves the edge and node remove
@@ -937,16 +938,24 @@ namespace MaxyGames.UNode.Editors {
 			return changes;
 		}
 
-		void ViewTransformChangedCallback(GraphView view) {
+		private float lastZoomLevel = 1f;
+		void OnViewTransformChanged(GraphView view) {
 			gridBackground?.MarkDirtyRepaint();
 			if(graphEditor != null && hasInitialize) {
 				graphData.GetCurrentCanvasData().zoomScale = scale;
 				graphData.position = -contentViewContainer.resolvedStyle.translate / scale;
 			}
+			if(Mathf.Abs(scale - lastZoomLevel) > 0.01f) {
+				foreach(var node in nodes) {
+					if(node is UNodeView v)
+						v.OnZoomUpdated(scale);
+				}
+				lastZoomLevel = scale;
+			}
 			miniMap?.SetDirty();
 		}
 
-		void ElementResizedCallback(VisualElement elem) {
+		void OnElementResized(VisualElement elem) {
 
 		}
 
@@ -1926,7 +1935,7 @@ namespace MaxyGames.UNode.Editors {
 			#endregion
 		}
 
-		void KeyDownCallback(KeyDownEvent e) {
+		void OnKeyDown(KeyDownEvent e) {
 			if(e.keyCode == KeyCode.S) {
 				// e.StopPropagation();
 			}
