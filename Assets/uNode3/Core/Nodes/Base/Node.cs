@@ -385,7 +385,7 @@ namespace MaxyGames.UNode {
 		}
 
 		protected FlowInput FlowInput(string id, Action<Flow> action) {
-			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+			if(nodeObject.FlowInputs.Any(p => p.id == id)) {
 				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
 			}
 			var port = new FlowInput(this, id, action);
@@ -393,7 +393,7 @@ namespace MaxyGames.UNode {
 		}
 
 		protected FlowInput FlowInput(string id, Func<Flow, IEnumerator> action) {
-			if(nodeObject.ValueInputs.Any(p => p.id == id)) {
+			if(nodeObject.FlowInputs.Any(p => p.id == id)) {
 				throw new ArgumentException($"Duplicate port for '{id}' in {GetType()}");
 			}
 			var port = new FlowInput(this, id, action);

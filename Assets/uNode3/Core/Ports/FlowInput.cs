@@ -65,6 +65,7 @@ namespace MaxyGames.UNode {
 				throw new Exception("Cannot restore port because the id is different.");
 			name = other.name;
 			action = other.action;
+			node = other.node;
 		}
 
 		public bool IsCoroutine() {
