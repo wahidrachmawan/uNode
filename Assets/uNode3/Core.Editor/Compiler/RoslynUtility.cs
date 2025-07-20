@@ -445,25 +445,10 @@ namespace MaxyGames.UNode.Editors {
 				syntaxTrees: syntaxTrees,
 				references: GetMetadataReferences(),
 				options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug));
-
+			
 			if(Data.useSourceGenerators()) {
 				GetRoslynGenerators(out var sourceGenerators, out _);
-				var path = syntaxTrees.First().FilePath;
-				Debug.Log("Pathg" + path);
-				Debug.Log(Assembly.GetEntryAssembly() != null);
-				var driver = CSharpGeneratorDriver.Create(new[] { sourceGenerators.First(s => s.GetGeneratorType().FullName.EndsWith("SystemGenerator")) } , additionalTexts: new[] { new FileAdditionalText(path, path) }, parseOptions: new CSharpParseOptions(preprocessorSymbols: new[] { "DOTS_OUTPUT_SOURCEGEN_FILES" })).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
-				foreach(var d in driver.GetRunResult().Results) {
-					if(d.Generator.GetType().FullName.EndsWith("SystemGenerator")) {
-						Debug.Log(d.Generator);
-						foreach(var s in d.Diagnostics) {
-							Debug.Log(s);
-						}
-						foreach(var s in d.GeneratedSources) {
-							Debug.Log(s);
-						}
-						Debug.Log(d.Exception);
-					}
-				}
+				CSharpGeneratorDriver.Create(sourceGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
 				compilation = compilationUpdated as CSharpCompilation;
 			}
 			using(var assemblyStream = new MemoryStream())
