@@ -154,7 +154,8 @@ namespace MaxyGames.UNode.Editors {
 			static int _index;
 			internal static string randomAssemblyName => Path.GetRandomFileName() + (++_index).ToString();
 		}
-		static UnityEditor.Compilation.Assembly AssemblyCSharp {
+
+		public static UnityEditor.Compilation.Assembly AssemblyCSharp {
 			get {
 				if(CachedData.assemblyCSharp == null && CachedData.hasDefaultAssembly == null) {
 					CachedData.hasDefaultAssembly = false;
@@ -183,6 +184,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					else if(typeof(IIncrementalGenerator).IsAssignableFrom(type)) {
 						if(ReflectionUtils.CanCreateInstance(type)) {
+							sourceGenerators.Add((ReflectionUtils.CreateInstance(type) as IIncrementalGenerator).AsSourceGenerator());
 							incrementalGenerators.Add(ReflectionUtils.CreateInstance(type) as IIncrementalGenerator);
 						}
 					}
@@ -347,7 +349,7 @@ namespace MaxyGames.UNode.Editors {
 
 			if(Data.useSourceGenerators()) {
 				GetRoslynGenerators(out var sourceGenerators, out _);
-				var generatorDriver = CSharpGeneratorDriver.Create(sourceGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
+				CSharpGeneratorDriver.Create(sourceGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
 				compilation = compilationUpdated as CSharpCompilation;
 			}
 			using(var assemblyStream = new MemoryStream())
@@ -412,6 +414,24 @@ namespace MaxyGames.UNode.Editors {
 			return result;
 		}
 
+		public class FileAdditionalText : AdditionalText {
+			private readonly string _path;
+			private readonly SourceText _text;
+
+			public FileAdditionalText(string path) {
+				_path = path;
+				_text = SourceText.From(File.ReadAllText(path), System.Text.Encoding.UTF8);
+			}
+
+			public FileAdditionalText(string path, string text) {
+				_path = path;
+				_text = SourceText.From(text, System.Text.Encoding.UTF8);
+			}
+
+			public override string Path => _path;
+			public override SourceText GetText(CancellationToken cancellationToken = default) => _text;
+		}
+
 		private static CompileResult DoCompileAndSave(
 			string assemblyName,
 			IEnumerable<Syntax> syntaxTrees,
@@ -419,6 +439,7 @@ namespace MaxyGames.UNode.Editors {
 			List<EmbeddedText> embeddedTexts = null,
 			bool loadAssembly = true) {
 			CompileResult result = new CompileResult();
+			var option = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug);
 			var compilation = CSharpCompilation.Create(
 				assemblyName,
 				syntaxTrees: syntaxTrees,
@@ -427,7 +448,22 @@ namespace MaxyGames.UNode.Editors {
 
 			if(Data.useSourceGenerators()) {
 				GetRoslynGenerators(out var sourceGenerators, out _);
-				var generatorDriver = CSharpGeneratorDriver.Create(sourceGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
+				var path = syntaxTrees.First().FilePath;
+				Debug.Log("Pathg" + path);
+				Debug.Log(Assembly.GetEntryAssembly() != null);
+				var driver = CSharpGeneratorDriver.Create(new[] { sourceGenerators.First(s => s.GetGeneratorType().FullName.EndsWith("SystemGenerator")) } , additionalTexts: new[] { new FileAdditionalText(path, path) }, parseOptions: new CSharpParseOptions(preprocessorSymbols: new[] { "DOTS_OUTPUT_SOURCEGEN_FILES" })).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
+				foreach(var d in driver.GetRunResult().Results) {
+					if(d.Generator.GetType().FullName.EndsWith("SystemGenerator")) {
+						Debug.Log(d.Generator);
+						foreach(var s in d.Diagnostics) {
+							Debug.Log(s);
+						}
+						foreach(var s in d.GeneratedSources) {
+							Debug.Log(s);
+						}
+						Debug.Log(d.Exception);
+					}
+				}
 				compilation = compilationUpdated as CSharpCompilation;
 			}
 			using(var assemblyStream = new MemoryStream())
@@ -456,18 +492,22 @@ namespace MaxyGames.UNode.Editors {
 						result.rawPdb = symbolsStream.ToArray();
 						if(loadAssembly)
 							result.LoadAssembly();
-						var pdbPath = Path.ChangeExtension(assemblyPath, "pdb");
-						File.Open(assemblyPath, FileMode.OpenOrCreate).Close();
-						File.Open(pdbPath, FileMode.OpenOrCreate).Close();
-						File.WriteAllBytes(assemblyPath, assemblyStream.ToArray());
-						File.WriteAllBytes(pdbPath, symbolsStream.ToArray());
+						if(!string.IsNullOrEmpty(assemblyPath)) {
+							var pdbPath = Path.ChangeExtension(assemblyPath, "pdb");
+							File.Open(assemblyPath, FileMode.OpenOrCreate).Close();
+							File.Open(pdbPath, FileMode.OpenOrCreate).Close();
+							File.WriteAllBytes(assemblyPath, assemblyStream.ToArray());
+							File.WriteAllBytes(pdbPath, symbolsStream.ToArray());
+						}
 					}
 					else {
 						result.rawAssembly = assemblyStream.ToArray();
 						if(loadAssembly)
 							result.LoadAssembly();
-						File.Open(assemblyPath, FileMode.OpenOrCreate).Close();
-						File.WriteAllBytes(assemblyPath, assemblyStream.ToArray());
+						if(!string.IsNullOrEmpty(assemblyPath)) {
+							File.Open(assemblyPath, FileMode.OpenOrCreate).Close();
+							File.WriteAllBytes(assemblyPath, assemblyStream.ToArray());
+						}
 					}
 				}
 				else {

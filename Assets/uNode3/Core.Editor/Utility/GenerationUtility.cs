@@ -238,7 +238,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(saveInTemporaryFolder) {
 					EditorUtility.DisplayProgressBar("Compiling Scripts", "", 1);
-					var result = RoslynUtility.CompileFilesAndSave(Path.GetRandomFileName(), scriptPaths, Path.GetFullPath(dir) + Path.DirectorySeparatorChar + "RuntimeAssembly.dll", false);
+					var result = RoslynUtility.CompileFilesAndSave(Path.GetRandomFileName(), scriptPaths, tempAssemblyPath, false);
 					if(result.errors != null && result.errors.Any()) {
 						Debug.LogError(result.GetErrorMessage());
 					}
@@ -530,7 +530,7 @@ namespace MaxyGames.UNode.Editors {
 					uNodeThreadUtility.QueueAndWait(() => {
 						EditorProgressBar.ShowProgressBar("Compiling Scripts", 1);
 					});
-					var result = RoslynUtility.CompileFilesAndSave(Path.GetRandomFileName(), scriptPaths, Path.GetFullPath(dir) + Path.DirectorySeparatorChar + "RuntimeAssembly.dll", false);
+					var result = RoslynUtility.CompileFilesAndSave(Path.GetRandomFileName(), scriptPaths, tempAssemblyPath, false);
 					if(result == null) {
 						throw new Exception("Something wrong with compile using Roslyn.");
 					}
