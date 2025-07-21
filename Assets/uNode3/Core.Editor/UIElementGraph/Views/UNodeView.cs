@@ -519,11 +519,15 @@ namespace MaxyGames.UNode.Editors {
 		public virtual void OnZoomUpdated(float zoom) {
 			if(zoom > 0.2f) {
 				//titleContainer.style.visibility = StyleKeyword.Null;
-				portInputContainer.style.display = StyleKeyword.Null;
+				if(portInputContainer != null) {
+					portInputContainer.style.display = StyleKeyword.Null;
+				}
 			}
 			else {
 				//titleContainer.style.visibility = Visibility.Hidden;
-				portInputContainer.style.display = DisplayStyle.None;
+				if(portInputContainer != null) {
+					portInputContainer.style.display = DisplayStyle.None;
+				}
 			}
 			if(zoom > 0.3f) {
 				foreach(var p in inputPorts) {
