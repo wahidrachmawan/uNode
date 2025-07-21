@@ -1451,7 +1451,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				return changed;
 			}
-			FieldInfo[] fieldInfo = GetFields(obj.GetType(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+			FieldInfo[] fieldInfo = GetFields(obj.GetType().GetType(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
 			foreach(FieldInfo field in fieldInfo) {
 				Type fieldType = field.FieldType;
 				if(!fieldType.IsClass || !fieldType.IsSerializable)
