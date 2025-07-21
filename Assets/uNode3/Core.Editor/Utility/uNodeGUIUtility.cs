@@ -58,7 +58,7 @@ namespace MaxyGames.UNode.Editors {
 		public static void EditRuntimeTypeValueLayouted(GUIContent label, object value, RuntimeType type, Action<object> onChange, bool allowSceneObject, UnityEngine.Object unityObject = null, bool acceptUnityObject = true) {
 			if(type is INativeMember) {
 				var nativeType = (type as INativeMember).GetNativeMember() as Type;
-				if(nativeType != null) {
+				if(nativeType != null && nativeType != type) {
 					EditValueLayouted(label, value, nativeType, (val) => {
 						onChange(val);
 					}, new uNodeUtility.EditValueSettings() {
@@ -418,6 +418,17 @@ namespace MaxyGames.UNode.Editors {
 			if(label != GUIContent.none) {
 				position = EditorGUI.PrefixLabel(position, label);
 			}
+			if(type is MissingType) {
+				if(EditorGUI.DropdownButton(position, new GUIContent("Type: " + type.PrettyName() + " is missing."), FocusType.Keyboard, EditorStyles.helpBox)) {
+					if(type is IRuntimeMemberWithRef withRef) {
+						var reference = withRef.GetReference();
+						if(reference is BaseGraphReference graphReference && graphReference.UnityObject != null) {
+							EditorGUIUtility.PingObject(graphReference.UnityObject);
+						}
+					}
+				}
+				return;
+			}
 			if(EditorGUI.DropdownButton(position, new GUIContent("Type: " + type.PrettyName() + " is not compiled."), FocusType.Keyboard, EditorStyles.helpBox)) {
 				if(type is IRuntimeMemberWithRef withRef) {
 					var reference = withRef.GetReference();
@@ -431,7 +442,7 @@ namespace MaxyGames.UNode.Editors {
 		public static void EditRuntimeTypeValue(Rect position, GUIContent label, object value, RuntimeType type, Action<object> onChange, bool allowSceneObject, bool acceptUnityObject = true) {
 			if(type is INativeMember) {
 				var nativeType = (type as INativeMember).GetNativeMember() as Type;
-				if(nativeType != null) {
+				if(nativeType != null && nativeType is not INativeMember) {
 					EditValue(position, label, value, nativeType, (val) => {
 						onChange(val);
 					}, new uNodeUtility.EditValueSettings() {
