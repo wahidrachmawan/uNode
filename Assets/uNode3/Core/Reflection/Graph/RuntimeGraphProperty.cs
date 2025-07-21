@@ -135,7 +135,7 @@ namespace MaxyGames.UNode {
 							else {
 								att = MethodAttributes.Private;
 							}
-							if(property.modifier.Static || owner.IsAbstract & owner.IsSealed) {
+							if(property.modifier.Static || owner.IsAbstract && owner.IsSealed) {
 								att |= MethodAttributes.Static;
 							}
 							if(property.modifier.Abstract) {
@@ -201,7 +201,7 @@ namespace MaxyGames.UNode {
 							else {
 								att = MethodAttributes.Private;
 							}
-							if(property.modifier.Static || owner.IsAbstract & owner.IsSealed) {
+							if(property.modifier.Static || owner.IsAbstract && owner.IsSealed) {
 								att |= MethodAttributes.Static;
 							}
 							if(property.modifier.Abstract) {
