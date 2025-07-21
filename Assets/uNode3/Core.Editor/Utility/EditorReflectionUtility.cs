@@ -1403,75 +1403,94 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		public static bool AnalizeSerializedObject(object obj, Func<object, bool> validation, Action<object> doAction = null) {
+		public static bool AnalizeSerializedObject(object obj, Func<object, bool> validation, Action<object> doAction = null, HashSet<object> analizedHash = null) {
 			if(object.ReferenceEquals(obj, null) || validation == null)
 				return false;
-			if(!(obj is UnityEngine.Object) && validation(obj)) {
-				if(doAction != null)
-					doAction(obj);
-				if(obj is MemberData) {
-					var mInstane = (obj as MemberData).instance;
-					if(mInstane != null && !(mInstane is UnityEngine.Object)) {
-						if(AnalizeSerializedObject(mInstane, validation, doAction)) {
-							//This make sure to serialize the data.
-							(obj as MemberData).instance = mInstane;
+			bool freeHash = false;
+			try {
+				if(analizedHash == null) {
+					analizedHash = StaticHashPool<object>.Allocate();
+					StaticHashPool<object>.Free(analizedHash);
+					freeHash = true;
+				}
+				if(analizedHash.Contains(obj)) {
+					return false;
+				}
+				else {
+					analizedHash.Add(obj);
+				}
+				if(!(obj is UnityEngine.Object) && validation(obj)) {
+					if(doAction != null)
+						doAction(obj);
+					if(obj is MemberData) {
+						var mInstane = (obj as MemberData).instance;
+						if(mInstane != null && !(mInstane is UnityEngine.Object)) {
+							if(AnalizeSerializedObject(mInstane, validation, doAction, analizedHash)) {
+								//This make sure to serialize the data.
+								(obj as MemberData).instance = mInstane;
+							}
 						}
 					}
+					return true;
 				}
-				return true;
-			}
-			if(obj is MemberData) {
-				MemberData mData = obj as MemberData;
-				if(mData != null && mData.instance != null && !(mData.instance is UnityEngine.Object)) {
-					bool flag = AnalizeSerializedObject(mData.instance, validation, doAction);
-					if(flag) {
-						//This make sure to serialize the data.
-						mData.instance = mData.instance;
+				if(obj is MemberData) {
+					MemberData mData = obj as MemberData;
+					if(mData != null && mData.instance != null && !(mData.instance is UnityEngine.Object)) {
+						bool flag = AnalizeSerializedObject(mData.instance, validation, doAction, analizedHash);
+						if(flag) {
+							//This make sure to serialize the data.
+							mData.instance = mData.instance;
+						}
+						return flag;
 					}
-					return flag;
+					return false;
 				}
-				return false;
-			}
-			bool changed = false;
-			if(obj is IList) {
-				IList list = obj as IList;
-				for(int i = 0; i < list.Count; i++) {
-					object element = list[i];
-					if(element == null)
+				bool changed = false;
+				if(obj is IList) {
+					IList list = obj as IList;
+					for(int i = 0; i < list.Count; i++) {
+						object element = list[i];
+						if(element == null)
+							continue;
+						if(element is UnityEngine.Object) {
+							if(validation(element)) {
+								if(doAction != null)
+									doAction(element);
+								changed = true;
+							}
+							continue;
+						}
+						changed = AnalizeSerializedObject(element, validation, doAction, analizedHash) || changed;
+					}
+					return changed;
+				}
+				FieldInfo[] fieldInfo = GetFields(obj.GetType(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+				foreach(FieldInfo field in fieldInfo) {
+					Type fieldType = field.FieldType;
+					if(!fieldType.IsClass || !fieldType.IsSerializable)
 						continue;
-					if(element is UnityEngine.Object) {
-						if(validation(element)) {
+					if(!field.IsPublic && !field.IsDefinedAttribute<SerializeField>() && !field.IsDefinedAttribute<SerializeReference>())
+						continue;
+					object value = field.GetValueOptimized(obj);
+					if(object.ReferenceEquals(value, null))
+						continue;
+					if(value is UnityEngine.Object) {
+						if(validation(value)) {
 							if(doAction != null)
-								doAction(element);
+								doAction(value);
 							changed = true;
 						}
 						continue;
 					}
-					changed = AnalizeSerializedObject(element, validation, doAction) || changed;
+					changed = AnalizeSerializedObject(value, validation, doAction, analizedHash) || changed;
 				}
 				return changed;
 			}
-			FieldInfo[] fieldInfo = GetFields(obj.GetType(), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-			foreach(FieldInfo field in fieldInfo) {
-				Type fieldType = field.FieldType;
-				if(!fieldType.IsClass || !fieldType.IsSerializable)
-					continue;
-				if(!field.IsPublic && !field.IsDefinedAttribute<SerializeField>() && !field.IsDefinedAttribute<SerializeReference>())
-					continue;
-				object value = field.GetValueOptimized(obj);
-				if(object.ReferenceEquals(value, null))
-					continue;
-				if(value is UnityEngine.Object) {
-					if(validation(value)) {
-						if(doAction != null)
-							doAction(value);
-						changed = true;
-					}
-					continue;
+			finally {
+				if(freeHash) {
+					StaticHashPool<object>.Free(analizedHash);
 				}
-				changed = AnalizeSerializedObject(value, validation, doAction) || changed;
 			}
-			return changed;
 		}
 
 		public class ReflectionItem {
