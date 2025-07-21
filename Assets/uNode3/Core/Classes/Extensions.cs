@@ -1582,6 +1582,12 @@ namespace MaxyGames.UNode {
 			if(from is RuntimeType) {
 				if(ReflectionUtils.IsTypeEqual(from, to)) return true;
 				if(to == typeof(object)) return true;
+				if(ReflectionUtils.IsNativeType(from)) {
+					var nt = ReflectionUtils.GetNativeType(from);
+					if(nt != null) {
+						return nt.IsCastableTo(to);
+					}
+				}
 				if(to.IsInterface) {
 					return from.HasImplementInterface(to);
 				}
@@ -1749,6 +1755,12 @@ namespace MaxyGames.UNode {
 			if(from is RuntimeType) {
 				if(ReflectionUtils.IsTypeEqual(from, to)) return true;
 				if(to == typeof(object)) return true;
+				if(ReflectionUtils.IsNativeType(from)) {
+					var nt = ReflectionUtils.GetNativeType(from);
+					if(nt != null) {
+						return nt.IsCastableTo(to);
+					}
+				}
 				if(to.IsInterface) {
 					return from.HasImplementInterface(to);
 				}

@@ -69,7 +69,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public Type GetNativeType() {
-			return this;
+			return null;
 		}
 	}
 
