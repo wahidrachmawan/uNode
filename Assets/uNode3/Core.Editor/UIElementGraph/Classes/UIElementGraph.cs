@@ -807,7 +807,7 @@ namespace MaxyGames.UNode.Editors {
 
 													var members = member.GetMembers(false);
 													if(members != null && members.Length > 0) {
-														for(int i=0;i<members.Length;i++) {
+														for(int i = 0; i < members.Length; i++) {
 															members[i] = ReflectionUtils.GetRuntimeMember(members[i]) ?? members[i];
 														}
 													}
@@ -1162,7 +1162,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 			#endregion
 
-			#region Pathbar
+			ReloadPathbar();
+
+			rootContent.Add(tabbarContainer);
+			tabbarContainer.SendToBack();
+		}
+
+		private void ReloadPathbar() {
 			var pathbar = new VisualElement() {
 				name = "pathbar"
 			};
@@ -1281,6 +1287,10 @@ namespace MaxyGames.UNode.Editors {
 							if(parentNode.node is ISuperNode) {
 								GN.Add(parentNode);
 							}
+							if(parentNode.node is INodeWithCustomCanvas canvas) {
+								parent = canvas.ParentCanvas;
+								continue;
+							}
 						}
 						else if(parent is NodeContainer) {
 							break;
@@ -1316,10 +1326,6 @@ namespace MaxyGames.UNode.Editors {
 				pathbar.Add(graph);
 			}
 			tabbarContainer.Add(pathbar);
-			#endregion
-
-			rootContent.Add(tabbarContainer);
-			tabbarContainer.SendToBack();
 		}
 
 		public override void FrameGraph() {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "StringBuilder", typeof(string), inputs = new[] { typeof(string) })]
+	[NodeMenu("Data", "StringBuilder", typeof(string), inputs = new[] { typeof(string), typeof(object) })]
 	public class StringBuilderNode : ValueNode {
 		public class Data {
 			public string id = uNodeUtility.GenerateUID();
@@ -22,6 +22,7 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRegister();
 			for(int i=0;i<stringValues.Count;i++) {
 				stringValues[i].port = ValueInput(stringValues[i].id, typeof(string), MemberData.CreateFromValue("")).SetName(i.ToString());
+				stringValues[i].port.filter = new(typeof(string), typeof(object));
 			}
 		}
 
@@ -33,14 +34,14 @@ namespace MaxyGames.UNode.Nodes {
 			if(useStringBuilder) {
 				StringBuilder builder = new();
 				for(int i = 0; i < stringValues.Count; i++) {
-					builder.Append(stringValues[i].port.GetValue<string>(flow));
+					builder.Append(stringValues[i].port.GetValue(flow));
 				}
 				return builder.ToString();
 			}
 			else {
 				string builder = null;
 				for(int i = 0; i < stringValues.Count; i++) {
-					builder += stringValues[i].port.GetValue<string>(flow);
+					builder += stringValues[i].port.GetValue(flow);
 				}
 				return builder;
 			}
@@ -56,6 +57,9 @@ namespace MaxyGames.UNode.Nodes {
 					return builder.CGInvoke(nameof(ToString));
 				}
 				else {
+					if(stringValues.Any(s => s.port.ValueType != typeof(string))) {
+						return CG.Invoke(typeof(string), nameof(string.Concat), stringValues.Select(s => CG.Value(s.port)).ToArray());
+					}
 					string builder = null;
 					for(int i = 0; i < stringValues.Count; i++) {
 						if(i != 0)

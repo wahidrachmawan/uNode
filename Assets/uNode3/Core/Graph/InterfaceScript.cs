@@ -48,7 +48,7 @@ namespace MaxyGames.UNode {
 		}
 
 		private void OnValidate() {
-			GraphData.name = name;
+			serializedGraph.Graph.name = name;
 		}
 
 

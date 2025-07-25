@@ -90,14 +90,38 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Ports
+		/// <summary>
+		/// Establishes a connection between the specified source and destination ports.
+		/// </summary>
+		/// <remarks>This method creates a connection between the two specified ports by invoking the underlying
+		/// connection logic. Ensure that both ports are valid and compatible before calling this method.</remarks>
+		/// <param name="source">The source port to connect from. Cannot be <c>null</c>.</param>
+		/// <param name="destination">The destination port to connect to. Cannot be <c>null</c>.</param>
 		public static void ConnectTo(this UPort source, UPort destination) {
 			Connection.CreateAndConnect(source, destination);
 		}
 
+		/// <summary>
+		/// Connects the specified <see cref="ValueInput"/> source to the given <see cref="MemberData"/> destination.
+		/// </summary>
+		/// <remarks>This method establishes a connection between the source and destination, assigning the source to
+		/// the default value of the destination.</remarks>
+		/// <param name="source">The source <see cref="ValueInput"/> to be connected.</param>
+		/// <param name="destination">The <see cref="MemberData"/> instance to which the source will be connected.</param>
 		public static void ConnectTo(this ValueInput source, MemberData destination) {
 			source.AssignToDefault(destination);
 		}
 
+		/// <summary>
+		/// Establishes a connection between the specified source and destination ports,  designating the connection as a
+		/// proxy.
+		/// </summary>
+		/// <remarks>This method creates a connection between the two specified ports and marks the connection  as a
+		/// proxy by setting the <c>isProxy</c> property to <see langword="true"/>.  Ensure that both <paramref
+		/// name="source"/> and <paramref name="destination"/> are valid  and properly initialized before calling this
+		/// method.</remarks>
+		/// <param name="source">The source <see cref="UPort"/> to initiate the connection from.</param>
+		/// <param name="destination">The destination <see cref="UPort"/> to connect to.</param>
 		public static void ConnectToAsProxy(this UPort source, UPort destination) {
 			Connection.CreateAndConnect(source, destination).isProxy = true;
 		}
@@ -228,10 +252,23 @@ namespace MaxyGames.UNode {
 			return result;
 		}
 
+		/// <summary>
+		/// Indicates whether custom attributes of a specified type are applied to a specified member.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="info"></param>
+		/// <returns></returns>
 		public static bool IsDefinedAttribute<T>(this MemberInfo info) {
 			return IsDefinedAttribute(info, typeof(T));
 		}
 
+		/// <summary>
+		/// Indicates whether custom attributes of a specified type are applied to a specified member.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="info"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
 		public static bool IsDefinedAttribute<T>(this MemberInfo info, out T value) where T : System.Attribute {
 			if(IsDefinedAttribute(info, typeof(T))) {
 				value = info.GetCustomAttribute<T>();
@@ -695,6 +732,15 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Traverses the parent hierarchy of the specified <see cref="UGraphElement"/> to find a node of the specified type.
+		/// </summary>
+		/// <remarks>If the graph associated with the specified <paramref name="element"/> has a linked owner, the
+		/// method will also search the parent hierarchy of the linked owner.</remarks>
+		/// <typeparam name="T">The type of the node to search for.</typeparam>
+		/// <param name="element">The starting <see cref="UGraphElement"/> from which to begin the search.</param>
+		/// <returns>The first node of type <typeparamref name="T"/> found in the parent hierarchy, or <see langword="default"/> if no
+		/// such node exists.</returns>
 		public static T GetNodeInParent<T>(this UGraphElement element) {
 			var parent = element;
 			while(parent != null) {
@@ -710,6 +756,17 @@ namespace MaxyGames.UNode {
 			return default;
 		}
 
+		/// <summary>
+		/// Traverses the parent hierarchy of the specified <see cref="UGraphElement"/> to find an object or node of the
+		/// specified type.
+		/// </summary>
+		/// <remarks>This method searches the parent hierarchy of the provided <paramref name="element"/> for an
+		/// object or node of type <typeparamref name="T"/>. If no match is found in the hierarchy, the method will also check
+		/// the linked owner of the graph, if applicable.</remarks>
+		/// <typeparam name="T">The type of object or node to search for in the parent hierarchy.</typeparam>
+		/// <param name="element">The starting <see cref="UGraphElement"/> from which to begin the search.</param>
+		/// <returns>An instance of type <typeparamref name="T"/> if found in the parent hierarchy or linked graph; otherwise, the
+		/// default value for type <typeparamref name="T"/>.</returns>
 		public static T GetObjectOrNodeInParent<T>(this UGraphElement element) {
 			var parent = element;
 			while(parent != null) {
@@ -1418,6 +1475,14 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Types
+		/// <summary>
+		/// Converts a serialized type name into a pretty name format.
+		/// </summary>
+		/// <param name="typeName">The serialized type name to be converted.</param>
+		/// <param name="fullName">A boolean value indicating whether to include the full namespace in the resulting type name. <see
+		/// langword="true"/> to include the full namespace; otherwise, <see langword="false"/>.</param>
+		/// <returns>A pretty name representation of the type name. If the type cannot be deserialized, the original <paramref
+		/// name="typeName"/> is returned.</returns>
 		public static string PrettyName(this string typeName, bool fullName = false) {
 			Type t = TypeSerializer.Deserialize(typeName, false);
 			if(t != null) {
@@ -1426,6 +1491,13 @@ namespace MaxyGames.UNode {
 			return typeName;
 		}
 
+		/// <summary>
+		/// Generates a pretty name for the specified <see cref="Type"/>.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="fullName"></param>
+		/// <param name="info"></param>
+		/// <returns></returns>
 		public static string PrettyName(this Type type, bool fullName, ParameterInfo info) {
 			if(info != null) {
 				if(info.ParameterType.IsByRef) {
@@ -1443,6 +1515,16 @@ namespace MaxyGames.UNode {
 			return CSharpTypeName(type, fullName);
 		}
 
+		/// <summary>
+		/// Generates a pretty name for the specified <see cref="Type"/>.
+		/// </summary>
+		/// <param name="type">The <see cref="Type"/> to generate the name for. Cannot be <see langword="null"/>.</param>
+		/// <param name="fullName">A value indicating whether to include the namespace in the generated name. <see langword="true"/> to include the
+		/// namespace; otherwise, <see langword="false"/>.</param>
+		/// <param name="refKind">Specifies the kind of reference modifier to include in the name, such as <see cref="RefKind.Ref"/> or <see
+		/// cref="RefKind.Out"/>. Defaults to <see cref="RefKind.None"/>.</param>
+		/// <returns>A string representing the pretty name of the <paramref name="type"/>, optionally including the namespace
+		/// and reference modifier based on the provided parameters.</returns>
 		public static string PrettyName(this Type type, bool fullName = false, RefKind refKind = RefKind.None) {
 			return CSharpTypeName(type, fullName, refKind);
 		}
@@ -1489,10 +1571,22 @@ namespace MaxyGames.UNode {
 		}
 		#endregion
 		
+		/// <summary>
+		/// Determines whether the specified <see cref="PortAccessibility"/> value allows data to be retrieved.
+		/// </summary>
+		/// <param name="accessibility">The <see cref="PortAccessibility"/> value to evaluate.</param>
+		/// <returns><see langword="true"/> if the <paramref name="accessibility"/> is <see cref="PortAccessibility.ReadWrite"/>  or
+		/// <see cref="PortAccessibility.ReadOnly"/>; otherwise, <see langword="false"/>.</returns>
 		public static bool CanGet(this PortAccessibility accessibility) {
 			return accessibility == PortAccessibility.ReadWrite || accessibility == PortAccessibility.ReadOnly;
 		}
 
+		/// <summary>
+		/// Determines whether the specified <see cref="PortAccessibility"/> value allows writing to the port.
+		/// </summary>
+		/// <param name="accessibility">The <see cref="PortAccessibility"/> value to evaluate.</param>
+		/// <returns><see langword="true"/> if the port accessibility is <see cref="PortAccessibility.ReadWrite"/> or  <see
+		/// cref="PortAccessibility.WriteOnly"/>; otherwise, <see langword="false"/>.</returns>
 		public static bool CanSet(this PortAccessibility accessibility) {
 			return accessibility == PortAccessibility.ReadWrite || accessibility == PortAccessibility.WriteOnly;
 		}
@@ -1920,6 +2014,15 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
+		/// <summary>
+		/// Adds the elements of the specified collection to the target collection.
+		/// </summary>
+		/// <remarks>This method iterates over the <paramref name="values"/> collection and adds each element to the
+		/// <paramref name="collections"/> collection. If <paramref name="values"/> is <see langword="null"/>, the method
+		/// performs no operation.</remarks>
+		/// <typeparam name="T">The type of elements in the collections.</typeparam>
+		/// <param name="collections">The target collection to which the elements will be added. Cannot be <see langword="null"/>.</param>
+		/// <param name="values">The collection of elements to add. If <see langword="null"/>, no elements are added.</param>
 		public static void AddRange<T>(this ICollection<T> collections, IEnumerable<T> values) {
 			if(values != null) {
 				foreach(var value in values) {
@@ -1928,6 +2031,12 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Converts the elements of the specified <see cref="IEnumerable{T}"/> to a <see cref="HashSet{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The type of elements in the source collection.</typeparam>
+		/// <param name="collections">The source collection to convert to a <see cref="HashSet{T}"/>.</param>
+		/// <returns>A <see cref="HashSet{T}"/> containing the elements of the source collection.</returns>
 		public static HashSet<T> ToHashSet<T>(this IEnumerable<T> collections) {
 			return new HashSet<T>(collections);
 		}
