@@ -447,10 +447,15 @@ namespace MaxyGames.UNode {
 							}
 						}
 						else {
-							if(inputType.IsCastableTo(targetType) == false) {
-								RegisterError(port.node, new ErrorMessage() {
-									message = $"Cannot convert: {inputType.PrettyName(true)} to {targetType.PrettyName(true)}. Error from port: {port.GetPrettyName()}",
-								});
+							if(p.filter != null) {
+
+							}
+							else {
+								if(inputType.IsCastableTo(targetType) == false) {
+									RegisterError(port.node, new ErrorMessage() {
+										message = $"Cannot convert: {inputType.PrettyName(true)} to {targetType.PrettyName(true)}. Error from port: {port.GetPrettyName()}",
+									});
+								}
 							}
 						}
 						//if(!member.isStatic && member.targetType != MemberData.TargetType.Null &&
