@@ -264,7 +264,7 @@ namespace MaxyGames.UNode {
 
 				var obj = value as UnityEngine.Object;
 
-				if(object.ReferenceEquals(null, obj) == false || value is IValueReference) {
+				if(object.ReferenceEquals(null, obj) == false || value is IValueReference || value is UReference) {
 					//Serializing Unity Object or value references
 					if(this.referenceIndexMapping.TryGetValue(value, out index) == false) {
 						index = this.referencedObjects.Count;
@@ -296,7 +296,6 @@ namespace MaxyGames.UNode {
 
 					return true;
 				}
-
 				index = -1;
 				return false;
 			}

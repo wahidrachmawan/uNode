@@ -3,18 +3,18 @@ using UnityEngine;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[EventMenu("", "On Exit", scope = NodeScope.State)]
+	[EventMenu("", "On State Exit", scope = NodeScope.State)]
 	[StateEvent]
 	[Description("On Exit is called once when the state becomes inactive.")]
 	public class StateOnExitEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			var state = nodeObject.GetNodeInParent<INodeWithEnterExitEvent>();
 			if(state != null) {
-				state.OnExitState += flow => Trigger(flow);
+				state.OnExitCallback += flow => Trigger(flow);
 			}
 		}
 
-		public override string GetTitle() => "On Exit";
+		public override string GetTitle() => "On State Exit";
 
 		public override Type GetNodeIcon() {
 			return typeof(TypeIcons.EventIcon);

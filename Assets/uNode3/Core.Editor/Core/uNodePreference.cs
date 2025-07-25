@@ -50,7 +50,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public DisplayKind displayKind;
 
-			public bool showGrid = false,
+			public bool showGrid = true,
 				inEditorDocumentation = true,
 				inspectorIntegration = true,
 				autoBackupOnSave = true,
@@ -177,6 +177,9 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				public bool analyzeScript;
 				[Hide(nameof(analyzeScript), false)]
 				public bool formatScript = true;
+				[Hide(nameof(analyzeScript), false)]
+				[Tooltip("If enabled, static extension method calls will be rewritten using instance-style syntax where safe (e.g., StaticClass.Method(x) → x.Method()).")]
+				public bool preferExtensionMethodSyntax = true;
 				[Hide(nameof(analyzeScript), false)]
 				public bool removeUnnecessaryCode = true;
 

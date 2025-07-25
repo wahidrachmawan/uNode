@@ -60,7 +60,6 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
-		private string evtCode;
 		public override void OnGeneratorInitialize() {
 			base.OnGeneratorInitialize();
 			var mData = CG.generatorData.AddMethod(
@@ -96,10 +95,10 @@ namespace MaxyGames.UNode.Nodes {
 
 			if(targetType.IsCastableTo(typeof(Delegate))) {
 				enableEvent.AddCodeForEvent(
-					CG.WrapWithInformation(CG.Value(target, instance: instance).CGSet(mData.name, SetType.Add), this)
+					CG.WrapWithInformation(CG.Value(target, instance: instance).CGSet(mData.name, target.type, SetType.Add), this)
 				);
 				disableEvent.AddCodeForEvent(
-					CG.WrapWithInformation(CG.Value(target, instance: instance).CGSet(mData.name, SetType.Subtract), this)
+					CG.WrapWithInformation(CG.Value(target, instance: instance).CGSet(mData.name, target.type, SetType.Subtract), this)
 				);
 			}
 			else if(targetType.IsCastableTo(typeof(UnityEventBase))) {

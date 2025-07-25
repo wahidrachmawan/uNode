@@ -218,6 +218,13 @@ namespace MaxyGames.UNode.Editors {
 									referenceChanged = true;
 								}
 							}
+							else if(references[i] is UReference uref) {
+								graphElement = uref.GetGraphElement();
+								if(!oldGuids.Contains(graphElement.id) && ValidateReference(graphElement, out var validElement)) {
+									uref.SetGraphElement(validElement);
+									referenceChanged = true;
+								}
+							}
 						}
 
 						if(referenceChanged) {
@@ -246,16 +253,11 @@ namespace MaxyGames.UNode.Editors {
 												};
 											}
 										}
-										else if(item.reference is ParameterRef parameterRef) {
-											if(ValidateReference(parameterRef.reference, out var validElement)) {
+										else if(item.reference is UReference) {
+											var uref = item.reference as UReference;
+											if(ValidateReference(uref.GetGraphElement(), out var validElement)) {
 												postAction += () => {
-													var reference = item.reference;
-													if(reference is UReference) {
-														(reference as UReference).SetGraphElement(validElement);
-													}
-													else {
-														throw new InvalidOperationException();
-													}
+													uref.SetGraphElement(validElement);
 												};
 											}
 										}
@@ -267,6 +269,14 @@ namespace MaxyGames.UNode.Editors {
 								if(self != parent.graphContainer) {
 									mData.CopyFrom(MemberData.This(parent.graphContainer));
 								}
+							}
+						}
+						else if(obj is UReference) {
+							var uref = obj as UReference;
+							if(ValidateReference(uref.GetGraphElement(), out var validElement)) {
+								postAction += () => {
+									uref.SetGraphElement(validElement);
+								};
 							}
 						}
 						return false;

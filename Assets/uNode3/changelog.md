@@ -5,9 +5,10 @@
 - Added new Call Stack window, auto open when breakpoint is hit in playmode allowing for see the execution flows and has ability to highlight node, ping object, and open script.
 - Added ability to make connection by single click on the port ( no need to hold down left button )
 - Renamed State Graph to Event Graph
+- Improved C# Parser
 - Improved Code Generation
 - Improved Editor
-- Fixed some bugs
+- Fixed most of reported bugs
 
 ## v3.1.5
 - Added more drag & drop menu items

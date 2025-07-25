@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	public interface INodeWithEnterExitEvent {
-		public event System.Action<Flow> OnEnterState;
-		public event System.Action<Flow> OnExitState;
+		public event System.Action<Flow> OnEnterCallback;
+		public event System.Action<Flow> OnExitCallback;
 	}
 
 	public class ScriptState : Node, ISuperNode, INodeWithEventHandler, INodeWithEnterExitEvent, IStateNodeWithTransition, INodeWithConnection {
@@ -35,7 +35,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		private event System.Action<Flow> m_onEnter;
-		public event System.Action<Flow> OnEnterState {
+		public event System.Action<Flow> OnEnterCallback {
 			add {
 				m_onEnter -= value;
 				m_onEnter += value;
@@ -45,7 +45,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 		private event System.Action<Flow> m_onExit;
-		public event System.Action<Flow> OnExitState {
+		public event System.Action<Flow> OnExitCallback {
 			add {
 				m_onExit -= value;
 				m_onExit += value;

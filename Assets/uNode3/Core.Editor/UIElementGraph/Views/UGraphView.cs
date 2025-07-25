@@ -946,6 +946,15 @@ namespace MaxyGames.UNode.Editors {
 				graphData.position = -contentViewContainer.resolvedStyle.translate / scale;
 			}
 			if(Mathf.Abs(scale - lastZoomLevel) > 0.01f) {
+				if(gridBackground != null) {
+					if(scale >= 0.5f) {
+						gridBackground.style.display = StyleKeyword.Null;
+					}
+					else {
+						gridBackground.style.display = DisplayStyle.None;
+					}
+				}
+
 				foreach(var node in nodes) {
 					if(node is UNodeView v)
 						v.OnZoomUpdated(scale);
