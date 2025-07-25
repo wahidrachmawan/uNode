@@ -117,6 +117,10 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	public interface IStateTransitionNode {
+		IStateNodeWithTransition StateNode { get; }
+	}
+
 	public interface IStateNodeWithTransition {
 		UGraphElement TransitionContainer { get; }
 		IEnumerable<Nodes.StateTransition> GetTransitions();

@@ -1755,6 +1755,7 @@ namespace MaxyGames.UNode.Editors {
 						stateNode.TransitionContainer, "Transition",
 						new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
 						(transition) => {
+							transition.nodeObject.name = "FINISH";
 							transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
 							//NodeEditorUtility.AddNewNode<Nodes.ScriptState>(node.nodeObject.parent, "State", 
 							//	new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 150), 

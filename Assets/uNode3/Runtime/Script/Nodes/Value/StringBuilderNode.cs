@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System.Text;
 
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Data", "StringBuilder", typeof(string), inputs = new[] { typeof(string) })]
@@ -14,6 +15,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		[HideInInspector]
 		public List<Data> stringValues = new List<Data>() { new Data(), new Data() };
+		[Tooltip("If enabled, the output is a concatenation using System.Text.StringBuilder instead of concatenating strings.")]
+		public bool useStringBuilder;
 
 		protected override void OnRegister() {
 			base.OnRegister();
@@ -27,22 +30,40 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override object GetValue(Flow flow) {
-			string builder = null;
-			for(int i = 0; i < stringValues.Count; i++) {
-				builder += stringValues[i].port.GetValue<string>(flow);
+			if(useStringBuilder) {
+				StringBuilder builder = new();
+				for(int i = 0; i < stringValues.Count; i++) {
+					builder.Append(stringValues[i].port.GetValue<string>(flow));
+				}
+				return builder.ToString();
 			}
-			return builder;
+			else {
+				string builder = null;
+				for(int i = 0; i < stringValues.Count; i++) {
+					builder += stringValues[i].port.GetValue<string>(flow);
+				}
+				return builder;
+			}
 		}
 
 		protected override string GenerateValueCode() {
 			if(stringValues.Count > 0) {
-				string builder = null;
-				for(int i = 0; i < stringValues.Count; i++) {
-					if(i != 0)
-						builder += " + ";
-					builder += CG.Value(stringValues[i].port);
+				if(useStringBuilder) {
+					string builder = CG.New(typeof(StringBuilder), CG.Value(stringValues[0].port));
+					for(int i = 1; i < stringValues.Count; i++) {
+						builder = CG.Invoke(builder, nameof(StringBuilder.Append), CG.Value(stringValues[i].port));
+					}
+					return builder.CGInvoke(nameof(ToString));
 				}
-				return builder;
+				else {
+					string builder = null;
+					for(int i = 0; i < stringValues.Count; i++) {
+						if(i != 0)
+							builder += " + ";
+						builder += CG.Value(stringValues[i].port);
+					}
+					return builder;
+				}
 			}
 			return "null";
 		}

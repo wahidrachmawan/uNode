@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace MaxyGames.UNode.Editors {
+namespace MaxyGames.UNode.Editors.Drawer {
 	public class CharPropertyDrawer : UPropertyDrawer<char> {
 		public override void Draw(Rect position, DrawerOption option) {
 			EditorGUI.BeginChangeCheck();

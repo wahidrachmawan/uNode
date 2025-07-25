@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class StateTransition : Node, ISuperNode, INodeWithEnterExitEvent, INodeWithEventHandler, INodeWithCustomCanvas {
+	public class StateTransition : Node, ISuperNode, INodeWithEnterExitEvent, INodeWithEventHandler, IStateTransitionNode, INodeWithCustomCanvas {
 		public IStateNodeWithTransition StateNode {
 			get {
 				return nodeObject.GetNodeInParent<IStateNodeWithTransition>();
@@ -145,13 +145,15 @@ namespace MaxyGames.UNode.Nodes {
 					//		}
 					//	}
 					//});
-					if(onEnter != null) {
-						onEnter = CG.Set(state.CGAccess(nameof(StateMachines.State.onEnter)), CG.Lambda(onEnter), SetType.Add);
-						onEnter = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onEnter), this);
-					}
-					if(onExit != null) {
-						onExit = CG.Set(state.CGAccess(nameof(StateMachines.State.onExit)), CG.Lambda(onExit), SetType.Add);
-						onExit = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onExit), this);
+					if(string.IsNullOrEmpty(state) == false) {
+						if(onEnter != null) {
+							onEnter = CG.Set(state.CGAccess(nameof(StateMachines.State.onEnter)), CG.Lambda(onEnter), SetType.Add);
+							onEnter = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onEnter), this);
+						}
+						if(onExit != null) {
+							onExit = CG.Set(state.CGAccess(nameof(StateMachines.State.onExit)), CG.Lambda(onExit), SetType.Add);
+							onExit = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onExit), this);
+						}
 					}
 					if(onEnter != null || onExit != null) {
 						CG.InsertCodeToFunction("Awake", CG.Flow(

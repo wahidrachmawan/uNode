@@ -23,7 +23,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override void CheckError(ErrorAnalyzer analizer) {
 			base.CheckError(analizer);
-			if(nodeObject.parent is not NodeObject parentNode || parentNode.node is not INodeWithEnterExitEvent) {
+			if(nodeObject.parent is not NodeObject parentNode || parentNode.node is not INodeWithEnterExitEvent || 
+				parentNode.node is IStateTransitionNode state && (state.StateNode is not INodeWithEnterExitEvent)) {
 				analizer.RegisterError(this, "On Enter event can only be placed inside Script State.");
 			}
 		}
