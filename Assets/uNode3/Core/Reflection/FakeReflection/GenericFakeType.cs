@@ -536,7 +536,12 @@ namespace MaxyGames.UNode {
 						}
 					}
 				}
-				return type.MakeGenericType(param);
+				try {
+					return type.MakeGenericType(param);
+				}
+				catch(Exception ex) {
+					UnityEngine.Debug.LogError("Error on getting generic type: " + type + "\n" + ex.Message);
+				}
 			}
 			return type;
 		}
