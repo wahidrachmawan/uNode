@@ -1391,6 +1391,12 @@ namespace MaxyGames.UNode.Editors {
 					var eventMenus = NodeEditorUtility.FindEventMenu();
 					foreach(var menu in eventMenus) {
 						if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
+							if(superNode.node is IStateTransitionNode stateTransition) {
+								if(stateTransition.StateNode is Nodes.AnyStateNode) {
+									if(menu.type == typeof(Nodes.StateOnEnterEvent)) continue;
+									if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
+								}
+							}
 							yield return new DropdownMenuAction("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
