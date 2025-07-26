@@ -16,6 +16,8 @@ namespace MaxyGames.UNode.Nodes {
 
 		public IEnumerable<NodeObject> NestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
+		public bool IsExpose = false;
+		
 		[System.NonSerialized]
 		public FlowInput enter;
 		[System.NonSerialized]
@@ -102,8 +104,12 @@ namespace MaxyGames.UNode.Nodes {
 		/// </summary>
 		public void Finish(Flow flow) {
 			var state = flow.GetUserData(StateNode as Node) as StateMachines.IState;
+			var targetState = flow.GetUserData(exit.GetTargetNode()) as StateMachines.IState;
 			if(state.IsActive) {
-				state.FSM.ChangeState(flow.GetUserData(exit.GetTargetNode()) as StateMachines.IState);
+				if(targetState.IsActive && !targetState.CanTriggerWhenActive) {
+					return;
+				};
+				state.FSM.ChangeState(targetState);
 #if UNITY_EDITOR
 				if(GraphDebug.useDebug) {
 					GraphDebug.Flow(flow.instance.target, nodeObject.graphContainer.GetGraphID(), id, nameof(exit));
