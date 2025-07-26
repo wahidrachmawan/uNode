@@ -27,8 +27,7 @@ namespace MaxyGames.UNode.Editors {
 			title = targetNode.GetTitle();
 			titleButtonContainer.RemoveFromHierarchy();
 			this.AddStyleSheet("uNodeStyles/NativeRegionStyle");
-			var border = this.Q("node-border");
-			//border.style.overflow = Overflow.Visible;
+			border = this.Q("node-border");
 			horizontalDivider = border.Q("contents").Q("divider");
 
 			comment = new Label(node.comment);
@@ -122,6 +121,22 @@ namespace MaxyGames.UNode.Editors {
 			horizontalDivider.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, 0.9f);
 			mainContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, bodyTransparent);
 			titleContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, titleTransparent);
+		}
+
+		private float m_titleSize;
+		private Label m_titleLabel;
+		public override void OnZoomUpdated(float zoom) {
+			zoom += 0.2f;
+			if(m_titleLabel == null) {
+				m_titleLabel = titleContainer.Q<Label>("title-label");
+				m_titleSize = m_titleLabel.resolvedStyle.fontSize;
+			}
+			if(m_titleSize == 0) {
+				m_titleSize = m_titleLabel.resolvedStyle.fontSize;
+			}
+			else {
+				m_titleLabel.style.fontSize = m_titleSize / Mathf.Clamp(zoom, 0.01f, 1);
+			}
 		}
 
 		public override void ReloadView() {
