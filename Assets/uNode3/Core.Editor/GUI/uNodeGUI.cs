@@ -939,11 +939,49 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Layout Version
+		private static Dictionary<int, string> editBuffer = new();
 		public static string TextInput(string text, string placeholder, bool area = false, bool delayedField = true, GUIStyle style = null, params GUILayoutOption[] options) {
 			if(style == null) {
 				style = EditorStyles.textField;
 			}
-			var newText = area ? EditorGUILayout.TextArea(text, style, options) : delayedField ? EditorGUILayout.DelayedTextField(text, style, options) : EditorGUILayout.TextField(text, style, options);
+			string newText = text;
+			if(area) {
+				newText = EditorGUILayout.TextArea(text, style, options);
+			}
+			else if(delayedField) {
+				int controlId = GUIUtility.GetControlID(FocusType.Keyboard) + 1;
+				int currentKeyboard = GUIUtility.keyboardControl;
+
+				if(currentKeyboard == controlId - 1) {
+					//For auto focus to the text control
+					GUIUtility.keyboardControl = controlId;
+				}
+
+				string buffer = editBuffer.TryGetValue(controlId, out var buf) ? buf : text;
+				buffer = EditorGUILayout.TextField(buffer, style, options);
+				if(buffer != text) {
+					editBuffer[controlId] = buffer;
+					if(currentKeyboard == controlId) {
+						if(Event.current.type == EventType.KeyUp &&
+							Event.current.keyCode == KeyCode.Return) {
+							GUIUtility.keyboardControl = 0; // remove focus
+
+							editBuffer.Remove(controlId);
+							newText = buffer;
+							//GUI.FocusControl(null);
+							GUI.changed = true;
+							//Event.current.Use();
+						}
+					}
+					else if(editBuffer.ContainsKey(controlId) && buffer != text) {
+						editBuffer.Remove(controlId);
+						newText = buffer;
+					}
+				}
+			}
+			else {
+				newText = EditorGUILayout.TextField(text, style, options);
+			}
 			if(string.IsNullOrEmpty(text)) {
 				const int textMargin = 2;
 				var guiColor = GUI.color;

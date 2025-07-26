@@ -9,6 +9,13 @@ using System.Collections;
 using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
+	/// <summary>
+	/// Provides an abstract base class for manipulating graph-related data and behavior.
+	/// </summary>
+	/// <remarks>The <see cref="GraphManipulator"/> class defines a framework for handling commands, canvas
+	/// features,  and context menus within a graph editor. It includes methods for validating actions, handling commands, 
+	/// and creating new graph elements such as variables, properties, and functions.  Derived classes can override its
+	/// virtual members to implement specific manipulation logic.</remarks>
 	public abstract class GraphManipulator {
 		/// <summary>
 		/// The list of manipulation command
@@ -223,7 +230,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					postAction?.Invoke();
 					uNodeThreadUtility.Queue(() => {
-						GraphUtility.RefactorElementName(mousePosition, variable, null);
+						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable));
 					});
 				});
 			});
@@ -242,7 +249,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						postAction?.Invoke();
 						uNodeThreadUtility.Queue(() => {
-							GraphUtility.RefactorElementName(mousePosition, p, GraphChanged);
+							CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, p));
 						});
 					});
 				});
@@ -368,7 +375,7 @@ namespace MaxyGames.UNode.Editors {
 				var variable = graphData.selectedRoot.variableContainer.AddVariable("localVariable", type);
 				postAction?.Invoke();
 				uNodeThreadUtility.Queue(() => {
-					GraphUtility.RefactorElementName(mousePosition, variable, null);
+					CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable));
 				});
 			});
 			return true;
@@ -384,7 +391,7 @@ namespace MaxyGames.UNode.Editors {
 						f.modifier.SetPrivate();
 					}
 					uNodeThreadUtility.Queue(() => {
-						GraphUtility.RefactorElementName(mousePosition, f, null);
+						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, f));
 					});
 				});
 				GraphChanged();
@@ -396,7 +403,7 @@ namespace MaxyGames.UNode.Editors {
 						f.modifier.SetPrivate();
 					}
 					uNodeThreadUtility.Queue(() => {
-						GraphUtility.RefactorElementName(mousePosition, f, null);
+						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, f));
 					});
 				});
 				GraphChanged();
