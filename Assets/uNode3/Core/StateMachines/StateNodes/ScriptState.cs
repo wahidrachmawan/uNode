@@ -11,6 +11,8 @@ namespace MaxyGames.UNode.Nodes {
 	}
 
 	public class ScriptState : Node, ISuperNode, INodeWithEventHandler, INodeWithEnterExitEvent, IStateNodeWithTransition, INodeWithConnection {
+		public bool CanTriggerWhenActive = true;
+
 		[HideInInspector]
 		public StateTranstionData transitions = new StateTranstionData();
 
@@ -67,37 +69,43 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			base.OnRuntimeInitialize(instance);
-			var state = new StateMachines.State(
-				onEnter: () => {
+			var state = new StateMachines.State();
+			state.CanTriggerWhenActive = CanTriggerWhenActive;
+			state.onEnter = () => {
 #if UNITY_EDITOR
-					if(GraphDebug.useDebug) {
-						GraphDebug.FlowNode(instance.target, nodeObject.graphContainer.GetGraphID(), id, null);
-					}
+				if(GraphDebug.useDebug) {
+					GraphDebug.FlowNode(instance.target, nodeObject.graphContainer.GetGraphID(), id, null);
+				}
 #endif
-					m_onEnter?.Invoke(instance.defaultFlow);
-					foreach(var tr in GetTransitions()) {
-						tr.OnEnter(instance.defaultFlow);
-					}
-				},
-				onExit: () => {
+				m_onEnter?.Invoke(instance.defaultFlow);
+				foreach(var tr in GetTransitions()) {
+					tr.OnEnter(instance.defaultFlow);
+				}
+			};
+			state.onExit = () => {
 #if UNITY_EDITOR
-					if(GraphDebug.useDebug) {
-						GraphDebug.FlowNode(instance.target, nodeObject.graphContainer.GetGraphID(), id, true);
-					}
+				if(GraphDebug.useDebug) {
+					GraphDebug.FlowNode(instance.target, nodeObject.graphContainer.GetGraphID(), id, true);
+				}
 #endif
-					m_onExit?.Invoke(instance.defaultFlow);
-					foreach(var tr in GetTransitions()) {
-						tr.OnExit(instance.defaultFlow);
-					}
-					//Stop all running coroutine flows
-					foreach(var element in nodeObject.GetObjectsInChildren(true)) {
-						if(element is NodeObject node && node.node is not BaseEventNode) {
-							foreach(var port in node.FlowInputs) {
-								instance.StopState(port);
-							}
+				m_onExit?.Invoke(instance.defaultFlow);
+				foreach(var tr in GetTransitions()) {
+					tr.OnExit(instance.defaultFlow);
+				}
+				//Stop all running coroutine flows
+				foreach(var element in nodeObject.GetObjectsInChildren(true)) {
+					if(element is NodeObject node && node.node is not BaseEventNode) {
+						foreach(var port in node.FlowInputs) {
+							instance.StopState(port);
 						}
 					}
-				});
+				}
+			};
+			state.onUpdate = () => {
+				if(state.CanTriggerWhenActive != CanTriggerWhenActive) {
+					state.CanTriggerWhenActive = CanTriggerWhenActive;
+				}
+			};
 			instance.SetUserData(this, state);
 		}
 
@@ -146,7 +154,13 @@ namespace MaxyGames.UNode.Nodes {
 		protected override string GenerateFlowCode() {
 			var state = CG.GetVariableNameByReference(this);
 			var fsm = CG.GetVariableNameByReference(nodeObject.parent);
-			return CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
+			var csCode = CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
+			if (CanTriggerWhenActive) {
+				return csCode;
+			}
+			else {
+				return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), null, csCode);
+			}
 		}
 
 		string INodeWithEventHandler.GenerateTriggerCode(string contents) {

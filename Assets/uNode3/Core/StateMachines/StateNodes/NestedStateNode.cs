@@ -6,6 +6,8 @@ using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
 	public class NestedStateNode : Node, ISuperNodeWithEntry, INodeWithEventHandler, IStateNodeWithTransition, INodeWithConnection {
+		public bool CanTriggerWhenActive = true;
+
 		[HideInInspector]
 		public StateTranstionData transitions = new StateTranstionData();
 
@@ -58,6 +60,7 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRuntimeInitialize(instance);
 
 			var state = new StateMachines.NestedState();
+			state.CanTriggerWhenActive = CanTriggerWhenActive;
 			state.onEnter = () => {
 #if UNITY_EDITOR
 				if(GraphDebug.useDebug) {
@@ -94,6 +97,11 @@ namespace MaxyGames.UNode.Nodes {
 				//	}
 				//}
 			};
+			state.onUpdate = () => {
+				if(state.CanTriggerWhenActive != CanTriggerWhenActive) {
+					state.CanTriggerWhenActive = CanTriggerWhenActive;
+				}
+			};
 			instance.SetUserData(this, state);
 		}
 
@@ -129,7 +137,13 @@ namespace MaxyGames.UNode.Nodes {
 		protected override string GenerateFlowCode() {
 			var state = CG.GetVariableNameByReference(this);
 			var fsm = CG.GetVariableNameByReference(nodeObject.parent);
-			return CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
+			var csCode = CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
+			if (CanTriggerWhenActive) {
+				return csCode;
+			}
+			else {
+				return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), null, csCode);
+			}
 		}
 
 		string INodeWithEventHandler.GenerateTriggerCode(string contents) {

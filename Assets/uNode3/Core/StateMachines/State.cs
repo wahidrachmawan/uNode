@@ -16,6 +16,10 @@ namespace MaxyGames.StateMachines {
 		/// True if the state is active
 		/// </summary>
 		bool IsActive { get; }
+		/// <summary>
+		/// True if status can be triggered while active
+		/// </summary>
+		bool CanTriggerWhenActive { get; set; }
 
 		/// <summary>
 		/// Callback when state is entered
@@ -58,6 +62,8 @@ namespace MaxyGames.StateMachines {
 		public List<ITransition> transitions = new();
 
 		public virtual bool IsActive => FSM != null && FSM.ActiveState == this && FSM.IsActive;
+
+		public bool CanTriggerWhenActive { get; set; }
 
 		public IStateMachine FSM { get; set; }
 
@@ -176,7 +182,7 @@ namespace MaxyGames.StateMachines {
 	/// The nested state that can have state inside of it
 	/// </summary>
 	public class NestedState : BaseState, IStateMachine {
-		public Action onEnter, onExit;
+		public Action onEnter, onUpdate, onExit;
 		[NonSerialized]
 		private IState m_activeState;
 		[NonSerialized]
@@ -238,6 +244,7 @@ namespace MaxyGames.StateMachines {
 				}
 			}
 			ActiveState?.Tick();
+			onUpdate?.Invoke();
 		}
 
 		protected override void OnEnter() {
