@@ -22,8 +22,7 @@ namespace MaxyGames.UNode.Nodes {
 							var target = serializedTransition.reference as NodeObject;
 							if(target.node is StateTransition) {
 								m_transition = target.node as StateTransition;
-								if(object.ReferenceEquals(transition.StateNode, parent.node) == false
-								&& transition.IsExpose == false) {
+								if(object.ReferenceEquals(m_transition.StateNode, parent.node) == false && m_transition.IsExpose == false) {
 									m_transition = null;
 								}
 							}

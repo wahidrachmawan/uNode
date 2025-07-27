@@ -63,7 +63,7 @@ namespace MaxyGames.StateMachines {
 
 		public virtual bool IsActive => FSM != null && FSM.ActiveState == this && FSM.IsActive;
 
-		public bool CanTriggerWhenActive { get; set; }
+		public bool CanTriggerWhenActive { get; set; } = true;
 
 		public IStateMachine FSM { get; set; }
 
@@ -192,6 +192,10 @@ namespace MaxyGames.StateMachines {
 			set {
 				if(value != null) {
 					value.FSM = this;
+				}
+				if(value == m_activeState && value.CanTriggerWhenActive == false) {
+					//Return when it is cannot be triggered again while is active
+					return;
 				}
 				if(m_transitionState == null) {
 					m_activeState?.Exit();

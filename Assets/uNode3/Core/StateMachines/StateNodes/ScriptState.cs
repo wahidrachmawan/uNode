@@ -145,8 +145,9 @@ namespace MaxyGames.UNode.Nodes {
 					onExit = CG.SetValue(nameof(StateMachines.State.onExit), CG.Lambda(onExit));
 				}
 				CG.InsertCodeToFunction("Awake", CG.WrapWithInformation(CG.Flow(
-						state.CGSet(CG.New(typeof(StateMachines.State), null, new[] { onEnter, onExit })),
-						state.CGAccess(nameof(StateMachines.IState.FSM)).CGSet(CG.GetVariableNameByReference(nodeObject.parent))
+					state.CGSet(CG.New(typeof(StateMachines.State), null, new[] { onEnter, onExit })),
+					state.CGAccess(nameof(StateMachines.IState.FSM)).CGSet(CG.GetVariableNameByReference(nodeObject.parent)),
+					CanTriggerWhenActive == false ? state.CGAccess(nameof(StateMachines.IState.CanTriggerWhenActive)).CGSet(CG.Value(CanTriggerWhenActive)) : null
 				), this));
 			});
 		}
@@ -154,13 +155,7 @@ namespace MaxyGames.UNode.Nodes {
 		protected override string GenerateFlowCode() {
 			var state = CG.GetVariableNameByReference(this);
 			var fsm = CG.GetVariableNameByReference(nodeObject.parent);
-			var csCode = CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
-			if (CanTriggerWhenActive) {
-				return csCode;
-			}
-			else {
-				return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), null, csCode);
-			}
+			return CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state);
 		}
 
 		string INodeWithEventHandler.GenerateTriggerCode(string contents) {

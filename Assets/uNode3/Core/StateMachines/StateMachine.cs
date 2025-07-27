@@ -39,19 +39,23 @@ namespace MaxyGames.StateMachines {
 
 	public class StateMachine : IStateMachine {
 		[NonSerialized]
-		private BaseState m_activeState;
+		private IState m_activeState;
 		[NonSerialized]
-		private BaseState m_transitionState;
+		private IState m_transitionState;
 		public IState ActiveState {
 			get => m_activeState;
 			set {
 				if(value != null) {
 					value.FSM = this;
 				}
+				if(value == m_activeState && value.CanTriggerWhenActive == false) {
+					//Return when it is cannot be triggered again while is active
+					return;
+				}
 				if(m_transitionState == null) {
 					m_activeState?.Exit();
 					m_activeState = null;
-					m_transitionState = (BaseState)value;
+					m_transitionState = value;
 				}
 			}
 		}

@@ -75,7 +75,7 @@ namespace MaxyGames.UNode.Nodes {
 		public override string GetTitle() {
 			switch(kind) {
 				case Kind.StateMachine: {
-					var fsm = reference?.reference as StateGraphContainer;
+					var fsm = reference?.reference;
 					if(fsm != null) {
 						return $"Get: {fsm.name}";
 					}
@@ -89,10 +89,10 @@ namespace MaxyGames.UNode.Nodes {
 					return "Get State";
 				}
 				case Kind.SetState: {
-					var fsm = reference?.reference as StateGraphContainer;
+					var fsm = reference?.reference;
 					var node = stateReference?.reference as NodeObject;
 					if(fsm != null && node != null) {
-						return $"Set '{fsm.name}' State to: {node.GetTitle()}";
+						return $"Set '{fsm.name}' state to: {node.GetTitle()}";
 					}
 					return "Set State";
 				}
@@ -111,7 +111,7 @@ namespace MaxyGames.UNode.Nodes {
 		public override void OnGeneratorInitialize() {
 			switch(kind) {
 				case Kind.StateMachine: {
-					var fsm = reference?.reference as StateGraphContainer;
+					var fsm = reference?.reference;
 					if(fsm == null) {
 						throw new Exception("Reference state machine is null");
 					}
@@ -137,7 +137,7 @@ namespace MaxyGames.UNode.Nodes {
 					break;
 				}
 				case Kind.SetState: {
-					var fsm = reference?.reference as StateGraphContainer;
+					var fsm = reference?.reference;
 					var node = stateReference?.reference as NodeObject;
 					if(fsm == null) {
 						throw new Exception("Reference state machine is null");

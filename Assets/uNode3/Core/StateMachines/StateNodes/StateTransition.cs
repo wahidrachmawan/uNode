@@ -16,6 +16,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		public IEnumerable<NodeObject> NestedFlowNodes => nodeObject.GetObjectsInChildren<NodeObject>(obj => obj.node is BaseEventNode);
 
+		[Tooltip("If enable, this transition can be triggered from anywhere with Trigger Transition node")]
 		public bool IsExpose = false;
 		
 		[System.NonSerialized]
@@ -106,9 +107,6 @@ namespace MaxyGames.UNode.Nodes {
 			var state = flow.GetUserData(StateNode as Node) as StateMachines.IState;
 			var targetState = flow.GetUserData(exit.GetTargetNode()) as StateMachines.IState;
 			if(state.IsActive) {
-				if(targetState.IsActive && !targetState.CanTriggerWhenActive) {
-					return;
-				};
 				state.FSM.ChangeState(targetState);
 #if UNITY_EDITOR
 				if(GraphDebug.useDebug) {
