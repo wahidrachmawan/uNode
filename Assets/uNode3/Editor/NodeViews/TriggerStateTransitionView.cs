@@ -24,6 +24,31 @@ namespace MaxyGames.UNode.Editors {
 				m_title = "Trigger:";
 				button = new Button(() => {
 					GenericMenu menu = new GenericMenu();
+					var mPos = Event.current.mousePosition.ToScreenPoint();
+					menu.AddItem(new GUIContent("Create new transition"), false, () => {
+						string name = "FINISH";
+						ActionPopupWindow.Show(
+							onGUI: () => {
+								name = EditorGUILayout.TextField("Name", name);
+							},
+							onGUIBottom: () => {
+								if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
+									NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
+										stateNode.TransitionContainer, "Transition",
+										new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
+										(transition) => {
+											transition.nodeObject.name = name;
+											transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());
+
+											node.serializedTransition = new(transition);
+											node.transition = transition;
+										});
+									ActionPopupWindow.CloseLast();
+									owner.MarkRepaint(node);
+								}
+							}).ChangePosition(mPos);
+					});
+					menu.AddSeparator("");
 					var transitions = stateNode.GetTransitions().ToList();
 					var allTransitions = nodeObject.GetObjectInParent<EventGraphContainer>().GetNodesInChildren<Nodes.StateTransition>(true).ToList();
 					foreach(var tr in transitions) {

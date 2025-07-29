@@ -37,8 +37,11 @@ namespace MaxyGames.UNode.Editors {
 			_owner = editorData._owner;
 			_graph = editorData._graph;
 			_serializedSelecteds = new List<BaseReference>(editorData.serializedSelecteds);
-			foreach(var ele in selections) {
-				serializedSelecteds.Add(new UGraphElementRef(ele));
+			if(selections.Length > 0) {
+				_serializedSelecteds.Clear();
+				foreach(var ele in selections) {
+					serializedSelecteds.Add(new UGraphElementRef(ele));
+				}
 			}
 			currentCanvas = editorData.currentCanvas;
 		}
@@ -415,7 +418,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="element"></param>
 		public void RemoveFromSelection(UGraphElement element) {
-			for(int i=0;i< serializedSelecteds.Count;i++) {
+			for(int i = 0; i < serializedSelecteds.Count; i++) {
 				if(serializedSelecteds[i].ReferenceValue as UGraphElement == element) {
 					serializedSelecteds.RemoveAt(i);
 				}
@@ -502,17 +505,18 @@ namespace MaxyGames.UNode.Editors {
 		public GraphCanvas GetCurrentCanvasData() {
 			return GetGraphPosition(currentCanvas, false);
 		}
-		
+
 		private GraphCanvas GetGraphPosition(UGraphElement obj, bool focusCanvas = true) {
 			if(obj == null) {
 				obj = graphData?.mainGraphContainer;
 			}
 			GraphCanvas graphCanvas = canvasDatas.FirstOrDefault(p => p.graphElement == obj);
 			if(graphCanvas != null) {
-				if (graphCanvas.position != Vector2.zero) {
+				if(graphCanvas.position != Vector2.zero) {
 					return graphCanvas;
 				}
-			} else {
+			}
+			else {
 				graphCanvas = new GraphCanvas(obj);
 				canvasDatas.Add(graphCanvas);
 			}
@@ -523,7 +527,8 @@ namespace MaxyGames.UNode.Editors {
 				if(obj is NodeContainerWithEntry containerWithEntry && containerWithEntry.Entry != null) {
 					graphCanvas.position = new Vector2(containerWithEntry.Entry.position.x - 200, containerWithEntry.Entry.position.y - 200);
 				}
-			} else if(obj is NodeObject nodeObject) {
+			}
+			else if(obj is NodeObject nodeObject) {
 				if(nodeObject.node is ISuperNode) {
 					ISuperNode superNode = nodeObject.node as ISuperNode;
 					foreach(var n in superNode.NestedFlowNodes) {
@@ -532,7 +537,8 @@ namespace MaxyGames.UNode.Editors {
 							break;
 						}
 					}
-				} else {
+				}
+				else {
 					graphCanvas.position = new Vector2(nodeObject.position.x - 200, nodeObject.position.y - 200);
 				}
 			}
@@ -540,7 +546,7 @@ namespace MaxyGames.UNode.Editors {
 				if(obj is NodeObject) {
 					var nodes = obj.GetObjectsInChildren<NodeObject>();
 					var n = nodes.FirstOrDefault();
-					if (n != null) {
+					if(n != null) {
 						graphCanvas.position = new Vector2(n.position.x - 200, n.position.y - 200);
 					}
 				}

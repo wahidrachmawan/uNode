@@ -628,12 +628,28 @@ namespace MaxyGames.UNode.Editors {
 			if(showArrow == false) return;
 			Vector2 start = PointsAndTangents[0];
 			Vector2 end = PointsAndTangents[3];
+			//if(start.x == end.x) {
+			//	start.x += 2;
+			//	end.x -= 2;
+			//}
+			//if(start.y == end.y) {
+			//	start.y += 2;
+			//	end.y -= 2;
+			//}
 			Vector2 mid = (start + end) / 2;
 			Vector2 direction = end - start;
 
 			if(IsSelfTransition()) {
 				mid = PointsAndTangents[0] + Vector2.up * selfArrowOffset;
 				direction = Vector2.down;
+			}
+			else {
+				if(direction.x == 0) {
+					direction.x += 4;
+				}
+				if(direction.y == 0) {
+					direction.y += 4;
+				}
 			}
 
 			float distanceFromMid = arrowWidth * Mathf.Sqrt(3) / 4;
