@@ -65,19 +65,13 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override string GenerateFlowCode() {
-			if(transition.IsExpose) {
-				//Do change state only when the original state is active
+			if(transition.IsExpose && transition.StateNode is not AnyStateNode && transition.StateNode != nodeObject.GetNodeInParent<IStateNodeWithTransition>()) {
+				//Do change state only when the original state is active, any state is excluded because it's always active
 				var targetState = CG.GetVariableNameByReference(transition.exit.GetTargetNode());
-				var fsm = CG.GetVariableNameByReference(transition.exit.GetTargetNode().parent);
-				var changeStateCode = CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), targetState);
-				if(transition.StateNode.GetType() == typeof(AnyStateNode)) {
-					var state = CG.GetVariableNameByReference((transition.StateNode as Node).nodeObject.parent);
-					return CG.If(state.CGAccess(nameof(StateMachines.IStateMachine.IsActive)), changeStateCode);
-				}
-				else {
-					var state = CG.GetVariableNameByReference(transition.StateNode);
-					return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), changeStateCode);
-				}
+				var changeStateCode = CG.GeneratePort(transition.exit);
+
+				var state = CG.GetVariableNameByReference(transition.StateNode);
+				return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), changeStateCode);
 			}
 			else {
 				return CG.GeneratePort(transition.exit);
