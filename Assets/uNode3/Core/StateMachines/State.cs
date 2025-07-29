@@ -17,7 +17,7 @@ namespace MaxyGames.StateMachines {
 		/// </summary>
 		bool IsActive { get; }
 		/// <summary>
-		/// True if status can be triggered while active
+		/// True if state can be triggered while active
 		/// </summary>
 		bool CanTriggerWhenActive { get; set; }
 

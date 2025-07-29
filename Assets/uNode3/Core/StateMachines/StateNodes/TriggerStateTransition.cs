@@ -65,7 +65,23 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override string GenerateFlowCode() {
-			return CG.GeneratePort(transition.exit);
+			if(transition.IsExpose) {
+				//Do change state only when the original state is active
+				var targetState = CG.GetVariableNameByReference(transition.exit.GetTargetNode());
+				var fsm = CG.GetVariableNameByReference(transition.exit.GetTargetNode().parent);
+				var changeStateCode = CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), targetState);
+				if(transition.StateNode.GetType() == typeof(AnyStateNode)) {
+					var state = CG.GetVariableNameByReference((transition.StateNode as Node).nodeObject.parent);
+					return CG.If(state.CGAccess(nameof(StateMachines.IStateMachine.IsActive)), changeStateCode);
+				}
+				else {
+					var state = CG.GetVariableNameByReference(transition.StateNode);
+					return CG.If(state.CGAccess(nameof(StateMachines.IState.IsActive)), changeStateCode);
+				}
+			}
+			else {
+				return CG.GeneratePort(transition.exit);
+			}
 		}
 	}
 }
