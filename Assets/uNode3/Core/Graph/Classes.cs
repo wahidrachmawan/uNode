@@ -554,9 +554,6 @@ namespace MaxyGames.UNode {
 	public sealed class EventGraphContainer : URoot<NodeContainer> { }
 
 	public sealed class MainGraphContainer : NodeContainer, IPrettyName, IIcon {
-		public const string StateGraph = "State Graph";
-		public const string MacroGraph = "Macro Graph";
-
 		public override bool AllowCoroutine() {
 			var container = graphContainer;
 			if(container is IMacroGraph || container is IStateGraph) {
@@ -578,7 +575,7 @@ namespace MaxyGames.UNode {
 				return "Macro Graph";
 			}
 			else if(container is IStateGraph) {
-				return "State Graph";
+				return "Event Graph";
 			}
 			else if(container is ICustomMainGraph mainGraph) {
 				return mainGraph.MainGraphTitle;

@@ -71,7 +71,7 @@ namespace MaxyGames.UNode.Editors {
 					StateTransitionView transition = port.portData.userData as StateTransitionView;
 					if(transition != null) {
 						var edge = new TransitionEdgeView();
-						edge.showArrow = false;
+						edge.showArrow = true;
 						edge.input = transition.inputPort;
 						edge.output = port;
 						owner.Connect(edge, false);

@@ -104,6 +104,7 @@ namespace MaxyGames.UNode.Editors {
 			var value = new T();
 			value.name = name;
 			value.SetParent(parent);
+			EditorReflectionUtility.UpdateRuntimeType(parent);
 			action?.Invoke(value);
 		}
 
@@ -145,6 +146,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			variable.SetParent(container);
+			EditorReflectionUtility.UpdateRuntimeType(container.graphContainer);
 			action?.Invoke(variable);
 		}
 

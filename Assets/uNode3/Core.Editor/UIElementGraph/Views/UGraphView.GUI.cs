@@ -998,6 +998,13 @@ namespace MaxyGames.UNode.Editors {
 
 			//EditorUtility.DisplayProgressBar("Capturing", "", 0);
 			Rect graphRect = CalculateVisibleGraphRect();
+#if UNODE_DEV
+			{//Expand the visible rect
+				graphRect.min -= new Vector2(300, 300);
+				graphRect.max += new Vector2(100, 100);
+			}
+#endif
+
 			UpdatePosition(new Vector2(graphRect.x, graphRect.y));
 			float xCount = 1;
 			float yCount = 1;

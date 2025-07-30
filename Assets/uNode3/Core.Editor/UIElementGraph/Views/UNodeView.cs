@@ -111,6 +111,7 @@ namespace MaxyGames.UNode.Editors {
 		protected VisualElement debugContainer;
 		protected VisualElement border;
 		protected Image titleIcon;
+		protected Label titleLabel;
 		#endregion
 
 		#region Initialization
@@ -149,6 +150,7 @@ namespace MaxyGames.UNode.Editors {
 			controlsContainer = new VisualElement { name = "controls" };
 			mainContainer.Add(controlsContainer);
 
+			titleLabel = titleContainer.Q<Label>("title-label");
 			titleIcon = new Image() { name = "title-icon" };
 			titleContainer.Add(titleIcon);
 			titleIcon.SendToBack();
@@ -518,13 +520,15 @@ namespace MaxyGames.UNode.Editors {
 
 		public virtual void OnZoomUpdated(float zoom) {
 			if(zoom > 0.2f) {
-				//titleContainer.style.visibility = StyleKeyword.Null;
+				titleIcon.style.visibility = StyleKeyword.Null;
+				titleLabel.style.visibility = StyleKeyword.Null;
 				if(portInputContainer != null) {
 					portInputContainer.style.display = StyleKeyword.Null;
 				}
 			}
 			else {
-				//titleContainer.style.visibility = Visibility.Hidden;
+				titleIcon.style.visibility = Visibility.Hidden;
+				titleLabel.style.visibility = Visibility.Hidden;
 				if(portInputContainer != null) {
 					portInputContainer.style.display = DisplayStyle.None;
 				}
