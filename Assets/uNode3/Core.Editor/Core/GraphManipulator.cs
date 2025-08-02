@@ -1324,6 +1324,41 @@ namespace MaxyGames.UNode.Editors {
 			return true;
 		}
 
+		public override IEnumerable<DropdownMenuItem> ContextMenuForVariable(Vector2 mousePosition, Variable variable) {
+			if(graph is IGraphWithProperties) {
+				yield return new DropdownMenuAction($"Encapsulate variable: '{variable.name}' and use property", evt => {
+					if(variable.modifier.isPublic) {
+						if(EditorUtility.DisplayDialog("", "Are you sure to encapsulate public variable? when encapsulate public variable, the variable will became private", "Yes", "Cancel") == false) {
+							return;
+						}
+						NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, uNodeUtility.AutoCorrectName(ObjectNames.NicifyVariableName(variable.name)), variable.type, p => {
+							p.CreateGetter();
+							{
+								var root = p.getRoot;
+								var returnNode = root.AddChildNode(new Nodes.NodeReturn());
+								returnNode.EnsureRegistered();
+								returnNode.value.AssignToDefault(MemberData.CreateFromValue(variable));
+								root.Entry.exit.ConnectTo(returnNode.enter);
+							}
+							p.CreateSetter();
+							{
+								var root = p.setRoot;
+								var setNode = root.AddChildNode(new Nodes.NodeSetValue());
+								setNode.EnsureRegistered();
+								setNode.target.AssignToDefault(MemberData.CreateFromValue(variable));
+								setNode.value.AssignToDefault(MemberData.CreateFromValue(new ParameterRef(root, root.parameters[0])));
+								root.Entry.exit.ConnectTo(setNode.enter);
+							}
+							uNodeThreadUtility.Queue(() => {
+								CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, p));
+							});
+						});
+					}
+				}, DropdownMenuAction.AlwaysEnabled);
+			}
+			yield break;
+		}
+
 		public override IEnumerable<DropdownMenuItem> ContextMenuForGraph(Vector2 mousePosition) {
 			if(graph != null) {
 				if(graph is IClassGraph) {

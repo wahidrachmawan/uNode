@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.2.1
+- Added encapsulate variable to property context menu
+- Added ability to implement interface property
+- Improved Editor
+
 ## v3.2.0
 - Added new State Machine graph and support for Class Component & C# Graph that inherit from MonoBehaviour
 - Added new Call Stack window, auto open when breakpoint is hit in playmode allowing for see the execution flows and has ability to highlight node, ping object, and open script.
