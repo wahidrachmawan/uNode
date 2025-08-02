@@ -323,12 +323,48 @@ namespace MaxyGames.UNode.Editors {
 											prop.CreateGetter();
 										}
 										if(m.SetMethod != null) {
-											prop.CreateSeter();
+											prop.CreateSetter();
 										}
 									});
 								GraphChanged();
 							}
 						});
+					}
+				}
+				#endregion
+
+				#region Implement Interfaces
+				var interfaceSystem = graphData.graph as IInterfaceSystem;
+				if(interfaceSystem != null && interfaceSystem.Interfaces.Count > 0) {
+					foreach(var inter in interfaceSystem.Interfaces) {
+						if(inter == null || !inter.isFilled)
+							continue;
+						Type t = inter.type;
+						if(t != null) {
+							var properties = t.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+							foreach(var property in properties) {
+								bool flag = false;
+								if(graph.GetProperty(property.Name)) {
+									flag = true;
+								}
+
+								var m = property;
+								menu.AddItem(new GUIContent("Interface " + t.Name + "/" + property.Name), flag, () => {
+									if(!flag) {
+										uNodeEditorUtility.RegisterUndo(base.graph);
+										NodeEditorUtility.AddNewProperty(graphData.graph.GraphData.propertyContainer, m.Name, m.PropertyType, p => {
+											if(property.CanRead == false) {
+												p.CreateSetter();
+											}
+											if(property.CanWrite == false) {
+												p.CreateGetter();
+											}
+										});
+										GraphChanged();
+									}
+								});
+							}
+						}
 					}
 				}
 				#endregion

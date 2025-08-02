@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 		protected override void DoDraw(DrawerOption option) {
 			var value = option.value as Property;
-			bool isInterface = option.unityObject is IScriptInterface;
+			bool isInterface = option.unityObject is IScriptInterface or GraphInterface;
 
 			uNodeGUIUtility.DrawTypeDrawer(value.ReturnType(), new GUIContent("Type"), type => {
 				value.type = type;

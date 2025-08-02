@@ -15,9 +15,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 		protected override void DoDraw(DrawerOption option) {
 			var value = option.value as Function;
-			if(value.parent is not Property) {
+			bool isFromProperty = value.parent is Property;
+			if(isFromProperty == false) {
 				UInspector.Draw(option.property[nameof(Function.modifier)]);
 			}
+			EditorGUI.BeginDisabledGroup(isFromProperty);
 			uNodeGUIUtility.DrawTypeDrawer(value.ReturnType(), new GUIContent("Return Type"), type => {
 				if(type == null)
 					type = typeof(void);
@@ -39,9 +41,13 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}
 
 			UInspector.Draw(option.property[nameof(Function.parameters)]);
-			uNodeGUI.DrawAttribute(value.attributes, option.unityObject, (a) => {
-				value.attributes = a;
-			}, AttributeTargets.Method);
+			bool isInterface = option.unityObject is IScriptInterface or GraphInterface;
+			if(!isInterface) {
+				uNodeGUI.DrawAttribute(value.attributes, option.unityObject, (a) => {
+					value.attributes = a;
+				}, AttributeTargets.Method);
+			}
+			EditorGUI.EndDisabledGroup();
 		}
 	}
 }

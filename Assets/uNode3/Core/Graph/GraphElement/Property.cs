@@ -45,7 +45,7 @@ namespace MaxyGames.UNode {
 			return false;
 		}
 
-		public bool CreateSeter() {
+		public bool CreateSetter() {
 			if(setRoot == null) {
 				setRoot = AddChild(new Function("Setter", typeof(void), new[] { new ParameterData("value", ReturnType()) }));
 				return true;
