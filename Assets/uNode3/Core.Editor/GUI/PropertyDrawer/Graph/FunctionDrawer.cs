@@ -10,7 +10,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 	class FunctionDrawer : UGraphElementDrawer<Function> {
 		protected override void DrawHeader(DrawerOption option) {
 			var value = option.value as Function;
+			EditorGUI.BeginDisabledGroup(value.parent is Property);
 			DrawNicelyHeader(option, value.ReturnType());
+			EditorGUI.EndDisabledGroup();
 		}
 
 		protected override void DoDraw(DrawerOption option) {

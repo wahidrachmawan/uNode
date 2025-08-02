@@ -102,7 +102,7 @@ namespace MaxyGames.UNode {
 		public Rect position;
 
 		[SerializeField, Hide]
-		private NodeSerializedData _nodeSerializedData;
+		private NodeSerializedData _nodeSerializedData = new();
 
 		public NodeSerializedData serializedData => _nodeSerializedData;
 

@@ -555,7 +555,7 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Analizer
-		internal static class Analizer {
+		public static class Analizer {
 			/// <summary>
 			/// Perform field reflection in obj.
 			/// </summary>
@@ -622,10 +622,12 @@ namespace MaxyGames.UNode.Editors {
 				else if(obj is NodeObject) {
 					var nodeObject = obj as NodeObject;
 					var references = nodeObject.serializedData.References;
-					foreach(var reference in references) {
-						if(ValidateReference(reference))
-							continue;
-						changed = AnalizeObject(reference, validation, doAction) || changed;
+					if(references != null) {
+						foreach(var reference in references) {
+							if(ValidateReference(reference))
+								continue;
+							changed = AnalizeObject(reference, validation, doAction) || changed;
+						}
 					}
 					foreach(var port in nodeObject.ValueInputs) {
 						if(port != null && port.UseDefaultValue) {

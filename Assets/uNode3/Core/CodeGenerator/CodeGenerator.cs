@@ -110,7 +110,7 @@ namespace MaxyGames {
 
 							generatedData.classNames[graph] = className;
 							//update progress bar
-							setting.updateProgress?.Invoke(progress, "initializing class:" + className);
+							setting.updateProgress?.Invoke(Mathf.Clamp(progress, 0, 0.9f), "initializing class:" + className);
 							//Initialize code gen for classes
 							Initialize(out fieldCount, out propCount, out ctorCount);
 						});
@@ -126,28 +126,28 @@ namespace MaxyGames {
 						GenerateFunctions((prog, text) => {
 							float p = progress + (prog * (childFill));
 							if(setting.updateProgress != null)
-								setting.updateProgress(p, text);
+								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
 						});
 						progress += childFill;
 						//Generate properties
 						string properties = GenerateProperties((prog, text) => {
 							float p = progress + (prog * (childFill));
 							if(setting.updateProgress != null)
-								setting.updateProgress(p, text);
+								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
 						});
 						progress += childFill;
 						//Generate constructors
 						string constructors = GenerateConstructors((prog, text) => {
 							float p = progress + (prog * (childFill));
 							if(setting.updateProgress != null)
-								setting.updateProgress(p, text);
+								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
 						});
 						progress += childFill;
 						//Generate variables
 						string variables = GenerateVariables((prog, text) => {
 							float p = progress + (prog * (childFill));
 							if(setting.updateProgress != null)
-								setting.updateProgress(p, text);
+								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
 						});
 						progress += childFill;
 
@@ -450,6 +450,7 @@ namespace MaxyGames {
 				ThreadingUtil.Do(() => {
 					//Finish generating scripts
 					setting.updateProgress?.Invoke(1, "finish");
+					setting.onSuccess?.Invoke(generatedData);
 					OnSuccessGeneratingGraph?.Invoke(generatedData, setting);
 				});
 				//Ensure the generator data is clean.
@@ -531,44 +532,46 @@ namespace MaxyGames {
 					}
 				});
 			}
-			for(int i = 0; i < generatorData.allNode.Count; i++) {
-				var node = generatorData.allNode[i];
-				if(node == null)
-					continue;
-				ThreadingUtil.Queue(() => {
-					if(node != null) {
-						generationState.context = node;
-						if(generatorData.initActionForNodes.TryGetValue(node, out var action)) {
-							action();
-						}
-						//Skip if not flow node
-						if(node.primaryFlowInput != null) {
-							var func = node.GetObjectInParent<Function>();
-							if(func != null) {
-								generationState.isStatic = func.modifier.Static;
+			if(setting.generateIdentifierOnly == false) {
+				for(int i = 0; i < generatorData.allNode.Count; i++) {
+					var node = generatorData.allNode[i];
+					if(node == null)
+						continue;
+					ThreadingUtil.Queue(() => {
+						if(node != null) {
+							generationState.context = node;
+							if(generatorData.initActionForNodes.TryGetValue(node, out var action)) {
+								action();
 							}
-							if(IsStateFlow(node.primaryFlowInput)) {
-								isInUngrouped = true;
+							//Skip if not flow node
+							if(node.primaryFlowInput != null) {
+								var func = node.GetObjectInParent<Function>();
+								if(func != null) {
+									generationState.isStatic = func.modifier.Static;
+								}
+								if(IsStateFlow(node.primaryFlowInput)) {
+									isInUngrouped = true;
+								}
+								GeneratePort(node.primaryFlowInput);
+								if(node.node is IEventGenerator) {
+									(node.node as IEventGenerator).GenerateEventCode();
+								}
+								isInUngrouped = false;
+								progress += count;
+								if(updateProgress != null)
+									updateProgress(progress / generatorData.allNode.Count, "generating node:" + node.name);
 							}
-							GeneratePort(node.primaryFlowInput);
-							if(node.node is IEventGenerator) {
+							else if(node.node is IEventGenerator) {
 								(node.node as IEventGenerator).GenerateEventCode();
+								progress += count;
+								if(updateProgress != null)
+									updateProgress(progress / generatorData.allNode.Count, "generating node:" + node.name);
 							}
-							isInUngrouped = false;
-							progress += count;
-							if(updateProgress != null)
-								updateProgress(progress / generatorData.allNode.Count, "generating node:" + node.name);
 						}
-						else if(node.node is IEventGenerator) {
-							(node.node as IEventGenerator).GenerateEventCode();
-							progress += count;
-							if(updateProgress != null)
-								updateProgress(progress / generatorData.allNode.Count, "generating node:" + node.name);
-						}
-					}
-				});
+					});
+				}
+				ThreadingUtil.WaitQueue();
 			}
-			ThreadingUtil.WaitQueue();
 			generationState.isStatic = false;
 			#endregion
 
@@ -608,11 +611,16 @@ namespace MaxyGames {
 						mData.attributes = attribute;
 						mData.summary = function.comment;
 						mData.owner = function;
-						if(function.LocalVariables.Any()) {
-							mData.code += M_GenerateLocalVariable(function.LocalVariables).AddLineInFirst();
+						if(setting.generateIdentifierOnly) {
+							mData.code += CG.Throw(Null);
 						}
-						if(function.Entry != null && (mData.modifier == null || !mData.modifier.Abstract)) {
-							mData.code += GeneratePort(function.Entry.exit).AddLineInFirst();
+						else {
+							if(function.LocalVariables.Any()) {
+								mData.code += M_GenerateLocalVariable(function.LocalVariables).AddLineInFirst();
+							}
+							if(function.Entry != null && (mData.modifier == null || !mData.modifier.Abstract)) {
+								mData.code += GeneratePort(function.Entry.exit).AddLineInFirst();
+							}
 						}
 					}
 					catch(Exception ex) {
@@ -954,16 +962,32 @@ namespace MaxyGames {
 						iData = mData.Items[i + 1];
 					}
 					if(iData != null) {
+						//var gTypes = MemberDataUtility.GetGenericTypes(mData.Items[i + 1]);
+						//if(gTypes != null && gTypes.All(t => t != null)) {
+						//	if(gTypes.Length > 0) {
+						//		if(mData.targetType != MemberData.TargetType.uNodeGenericParameter &&
+						//			mData.targetType != MemberData.TargetType.Type) {
+						//			genericData += string.Format("<{0}>", string.Join(", ", gTypes.Select(t => Type(t)))).Replace('+', '.');
+						//		}
+						//		else {
+						//			genericData += string.Format("{0}", string.Join(", ", gTypes.Select(t => Type(t)))).Replace('+', '.');
+						//		}
+						//	}
+						//}
+						//else {
+						//	//Fallback to traditional name when something went wrong
+						//}
+
 						MemberDataUtility.GetItemName(mData.Items[i + 1],
 							out var genericType,
-							out var paramsType);
+							out _);
 						if(genericType.Length > 0) {
 							if(mData.targetType != MemberData.TargetType.uNodeGenericParameter &&
 								mData.targetType != MemberData.TargetType.Type) {
-								genericData += string.Format("<{0}>", string.Join(", ", genericType)).Replace('+', '.');
+								genericData += string.Format("<{0}>", string.Join(", ", genericType.Select(t => ParseType(t)))).Replace('+', '.');
 							}
 							else {
-								genericData += string.Format("{0}", string.Join(", ", genericType)).Replace('+', '.');
+								genericData += string.Format("{0}", string.Join(", ", genericType.Select(t => ParseType(t)))).Replace('+', '.');
 							}
 						}
 					}
@@ -1593,9 +1617,14 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string ParseType(string fullTypeName) {
 			if(!string.IsNullOrEmpty(fullTypeName)) {
+				if(generatorData.typesMap2.TryGetValue(fullTypeName, out var result)) {
+					return result;
+				}
 				Type type = TypeSerializer.Deserialize(fullTypeName, false);
 				if(type != null) {
-					return Type(type);
+					result = Type(type);
+					generatorData.typesMap2[fullTypeName] = result;
+					return result;
 				}
 				else {
 					if(fullTypeName.Contains("`")) {
@@ -1665,11 +1694,12 @@ namespace MaxyGames {
 							//if(dType == null) {//Fallback for fail deserialization
 							//	return fullTypeName;
 							//}
-							var result = data1[0] + "<" + string.Join(", ", gTypes) + ">";
+							result = data1[0] + "<" + string.Join(", ", gTypes) + ">";
 							while(step > 0) {
 								result += "[]";
 								step--;
 							}
+							generatorData.typesMap2[fullTypeName] = result;
 							return result;
 						}
 					}

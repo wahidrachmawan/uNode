@@ -1022,7 +1022,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 #region GenerateCSharpScript
-		public static CG.GeneratedData GenerateCSharpScript(UnityEngine.Object source, Action<float, string> updateProgress = null) {
+		public static CG.GeneratedData GenerateCSharpScript(UnityEngine.Object source, Action<float, string> updateProgress = null, Action<CG.GeneratedData> onSuccess = null, Action<CG.GeneratedData> onInitialize = null) {
 			if(source == null) {
 				return null;
 			}
@@ -1047,11 +1047,46 @@ namespace MaxyGames.UNode.Editors {
 				debugScript = debug,
 				debugValueNode = debugValue,
 				updateProgress = updateProgress,
+				onSuccess = onSuccess,
+				onInitialize = onInitialize,
 			});
 		}
-#endregion
 
-#region GenerateCSharpAsync
+		public static CG.GeneratedData GenerateCSharpScriptForIdentifier(UnityEngine.Object source, Action<float, string> updateProgress = null, Action<CG.GeneratedData> onSuccess = null, Action<CG.GeneratedData> onInitialize = null) {
+			if(source == null) {
+				return null;
+			}
+			GeneratedScriptData scriptData;
+			bool debug, debugValue;
+			if(source is IScriptGraph scriptGraph) {
+				scriptData = scriptGraph.ScriptData;
+				debug = scriptData.debug;
+				debugValue = scriptData.debugValueNode;
+			}
+			else if(source is ITypeWithScriptData typeWithScriptData) {
+				scriptData = typeWithScriptData.ScriptData;
+				debug = scriptData.debug;
+				debugValue = scriptData.debugValueNode;
+			}
+			else {
+				throw new Exception("Unsupported graph type: " + source.GetType());
+			}
+			return CG.Generate(new CG.GeneratorSetting(source) {
+				fullTypeName = preferenceData.generatorData.fullTypeName,
+				fullComment = false,
+				generationMode = GenerationKind.Compatibility,
+				runtimeOptimization = false,
+				debugScript = debug,
+				debugValueNode = debugValue,
+				updateProgress = updateProgress,
+				onSuccess = onSuccess,
+				onInitialize = onInitialize,
+				generateIdentifierOnly = true,
+			});
+		}
+		#endregion
+
+		#region GenerateCSharpAsync
 		/// <summary>
 		/// Generate Project Script in background.
 		/// Note: don't call it from main thread.

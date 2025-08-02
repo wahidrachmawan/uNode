@@ -64,6 +64,8 @@ namespace MaxyGames.UNode.Editors {
 			T window = Craete(false);
 			window.variable = startValue;
 			window.onGUI = onGUI;
+			window.onGUITop = null;
+			window.onGUIBottom = null;
 			window.Initialize();
 			return window;
 		}
@@ -75,8 +77,12 @@ namespace MaxyGames.UNode.Editors {
 			window.onGUI = onGUI;
 			if(onGUITop != null)
 				window.onGUITop = delegate (ref object obj) { onGUITop(); };
+			else
+				window.onGUITop = null;
 			if(onGUIBottom != null)
 				window.onGUIBottom = delegate (ref object obj) { onGUIBottom(); };
+			else
+				window.onGUIBottom = null;
 			window.Initialize();
 			return window;
 		}
@@ -102,10 +108,16 @@ namespace MaxyGames.UNode.Editors {
 			T window = Craete(false);
 			if(onGUI != null)
 				window.onGUI = delegate (ref object obj) { onGUI(); };
+			else
+				window.onGUI = null;
 			if(onGUITop != null)
 				window.onGUITop = delegate (ref object obj) { onGUITop(); };
+			else
+				window.onGUITop = null;
 			if(onGUIBottom != null)
 				window.onGUIBottom = delegate (ref object obj) { onGUIBottom(); };
+			else
+				window.onGUIBottom = null;
 			window.Initialize();
 			return window;
 		}
@@ -114,6 +126,8 @@ namespace MaxyGames.UNode.Editors {
 			T window = Craete(true);
 			window.variable = startValue;
 			window.onGUI = onGUI;
+			window.onGUITop = null;
+			window.onGUIBottom = null;
 			window.Initialize();
 			return window;
 		}
@@ -125,8 +139,12 @@ namespace MaxyGames.UNode.Editors {
 			window.onGUI = onGUI;
 			if(onGUITop != null)
 				window.onGUITop = delegate (ref object obj) { onGUITop(); };
+			else
+				window.onGUITop = null;
 			if(onGUIBottom != null)
 				window.onGUIBottom = delegate (ref object obj) { onGUIBottom(); };
+			else
+				window.onGUIBottom = null;
 			window.Initialize();
 			return window;
 		}
@@ -152,10 +170,16 @@ namespace MaxyGames.UNode.Editors {
 			T window = Craete(true);
 			if(onGUI != null)
 				window.onGUI = delegate (ref object obj) { onGUI(); };
+			else
+				window.onGUI = null;
 			if(onGUITop != null)
 				window.onGUITop = delegate (ref object obj) { onGUITop(); };
+			else
+				window.onGUITop = null;
 			if(onGUIBottom != null)
 				window.onGUIBottom = delegate (ref object obj) { onGUIBottom(); };
+			else
+				window.onGUIBottom = null;
 			window.Initialize();
 			return window;
 		}
@@ -240,14 +264,14 @@ namespace MaxyGames.UNode.Editors {
 			if(onGUITop != null) {
 				onGUITop(ref variable);
 			}
-			scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-			GUI.SetNextControlName("act");
 			if(onGUI != null) {
+				scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+				GUI.SetNextControlName("act");
 				onGUI(ref variable);
+				EditorGUILayout.EndScrollView();
 			}
-			EditorGUILayout.EndScrollView();
-			GUILayout.FlexibleSpace();
 			if(onGUIBottom != null) {
+				GUILayout.FlexibleSpace();
 				onGUIBottom(ref variable);
 			}
 			EditorGUILayout.EndVertical();

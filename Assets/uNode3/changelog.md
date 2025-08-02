@@ -3,7 +3,10 @@
 ## v3.2.1
 - Added encapsulate variable to property context menu
 - Added ability to implement interface property
+- Added ability to insert c# code to existing graph
 - Improved Editor
+- Fixed generic type name is not trimmed
+- Fixed some bugs
 
 ## v3.2.0
 - Added new State Machine graph and support for Class Component & C# Graph that inherit from MonoBehaviour

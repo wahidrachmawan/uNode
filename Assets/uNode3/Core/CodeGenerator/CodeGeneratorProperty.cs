@@ -16,6 +16,9 @@ namespace MaxyGames {
 		#endregion
 
 		#region Events
+		/// <summary>
+		/// Callback when graph is successfull generating code
+		/// </summary>
 		public static event Action<GeneratedData, GeneratorSetting> OnSuccessGeneratingGraph;
 		#endregion
 
@@ -67,32 +70,17 @@ namespace MaxyGames {
 		/// Is generating with the pure script mode?
 		/// </summary>
 		/// <value></value>
-		public static bool generatePureScript {
-			get{
-				switch(setting.generationMode) {
-					case GenerationKind.Performance:
-						 return true;
-					case GenerationKind.Compatibility:
-						return false;
-				}
-				if(graphSystem != null) {
-					switch(graphSystem.generationKind) {
-						case GenerationKind.Performance:
-							return true;
-						case GenerationKind.Compatibility:
-							return false;
-					}
-				}
-				return true;
-			}
-		}
+		public static bool generatePureScript => setting.generatePureScript;
 		
 		/// <summary>
 		/// The target graph system.
 		/// </summary>
 		/// <typeparam name="GraphSystemAttribute"></typeparam>
 		/// <returns></returns>
-		public static GraphSystemAttribute graphSystem { get; private set; }
+		public static GraphSystemAttribute graphSystem {
+			get => setting.graphSystem;
+			set => setting.graphSystem = value;
+		}
         #endregion
 	}
 }

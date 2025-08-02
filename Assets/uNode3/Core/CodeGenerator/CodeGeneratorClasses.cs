@@ -223,6 +223,7 @@ namespace MaxyGames {
 				{ typeof(void), "void" },
 				{ typeof(object), "object" },
 			};
+			internal Dictionary<string, string> typesMap2 = new();
 			public Dictionary<NodeObject, HashSet<NodeObject>> FlowConnectedTo = new Dictionary<NodeObject, HashSet<NodeObject>>();
 			public Dictionary<UPort, string> generatedData = new Dictionary<UPort, string>(32);
 			public Dictionary<NodeObject, string> eventCoroutineData = new Dictionary<NodeObject, string>();
@@ -662,6 +663,27 @@ namespace MaxyGames {
 			public bool runtimeOptimization = false;
 
 			public GenerationKind generationMode = GenerationKind.Default;
+			public GraphSystemAttribute graphSystem;
+
+			public bool generatePureScript {
+				get {
+					switch(generationMode) {
+						case GenerationKind.Performance:
+							return true;
+						case GenerationKind.Compatibility:
+							return false;
+					}
+					if(graphSystem != null) {
+						switch(graphSystem.generationKind) {
+							case GenerationKind.Performance:
+								return true;
+							case GenerationKind.Compatibility:
+								return false;
+						}
+					}
+					return true;
+				}
+			}
 
 			public bool disableScriptWarning = true;
 
@@ -669,6 +691,7 @@ namespace MaxyGames {
 			public bool debugValueNode;
 			public bool debugPreprocessor = false;
 			public bool includeGraphInformation = true;
+			public bool generateIdentifierOnly;
 			[NonSerialized]
 			public int debugID;
 
@@ -701,7 +724,7 @@ namespace MaxyGames {
 			/// <summary>
 			/// Called before performing generations
 			/// </summary>
-			public Action<GeneratedData> onInitialize;
+			public Action<GeneratedData> onInitialize, onSuccess;
 
 			//TODO: fix me
 			//public GeneratorSetting(uNodeInterface ifaceAsset) {
@@ -922,6 +945,7 @@ namespace MaxyGames {
 			public string functions;
 			public string constructors;
 			public string nestedTypes;
+			public string additionalContents;
 
 			#region Constructors
 			public ClassData() { }
@@ -1030,6 +1054,11 @@ namespace MaxyGames {
 					builder2.Append(nestedTypes);
 					builder2.AppendLine();
 				}
+				if(!string.IsNullOrEmpty(additionalContents)) {
+					builder2.AppendLine();
+					builder2.Append(additionalContents);
+					builder2.AppendLine();
+				}
 				if(owner == null) {
 					builder.Append(builder2.ToString().AddTabAfterNewLine(1, false));
 				} else {
@@ -1087,6 +1116,15 @@ namespace MaxyGames {
 				}
 				else {
 					nestedTypes += contents.AddFirst("\n\n");
+				}
+			}
+
+			public void RegisterAdditionalContent(string contents) {
+				if(string.IsNullOrEmpty(nestedTypes)) {
+					additionalContents = contents;
+				}
+				else {
+					additionalContents += contents.AddFirst("\n\n");
 				}
 			}
 
@@ -1388,7 +1426,13 @@ namespace MaxyGames {
 				if(modifier != null) {
 					m = modifier.GenerateCode();
 				}
-				string code = GeneratePort(obj.Entry.nodeObject.primaryFlowOutput);
+				string code;
+				if(setting.generateIdentifierOnly) {
+					code = Throw(Null);
+				}
+				else {
+					code = GeneratePort(obj.Entry.nodeObject.primaryFlowOutput);
+				}
 				string parameters = null;
 				if(obj.parameters != null && obj.parameters.Count > 0) {
 					int index = 0;
@@ -1447,6 +1491,9 @@ namespace MaxyGames {
 			public string getContents {
 				private get {
 					if(string.IsNullOrEmpty(m_getContents)) {
+						if(setting.generateIdentifierOnly) {
+							return Throw(Null);
+						}
 						string str = null;
 						if(obj.getRoot.LocalVariables.Any()) {
 							string lv = M_GenerateLocalVariable(obj.getRoot.LocalVariables);
@@ -1465,6 +1512,9 @@ namespace MaxyGames {
 			public string setContents {
 				private get {
 					if(string.IsNullOrEmpty(m_setContents)) {
+						if(setting.generateIdentifierOnly) {
+							return Throw(Null);
+						}
 						string str = null;
 						if(obj.setRoot.LocalVariables.Any()) {
 							string lv = M_GenerateLocalVariable(obj.setRoot.LocalVariables);
@@ -2053,13 +2103,19 @@ namespace MaxyGames {
 			public event Func<string, string> postScriptModifier;
 
 			private GeneratorSetting setting;
-			private Dictionary<object, ClassData> classes = new Dictionary<object, ClassData>();
+			public Dictionary<object, ClassData> classes = new Dictionary<object, ClassData>();
 			private StringBuilder scriptBuilder;
 
 			public GeneratedData(GeneratorSetting setting) {
 				this.setting = setting;
 			}
 
+			/// <summary>
+			/// Builds the complete script by generating code for all registered classes and appending the results to the script.
+			/// </summary>
+			/// <remarks>This method iterates through all registered class builders, generates the corresponding code
+			/// for each class, and appends the generated code to the script. If a class does not produce any code, it is
+			/// skipped.</remarks>
 			public void BuildScript() {
 				scriptBuilder = new StringBuilder();
 				foreach(var (owner, builder) in classes) {
@@ -2072,6 +2128,9 @@ namespace MaxyGames {
 
 			public void RegisterClass(object owner, ClassData builder) {
 				classes[owner] = builder;
+
+				//As the new class is registered, invalidate the builder
+				scriptBuilder = null;
 			}
 			
 			public void InitOwner() {
