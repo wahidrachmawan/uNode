@@ -763,7 +763,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				foreach(var p in method.GetParameters()) {
 					func.parameters.Add(new ParameterData() {
 						name = p.Name,
-						type = p.ParameterType,
+						type = p.ParameterType.IsByRef ? p.ParameterType.ElementType() : p.ParameterType,
 						refKind = p.IsOut ? RefKind.Out : p.IsIn ? RefKind.In : p.ParameterType.IsByRef ? RefKind.Ref : RefKind.None
 					});
 				}
