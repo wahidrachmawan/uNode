@@ -349,7 +349,7 @@ namespace MaxyGames.UNode.Editors {
 							if(edge.Input != null) {
 								var port = edge.Input;
 
-								if(port.owner.graphData.isInMacro) {
+								if(port.owner.graphData.IsInMacro) {
 									var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
 									Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
 										port.owner.graph.window.rootVisualElement.parent,
@@ -380,7 +380,7 @@ namespace MaxyGames.UNode.Editors {
 							else if(edge.Output != null) {
 								var port = edge.Output;
 
-								if(port.owner.graphData.isInMacro) {
+								if(port.owner.graphData.IsInMacro) {
 									var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
 									Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
 										port.owner.graph.window.rootVisualElement.parent,

@@ -10,6 +10,14 @@ namespace MaxyGames.UNode.Editors {
 	/// Provide useful function for show custom window.
 	/// </summary>
 	public class ActionWindow : BaseActionWindow<ActionWindow> {
+		static ActionWindow() {
+			AssemblyReloadEvents.beforeAssemblyReload += OnBeforeDomainReload;
+		}
+
+		private static void OnBeforeDomainReload() {
+			CloseAll();
+		}
+
 		protected override void Initialize() {
 			this.minSize = new Vector2(300, 200);
 			this.titleContent = new GUIContent("Editor");

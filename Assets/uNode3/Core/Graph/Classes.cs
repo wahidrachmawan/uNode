@@ -282,7 +282,20 @@ namespace MaxyGames.UNode {
 
 		public override void SetGraphElement(UGraphElement value) {
 			base.SetGraphElement(value);
-			_parameter = null;
+			if(_parameter != null) {
+				var oldParam = _parameter;
+				_parameter = null;
+				if(value is IParameterSystem system) {
+					_parameter = system.GetParameterByID(oldParam.id);
+					if(_parameter == null) {
+						_parameter = system.GetParameterByName(oldParam.name);
+					}
+					if(_parameter != null) {
+						_parameterID = _parameter.id;
+						_type = new(_parameter.type);
+					}
+				}
+			}
 		}
 
 		public Type GetIcon() {

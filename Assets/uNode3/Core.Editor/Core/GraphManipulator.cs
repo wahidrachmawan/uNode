@@ -9,6 +9,42 @@ using System.Collections;
 using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
+	public class ContextMenuItem : IComparable<ContextMenuItem> {
+		public DropdownMenuItem menu;
+		public int order;
+
+		public ContextMenuItem() { }
+
+		public ContextMenuItem(DropdownMenuItem menu, int order = 0) {
+			this.menu = menu;
+			this.order = order;
+		}
+
+		public ContextMenuItem(string actionName, Action<DropdownMenuAction> action, int order = 0) {
+			this.menu = new DropdownMenuAction(actionName, action, DropdownMenuAction.AlwaysEnabled);
+			this.order = order;
+		}
+
+		public static ContextMenuItem CreateAction(string actionName, Action<DropdownMenuAction> action, int order = 0) {
+			return new ContextMenuItem(actionName, action, order);
+		}
+
+		public static ContextMenuItem CreateSeparator(string subMenuPath = "", int order = 0) {
+			return new ContextMenuItem() {
+				menu = new DropdownMenuSeparator(subMenuPath),
+				order = order,
+			};
+		}
+
+		public int CompareTo(ContextMenuItem other) {
+			return CompareUtility.Compare(order, other.order);
+		}
+
+		public static implicit operator ContextMenuItem(DropdownMenuItem menu) {
+			return new ContextMenuItem(menu);
+		}
+	}
+
 	/// <summary>
 	/// Provides an abstract base class for manipulating graph-related data and behavior.
 	/// </summary>
@@ -150,13 +186,288 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="postAction"></param>
 		/// <returns></returns>
 		public virtual bool CreateNewClass(Vector2 mousePosition, Action postAction) => false;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForGraph(Vector2 mousePosition) => null;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForVariable(Vector2 mousePosition, Variable variable) => null;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForProperty(Vector2 mousePosition, Property variable) => null;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForEventGraph(Vector2 mousePosition, NodeContainer variable) => null;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForFunction(Vector2 mousePosition, Function variable) => null;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) => null;
-		public virtual IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForGraph(Vector2 mousePosition) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForVariable(Vector2 mousePosition, Variable value) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForProperty(Vector2 mousePosition, Property value) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForEventGraph(Vector2 mousePosition, NodeContainer value) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForFunction(Vector2 mousePosition, Function value) => null;
+		public virtual IEnumerable<ContextMenuItem> ContextMenuForNode(Vector2 mousePosition, Node value) => null;
+
+		#region Static
+		public static ContextMenuItem[] GetAllMenuForGraph(GraphEditor graphEditor, Vector2 mousePosition) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForGraph))) {
+					var menuItems = manipulator.ContextMenuForGraph(mousePosition);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+
+		public static ContextMenuItem[] GetAllMenuForGraphCanvas(GraphEditor graphEditor, Vector2 mousePosition) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForGraphCanvas))) {
+					var menuItems = manipulator.ContextMenuForGraphCanvas(mousePosition);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+
+		public static ContextMenuItem[] GetAllMenuForVariable(GraphEditor graphEditor, Vector2 mousePosition, Variable value) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForVariable))) {
+					var menuItems = manipulator.ContextMenuForVariable(mousePosition, value);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+
+		public static ContextMenuItem[] GetAllMenuForProperty(GraphEditor graphEditor, Vector2 mousePosition, Property value) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForProperty))) {
+					var menuItems = manipulator.ContextMenuForProperty(mousePosition, value);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+
+		public static ContextMenuItem[] GetAllMenuForEventGraph(GraphEditor graphEditor, Vector2 mousePosition, NodeContainer value) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForEventGraph))) {
+					var menuItems = manipulator.ContextMenuForEventGraph(mousePosition, value);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+
+		public static ContextMenuItem[] GetAllMenuForFunction(GraphEditor graphEditor, Vector2 mousePosition, Function value) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForFunction))) {
+					var menuItems = manipulator.ContextMenuForFunction(mousePosition, value);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+
+		public static ContextMenuItem[] GetAllMenuForNode(GraphEditor graphEditor, Vector2 mousePosition, Node value) {
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			var pool = StaticListPool<ContextMenuItem>.pool;
+			var list = pool.Allocate();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.IsValid(nameof(manipulator.ContextMenuForNode))) {
+					var menuItems = manipulator.ContextMenuForNode(mousePosition, value);
+					if(menuItems != null) {
+						foreach(var menu in menuItems) {
+							if(menu == null) continue;
+							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
+							if(index < 0) {
+								index = list.FindIndex(item => menu.CompareTo(item) > 0);
+								if(index > 0) {
+									index--;
+								}
+							}
+							else {
+								index++;
+							}
+							if(index >= 0 && list.Count > index) {
+								list.Insert(index, menu);
+							}
+							else if(index == -1 && list.Count > 0) {
+								list.Insert(0, menu);
+							}
+							else {
+								list.Add(menu);
+							}
+						}
+					}
+				}
+			}
+			var result = list.ToArray();
+			pool.Free(list);
+			return result;
+		}
+		#endregion
 
 		/// <summary>
 		/// Call this to mark that the graph has been changed
@@ -1324,7 +1635,7 @@ namespace MaxyGames.UNode.Editors {
 			return true;
 		}
 
-		public override IEnumerable<DropdownMenuItem> ContextMenuForVariable(Vector2 mousePosition, Variable variable) {
+		public override IEnumerable<ContextMenuItem> ContextMenuForVariable(Vector2 mousePosition, Variable variable) {
 			if(graph is IGraphWithProperties) {
 				yield return new DropdownMenuAction($"Encapsulate variable: '{variable.name}' and use property", evt => {
 					if(variable.modifier.isPublic) {
@@ -1359,7 +1670,7 @@ namespace MaxyGames.UNode.Editors {
 			yield break;
 		}
 
-		public override IEnumerable<DropdownMenuItem> ContextMenuForGraph(Vector2 mousePosition) {
+		public override IEnumerable<ContextMenuItem> ContextMenuForGraph(Vector2 mousePosition) {
 			if(graph != null) {
 				if(graph is IClassGraph) {
 					yield return new DropdownMenuAction("Show Inheritors", evt => {
@@ -1380,13 +1691,13 @@ namespace MaxyGames.UNode.Editors {
 			yield break;
 		}
 
-		public override IEnumerable<DropdownMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) {
+		public override IEnumerable<ContextMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) {
 			if(graphEditor.canvasData.ShowAddNodeContextMenu) {
-				yield return new DropdownMenuAction("Add Node", evt => {
+				yield return new ContextMenuItem("Add Node", evt => {
 					graphEditor.ShowNodeMenu(mousePosition);
-				}, DropdownMenuAction.AlwaysEnabled);
+				}, int.MinValue);
 
-				yield return new DropdownMenuAction("Add Node (Set)", evt => {
+				yield return new ContextMenuItem("Add Node (Set)", evt => {
 					graphEditor.ShowNodeMenu(mousePosition, new FilterAttribute() { SetMember = true, VoidType = false }, (node) => {
 						node.EnsureRegistered();
 						NodeEditorUtility.AddNewNode(graphData, new Vector2(node.nodeObject.position.x, node.position.y), delegate (Nodes.NodeSetValue n) {
@@ -1396,14 +1707,14 @@ namespace MaxyGames.UNode.Editors {
 						});
 						node.nodeObject.SetPosition(new Vector2(node.position.x - 150, node.position.y - 100));
 					});
-				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Add Node (Favorites)", evt => {
+				}, int.MinValue);
+				yield return new ContextMenuItem("Add Node (Favorites)", evt => {
 					graphEditor.ShowFavoriteMenu(mousePosition);
-				}, DropdownMenuAction.AlwaysEnabled);
+				}, int.MinValue);
 			}
 
 			if(graphEditor.canvasData.SupportMacro) {
-				yield return new DropdownMenuAction("Add Linked Macro", evt => {
+				yield return new ContextMenuItem("Add Linked Macro", evt => {
 					var macros = GraphUtility.FindGraphs<MacroGraph>();
 					List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
 					foreach(var macro in macros) {
@@ -1418,33 +1729,33 @@ namespace MaxyGames.UNode.Editors {
 							tooltip: new GUIContent(m.GraphData.comment)));
 					}
 					ItemSelector.ShowWindow(null, null, null, customItems).ChangePosition(graphEditor.GetMenuPosition()).displayDefaultItem = false;
-				}, DropdownMenuAction.AlwaysEnabled);
+				}, int.MinValue);
 			}
 
 
 			#region Event & State
 			if(graphData.currentCanvas is MainGraphContainer) {
 				if(graphData.graph is IStateGraph state && state.CanCreateStateGraph) {
-					yield return new DropdownMenuSeparator("");
-					yield return new DropdownMenuAction("Add State", evt => {
+					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
+					yield return new ContextMenuItem("Add State", evt => {
 						NodeEditorUtility.AddNewNode<Nodes.StateNode>(graphData,
 							"State",
 							mousePosition);
 						graphEditor.Refresh();
-					}, DropdownMenuAction.AlwaysEnabled);
+					}, int.MinValue);
 					//Add events
 					var eventMenus = NodeEditorUtility.FindEventMenu();
 					foreach(var menu in eventMenus) {
 						if(menu.IsValidScopes(NodeScope.StateGraph)) {
-							yield return new DropdownMenuAction("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
-							}, DropdownMenuAction.AlwaysEnabled);
+							}, int.MinValue);
 						}
 					}
 				}
 				else if(graphData.graph is ICustomMainGraph mainGraph) {
-					yield return new DropdownMenuSeparator("");
+					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
 
 					var scopes = mainGraph.MainGraphScope.Split(',');
 
@@ -1452,10 +1763,10 @@ namespace MaxyGames.UNode.Editors {
 					var eventMenus = NodeEditorUtility.FindEventMenu();
 					foreach(var menu in eventMenus) {
 						if(menu.IsValidScopes(scopes)) {
-							yield return new DropdownMenuAction("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
-							}, DropdownMenuAction.AlwaysEnabled);
+							}, int.MinValue);
 						}
 					}
 				}
@@ -1463,7 +1774,7 @@ namespace MaxyGames.UNode.Editors {
 			else if(graphData.currentCanvas is NodeObject superNode) {
 
 				if(superNode.node is INodeWithEventHandler) {
-					yield return new DropdownMenuSeparator("");
+					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
 
 					#region Add Event
 					var eventMenus = NodeEditorUtility.FindEventMenu();
@@ -1475,54 +1786,54 @@ namespace MaxyGames.UNode.Editors {
 									if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
 								}
 							}
-							yield return new DropdownMenuAction("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
-							}, DropdownMenuAction.AlwaysEnabled);
+							}, int.MinValue);
 						}
 					}
 					#endregion
 				}
 				if(superNode.node is Nodes.ScriptState) {
-					yield return new DropdownMenuAction("Add Trigger Transition", evt => {
+					yield return new ContextMenuItem("Add Trigger Transition", evt => {
 						NodeEditorUtility.AddNewNode<Nodes.TriggerStateTransition>(graphData,
 							"Trigger",
 							mousePosition);
 						graphEditor.Refresh();
-					}, DropdownMenuAction.AlwaysEnabled);
+					}, int.MinValue);
 				}
 			}
 			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
-				yield return new DropdownMenuAction("Add State", evt => {
+				yield return new ContextMenuItem("Add State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.ScriptState>(graphData,
 						"State",
 						mousePosition);
 					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Add Any State", evt => {
+				}, int.MinValue);
+				yield return new ContextMenuItem("Add Any State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.AnyStateNode>(graphData,
 						"AnyState",
 						mousePosition);
 					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Add Nested State", evt => {
+				}, int.MinValue);
+				yield return new ContextMenuItem("Add Nested State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.NestedStateNode>(graphData,
 						"NestedState",
 						mousePosition);
 					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
+				}, int.MinValue);
 			}
 			#endregion
 
 			#region Add Region
-			yield return new DropdownMenuSeparator("");
-			yield return new DropdownMenuAction("Add Region", (e) => {
+			yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
+			yield return new ContextMenuItem("Add Region", (e) => {
 				graphEditor.SelectionAddRegion(mousePosition);
-			}, DropdownMenuAction.AlwaysEnabled);
+			}, int.MinValue);
 			#endregion
 
 			#region Add Notes
-			yield return new DropdownMenuAction("Add Note", (e) => {
+			yield return new ContextMenuItem("Add Note", (e) => {
 				Rect rect = new Rect(mousePosition.x, mousePosition.y, 200, 130);
 				NodeEditorUtility.AddNewNode<Nodes.StickyNote>(graphData, mousePosition, (node) => {
 					node.nodeObject.name = "Title";
@@ -1530,27 +1841,27 @@ namespace MaxyGames.UNode.Editors {
 					node.position = rect;
 				});
 				graphEditor.Refresh();
-			}, DropdownMenuAction.AlwaysEnabled);
+			}, int.MinValue);
 			#endregion
 
 			#region Add Await
 			if(graphData.selectedRoot is Function) {
 				var func = graphData.selectedRoot as Function;
 				if(func.modifier.Async) {
-					yield return new DropdownMenuAction("Add Await", (e) => {
+					yield return new ContextMenuItem("Add Await", (e) => {
 						Rect rect = new Rect(mousePosition.x, mousePosition.y, 200, 130);
 						NodeEditorUtility.AddNewNode<Nodes.AwaitNode>(graphData, mousePosition, (node) => {
 							node.position = rect;
 						});
 						graphEditor.Refresh();
-					}, DropdownMenuAction.AlwaysEnabled);
+					}, int.MinValue);
 				}
 			}
 			#endregion
 
 			#region Return & Jump
 			if(graphData.selectedRoot is BaseFunction) {
-				yield return new DropdownMenuAction("Jump Statement/Add Return", (e) => {
+				yield return new ContextMenuItem("Jump Statement/Add Return", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);
 					NodeEditorUtility.AddNewNode<Nodes.NodeReturn>(graphData, mousePosition, (node) => {
@@ -1561,8 +1872,8 @@ namespace MaxyGames.UNode.Editors {
 						node.position = rect;
 					});
 					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Jump Statement/Add Break", (e) => {
+				}, int.MinValue);
+				yield return new ContextMenuItem("Jump Statement/Add Break", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);
 					NodeEditorUtility.AddNewNode<Nodes.NodeBreak>(graphData, mousePosition, (node) => {
@@ -1573,8 +1884,8 @@ namespace MaxyGames.UNode.Editors {
 						node.position = rect;
 					});
 					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Jump Statement/Add Continue", (e) => {
+				}, int.MinValue);
+				yield return new ContextMenuItem("Jump Statement/Add Continue", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);
 					NodeEditorUtility.AddNewNode<Nodes.NodeContinue>(graphData, mousePosition, (node) => {
@@ -1585,13 +1896,13 @@ namespace MaxyGames.UNode.Editors {
 						node.position = rect;
 					});
 					graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
+				}, int.MinValue);
 			}
 			#endregion
 
 		}
 
-		public override IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
+		public override IEnumerable<ContextMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
 			#region MultipurposeNode
 			if(node is MultipurposeNode) {
 				MultipurposeNode mNode = node as MultipurposeNode;
@@ -1806,35 +2117,30 @@ namespace MaxyGames.UNode.Editors {
 			return true;
 		}
 
-		public override IEnumerable<DropdownMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
+		public override IEnumerable<ContextMenuItem> ContextMenuForNode(Vector2 mousePosition, Node node) {
 			#region Transition
 			if(node is Nodes.StateNode) {
-				yield return new DropdownMenuSeparator("");
+				yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
 				foreach(TransitionMenu menuItem in NodeEditorUtility.FindTransitionMenu()) {
-					object[] eventObject = new object[]{
-								menuItem.type,
-								menuItem.name,
-							};
-					yield return new DropdownMenuAction("Add Transition/" + menuItem.path, ((e) => {
-						object[] objToArray = e.userData as object[];
-						System.Type type = (System.Type)objToArray[0];
+					var menu = menuItem;
+					yield return new ContextMenuItem("Add Transition/" + menuItem.path, ((e) => {
 						if(node is Nodes.StateNode stateNode) {
 							var transition = new NodeObject();
 							NodeEditorUtility.AddNewNode<TransitionEvent>(
 								stateNode.transitions.container,
-								objToArray[1] as string,
-								type,
+								menu.name,
+								menu.type,
 								new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
 								(transition) => {
 									graphEditor.Refresh();
 								});
 						}
-					}), DropdownMenuAction.AlwaysEnabled, eventObject);
+					}), int.MinValue);
 				}
-				yield return new DropdownMenuSeparator("");
+				yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
 			}
 			else if(node is IStateNodeWithTransition stateNode) {
-				yield return new DropdownMenuAction("Add Transition/Empty", ((e) => {
+				yield return new ContextMenuItem("Add Transition/Empty", ((e) => {
 					NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
 						stateNode.TransitionContainer, "Transition",
 						new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
@@ -1847,14 +2153,14 @@ namespace MaxyGames.UNode.Editors {
 							//	});
 							graphEditor.Refresh();
 						});
-				}), DropdownMenuAction.AlwaysEnabled);
+				}), int.MinValue);
 
 				var eventMenus = NodeEditorUtility.FindEventMenu();
 				foreach(var menu in eventMenus) {
 					if(menu.type == typeof(Nodes.StateOnEnterEvent)) continue;
 					if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
 					if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
-						yield return new DropdownMenuAction("Add Transition/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+						yield return new ContextMenuItem("Add Transition/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 							NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
 								stateNode.TransitionContainer, menu.nodeName,
 								new Vector2(node.position.x + (node.position.width / 2), node.position.position.y + (node.position.height / 2) + 50),
@@ -1875,10 +2181,10 @@ namespace MaxyGames.UNode.Editors {
 									//	});
 								});
 							graphEditor.Refresh();
-						}, DropdownMenuAction.AlwaysEnabled);
+						}, int.MinValue);
 					}
 				}
-				yield return new DropdownMenuSeparator("");
+				yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
 			}
 			#endregion
 

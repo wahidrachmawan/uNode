@@ -438,18 +438,9 @@ namespace MaxyGames.UNode.Editors {
 					//uNodeGUIUtility.GUIChanged(editorData.graph);
 					//});
 
-					var manipulators = NodeEditorUtility.FindGraphManipulators();
-					foreach(var manipulator in manipulators) {
-						manipulator.graphEditor = graphEditor;
-						if(manipulator.IsValid(nameof(manipulator.ContextMenuForVariable))) {
-							var menuItems = manipulator.ContextMenuForVariable(mPos, variable);
-							if(menuItems != null) {
-								foreach(var menu in menuItems) {
-									if(menu == null) continue;
-									evt.menu.MenuItems().Add(menu);
-								}
-							}
-						}
+					var menus = GraphManipulator.GetAllMenuForVariable(graphEditor, mPos, variable);
+					foreach(var m in menus) {
+						evt.menu.MenuItems().Add(m.menu);
 					}
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Move Up", act => {
@@ -535,18 +526,9 @@ namespace MaxyGames.UNode.Editors {
 					evt.menu.AppendAction("Find All References", act => {
 						GraphUtility.ShowPropertyUsages(current);
 					});
-					var manipulators = NodeEditorUtility.FindGraphManipulators();
-					foreach(var manipulator in manipulators) {
-						manipulator.graphEditor = graphEditor;
-						if(manipulator.IsValid(nameof(manipulator.ContextMenuForProperty))) {
-							var menuItems = manipulator.ContextMenuForProperty(mPos, property);
-							if(menuItems != null) {
-								foreach(var menu in menuItems) {
-									if(menu == null) continue;
-									evt.menu.MenuItems().Add(menu);
-								}
-							}
-						}
+					var menus = GraphManipulator.GetAllMenuForProperty(graphEditor, mPos, property);
+					foreach(var m in menus) {
+						evt.menu.MenuItems().Add(m.menu);
 					}
 					if(current.modifier.Abstract == false) {
 						evt.menu.AppendSeparator("");
@@ -711,18 +693,9 @@ namespace MaxyGames.UNode.Editors {
 					evt.menu.AppendAction("Find All References", act => {
 						GraphUtility.ShowFunctionUsages(current);
 					});
-					var manipulators = NodeEditorUtility.FindGraphManipulators();
-					foreach(var manipulator in manipulators) {
-						manipulator.graphEditor = graphEditor;
-						if(manipulator.IsValid(nameof(manipulator.ContextMenuForFunction))) {
-							var menuItems = manipulator.ContextMenuForFunction(mPos, function);
-							if(menuItems != null) {
-								foreach(var menu in menuItems) {
-									if(menu == null) continue;
-									evt.menu.MenuItems().Add(menu);
-								}
-							}
-						}
+					var menus = GraphManipulator.GetAllMenuForFunction(graphEditor, mPos, function);
+					foreach(var m in menus) {
+						evt.menu.MenuItems().Add(m.menu);
 					}
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Move Up", (act) => {
@@ -837,7 +810,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(graphElement is MainGraphContainer mainContainer) {
 				if(desiredGraph is IMacroGraph || desiredGraph is IStateGraph state && state.CanCreateStateGraph || desiredGraph is ICustomMainGraph) {
-					content.label.text = $"[{graphData.mainGraphTitle}]";
+					content.label.text = $"[{graphData.MainGraphTitle}]";
 					Texture icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.EventIcon));
 					content.ShowIcon(icon);
 					content.onClick = (_) => {
@@ -941,18 +914,9 @@ namespace MaxyGames.UNode.Editors {
 					//evt.menu.AppendAction("Find All References", act => {
 					//	GraphUtility.ShowFunctionUsages(current);
 					//});
-					var manipulators = NodeEditorUtility.FindGraphManipulators();
-					foreach(var manipulator in manipulators) {
-						manipulator.graphEditor = graphEditor;
-						if(manipulator.IsValid(nameof(manipulator.ContextMenuForGraph))) {
-							var menuItems = manipulator.ContextMenuForEventGraph(mPos, current);
-							if(menuItems != null) {
-								foreach(var menu in menuItems) {
-									if(menu == null) continue;
-									evt.menu.MenuItems().Add(menu);
-								}
-							}
-						}
+					var menus = GraphManipulator.GetAllMenuForEventGraph(graphEditor, mPos, current);
+					foreach(var m in menus) {
+						evt.menu.MenuItems().Add(m.menu);
 					}
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Move Up", (act) => {
@@ -1271,18 +1235,10 @@ namespace MaxyGames.UNode.Editors {
 									//	evt.menu.AppendSeparator("");
 									//	CreateNestedTypesMenu(evt.menu, root as INestedClassSystem);
 									//}
-									var manipulators = NodeEditorUtility.FindGraphManipulators();
-									foreach(var manipulator in manipulators) {
-										manipulator.graphEditor = graphEditor;
-										if(manipulator.IsValid(nameof(manipulator.ContextMenuForGraph))) {
-											var menuItems = manipulator.ContextMenuForGraph(mPos);
-											if(menuItems != null) {
-												foreach(var menu in menuItems) {
-													if(menu == null) continue;
-													evt.menu.MenuItems().Add(menu);
-												}
-											}
-										}
+
+									var menus = GraphManipulator.GetAllMenuForGraph(graphEditor, mPos);
+									foreach(var m in menus) {
+										evt.menu.MenuItems().Add(m.menu);
 									}
 								};
 
@@ -1476,7 +1432,7 @@ namespace MaxyGames.UNode.Editors {
 			if(desiredGraph is IStateGraph stateGraph && stateGraph.CanCreateStateGraph) {
 				eventContainer.SetDisplay(true);
 				eventContainer.parent.SetDisplay(true);
-				if(showEvents && graphData.graphData.mainGraphContainer.GetNodeInChildren<BaseEventNode>() != null && graphData.isInMainGraph) {
+				if(showEvents && graphData.graphData.mainGraphContainer.GetNodeInChildren<BaseEventNode>() != null && graphData.IsInMainGraph) {
 					var events = graphData.graphData.mainGraphContainer.GetNodesInChildren<BaseEventNode>().ToArray();
 
 					TreeView treeView = eventContainer.Q<TreeView>();

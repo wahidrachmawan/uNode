@@ -283,8 +283,9 @@ namespace MaxyGames {
 							generationState.isStatic = false;
 							generationState.state = State.Function;
 
-							foreach(var p in generatorData.coroutineEvent) {
-								var pair = p;
+							var pairs = generatorData.coroutineEvent.ToList();
+							for(int i = 0; i < pairs.Count; i++) {
+								var pair = pairs[i];
 								if(!string.IsNullOrEmpty(pair.Value.variableName) && pair.Key != null) {
 									ThreadingUtil.Queue((() => {
 										additionalVariables.Append(
@@ -341,6 +342,10 @@ namespace MaxyGames {
 										}
 										InitData.Add(WrapWithInformation(genData, pair.Key));
 									}));
+								}
+
+								if(pairs.Count != generatorData.coroutineEvent.Count) {
+									pairs = generatorData.coroutineEvent.ToList();
 								}
 							}
 							ThreadingUtil.WaitQueue();
@@ -1998,7 +2003,7 @@ namespace MaxyGames {
 					data += dataList[index];
 				}
 			}
-			if(generatePureScript) {
+			if(generatePureScript || ReflectionUtils.IsNativeType(ctor.owner)) {
 				return New(ctor.DeclaringType, data);
 			}
 			else {

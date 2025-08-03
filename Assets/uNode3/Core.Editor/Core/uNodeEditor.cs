@@ -222,7 +222,7 @@ namespace MaxyGames.UNode.Editors {
 			internal void RemoveIncorrectDatas() {
 				var selectedData = selectedGraphData;
 				for(int y = 0; y < graphDatas.Count; y++) {
-					if(graphDatas[y] != selectedData && !graphDatas[y].isValidGraph) {
+					if(graphDatas[y] != selectedData && !graphDatas[y].IsValidGraph) {
 						graphDatas.RemoveAt(y);
 						y--;
 					}

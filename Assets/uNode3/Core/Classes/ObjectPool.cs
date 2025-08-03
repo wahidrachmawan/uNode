@@ -121,7 +121,7 @@ namespace MaxyGames.UNode {
 	}
 
 	public static class StaticListPool<T> {
-		private readonly static ObjectPool<List<T>> pool = new ObjectPool<List<T>>(Construct, null, OnFree);
+		public readonly static ObjectPool<List<T>> pool = new ObjectPool<List<T>>(Construct, null, OnFree);
 
 		public static List<T> Allocate() {
 			return pool.Allocate();
@@ -141,7 +141,7 @@ namespace MaxyGames.UNode {
 	}
 
 	public static class StaticHashPool<T> {
-		private readonly static ObjectPool<HashSet<T>> pool = new ObjectPool<HashSet<T>>(Construct, null, OnFree);
+		public readonly static ObjectPool<HashSet<T>> pool = new ObjectPool<HashSet<T>>(Construct, null, OnFree);
 
 		public static HashSet<T> Allocate() {
 			return pool.Allocate();

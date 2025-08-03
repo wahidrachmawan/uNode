@@ -1278,7 +1278,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			else {
-				if(menuItem.IsCoroutine && !graphData.supportCoroutine) {
+				if(menuItem.IsCoroutine && !graphData.SupportCoroutine) {
 					return false;
 				}
 			}

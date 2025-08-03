@@ -126,7 +126,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// True if the data is valid
 		/// </summary>
-		public bool isValidGraph => owner is IGraph && graph != null;
+		public bool IsValidGraph => owner is IGraph && graph != null;
 
 		/// <summary>
 		/// Get the graph system
@@ -194,7 +194,7 @@ namespace MaxyGames.UNode.Editors {
 						m_scopes.Add(NodeScope.Coroutine);
 					}
 				}
-				if(isInMacro) {
+				if(IsInMacro) {
 					m_scopes.Add(NodeScope.Macro);
 					m_scopes.Add(NodeScope.FlowGraph);
 				}
@@ -218,17 +218,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// True if the current canvas is macro editing
-		/// </summary>
-		public bool isInMacro {
-			get {
-				if(currentCanvas is NodeContainer && graph is IMacroGraph)
-					return true;
-				return currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro;
-			}
-		}
-
-		/// <summary>
 		/// The all nodes in current canvas
 		/// </summary>
 		public IEnumerable<NodeObject> nodes {
@@ -243,9 +232,9 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Return true, if can add node to the <see cref="currentCanvas"/>
 		/// </summary>
-		public bool canAddNode {
+		public bool CanAddNode {
 			get {
-				if(isValidGraph) {
+				if(IsValidGraph) {
 					if(currentCanvas is MainGraphContainer) {
 						if(graph is IMacroGraph) {
 							return true;
@@ -272,7 +261,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Return true if the current canvas is supporting coroutine
 		/// </summary>
-		public bool supportCoroutine {
+		public bool SupportCoroutine {
 			get {
 				if(selectedGroup != null) {
 					if(selectedGroup?.node is ISuperNode superNode) {
@@ -297,6 +286,15 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// True if the current canvas is supported to add flow nodes
+		/// </summary>
+		public bool SupportFlowNode {
+			get {
+				return scopes.Count == 0 || scopes.Contains(NodeScope.FlowGraph);
+			}
+		}
+
 		#region Selection
 		/// <summary>
 		/// The selected uNode root
@@ -317,9 +315,40 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Return true if has selected elements
+		/// </summary>
+		public bool hasSelection => serializedSelecteds.Count > 0;
+
+		/// <summary>
+		/// All selection objects
+		/// </summary>
+		public IEnumerable<object> selecteds {
+			get {
+				foreach(var ele in serializedSelecteds) {
+					yield return ele.ReferenceValue;
+				}
+			}
+		}
+
+		/// <summary>
+		/// All selecteds nodes
+		/// </summary>
+		public IEnumerable<NodeObject> selectedNodes {
+			get {
+				foreach(var ele in serializedSelecteds) {
+					if(ele.ReferenceValue is NodeObject node) {
+						yield return node;
+					}
+				}
+			}
+		}
+
+		public int selectedCount => serializedSelecteds.Count;
+
+		/// <summary>
 		/// Return true if it is currently in Main Graph
 		/// </summary>
-		public bool isInMainGraph {
+		public bool IsInMainGraph {
 			get {
 				return selectedRoot is MainGraphContainer;
 			}
@@ -328,7 +357,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Return true if the graph is support main graph
 		/// </summary>
-		public bool isSupportMainGraph {
+		public bool IsSupportMainGraph {
 			get {
 				if(graph is IStateGraph stateGraph) {
 					return stateGraph.CanCreateStateGraph;
@@ -344,9 +373,20 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// True if the current canvas is macro editing
+		/// </summary>
+		public bool IsInMacro {
+			get {
+				if(currentCanvas is NodeContainer && graph is IMacroGraph)
+					return true;
+				return currentCanvas is NodeObject nodeObject && nodeObject.node is IMacro;
+			}
+		}
+
+		/// <summary>
 		/// The title of main graph
 		/// </summary>
-		public string mainGraphTitle {
+		public string MainGraphTitle {
 			get {
 				if(graph is IStateGraph) {
 					return "EVENT GRAPH";
@@ -431,44 +471,13 @@ namespace MaxyGames.UNode.Editors {
 		public void ClearSelection() {
 			serializedSelecteds.Clear();
 		}
-
-		/// <summary>
-		/// Return true if has selected elements
-		/// </summary>
-		public bool hasSelection => serializedSelecteds.Count > 0;
-
-		/// <summary>
-		/// All selection objects
-		/// </summary>
-		public IEnumerable<object> selecteds {
-			get {
-				foreach(var ele in serializedSelecteds) {
-					yield return ele.ReferenceValue;
-				}
-			}
-		}
-
-		/// <summary>
-		/// All selecteds nodes
-		/// </summary>
-		public IEnumerable<NodeObject> selectedNodes {
-			get {
-				foreach(var ele in serializedSelecteds) {
-					if(ele.ReferenceValue is NodeObject node) {
-						yield return node;
-					}
-				}
-			}
-		}
-
-		public int selectedCount => serializedSelecteds.Count;
 		#endregion
 
 		#region Canvas
 		/// <summary>
 		/// True if the owner can be edited by graph editor.
 		/// </summary>
-		public bool isGraphOpen {
+		public bool IsGraphOpen {
 			get {
 				return selectedRoot.IsValidElement() || selectedGroup.IsValidElement() || graph is IMacroGraph || graph is IStateGraph state && state.CanCreateStateGraph;
 			}

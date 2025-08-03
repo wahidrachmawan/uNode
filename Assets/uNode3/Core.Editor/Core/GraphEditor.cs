@@ -695,7 +695,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void Validate() {
-			if(graphData != null && graphData.isSupportMainGraph == false && graphData.graphData != null) {
+			if(graphData != null && graphData.IsSupportMainGraph == false && graphData.graphData != null) {
 				var container = graphData.graphData.mainGraphContainer;
 				if(container.childCount > 0) {
 					container.Destroy();

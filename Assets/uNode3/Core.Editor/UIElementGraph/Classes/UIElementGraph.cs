@@ -898,7 +898,7 @@ namespace MaxyGames.UNode.Editors {
 
 		private void InitTabbar(VisualElement container) {
 			#region Main/Selection Tab
-			if(window.mainTab != null && window.mainTab == window.selectedTab && !window.mainTab.selectedGraphData.isValidGraph) {
+			if(window.mainTab != null && window.mainTab == window.selectedTab && !window.mainTab.selectedGraphData.IsValidGraph) {
 				window.mainTab.owner = null;
 				window.mainTab.graph = null;
 				window.mainTab.selectedGraphData = new GraphEditorData();
@@ -1216,7 +1216,7 @@ namespace MaxyGames.UNode.Editors {
 				graph.EnableBreadcrumb(true);
 				pathbar.Add(graph);
 				var root = window.selectedTab.selectedGraphData.selectedRoot;
-				var function = new ClickableElement(root is NodeContainerWithEntry ? root.name : $"[{graphData.mainGraphTitle}]") {
+				var function = new ClickableElement(root is NodeContainerWithEntry ? root.name : $"[{graphData.MainGraphTitle}]") {
 					name = "path-element"
 				};
 				function.AddToClassList("path-function");
@@ -1233,8 +1233,8 @@ namespace MaxyGames.UNode.Editors {
 						}
 					};
 					function.AddManipulator(new ContextualMenuManipulator(evt => {
-						if(graphData.isSupportMainGraph) {
-							evt.menu.AppendAction($"[{graphData.mainGraphTitle}]", (act) => {
+						if(graphData.IsSupportMainGraph) {
+							evt.menu.AppendAction($"[{graphData.MainGraphTitle}]", (act) => {
 								if(graphData.selectedRoot != null || graphData.selectedGroup != null) {
 									graphData.ClearSelection();
 									graphData.currentCanvas = null;
@@ -1877,7 +1877,7 @@ namespace MaxyGames.UNode.Editors {
 					if(saveButton.visible == false)
 						saveButton.visible = true;
 				}
-				if(graphData.isGraphOpen) {
+				if(graphData.IsGraphOpen) {
 					if(frameButton.resolvedStyle.display == DisplayStyle.None)
 						frameButton.SetDisplay(true);
 				}

@@ -520,15 +520,23 @@ namespace MaxyGames.UNode.Editors {
 
 		public virtual void OnZoomUpdated(float zoom) {
 			if(zoom > 0.2f) {
-				titleIcon.style.visibility = StyleKeyword.Null;
-				titleLabel.style.visibility = StyleKeyword.Null;
+				if(titleIcon != null) {
+					titleIcon.style.visibility = StyleKeyword.Null;
+				}
+				if(titleLabel != null) {
+					titleLabel.style.visibility = StyleKeyword.Null;
+				}
 				if(portInputContainer != null) {
 					portInputContainer.style.display = StyleKeyword.Null;
 				}
 			}
 			else {
-				titleIcon.style.visibility = Visibility.Hidden;
-				titleLabel.style.visibility = Visibility.Hidden;
+				if(titleIcon != null) {
+					titleIcon.style.visibility = Visibility.Hidden;
+				}
+				if(titleLabel != null) {
+					titleLabel.style.visibility = Visibility.Hidden;
+				}
 				if(portInputContainer != null) {
 					portInputContainer.style.display = DisplayStyle.None;
 				}
