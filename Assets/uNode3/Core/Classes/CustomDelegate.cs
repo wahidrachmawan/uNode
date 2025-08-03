@@ -44,6 +44,15 @@ namespace MaxyGames {
 			return Expression.GetFuncType(types);
 		}
 
+		public static Type GetDelegateType(params Type[] types) {
+			for(int i = 0; i < types.Length; i++) {
+				if(types[i] is RuntimeType) {
+					return ReflectionFaker.FakeDelegate(types);
+				}
+			}
+			return Expression.GetDelegateType(types);
+		}
+
 		public static Delegate CreateDelegate(MethodInfo methodInfo, object target) {
 			Func<Type[], Type> getType;
 			var isAction = methodInfo.ReturnType.Equals((typeof(void)));

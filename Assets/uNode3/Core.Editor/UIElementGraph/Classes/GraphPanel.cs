@@ -548,77 +548,79 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
-					evt.menu.AppendSeparator("");
-					if(current.getRoot == null && current.setRoot == null) {
-						evt.menu.AppendAction("Add Getter and Setter", act => {
-							uNodeEditorUtility.RegisterUndo(graphData.owner);
-							NodeEditorUtility.AddNewObject<Function>("Setter", current, func => {
-								func.parameters = new List<ParameterData>() { new ParameterData("value", current.ReturnType()) };
-								current.setRoot = func;
-							});
-							NodeEditorUtility.AddNewObject<Function>("Getter", current, func => {
-								func.returnType = current.ReturnType();
-								current.getRoot = func;
-								NodeEditorUtility.AddNewNode<Nodes.NodeReturn>(func, new Vector2(0, 100), (node) => {
-									current.getRoot.Entry.EnsureRegistered();
-									node.enter.ConnectTo(current.getRoot.Entry.exit);
-									if(ReflectionUtils.CanCreateInstance(current.ReturnType())) {
-										node.value.AssignToDefault(MemberData.CreateFromValue(ReflectionUtils.CreateInstance(current.ReturnType())));
-									}
+					if(current.modifier.Abstract == false) {
+						evt.menu.AppendSeparator("");
+						if(current.getRoot == null && current.setRoot == null) {
+							evt.menu.AppendAction("Add Getter and Setter", act => {
+								uNodeEditorUtility.RegisterUndo(graphData.owner);
+								NodeEditorUtility.AddNewObject<Function>("Setter", current, func => {
+									func.parameters = new List<ParameterData>() { new ParameterData("value", current.ReturnType()) };
+									current.setRoot = func;
 								});
-							});
-							graphEditor.Refresh();
-						});
-					}
-					if(current.setRoot == null) {
-						evt.menu.AppendAction("Add Setter", act => {
-							NodeEditorUtility.AddNewObject<Function>("Setter", current, func => {
-								func.parameters = new List<ParameterData>() { new ParameterData("value", current.ReturnType()) };
-								current.setRoot = func;
-								//		NodeEditorUtility.AddNewObject<Nodes.NodeAction>(editorData.graph, "Entry", func.transform, (node) => {
-								//			func.startNode = node;
-								//		});
-							});
-							graphEditor.Refresh();
-						});
-					}
-					if(current.getRoot == null) {
-						evt.menu.AppendAction("Add Getter", act => {
-							NodeEditorUtility.AddNewObject<Function>("Getter", current, func => {
-								func.returnType = current.ReturnType();
-								current.getRoot = func;
-								NodeEditorUtility.AddNewNode<Nodes.NodeReturn>(func, new Vector2(0, 100), (node) => {
-									current.getRoot.Entry.EnsureRegistered();
-									node.enter.ConnectTo(current.getRoot.Entry.exit);
-									if(ReflectionUtils.CanCreateInstance(current.ReturnType())) {
-										node.value.AssignToDefault(MemberData.CreateFromValue(ReflectionUtils.CreateInstance(current.ReturnType())));
-									}
+								NodeEditorUtility.AddNewObject<Function>("Getter", current, func => {
+									func.returnType = current.ReturnType();
+									current.getRoot = func;
+									NodeEditorUtility.AddNewNode<Nodes.NodeReturn>(func, new Vector2(0, 100), (node) => {
+										current.getRoot.Entry.EnsureRegistered();
+										node.enter.ConnectTo(current.getRoot.Entry.exit);
+										if(ReflectionUtils.CanCreateInstance(current.ReturnType())) {
+											node.value.AssignToDefault(MemberData.CreateFromValue(ReflectionUtils.CreateInstance(current.ReturnType())));
+										}
+									});
 								});
+								graphEditor.Refresh();
 							});
-							graphEditor.Refresh();
-						});
-					}
-					if(current.getRoot && current.setRoot) {
-						evt.menu.AppendAction("Remove Getter and Setter", act => {
-							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Getter and Setter");
-							current.getRoot.Destroy();
-							current.setRoot.Destroy();
-							graphEditor.Refresh();
-						});
-					}
-					if(current.setRoot) {
-						evt.menu.AppendAction("Remove Setter", act => {
-							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Setter");
-							current.setRoot.Destroy();
-							graphEditor.Refresh();
-						});
-					}
-					if(current.getRoot) {
-						evt.menu.AppendAction("Remove Getter", act => {
-							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Getter");
-							current.getRoot.Destroy();
-							graphEditor.Refresh();
-						});
+						}
+						if(current.setRoot == null) {
+							evt.menu.AppendAction("Add Setter", act => {
+								NodeEditorUtility.AddNewObject<Function>("Setter", current, func => {
+									func.parameters = new List<ParameterData>() { new ParameterData("value", current.ReturnType()) };
+									current.setRoot = func;
+									//		NodeEditorUtility.AddNewObject<Nodes.NodeAction>(editorData.graph, "Entry", func.transform, (node) => {
+									//			func.startNode = node;
+									//		});
+								});
+								graphEditor.Refresh();
+							});
+						}
+						if(current.getRoot == null) {
+							evt.menu.AppendAction("Add Getter", act => {
+								NodeEditorUtility.AddNewObject<Function>("Getter", current, func => {
+									func.returnType = current.ReturnType();
+									current.getRoot = func;
+									NodeEditorUtility.AddNewNode<Nodes.NodeReturn>(func, new Vector2(0, 100), (node) => {
+										current.getRoot.Entry.EnsureRegistered();
+										node.enter.ConnectTo(current.getRoot.Entry.exit);
+										if(ReflectionUtils.CanCreateInstance(current.ReturnType())) {
+											node.value.AssignToDefault(MemberData.CreateFromValue(ReflectionUtils.CreateInstance(current.ReturnType())));
+										}
+									});
+								});
+								graphEditor.Refresh();
+							});
+						}
+						if(current.getRoot && current.setRoot) {
+							evt.menu.AppendAction("Remove Getter and Setter", act => {
+								uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Getter and Setter");
+								current.getRoot.Destroy();
+								current.setRoot.Destroy();
+								graphEditor.Refresh();
+							});
+						}
+						if(current.setRoot) {
+							evt.menu.AppendAction("Remove Setter", act => {
+								uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Setter");
+								current.setRoot.Destroy();
+								graphEditor.Refresh();
+							});
+						}
+						if(current.getRoot) {
+							evt.menu.AppendAction("Remove Getter", act => {
+								uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Getter");
+								current.getRoot.Destroy();
+								graphEditor.Refresh();
+							});
+						}
 					}
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Move Up", act => {

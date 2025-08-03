@@ -106,5 +106,35 @@ namespace MaxyGames.UNode {
 			return FakeGenericType(("System.Func`" + typeArguments.Length).ToType(), typeArguments);
 		}
 
+		public static FakeType FakeDelegate(Type[] typeArguments) {
+			if(typeArguments.Any(t => t.IsByRef)) {
+				for(int i = 0; i < typeArguments.Length; i++) {
+					if(typeArguments[i].IsByRef) {
+						var elementType = typeArguments[i].ElementType();
+						if(elementType is RuntimeType) {
+							var nt = ReflectionUtils.GetNativeType(elementType);
+							if(nt != null) {
+								typeArguments[i] = nt.MakeByRefType();
+							}
+							else {
+								typeArguments[i] = typeof(object).MakeByRefType();
+							}
+						}
+					}
+					else {
+						if(typeArguments[i] is RuntimeType) {
+							var nt = ReflectionUtils.GetNativeType(typeArguments[i]);
+							if(nt != null) {
+								typeArguments[i] = nt;
+							}
+							else {
+								typeArguments[i] = typeof(object);
+							}
+						}
+					}
+				}
+			}
+			return FakeFuncDelegate(typeArguments);
+		}
 	}
 }

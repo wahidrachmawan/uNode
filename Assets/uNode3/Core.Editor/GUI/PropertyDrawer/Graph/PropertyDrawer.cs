@@ -23,7 +23,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}, targetObject: option.unityObject);
 
 
-			if(isInterface && value.AutoProperty) {
+			if((isInterface || value.modifier.Abstract) && value.AutoProperty) {
+				if(value.modifier.Abstract) {
+					UInspector.Draw(option.property[nameof(value.modifier)]);
+				}
 				value.modifier.SetPublic();
 				UInspector.Draw(option.property[nameof(value.accessor)]);
 			}

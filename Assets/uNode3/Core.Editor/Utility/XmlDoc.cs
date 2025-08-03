@@ -171,7 +171,7 @@ namespace MaxyGames.UNode.Editors {
 
 		private const string prefix = "file:///";
 		private static XmlDocument XMLFromAssemblyNonCached(Assembly assembly) {
-			if(assembly.CodeBase.StartsWith(prefix)) {
+			if(assembly.IsDynamic == false && assembly.CodeBase.StartsWith(prefix)) {
 				string xml = null;
 				if(XMLDocPath != null) {
 					string path;

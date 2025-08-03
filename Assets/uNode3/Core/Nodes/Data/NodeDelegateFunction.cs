@@ -79,7 +79,7 @@ namespace MaxyGames.UNode.Nodes {
 					var function = target.startItem.GetReferenceValue() as Function;
 					if(function != null) {
 						var type = function.ReturnType();
-						var parameters = function.parameters.Select(p => p.Type);
+						var parameters = function.parameters.Select(p => p.isByRef ? p.Type.MakeByRefType() :  p.Type);
 						if(parameters.Any(p => p.IsByRef) == false) {
 							if(type == typeof(void)) {
 								var delType = CustomDelegate.GetActionDelegateType(parameters.ToArray());
@@ -101,6 +101,16 @@ namespace MaxyGames.UNode.Nodes {
 								}
 								return delType;
 							}
+						}
+						else {
+							var delType = CustomDelegate.GetDelegateType(parameters.Append(type).ToArray());
+							foreach(var p in output.GetConnectedPorts()) {
+								if(p.type.IsCastableTo(delType)) {
+									delType = p.type;
+									break;
+								}
+							}
+							return delType;
 						}
 					}
 				}

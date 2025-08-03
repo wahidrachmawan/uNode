@@ -250,9 +250,8 @@ namespace MaxyGames.UNode.Nodes {
 				if(methodInfo.ReturnType == typeof(void)) {
 					return CustomDelegate.GetActionDelegateType(methodInfo.GetParameters().Select(p => p.ParameterType).ToArray());
 				} else {
-					var types = methodInfo.GetParameters().Select(i => i.ParameterType).ToList();
-					types.Add(methodInfo.ReturnType);
-					return CustomDelegate.GetFuncDelegateType(types.ToArray());
+					var types = methodInfo.GetParameters().Select(i => i.ParameterType).Append(methodInfo.ReturnType).ToArray();
+					return CustomDelegate.GetDelegateType(types);
 				}
 			}
 			return typeof(Delegate);
