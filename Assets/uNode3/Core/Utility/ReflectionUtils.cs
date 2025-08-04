@@ -1099,7 +1099,10 @@ namespace MaxyGames.UNode {
 		/// <param name="type"></param>
 		/// <returns></returns>
 		public static bool CanCreateInstance(Type type) {
-			if(type == typeof(string) || type.IsPrimitive || type.IsValueType && type != typeof(void))
+			if(type == typeof(void)) {
+				return false;
+			}
+			if(type == typeof(string) || type.IsPrimitive || type.IsValueType)
 				return true;
 			if(type.IsInterface || type.IsAbstract || type.ContainsGenericParameters)
 				return false;
