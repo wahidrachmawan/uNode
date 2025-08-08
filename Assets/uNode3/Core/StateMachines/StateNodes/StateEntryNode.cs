@@ -31,7 +31,6 @@ namespace MaxyGames.UNode.Nodes {
 			if(container != null && container.Entry != this) {
 				analizer.RegisterError(this, "Multiple entry node is not supported.");
 			}
-			analizer.CheckPort(exit);
 		}
 
 		public override Type GetNodeIcon() {

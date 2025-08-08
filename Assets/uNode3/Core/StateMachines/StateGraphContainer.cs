@@ -43,11 +43,13 @@ namespace MaxyGames.UNode {
 			instance.eventData.postInitialize += val => {
 				if(Entry is Nodes.StateEntryNode entry) {
 					var startStateNode = entry.exit.GetTargetNode();
-					if(startStateNode == null) {
-						throw new GraphException("The entry is not connected", entry);
+					if(startStateNode != null) {
+						var startState = val.GetUserData(startStateNode) as StateMachines.BaseState;
+						fsm.ActiveState = startState;
 					}
-					var startState = val.GetUserData(startStateNode) as StateMachines.BaseState;
-					fsm.ActiveState = startState;
+					//else {
+					//	throw new GraphException("The entry is not connected", entry);
+					//}
 				}
 				else {
 					var node = this.GetNodeInChildren<Nodes.ScriptState>();

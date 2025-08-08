@@ -14,6 +14,16 @@ namespace MaxyGames.UNode.Editors {
 		string DisplayName { get; }
 	}
 
+	public interface ISelectorItem { }
+
+	public interface ISelectorItemWithValue : ISelectorItem {
+		public object ItemValue { get; }
+	}
+
+	public interface ISelectorItemWithType : ISelectorItem {
+		public Type ItemType { get; }
+	}
+
 	public class TypeTreeView : MemberTreeView {
 		public Type type;
 		public FilterAttribute filter;
@@ -56,7 +66,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	internal class NamespaceTreeView : TreeViewItem {
+	internal class NamespaceTreeView : TreeViewItem, ISelectorItem {
 		public string Namespace;
 
 		public NamespaceTreeView() {
@@ -68,7 +78,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	public class MemberTreeView : TreeViewItem, IDisplayName {
+	public class MemberTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType {
 		public MemberInfo member;
 		public object instance;
 
@@ -90,6 +100,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 		}
+
+		public object ItemValue => member;
+
+		public Type ItemType => ReflectionUtils.GetMemberType(member);
 
 		public MemberTreeView() {
 
@@ -122,19 +136,21 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	internal class NodeTreeView : TreeViewItem {
-		public NodeTreeData data;
+	internal class NodeTreeView : TreeViewItem, ISelectorItemWithValue {
+		public SelectorItemNodeTreeData data;
 
 		public NodeTreeView() {
 
 		}
 
-		public NodeTreeView(NodeTreeData data, int id, int depth) : base(id, depth, data.name) {
+		public NodeTreeView(SelectorItemNodeTreeData data, int id, int depth) : base(id, depth, data.name) {
 			this.data = data;
 		}
+
+		public object ItemValue => data;
 	}
 
-	internal class NodeTreeData {
+	public class SelectorItemNodeTreeData {
 		public string name;
 		public NodeMenu menu;
 		public INodeItemCommand command;
@@ -428,16 +444,16 @@ namespace MaxyGames.UNode.Editors {
 					var menus = NodeEditorUtility.FindNodeMenu();
 					var createNodeMenus = NodeEditorUtility.FindCreateNodeCommands();
 					//Init data
-					List<NodeTreeData> datas = new List<NodeTreeData>();
+					List<SelectorItemNodeTreeData> datas = new List<SelectorItemNodeTreeData>();
 					foreach(var m in menus) {
-						datas.Add(new NodeTreeData() {
+						datas.Add(new SelectorItemNodeTreeData() {
 							name = m.name,
 							menu = m,
 							category = m.category,
 						});
 					}
 					foreach(var m in createNodeMenus) {
-						datas.Add(new NodeTreeData() {
+						datas.Add(new SelectorItemNodeTreeData() {
 							name = m.name,
 							command = m,
 							category = m.category,
@@ -512,7 +528,7 @@ namespace MaxyGames.UNode.Editors {
 			return members;
 		}
 
-		void AddNodes(List<NodeTreeData> nodes, TreeViewItem item, IList<TreeViewItem> rows) {
+		void AddNodes(List<SelectorItemNodeTreeData> nodes, TreeViewItem item, IList<TreeViewItem> rows) {
 			bool isSearching = !string.IsNullOrEmpty(searchString);
 			if(item.children == null)
 				item.children = new List<TreeViewItem>();

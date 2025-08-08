@@ -20,34 +20,34 @@ namespace MaxyGames.UNode.Editors {
 				}
 				bool flag = true;
 				switch(searchFilter) {
-					case SearchFilter.Function:
-						if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType == MemberData.TargetType.uNodeFunction;
+					case SearchFilter.Function: {
+						if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Function);
 						}
 						break;
-					case SearchFilter.Property:
-						if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType == MemberData.TargetType.uNodeProperty;
+					}
+					case SearchFilter.Property: {
+						if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Property);
 						}
 						break;
-					case SearchFilter.Type:
+					}
+					case SearchFilter.Type: {
 						if(tree is MemberTreeView) {
 							var item = tree as MemberTreeView;
 							flag = item.member is Type;
 						}
-						else if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType.IsTargetingType();
+						else if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Type);
 						}
 						break;
-					case SearchFilter.Variable:
-						if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType.IsTargetingVariable();
+					}
+					case SearchFilter.Variable: {
+						if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Variable);
 						}
 						break;
+					}
 				}
 				if(!flag) {
 					return false;
@@ -560,34 +560,34 @@ namespace MaxyGames.UNode.Editors {
 				}
 				bool flag = true;
 				switch(searchFilter) {
-					case SearchFilter.Function:
-						if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType == MemberData.TargetType.uNodeFunction;
+					case SearchFilter.Function: {
+						if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Function);
 						}
 						break;
-					case SearchFilter.Property:
-						if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType == MemberData.TargetType.uNodeProperty;
+					}
+					case SearchFilter.Property: {
+						if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Property);
 						}
 						break;
-					case SearchFilter.Type:
+					}
+					case SearchFilter.Type: {
 						if(tree is MemberTreeView) {
 							var item = tree as MemberTreeView;
 							flag = item.member is Type;
 						}
-						else if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType.IsTargetingType();
+						else if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Type);
 						}
 						break;
-					case SearchFilter.Variable:
-						if(tree is SelectorCustomTreeView) {
-							var item = tree as SelectorCustomTreeView;
-							flag = item.graphItem != null && item.graphItem.targetType.IsTargetingVariable();
+					}
+					case SearchFilter.Variable: {
+						if(tree is SelectorCustomTreeView item) {
+							flag = item.item.IsValidSearchFilter(SearchFilter.Variable);
 						}
 						break;
+					}
 				}
 				if(!flag) {
 					return false;

@@ -118,45 +118,33 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		internal class SelectorCallbackTreeView : TreeViewItem {
-			public Action<Rect> onSelect;
-			//public Action<Rect> onNext;
-			//public Action<bool> onExpandChange;
-
-			public SelectorCallbackTreeView() {
-
-			}
-
-			public SelectorCallbackTreeView(Action<Rect> onSelect, string displayName, int id, int depth) : base(id, depth, displayName) {
-				this.onSelect = onSelect;
-			}
-		}
-
-		internal class SelectorCustomTreeView : TreeViewItem, IDisplayName {
+		internal class SelectorCustomTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType {
 			public readonly CustomItem item;
-			public readonly GraphItem graphItem;
 
 			public string DisplayName {
 				get {
-					if(item is ItemReflection ri) {
-						if(ri.item != null) {
-							var member = ri.item.memberInfo;
-							if(member is MethodInfo method) {
-								if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
-									return EditorReflectionUtility.GetPrettyExtensionMethodName(method);
-								}
-							}
-							if(member != null) {
-								if(uNodePreference.preferenceData.coloredItem) {
-									return NodeBrowser.GetRichMemberName(member);
-								}
-								else {
-									return NodeBrowser.GetPrettyMemberName(member);
-								}
-							}
-						}
+					if(item is IDisplayName d) {
+						return d.DisplayName ?? displayName;
 					}
 					return displayName;
+				}
+			}
+
+			public object ItemValue {
+				get {
+					if(item is ISelectorItemWithValue value) {
+						return value.ItemValue;
+					}
+					return item;
+				}
+			}
+
+			public Type ItemType {
+				get {
+					if(item is ISelectorItemWithType t) {
+						return t.ItemType;
+					}
+					return null;
 				}
 			}
 
@@ -170,7 +158,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			public SelectorCustomTreeView(GraphItem item, int id, int depth) : base(id, depth, item.DisplayName) {
-				this.graphItem = item;
+				this.item = CustomItem.Create(item);
 				switch(item.targetType) {
 					case MemberData.TargetType.Self:
 						icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.KeywordIcon)) as Texture2D;
@@ -199,7 +187,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		internal class SelectorMemberTreeView : TreeViewItem {
+		internal class SelectorMemberTreeView : TreeViewItem, ISelectorItemWithValue, ISelectorItemWithType {
 			public MemberData member;
 
 			public SelectorMemberTreeView() {
@@ -209,6 +197,10 @@ namespace MaxyGames.UNode.Editors {
 			public SelectorMemberTreeView(MemberData member, string displayName, int id) : base(id, -1, displayName) {
 				this.member = member;
 			}
+
+			public object ItemValue => member;
+
+			public Type ItemType => member.type;
 		}
 
 		//public abstract class SelectorTreeView : TreeViewItem {
@@ -218,7 +210,7 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Enum
-		enum SearchKind {
+		public enum SearchKind {
 			Contains,
 			Startwith,
 			Equal,
@@ -226,7 +218,7 @@ namespace MaxyGames.UNode.Editors {
 			Relevant,
 		}
 
-		enum SearchFilter {
+		public enum SearchFilter {
 			All,
 			Function,
 			Variable,
@@ -235,11 +227,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		class Data : IDisposable {
+		public class Data : IDisposable {
+			public EditorWindow window;
 			public Rect windowRect;
 			public Action<MemberData> selectCallback;
 
-			public List<TreeViewItem> items = new List<TreeViewItem>();
 			public FilterAttribute filter;
 			public HashSet<string> usingNamespaces;
 
@@ -279,6 +271,23 @@ namespace MaxyGames.UNode.Editors {
 
 			public Manager manager;
 
+			public object targetObject;
+
+			public bool closeOnSelect = true;
+
+			/// <summary>
+			/// The custom icon for can select callback
+			/// </summary>
+			public Func<TreeViewItem, Texture> selectIconCallback; 
+
+			public Object targetUnityObject {
+				get {
+					if(targetObject is UGraphElement)
+						return (targetObject as UGraphElement).graphContainer as Object;
+					return targetObject as Object;
+				}
+			}
+
 			public DataSetup setup = new DataSetup();
 
 			public Data() {
@@ -290,25 +299,132 @@ namespace MaxyGames.UNode.Editors {
 				setup.Dispose();
 				manager?.Dispose();
 			}
+
+			public void Select(MemberData value) {
+				selectCallback?.Invoke(value);
+				if(closeOnSelect) {
+					manager.window.Close();
+				}
+			}
+
+			public bool CanSelectTree(TreeViewItem tree) {
+				if(tree is TypeTreeView) {
+					var item = tree as TypeTreeView;
+					return M_CanSelectType(item.type, filter);
+				}
+				else if(tree is MemberTreeView) {
+					var item = tree as MemberTreeView;
+					return item.CanSelect();
+				}
+				else if(tree is SelectorMemberTreeView) {
+					var item = tree as SelectorMemberTreeView;
+					var type = item.member.type;
+					if(type != null && !item.member.targetType.HasFlags(MemberData.TargetType.Self | MemberData.TargetType.Null)) {
+						return IsValidTypeToSelect(type);
+					}
+					return true;
+				}
+				else if(tree is SelectorCustomTreeView) {
+					var item = tree as SelectorCustomTreeView;
+					if(item.item != null) {
+						if(item.item.CanSelect(this))
+							return true;
+					}
+				}
+				else if(tree is SelectorGroupedTreeView) {
+					return true;
+				}
+				else if(tree is NamespaceTreeView) {
+					return true;
+				}
+				return false;
+			}
+
+			public bool IsValidTypeToSelect(Type type) {
+				return filter == null || filter.IsValidType(type);
+			}
+
+			public bool CanNextTree(TreeViewItem tree) {
+				if(tree is TypeTreeView) {
+					var item = tree as TypeTreeView;
+					var type = item.type;
+					return !type.IsEnum;
+				}
+				else if(tree is MemberTreeView) {
+					var item = tree as MemberTreeView;
+					return item.HasDeepMember();
+				}
+				else if(tree is SelectorCustomTreeView) {
+					var item = tree as SelectorCustomTreeView;
+					return item.item.HasNextItem(this);
+				}
+				//else if(tree is SelectorGroupedTreeView) {
+				//	return true;
+				//} else if(tree is NamespaceTreeView) {
+				//	return true;
+				//}
+				return false;
+			}
+
+			/// <summary>
+			/// The custom row gui callback
+			/// </summary>
+			public Func<ItemRowGUIArgs, bool> OnRowGUI;
+			internal bool RowGUI(ItemRowGUIArgs args) {
+				return OnRowGUI?.Invoke(args) == true;
+			}
+
+			/// <summary>
+			/// The custom row gui callback, called every EventType.Repaint
+			/// </summary>
+			public Func<ItemRowGUIArgs, bool> OnRowRepaint;
+			internal bool RowRepaintGUI(ItemRowGUIArgs args) {
+				return OnRowRepaint?.Invoke(args) == true;
+			}
 		}
 
-		class DataSetup : IDisposable {
+		public struct ItemRowGUIArgs {
+			/// <summary>
+			/// Item for the current row being handled in TreeView.RowGUI.
+			/// </summary>
+			public TreeViewItem item;
+
+			/// <summary>
+			/// Label used for text rendering of the item displayName. Note this is an empty
+			/// string when isRenaming == true.
+			/// </summary>
+			public string label;
+
+			/// <summary>
+			/// Row rect for the current row being handled.
+			/// </summary>
+			public Rect rowRect;
+
+			/// <summary>
+			/// Row index into the list of current rows.
+			/// </summary>
+			public int row;
+
+			/// <summary>
+			/// The tree manager reference
+			/// </summary>
+			public Manager manager;
+		}
+
+		public class DataSetup : IDisposable {
 			public List<KeyValuePair<string, List<Type>>> typeList;
 			private Thread setupThread;
-
-			private ItemSelector window;
 
 			public bool isFinished => progress == 1;
 			public float progress;
 			public Data data;
 
-			public void Setup(Action<float> onProgress, ItemSelector window) {
+			public void Setup(Action<float> onProgress, Data data) {
 				if(!window.filter.DisplayDefaultStaticType || !window.displayDefaultItem) {
 					onProgress?.Invoke(1);
 					return;
 				}
-				this.data = window.editorData;
-				this.window = window;
+				this.data = data;
 				if(setupThread != null) {
 					setupThread.Abort();
 					setupThread.Join(500);
@@ -554,7 +670,7 @@ namespace MaxyGames.UNode.Editors {
 				return uNodeEditor.SavedData.HasFavorite("NODES", menu.type.FullName);
 			}
 
-			public override void OnSelect(ItemSelector selector) {
+			public override void OnSelect(ItemSelector.Data selector) {
 				action();
 			}
 
@@ -568,11 +684,39 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		class ItemReflection : CustomItem, IFavoritable {
+		class ItemReflection : CustomItem, IDisplayName, IFavoritable, ISelectorItemWithValue {
 			public EditorReflectionUtility.ReflectionItem item;
 
-			public override bool CanSelect(ItemSelector selector) {
+			public object ItemValue => item.memberInfo;
+
+			public string DisplayName {
+				get {
+					if(item != null) {
+						var member = item.memberInfo;
+						if(member is MethodInfo method) {
+							if(method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)) {
+								return EditorReflectionUtility.GetPrettyExtensionMethodName(method);
+							}
+						}
+						if(member != null) {
+							if(uNodePreference.preferenceData.coloredItem) {
+								return NodeBrowser.GetRichMemberName(member);
+							}
+							else {
+								return NodeBrowser.GetPrettyMemberName(member);
+							}
+						}
+					}
+					return null;
+				}
+			}
+
+			public override bool CanSelect(ItemSelector.Data selector) {
 				return item.canSelectItems;
+			}
+
+			public override bool HasNextItem(Data selector) {
+				return item != null && item.hasNextItems;
 			}
 
 			public bool CanSetFavorite() {
@@ -611,23 +755,150 @@ namespace MaxyGames.UNode.Editors {
 					uNodeEditor.SavedData.RemoveFavorite(item.memberInfo);
 				}
 			}
+
+			public override MemberData GetMemberForNextItem(Data selector) {
+				if(item.memberInfo is ConstructorInfo) {
+					selector.Select(MemberData.CreateFromMember(item.memberInfo));
+					return null;
+				}
+				var member = MemberData.CreateFromMember(item.memberInfo);
+				if(!item.isStatic) {
+					member.instance = item.instance;
+				}
+				return member;
+			}
+
+			public override IEnumerable<TreeViewItem> GetDeepItems(Data selector) {
+				return TreeFunction.CreateItemsFromType(item.memberType, selector.filter);
+			}
+
+			public override IEnumerable<GUIContent> GetTooltipContents() => item.memberInfo != null ? Utility.GetTooltipContents(item.memberInfo) : new[] { tooltip };
 		}
 
 		class ItemClickable : CustomItem {
 			public Action<object> onClick;
 			public object userObject;
 
-			public override void OnSelect(ItemSelector selector) {
+			public override void OnSelect(ItemSelector.Data selector) {
 				onClick?.Invoke(userObject);
 			}
 
-			public override bool CanSelect(ItemSelector selector) {
+			public override bool CanSelect(ItemSelector.Data selector) {
 				return onClick != null;
 			}
 		}
 
-		class ItemGraph : CustomItem {
+		class ItemGraph : CustomItem, IDisplayName, ISelectorItemWithType, ISelectorItemWithValue {
 			public GraphItem item;
+
+			public Type ItemType {
+				get {
+					return item.type;
+				}
+			}
+
+			public object ItemValue {
+				get {
+					return item.GetData();
+				}
+			}
+
+			public string DisplayName => item.DisplayName;
+
+			public override void OnSelect(Data selector) {
+				selector.manager.SelectGraphItem(item);
+			}
+
+			public override bool CanSelect(Data selector) {
+				if(item.type != null) {
+					if(selector.IsValidTypeToSelect(item.type)) {
+						return true;
+					}
+					else if(item.targetType == MemberData.TargetType.Self) {
+						if(item.targetObject is IClassGraph cls) {
+							return selector.IsValidTypeToSelect(cls.InheritType);
+						}
+					}
+					return false;
+				}
+				else if(item.genericParameter != null) {
+					return selector.filter == null || selector.filter.CanSelectType;
+				}
+				return false;
+			}
+
+			public override bool HasNextItem(Data selector) {
+				return item.haveNextItem;
+			}
+
+			public override MemberData GetMemberForNextItem(Data selector) {
+				return item.GetData();
+			}
+
+			public override bool IsValidSearchFilter(SearchFilter filter) {
+				switch(filter) {
+					case SearchFilter.All:
+						return true;
+					case SearchFilter.Function:
+						return item.targetType is MemberData.TargetType.uNodeFunction or MemberData.TargetType.Method;
+					case SearchFilter.Property:
+						return item.targetType is MemberData.TargetType.uNodeProperty or MemberData.TargetType.Property;
+					case SearchFilter.Type:
+						return item.targetType is MemberData.TargetType.Type or MemberData.TargetType.uNodeType;
+					case SearchFilter.Variable:
+						return item.targetType is MemberData.TargetType.uNodeVariable or MemberData.TargetType.uNodeLocalVariable or MemberData.TargetType.Field;
+				}
+				return false;
+			}
+
+			public override Texture GetIcon() {
+				switch(item.targetType) {
+					case MemberData.TargetType.Self:
+						return icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.KeywordIcon));
+					case MemberData.TargetType.uNodeVariable:
+						return icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FieldIcon));
+					case MemberData.TargetType.uNodeLocalVariable:
+						return icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.LocalVariableIcon));
+					case MemberData.TargetType.uNodeProperty:
+						return icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.PropertyIcon));
+					case MemberData.TargetType.uNodeConstructor:
+					case MemberData.TargetType.uNodeFunction:
+						return icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.MethodIcon));
+					case MemberData.TargetType.uNodeParameter:
+					case MemberData.TargetType.uNodeGenericParameter:
+						return uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.LocalVariableIcon));
+					default:
+						return uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.KeywordIcon));
+				}
+			}
+
+			public override IEnumerable<GUIContent> GetTooltipContents() {
+				yield return new GUIContent(item.DisplayName, GetIcon());
+				yield return new GUIContent("Target Kind : " + item.targetType);
+				if(item.type != null) {
+					yield return new GUIContent("Type : " + item.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.type));
+				}
+				if(item.toolTip != null && !string.IsNullOrEmpty(item.toolTip)) {
+					yield return new GUIContent("Documentation ▼");
+					if(item.toolTip.Contains("\n")) {
+						string[] str = item.toolTip.Split('\n');
+						for(int i = 0; i < str.Length; i++) {
+							if(i == 0) {
+								yield return new GUIContent(str[i]);
+								continue;
+							}
+							yield return new GUIContent(str[i]);
+						}
+					}
+					else {
+						yield return new GUIContent(item.toolTip);
+					}
+				}
+			}
+
+			public override IEnumerable<TreeViewItem> GetDeepItems(Data selector) {
+				return TreeFunction.CreateItemsFromType(item.type, selector.filter);
+			}
 		}
 
 		public abstract class CustomItem {
@@ -645,12 +916,39 @@ namespace MaxyGames.UNode.Editors {
 				return null;
 			}
 
-			public virtual void OnSelect(ItemSelector selector) {
+			public virtual void OnSelect(ItemSelector.Data selector) {
 
 			}
 
-			public virtual bool CanSelect(ItemSelector selector) {
+			public virtual bool CanSelect(ItemSelector.Data selector) {
 				return true;
+			}
+
+			public virtual MemberData GetMemberForNextItem(ItemSelector.Data selector) => throw new NotImplementedException();
+
+			public virtual bool HasNextItem(ItemSelector.Data selector) => false;
+
+			public virtual bool IsValidSearchFilter(SearchFilter filter) => true;
+
+			public virtual IEnumerable<TreeViewItem> GetDeepItems(Data selector) => null;
+
+			public virtual IEnumerable<GUIContent> GetTooltipContents() {
+				if(tooltip != null && !string.IsNullOrEmpty(tooltip.text)) {
+					if(tooltip.text.Contains("\n")) {
+						string[] str = tooltip.text.Split('\n');
+						for(int i = 0; i < str.Length; i++) {
+							if(i == 0) {
+								yield return new GUIContent(str[i], tooltip.image);
+								continue;
+							}
+							yield return new GUIContent(str[i]);
+						}
+					}
+					else {
+						yield return tooltip;
+					}
+				}
+				yield break;
 			}
 
 			public static CustomItem Create(NodeMenu menu, Action action, Texture icon = null, GUIContent tooltip = null, string category = null) {
@@ -865,7 +1163,10 @@ namespace MaxyGames.UNode.Editors {
 							//flag |= BindingFlags.Static | BindingFlags.NonPublic;
 							var defaultCtor = ReflectionUtils.GetDefaultConstructor(type);
 							if(validation == null || validation(defaultCtor)) {
-								result.Add(CreateItemFromMember(defaultCtor, filter));
+								var item = CreateItemFromMember(defaultCtor, filter);
+								if(item != null) {
+									result.Add(item);
+								}
 							}
 						}
 						ConstructorInfo[] ctor = type.GetConstructors(flag);

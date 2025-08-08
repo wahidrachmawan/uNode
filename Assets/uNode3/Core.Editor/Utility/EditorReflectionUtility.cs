@@ -979,7 +979,6 @@ namespace MaxyGames.UNode.Editors {
 						continue;
 					}
 					Items.Add(new ReflectionItem() {
-						isStatic = true,
 						memberInfo = type,
 						hasNextItems = !type.IsEnum,
 						canSelectItems =
@@ -999,7 +998,6 @@ namespace MaxyGames.UNode.Editors {
 						continue;
 					}
 					Items.Add(new ReflectionItem() {
-						isStatic = true,
 						memberInfo = type,
 						hasNextItems = !type.IsEnum,
 						canSelectItems =
@@ -1036,7 +1034,6 @@ namespace MaxyGames.UNode.Editors {
 			if(info is Type) {
 				Type type = info as Type;
 				return new ReflectionItem() {
-					isStatic = true,
 					memberInfo = type,
 					hasNextItems = !type.IsEnum,
 					canSelectItems =
@@ -1075,7 +1072,6 @@ namespace MaxyGames.UNode.Editors {
 							hasNextItems = hasNextItem,
 							memberInfo = info,
 							canSelectItems = true,
-							isStatic = ReflectionUtils.GetMemberIsStatic(info),
 						};
 						if(validation != null && !validation(item)) {
 							return null;
@@ -1089,7 +1085,6 @@ namespace MaxyGames.UNode.Editors {
 								hasNextItems = hasNextItem,
 								memberInfo = info,
 								canSelectItems = true,
-								isStatic = ReflectionUtils.GetMemberIsStatic(info),
 							};
 							if(validation != null && !validation(item)) {
 								return null;
@@ -1104,7 +1099,6 @@ namespace MaxyGames.UNode.Editors {
 								hasNextItems = hasNextItem,
 								memberInfo = info,
 								canSelectItems = true,
-								isStatic = ReflectionUtils.GetMemberIsStatic(info),
 							};
 							if(validation != null && !validation(item)) {
 								return null;
@@ -1119,7 +1113,6 @@ namespace MaxyGames.UNode.Editors {
 						ReflectionItem item = new ReflectionItem() {
 							hasNextItems = true,
 							memberInfo = info,
-							isStatic = ReflectionUtils.GetMemberIsStatic(info),
 						};
 						if(validation != null && !validation(item)) {
 							return null;
@@ -1134,7 +1127,6 @@ namespace MaxyGames.UNode.Editors {
 					ReflectionItem item = new ReflectionItem() {
 						hasNextItems = true,
 						memberInfo = info,
-						isStatic = ReflectionUtils.GetMemberIsStatic(info),
 					};
 					if(validation != null && !validation(item)) {
 						return null;
@@ -1496,7 +1488,16 @@ namespace MaxyGames.UNode.Editors {
 		public class ReflectionItem {
 			public object instance;
 			public MemberInfo memberInfo;
-			public bool isStatic;
+
+			private bool? m_isStatic;
+			public bool isStatic {
+				get {
+					if(m_isStatic == null) {
+						m_isStatic = memberInfo != null && ReflectionUtils.GetMemberIsStatic(memberInfo);
+					}
+					return m_isStatic == true;
+				}
+			}
 
 			public bool hasNextItems;
 			public bool canSelectItems;

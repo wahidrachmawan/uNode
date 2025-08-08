@@ -68,6 +68,10 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public System.Type portType;
 		/// <summary>
+		/// The filter for port
+		/// </summary>
+		public FilterAttribute filter;
+		/// <summary>
 		/// The port kind.
 		/// </summary>
 		public PortKind portKind;

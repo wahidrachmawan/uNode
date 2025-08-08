@@ -21,6 +21,7 @@ namespace MaxyGames.UNode.Editors {
 	[Serializable]
 	public class ControlConfig {
 		public UNodeView owner;
+		public UPortRef portReference;
 		public object value;
 		public Type type;
 		public FilterAttribute filter;

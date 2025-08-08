@@ -13,7 +13,6 @@ namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.StickyNote))]
 	public class StickyNoteView : BaseNodeView, IElementResizable {
 		protected Label comment;
-		protected Label titleLabel;
 
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			this.owner = owner;
@@ -27,7 +26,6 @@ namespace MaxyGames.UNode.Editors {
 			comment.style.whiteSpace = WhiteSpace.Normal;
 			inputContainer.Add(comment);
 			elementTypeColor = Color.yellow;
-			titleLabel = titleContainer.Q<Label>("title-label");
 
 			titleContainer.RegisterCallback<MouseDownEvent>((e) => {
 				if(e.clickCount == 2) {

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-    [NodeMenu("Data", "Convert", typeof(object), inputs = new[] { typeof(object) })]
+    [NodeMenu("Data", "Convert", typeof(object), inputs = new[] { typeof(object) }, icon = typeof(TypeIcons.RefreshIcon))]
 	[Description("Convert value to other type")]
 	public class NodeConvert : ValueNode {
 		[Filter(AllowInterface = true, OnlyGetType = true, ArrayManipulator = true, DisplayRuntimeType = true)]

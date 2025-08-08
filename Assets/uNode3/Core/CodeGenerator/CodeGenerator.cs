@@ -1511,7 +1511,11 @@ namespace MaxyGames {
 			if(generatorData.typesMap.TryGetValue(type, out var typeResult)) {
 				return typeResult;
 			}
-			if(type is RuntimeType && type is not INativeMember) {
+			if(type.IsByRef) {
+				type = type.GetElementType();
+				return Type(type);
+			}
+			if(type is RuntimeType && ReflectionUtils.IsNativeType(type) == false) {
 				var runtimeType = type as RuntimeType;
 				if(!generatePureScript) {
 					if(runtimeType is RuntimeGraphType graphType) {

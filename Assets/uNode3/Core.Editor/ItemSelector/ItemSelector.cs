@@ -12,21 +12,14 @@ using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	public partial class ItemSelector {
-		private Data editorData = new Data();
-
 		private static readonly string[] defaultUsingNamespace = new[] { "UnityEngine" };
 
 		public const string CategoryInherited = "Inherit Members";
 
-		public Object targetUnityObject {
-			get {
-				if(targetObject is UGraphElement)
-					return (targetObject as UGraphElement).graphContainer as Object;
-				return targetObject as Object;
-			}
+		public object targetObject {
+			get => editorData.targetObject;
+			set => editorData.targetObject = value;
 		}
-
-		public object targetObject;
 		public List<CustomItem> customItems = new List<CustomItem>();
 		public bool customItemDefaultExpandState = true;
 		
@@ -51,6 +44,7 @@ namespace MaxyGames.UNode.Editors {
 				return preferenceData.minDeepTypeSearch;
 			}
 		}
+		public Data editorData => treeManager.editorData;
 		public Action<MemberData> selectCallback {
 			get => editorData.selectCallback;
 			set => editorData.selectCallback = value;
@@ -120,18 +114,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		#region Select
-		public void Select(MemberData member) {
-			if(selectCallback != null) {
-				selectCallback(member);
-			}
-			Close();
-		}
-
+		#region Others
 		static bool HasRuntimeType(IList<MemberData> members) {
-			for (int i = 0; i < members.Count; i++) {
+			for(int i = 0; i < members.Count; i++) {
 				var m = members[i];
-				if (m.targetType == MemberData.TargetType.uNodeType) {
+				if(m.targetType == MemberData.TargetType.uNodeType) {
 					return true;
 				}
 			}
@@ -149,9 +136,7 @@ namespace MaxyGames.UNode.Editors {
 				type.HasElementType && IsGenericTypeDefinition(type.GetElementType()) ||
 				type.GetGenericArguments().Any(x => IsGenericTypeDefinition(x));
 		}
-		#endregion
 
-		#region Others
 		public static void SortCustomItems(List<CustomItem> customItems) {
 			customItems.Sort((x, y) => {
 				int index = string.Compare(x.category, y.category, StringComparison.OrdinalIgnoreCase);
@@ -160,31 +145,6 @@ namespace MaxyGames.UNode.Editors {
 				}
 				return index;
 			});
-		}
-
-		public static List<GraphItem> GetGraphItems(object target, FilterAttribute filter = null) {
-			if(target is Node) {
-				target = (target as Node).nodeObject;
-			}
-			if(target is UGraphElement) {
-				return new List<GraphItem>();
-			} else {
-				List<GraphItem> ESItems = new List<GraphItem>();
-				var VS = target as IGraphWithVariables;
-				var PS = target as IGraphWithProperties;
-				if(VS != null)
-					ESItems.AddRange((VS as IGraph).GetVariables().Select(item => new GraphItem(item, target)));
-				if(PS != null)
-					ESItems.AddRange((PS as IGraph).GetProperties().Select(item => new GraphItem(item, target)));
-				if(target is IGraph) {
-					if(filter == null || !filter.SetMember && filter.ValidMemberType.HasFlags(MemberTypes.Method) && filter.IsValidTarget(MemberTypes.Method)) {
-						ESItems.AddRange((target as IGraph).GetFunctions().Where(item => IsCorrectItem(item, filter)).Select(item => new GraphItem(item, target)));
-					}
-				}
-				ESItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-				RemoveIncorrectGraphItem(ESItems, filter);
-				return ESItems;
-			}
 		}
 
 		public static List<CustomItem> MakeExtensionItems(Type type, ICollection<string> ns, FilterAttribute filter, string category = "Data") {
@@ -266,6 +226,31 @@ namespace MaxyGames.UNode.Editors {
 		public static List<CustomItem> MakeCustomItems(object target, FilterAttribute filter = null, string category = "Data") {
 			if (target == null)
 				return null;
+			static List<GraphItem> GetGraphItems(object target, FilterAttribute filter = null) {
+				if(target is Node) {
+					target = (target as Node).nodeObject;
+				}
+				if(target is UGraphElement) {
+					return new List<GraphItem>();
+				}
+				else {
+					List<GraphItem> items = new List<GraphItem>();
+					var VS = target as IGraphWithVariables;
+					var PS = target as IGraphWithProperties;
+					if(VS != null)
+						items.AddRange((VS as IGraph).GetVariables().Select(item => new GraphItem(item, target)));
+					if(PS != null)
+						items.AddRange((PS as IGraph).GetProperties().Select(item => new GraphItem(item, target)));
+					if(target is IGraph) {
+						if(filter == null || !filter.SetMember && filter.ValidMemberType.HasFlags(MemberTypes.Method) && filter.IsValidTarget(MemberTypes.Method)) {
+							items.AddRange((target as IGraph).GetFunctions().Where(item => IsCorrectItem(item, filter)).Select(item => new GraphItem(item, target)));
+						}
+					}
+					items.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+					RemoveIncorrectGraphItem(items, filter);
+					return items;
+				}
+			}
 			var items = GetGraphItems(target, filter);
 			return items.Select(i => CustomItem.Create(i, category: category)).ToList();
 		}
@@ -335,7 +320,6 @@ namespace MaxyGames.UNode.Editors {
 					var item = new EditorReflectionUtility.ReflectionItem() {
 						canSelectItems = true,
 						hasNextItems = false,
-						isStatic = false,
 						memberInfo = null,
 						memberType = type,
 						instance = new MemberData("this", type, MemberData.TargetType.Self) { instance = instance },
@@ -473,6 +457,158 @@ namespace MaxyGames.UNode.Editors {
 			return items;
 		}
 
+		public static IEnumerable<ItemSelector.CustomItem> MakeCustomItems(PortCommandData data, GraphEditor graphEditor, NodeObject node, Vector2 position, Action onClicked = null, IEnumerable<Type> types = null, NodeFilter nodeFilter = NodeFilter.None) {
+			var type = data.portType;
+			if(type is RuntimeType) {
+				(type as RuntimeType).Update();
+			}
+			//Create custom items for port commands
+			if(data.portKind == PortKind.ValueInput) {
+				var editorData = graphEditor.graphData;
+				if(editorData.graph is IGraphWithVariables) {
+					var IVS = editorData.graph as IGraphWithVariables;
+					yield return ItemSelector.CustomItem.Create("Promote to variable", () => {
+						uNodeEditorUtility.RegisterUndo(editorData.owner, "Promote to variable");
+						NodeEditorUtility.AddNewVariable(editorData.graphData.variableContainer, data.portName, type, v => {
+							NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, (node) => {
+								node.target = MemberData.CreateFromValue(v);
+								node.Register();
+								data.port.ConnectTo(node.output);
+							});
+						});
+						uNodeGUIUtility.GUIChanged(editorData.graph, UIChangeType.Important);
+						onClicked?.Invoke();
+					}, "@", icon: uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FieldIcon)));
+				}
+				if(editorData.selectedRoot is ILocalVariableSystem) {
+					var IVS = editorData.selectedRoot as ILocalVariableSystem;
+					yield return ItemSelector.CustomItem.Create("Promote to local variable", () => {
+						uNodeEditorUtility.RegisterUndo(editorData.owner, "Promote to variable");
+						NodeEditorUtility.AddNewVariable(editorData.selectedRoot.variableContainer, data.portName, type, v => {
+							NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, (node) => {
+								node.target = MemberData.CreateFromValue(v);
+								node.Register();
+								data.port.ConnectTo(node.output);
+							});
+						});
+						uNodeGUIUtility.GUIChanged(editorData.graph, UIChangeType.Important);
+						onClicked?.Invoke();
+					}, "@", icon: uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FieldIcon)));
+				}
+				foreach(var pType in types) {
+					if(!pType.IsSubclassOf(typeof(Delegate)) && !pType.IsPrimitive) {
+						var filter = new FilterAttribute() { MaxMethodParam = int.MaxValue };
+						var ctors = pType.GetConstructors(
+							System.Reflection.BindingFlags.Instance |
+							System.Reflection.BindingFlags.Public |
+							System.Reflection.BindingFlags.Static);
+						for(int i = ctors.Length - 1; i >= 0; i--) {
+							if(ReflectionUtils.IsValidParameters(ctors[i])) {
+								var item = EditorReflectionUtility.GetReflectionItems(ctors[i], filter);
+								if(item == null)
+									continue;
+								yield return ItemSelector.CustomItem.Create(item.displayName, item, category: "@");
+							}
+						}
+					}
+				}
+			}
+			else if(data.portKind == PortKind.ValueOutput) {
+				bool canSetValue = false;
+				bool canGetValue = true;
+				var port = data.port as ValueOutput;
+				if(port != null) {
+					canSetValue = port.CanSetValue();
+					canGetValue = port.CanGetValue();
+				}
+				bool onlySet = canSetValue && !canGetValue;
+				FilterAttribute FA = new FilterAttribute {
+					VoidType = true,
+					MaxMethodParam = int.MaxValue,
+					Public = true,
+					Instance = true,
+					Static = false,
+					UnityReference = false,
+					InvalidTargetType = MemberData.TargetType.Null | MemberData.TargetType.Values,
+					// DisplayDefaultStaticType = false
+				};
+				if(onlySet == false) {
+					foreach(var item in ItemSelector.MakeCustomItems(data.portType, FA, "Data Members", "Data Members ( Inherited )")) {
+						yield return item;
+					}
+				}
+				if(type.IsByRefLike == false) {
+					var usingNamespaces = data.port.node.graphContainer.GetUsingNamespaces();
+					FA.Static = true;
+					foreach(var item in ItemSelector.MakeExtensionItems(type, usingNamespaces, FA, "Extensions")) {
+						yield return item;
+					}
+				}
+
+				var customInputItems = NodeEditorUtility.FindCustomInputPortItems();
+				if(customInputItems != null && customInputItems.Count > 0) {
+					var source = port;
+					foreach(var c in customInputItems) {
+						c.graphEditor = graphEditor;
+						c.mousePositionOnCanvas = position;
+						if(c.IsValidPort(source,
+							canSetValue && canGetValue ?
+								PortAccessibility.ReadWrite :
+								canGetValue ? PortAccessibility.ReadOnly : PortAccessibility.WriteOnly)) {
+							var items = c.GetItems(source);
+							if(items != null) {
+								foreach(var item in items) {
+									yield return item;
+								}
+							}
+						}
+					}
+				}
+			}
+			var portCommands = NodeEditorUtility.FindPortCommands();
+			if(portCommands != null && portCommands.Count > 0) {
+				foreach(var command in portCommands) {
+					if(command.onlyContextMenu)
+						continue;
+					command.graph = graphEditor;
+					command.mousePositionOnCanvas = position;
+					command.filter = data.filter;
+					if(command.IsValidPort(node, data)) {
+						yield return ItemSelector.CustomItem.Create(command.name, () => {
+							uNodeEditorUtility.RegisterUndo(graphEditor.graphData.owner, "Connect port");
+							command.OnClick(node, data, position);
+							onClicked?.Invoke();
+						}, "@", icon: uNodeEditorUtility.GetTypeIcon(command.GetIcon()));
+					}
+				}
+			}
+
+			//Node Menu
+			if(nodeFilter != NodeFilter.None) {
+				foreach(var menuItem in NodeEditorUtility.FindNodeMenu()) {
+					if(NodeEditorUtility.IsValidMenu(menuItem, data.portType, nodeFilter, graphEditor.graphData) == false) {
+						continue;
+					}
+					yield return ItemSelector.CustomItem.Create(
+						menuItem,
+						() => {
+							NodeEditorUtility.AddNewNode<Node>(graphEditor.graphData, menuItem.nodeName, menuItem.type, position, n => {
+								NodeEditorUtility.AutoConnectPortToTarget(data.port, n, graphEditor.graphData.currentCanvas);
+							});
+							onClicked?.Invoke();
+						},
+						icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon()));
+				}
+				var items = ItemSelector.MakeCustomItemsForMacros(graphEditor.graphData.currentCanvas, position, nodeFilter, data.portType, n => {
+					NodeEditorUtility.AutoConnectPortToTarget(data.port, n, graphEditor.graphData.currentCanvas);
+					onClicked?.Invoke();
+				});
+				foreach(var item in items) {
+					yield return item;
+				}
+			}
+		}
+
 		public static List<TreeViewItem> MakeFavoriteTrees(Func<List<CustomItem>> favoriteHandler, FilterAttribute filter) {
 			var result = new List<TreeViewItem>();
 			if(favoriteHandler != null) {
@@ -578,7 +714,6 @@ namespace MaxyGames.UNode.Editors {
 
 		static EditorReflectionUtility.ReflectionItem GetItemFromType(Type type, FilterAttribute filter) {
 			return new EditorReflectionUtility.ReflectionItem() {
-				isStatic = true,
 				memberInfo = type,
 				canSelectItems = filter == null || 
 					filter.CanSelectType && filter.IsValidType(type) || 

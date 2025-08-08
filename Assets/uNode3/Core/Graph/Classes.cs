@@ -411,6 +411,10 @@ namespace MaxyGames.UNode {
 			throw null;
 		}
 
+		public static implicit operator UPortRef(UPort value) {
+			return new UPortRef(value);
+		}
+
 		public override object ReferenceValue => GetPort();
 	}
 

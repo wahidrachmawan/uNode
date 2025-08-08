@@ -43,10 +43,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			editorData.manager = new Manager(new TreeViewState());
-			editorData.manager.window = this;
+			editorData.window = this;
 			editorData.searchField = new SearchField();
-			editorData.searchField.downOrUpArrowKeyPressed += editorData.manager.SetFocusAndEnsureSelectedItem;
+			editorData.searchField.downOrUpArrowKeyPressed += treeManager.SetFocusAndEnsureSelectedItem;
 			editorData.searchField.autoSetFocusOnFindCommand = true;
 			window = this;
 			uNodeThreadUtility.Queue(DoSetup);
@@ -176,7 +175,7 @@ namespace MaxyGames.UNode.Editors {
 										//}
 										if(filter.IsValidType(graphType)) {
 											var item = CustomItem.Create("This", () => {
-												Select(MemberData.This(graph));
+												editorData.Select(MemberData.This(graph));
 											}, icon: uNodeEditorUtility.GetTypeIcon(graphType ?? typeof(TypeIcons.KeywordIcon)));
 											categoryTree.AddChild(new SelectorCustomTreeView(item, "[THIS]".GetHashCode(), -1));
 										}
@@ -355,7 +354,7 @@ namespace MaxyGames.UNode.Editors {
 				else {
 					requiredRepaint = true;
 				}
-			}, this);
+			}, editorData);
 		}
 		#endregion
 
@@ -363,7 +362,7 @@ namespace MaxyGames.UNode.Editors {
 		static bool M_CanSelectType(Type type, FilterAttribute filter) {
 			return filter == null || !filter.SetMember && (
 				filter.CanSelectType && filter.IsValidType(type) ||
-				filter.IsValidTarget(MemberData.TargetType.Values) && filter.IsValidTypeForValueConstant(type) ||
+				filter.IsValidTarget(MemberData.TargetType.Values) && filter.IsValidTypeForValueConstant(type) && filter.IsValidType(type) ||
 				filter.Types?.Count == 1 && filter.Types[0] == typeof(Type) && !(type is RuntimeType)
 			);
 		}
@@ -671,73 +670,7 @@ namespace MaxyGames.UNode.Editors {
 				else if(tree is SelectorCustomTreeView) {
 					SelectorCustomTreeView item = tree as SelectorCustomTreeView;
 					if(item.item != null) {
-						if(item.item.tooltip != null && !string.IsNullOrEmpty(item.item.tooltip.text)) {
-							if(item.item.tooltip.text.Contains("\n")) {
-								string[] str = item.item.tooltip.text.Split('\n');
-								for(int i = 0; i < str.Length; i++) {
-									if(i == 0) {
-										contents.Add(new GUIContent(str[i], item.item.tooltip.image));
-										continue;
-									}
-									contents.Add(new GUIContent(str[i]));
-								}
-							}
-							else {
-								contents.Add(item.item.tooltip);
-							}
-						}
-						else if(item.item is ItemReflection ri && ri.item != null && ri.item.memberInfo != null) {
-							contents = GetTooltipContents(ri.item.memberInfo);
-						}
-					}
-					else if(item.graphItem != null) {
-						Texture icon;
-						switch(item.graphItem.targetType) {
-							case MemberData.TargetType.Self:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.KeywordIcon));
-								break;
-							case MemberData.TargetType.uNodeVariable:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FieldIcon));
-								break;
-							case MemberData.TargetType.uNodeLocalVariable:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.LocalVariableIcon));
-								break;
-							case MemberData.TargetType.uNodeProperty:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.PropertyIcon));
-								break;
-							case MemberData.TargetType.uNodeConstructor:
-							case MemberData.TargetType.uNodeFunction:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.MethodIcon));
-								break;
-							case MemberData.TargetType.uNodeParameter:
-							case MemberData.TargetType.uNodeGenericParameter:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.LocalVariableIcon));
-								break;
-							default:
-								icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.KeywordIcon));
-								break;
-						}
-						contents.Add(new GUIContent(item.graphItem.DisplayName, icon));
-						contents.Add(new GUIContent("Target Kind : " + item.graphItem.targetType));
-						if(item.graphItem.type != null) {
-							contents.Add(new GUIContent("Type : " + item.graphItem.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.graphItem.type)));
-						}
-						if(item.graphItem.toolTip != null && !string.IsNullOrEmpty(item.graphItem.toolTip)) {
-							contents.Add(new GUIContent("Documentation ▼"));
-							if(item.graphItem.toolTip.Contains("\n")) {
-								string[] str = item.graphItem.toolTip.Split('\n');
-								for(int i = 0; i < str.Length; i++) {
-									if(i == 0) {
-										contents.Add(new GUIContent(str[i]));
-										continue;
-									}
-									contents.Add(new GUIContent(str[i]));
-								}
-							}
-							else {
-								contents.Add(new GUIContent(item.graphItem.toolTip));
-							}
-						}
+						contents.AddRange(item.item.GetTooltipContents());
 					}
 				}
 				return contents;
@@ -816,5 +749,100 @@ namespace MaxyGames.UNode.Editors {
 			#endregion
 		}
 		#endregion
+
+
+		static bool ResolveGenericItem(MemberInfo member, Action<MemberInfo> onResolved, FilterAttribute filter, object targetObject, EditorWindow window) {
+			if(member == null)
+				return false;
+			MethodInfo method = member as MethodInfo;
+			Type mType = member as Type;
+
+			void DoResolve(MemberData[] types) {
+				bool hasGenericParameterTarget = types.Any(i => i.targetType == MemberData.TargetType.uNodeGenericParameter);
+				if(!hasGenericParameterTarget) {
+					if(method != null && method.IsGenericMethodDefinition) {
+						method = ReflectionUtils.MakeGenericMethod(method, types.Select(i => i.startType).ToArray());
+						member = method;
+					}
+					else if(mType != null && mType.IsGenericTypeDefinition) {
+						mType = ReflectionUtils.MakeGenericType(mType, types.Select(i => i.startType).ToArray());
+						member = mType;
+					}
+					else {
+						//item.genericArguments = MemberDataUtility.MakeTypeDatas(types, item.genericObjects);
+						//item.genericObjects = new List<Object>();
+						//item.genericObjects.AddRange(types.Where(i => i != null && i.instance != null).Select(i => (i.GetInstance() as UnityEngine.Object)).ToList());
+						throw new InvalidOperationException();
+					}
+				}
+				else {
+					throw new InvalidOperationException();
+					//item.genericArguments = MemberDataUtility.MakeTypeDatas(types, item.genericObjects);
+					//item.genericObjects = new List<Object>();
+					//item.genericObjects.AddRange(types.Where(i => i != null && i.instance != null).Select(i => (i.GetInstance() as UnityEngine.Object)).ToList());
+					//if(method != null && method.IsGenericMethodDefinition) {
+					//	item.genericParameterTypes = types;
+					//} else if(item.instance is MemberData mData) {
+					//	mData.name = types[0].name;
+					//	mData.instance = types[0].instance;
+					//	mData.targetType = MemberData.TargetType.uNodeGenericParameter;
+					//}
+				}
+				onResolved(member);
+			}
+
+			if(mType != null && mType.IsGenericTypeDefinition || method != null && method.IsGenericMethodDefinition) {
+				Type[] genericType = method != null ? method.GetGenericArguments() : mType.GetGenericArguments();
+				FilterAttribute F = new FilterAttribute(filter);
+				F.OnlyGetType = true;
+				//F.DisplayRuntimeType = false;
+				F.Types = new List<Type>();
+				TypeItem[] typeItems = new TypeItem[genericType.Length];
+				for(int i = 0; i < genericType.Length; i++) {
+					FilterAttribute fil = new FilterAttribute() {
+						OnlyGetType = true,
+						//DisplayRuntimeType = false,
+					};
+					fil.ToFilterGenericConstraints(genericType[i], genericType);
+					int index = i;
+					typeItems[i] = new TypeItem(genericType[i].BaseType, fil) {
+						onChanged = item => {
+							genericType[index] = item.type;
+						}
+					};
+				}
+				if(genericType.Length == 1) {
+					ItemSelector w = null;
+					Action<MemberData> action = delegate (MemberData m) {
+						if(w != null) {
+							w.Close();
+							//EditorGUIUtility.ExitGUI();
+						}
+						if(typeItems[0].filter.Types.Count > 0) {
+							DoResolve(new[] { m });
+						}
+						else {
+							TypeBuilderWindow.Show(Rect.zero, targetObject, typeItems[0].filter, delegate (MemberData[] types) {
+								DoResolve(types);
+							}, new TypeItem(m, typeItems[0].filter)).ChangePosition(window.position);
+						}
+					};
+					Rect newPos = window.position;
+					if(newPos.x + (newPos.width * 2) >= Screen.currentResolution.width) {
+						newPos.x -= newPos.width - 20;
+					}
+					else {
+						newPos.x += newPos.width - 20;
+					}
+					w = ShowAsNew(targetObject, typeItems[0].filter, action).ChangePosition(newPos);
+					return true;
+				}
+				TypeBuilderWindow.Show(Rect.zero, targetObject, F, delegate (MemberData[] types) {
+					DoResolve(types);
+				}, typeItems).ChangePosition(window.position);
+				return true;
+			}
+			return false;
+		}
 	}
 }

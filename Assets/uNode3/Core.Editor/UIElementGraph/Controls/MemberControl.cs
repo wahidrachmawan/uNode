@@ -232,6 +232,9 @@ namespace MaxyGames.UNode.Editors.UIControl {
 				}, new TypeItem[1] { member }).ChangePosition(GUIUtility.GUIToScreenPoint(mouseEvent.mousePosition));
 			}
 			else {
+				if(config.portReference != null) {
+
+				}
 				ItemSelector.ShowWindow(config.targetCanvas, filter, (m) => {
 					m.ResetCache();
 					config.OnValueChanged(m);

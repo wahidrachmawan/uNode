@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
+using System.Reflection;
 
 namespace MaxyGames.UNode.Editors {
 	public class PortView : Port, IEdgeConnectorListener {
@@ -545,79 +546,17 @@ namespace MaxyGames.UNode.Editors {
 			List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
 			var editorData = owner.owner.graphData;
 			var portType = GetPortType();
-			if(editorData.graph is IGraphWithVariables) {
-				var IVS = editorData.graph as IGraphWithVariables;
-				var type = portType;
-				customItems.Add(ItemSelector.CustomItem.Create("Promote to variable", () => {
-					uNodeEditorUtility.RegisterUndo(editorData.owner, "Promote to variable");
-					NodeEditorUtility.AddNewVariable(editorData.graphData.variableContainer, portView.GetName(), type, v => {
-						NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, (node) => {
-							node.target = MemberData.CreateFromValue(v);
-							node.Register();
-							portView.GetPortValue().ConnectTo(node.output);
-						});
-					});
-					uNodeGUIUtility.GUIChanged(editorData.graph, UIChangeType.Important);
-				}, "@", icon: uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FieldIcon))));
-			}
-			if(editorData.selectedRoot is ILocalVariableSystem) {
-				var IVS = editorData.selectedRoot as ILocalVariableSystem;
-				var type = portType;
-				customItems.Add(ItemSelector.CustomItem.Create("Promote to local variable", () => {
-					uNodeEditorUtility.RegisterUndo(editorData.owner, "Promote to variable");
-					NodeEditorUtility.AddNewVariable(editorData.selectedRoot.variableContainer, portView.GetName(), type, v => {
-						NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, position, (node) => {
-							node.target = MemberData.CreateFromValue(v);
-							node.Register();
-							portView.GetPortValue().ConnectTo(node.output);
-						});
-					});
-					uNodeGUIUtility.GUIChanged(editorData.graph, UIChangeType.Important);
-				}, "@", icon: uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.FieldIcon))));
-			}
-			{//Create custom items for port commands
-				foreach(var pType in types) {
-					if(!pType.IsSubclassOf(typeof(Delegate)) && !pType.IsPrimitive) {
-						var filter = new FilterAttribute() { MaxMethodParam = int.MaxValue };
-						var ctors = pType.GetConstructors(
-							System.Reflection.BindingFlags.Instance |
-							System.Reflection.BindingFlags.Public |
-							System.Reflection.BindingFlags.Static);
-						for(int i = ctors.Length - 1; i >= 0; i--) {
-							if(ReflectionUtils.IsValidParameters(ctors[i])) {
-								var item = EditorReflectionUtility.GetReflectionItems(ctors[i], filter);
-								if(item == null)
-									continue;
-								customItems.Add(ItemSelector.CustomItem.Create(item.displayName, item, category: "@"));
-							}
-						}
-					}
-				}
-				var portCommands = NodeEditorUtility.FindPortCommands();
-				if(portCommands != null && portCommands.Count > 0) {
-					PortCommandData commandData = new PortCommandData() {
-						portType = portType,
-						portName = GetName(),
-						port = portView.GetPortValue(),
-						portKind = PortKind.ValueInput,
-					};
-					foreach(var command in portCommands) {
-						if(command.onlyContextMenu)
-							continue;
-						command.graph = owner.owner.graphEditor;
-						command.mousePositionOnCanvas = position;
-						command.filter = portData.GetFilter();
-						if(command.IsValidPort(owner.targetNode, commandData)) {
-							customItems.Add(ItemSelector.CustomItem.Create(command.name, () => {
-								uNodeEditorUtility.RegisterUndo(editorData.owner, "Connect port");
-								command.OnClick(owner.targetNode, commandData, position);
-								owner.MarkRepaint();
-							}, "@", icon: uNodeEditorUtility.GetTypeIcon(command.GetIcon())));
-						}
-					}
-				}
-			}
-			owner.owner.graphEditor.ShowNodeMenu(position, FA, (n) => {
+			PortCommandData commandData = new PortCommandData() {
+				portType = portType,
+				portName = GetName(),
+				port = portView.GetPortValue(),
+				portKind = PortKind.ValueInput,
+				filter = portData.GetFilter(),
+			};
+			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, owner.graph, owner.nodeObject, position, () => {
+				owner.MarkRepaint();
+			}, types));
+			var win = owner.owner.graphEditor.ShowNodeMenu(position, FA, (n) => {
 				if(n.nodeObject.CanGetValue()) {
 					if(n is MultipurposeNode mNode) {
 						var type = mNode.nodeObject.ReturnType();
@@ -647,6 +586,18 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@", "Data" });
+			var portFilter = portData.GetFilter();
+			win.editorData.selectIconCallback = (tree) => {
+				if(tree is ISelectorItemWithType selectorItemWithType) {
+					var itemType = selectorItemWithType.ItemType;
+					if(itemType != null) {
+						if(portFilter.IsValidType(itemType) == false) {
+							return uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.RefreshIcon));
+						}
+					}
+				}
+				return null;
+			};
 		}
 
 		private void OnDropOutsidePortFromValueOutput(Vector2 position, PortView portView, PortView sidePort) {
@@ -659,99 +610,26 @@ namespace MaxyGames.UNode.Editors {
 				canGetValue = port.CanGetValue();
 			}
 			bool onlySet = canSetValue && !canGetValue;
-			FilterAttribute FA = new FilterAttribute {
-				VoidType = true,
-				MaxMethodParam = int.MaxValue,
-				Public = true,
-				Instance = true,
-				Static = false,
-				UnityReference = false,
-				InvalidTargetType = MemberData.TargetType.Null | MemberData.TargetType.Values,
-				// DisplayDefaultStaticType = false
+			PortCommandData commandData = new PortCommandData() {
+				portType = portType,
+				portName = GetName(),
+				port = GetPortValue(),
+				portKind = PortKind.ValueOutput,
 			};
-			List<ItemSelector.CustomItem> customItems = null;
-			//TODO: fix this ( self target )
-			//if(!onlySet && GetNode() is MultipurposeNode && type.IsCastableTo(typeof(uNodeRoot))) {
-			//	MultipurposeNode multipurposeNode = GetNode() as MultipurposeNode;
-			//	if(multipurposeNode.target != null && multipurposeNode.target.target != null && (multipurposeNode.target.target.targetType == MemberData.TargetType.SelfTarget || multipurposeNode.target.target.targetType == MemberData.TargetType.Values)) {
-			//		var sTarget = multipurposeNode.target.target.startTarget;
-			//		if(sTarget is uNodeRoot) {
-			//			customItems = ItemSelector.MakeCustomItems(sTarget as uNodeRoot);
-			//			customItems.AddRange(ItemSelector.MakeCustomItems(typeof(uNodeRoot), sTarget, FA, "Inherit Member"));
-			//		}
-			//	}
-			//}
-			if(customItems == null) {
-				if(type is RuntimeType) {
-					(type as RuntimeType).Update();
-				}
-				customItems = onlySet ? new List<ItemSelector.CustomItem>() : ItemSelector.MakeCustomItems(type, FA, "Data Members", "Data Members ( Inherited )");
-				if(type.IsByRefLike == false) {
-					var usingNamespaces = GetNodeObject().graphContainer.GetUsingNamespaces();
-					FA.Static = true;
-					customItems.AddRange(ItemSelector.MakeExtensionItems(type, usingNamespaces, FA, "Extensions"));
-				}
-
-				var customInputItems = NodeEditorUtility.FindCustomInputPortItems();
-				if(customInputItems != null && customInputItems.Count > 0) {
-					var source = portView.GetPortValue() as ValueOutput;
-					foreach(var c in customInputItems) {
-						c.graphEditor = owner.owner.graphEditor;
-						c.mousePositionOnCanvas = position;
-						if(c.IsValidPort(source,
-							canSetValue && canGetValue ?
-								PortAccessibility.ReadWrite :
-								canGetValue ? PortAccessibility.ReadOnly : PortAccessibility.WriteOnly)) {
-							var items = c.GetItems(source);
-							if(items != null) {
-								customItems.AddRange(items);
-							}
-						}
-					}
-				}
-				var portCommands = NodeEditorUtility.FindPortCommands();
-				if(portCommands != null && portCommands.Count > 0) {
-					PortCommandData commandData = new PortCommandData() {
-						portType = portType,
-						portName = GetName(),
-						port = GetPortValue(),
-						portKind = PortKind.ValueOutput,
-					};
-					foreach(var command in portCommands) {
-						if(command.onlyContextMenu)
-							continue;
-						command.graph = owner.owner.graphEditor;
-						command.mousePositionOnCanvas = position;
-						command.filter = portData.GetFilter();
-						if(command.IsValidPort(owner.targetNode, commandData)) {
-							customItems.Add(ItemSelector.CustomItem.Create(command.name, () => {
-								command.OnClick(owner.targetNode, commandData, position);
-								owner.MarkRepaint();
-							}, "@"));
-						}
-					}
-				}
-				foreach(var menuItem in NodeEditorUtility.FindNodeMenu()) {
-					if(NodeEditorUtility.IsValidMenu(menuItem, type, NodeFilter.ValueOutput, owner.graphData) == false) {
-						continue;
-					}
-					customItems.Add(ItemSelector.CustomItem.Create(
-						menuItem,
-						() => {
-							NodeEditorUtility.AddNewNode<Node>(owner.graphData, menuItem.nodeName, menuItem.type, position, n => {
-								NodeEditorUtility.AutoConnectPortToTarget(portView.GetPortValue(), n, owner.graphData.currentCanvas);
-								owner.MarkRepaint();
-							});
-							portView.owner.owner.MarkRepaint();
-						},
-						icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon())));
-				}
-				customItems.AddRange(ItemSelector.MakeCustomItemsForMacros(owner.graphData.currentCanvas, position, NodeFilter.ValueOutput, type, n => {
-					NodeEditorUtility.AutoConnectPortToTarget(portView.GetPortValue(), n, owner.graphData.currentCanvas);
-					owner.owner.MarkRepaint();
-				}));
-			}
+			var customItems = ItemSelector.MakeCustomItems(commandData, owner.graph, owner.nodeObject, position, () => {
+				portView.owner.MarkRepaint();
+			}, nodeFilter: NodeFilter.ValueOutput).ToList();
 			if(customItems != null) {
+				FilterAttribute FA = new FilterAttribute {
+					VoidType = true,
+					MaxMethodParam = int.MaxValue,
+					Public = true,
+					Instance = true,
+					Static = false,
+					UnityReference = false,
+					InvalidTargetType = MemberData.TargetType.Null | MemberData.TargetType.Values,
+					// DisplayDefaultStaticType = false
+				};
 				FA.Static = true;
 				ItemSelector.SortCustomItems(customItems);
 				ItemSelector w = ItemSelector.ShowWindow(portView.owner.nodeObject, FA, (MemberData mData) => {
@@ -759,19 +637,19 @@ namespace MaxyGames.UNode.Editors {
 						bool needAutoConnect = true;
 						if(n is MultipurposeNode multipurposeNode && multipurposeNode.instance != null) {//For auto connect to parameter ports
 							if(type.IsCastableTo(mData.startType)) {
-								var con = Connection.CreateAndConnect(multipurposeNode.member.instance, portView.GetPortValue());
+								var con = Connection.CreateAndConnect(multipurposeNode.member.instance, port);
 								NodeEditorUtility.AutoRerouteAndProxy(con, owner.graphData.currentCanvas);
 								needAutoConnect = false;
 							}
 							else {
-								NodeEditorUtility.AutoConvertPort(type, mData.startType, portView.GetPortValue<ValueOutput>(), NodeEditorUtility.GetPort<ValueInput>(n), (val) => {
+								NodeEditorUtility.AutoConvertPort(type, mData.startType, port, NodeEditorUtility.GetPort<ValueInput>(n), (val) => {
 									multipurposeNode.instance.ConnectTo(val.nodeObject.primaryValueOutput);
 									needAutoConnect = false;
 								}, owner.graphData.currentCanvas, new FilterAttribute(mData.startType));
 							}
 						}
 						if(needAutoConnect) {
-							NodeEditorUtility.AutoConnectPortToTarget(portView.GetPortValue<ValueOutput>(), n, owner.graphData.currentCanvas);
+							NodeEditorUtility.AutoConnectPortToTarget(port, n, owner.graphData.currentCanvas);
 						}
 						portView.owner.owner.MarkRepaint();
 						if(sidePort != null) {

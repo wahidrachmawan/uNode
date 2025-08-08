@@ -18,8 +18,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public sealed class Manager : TreeView, IDisposable {
-			public ItemSelector window;
-
 			public List<NestedTreeData> deepTrees = new List<NestedTreeData>();
 			public bool isDeep => deepTrees.Count > 0;
 			public TreeViewItem lastTree => deepTrees.LastOrDefault().tree;
@@ -58,25 +56,27 @@ namespace MaxyGames.UNode.Editors {
 			public new bool hasSearch => !string.IsNullOrEmpty(searchString);
 			public bool isReloading { get; private set; }
 
-			private Data editorData => window?.editorData;
-			public FilterAttribute filter => editorData?.filter;
+			public Data editorData { get; } = new Data();
+			public FilterAttribute filter => editorData.filter;
+			public EditorWindow window => editorData.window;
 
 			public Manager(TreeViewState state) : base(state) {
 				showAlternatingRowBackgrounds = true;
 				showBorder = true;
+				editorData.manager = this;
 			}
 
 			#region GUI
 			protected override void SingleClickedItem(int id) {
 				var tree = GetRows().FirstOrDefault(i => i.id == id);
-				if(CanSelectTree(tree)) {
+				if(editorData.CanSelectTree(tree)) {
 					SelectTree(tree);
 				}
 			}
 
 			protected override void ContextClickedItem(int id) {
 				var tree = GetRows().FirstOrDefault(i => i.id == id);
-				if(CanNextTree(tree)) {
+				if(editorData.CanNextTree(tree)) {
 					NextTree(tree);
 				}
 			}
@@ -89,13 +89,13 @@ namespace MaxyGames.UNode.Editors {
 						var tree = GetRows().FirstOrDefault(i => i.id == selections[0]);
 						if(tree != null) {
 							if(evt.keyCode == KeyCode.Return) {
-								if(CanSelectTree(tree)) {
+								if(editorData.CanSelectTree(tree)) {
 									SelectTree(tree);
 									evt.Use();
 								}
 							}
 							else if(evt.keyCode == KeyCode.RightArrow) {
-								if(CanNextTree(tree)) {
+								if(editorData.CanNextTree(tree)) {
 									NextTree(tree);
 									evt.Use();
 								}
@@ -162,6 +162,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			protected override void RowGUI(RowGUIArgs args) {
+				if(editorData.RowRepaintGUI(new ItemRowGUIArgs() { item = args.item, label = args.label, row = args.row, rowRect = args.rowRect, manager = this })) {
+					//In case there's custom row gui.
+					return;
+				}
 				Event evt = Event.current;
 				if(args.rowRect.Contains(evt.mousePosition)) {
 					if(evt.type == EventType.MouseMove) {
@@ -173,7 +177,7 @@ namespace MaxyGames.UNode.Editors {
 					#region Tooltip
 					if(args.rowRect.Contains(evt.mousePosition)) {
 						if(hoveredTree != args.item) {
-							var contents = Utility.GetTooltipContents(args.item, window.filter.OnlyGetType);
+							var contents = Utility.GetTooltipContents(args.item, filter?.OnlyGetType == true);
 							if(contents.Count > 0) {
 								if(window.position.x + window.position.width + 300 <= Screen.currentResolution.width) {
 									tooltipWindow = TooltipWindow.Show(new Vector2(window.position.x + window.position.width, window.position.y), contents);
@@ -226,14 +230,25 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				else {
-					bool canSelect = CanSelectTree(args.item);
-					bool canNext = CanNextTree(args.item);
+					bool canSelect = editorData.CanSelectTree(args.item);
+					bool canNext = editorData.CanNextTree(args.item);
 					if(evt.type == EventType.Repaint) {
+						if(editorData.RowRepaintGUI(new ItemRowGUIArgs() { item = args.item, label = args.label, row = args.row, rowRect = args.rowRect, manager = this })) {
+							//In case there's custom row gui.
+							return;
+						}
 						if(canSelect) {
 							Rect pos = labelRect;
 							pos.x += labelRect.width - 25;
 							pos.width = 15;
-							uNodeGUIStyle.itemSelect.Draw(pos, GUIContent.none, false, false, false, false);
+
+							var selectIcon = editorData.selectIconCallback?.Invoke(args.item);
+							if(selectIcon != null) {
+								GUI.DrawTexture(pos, selectIcon);
+							}
+							else {
+								uNodeGUIStyle.itemSelect.Draw(pos, GUIContent.none, false, false, false, false);
+							}
 						}
 						if(canNext) {
 							Rect pos = labelRect;
@@ -472,7 +487,7 @@ namespace MaxyGames.UNode.Editors {
 						DoAddNestedTree(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
-					})) { return; }
+					}, filter, editorData.targetObject, window)) { return; }
 					DoAddNestedTree(tree);
 					SelectDeepTrees();
 				}
@@ -491,19 +506,14 @@ namespace MaxyGames.UNode.Editors {
 						DoAddNestedTree(new MemberTreeView(mInfo, item.id, item.depth) { instance = item.instance });
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
-					})) { return; }
+					}, filter, editorData.targetObject, window)) { return; }
 
 					DoAddNestedTree(tree);
 					SelectDeepTrees();
 				}
-				else if(tree is SelectorCallbackTreeView) {
-					var item = tree as SelectorCallbackTreeView;
-					item.onSelect(window.editorData.windowRect);
-					window.Close();
-				}
 				else if(tree is SelectorMemberTreeView) {
 					var item = tree as SelectorMemberTreeView;
-					window.Select(item.member);
+					editorData.Select(item.member);
 				}
 				else if(tree is SelectorCustomTreeView) {
 					var item = tree as SelectorCustomTreeView;
@@ -538,7 +548,7 @@ namespace MaxyGames.UNode.Editors {
 									}
 									SelectDeepTrees();
 									GUIUtility.ExitGUI();
-								})) { return; }
+								}, filter, editorData.targetObject, window)) { return; }
 								if(member is Type) {
 									DoAddNestedTree(new TypeTreeView(member as Type, tree.id, tree.depth));
 								}
@@ -551,11 +561,8 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 						else {
-							item.item.OnSelect(window);
+							item.item.OnSelect(editorData);
 						}
-					}
-					else if(item.graphItem != null) {
-						SelectGraphItem(item.graphItem);
 					}
 					else {
 						throw new Exception();
@@ -573,13 +580,13 @@ namespace MaxyGames.UNode.Editors {
 				if(tree is TypeTreeView) {
 					if(ResolveGenericItem((tree as TypeTreeView).type, (mInfo) => {
 						DoNextTree(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
-					})) { return; }
+					}, filter, editorData.targetObject, window)) { return; }
 				}
 				else if(tree is MemberTreeView) {
 					var item = tree as MemberTreeView;
 					if(ResolveGenericItem(item.member, (mInfo) => {
 						DoNextTree(new MemberTreeView(mInfo, item.id, item.depth) { instance = item.instance });
-					})) { return; }
+					}, filter, editorData.targetObject, window)) { return; }
 				}
 				DoNextTree(tree);
 			}
@@ -632,12 +639,12 @@ namespace MaxyGames.UNode.Editors {
 					var type = (lastItem as TypeTreeView).type;
 					if(filter.Types?.Count == 1 && filter.Types[0] == typeof(Type) && !(type is RuntimeType)) {
 						MemberData val = MemberData.CreateFromType(type);
-						window.Select(val);
+						editorData.Select(val);
 						return;
 					}
 					else if(filter.IsValidTarget(MemberData.TargetType.Values)) {
 						MemberData val = MemberData.Default(type);
-						window.Select(val);
+						editorData.Select(val);
 						return;
 					}
 				}
@@ -655,7 +662,7 @@ namespace MaxyGames.UNode.Editors {
 						var tree = item as MemberTreeView;
 						var member = tree.member;
 						if(member is ConstructorInfo) {
-							window.Select(MemberData.CreateFromMember(member));
+							editorData.Select(MemberData.CreateFromMember(member));
 							return;
 						}
 						if(member is IRuntimeMember) {
@@ -676,29 +683,18 @@ namespace MaxyGames.UNode.Editors {
 					}
 					else if(item is SelectorCustomTreeView) {
 						var tree = item as SelectorCustomTreeView;
-						if(tree.graphItem != null) {
-							members.Add(tree.graphItem.GetData());
-						}
-						else if(tree.item != null && tree.item is ItemReflection) {
-							var cItem = (tree.item as ItemReflection).item;
-							if(cItem.memberInfo is ConstructorInfo) {
-								window.Select(MemberData.CreateFromMember(cItem.memberInfo));
-								return;
-							}
-							var member = MemberData.CreateFromMember(cItem.memberInfo);
-							if(!cItem.isStatic) {
-								member.instance = cItem.instance;
-							}
-							members.Add(member);
+						var next = tree.item.GetMemberForNextItem(editorData);
+						if(next != null) {
+							members.Add(next);
 						}
 						else {
-							throw null;
+							return;
 						}
 					}
 				}
 				if(HasRuntimeType(members)) {
 					if(members.Count == 1) {
-						window.Select(members[0]);
+						editorData.Select(members[0]);
 						return;
 					}
 				}
@@ -788,98 +784,17 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-				window.Select(mData);
+				editorData.Select(mData);
 			}
 
-			public bool CanSelectTree(TreeViewItem tree) {
-				if(tree is TypeTreeView) {
-					var item = tree as TypeTreeView;
-					return M_CanSelectType(item.type, filter);
-				}
-				else if(tree is MemberTreeView) {
-					var item = tree as MemberTreeView;
-					return item.CanSelect();
-				}
-				else if(tree is SelectorCallbackTreeView) {
-					return true;
-				}
-				else if(tree is SelectorMemberTreeView) {
-					var item = tree as SelectorMemberTreeView;
-					var type = item.member.type;
-					if(type != null && !item.member.targetType.HasFlags(MemberData.TargetType.Self | MemberData.TargetType.Null)) {
-						return IsValidTypeToSelect(type);
-					}
-					return true;
-				}
-				else if(tree is SelectorCustomTreeView) {
-					var item = tree as SelectorCustomTreeView;
-					if(item.item != null) {
-						if(item.item.CanSelect(window))
-							return true;
-					}
-					if(item.graphItem != null) {
-						if(item.graphItem.type != null) {
-							if(IsValidTypeToSelect(item.graphItem.type)) {
-								return true;
-							}
-							else if(item.graphItem.targetType == MemberData.TargetType.Self) {
-								if(item.graphItem.targetObject is IClassGraph cls) {
-									return IsValidTypeToSelect(cls.InheritType);
-								}
-							}
-							return false;
-						}
-						else if(item.graphItem.genericParameter != null) {
-							return filter == null || filter.CanSelectType;
-						}
-					}
-				}
-				else if(tree is SelectorGroupedTreeView) {
-					return true;
-				}
-				else if(tree is NamespaceTreeView) {
-					return true;
-				}
-				return false;
-			}
-
-			private bool IsValidTypeToSelect(Type type) {
-				return filter == null || filter.IsValidType(type);
-			}
-
-			public bool CanNextTree(TreeViewItem tree) {
-				if(tree is TypeTreeView) {
-					var item = tree as TypeTreeView;
-					var type = item.type;
-					return !type.IsEnum;
-				}
-				else if(tree is MemberTreeView) {
-					var item = tree as MemberTreeView;
-					return item.HasDeepMember();
-				}
-				else if(tree is SelectorCustomTreeView) {
-					var item = tree as SelectorCustomTreeView;
-					if(item.item is ItemReflection ri) {
-						return ri.item != null && ri.item.hasNextItems;
-					}
-					return item.graphItem != null && item.graphItem.haveNextItem;
-				}
-				//else if(tree is SelectorGroupedTreeView) {
-				//	return true;
-				//} else if(tree is NamespaceTreeView) {
-				//	return true;
-				//}
-				return false;
-			}
-
-			void SelectGraphItem(GraphItem item) {
+			public void SelectGraphItem(GraphItem item) {
 				if(item.function != null && item.function.genericParameters.Length > 0 && item.genericParameterTypes == null) {
 					TypeItem[] defaultType = item.function.genericParameters.Select(p => new TypeItem(p.value,
-						new FilterAttribute(window.filter) {
+						new FilterAttribute(this.filter) {
 							Types = new List<Type>() { p.value },
 							ArrayManipulator = true,
 						})).ToArray();
-					TypeBuilderWindow.Show(window.editorData.windowRect, window.targetObject, window.filter, delegate (MemberData[] types) {
+					TypeBuilderWindow.Show(editorData.windowRect, editorData.targetObject, this.filter, delegate (MemberData[] types) {
 						item.genericParameterTypes = types;
 						SelectGraphItem(item);
 					}, defaultType);
@@ -887,7 +802,7 @@ namespace MaxyGames.UNode.Editors {
 					return;
 				}
 				if(item.targetType == MemberData.TargetType.Self) {
-					window.Select(new MemberData("this", item.type, item.targetType) { instance = item.targetObject });
+					editorData.Select(new MemberData("this", item.type, item.targetType) { instance = item.targetObject });
 					return;
 				}
 				var member = new MemberData();
@@ -952,102 +867,7 @@ namespace MaxyGames.UNode.Editors {
 				member.isStatic = false;
 				member.targetType = item.targetType;
 				member.Items = new[] { iData };
-				window.Select(member);
-			}
-
-
-			bool ResolveGenericItem(MemberInfo member, Action<MemberInfo> onResolved) {
-				if(member == null)
-					return false;
-				MethodInfo method = member as MethodInfo;
-				Type mType = member as Type;
-
-				void DoResolve(MemberData[] types) {
-					bool hasGenericParameterTarget = types.Any(i => i.targetType == MemberData.TargetType.uNodeGenericParameter);
-					if(!hasGenericParameterTarget) {
-						if(method != null && method.IsGenericMethodDefinition) {
-							method = ReflectionUtils.MakeGenericMethod(method, types.Select(i => i.startType).ToArray());
-							member = method;
-						}
-						else if(mType != null && mType.IsGenericTypeDefinition) {
-							mType = ReflectionUtils.MakeGenericType(mType, types.Select(i => i.startType).ToArray());
-							member = mType;
-						}
-						else {
-							//item.genericArguments = MemberDataUtility.MakeTypeDatas(types, item.genericObjects);
-							//item.genericObjects = new List<Object>();
-							//item.genericObjects.AddRange(types.Where(i => i != null && i.instance != null).Select(i => (i.GetInstance() as UnityEngine.Object)).ToList());
-							throw new InvalidOperationException();
-						}
-					}
-					else {
-						throw new InvalidOperationException();
-						//item.genericArguments = MemberDataUtility.MakeTypeDatas(types, item.genericObjects);
-						//item.genericObjects = new List<Object>();
-						//item.genericObjects.AddRange(types.Where(i => i != null && i.instance != null).Select(i => (i.GetInstance() as UnityEngine.Object)).ToList());
-						//if(method != null && method.IsGenericMethodDefinition) {
-						//	item.genericParameterTypes = types;
-						//} else if(item.instance is MemberData mData) {
-						//	mData.name = types[0].name;
-						//	mData.instance = types[0].instance;
-						//	mData.targetType = MemberData.TargetType.uNodeGenericParameter;
-						//}
-					}
-					onResolved(member);
-				}
-
-				if(mType != null && mType.IsGenericTypeDefinition || method != null && method.IsGenericMethodDefinition) {
-					Type[] genericType = method != null ? method.GetGenericArguments() : mType.GetGenericArguments();
-					FilterAttribute F = new FilterAttribute(filter);
-					F.OnlyGetType = true;
-					//F.DisplayRuntimeType = false;
-					F.Types = new List<Type>();
-					TypeItem[] typeItems = new TypeItem[genericType.Length];
-					for(int i = 0; i < genericType.Length; i++) {
-						FilterAttribute fil = new FilterAttribute() {
-							OnlyGetType = true,
-							//DisplayRuntimeType = false,
-						};
-						fil.ToFilterGenericConstraints(genericType[i], genericType);
-						int index = i;
-						typeItems[i] = new TypeItem(genericType[i].BaseType, fil) {
-							onChanged = item => {
-								genericType[index] = item.type;
-							}
-						};
-					}
-					if(genericType.Length == 1) {
-						ItemSelector w = null;
-						Action<MemberData> action = delegate (MemberData m) {
-							if(w != null) {
-								w.Close();
-								//EditorGUIUtility.ExitGUI();
-							}
-							if(typeItems[0].filter.Types.Count > 0) {
-								DoResolve(new[] { m });
-							}
-							else {
-								TypeBuilderWindow.Show(Rect.zero, window.targetObject, typeItems[0].filter, delegate (MemberData[] types) {
-									DoResolve(types);
-								}, new TypeItem(m, typeItems[0].filter)).ChangePosition(window.position);
-							}
-						};
-						Rect newPos = window.position;
-						if(newPos.x + (newPos.width * 2) >= Screen.currentResolution.width) {
-							newPos.x -= newPos.width - 20;
-						}
-						else {
-							newPos.x += newPos.width - 20;
-						}
-						w = ShowAsNew(window.targetObject, typeItems[0].filter, action).ChangePosition(newPos);
-						return true;
-					}
-					TypeBuilderWindow.Show(Rect.zero, window.targetObject, F, delegate (MemberData[] types) {
-						DoResolve(types);
-					}, typeItems).ChangePosition(window.position);
-					return true;
-				}
-				return false;
+				editorData.Select(member);
 			}
 			#endregion
 
@@ -1081,10 +901,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				else if(tree is SelectorCustomTreeView) {
 					var item = tree as SelectorCustomTreeView;
-					if(item.graphItem != null) {
-						return item.graphItem.GetIcon();
-					}
-					else if(item.item != null) {
+					if(item.item != null) {
 						return item.item.GetSecondaryIcon();
 					}
 				}
@@ -1161,30 +978,13 @@ namespace MaxyGames.UNode.Editors {
 						};
 						SetSearchExpanded(item.id, true);
 					}
-					else if(tree is SelectorCallbackTreeView) {
-						var item = tree as SelectorCallbackTreeView;
-						result = new SelectorCallbackTreeView(item.onSelect, item.displayName, item.id, item.depth) {
+					else if(tree is SelectorCustomTreeView) {
+						var item = tree as SelectorCustomTreeView;
+						result = new SelectorCustomTreeView(item.item, item.id, item.depth) {
 							children = children,
 							parent = item.parent,
 							icon = item.icon,
 						};
-					}
-					else if(tree is SelectorCustomTreeView) {
-						var item = tree as SelectorCustomTreeView;
-						if(item.item != null) {
-							result = new SelectorCustomTreeView(item.item, item.id, item.depth) {
-								children = children,
-								parent = item.parent,
-								icon = item.icon,
-							};
-						}
-						else {
-							result = new SelectorCustomTreeView(item.graphItem, item.id, item.depth) {
-								children = children,
-								parent = item.parent,
-								icon = item.icon,
-							};
-						}
 					}
 					else if(tree is SelectorMemberTreeView) {
 						var item = tree as SelectorMemberTreeView;
@@ -1214,7 +1014,7 @@ namespace MaxyGames.UNode.Editors {
 					else if(tree is TypeTreeView) {
 						var item = tree as TypeTreeView;
 						item = new TypeTreeView() {
-							filter = item.filter ?? window.filter,
+							filter = item.filter ?? this.filter,
 							children = children,
 							parent = item.parent,
 							type = item.type,
@@ -1285,7 +1085,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(isDeep) {
 						var treeView = lastTree;
-						var filter = new FilterAttribute(window.filter) { Static = window.filter.Static && lastTree is TypeTreeView };
+						var filter = new FilterAttribute(this.filter) { Static = this.filter.Static && lastTree is TypeTreeView };
 						if(treeView is MemberTreeView) {
 							var item = treeView as MemberTreeView;
 							var mType = ReflectionUtils.GetMemberType(item.member);
@@ -1293,7 +1093,7 @@ namespace MaxyGames.UNode.Editors {
 							var inheritTree = new SelectorCategoryTreeView("Inherit Members", -1, -1);
 							foreach(var tree in members) {
 								if(CanAddTree(tree)) {
-									if(tree.member.DeclaringType != mType) {
+									if(tree.member?.DeclaringType != mType) {
 										inheritTree.AddChild(tree);
 									}
 									else {
@@ -1362,25 +1162,16 @@ namespace MaxyGames.UNode.Editors {
 						}
 						else if(treeView is SelectorCustomTreeView) {
 							var item = treeView as SelectorCustomTreeView;
-							if(item.graphItem != null) {
-								var members = TreeFunction.CreateItemsFromType(item.graphItem.type, filter);
-								foreach(var tree in members) {
+							var trees = item.item.GetDeepItems(editorData);
+							if(trees != null) {
+								deepItems = new List<TreeViewItem>(trees);
+								foreach(var tree in deepItems) {
+									if(tree == null) continue;
 									if(CanAddTree(tree)) {
 										root.AddChild(tree);
 										AddTrees(tree, rows);
 									}
 								}
-								deepItems = new List<TreeViewItem>(members);
-							}
-							else if(item.item is ItemReflection ri && ri.item != null) {
-								var members = TreeFunction.CreateItemsFromType(ri.item.memberType, filter);
-								foreach(var tree in members) {
-									if(CanAddTree(tree)) {
-										root.AddChild(tree);
-										AddTrees(tree, rows);
-									}
-								}
-								deepItems = new List<TreeViewItem>(members);
 							}
 						}
 						else if(treeView is SelectorGroupedTreeView) {
@@ -1430,7 +1221,7 @@ namespace MaxyGames.UNode.Editors {
 				if(treeView is TypeTreeView) {
 					var item = treeView as TypeTreeView;
 					if(item.filter == null) {
-						item.filter = window.filter;
+						item.filter = filter;
 					}
 					if(!hasSearch) {
 						item.Expand(IsExpanded(item.id));

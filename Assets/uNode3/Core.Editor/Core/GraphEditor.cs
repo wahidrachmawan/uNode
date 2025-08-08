@@ -428,12 +428,13 @@ namespace MaxyGames.UNode.Editors {
 			return window.GetMousePositionForMenu(position);
 		}
 
-		public void ShowFavoriteMenu(Vector2 position,
+		public ItemSelector ShowFavoriteMenu(Vector2 position,
 			FilterAttribute filter = null,
 			Action<Node> onAddNode = null,
-			NodeFilter nodeFilter = NodeFilter.None) {
+			NodeFilter nodeFilter = NodeFilter.None,
+			Func<MemberData, bool> processMember = null) {
 			if(uNodeEditorUtility.DisplayRequiredProVersion()) {
-				return;
+				return null;
 			}
 
 			var valueMenuPos = GetMenuPosition();
@@ -477,6 +478,10 @@ namespace MaxyGames.UNode.Editors {
 				graphData.graph,
 				filter,
 				delegate (MemberData value) {
+					if(processMember?.Invoke(value) == true) {
+						Refresh();
+						return;
+					}
 					CreateNodeProcessor(value, graphData, position, (n) => {
 						if(onAddNode != null) {
 							onAddNode(n);
@@ -486,23 +491,25 @@ namespace MaxyGames.UNode.Editors {
 				}).ChangePosition(valueMenuPos);
 			w.displayDefaultItem = false;
 			w.CustomTrees = customItems;
+			return w;
 		}
 
-		public void ShowNodeMenu(Vector2 position,
+		public ItemSelector ShowNodeMenu(Vector2 position,
 			FilterAttribute filter = null,
 			Action<Node> onAddNode = null,
 			NodeFilter nodeFilter = NodeFilter.None,
 			List<ItemSelector.CustomItem> additionalItems = null,
-			IEnumerable<string> expandedCategory = null) {
+			IEnumerable<string> expandedCategory = null,
+			Func<MemberData, bool> processMember = null) {
 			var valueMenuPos = GetMenuPosition();
 			if(filter == null) {
 				filter = new FilterAttribute();
 				//filter.CanSelectType = true;
 				//filter.HideTypes.Add(typeof(void));
-			} 
-			//else {
-			//	filter = new FilterAttribute(filter);
-			//}
+			}
+			else {
+				filter = new FilterAttribute(filter);
+			}
 			filter.DisplayInstanceOnStatic = true;
 			filter.MaxMethodParam = int.MaxValue;
 			filter.Public = true;
@@ -514,6 +521,10 @@ namespace MaxyGames.UNode.Editors {
 				graphData.currentCanvas,
 				filter,
 				delegate (MemberData value) {
+					if(processMember?.Invoke(value) == true) {
+						Refresh();
+						return;
+					}
 					CreateNodeProcessor(value, graphData, position, (n) => {
 						if(onAddNode != null) {
 							onAddNode(n);
@@ -548,7 +559,7 @@ namespace MaxyGames.UNode.Editors {
 			w.customItemDefaultExpandState = false;
 			w.defaultExpandedItems = expandedCategory;
 			if(filter.SetMember)
-				return;//Return on set member is true.
+				return w;//Return on set member is true.
 			List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
 			if(additionalItems != null) {
 				customItems.AddRange(additionalItems);
@@ -627,6 +638,10 @@ namespace MaxyGames.UNode.Editors {
 				if(filter.IsValidType(typeof(Type))) {
 					customItems.Add(ItemSelector.CustomItem.Create("typeof()", delegate () {
 						var win = TypeBuilderWindow.Show(Vector2.zero, graphData.currentCanvas, new FilterAttribute() { OnlyGetType = true, DisplayGeneratedRuntimeType = false }, delegate (MemberData[] types) {
+							if(processMember?.Invoke(types[0]) == true) {
+								Refresh();
+								return;
+							}
 							NodeEditorUtility.AddNewNode<MultipurposeNode>(graphData, position, n => {
 								n.target = types[0];
 								n.Register();
@@ -658,6 +673,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			ItemSelector.SortCustomItems(customItems);
 			w.customItems = customItems;
+			return w;
 		}
 		#endregion
 

@@ -14,6 +14,8 @@ namespace MaxyGames.UNode.Editors {
 		public static ItemSelector window;
 		private List<SearchProgress> progresses;
 
+		private Manager treeManager;
+
 		#region ShowWindows
 		public static ItemSelector ShowType(object targetObject, FilterAttribute filter, Action<MemberData> selectCallback, List<CustomItem> customItems = null) {
 			if(filter == null) {
@@ -77,9 +79,13 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region UnityEvent
+		private void OnEnable() {
+			treeManager = new Manager(new());
+		}
+
 		private void OnDisable() {
 			window = null;
-			editorData.Dispose();
+			editorData?.Dispose();
 		}
 
 		private void Update() {
@@ -147,7 +153,7 @@ namespace MaxyGames.UNode.Editors {
 							fullPath = member.DeclaringType.PrettyName() + "." + member.Name;
 						}
 					}
-					bool canSelect = !(lastItem is SelectorGroupedTreeView || lastItem is NamespaceTreeView) && editorData.manager.CanSelectTree(lastItem);
+					bool canSelect = !(lastItem is SelectorGroupedTreeView || lastItem is NamespaceTreeView) && editorData.CanSelectTree(lastItem);
 					var rect = uNodeGUIUtility.GetRect();
 					if(GUI.Button(new Rect(rect.x, rect.y, canSelect ? rect.width - 60 : rect.width, rect.height), new GUIContent("<-" + lastItem.displayName, fullPath), EditorStyles.miniButton)) {
 						editorData.manager.Back();

@@ -97,6 +97,7 @@ namespace MaxyGames.UNode.Editors {
 				value = port.DefaultValue,
 				type = portType,
 				filter = GetFilter(),
+				portReference = port,
 				onValueChanged = (val) => port.DefaultValue = val as MemberData,
 			};
 			return new UIControl.MemberControl(config, autoLayout);
