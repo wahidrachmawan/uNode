@@ -287,6 +287,7 @@ namespace MaxyGames.UNode.Editors {
 				needReloadNodes = false;
 				// _needReloadedViews.Clear();
 				foreach(var v in views) {
+					if(v == null) continue;
 					_needReloadedViews.Add(v);
 				}
 				return;
@@ -302,6 +303,7 @@ namespace MaxyGames.UNode.Editors {
 				});
 			}
 			foreach(var v in views) {
+				if(v == null) continue;
 				_needReloadedViews.Add(v);
 			}
 		}
@@ -317,6 +319,12 @@ namespace MaxyGames.UNode.Editors {
 			if(nodeViewsPerNode.TryGetValue(node, out view)) {
 				MarkRepaint(view);
 			}
+		}
+
+		public void MarkRepaint(IEnumerable<NodeObject> nodes) {
+			if(nodes == null)
+				return;
+			MarkRepaint(nodes.Select(n => nodeViewsPerNode.TryGetValue(n, out var view) ? view : null));
 		}
 
 		public void MarkRepaintEdges() {

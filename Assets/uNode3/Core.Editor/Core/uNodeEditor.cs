@@ -712,36 +712,6 @@ namespace MaxyGames.UNode.Editors {
 				return _preferenceData;
 			}
 		}
-
-		/// <summary>
-		/// Are the main selection is locked?
-		/// </summary>
-		public static bool isLocked {
-			get {
-				return uNodePreference.preferenceData.isLocked;
-			}
-			set {
-				if(uNodePreference.preferenceData.isLocked != value) {
-					uNodePreference.preferenceData.isLocked = value;
-					uNodePreference.SavePreference();
-				}
-			}
-		}
-
-		/// <summary>
-		/// Are the node is dimmed?
-		/// </summary>
-		public static bool isDim {
-			get {
-				return uNodePreference.preferenceData.isDim;
-			}
-			set {
-				if(uNodePreference.preferenceData.isDim != value) {
-					uNodePreference.preferenceData.isDim = value;
-					uNodePreference.SavePreference();
-				}
-			}
-		}
 		#endregion
 
 		#region Events

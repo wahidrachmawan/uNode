@@ -549,6 +549,33 @@ namespace MaxyGames.UNode.Editors {
 				return nodes.ToList();
 			}
 
+			public static List<UNodeView> FindNodeToCarryOnlyInputs(UNodeView source) {
+				HashSet<UNodeView> nodes = new HashSet<UNodeView>();
+				nodes.AddRange(FindConnectedNodes(source, includeFlowOutput: false, includeValueInput: true));
+				nodes.Remove(source);
+				var exceptions = CG.Nodes.FindAllConnections(source.nodeObject, includeFlowInput: true, includeValueOutput: true, includeFlowOutput: true, includeProxyConnections: false);
+				exceptions.Remove(source.nodeObject);
+				void Recursive(NodeObject node) {
+					if(node == source.nodeObject) return;
+					foreach(var port in node.ValueInputs) {
+						foreach(var con in port.ValidConnections) {
+							if(exceptions.Add(con.Output.node)) {
+								Recursive(con.Output.node);
+							}
+						}
+					}
+				}
+				foreach(var ex in exceptions.ToArray()) {
+					Recursive(ex);
+				}
+				foreach(var ex in exceptions) {
+					if(source.owner.nodeViewsPerNode.TryGetValue(ex, out var view)) {
+						nodes.Remove(view);
+					}
+				}
+				return nodes.ToList();
+			}
+
 			public static HashSet<UNodeView> FindConnectedFlowNodes(UNodeView source, bool includeValueInput = false, bool includeValueOutput = false) {
 				var inputs = source.outputPorts.
 					Where((p) => p.connected && p.isFlow && !p.IsProxy()).

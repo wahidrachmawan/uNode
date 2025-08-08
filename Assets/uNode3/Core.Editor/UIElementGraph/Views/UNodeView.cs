@@ -710,6 +710,8 @@ namespace MaxyGames.UNode.Editors {
 			base.SetPosition(position);
 		}
 
+		public virtual IEnumerable<UNodeView> GetCarryNodes() => null;
+
 		//public override Rect GetPosition() {
 		//	if(resolvedStyle.position == Position.Absolute) {
 		//		return new Rect(resolvedStyle.right, resolvedStyle.top, layout.width, layout.height);
@@ -717,5 +719,5 @@ namespace MaxyGames.UNode.Editors {
 		//	return base.GetPosition();
 		//}
 		#endregion
-	}
+		}
 }

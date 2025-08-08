@@ -1946,6 +1946,10 @@ namespace MaxyGames.UNode.Editors {
 			});
 			Refresh();
 		}
+
+		public override void MarkRepaint(IEnumerable<NodeObject> nodes) {
+			graphView?.MarkRepaint(nodes);
+		}
 	}
 
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]

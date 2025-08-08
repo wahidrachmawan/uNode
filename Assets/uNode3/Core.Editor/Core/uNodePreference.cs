@@ -20,7 +20,6 @@ namespace MaxyGames.UNode.Editors {
 
 		public class PreferenceData {
 			public bool isDim = true,
-				isLocked = false,
 				carryNodes = false;
 
 			[Tooltip("The default access modifier for new variable")]
@@ -47,6 +46,8 @@ namespace MaxyGames.UNode.Editors {
 			//Controls
 			[Tooltip("When true, right click to move the canvas will be disabled")]
 			public bool disableRightClickMove;
+			[Tooltip("If true, when moving node the input value of the node will be always be carry")]
+			public bool autoCarryInputValue = true;
 
 			public DisplayKind displayKind;
 
@@ -454,6 +455,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				if(uNodeUtility.isOSXPlatform == false) {
 					uNodeGUIUtility.ShowField(nameof(preferenceData.disableRightClickMove), preferenceData);
 				}
+				uNodeGUIUtility.ShowField(nameof(preferenceData.autoCarryInputValue), preferenceData);
 			}
 			else if(selectedMenu == 1) {
 				preferenceData.inspectorIntegration = EditorGUILayout.Toggle(new GUIContent("Inspector Integration", "If true, graph inspector can be displayed on Unity Inspector"), preferenceData.inspectorIntegration);

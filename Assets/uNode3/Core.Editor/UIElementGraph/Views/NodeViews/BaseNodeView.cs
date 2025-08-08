@@ -63,6 +63,9 @@ namespace MaxyGames.UNode.Editors {
 			InitializeDefaultPorts();
 		}
 
+		/// <summary>
+		/// Initialize the default ports
+		/// </summary>
 		protected virtual void InitializeDefaultPorts() {
 			foreach(var port in nodeObject.FlowInputs) {
 				if(port == nodeObject.primaryFlowInput) {
@@ -400,79 +403,41 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Callbacks & Overrides
+		/// <summary>
+		/// Get nodes to carry
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<UNodeView> GetCarryNodes() {
+			var preference = uNodePreference.GetPreference();
+			bool carry;
+			if(preference.carryNodes) {
+				if(owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
+					carry = false;
+				}
+				else {
+					carry = true;
+				}
+			}
+			else {
+				if(!owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
+					carry = false;
+				}
+				else {
+					carry = true;
+				}
+			}
+			if(carry) {
+				return UIElementUtility.Nodes.FindNodeToCarry(this).Distinct();
+			}
+			else {
+				if(preference.autoCarryInputValue) {
+					return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Distinct();
+				}
+			}
+			return null;
+		}
+
 		public override void SetPosition(Rect newPos) {
-			// if (newPos != targetNode.editorRect && preference.snapNode) {
-			// 	float range = preference.snapRange;
-			// 	newPos.x = NodeEditorUtility.SnapTo(newPos.x, range);
-			// 	newPos.y = NodeEditorUtility.SnapTo(newPos.y, range);
-			// 	if (preference.snapToPin && owner.selection.Count == 1) {
-			// 		var connectedPort = inputPorts.Where((p) => p.connected).ToList();
-			// 		bool hFlag = false;
-			// 		bool vFalg = false;
-			// 		var snapRange = preference.snapToPinRange / uNodePreference.nodeGraph.zoomScale;
-			// 		for (int i = 0; i < connectedPort.Count; i++) {
-			// 			var edges = connectedPort[i].GetEdges();
-			// 			if (connectedPort[i].orientation == Orientation.Vertical) {
-			// 				if (vFalg)
-			// 					continue;
-			// 				foreach (var e in edges) {
-			// 					if (e != null) {
-			// 						float distanceToPort = e.input.GetGlobalCenter().x - e.output.GetGlobalCenter().x;
-			// 						if (Mathf.Abs(distanceToPort) <= snapRange && Mathf.Abs(newPos.x - layout.x) <= snapRange) {
-			// 							newPos.x = layout.x - distanceToPort;
-			// 							vFalg = true;
-			// 							break;
-			// 						}
-			// 					}
-			// 				}
-			// 			} else {
-			// 				//if(hFlag || vFalg)
-			// 				//	continue;
-			// 				//foreach(var e in edges) {
-			// 				//	if(e != null) {
-			// 				//		float distanceToPort = e.edgeControl.to.y - e.edgeControl.from.y;
-			// 				//		if(Mathf.Abs(distanceToPort) <= preference.snapToPinRange &&
-			// 				//			Mathf.Abs(newPos.y - layout.y) <= preference.snapToPinRange) {
-			// 				//			newPos.y = layout.y - distanceToPort;
-			// 				//			hFlag = true;
-			// 				//			break;
-			// 				//		}
-			// 				//	}
-			// 				//}
-			// 			}
-			// 		}
-			// 		connectedPort = outputPorts.Where((p) => p.connected).ToList();
-			// 		for (int i = 0; i < connectedPort.Count; i++) {
-			// 			var edges = connectedPort[i].GetEdges();
-			// 			if (connectedPort[i].orientation == Orientation.Vertical) {
-			// 				//if(vFalg)
-			// 				//	continue;
-			// 				//foreach(var e in edges) {
-			// 				//	if(e != null) {
-			// 				//		float distanceToPort = e.edgeControl.to.x - e.edgeControl.from.x;
-			// 				//		if(Mathf.Abs(distanceToPort) <= preference.snapToPinRange &&
-			// 				//			Mathf.Abs(newPos.x - layout.x) <= preference.snapToPinRange) {
-			// 				//			newPos.x = layout.x + distanceToPort;
-			// 				//			break;
-			// 				//		}
-			// 				//	}
-			// 				//}
-			// 			} else {
-			// 				if (hFlag || vFalg)
-			// 					continue;
-			// 				foreach (var e in edges) {
-			// 					if (e != null) {
-			// 						float distanceToPort = e.input.GetGlobalCenter().y - e.output.GetGlobalCenter().y;
-			// 						if (Mathf.Abs(distanceToPort) <= snapRange && Mathf.Abs(newPos.y - layout.y) <= snapRange) {
-			// 							newPos.y = layout.y + distanceToPort;
-			// 							break;
-			// 						}
-			// 					}
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
 			float xPos = newPos.x - nodeObject.position.x;
 			float yPos = newPos.y - nodeObject.position.y;
 
@@ -481,23 +446,15 @@ namespace MaxyGames.UNode.Editors {
 			//Handle carry nodes
 			if(owner.selection.Count == 1 && owner.selection.Contains(this) && owner.currentEvent != null && isBlock == false) {
 				if((xPos != 0 || yPos != 0)) {
-					var preference = uNodePreference.GetPreference();
-					if(preference.carryNodes) {
-						if(owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
-							return;
-						}
-					} else {
-						if(!owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
-							return;
-						}
-					}
-					List<UNodeView> nodes = UIElementUtility.Nodes.FindNodeToCarry(this);
-					foreach(var n in nodes.Distinct()) {
-						if(n != null) {
-							Rect rect = n.nodeObject.position;
-							rect.x += xPos;
-							rect.y += yPos;
-							n.Teleport(rect);
+					var nodes = GetCarryNodes();
+					if(nodes != null) {
+						foreach(var n in nodes) {
+							if(n != null) {
+								Rect rect = n.nodeObject.position;
+								rect.x += xPos;
+								rect.y += yPos;
+								n.Teleport(rect);
+							}
 						}
 					}
 				}

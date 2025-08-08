@@ -78,6 +78,14 @@ namespace MaxyGames.UNode.Editors {
 
 		}
 
+		public virtual void MarkRepaint(NodeObject node) {
+			MarkRepaint(new NodeObject[] { node });
+		}
+
+		public virtual void MarkRepaint(IEnumerable<NodeObject> nodes) {
+
+		}
+
 		/// <summary>
 		/// Refresh the graph.
 		/// </summary>

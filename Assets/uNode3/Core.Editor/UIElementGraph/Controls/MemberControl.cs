@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -232,17 +233,109 @@ namespace MaxyGames.UNode.Editors.UIControl {
 				}, new TypeItem[1] { member }).ChangePosition(GUIUtility.GUIToScreenPoint(mouseEvent.mousePosition));
 			}
 			else {
-				if(config.portReference != null) {
-
+				if(config.portReference?.GetPort() is ValuePort port) {
+					var pos = port.node.position.position;
+					pos.x -= 200;
+					pos.y += port.node.position.height / 2;
+					ShowMenu(port, pos, config.owner.graph, filter);
 				}
-				ItemSelector.ShowWindow(config.targetCanvas, filter, (m) => {
-					m.ResetCache();
-					config.OnValueChanged(m);
-					config.owner.OnValueChanged();
-					UpdateControl();
-					config.owner.MarkRepaint();
-				}).ChangePosition(GUIUtility.GUIToScreenPoint(mouseEvent.mousePosition));
+				else {
+					ItemSelector.ShowWindow(config.targetCanvas, filter, (m) => {
+						m.ResetCache();
+						config.OnValueChanged(m);
+						config.owner.OnValueChanged();
+						UpdateControl();
+						config.owner.MarkRepaint();
+					}).ChangePosition(GUIUtility.GUIToScreenPoint(mouseEvent.mousePosition));
+				}
 			}
+		}
+
+		static void ShowMenu(ValuePort port, Vector2 positionInCanvas, GraphEditor graphEditor, FilterAttribute filter) {
+			filter.MaxMethodParam = int.MaxValue;
+			FilterAttribute FA = filter;
+			var types = FA.Types;
+			FA = new FilterAttribute(FA) {
+				ValidateType = (type) => {
+					for(int i = 0; i < types.Count; i++) {
+						if(NodeEditorUtility.CanAutoConvertType(type, types[i])) {
+							return true;
+						}
+					}
+					return false;
+				},
+				// DisplayDefaultStaticType = false
+			};
+			var nodeObject = port.node;
+			var customItems = new List<ItemSelector.CustomItem>();
+			var editorData = graphEditor.graphData;
+			var portType = port.type;
+			PortCommandData commandData = new PortCommandData() {
+				portType = portType,
+				portName = port.GetPrettyName(),
+				port = port,
+				portKind = PortKind.ValueInput,
+				filter = filter,
+			};
+			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, graphEditor, nodeObject, positionInCanvas, () => {
+				graphEditor.Refresh();
+			}, types));
+			var win = graphEditor.ShowNodeMenu(positionInCanvas, FA, (n) => {
+				if(n.nodeObject.CanGetValue()) {
+					if(n is MultipurposeNode mNode) {
+						var type = mNode.nodeObject.ReturnType();
+						Type rightType = type;
+						for(int i = 0; i < types.Count; i++) {
+							if(NodeEditorUtility.CanAutoConvertType(type, types[i])) {
+								rightType = types[i];
+								break;
+							}
+						}
+						if(!type.IsCastableTo(rightType)) {
+							NodeEditorUtility.AutoConvertPort(
+								type,
+								rightType,
+								NodeEditorUtility.GetPort<ValueOutput>(n),
+								NodeEditorUtility.GetPort<ValueInput>(nodeObject),
+								(node) => {
+									port.ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
+								}, graphEditor.graphData.currentCanvas, new FilterAttribute(rightType));
+							return;
+						}
+					}
+					port.ConnectTo(n.nodeObject.primaryValueOutput);
+				}
+			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@", "Data" },
+				processMember: member => {
+					if(port is ValueInput input) {
+						if(member.targetType is not MemberData.TargetType.NodePort or MemberData.TargetType.Method or MemberData.TargetType.uNodeFunction or MemberData.TargetType.Constructor or MemberData.TargetType.uNodeConstructor ||
+						member.isStatic == false && member.IsTargetingUNode == false) {
+							if(member.targetType == MemberData.TargetType.Self) {
+								if(portType != member.type) {
+									return false;
+								}
+							}
+							if(member.type.IsCastableTo(input.type)) {
+								input.AssignToDefault(member);
+								graphEditor.MarkRepaint(port.node);
+								return true;
+							}
+						}
+					}
+					return false;
+				});
+			var portFilter = filter;
+			win.editorData.selectIconCallback = (tree) => {
+				if(tree is ISelectorItemWithType selectorItemWithType) {
+					var itemType = selectorItemWithType.ItemType;
+					if(itemType != null) {
+						if(portFilter.IsValidType(itemType) == false) {
+							return uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.RefreshIcon));
+						}
+					}
+				}
+				return null;
+			};
 		}
 
 		private void BuildContextualMenu(ContextualMenuPopulateEvent evt) {

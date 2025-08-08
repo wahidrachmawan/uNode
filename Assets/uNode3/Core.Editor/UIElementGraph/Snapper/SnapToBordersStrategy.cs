@@ -105,8 +105,11 @@ namespace MaxyGames.UNode.Editors {
 			List<Rect> notSelectedElementRects = new List<Rect>();
 			var ignoredElements = m_GraphView.selection.OfType<GraphElement>().ToList();
 
-			if(ignoredElements.Count == 1 && ignoredElements[0] is UNodeView && uNodePreference.preferenceData.carryNodes) {
-				ignoredElements.AddRange(UIElementUtility.Nodes.FindNodeToCarry(ignoredElements[0] as UNodeView));
+			if(ignoredElements.Count == 1 && ignoredElements[0] is UNodeView firstNode) {
+				var carryNodes = firstNode.GetCarryNodes();
+				if(carryNodes != null) {
+					ignoredElements.AddRange(carryNodes);
+				}
 			}
 
 			// Consider only the visible nodes.
