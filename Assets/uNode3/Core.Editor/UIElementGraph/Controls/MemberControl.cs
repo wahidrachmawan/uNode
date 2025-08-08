@@ -308,7 +308,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@", "Data" },
 				processMember: member => {
 					if(port is ValueInput input) {
-						if(member.targetType is not MemberData.TargetType.NodePort or MemberData.TargetType.Method or MemberData.TargetType.uNodeFunction or MemberData.TargetType.Constructor or MemberData.TargetType.uNodeConstructor ||
+						if(!(member.targetType is MemberData.TargetType.NodePort or MemberData.TargetType.Method or MemberData.TargetType.uNodeFunction or MemberData.TargetType.Constructor or MemberData.TargetType.uNodeConstructor) ||
 						member.isStatic == false && member.IsTargetingUNode == false) {
 							if(member.targetType == MemberData.TargetType.Self) {
 								if(portType != member.type) {
