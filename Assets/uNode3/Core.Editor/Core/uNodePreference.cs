@@ -19,9 +19,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public class PreferenceData {
-			public bool isDim = true,
-				carryNodes = false;
-
 			[Tooltip("The default access modifier for new variable")]
 			public DefaultAccessor newVariableAccessor;
 			[Tooltip("The default access modifier for new property")]
@@ -47,7 +44,9 @@ namespace MaxyGames.UNode.Editors {
 			[Tooltip("When true, right click to move the canvas will be disabled")]
 			public bool disableRightClickMove;
 			[Tooltip("If true, when moving node the input value of the node will be always be carry")]
-			public bool autoCarryInputValue = true;
+			public bool autoCarryInputValue;
+			public bool carryNodes = false;
+			//public bool isDim = true;
 
 			public DisplayKind displayKind;
 

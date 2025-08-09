@@ -469,7 +469,7 @@ namespace MaxyGames {
 		/// <param name="breakCoroutine"></param>
 		/// <param name="flowConnection"></param>
 		/// <returns></returns>
-		public static string FlowFinish(FlowInput input, bool isSuccess, bool alwaysHaveReturnValue = true, bool breakCoroutine = false, params FlowOutput[] flowConnection) {
+		public static string FlowFinish(FlowInput input, bool isSuccess, bool alwaysHaveReturnValue, bool breakCoroutine = false, params FlowOutput[] flowConnection) {
 			string result = null;
 			if(isSuccess) {
 				string success = null;

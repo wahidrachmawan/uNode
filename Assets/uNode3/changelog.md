@@ -3,7 +3,8 @@
 ## v3.2.1
 - Added encapsulate variable to property context menu
 - Added ability to implement interface property
-- Added ability to insert c# code to existing graph
+- Added ability to insert c# code to existing graph from c# class, variable, property, method, statement, or expression.
+- Added preference option to always carry connected input value nodes
 - Improved Editor
 - Fixed generic type name is not trimmed
 - Fixed some bugs

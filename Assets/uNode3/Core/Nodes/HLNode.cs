@@ -601,8 +601,8 @@ namespace MaxyGames.UNode.Nodes {
 								init,
 								CG.If(
 									generatedInstanceName.CGInvoke(nameof(IStateNode.Execute), CG.This),
-									CG.FlowFinish(enter, true, true, false, onSuccess, exit),
-									CG.FlowFinish(enter, false, true, false, onFailure, exit)
+									CG.FlowFinish(enter, true, CG.IsStateFlow(enter), false, onSuccess, exit),
+									CG.FlowFinish(enter, false, CG.IsStateFlow(enter), false, onFailure, exit)
 								)
 							);
 						}
@@ -637,8 +637,8 @@ namespace MaxyGames.UNode.Nodes {
 								CG.WaitEvent(m_instance),
 								CG.If(
 									CG.CompareEventState(m_instance, true),
-									CG.FlowFinish(enter, true, true, false, onSuccess, exit),
-									CG.FlowFinish(enter, false, true, false, onFailure, exit)
+									CG.FlowFinish(enter, true, CG.IsStateFlow(enter), false, onSuccess, exit),
+									CG.FlowFinish(enter, false, CG.IsStateFlow(enter), false, onFailure, exit)
 								)
 							);
 						}

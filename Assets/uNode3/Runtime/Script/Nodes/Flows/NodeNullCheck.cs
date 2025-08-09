@@ -39,8 +39,8 @@ namespace MaxyGames.UNode.Nodes {
 		protected override string GenerateFlowCode() {
 			return CG.If(
 				CG.Compare(value.CGValue(), CG.Null, ComparisonType.Equal),
-				CG.FlowFinish(enter, true, onNull),
-				CG.FlowFinish(enter, false, onNotNull)
+				CG.FlowFinish(enter, true, CG.IsStateFlow(enter), onNull),
+				CG.FlowFinish(enter, false, CG.IsStateFlow(enter), onNotNull)
 			);
 		}
 

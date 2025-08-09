@@ -58,8 +58,8 @@ namespace MaxyGames.UNode.Nodes {
 					}
 					else if(CG.debugScript) {
 						return CG.If(data,
-							CG.FlowFinish(enter, true, true, false, onTrue, exit),
-							CG.FlowFinish(enter, false, true, false, onFalse, exit));
+							CG.FlowFinish(enter, true, onTrue, exit),
+							CG.FlowFinish(enter, false, onFalse, exit));
 					}
 					if(onTrue.isAssigned) {
 						if(onFalse.isAssigned) {
@@ -86,7 +86,7 @@ namespace MaxyGames.UNode.Nodes {
 							CG.If(
 								data.AddFirst("!(").Add(")"),
 								CG.Flow(onFalse)) +
-							CG.FlowFinish(enter, false, true, false, exit).AddLineInFirst();
+							CG.FlowFinish(enter, false, exit).AddLineInFirst();
 					}
 					return
 						CG.If(data, "") +
