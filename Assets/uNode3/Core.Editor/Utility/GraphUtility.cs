@@ -208,6 +208,20 @@ namespace MaxyGames.UNode.Editors {
 							con.Disconnect();
 						}
 
+						if(nodeObject.node is Nodes.MacroNode) {
+							foreach(var port in nodeObject.Ports) {
+								if(int.TryParse(port.id, out var id)) {
+									if(elementsMap.TryGetValue(id, out var tElement) && tElement is NodeObject) {
+										var p = port;
+										postAction += () => {
+											//Make sure we set the id after the id is updated to newers id
+											p.id = tElement.id.ToString();
+										};
+									}
+								}
+							}
+						}
+
 						//Pre validate references
 						bool referenceChanged = false;
 						var references = nodeObject.serializedData.References;

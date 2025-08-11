@@ -872,6 +872,13 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+			public override Texture GetSecondaryIcon() {
+				if(item.type != null) {
+					return uNodeEditorUtility.GetTypeIcon(item.type);
+				}
+				return null;
+			}
+
 			public override IEnumerable<GUIContent> GetTooltipContents() {
 				yield return new GUIContent(item.DisplayName, GetIcon());
 				yield return new GUIContent("Target Kind : " + item.targetType);

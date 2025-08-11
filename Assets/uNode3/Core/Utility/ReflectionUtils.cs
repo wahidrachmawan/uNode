@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace MaxyGames.UNode {
 	public static class ReflectionUtils {
@@ -2300,7 +2301,7 @@ namespace MaxyGames.UNode {
 						return pType[0];
 					}
 
-					return null;
+					//return null;
 				}
 				else if((constraints & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0) {//struct constraint
 					var pType = type.GetGenericParameterConstraints();
@@ -2311,14 +2312,14 @@ namespace MaxyGames.UNode {
 							}
 						}
 					}
-					return null;
+					//return null;
 				}
 				else if((constraints & GenericParameterAttributes.DefaultConstructorConstraint) != 0) {//new constraint
 					var pType = type.GetGenericParameterConstraints();
 					if(pType.Length == 0) {
 						return typeof(object);
 					}
-					return null;
+					//return null;
 				}
 				else {
 					//no constraint
@@ -2329,14 +2330,11 @@ namespace MaxyGames.UNode {
 					else if(pType.Length == 1 && pType[0] != typeof(ValueType)) {
 						return pType[0];
 					}
-					return null;
+					//return null;
 				}
 			}
+			//return GenericConstraintResolver.FindOrCreateTypeForGenericParameter(type);
 			return null;
-		}
-
-		public static bool IsValidGenericConstraint(Type type, Type genericParameter) {
-			return GetDefaultConstraint(genericParameter, type) != null;
 		}
 
 		internal static Type GetDefaultConstraint(Type type, Type preferedType) {
@@ -2567,6 +2565,299 @@ namespace MaxyGames.UNode {
 				return true;
 			}
 			return false;
+		}
+	}
+
+	//A class to resolve generic parameter constraint
+	static class GenericConstraintResolver {
+		private static readonly Dictionary<string, Type> Cache = new();
+		private static readonly ModuleBuilder DynamicModule;
+
+		static GenericConstraintResolver() {
+			var asmName = new AssemblyName("DynamicConstraintTypes");
+			var asmBuilder = AssemblyBuilder.DefineDynamicAssembly(asmName, AssemblyBuilderAccess.Run);
+			DynamicModule = asmBuilder.DefineDynamicModule("MainModule");
+		}
+
+		/// <summary>
+		/// Find or create a concrete Type that satisfies the generic parameter's constraints.
+		/// This inspects class/struct/new()/interface/base-class constraints and also supports 'unmanaged'.
+		/// </summary>
+		public static Type FindOrCreateTypeForGenericParameter(Type genericParam) {
+			if(!genericParam.IsGenericParameter)
+				throw new ArgumentException("Type must be a generic parameter (e.g. T from MethodInfo.GetGenericArguments()).", nameof(genericParam));
+
+			var key = GetConstraintKey(genericParam);
+			if(Cache.TryGetValue(key, out var result)) {
+				return result;
+			}
+			result = FindOrCreateInternal(genericParam);
+			return Cache[key] = result;
+		}
+
+		private static string GetConstraintKey(Type gp) {
+			var attrs = gp.GenericParameterAttributes;
+			var constraints = gp.GetGenericParameterConstraints();
+			bool mustBeUnmanaged = DetectIsUnmanagedAttribute(gp);
+			return string.Join("|",
+				attrs.ToString(),
+				mustBeUnmanaged ? "UNMANAGED" : "MANAGED",
+				string.Join(",", constraints.Select(c => c?.AssemblyQualifiedName ?? "<null>"))
+			);
+		}
+
+		private static Type FindOrCreateInternal(Type genericParam) {
+			var attrs = genericParam.GenericParameterAttributes;
+			var constraints = genericParam.GetGenericParameterConstraints();
+
+			bool mustBeClass = attrs.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint);
+			bool mustBeStruct = attrs.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint);
+			bool mustHaveDefaultCtor = attrs.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint);
+			bool mustBeUnmanaged = mustBeStruct && DetectIsUnmanagedAttribute(genericParam);
+
+			// 1) Search loaded assemblies for the first matching type
+			var candidateTypes = ReflectionUtils.GetAssemblies()
+				.SelectMany(a => {
+					try { return a.GetTypes(); }
+					catch(ReflectionTypeLoadException ex) { return ex.Types.Where(t => t != null)!; }
+				})
+				.Where(t => t != null && !t.IsGenericTypeDefinition);
+
+			foreach(var t in candidateTypes) {
+				if(IsValidCandidate(t, mustBeClass, mustBeStruct, mustHaveDefaultCtor, mustBeUnmanaged, constraints))
+					return t;
+			}
+
+			// 2) No existing type found → create a dynamic type that meets constraints
+			return CreateDynamicType(mustBeClass, mustBeStruct, mustBeUnmanaged, mustHaveDefaultCtor, constraints);
+		}
+
+		private static bool DetectIsUnmanagedAttribute(Type genericParam) {
+			// Compiler encodes 'unmanaged' as IsUnmanagedAttribute on the generic parameter metadata.
+			return genericParam.GetCustomAttributesData()
+				.Any(a => a.AttributeType.FullName == "System.Runtime.CompilerServices.IsUnmanagedAttribute");
+		}
+
+		private static bool IsValidCandidate(Type type, bool mustBeClass, bool mustBeStruct, bool mustHaveDefaultCtor, bool mustBeUnmanaged, Type[] constraints) {
+			if(type == null) return false;
+
+			if(mustBeStruct) {
+				if(!type.IsValueType || Nullable.GetUnderlyingType(type) != null) return false;
+			}
+
+			if(mustBeClass && type.IsValueType) return false;
+
+			if(mustHaveDefaultCtor && type.GetConstructor(Type.EmptyTypes) == null) return false;
+
+			if(mustBeUnmanaged && !IsUnmanagedType(type)) return false;
+
+			foreach(var c in constraints) {
+				if(c == null) continue;
+				if(!c.IsAssignableFrom(type))
+					return false;
+			}
+
+			return true;
+		}
+
+		private static bool IsUnmanagedType(Type t) {
+			// True for primitives and enums
+			if(t.IsPrimitive || t.IsEnum) return true;
+
+			// Nullable<T> is not unmanaged
+			if(t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>)) return false;
+
+			// Must be value type to be unmanaged
+			if(!t.IsValueType) return false;
+
+			// Inspect all instance fields recursively; if any field is a reference-type or non-unmanaged, fail.
+			var seen = new HashSet<Type>();
+			var stack = new Stack<Type>();
+			stack.Push(t);
+
+			while(stack.Count > 0) {
+				var ty = stack.Pop();
+				if(!seen.Add(ty)) continue;
+
+				// Enums and primitives are fine
+				if(ty.IsPrimitive || ty.IsEnum) continue;
+
+				// For value types, check fields
+				var fields = ty.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				foreach(var f in fields) {
+					var ft = f.FieldType;
+					if(ft.IsPointer) continue; // pointer considered unmanaged
+					if(!ft.IsValueType)
+						return false; // reference field => not unmanaged
+
+					if(ft.IsPrimitive || ft.IsEnum) continue;
+
+					// push for deeper inspection
+					stack.Push(ft);
+				}
+			}
+
+			return true;
+		}
+
+		private static Type CreateDynamicType(bool mustBeClass, bool mustBeStruct, bool mustBeUnmanaged, bool mustHaveDefaultCtor, Type[] constraints) {
+			string typeName = "Fallback_" + Guid.NewGuid().ToString("N");
+			TypeBuilder tb;
+
+			// Create either a struct (value type) or class (reference type)
+			if(mustBeStruct) {
+				tb = DynamicModule.DefineType(typeName,
+					TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.SequentialLayout | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit,
+					typeof(ValueType));
+			}
+			else {
+				tb = DynamicModule.DefineType(typeName,
+					TypeAttributes.Public | TypeAttributes.Class);
+			}
+
+			// If constraints include a concrete base class, set it as parent (first class constraint)
+			var baseClass = constraints.FirstOrDefault(c => c != null && c.IsClass);
+			if(baseClass != null && !mustBeStruct) {
+				if(baseClass != typeof(ValueType))
+					tb.SetParent(baseClass);
+			}
+
+			// If unmanaged requested and struct, create only primitive fields (blittable)
+			if(mustBeUnmanaged && mustBeStruct) {
+				tb.DefineField("b", typeof(byte), FieldAttributes.Public);
+			}
+
+			// Implement interface constraints and auto-generate simple members
+			var interfaces = constraints.Where(c => c != null && c.IsInterface).ToArray();
+			foreach(var iface in interfaces) {
+				tb.AddInterfaceImplementation(iface);
+				ImplementInterfaceMembers(tb, iface);
+			}
+
+			// Add a public default constructor for classes (if required or simply to be safe)
+			if(!mustBeStruct) {
+				var ctor = tb.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
+				var il = ctor.GetILGenerator();
+
+				if(baseClass != null) {
+					var baseCtor = baseClass.GetConstructor(Type.EmptyTypes);
+					if(baseCtor != null) {
+						il.Emit(OpCodes.Ldarg_0);
+						il.Emit(OpCodes.Call, baseCtor);
+					}
+					else {
+						// fallback: call object::.ctor()
+						var objCtor = typeof(object).GetConstructor(Type.EmptyTypes)!;
+						il.Emit(OpCodes.Ldarg_0);
+						il.Emit(OpCodes.Call, objCtor);
+					}
+				}
+				else {
+					var objCtor = typeof(object).GetConstructor(Type.EmptyTypes)!;
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Call, objCtor);
+				}
+
+				il.Emit(OpCodes.Ret);
+			}
+			// For structs, default initialization is fine (runtime provides default ctor behaviour).
+
+			var created = tb.CreateTypeInfo()!;
+			return created;
+		}
+
+		private static void ImplementInterfaceMembers(TypeBuilder tb, Type iface) {
+			// Implement methods
+			foreach(var method in iface.GetMethods()) {
+				var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
+
+				// Name collision handling: use method.Name; method overrides will be mapped with DefineMethodOverride
+				var methodBuilder = tb.DefineMethod(
+					method.Name,
+					MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot,
+					method.ReturnType,
+					paramTypes);
+
+				var il = methodBuilder.GetILGenerator();
+
+				// For return values, push default
+				if(method.ReturnType != typeof(void)) {
+					if(method.ReturnType.IsValueType) {
+						var local = il.DeclareLocal(method.ReturnType);
+						il.Emit(OpCodes.Ldloca_S, local);
+						il.Emit(OpCodes.Initobj, method.ReturnType);
+						il.Emit(OpCodes.Ldloc_0);
+					}
+					else {
+						il.Emit(OpCodes.Ldnull);
+					}
+				}
+
+				il.Emit(OpCodes.Ret);
+
+				tb.DefineMethodOverride(methodBuilder, method);
+			}
+
+			// Implement properties
+			foreach(var prop in iface.GetProperties()) {
+				var pb = tb.DefineProperty(prop.Name, PropertyAttributes.None, prop.PropertyType, Type.EmptyTypes);
+
+				if(prop.CanRead) {
+					var getMethod = tb.DefineMethod("get_" + prop.Name,
+						MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+						prop.PropertyType, Type.EmptyTypes);
+
+					var il = getMethod.GetILGenerator();
+					if(prop.PropertyType.IsValueType) {
+						var local = il.DeclareLocal(prop.PropertyType);
+						il.Emit(OpCodes.Ldloca_S, local);
+						il.Emit(OpCodes.Initobj, prop.PropertyType);
+						il.Emit(OpCodes.Ldloc_0);
+					}
+					else {
+						il.Emit(OpCodes.Ldnull);
+					}
+					il.Emit(OpCodes.Ret);
+
+					pb.SetGetMethod(getMethod);
+					tb.DefineMethodOverride(getMethod, prop.GetGetMethod()!);
+				}
+
+				if(prop.CanWrite) {
+					var setMethod = tb.DefineMethod("set_" + prop.Name,
+						MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+						null, new[] { prop.PropertyType });
+
+					var il = setMethod.GetILGenerator();
+					il.Emit(OpCodes.Ret);
+
+					pb.SetSetMethod(setMethod);
+					tb.DefineMethodOverride(setMethod, prop.GetSetMethod()!);
+				}
+			}
+
+			// Implement events (add/remove) as no-op
+			foreach(var ev in iface.GetEvents()) {
+				var eventBuilder = tb.DefineEvent(ev.Name, EventAttributes.None, ev.EventHandlerType);
+
+				var addMethod = tb.DefineMethod("add_" + ev.Name,
+					MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+					null, new[] { ev.EventHandlerType });
+
+				var ilAdd = addMethod.GetILGenerator();
+				ilAdd.Emit(OpCodes.Ret);
+				tb.DefineMethodOverride(addMethod, ev.GetAddMethod()!);
+				eventBuilder.SetAddOnMethod(addMethod);
+
+				var removeMethod = tb.DefineMethod("remove_" + ev.Name,
+					MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
+					null, new[] { ev.EventHandlerType });
+
+				var ilRemove = removeMethod.GetILGenerator();
+				ilRemove.Emit(OpCodes.Ret);
+				tb.DefineMethodOverride(removeMethod, ev.GetRemoveMethod()!);
+				eventBuilder.SetRemoveOnMethod(removeMethod);
+			}
 		}
 	}
 }

@@ -27,6 +27,8 @@ namespace MaxyGames.UNode.Editors {
 			inputContainer.Add(comment);
 			elementTypeColor = Color.yellow;
 
+			titleLabel = titleContainer.Q<Label>("title-label");
+
 			titleContainer.RegisterCallback<MouseDownEvent>((e) => {
 				if(e.clickCount == 2) {
 					ActionPopupWindow.Show(node.name,

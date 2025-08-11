@@ -1189,7 +1189,14 @@ namespace MaxyGames.UNode.Editors {
 
 				if(GraphUtility.CopyPaste.IsCopiedNodes) {
 					evt.menu.AppendAction("Paste", (e) => {
-						var pastedNodes = graphEditor.PasteNode(clickedPos);
+						var pastedNodes = graphEditor.PasteNode(clickedPos, true);
+						ClearSelection();
+						graphData.ClearSelection();
+						graphData.AddToSelection(pastedNodes);
+						graphEditor.SelectionChanged();
+					}, DropdownMenuAction.AlwaysEnabled);
+					evt.menu.AppendAction("Paste with connections", (e) => {
+						var pastedNodes = graphEditor.PasteNode(clickedPos, false);
 						ClearSelection();
 						graphData.ClearSelection();
 						graphData.AddToSelection(pastedNodes);
@@ -1198,6 +1205,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				else {
 					evt.menu.AppendAction("Paste", null, DropdownMenuAction.AlwaysDisabled);
+					evt.menu.AppendAction("Paste with connections", null, DropdownMenuAction.AlwaysDisabled);
 				}
 				if(graphData.selectedNodes.Any()) {
 					evt.menu.AppendAction("Delete", (e) => {
@@ -1502,7 +1510,8 @@ namespace MaxyGames.UNode.Editors {
 					//}
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Copy", (e) => {
-						GraphUtility.CopyPaste.Copy(node.nodeObject);
+						CopySelectedNodes();
+						//GraphUtility.CopyPaste.Copy(node.nodeObject);
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendAction("Remove", (e) => {
 						uNodeEditorUtility.RegisterUndo(node.GetUnityObject(), "Remove");

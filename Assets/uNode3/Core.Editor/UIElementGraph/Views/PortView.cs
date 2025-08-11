@@ -554,7 +554,7 @@ namespace MaxyGames.UNode.Editors {
 				filter = portData.GetFilter(),
 			};
 			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, owner.graph, owner.nodeObject, position, () => {
-				owner.MarkRepaint();
+				owner.owner.MarkRepaint();
 			}, types));
 			var win = owner.owner.graphEditor.ShowNodeMenu(position, FA, (n) => {
 				if(n.nodeObject.CanGetValue()) {
@@ -617,7 +617,7 @@ namespace MaxyGames.UNode.Editors {
 				portKind = PortKind.ValueOutput,
 			};
 			var customItems = ItemSelector.MakeCustomItems(commandData, owner.graph, owner.nodeObject, position, () => {
-				portView.owner.MarkRepaint();
+				portView.owner.owner.MarkRepaint();
 			}, nodeFilter: NodeFilter.ValueOutput).ToList();
 			if(customItems != null) {
 				FilterAttribute FA = new FilterAttribute {

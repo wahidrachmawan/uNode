@@ -146,6 +146,23 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		public ValueOutput primaryValueOutput;
 
+		public IEnumerable<UPort> Ports {
+			get {
+				foreach(var port in FlowInputs) {
+					yield return port;
+				}
+				foreach(var port in FlowOutputs) {
+					yield return port;
+				}
+				foreach(var port in ValueInputs) {
+					yield return port;
+				}
+				foreach(var port in ValueOutputs) {
+					yield return port;
+				}
+			}
+		}
+
 		private NodePorts<ValueInput> _valueInputs;
 		/// <summary>
 		/// The list of all value input ports

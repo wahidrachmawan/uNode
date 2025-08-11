@@ -123,20 +123,13 @@ namespace MaxyGames.UNode.Editors {
 			titleContainer.style.backgroundColor = new Color(region.nodeColor.r, region.nodeColor.g, region.nodeColor.b, titleTransparent);
 		}
 
-		private float m_titleSize;
+		private const float m_titleSize = 25;
 		private Label m_titleLabel;
 		public override void OnZoomUpdated(float zoom) {
-			zoom += 0.2f;
 			if(m_titleLabel == null) {
 				m_titleLabel = titleContainer.Q<Label>("title-label");
-				m_titleSize = m_titleLabel.resolvedStyle.fontSize;
 			}
-			if(m_titleSize == 0) {
-				m_titleSize = m_titleLabel.resolvedStyle.fontSize;
-			}
-			else {
-				m_titleLabel.style.fontSize = m_titleSize / Mathf.Clamp(zoom, 0.01f, 1);
-			}
+			m_titleLabel.style.fontSize = m_titleSize / (Mathf.Clamp(zoom + 0.1f, 0.1f, 1));
 		}
 
 		public override void ReloadView() {

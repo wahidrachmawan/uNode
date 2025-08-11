@@ -972,6 +972,10 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Utility
+		struct CachedColor {
+			public Color[] value;
+		}
+
 		private bool isCapturing = false;
 		public void CaptureGraphScreenshot(float zoomScale = 2) {
 			if(isCapturing)
@@ -1022,7 +1026,7 @@ namespace MaxyGames.UNode.Editors {
 				uNodeThreadUtility.WaitFrame(100);
 				SetPixelCachedOnBoundChanged(false);
 				float progress = 0;
-				Texture2D[,] textures = new Texture2D[(int)yCount, (int)xCount];
+				CachedColor[,] textures = new CachedColor[(int)yCount, (int)xCount];
 				int currentCount = 0;
 				for(int y = 0; y < textures.GetLength(0); y++) {
 					for(int x = 0; x < textures.GetLength(1); x++) {
@@ -1035,7 +1039,7 @@ namespace MaxyGames.UNode.Editors {
 							var pixels = UnityEditorInternal.InternalEditorUtility.ReadScreenPixel(position, layoutWidth, layoutHeight);
 							var texture = new Texture2D(layoutWidth, layoutHeight, TextureFormat.RGB24, false);
 							texture.SetPixels(pixels);
-							textures[y, x] = texture;
+							textures[y, x] = new CachedColor() { value = texture.GetPixels() };
 							//EditorUtility.DisplayProgressBar("Capturing", "", progress);
 						});
 						currentCount++;
@@ -1052,7 +1056,7 @@ namespace MaxyGames.UNode.Editors {
 						realY--;
 						for(int x = 0; x < xCount; x++) {
 							Vector2 offet = new Vector2(x * layoutWidth, y * layoutHeight);
-							canvasTexture.SetPixels((int)offet.x, (int)offet.y, layoutWidth, layoutHeight, textures[realY, x].GetPixels());
+							canvasTexture.SetPixels((int)offet.x, (int)offet.y, layoutWidth, layoutHeight, textures[realY, x].value);
 						}
 					}
 					//Color[] colors = canvasTexture.GetPixels(0, 0, (int)(graphRect.width * zoomScale), (int)(graphRect.height * zoomScale));
