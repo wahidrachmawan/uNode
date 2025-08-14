@@ -525,9 +525,8 @@ namespace MaxyGames.UNode {
 			if(type.IsGenericTypeDefinition) {
 				var arguments = type.GetGenericArguments();
 				var param = new Type[typeArguments.Length];
-				Array.Copy(typeArguments, param, param.Length);
 				for(int i = 0; i < param.Length; i++) {
-					param[i] = ReflectionUtils.GetNativeType(param[i]);
+					param[i] = ReflectionUtils.GetNativeType(typeArguments[i]);
 					if(param[i] == null) {
 						param[i] = ReflectionUtils.GetDefaultConstraint(arguments[i]) ?? ReflectionUtils.GetDefaultConstraint(arguments[i], typeof(int));
 						if(param[i] == null) {
@@ -540,7 +539,7 @@ namespace MaxyGames.UNode {
 					return type.MakeGenericType(param);
 				}
 				catch(Exception ex) {
-					UnityEngine.Debug.LogError("Error on getting generic type: " + type + $"\nArgs: {string.Join(", ", typeArguments.Select(t => t.FullName))}\n" + ex.Message);
+					UnityEngine.Debug.LogError("Error on getting generic type: " + type + $"\nArgs: {string.Join(", ", param.Select(t => t.FullName))}\n" + ex.Message);
 				}
 			}
 			return type;

@@ -147,6 +147,7 @@ namespace MaxyGames.UNode {
 			ClearConnections();
 			this.DefaultValue = defaultValue;
 			Validate();
+			OnPortChanged();
 		}
 
 		/// <summary>
@@ -353,6 +354,9 @@ namespace MaxyGames.UNode {
 				dynamicType = other.dynamicType;
 			else if(other._type != null)
 				_type = other._type;
+
+			//OnChanged = other.OnChanged;
+			//optionalValue = other.optionalValue;
 		}
 	}
 }

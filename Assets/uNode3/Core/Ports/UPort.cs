@@ -206,5 +206,34 @@ namespace MaxyGames.UNode {
 			}
 			return base.ToString();
 		}
+
+		/// <summary>
+		/// Called when the port is changed.
+		/// </summary>
+		[NonSerialized]
+		protected Action<UPort> OnChanged;
+
+		public void OnPortChanged() {
+			OnChanged?.Invoke(this);
+		}
+
+		/// <summary>
+		/// Set port changed callback
+		/// </summary>
+		/// <param name="action"></param>
+		public void SetOnChangedCallback(Action action) {
+			if(action == null) {
+				OnChanged = null;
+			}
+			OnChanged = (_) => action();
+		}
+
+		/// <summary>
+		/// Set port changed callback
+		/// </summary>
+		/// <param name="action"></param>
+		public void SetOnChangedCallback(Action<UPort> action) {
+			OnChanged = action;
+		}
 	}
 }

@@ -174,9 +174,7 @@ namespace MaxyGames.UNode.Editors {
 										//else {
 										//}
 										if(filter.IsValidType(graphType)) {
-											var item = CustomItem.Create("This", () => {
-												editorData.Select(MemberData.This(graph));
-											}, icon: uNodeEditorUtility.GetTypeIcon(graphType ?? typeof(TypeIcons.KeywordIcon)));
+											var item = CustomItem.Create(new GraphItem(graph));
 											categoryTree.AddChild(new SelectorCustomTreeView(item, "[THIS]".GetHashCode(), -1));
 										}
 									}
@@ -335,6 +333,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						if(m_defaultExpandedItems != null) {
 							foreach(var str in m_defaultExpandedItems) {
+								if(string.IsNullOrEmpty(str)) continue;
 								foreach(var tree in categories) {
 									if(tree.displayName == str) {
 										if(tree is SelectorCategoryTreeView categ) {
@@ -805,6 +804,17 @@ namespace MaxyGames.UNode.Editors {
 					};
 					fil.ToFilterGenericConstraints(genericType[i], genericType);
 					int index = i;
+					//if(genericType[i].IsGenericParameter) {
+					//	var p = ReflectionUtils.GetStaticAssemblies().SelectMany(ass => ReflectionUtils.GetAssemblyTypes(ass)).FirstOrDefault(t => fil.IsValidType(t));
+					//	if(p != null) {
+					//		typeItems[i] = new TypeItem(p, fil) {
+					//			onChanged = item => {
+					//				genericType[index] = item.type;
+					//			}
+					//		};
+					//		continue;
+					//	}
+					//}
 					typeItems[i] = new TypeItem(genericType[i].BaseType, fil) {
 						onChanged = item => {
 							genericType[index] = item.type;

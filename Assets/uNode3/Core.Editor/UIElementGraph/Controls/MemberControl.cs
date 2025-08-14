@@ -237,6 +237,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					var pos = port.node.position.position;
 					pos.x -= 200;
 					pos.y += port.node.position.height / 2;
+					stackedActions.Clear();
 					ShowMenu(port, pos, config.owner.graph, filter);
 				}
 				else {
@@ -248,6 +249,18 @@ namespace MaxyGames.UNode.Editors.UIControl {
 						config.owner.MarkRepaint();
 					}).ChangePosition(GUIUtility.GUIToScreenPoint(mouseEvent.mousePosition));
 				}
+			}
+		}
+
+		static List<Action> stackedActions = new List<Action>();
+
+		static void PopStackedAction() {
+			if(stackedActions.Count > 0) {
+				uNodeThreadUtility.Queue(static () => {
+					var action = stackedActions[stackedActions.Count - 1];
+					stackedActions.RemoveAt(stackedActions.Count - 1);
+					action?.Invoke();
+				});
 			}
 		}
 
@@ -281,6 +294,24 @@ namespace MaxyGames.UNode.Editors.UIControl {
 				graphEditor.Refresh();
 			}, types));
 			var win = graphEditor.ShowNodeMenu(positionInCanvas, FA, (n) => {
+				void ExecuteStackedAction(NodeObject nodeObject) {
+					if(nodeObject.ValueInputs.Count > 0) {
+						if(Event.current != null) {
+							if(Event.current.control) {
+								for(int i = nodeObject.ValueInputs.Count - 1; i >= 0; i--) {
+									var port = nodeObject.ValueInputs[i];
+									if(port.hasValidConnections == false) {
+										stackedActions.Add(() => {
+											ShowMenu(port, new Vector2(positionInCanvas.x - 200, positionInCanvas.y), graphEditor, port.filter ?? new FilterAttribute(port.type));
+										});
+									}
+								}
+							}
+						}
+					}
+					PopStackedAction();
+				}
+
 				if(n.nodeObject.CanGetValue()) {
 					if(n is MultipurposeNode mNode) {
 						var type = mNode.nodeObject.ReturnType();
@@ -299,27 +330,44 @@ namespace MaxyGames.UNode.Editors.UIControl {
 								NodeEditorUtility.GetPort<ValueInput>(nodeObject),
 								(node) => {
 									port.ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
+									NodeEditorUtility.PlaceFit.PlaceFitNodes(node);
+									positionInCanvas.x -= 200;
 								}, graphEditor.graphData.currentCanvas, new FilterAttribute(rightType));
+							ExecuteStackedAction(n);
 							return;
 						}
 					}
 					port.ConnectTo(n.nodeObject.primaryValueOutput);
 				}
-			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@", "Data" },
+				NodeEditorUtility.PlaceFit.PlaceFitNodes(n);
+				ExecuteStackedAction(n);
+			}, NodeFilter.ValueInput, stackCreateNode: false, additionalItems: customItems, expandedCategory: new[] { "@", "Data", "Compare", "Math" },
 				processMember: member => {
 					if(port is ValueInput input) {
-						if(!(member.targetType is MemberData.TargetType.NodePort or MemberData.TargetType.Method or MemberData.TargetType.uNodeFunction or MemberData.TargetType.Constructor or MemberData.TargetType.uNodeConstructor) ||
-						member.isStatic == false && member.IsTargetingUNode == false) {
-							if(member.targetType == MemberData.TargetType.Self) {
-								if(portType != member.type) {
-									return false;
-								}
+						if(member.targetType is MemberData.TargetType.Method or MemberData.TargetType.uNodeFunction or MemberData.TargetType.Constructor or MemberData.TargetType.uNodeConstructor) {
+							return false;
+						}
+						if(member.targetType is MemberData.TargetType.Null or MemberData.TargetType.None or MemberData.TargetType.NodePort) {
+							uNodeEditorUtility.RegisterUndo(input.node.graphContainer);
+							input.AssignToDefault(member);
+							graphEditor.MarkRepaint(port.node);
+							PopStackedAction();
+							return true;
+						}
+						if(member.targetType == MemberData.TargetType.Self) {
+							if(portType != member.type) {
+								return false;
 							}
-							if(member.type.IsCastableTo(input.type)) {
-								input.AssignToDefault(member);
-								graphEditor.MarkRepaint(port.node);
-								return true;
-							}
+						}
+						else if(member.isStatic == false && member.IsTargetingReflection) {
+							return false;
+						}
+						if(member.type.IsCastableTo(input.type)) {
+							uNodeEditorUtility.RegisterUndo(input.node.graphContainer);
+							input.AssignToDefault(member);
+							graphEditor.MarkRepaint(port.node);
+							PopStackedAction();
+							return true;
 						}
 					}
 					return false;

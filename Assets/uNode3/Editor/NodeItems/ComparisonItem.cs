@@ -88,6 +88,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var type = filter.GetActualType();
 			if(type == null)
 				return true;
+			if(nodeFilter == NodeFilter.ValueInput) {
+				return type == typeof(object) || type == typeof(bool);
+			}
 			return type == typeof(object) || type.IsPrimitive && type != typeof(bool) && type != typeof(char);
 		}
 	}
@@ -119,6 +122,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var type = filter.GetActualType();
 			if(type == null)
 				return true;
+			if(nodeFilter == NodeFilter.ValueInput) {
+				return type == typeof(object) || type == typeof(bool);
+			}
 			return type == typeof(object) || type.IsPrimitive && type != typeof(bool) && type != typeof(char);
 		}
 	}
@@ -150,6 +156,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var type = filter.GetActualType();
 			if(type == null)
 				return true;
+			if(nodeFilter == NodeFilter.ValueInput) {
+				return type == typeof(object) || type == typeof(bool);
+			}
 			return type == typeof(object) || type.IsPrimitive && type != typeof(bool) && type != typeof(char);
 		}
 	}
@@ -181,6 +190,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 			var type = filter.GetActualType();
 			if(type == null)
 				return true;
+			if(nodeFilter == NodeFilter.ValueInput) {
+				return type == typeof(object) || type == typeof(bool);
+			}
 			return type == typeof(object) || type.IsPrimitive && type != typeof(bool) && type != typeof(char);
 		}
 	}

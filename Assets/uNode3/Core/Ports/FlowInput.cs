@@ -66,6 +66,7 @@ namespace MaxyGames.UNode {
 			name = other.name;
 			action = other.action;
 			node = other.node;
+			//OnChanged = other.OnChanged;
 		}
 
 		public bool IsCoroutine() {

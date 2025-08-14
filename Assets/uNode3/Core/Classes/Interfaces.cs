@@ -276,6 +276,8 @@ namespace MaxyGames.UNode {
 
 	}
 
+	internal interface INodeAsEdge { }
+
 	public interface IGraphValue {
 		object Get(Flow flow);
 		void Set(Flow flow, object value);
@@ -364,6 +366,13 @@ namespace MaxyGames.UNode {
 	/// </summary>
 	public interface IRichName {
 		string GetRichName();
+	}
+
+	/// <summary>
+	/// Interface for display human friendly name
+	/// </summary>
+	interface IFriendlyName {
+		string GetFriendlyName();
 	}
 
 	public interface ICustomMainGraph {

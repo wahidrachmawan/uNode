@@ -1070,12 +1070,18 @@ namespace MaxyGames.UNode.Editors {
 		/// Find command menu on create node.
 		/// </summary>
 		/// <returns></returns>
-		public static List<INodeItemCommand> FindCreateNodeCommands() {
+		public static List<INodeItemCommand> FindCreateNodeCommands(GraphEditor graphEditor = null, NodeFilter nodeFilter = NodeFilter.None, FilterAttribute filter = null) {
 			if(_createNodeMenuCommands == null) {
 				_createNodeMenuCommands = EditorReflectionUtility.GetListOfType<INodeItemCommand>();
 				_createNodeMenuCommands.Sort((x, y) => {
 					return CompareUtility.Compare(x.name, x.order, y.name, y.order);
 				});
+			}
+			//Setup the data for each command.
+			foreach(var n in _createNodeMenuCommands) {
+				n.graph = graphEditor;
+				n.nodeFilter = nodeFilter;
+				n.filter = filter;
 			}
 			return _createNodeMenuCommands;
 		}
@@ -1330,15 +1336,11 @@ namespace MaxyGames.UNode.Editors {
 				public NodeObject node;
 
 				public List<PlaceFitData> inputs = new();
-				public List<PlaceFitData> outputs = new();
 				public List<PlaceFitData> flows = new();
 
 				public List<NodeObject> GetNodes() {
 					var list = new List<NodeObject>() { node };
 					foreach(var data in inputs) {
-						list.AddRange(data.GetNodes());
-					}
-					foreach(var data in outputs) {
 						list.AddRange(data.GetNodes());
 					}
 					foreach(var data in flows) {
@@ -1351,8 +1353,8 @@ namespace MaxyGames.UNode.Editors {
 			private static Vector2 flowSpacing = new Vector2(20, 45);
 			private static Vector2 valueSpacing = new Vector2(25, 25);
 
-			public static void PlaceFitNodes(NodeObject node) {
-				var nodes = CG.Nodes.FindAllConnections(node, true, true, false, true);
+			public static NodeObject[] PlaceFitNodes(NodeObject node) {
+				var nodes = CG.Nodes.FindAllConnections(node, true, true, false, false);
 				foreach(var n in nodes) {
 					if(n.position.width == 0) {
 						n.position.width = 200;
@@ -1368,8 +1370,10 @@ namespace MaxyGames.UNode.Editors {
 						nodes.Remove(n);
 					}
 				}
-				var data = CreateData(node, nodes, nodes, nodes);
+
+				var data = CreateData(node, out var datas);
 				DoPlaceFit(data);
+				return datas.Select(d => d.node).ToArray();
 			}
 
 			private static Rect GetNodeRect(IList<NodeObject> nodes) {
@@ -1392,7 +1396,7 @@ namespace MaxyGames.UNode.Editors {
 				return result;
 			}
 
-			private static void TeleportNodes(IList<NodeObject> nodes, Vector2 position, bool fromCenter = true) {
+			private static void TeleportNodes(IList<NodeObject> nodes, Vector2 position, bool fromCenter = false) {
 				if(fromCenter) {
 					Vector2 center = Vector2.zero;
 					foreach(var node in nodes) {
@@ -1436,35 +1440,13 @@ namespace MaxyGames.UNode.Editors {
 						var nodes = childTree.GetNodes();
 						var totalRect = GetNodeRect(nodes);
 
-						TeleportNodes(nodes, new Vector2(parentPos.x - totalRect.width - valueSpacing.x, parentPos.y + offset));
+						TeleportNodes(nodes, new Vector2(parentPos.x - totalRect.width - valueSpacing.x, parentPos.y + offset), false);
 						offset += totalRect.height + valueSpacing.y;
 						listNodes.AddRange(nodes);
 					}
 					if(tree.inputs.Count == 1) {
 						var rect = GetNodeRect(listNodes);
 						var sourcePosition = GetNodeRect(new[] { tree.inputs[0].node });
-						MoveNodes(listNodes, new Vector2(0, -(sourcePosition.y - rect.y) + (parentPos.height - sourcePosition.height) / 2));
-					}
-					else {
-						MoveNodes(listNodes, new Vector2(0, ((parentPos.height - GetNodeRect(listNodes).height) / 2)));
-					}
-				}
-				if(tree.outputs.Count > 0) {
-					var parentPos = tree.node.position;
-					List<NodeObject> listNodes = new List<NodeObject>();
-					float offset = 0;
-					foreach(var childTree in tree.outputs) {
-						DoPlaceFit(childTree);
-						var nodes = childTree.GetNodes();
-						var totalRect = GetNodeRect(nodes);
-
-						TeleportNodes(nodes, new Vector2(parentPos.x + totalRect.width + valueSpacing.x, parentPos.y + offset), false);
-						offset += totalRect.height + valueSpacing.y;
-						listNodes.AddRange(nodes);
-					}
-					if(tree.outputs.Count == 1) {
-						var rect = GetNodeRect(listNodes);
-						var sourcePosition = GetNodeRect(new[] { tree.outputs[0].node });
 						MoveNodes(listNodes, new Vector2(0, -(sourcePosition.y - rect.y) + (parentPos.height - sourcePosition.height) / 2));
 					}
 					else {
@@ -1478,11 +1460,6 @@ namespace MaxyGames.UNode.Editors {
 						List<NodeObject> nodeViews = new List<NodeObject>();
 						if(tree.inputs.Count > 0) {
 							foreach(var childTree in tree.inputs) {
-								nodeViews.AddRange(childTree.GetNodes());
-							}
-						}
-						if(tree.outputs.Count > 0) {
-							foreach(var childTree in tree.outputs) {
 								nodeViews.AddRange(childTree.GetNodes());
 							}
 						}
@@ -1517,38 +1494,90 @@ namespace MaxyGames.UNode.Editors {
 						}
 						else {
 							var rect = GetNodeRect(listNodes);
-							MoveNodes(listNodes, new Vector2(((parentPos.width - rect.width) / 2), 0));
+							//MoveNodes(listNodes, new Vector2(((parentPos.width - rect.width) / 2), 0));
+
+							var sourcePosition = GetNodeRect(new[] { tree.node });
+							var startFlowPosition = GetNodeRect(new[] { tree.flows[0].node });
+							var endFlowPosition = GetNodeRect(new[] { tree.flows[tree.flows.Count - 1].node });
+
+							TeleportNodes(listNodes, new Vector2(sourcePosition.x - (startFlowPosition.x - rect.x) - ((endFlowPosition.x - startFlowPosition.x) / 2), rect.y));
 						}
 					}
 				}
 			}
 
-			private static PlaceFitData CreateData(NodeObject node, HashSet<NodeObject> inputs, HashSet<NodeObject> outputs, HashSet<NodeObject> flows) {
+			private static PlaceFitData CreateData(NodeObject node, out List<PlaceFitData> datas) {
+				HashSet<NodeObject> visited = new HashSet<NodeObject>();
+				var flowNodes = CG.Nodes.FindAllConnections(node, true, false, false, false);
+				var valueNodes = CG.Nodes.FindAllConnections(node, false, true, false, false);
 				var data = new PlaceFitData() {
 					node = node,
 				};
-				foreach(var port in node.ValueInputs) {
-					var targets = port.connections.Where(c => c.isProxy == false).Select(c => c.output.node);
-					foreach(var target in targets) {
-						if(inputs.Remove(target)) {
-							data.inputs.Add(CreateData(target, inputs, outputs, flows));
+				List<PlaceFitData> allDatas = new List<PlaceFitData> {
+					data
+				};
+				datas = allDatas;
+				visited.Add(node);
+
+				List<PlaceFitData> flowData = new List<PlaceFitData>();
+
+				void RecursiveForFlow(PlaceFitData data, HashSet<NodeObject> included, HashSet<NodeObject> visited) {
+					foreach(var port in data.node.FlowOutputs) {
+						var targets = port.connections.Where(c => c.isProxy == false).Select(c => c.input.node);
+						foreach(var target in targets) {
+							if(included.Contains(target) && visited.Add(target)) {
+								var childData = new PlaceFitData() {
+									node = target,
+								};
+								data.flows.Add(childData);
+								flowData.Add(childData);
+								allDatas.Add(childData);
+								RecursiveForFlow(childData, included, visited);
+							}
 						}
 					}
 				}
-				foreach(var port in node.ValueOutputs) {
-					var targets = port.connections.Where(c => c.isProxy == false).Select(c => c.input.node);
-					foreach(var target in targets) {
-						if(outputs.Remove(target)) {
-							data.outputs.Add(CreateData(target, inputs, outputs, flows));
+
+				void RecursiveForValue(PlaceFitData data, HashSet<NodeObject> included, HashSet<NodeObject> visited) {
+					foreach(var port in data.node.ValueInputs) {
+						var targets = port.connections.Where(c => c.isProxy == false).Select(c => c.output.node);
+						foreach(var target in targets) {
+							var other = target;
+							while(other.node is INodeAsEdge) {
+								var t = other.ValueInputs.FirstOrDefault(p => p.isValid && p.GetTargetNode() != null);
+								if(t != null) {
+									other = t.GetTargetNode();
+								}
+								else {
+									other = null;
+									break;
+								}
+							}
+
+							if(other != null && included.Contains(other) && visited.Add(other)) {
+								var childData = new PlaceFitData() {
+									node = other,
+								};
+								data.inputs.Add(childData);
+								allDatas.Add(childData);
+								RecursiveForValue(childData, included, visited);
+							}
 						}
 					}
 				}
-				foreach(var port in node.FlowOutputs) {
-					var targets = port.connections.Where(c => c.isProxy == false).Select(c => c.input.node);
-					foreach(var target in targets) {
-						if(outputs.Remove(target)) {
-							data.flows.Add(CreateData(target, inputs, outputs, flows));
-						}
+				RecursiveForFlow(data, flowNodes, visited);
+				RecursiveForValue(data, valueNodes, visited);
+
+				foreach(var flow in flowData) {
+					var included = CG.Nodes.FindAllConnections(flow.node, false, true, false, false);
+					RecursiveForValue(flow, included, visited);
+				}
+				foreach(var n in visited) {
+					if(n.position.width == 0) {
+						n.position.width = 200;
+					}
+					if(n.position.height == 0) {
+						n.position.height = 100;
 					}
 				}
 				return data;

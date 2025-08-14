@@ -376,6 +376,8 @@ namespace MaxyGames.UNode.Editors {
 
 		private void DragHandleMember(INodeItemCommand command, Vector2 position) {
 			command.graph = graphEditor;
+			command.filter = null;
+			command.nodeFilter = NodeFilter.None;
 			command.Setup(position);
 			DragAndDrop.SetGenericData("uNode", null);
 		}
@@ -1421,7 +1423,15 @@ namespace MaxyGames.UNode.Editors {
 					evt.menu.AppendSeparator("");
 					if(graphEditor.canvasData.SupportPlaceFit) {
 						if(nodeView.inputPorts.Any(p => p.connected && !p.IsProxy()) || nodeView.outputPorts.Any(p => p.connected && !p.IsProxy())) {
+							//Place fit selected nodes
 							evt.menu.AppendAction("Place fit nodes", (e) => {
+								//nodeView.RegisterUndo();
+								//var nodes = NodeEditorUtility.PlaceFit.PlaceFitNodes(nodeView.nodeObject);
+								//foreach(var n in nodes) {
+								//	if(nodeViewsPerNode.TryGetValue(n, out var view)) {
+								//		view.SetPosition(n.position.position);
+								//	}
+								//}
 								UIElementUtility.PlaceFitNodes(nodeView);
 							}, DropdownMenuAction.AlwaysEnabled);
 							//if(nodeView.outputPorts.Any(p => p.connected && p.orientation == Orientation.Vertical)) {

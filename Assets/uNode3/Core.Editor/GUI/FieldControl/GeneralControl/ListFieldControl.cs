@@ -46,12 +46,38 @@ namespace MaxyGames.UNode.Editors.Control {
 		}
 
 		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
-			if(ValidateValue(ref value, type)) {
+			if(ValidateValue(ref value, type, settings.nullable)) {
 				onChanged(value);
 			}
 			IList list = value as IList;
+			if(list == null) {
+				uNodeGUIUtility.DrawNullValue(label, type, delegate (object o) {
+					uNodeEditorUtility.RegisterUndo(settings.unityObject, "Create Field Instance");
+					if(onChanged != null) {
+						onChanged(o);
+					}
+				});
+				return;
+			}
 			var elementType = type.ElementType();
-			int size = EditorGUILayout.DelayedIntField(label, list.Count);
+
+			Rect position = uNodeGUIUtility.GetRect();
+			if(settings.nullable)
+				position.width -= 16;
+
+			int size = EditorGUI.DelayedIntField(position, label, list.Count);
+
+			if(settings.nullable) {
+				position.x += position.width;
+				position.width = 16;
+				if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard, EditorStyles.miniButton) && Event.current.button == 0) {
+					uNodeEditorUtility.RegisterUndo(settings.unityObject);
+					if(onChanged != null) {
+						onChanged(null);
+					}
+					return;
+				}
+			}
 			if(size != list.Count) {
 				if(list is Array) {
 					list = uNodeUtility.ResizeArray(list as Array, elementType, size);

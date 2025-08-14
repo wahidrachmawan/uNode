@@ -1,6 +1,7 @@
 ﻿namespace MaxyGames.UNode.Editors {
 	public interface INodeItemCommand {
 		GraphEditor graph { get; set; }
+		public NodeFilter nodeFilter { get; set; }
 		string name { get; }
 		string category { get; }
 		FilterAttribute filter { get; set; }

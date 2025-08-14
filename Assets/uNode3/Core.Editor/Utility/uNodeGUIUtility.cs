@@ -1699,7 +1699,7 @@ namespace MaxyGames.UNode.Editors {
 					rect.width -= 20;
 					if(EditorGUI.DropdownButton(rect, new GUIContent(arg.PrettyName(), arg.FullName), FocusType.Keyboard)) {
 						var filter = new FilterAttribute();
-						filter.ToFilterGenericConstraints(rawGenericArguments[index]);
+						filter.ToFilterGenericConstraints(rawGenericArguments[index], genericArguments);
 						if(Event.current.shift || Event.current.control) {
 							TypeBuilderWindow.Show(rect, targetObject, filter, (types) => {
 								genericArguments[index] = types[0].startType;

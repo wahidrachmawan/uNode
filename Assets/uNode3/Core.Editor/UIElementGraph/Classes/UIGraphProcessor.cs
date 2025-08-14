@@ -78,7 +78,9 @@ namespace MaxyGames.UNode.Editors {
 						nView.HideElement();
 						nView.SetDisplay(false);
 					}
-					return new ConversionEdgeView(valueConverter, new EdgeData(null, edgeData.input, PortUtility.GetPort(valueConverter.input.connections[0].output, graph)));
+					if(valueConverter.input.hasValidConnections) {
+						return new ConversionEdgeView(valueConverter, new EdgeData(null, edgeData.input, PortUtility.GetPort(valueConverter.input.connections[0].output, graph)));
+					}
 				}
 			}
 			if(edgeData.input.GetNode() is Nodes.NodeValueConverter vc && vc.output.isConnected) {

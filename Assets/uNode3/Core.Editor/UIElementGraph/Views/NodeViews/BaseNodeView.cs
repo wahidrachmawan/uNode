@@ -98,6 +98,9 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Functions
+		/// <summary>
+		/// Called once on setup
+		/// </summary>
 		protected override void OnSetup() {
 			base.OnSetup();
 			
@@ -112,6 +115,9 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Called every time when view is reloaded
+		/// </summary>
 		public override void ReloadView() {
 			try {
 				base.ReloadView();

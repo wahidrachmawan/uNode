@@ -420,7 +420,7 @@ namespace MaxyGames.UNode.Editors {
 			public Data data;
 
 			public void Setup(Action<float> onProgress, Data data) {
-				if(!window.filter.DisplayDefaultStaticType || !window.displayDefaultItem) {
+				if(!data.filter.DisplayDefaultStaticType || window?.displayDefaultItem == false) {
 					onProgress?.Invoke(1);
 					return;
 				}
@@ -560,7 +560,7 @@ namespace MaxyGames.UNode.Editors {
 				this.type = targetRoot is IReflectionType reflectionType ? reflectionType.ReflectionType : targetRoot is IClassGraph classGraph ? classGraph.InheritType : targetRoot.GetType();
 				this.targetObject = targetRoot as UnityEngine.Object;
 				this.DisplayName = this.Name;
-				this.haveNextItem = false;
+				this.haveNextItem = true;
 			}
 
 			public GraphItem(Variable variable, object targetObject) {
@@ -1004,7 +1004,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public static CustomItem Create(GraphItem item, string category = "Data", Texture icon = null, GUIContent tooltip = null) {
 				return new ItemGraph() {
-					name = "#ESItem",
+					name = item.Name,
 					item = item,
 					category = category,
 					icon = icon,

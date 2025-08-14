@@ -34,6 +34,9 @@ namespace MaxyGames.UNode.Editors {
 		public void OnValueChanged(object value) {
 			uNodeEditorUtility.RegisterUndo(owner.nodeObject.GetUnityObject());
 			onValueChanged?.Invoke(value);
+			//if(portReference?.GetPort() is UPort p) {
+			//	p.OnChanged?.Invoke();
+			//}
 			this.value = value;
 			uNodeGUIUtility.GUIChanged(owner.nodeObject, changeType);
 		}

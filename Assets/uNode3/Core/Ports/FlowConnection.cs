@@ -56,20 +56,24 @@ namespace MaxyGames.UNode {
 			}
 			if(!input.connections.Contains(this)) {
 				input.connections.Add(this);
+				input.OnPortChanged();
 			}
 			if(!output.connections.Contains(this)) {
 				output.ClearConnections();
 				output.connections.Add(this);
+				output.OnPortChanged();
 			}
 		}
 
 		public override void Disconnect() {
 			if(input != null) {
 				input.connections.Remove(this);
+				input.OnPortChanged();
 				input = null;
 			}
 			if(output != null) {
 				output.connections.Remove(this);
+				output.OnPortChanged();
 				output = null;
 			}
 		}

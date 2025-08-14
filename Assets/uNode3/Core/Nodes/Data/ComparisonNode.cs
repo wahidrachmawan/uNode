@@ -18,6 +18,23 @@ namespace MaxyGames.UNode.Nodes {
 			base.OnRegister();
 			inputA = ValueInput(nameof(inputA), GetInputType);
 			inputB = ValueInput(nameof(inputB), GetInputType);
+
+			void OnPortChanged(UPort port) {
+				var a = port as ValueInput;
+				var b = inputA == port ? inputB : inputA;
+				if(b.UseDefaultValue) {
+					var aType = a.ValueType;
+					var bType = b.ValueType;
+					if(aType != bType) {
+						if(bType == null || b.TargetType.IsTargetingValue() || bType.IsCastableTo(aType) == false) {
+							b.AssignToDefault(MemberData.CreateFromValue(null, aType));
+						}
+					}
+				}
+			}
+
+			inputA.SetOnChangedCallback(OnPortChanged);
+			inputB.SetOnChangedCallback(OnPortChanged);
 		}
 
 		private Type GetInputType() {

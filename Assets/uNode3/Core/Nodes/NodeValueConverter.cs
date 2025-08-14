@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class NodeValueConverter : ValueNode {
+	public class NodeValueConverter : ValueNode, INodeAsEdge {
 		public SerializedType type = new SerializedType(typeof(object));
 		public ValueInput input { get; set; }
 

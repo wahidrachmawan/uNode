@@ -99,6 +99,7 @@ namespace MaxyGames.UNode {
 
 			localFunction = other.localFunction;
 			isNextFlow = other.isNextFlow;
+			//OnChanged = other.OnChanged;
 		}
 	}
 }

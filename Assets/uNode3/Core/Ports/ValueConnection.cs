@@ -53,9 +53,11 @@ namespace MaxyGames.UNode {
 			if(!input.connections.Contains(this)) {
 				input.ClearConnections();
 				input.connections.Add(this);
+				input.OnPortChanged();
 			}
 			if(!output.connections.Contains(this)) {
 				output.connections.Add(this);
+				output.OnPortChanged();
 			}
 		}
 
@@ -66,9 +68,15 @@ namespace MaxyGames.UNode {
 				if(type != null) {
 					input.AssignToDefault(MemberData.CreateValueFromType(type));
 				}
+				else {
+					input.OnPortChanged();
+				}
+				input = null;
 			}
 			if(output != null) {
 				output.connections.Remove(this);
+				output.OnPortChanged();
+				output = null;
 			}
 		}
 

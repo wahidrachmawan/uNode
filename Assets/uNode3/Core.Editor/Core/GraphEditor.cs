@@ -508,7 +508,57 @@ namespace MaxyGames.UNode.Editors {
 			NodeFilter nodeFilter = NodeFilter.None,
 			List<ItemSelector.CustomItem> additionalItems = null,
 			IEnumerable<string> expandedCategory = null,
-			Func<MemberData, bool> processMember = null) {
+			Func<MemberData, bool> processMember = null,
+			bool stackCreateNode = true) {
+			stackedActions.Clear();
+			return ShowCreateNodeMenu(position, filter, onAddNode, nodeFilter, additionalItems, expandedCategory, processMember, stackCreateNode);
+		}
+
+
+		static List<Action> stackedActions = new List<Action>();
+
+		static void PopStackedAction() {
+			if(stackedActions.Count > 0) {
+				uNodeThreadUtility.Queue(static () => {
+					var action = stackedActions[stackedActions.Count - 1];
+					stackedActions.RemoveAt(stackedActions.Count - 1);
+					action?.Invoke();
+				});
+			}
+		}
+
+		private ItemSelector ShowCreateNodeMenu(Vector2 position,
+			FilterAttribute filter = null,
+			Action<Node> onAddNode = null,
+			NodeFilter nodeFilter = NodeFilter.None,
+			List<ItemSelector.CustomItem> additionalItems = null,
+			IEnumerable<string> expandedCategory = null,
+			Func<MemberData, bool> processMember = null,
+			bool stackCreateNode = true) {
+
+			void ExecuteStackedAction(NodeObject nodeObject) {
+				if(nodeObject.ValueInputs.Count > 0) {
+					if(Event.current != null) {
+						if(Event.current.control) {
+							for(int i = nodeObject.ValueInputs.Count - 1; i >= 0; i--) {
+								var port = nodeObject.ValueInputs[i];
+								if(port.hasValidConnections == false) {
+									stackedActions.Add(() => {
+										ShowCreateNodeMenu(new Vector2(position.x - 200, position.y), new FilterAttribute(port.type) { MaxMethodParam = int.MaxValue }, (n) => {
+											var otherPort = n.nodeObject.primaryValueOutput ?? n.nodeObject.ValueOutputs.FirstOrDefault();
+											if(otherPort != null) {
+												port.ConnectTo(otherPort);
+											}
+										}, NodeFilter.ValueInput, additionalItems, expandedCategory, processMember);
+									});
+								}
+							}
+						}
+					}
+				}
+				PopStackedAction();
+			}
+
 			var valueMenuPos = GetMenuPosition();
 			if(filter == null) {
 				filter = new FilterAttribute();
@@ -537,6 +587,7 @@ namespace MaxyGames.UNode.Editors {
 						if(onAddNode != null) {
 							onAddNode(n);
 						}
+						ExecuteStackedAction(n);
 						Refresh();
 					});
 				}).ChangePosition(valueMenuPos);
@@ -576,6 +627,7 @@ namespace MaxyGames.UNode.Editors {
 			{
 				customItems.AddRange(ItemSelector.MakeCustomItemsForMacros(graphData.currentCanvas, position, nodeFilter, actualType, node => {
 					onAddNode?.Invoke(node);
+					ExecuteStackedAction(node);
 					Refresh();
 				}));
 			}
@@ -590,7 +642,10 @@ namespace MaxyGames.UNode.Editors {
 					customItems.Add(ItemSelector.CustomItem.Create(
 						menuItem,
 						() => {
-							NodeEditorUtility.AddNewNode<Node>(graphData, menuItem.nodeName, menuItem.type, position, onAddNode);
+							NodeEditorUtility.AddNewNode<Node>(graphData, menuItem.nodeName, menuItem.type, position, n => {
+								onAddNode?.Invoke(n);
+								ExecuteStackedAction(n);
+							});
 							Refresh();
 						},
 						icon: uNodeEditorUtility.GetTypeIcon(menuItem.GetIcon())));
@@ -656,6 +711,7 @@ namespace MaxyGames.UNode.Editors {
 								if(onAddNode != null) {
 									onAddNode(n);
 								}
+								ExecuteStackedAction(n);
 								Refresh();
 								w.Close();
 							});
@@ -664,10 +720,8 @@ namespace MaxyGames.UNode.Editors {
 						GUIUtility.ExitGUI();
 					}, "Data"));
 				}
-				var nodeMenuItems = NodeEditorUtility.FindCreateNodeCommands();
+				var nodeMenuItems = NodeEditorUtility.FindCreateNodeCommands(this, nodeFilter, filter);
 				foreach(var n in nodeMenuItems) {
-					n.graph = this;
-					n.filter = filter;
 					if(!n.IsValid()) {
 						continue;
 					}
@@ -676,6 +730,7 @@ namespace MaxyGames.UNode.Editors {
 						if(onAddNode != null) {
 							onAddNode(createdNode);
 						}
+						ExecuteStackedAction(createdNode);
 					}, n.category, icon: uNodeEditorUtility.GetTypeIcon(n.icon)));
 				}
 			}

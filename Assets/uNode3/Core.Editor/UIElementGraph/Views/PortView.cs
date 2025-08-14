@@ -527,9 +527,22 @@ namespace MaxyGames.UNode.Editors {
 			}, NodeFilter.FlowInput);
 		}
 
-		private void OnDropOutsidePortFromValueInput(Vector2 position, PortView portView, PortView sidePort) {
-			var portData = this.portData as ValueInputData;
-			FilterAttribute FA = portData.GetFilter();
+
+		
+		static List<Action> stackedActions = new List<Action>();
+
+		static void PopStackedAction() {
+			if(stackedActions.Count > 0) {
+				uNodeThreadUtility.Queue(static () => {
+					var action = stackedActions[stackedActions.Count - 1];
+					stackedActions.RemoveAt(stackedActions.Count - 1);
+					action?.Invoke();
+				});
+			}
+		}
+
+		private static void OnDropOutsidePortFromValueInput(ValueInput portView, Vector2 position, GraphEditor graphEditor, FilterAttribute filter) {
+			FilterAttribute FA = filter;
 			var types = FA.Types;
 			FA = new FilterAttribute(FA) {
 				MaxMethodParam = int.MaxValue,
@@ -544,19 +557,37 @@ namespace MaxyGames.UNode.Editors {
 				// DisplayDefaultStaticType = false
 			};
 			List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
-			var editorData = owner.owner.graphData;
-			var portType = GetPortType();
+			var editorData = graphEditor.graphData;
+			var portType = portView.type;
 			PortCommandData commandData = new PortCommandData() {
 				portType = portType,
-				portName = GetName(),
-				port = portView.GetPortValue(),
+				portName = portView.name,
+				port = portView,
 				portKind = PortKind.ValueInput,
-				filter = portData.GetFilter(),
+				filter = filter,
 			};
-			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, owner.graph, owner.nodeObject, position, () => {
-				owner.owner.MarkRepaint();
+			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, graphEditor, portView.node, position, () => {
+				graphEditor.Repaint();
 			}, types));
-			var win = owner.owner.graphEditor.ShowNodeMenu(position, FA, (n) => {
+			var win = graphEditor.ShowNodeMenu(position, FA, (n) => {
+				void ExecuteStackedAction(NodeObject nodeObject) {
+					if(nodeObject.ValueInputs.Count > 0) {
+						if(Event.current != null) {
+							if(Event.current.control) {
+								for(int i = nodeObject.ValueInputs.Count - 1; i >= 0; i--) {
+									var port = nodeObject.ValueInputs[i];
+									if(port.hasValidConnections == false) {
+										stackedActions.Add(() => {
+											OnDropOutsidePortFromValueInput(port, new Vector2(position.x - 200, position.y), graphEditor, port.filter ?? new FilterAttribute(port.type));
+										});
+									}
+								}
+							}
+						}
+					}
+					PopStackedAction();
+				}
+
 				if(n.nodeObject.CanGetValue()) {
 					if(n is MultipurposeNode mNode) {
 						var type = mNode.nodeObject.ReturnType();
@@ -572,26 +603,23 @@ namespace MaxyGames.UNode.Editors {
 								type,
 								rightType,
 								NodeEditorUtility.GetPort<ValueOutput>(n),
-								NodeEditorUtility.GetPort<ValueInput>(portView.GetNodeObject()),
+								NodeEditorUtility.GetPort<ValueInput>(portView.node),
 								(node) => {
-									portView.GetPortValue().ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
-								}, owner.graphData.currentCanvas, new FilterAttribute(rightType));
+									portView.ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
+								}, editorData.currentCanvas, new FilterAttribute(rightType));
+							ExecuteStackedAction(n);
 							return;
 						}
 					}
-					portView.GetPortValue().ConnectTo(n.nodeObject.primaryValueOutput);
-					if(sidePort != null) {
-						//Reset the original connection
-						sidePort.ResetPortValue();
-					}
+					portView.ConnectTo(n.nodeObject.primaryValueOutput);
+					ExecuteStackedAction(n);
 				}
-			}, NodeFilter.ValueInput, additionalItems: customItems, expandedCategory: new[] { "@", "Data" });
-			var portFilter = portData.GetFilter();
+			}, NodeFilter.ValueInput, stackCreateNode: false, additionalItems: customItems, expandedCategory: new[] { "@", "Data" });
 			win.editorData.selectIconCallback = (tree) => {
 				if(tree is ISelectorItemWithType selectorItemWithType) {
 					var itemType = selectorItemWithType.ItemType;
 					if(itemType != null) {
-						if(portFilter.IsValidType(itemType) == false) {
+						if(filter.IsValidType(itemType) == false) {
 							return uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.RefreshIcon));
 						}
 					}
@@ -748,7 +776,7 @@ namespace MaxyGames.UNode.Editors {
 #endif
 
 				if(input.isValue) {//Input Value
-					OnDropOutsidePortFromValueInput(position, portView, sidePort);
+					OnDropOutsidePortFromValueInput(portView.GetPortValue<ValueInput>(), position, owner.graph, portView.GetFilter());
 				}
 				else {//Input Flow
 					OnDropOutsidePortFromFlowInput(position, portView, sidePort);

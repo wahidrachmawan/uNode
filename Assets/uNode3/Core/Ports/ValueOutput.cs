@@ -81,6 +81,7 @@ namespace MaxyGames.UNode {
 			set = other.set;
 			_type = other._type;
 			dynamicType = other.dynamicType;
+			//OnChanged = other.OnChanged;
 		}
 	}
 }
