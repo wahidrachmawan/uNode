@@ -228,11 +228,18 @@ TextField .unity-text-element {
 	flex-grow: 0;
 }
 
+.unity-base-field {
+	margin-left: 1px;
+	margin-right: 1px;
+}
+
 PopupElement{
 	flex-shrink: 1;
 	flex-grow: 0;
 	flex-basis: auto;
-	min-height: 15px;
+	margin-left: 1px;
+	margin-right: 1px;
+	min-height: 17px;
 }
 
 PopupElement > TextElement {
@@ -243,6 +250,10 @@ PopupElement > TextElement {
 
 PopupElement:hover {
 	background-color: rgb(91, 91, 91);
+}
+
+DefaultControl {
+	height: 17px;
 }
 
 /* proxy */

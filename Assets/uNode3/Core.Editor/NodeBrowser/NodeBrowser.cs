@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable CS0618
+using System;
 using System.Xml;
 using System.Reflection;
 using System.Collections.Generic;

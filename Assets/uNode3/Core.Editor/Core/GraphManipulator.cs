@@ -541,7 +541,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					postAction?.Invoke();
 					uNodeThreadUtility.Queue(() => {
-						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable));
+						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable), true);
 					});
 				});
 			});
@@ -560,7 +560,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						postAction?.Invoke();
 						uNodeThreadUtility.Queue(() => {
-							CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, p));
+							CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, p), true);
 						});
 					});
 				});
@@ -722,7 +722,7 @@ namespace MaxyGames.UNode.Editors {
 				var variable = graphData.selectedRoot.variableContainer.AddVariable("localVariable", type);
 				postAction?.Invoke();
 				uNodeThreadUtility.Queue(() => {
-					CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable));
+					CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable), true);
 				});
 			});
 			return true;
@@ -738,7 +738,7 @@ namespace MaxyGames.UNode.Editors {
 						f.modifier.SetPrivate();
 					}
 					uNodeThreadUtility.Queue(() => {
-						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, f));
+						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, f), true);
 					});
 				});
 				GraphChanged();
@@ -750,7 +750,7 @@ namespace MaxyGames.UNode.Editors {
 						f.modifier.SetPrivate();
 					}
 					uNodeThreadUtility.Queue(() => {
-						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, f));
+						CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, f), true);
 					});
 				});
 				GraphChanged();
@@ -1662,7 +1662,7 @@ namespace MaxyGames.UNode.Editors {
 							root.Entry.exit.ConnectTo(setNode.enter);
 						}
 						uNodeThreadUtility.Queue(() => {
-							CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, p));
+							CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, p), true);
 						});
 					});
 				}, DropdownMenuAction.AlwaysEnabled);

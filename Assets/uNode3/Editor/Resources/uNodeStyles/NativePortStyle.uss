@@ -237,8 +237,9 @@ PortInputView {
 	margin-top: 1px;
 	margin-bottom: 1px;
     padding-top: 0;
-    flex-direction: row;
-    justify-content: flex-end;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    left: -407px;
     position: absolute;
     overflow: hidden;
 }

@@ -37,6 +37,8 @@ namespace MaxyGames.UNode.Editors {
 
 		List<EdgeView> edges = new List<EdgeView>();
 
+		internal PortInputView inputView;
+
 		/// <summary>
 		/// True if the port is flow port
 		/// </summary>
@@ -65,6 +67,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else {
 				AddToClassList("value-port");
+				if(UIElementUtility.Theme.preferredDisplayValue == DisplayValueKind.Outside && portData.portValue is ValueInput) {
+					inputView = new PortInputView(portData as ValueInputData);
+					Add(inputView);
+				}
 			}
 
 			this.AddManipulator(new ContextualMenuManipulator(BuildContextualMenu));

@@ -9,6 +9,7 @@
 - Improved Code Generation
 - Improved Editor
 - Fixed generic type name is not trimmed
+- Fixed issue related to Unity 6.2
 - Fixed some bugs
 
 ## v3.2.0

@@ -95,6 +95,14 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected virtual void OnMouseUp(MouseUpEvent evt) {
+			if(m_Active && evt.button == (int)MouseButton.RightMouse) {
+				// Right click to cancel the edge connection.
+				Abort();
+				m_Active = false;
+				uNodeThreadUtility.Queue(target.ReleaseMouse);
+				evt.StopPropagation();
+				return;
+			}
 			if(!m_Active || !CanStopManipulation(evt))
 				return;
 

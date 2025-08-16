@@ -707,7 +707,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private EventPropagation DeleteSelection(List<ISelectable> selection) {
-			miniMap?.SetDirty();
+			MarkUIChange();
 			var processor = GraphProcessor;
 			var list = new List<ISelectable>();
 			list.AddRange(selection.Distinct());
@@ -963,6 +963,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 				lastZoomLevel = scale;
 			}
+			MarkUIChange();
+		}
+
+		internal void MarkUIChange() {
 			miniMap?.SetDirty();
 		}
 

@@ -349,10 +349,6 @@ namespace MaxyGames.UNode.Editors {
 						control.AddToClassList(ussClassAutoHideControl);
 						p.Add(control);
 					}
-					else {
-						var portInputView = new PortInputView(valueInput);
-						portInputContainer.Add(portInputView);
-					}
 					if(portData.portType.IsByRef) {
 						p.EnableInClassList("port-byref", true);
 					}
@@ -707,6 +703,7 @@ namespace MaxyGames.UNode.Editors {
 			if(isHidden) {
 				hidingRect = new Rect(position.position, hidingRect.size);
 			}
+			owner.MarkUIChange();
 			base.SetPosition(position);
 		}
 

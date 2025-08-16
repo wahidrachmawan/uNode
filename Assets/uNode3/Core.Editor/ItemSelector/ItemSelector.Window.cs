@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	public partial class ItemSelector : EditorWindow {
-		public static ItemSelector window;
+		private static ItemSelector window;
 		private List<SearchProgress> progresses;
 
 		private Manager treeManager;
@@ -108,17 +108,6 @@ namespace MaxyGames.UNode.Editors {
 				Repaint();
 				requiredRepaint = false;
 			}
-		}
-
-		static string GetPrettyTreeName(TreeViewItem tree) {
-			if(tree is MemberTreeView) {
-				var member = (tree as MemberTreeView).member;
-				if(member is Type) {
-					return (member as Type).PrettyName();
-				}
-				return member.Name;
-			}
-			return tree.displayName;
 		}
 
 		void DrawToolbar() {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable CS0618
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -749,6 +750,16 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		static string GetPrettyTreeName(TreeViewItem tree) {
+			if(tree is MemberTreeView) {
+				var member = (tree as MemberTreeView).member;
+				if(member is Type) {
+					return (member as Type).PrettyName();
+				}
+				return member.Name;
+			}
+			return tree.displayName;
+		}
 
 		static bool ResolveGenericItem(MemberInfo member, Action<MemberInfo> onResolved, FilterAttribute filter, object targetObject, EditorWindow window) {
 			if(member == null)

@@ -242,7 +242,7 @@ namespace MaxyGames.UNode.Editors {
 						onFinished: () => {
 							isLoading = true;
 							watch.Stop();
-							miniMap?.SetDirty();
+							MarkUIChange();
 							SetZoomScale(currentZoom, false);
 							contentViewContainer.SetOpacity(1);
 							ClearProgressBar();

@@ -197,10 +197,17 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void Inspect(Vector2 position, GraphEditorData editorData, int limitMultiEdit = 5) {
-			ActionPopupWindow.Show(() => {
-				ShowInspector(editorData);
-			}).ChangePosition(position);
+		public static void Inspect(Vector2 position, GraphEditorData editorData, bool popup = false, int limitMultiEdit = 5) {
+			if(popup) {
+				ActionPopupWindow.Show(() => {
+					ShowInspector(editorData);
+				}).ChangePosition(position);
+			}
+			else {
+				ActionWindow.Show(() => {
+					ShowInspector(editorData);
+				}).ChangePosition(position);
+			}
 		}
 
 		private static void RenameObject(UnityEngine.Object obj, Rect rect) {

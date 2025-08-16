@@ -1731,6 +1731,9 @@ namespace MaxyGames.UNode.Editors {
 
 		public override void DrawMainTab(uNodeEditor window) {
 			base.DrawMainTab(window);
+			if(rootContent == null) {
+				OnEnable();
+			}
 			if(mainGUIContainer == null) {
 				if(explorerSearch == null) {
 					explorerSearch = new UnityEditor.IMGUI.Controls.SearchField();

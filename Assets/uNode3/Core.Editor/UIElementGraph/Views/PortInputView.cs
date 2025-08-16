@@ -9,7 +9,7 @@ using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
-	public class PortInputView : GraphElement {
+	public class PortInputView : VisualElement {
 		public Color edgeColor {
 			get {
 				if(data != null && data.portView != null) {
@@ -33,31 +33,10 @@ namespace MaxyGames.UNode.Editors {
 			ClearClassList();
 			this.data = data;
 			this.ScheduleAction(DoUpdate, 500);
-			data?.owner?.RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+			RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyleResolved);
 		}
-
-		private void OnGeometryChanged(GeometryChangedEvent evt) {
-			// Check if dimension has changed
-			if(evt.oldRect.size == evt.newRect.size)
-				return;
-			UpdatePosition();
-		}
-
-		public void UpdatePosition() {
-			if(data == null || parent == null)
-				return;
-			this.SetPosition(new Vector2(0, data.portView.ChangeCoordinatesTo(parent, Vector2.zero).y));
-		}
-
-		private bool hasUpdatePosition = false;
 
 		void DoUpdate() {
-			//if(data.owner.IsFaded())
-			//	return;
-			if(!hasUpdatePosition) {
-				hasUpdatePosition = true;
-				UpdatePosition();
-			}
 			var color = edgeColor;
 			if(data.port.UseDefaultValue) {
 				if(m_Container == null) {
@@ -114,8 +93,7 @@ namespace MaxyGames.UNode.Editors {
 			Add(m_Container);
 		}
 
-		protected override void OnCustomStyleResolved(ICustomStyle style) {
-			base.OnCustomStyleResolved(style);
+		private void OnCustomStyleResolved(CustomStyleResolvedEvent evt) {
 			if(m_Container != null && m_Container.visible) {
 				m_EdgeControl.UpdateLayout();
 			}

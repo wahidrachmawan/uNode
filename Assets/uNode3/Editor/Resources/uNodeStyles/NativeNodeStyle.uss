@@ -325,7 +325,7 @@ RichLabel#title-label {
 
 .Layout {
     flex-basis: auto;
-    flex-grow: 1;
+    /*flex-grow: 1;*/
 }
 
 NodeJumpStatementView > #selection-border {

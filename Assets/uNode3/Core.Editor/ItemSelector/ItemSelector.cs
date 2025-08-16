@@ -31,10 +31,14 @@ namespace MaxyGames.UNode.Editors {
 			private get => m_defaultExpandedItems;
 		}
 
+		public bool displayDefaultItem {
+			get => editorData.displayDefaultItem;
+			set => editorData.displayDefaultItem = value;
+		}
+
 		public bool canSearch = true,
 			displayNoneOption = true,
 			displayCustomVariable = true,
-			displayDefaultItem = true,
 			displayGeneralType = true,
 			displayRecentItem = true;
 		public Func<List<CustomItem>> favoriteHandler;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable CS0618
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -273,6 +274,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public object targetObject;
 
+			public bool displayDefaultItem = true;
 			public bool closeOnSelect = true;
 
 			/// <summary>
@@ -420,7 +422,7 @@ namespace MaxyGames.UNode.Editors {
 			public Data data;
 
 			public void Setup(Action<float> onProgress, Data data) {
-				if(!data.filter.DisplayDefaultStaticType || window?.displayDefaultItem == false) {
+				if(!data.filter.DisplayDefaultStaticType || data.displayDefaultItem == false) {
 					onProgress?.Invoke(1);
 					return;
 				}
@@ -430,15 +432,14 @@ namespace MaxyGames.UNode.Editors {
 					setupThread.Join(500);
 					setupThread = null;
 				}
-				SetupNamespaces();
+				SetupNamespaces(data.targetObject);
 				setupThread = new Thread(() => SetupProgress(onProgress));
 				setupThread.Priority = System.Threading.ThreadPriority.Highest;
 				setupThread.Start();
 			}
 
-			void SetupNamespaces() {
+			void SetupNamespaces(object targetObject) {
 				if(data.usingNamespaces == null) {
-					var targetObject = window.targetObject;
 					if(targetObject is IGraph) {
 						data.usingNamespaces = (targetObject as IGraph).GetUsingNamespaces();
 					}
