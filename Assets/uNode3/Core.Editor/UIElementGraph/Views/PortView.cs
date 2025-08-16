@@ -308,11 +308,14 @@ namespace MaxyGames.UNode.Editors {
 		private Image proxyTitleIcon;
 		private IMGUIContainer proxyDebug;
 
-		public float GetProxyWidth() {
+		public float GetAdditionalWidth() {
 			if(displayProxyTitle) {
 				if(proxyTitleBox != null) {
 					return proxyTitleBox.layout.width + 20;
 				}
+			}
+			if(inputView != null && inputView.data.port.UseDefaultValue) {
+				return inputView.layout.width + 20;
 			}
 			return 0;
 		}

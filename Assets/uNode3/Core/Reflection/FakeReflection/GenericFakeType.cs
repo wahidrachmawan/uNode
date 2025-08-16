@@ -539,7 +539,11 @@ namespace MaxyGames.UNode {
 					return type.MakeGenericType(param);
 				}
 				catch(Exception ex) {
-					UnityEngine.Debug.LogError("Error on getting generic type: " + type + $"\nArgs: {string.Join(", ", param.Select(t => t.FullName))}\n" + ex.Message);
+					UnityEngine.Debug.LogError("Error on getting generic type: " + type + 
+						$"\nArgs: {string.Join(", ", param.Select(t => t.FullName))}" + 
+						$"\nGeneric Args: {string.Join(", ", arguments.Select(t => t.FullName))}" + 
+						$"\nPassed Args: {string.Join(", ", typeArguments.Select(t => t.FullName))}\n" + 
+						ex.Message);
 				}
 			}
 			return type;

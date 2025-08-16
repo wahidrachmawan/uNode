@@ -55,7 +55,6 @@ namespace MaxyGames.UNode.Editors {
 
 		public bool isNativeGraph => owner.isNativeGraph;
 
-		public VisualElement portInputContainer { protected set; get; }
 		public VisualElement flowInputContainer { protected set; get; }
 		public VisualElement flowOutputContainer { protected set; get; }
 		public VisualElement controlsContainer { protected set; get; }
@@ -262,7 +261,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected void RefreshControl(bool isVisible) {
-			portInputContainer.SetOpacity(isVisible);
 			foreach(var c in inputControls) {
 				// c.visible = isVisible;
 				c.SetOpacity(isVisible);
@@ -498,16 +496,6 @@ namespace MaxyGames.UNode.Editors {
 			nodeObject.Register();
 			RemovePorts();
 			RemoveControls();
-			if(portInputContainer != null) {//Remove port container to make sure data is up to date.
-				Remove(portInputContainer);
-			}
-
-			portInputContainer = new VisualElement {
-				name = "portInputContainer",
-				pickingMode = PickingMode.Ignore,
-			};
-			Add(portInputContainer);
-			portInputContainer.SendToBack();
 		}
 
 		public virtual void RegisterUndo(string name = "") {
@@ -522,8 +510,8 @@ namespace MaxyGames.UNode.Editors {
 				if(titleLabel != null) {
 					titleLabel.style.visibility = StyleKeyword.Null;
 				}
-				if(portInputContainer != null) {
-					portInputContainer.style.display = StyleKeyword.Null;
+				if(controlsContainer != null) {
+					controlsContainer.style.visibility = StyleKeyword.Null;
 				}
 			}
 			else {
@@ -533,8 +521,8 @@ namespace MaxyGames.UNode.Editors {
 				if(titleLabel != null) {
 					titleLabel.style.visibility = Visibility.Hidden;
 				}
-				if(portInputContainer != null) {
-					portInputContainer.style.display = DisplayStyle.None;
+				if(controlsContainer != null) {
+					controlsContainer.style.visibility = Visibility.Hidden;
 				}
 			}
 			if(zoom > 0.3f) {

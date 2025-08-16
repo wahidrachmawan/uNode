@@ -289,7 +289,6 @@ namespace MaxyGames.UNode.Editors {
 							border.EnableInClassList(ussClassBorderOnlyInput, false);
 							border.EnableInClassList(ussClassBorderOnlyOutput, false);
 						}
-						portInputContainer.EnableInClassList("flow", anyFlowInput);
 					} else {
 						border.EnableInClassList(ussClassBorderFlowNode, false);
 					}

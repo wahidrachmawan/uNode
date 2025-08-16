@@ -34,7 +34,7 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public static FakeType FakeGenericType(Type type, Type[] typeArguments) {
+		public static Type FakeGenericType(Type type, Type[] typeArguments) {
 			if(typeArguments == null) {
 				throw new ArgumentNullException(nameof(typeArguments));
 			}
@@ -83,11 +83,11 @@ namespace MaxyGames.UNode {
 			return result;
 		}
 
-		public static FakeType FakeActionDelegate(Type[] typeArguments) {
+		public static Type FakeActionDelegate(Type[] typeArguments) {
 			return FakeGenericType(("System.Action`" + typeArguments.Length).ToType(), typeArguments);
 		}
 
-		public static FakeType FakeFuncDelegate(Type returnType, Type[] typeArguments) {
+		public static Type FakeFuncDelegate(Type returnType, Type[] typeArguments) {
 			if(typeArguments.Length == 0) {
 				return FakeGenericType(typeof(Func<>), new[] { returnType });
 			}
@@ -99,14 +99,14 @@ namespace MaxyGames.UNode {
 			return FakeGenericType(("System.Func`" + typeArguments.Length + 1).ToType(), types);
 		}
 
-		public static FakeType FakeFuncDelegate(Type[] typeArguments) {
+		public static Type FakeFuncDelegate(Type[] typeArguments) {
 			if(typeArguments.Length == 1) {
 				return FakeGenericType(typeof(Func<>), typeArguments);
 			}
 			return FakeGenericType(("System.Func`" + typeArguments.Length).ToType(), typeArguments);
 		}
 
-		public static FakeType FakeDelegate(Type[] typeArguments) {
+		public static Type FakeDelegate(Type[] typeArguments) {
 			if(typeArguments.Any(t => t.IsByRef)) {
 				for(int i = 0; i < typeArguments.Length; i++) {
 					if(typeArguments[i].IsByRef) {

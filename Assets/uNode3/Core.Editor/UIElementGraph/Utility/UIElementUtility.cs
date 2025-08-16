@@ -1065,28 +1065,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static Rect GetLayoutNode(UNodeView node) {
-			var container = node.portInputContainer;
 			var rect = GetNodeRect(node);
 			float width = 0;
 			foreach(var port in node.inputPorts) {
-				if(port.isValue && port.IsProxy()) {
-					width = Mathf.Max(port.GetProxyWidth(), width);
-				}
-			}
-			if(container != null) {
-				var inputPorts = container.Children().Where(i => i is PortInputView).Select(i => i as PortInputView);
-				foreach(var port in inputPorts) {
-					if(port.IsControlVisible()) {
-						width = Mathf.Max(port.GetPortWidth() - 19, width);
-					}
-					//else if(port.data != null) {
-					//	foreach(var con in port.data.port.ValidConnections) {
-					//		if(con.isProxy) {
-					//			width = Mathf.Max(100, width);
-					//			break;
-					//		}
-					//	}
-					//}
+				if(port.isValue) {
+					width = Mathf.Max(port.GetAdditionalWidth(), width);
 				}
 			}
 			rect.width += width;

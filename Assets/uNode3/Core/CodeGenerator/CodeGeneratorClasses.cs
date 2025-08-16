@@ -1774,6 +1774,15 @@ namespace MaxyGames {
 				this.type = type;
 				this.refKind = refKind;
 			}
+
+			public MPData(ParameterData parameter) {
+				this.name = parameter.name;
+				this.type = parameter.type;
+				this.refKind = parameter.refKind;
+				if(parameter.hasDefaultValue) {
+					this.defaultValue = Value(parameter.defaultValue);
+				}
+			}
 		}
 
 		/// <summary>

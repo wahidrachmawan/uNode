@@ -337,6 +337,7 @@ namespace MaxyGames.UNode.Editors {
 			InitToolbar();
 			InitializeRootView();
 			InitializeGraph();
+			base.OnEnable();
 		}
 
 		private string GetDebugName() {

@@ -758,7 +758,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public virtual void OnEnable() {
-
+			CanvasChanged();
 		}
 
 		public virtual void OnDisable() {

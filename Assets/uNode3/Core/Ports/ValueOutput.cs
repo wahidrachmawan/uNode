@@ -79,6 +79,8 @@ namespace MaxyGames.UNode {
 			name = other.name;
 			get = other.get;
 			set = other.set;
+			canGetValue = other.canGetValue;
+			canSetValue = other.canSetValue;
 			_type = other._type;
 			dynamicType = other.dynamicType;
 			//OnChanged = other.OnChanged;

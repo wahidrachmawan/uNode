@@ -206,7 +206,7 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				ActionWindow.Show(() => {
 					ShowInspector(editorData);
-				}).ChangePosition(position);
+				}).ChangePosition(position, false);
 			}
 		}
 

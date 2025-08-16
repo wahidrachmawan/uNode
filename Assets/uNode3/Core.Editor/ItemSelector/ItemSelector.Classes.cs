@@ -813,6 +813,9 @@ namespace MaxyGames.UNode.Editors {
 			public override bool CanSelect(Data selector) {
 				if(item.type != null) {
 					if(selector.IsValidTypeToSelect(item.type)) {
+						if(selector.filter.SetMember) {
+							return item.onlyGet == false;
+						}
 						return true;
 					}
 					else if(item.targetType == MemberData.TargetType.Self) {

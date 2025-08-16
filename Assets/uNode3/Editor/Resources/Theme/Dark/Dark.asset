@@ -58,7 +58,7 @@ MonoBehaviour:
         serializedString: System.Boolean
         serializedBytes: 
         references: []
-      color: {r: 1, g: 0.22, b: 0.26, a: 1}
+      color: {r: 1, g: 0.21960784, b: 0.25882354, a: 1}
       includingSubTypes: 0
     - type:
         kind: 1
@@ -88,7 +88,103 @@ MonoBehaviour:
         references: []
       color: {r: 0.48, g: 0.34, b: 0.8, a: 1}
       includingSubTypes: 0
-    typeIcons: []
+    typeIcons:
+    - type:
+        kind: 1
+        serializedString: UnityEngine.AnimationCurve
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 5d6823c4a00a14640a1335660a08fb74, type: 3}
+      colorTint: {r: 1, g: 0.9490197, b: 0.6, a: 1}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: System.Array
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: d6549c460984653449ad97c961250b61, type: 3}
+      colorTint: {r: 1, g: 0.5939968, b: 0, a: 0}
+      includingSubTypes: 1
+    - type:
+        kind: 1
+        serializedString: System.Boolean
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 89dd958540e52e84cbf616680ad2326c, type: 3}
+      colorTint: {r: 0.9528302, g: 0.35506406, b: 0.3888364, a: 1}
+      includingSubTypes: 1
+    - type:
+        kind: 1
+        serializedString: System.Collections.IDictionary
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: bf1ac21dc8e63f34a81bacfc786cafcd, type: 3}
+      colorTint: {r: 1, g: 0.622566, b: 0, a: 0}
+      includingSubTypes: 1
+    - type:
+        kind: 1
+        serializedString: System.Single
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 7b915dc94b0822b47aac134a2de537dd, type: 3}
+      colorTint: {r: 1, g: 0.5019608, b: 0.40000004, a: 1}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: UnityEngine.Gradient
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 1624cedc663706444b496e9b831f4d1a, type: 3}
+      colorTint: {r: 1, g: 1, b: 1, a: 0}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: System.Int16
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 6d0e02cc8e48841448d7ca15b3579bb2, type: 3}
+      colorTint: {r: 0.802621, g: 1, b: 0, a: 1}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: System.Int32
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: f8b9bd4169d510a4c85b0c4a7633befa, type: 3}
+      colorTint: {r: 0.6627451, g: 0.8235295, b: 0.22352943, a: 1}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: System.Int64
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 875a58909ff8a3f4689c8663ba465066, type: 3}
+      colorTint: {r: 0.9771824, g: 1, b: 0, a: 1}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: System.Collections.IList
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 7bd0d54394e72544d8b820860e8332d4, type: 3}
+      colorTint: {r: 1, g: 1, b: 1, a: 0}
+      includingSubTypes: 1
+    - type:
+        kind: 1
+        serializedString: UnityEngine.Matrix4x4
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 3f29287c81e4de845ba783ce9e56324c, type: 3}
+      colorTint: {r: 0, g: 0, b: 0, a: 0}
+      includingSubTypes: 0
+    - type:
+        kind: 1
+        serializedString: UnityEngine.Quaternion
+        serializedBytes: 
+        references: []
+      icon: {fileID: 2800000, guid: 037ffe771fbace64ba21351c1e1a96b4, type: 3}
+      colorTint: {r: 0.8235295, g: 0.7843138, b: 0.5058824, a: 1}
+      includingSubTypes: 0
   visual: 0
   expanded: 0
   coloredPortBorder: 1

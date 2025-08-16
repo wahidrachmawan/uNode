@@ -2347,7 +2347,7 @@ namespace MaxyGames.UNode {
 						if(pType.Length == 0) {
 							return preferedType;
 						}
-						else if(pType.Length == 1 && !pType[0].IsInterface && preferedType.IsCastableTo(pType[0])) {
+						else if(pType.Length == 1 && preferedType.IsCastableTo(pType[0])) {
 							return preferedType;
 						}
 					}
@@ -2364,10 +2364,14 @@ namespace MaxyGames.UNode {
 							for(int i = 0; i < pType.Length; i++) {
 								if(pType[i] == typeof(ValueType)) {
 									if(preferedType.IsValueType) {
+										if(pType.Length > 1) continue;
 										return preferedType;
 									}
+									else {
+										break;
+									}
 								}
-								else if(!pType[i].IsInterface && preferedType.IsCastableTo(pType[i])) {
+								else if(preferedType.IsCastableTo(pType[i])) {
 									return preferedType;
 								}
 							}

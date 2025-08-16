@@ -121,7 +121,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			if(popupElement != null) {
 				if(!popupElement.visible && (control == null || showInstance || config.filter == null || config.filter.ValidTargetType != MemberData.TargetType.Values)) {
 					UpdatePopupLabel();
-					popupElement.visible = true;
+					popupElement.style.visibility = StyleKeyword.Null;
 					Add(popupElement);
 				}
 				popupElement.MarkDirtyRepaint();
@@ -275,7 +275,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 							return true;
 						}
 					}
-					return false;
+					return types.Count == 0;
 				},
 				// DisplayDefaultStaticType = false
 			};

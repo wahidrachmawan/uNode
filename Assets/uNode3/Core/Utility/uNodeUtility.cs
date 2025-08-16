@@ -1892,10 +1892,17 @@ namespace MaxyGames.UNode {
 		public Color GetColor(Type type) {
 			if(type == null) return defaultTypeColor;
 			foreach(var data in typeColors) {
+				if(data.Type == null) continue;
 				if(type == data.Type) {
 					return data.color;
 				}
 				else if(data.includingSubTypes) {
+					if(data.Type.IsInterface == true) {
+						if(type.IsCastableTo(data.Type)) {
+							return data.color;
+						}
+						continue;
+					}
 					if(type.IsSubclassOf(data.Type)) {
 						return data.color;
 					}
@@ -1907,10 +1914,17 @@ namespace MaxyGames.UNode {
 		public Texture2D GetIcon(Type type) {
 			if(type == null) return null;
 			foreach(var data in typeIcons) {
+				if(data.Type == null) continue;
 				if(type == data.Type) {
 					return data.Icon;
 				}
 				else if(data.includingSubTypes) {
+					if(data.Type.IsInterface == true) {
+						if(type.IsCastableTo(data.Type)) {
+							return data.icon;
+						}
+						continue;
+					}
 					if(type.IsSubclassOf(data.Type)) {
 						return data.Icon;
 					}
