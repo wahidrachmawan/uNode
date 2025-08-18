@@ -1003,11 +1003,11 @@ namespace MaxyGames.UNode {
 		/// <returns>Return the actual c# type</returns>
 		public static Type GetNativeType(Type type) {
 			if(type is IRuntimeMember) {
-				if(type is INativeMember native) {
-					return native.GetNativeMember() as Type;
-				}
-				else if(type is IFakeType fakeType) {
+				if(type is IFakeType fakeType) {
 					return fakeType.GetNativeType();
+				}
+				else if(type is INativeMember native) {
+					return native.GetNativeMember() as Type;
 				}
 				else if(type is IRuntimeType runtimeType) {
 					return runtimeType.GetNativeType();
@@ -1026,7 +1026,13 @@ namespace MaxyGames.UNode {
 		/// <exception cref="Exception"></exception>
 		public static Type GetNativeType(Type type, bool throwOnError) {
 			if(type is IRuntimeMember) {
-				if(type is INativeMember native) {
+				if(type is IFakeType fakeType) {
+					var result = fakeType.GetNativeType() as Type;
+					if(result != null) {
+						return result;
+					}
+				}
+				else if(type is INativeMember native) {
 					var result = native.GetNativeMember() as Type;
 					if(result != null) {
 						return result;
@@ -1035,12 +1041,6 @@ namespace MaxyGames.UNode {
 						throw new Exception("Couldn't resolve type: " + type + "\nMaybe it still not compiled, renamed or wrong names.");
 					else
 						return null;
-				}
-				else if(type is IFakeType fakeType) {
-					var result = fakeType.GetNativeType() as Type;
-					if(result != null) {
-						return result;
-					}
 				}
 				else if(type is IRuntimeType runtimeType) {
 					var result = runtimeType.GetNativeType();

@@ -97,6 +97,12 @@ namespace MaxyGames.UNode {
 
 		static readonly Dictionary<Texture, Type> typeMap = new Dictionary<Texture, Type>();
 
+		/// <summary>
+		/// Create a new icon type from the texture.
+		/// This will cache the type for the texture, so it can be reused in runtime but not serializable.
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <returns></returns>
 		public static Type FromTexture(Texture texture) {
 			if(texture == null)
 				return RuntimeType.Default;

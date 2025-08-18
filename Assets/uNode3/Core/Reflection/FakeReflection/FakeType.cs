@@ -47,6 +47,9 @@ namespace MaxyGames.UNode {
 
 	public abstract class FakeType : RuntimeType<Type>, IFakeType {
 		private bool hasInitialize = false;
+		/// <summary>
+		/// The dictionary to hold declared members, mapping original members to their fake counterparts.
+		/// </summary>
 		protected Dictionary<MemberInfo, MemberInfo> declaredMembers = new Dictionary<MemberInfo, MemberInfo>();
 
 		public FakeType(Type target) : base(target) { }
@@ -130,6 +133,18 @@ namespace MaxyGames.UNode {
 				method = target.GetMethod(name, bindingAttr);
 			}
 			else {
+				// If the types contain a RuntimeType, we need to check the declared members
+				if(types.Any(t => t is RuntimeType)) {
+					foreach(var (_, member2) in declaredMembers) {
+						// Check if the member is a MethodInfo and matches the name and parameter types
+						if(member2 is MethodInfo m && m.Name == name && m.GetParameters().Select(p => p.ParameterType).SequenceEqual(types)) {
+							// If it matches, return the member as MethodInfo
+							// This is a workaround to handle cases when there's a RuntimeType in the paramter types array
+							return member2 as MethodInfo;
+						}
+					}
+					return null; // If no matching method found, return null
+				}
 				method = target.GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
 			}
 			if(method != null && declaredMembers.TryGetValue(method, out var result)) {

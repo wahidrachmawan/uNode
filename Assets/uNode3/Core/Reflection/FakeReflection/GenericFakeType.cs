@@ -352,20 +352,22 @@ namespace MaxyGames.UNode {
 								}
 								break;
 							}
-							bool valid = true;
-							for(int i = 0; i < parameters.Length; i++) {
-								if(parameters[i].ParameterType is FakeType) {
-									valid = false;
-									break;
-								}
-							}
-							if(valid) {
-								var m = new FakeMethod(this, method, methodType, parameters);
-								declaredMembers[method] = m;
-							}
-							else {
-								declaredMembers[method] = null;
-							}
+							var m = new FakeMethod(this, method, methodType, parameters);
+							declaredMembers[method] = m;
+							//bool valid = true;
+							//for(int i = 0; i < parameters.Length; i++) {
+							//	if(parameters[i].ParameterType is FakeType && ReflectionUtils.IsNativeType(parameters[i].ParameterType) == false) {
+							//		valid = false;
+							//		break;
+							//	}
+							//}
+							//if(valid) {
+							//	var m = new FakeMethod(this, method, methodType, parameters);
+							//	declaredMembers[method] = m;
+							//}
+							//else {
+							//	declaredMembers[method] = null;
+							//}
 						}
 						break;
 					}
@@ -486,20 +488,22 @@ namespace MaxyGames.UNode {
 							}
 							break;
 						}
-						bool valid = true;
-						for(int i = 0; i < parameters.Length; i++) {
-							if(parameters[i].ParameterType is FakeType) {
-								valid = false;
-								break;
-							}
-						}
-						if(valid) {
-							var m = new FakeConstructor(this, ctor, parameters);
-							declaredMembers[ctor] = m;
-						}
-						else {
-							declaredMembers[ctor] = null;
-						}
+						var m = new FakeConstructor(this, ctor, parameters);
+						declaredMembers[ctor] = m;
+						//bool valid = true;
+						//for(int i = 0; i < parameters.Length; i++) {
+						//	if(parameters[i].ParameterType is FakeType) {
+						//		valid = false;
+						//		break;
+						//	}
+						//}
+						//if(valid) {
+						//	var m = new FakeConstructor(this, ctor, parameters);
+						//	declaredMembers[ctor] = m;
+						//}
+						//else {
+						//	declaredMembers[ctor] = null;
+						//}
 						break;
 					}
 					case MemberTypes.NestedType: {

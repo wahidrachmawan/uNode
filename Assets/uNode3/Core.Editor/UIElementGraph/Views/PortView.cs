@@ -639,6 +639,9 @@ namespace MaxyGames.UNode.Editors {
 
 		private void OnDropOutsidePortFromValueOutput(Vector2 position, PortView portView, PortView sidePort) {
 			Type type = portView.GetPortType();
+			if(type.IsByRef) {
+				type = type.GetElementType();
+			}
 			bool canSetValue = false;
 			bool canGetValue = true;
 			var port = portView.GetPortValue<ValueOutput>();
@@ -648,7 +651,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			bool onlySet = canSetValue && !canGetValue;
 			PortCommandData commandData = new PortCommandData() {
-				portType = portType,
+				portType = type,
 				portName = GetName(),
 				port = GetPortValue(),
 				portKind = PortKind.ValueOutput,
