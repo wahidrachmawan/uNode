@@ -974,11 +974,24 @@ namespace MaxyGames.UNode.Editors {
 
 		}
 
+		public new IEnumerable<PortView> ports {
+			get {
+				foreach(var view in nodeViews) {
+					foreach(var port in view.inputPorts) {
+						yield return port;
+					}
+					foreach(var port in view.outputPorts) {
+						yield return port;
+					}
+				}
+			}
+		}
+
 		public override List<GPort> GetCompatiblePorts(GPort startPort, NodeAdapter nodeAdapter) {
 			var compatiblePorts = new List<GPort>();
 			var startPortView = startPort as PortView;
 
-			compatiblePorts.AddRange(ports.ToList().Select(p => p as PortView).Where(p => {
+			compatiblePorts.AddRange(ports.Select(p => p).Where(p => {
 				if(p == null || !p.enabledSelf || p.direction == startPort.direction || p.isFlow != startPortView.isFlow /*|| !startPortView.IsValidTarget(p)*/)
 					return false;
 				return startPortView.CanConnect(p);
@@ -990,7 +1003,7 @@ namespace MaxyGames.UNode.Editors {
 		public List<PortView> GetCompatiblePorts(PortView startPort, NodeAdapter nodeAdapter) {
 			var compatiblePorts = new List<PortView>();
 
-			compatiblePorts.AddRange(ports.ToList().Select(p => p as PortView).Where(p => {
+			compatiblePorts.AddRange(ports.Select(p => p).Where(p => {
 				if(p == null || !p.enabledSelf || p.direction == startPort.direction || p.isFlow != startPort.isFlow /*|| !startPortView.IsValidTarget(p)*/)
 					return false;
 				return startPort.CanConnect(p);

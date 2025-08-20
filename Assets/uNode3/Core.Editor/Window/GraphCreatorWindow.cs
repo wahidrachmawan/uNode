@@ -192,7 +192,7 @@ namespace MaxyGames.UNode.Editors {
 		protected bool createEventInMainGraph = true;
 		protected List<MemberInfo> graphOverrideMembers = new List<MemberInfo>();
 		protected SerializedType graphInheritFrom = typeof(object);
-		protected FilterAttribute graphInheritFilter = FilterAttribute.DefaultInheritFilter;
+		protected FilterAttribute graphInheritFilter = new(FilterAttribute.DefaultInheritFilter);
 
 		protected List<VariableData> graphVariables = new List<VariableData>();
 

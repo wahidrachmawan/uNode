@@ -64,7 +64,9 @@ namespace MaxyGames.UNode.Editors {
 				return CreateInstance<T>();
 			}
 			else {
-				return windows.FirstOrDefault(f => f != null) as T ?? CreateInstance<T>();
+				var result = windows.FirstOrDefault(f => f != null) as T ?? CreateInstance<T>();
+				result?.Focus();
+				return result;
 			}
 		}
 

@@ -1152,10 +1152,13 @@ namespace MaxyGames.UNode.Editors {
 					FieldDecorator.DrawDecorators(linkedVar.GetAttributes());
 				}
 				using(new EditorGUILayout.HorizontalScope()) {
-					var indent = EditorGUI.indentLevel;
-					EditorGUI.indentLevel = 0;
-					bool flag = EditorGUILayout.Toggle(ownerVar != null, GUILayout.Width(EditorGUIUtility.singleLineHeight));
-					EditorGUI.indentLevel = indent;
+					bool flag = linkedVar.alwaysOverride;
+					if(flag == false) {
+						var indent = EditorGUI.indentLevel;
+						EditorGUI.indentLevel = 0;
+						flag = EditorGUILayout.Toggle(ownerVar != null, GUILayout.Width(EditorGUIUtility.singleLineHeight));
+						EditorGUI.indentLevel = indent;
+					}
 					if(flag != (ownerVar != null)) {
 						uNodeEditorUtility.RegisterUndo(unityObject);
 						if(flag) {
@@ -1176,8 +1179,20 @@ namespace MaxyGames.UNode.Editors {
 						});
 					}
 					EditorGUI.BeginDisabledGroup(ownerVar == null);
-					using(new EditorGUILayout.VerticalScope()) {
+					using(var scope = new EditorGUILayout.VerticalScope()) {
 						uNodeGUIUtility.EditVariableValue(variable, unityObject, false);
+						var rect = scope.rect;
+						rect.width = EditorGUIUtility.labelWidth;
+						rect.height = EditorGUIUtility.singleLineHeight;
+						if(Event.current.type == EventType.ContextClick && Event.current.button == 1 && rect.Contains(Event.current.mousePosition)) {
+							GenericMenu menu = new GenericMenu();
+							var originalVar = linkedVar;
+							menu.AddItem(new GUIContent("Reset to default"), false, () => {
+								variable.value = SerializerUtility.Duplicate(originalVar.defaultValue);
+							});
+							menu.ShowAsContext();
+							Event.current.Use();
+						}
 					}
 					EditorGUI.EndDisabledGroup();
 				}

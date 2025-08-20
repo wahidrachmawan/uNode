@@ -499,7 +499,7 @@ namespace MaxyGames.UNode.Editors {
 					sidePort.ResetPortValue();
 				}
 
-			}, NodeFilter.FlowOutput);
+			}, NodeFilter.FlowOutput, expandedCategory: new string[] { "Flow" });
 		}
 
 		private void OnDropOutsidePortFromFlowInput(Vector2 position, PortView portView, PortView sidePort) {
@@ -533,7 +533,7 @@ namespace MaxyGames.UNode.Editors {
 					//Reset the original connection
 					sidePort.ResetPortValue();
 				}
-			}, NodeFilter.FlowInput);
+			}, NodeFilter.FlowInput, expandedCategory: new string[] { "Flow" });
 		}
 
 

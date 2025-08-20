@@ -566,7 +566,6 @@ namespace MaxyGames.UNode.Editors {
 
 			public GraphItem(Variable variable, object targetObject) {
 				this.Name = variable.name;
-				this.onlyGet = variable.onlyGet;
 				this.targetType = MemberData.TargetType.uNodeVariable;
 				this.type = variable.type;
 				this.variable = variable;

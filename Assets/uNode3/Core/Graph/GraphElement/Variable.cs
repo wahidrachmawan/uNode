@@ -9,6 +9,11 @@ namespace MaxyGames.UNode {
 		[HideInInspector]
 		public SerializedValue serializedValue;
 
+		/// <summary>
+		/// Reset the value on executed. ( Only for local variable )
+		/// </summary>
+		public bool resetOnEnter;
+
 		public Type type {
 			get {
 				return serializedValue?.type ?? typeof(object);
@@ -30,7 +35,6 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-
 		public bool isOpenGeneric => serializedValue?.serializedType.isOpenGeneric ?? false;
 
 		public object defaultValue {
@@ -41,15 +45,6 @@ namespace MaxyGames.UNode {
 				serializedValue = new SerializedValue(value, type);
 			}
 		}
-
-		/// <summary>
-		/// Are this variable only can be get.
-		/// </summary>
-		public bool onlyGet { get; set; }
-		/// <summary>
-		/// Reset the value on executed. ( Only for local variable )
-		/// </summary>
-		public bool resetOnEnter;
 
 		public object Get(Flow flow) {
 			if(resetOnEnter) {
@@ -114,7 +109,14 @@ namespace MaxyGames.UNode {
 		/// The variable modifier for script generation
 		/// </summary>
 		public FieldModifier modifier = new FieldModifier();
+		/// <summary>
+		/// If true, instance variable will always override the value in the original variable.
+		/// </summary>
+		public bool alwaysOverride;
 
+		/// <summary>
+		/// True when the variable can be shown in the inspector.
+		/// </summary>
 		public bool showInInspector {
 			get {
 				if(modifier != null && modifier.Public || attributes.Any(a => a.type == typeof(SerializeField))) {

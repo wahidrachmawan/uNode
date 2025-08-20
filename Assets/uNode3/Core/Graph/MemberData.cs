@@ -451,7 +451,10 @@ namespace MaxyGames.UNode {
 					if(Items.Length == 0) {
 						return string.Empty;
 					}
-					else if(Items.Length == 1) {
+					if(startType is RuntimeType rt) {
+						startName = rt.Name;
+					}
+					if(Items.Length == 1) {
 						return _name = Items[0].GetActualName();
 					}
 					_name = string.Join(".", Items.Select(i => i.GetActualName()));

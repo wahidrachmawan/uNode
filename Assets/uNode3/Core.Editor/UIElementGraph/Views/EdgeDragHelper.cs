@@ -41,9 +41,9 @@ namespace MaxyGames.UNode.Editors {
 		public override void Reset(bool didConnect = false) {
 			if(m_CompatiblePorts != null) {
 				// Reset the highlights.
-				m_GraphView.ports.ForEach((p) => {
+				foreach(var p in m_GraphView.ports) {
 					p.OnStopEdgeDragging();
-				});
+				}
 				m_CompatiblePorts = null;
 			}
 
@@ -115,9 +115,9 @@ namespace MaxyGames.UNode.Editors {
 			m_CompatiblePorts = m_GraphView.GetCompatiblePorts(draggedPort as PortView, s_nodeAdapter);
 
 			// Only light compatible anchors when dragging an edge.
-			m_GraphView.ports.ForEach((p) => {
+			foreach(var p in m_GraphView.ports) {
 				p.OnStartEdgeDragging();
-			});
+			}
 
 			foreach(var compatiblePort in m_CompatiblePorts) {
 				compatiblePort.highlight = true;
@@ -251,9 +251,9 @@ namespace MaxyGames.UNode.Editors {
 			Vector2 mousePosition = evt.mousePosition;
 
 			// Reset the highlights.
-			m_GraphView.ports.ForEach((p) => {
+			foreach(var p in m_GraphView.ports) {
 				p.OnStopEdgeDragging();
-			});
+			}
 
 			// Clean up ghost edges.
 			if(m_GhostEdge != null) {

@@ -15,7 +15,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 		protected override void DoDraw(DrawerOption option) {
 			var value = option.value as Variable;
-			if(value.graphContainer.GetGraphInheritType() != typeof(ValueType)) {
+			var container = value.graphContainer;
+			if(container.GetGraphInheritType() != typeof(ValueType)) {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.serializedValue)],
 					label = new GUIContent("Default Value"),
@@ -27,6 +28,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				value.type = type;
 				uNodeGUIUtility.GUIChangedMajor(value);
 			}, targetObject: option.unityObject);
+
 			if(value.GetObjectInParent<NodeContainer>() == null) {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.modifier)],
@@ -36,10 +38,23 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						uNodeGUIUtility.GUIChangedMajor(value);
 					}
 				});
+
+				if(container is not IScriptGraphType && container is not IInstancedGraph && container is not IRuntimeClass && value.showInInspector) {
+					UInspector.Draw(new DrawerOption() {
+						property = option.property[nameof(Variable.alwaysOverride)],
+						nullable = false,
+						flags = option.flags,
+					});
+				}
+				else {
+					value.alwaysOverride = false;
+				}
+
 				uNodeGUI.DrawAttribute(value.attributes, option.unityObject, (a) => {
 					value.attributes = a;
 				}, value.modifier.Event ? AttributeTargets.Event : AttributeTargets.Field);
-			} else {
+			}
+			else {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.resetOnEnter)],
 					nullable = false,

@@ -1151,14 +1151,27 @@ namespace MaxyGames.UNode {
 									if(member.IsExtension) {
 										continue;
 									}
-									if(member.isStatic) {
-										result += member.startName.WrapWithColor(editorColor.typeColor);
-									}
-									else if(member.Items.Length > 1) {
-										result += member.startName.WrapWithColor(getColorForType(member.startType));
+									if(member.startType is Type startType) {
+										if(member.isStatic) {
+											result += startType.Name.WrapWithColor(editorColor.typeColor);
+										}
+										else if(member.Items.Length > 1) {
+											result += startType.Name.WrapWithColor(getColorForType(startType));
+										}
+										else {
+											result += startType.Name.WrapWithColor(typeColor);
+										}
 									}
 									else {
-										result += member.startName.WrapWithColor(typeColor);
+										if(member.isStatic) {
+											result += member.startName.WrapWithColor(editorColor.typeColor);
+										}
+										else if(member.Items.Length > 1) {
+											result += member.startName.WrapWithColor(getColorForType(member.startType));
+										}
+										else {
+											result += member.startName.WrapWithColor(typeColor);
+										}
 									}
 									break;
 							}
