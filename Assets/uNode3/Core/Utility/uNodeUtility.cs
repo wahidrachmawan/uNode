@@ -1841,6 +1841,8 @@ namespace MaxyGames.UNode {
 			mainThread = System.Threading.Thread.CurrentThread;
 		}
 
+		internal static List<Object> temporaryObjects = new List<Object>();
+
 		public static bool IsInMainThread => System.Threading.Thread.CurrentThread == mainThread;
 	}
 
@@ -1934,7 +1936,7 @@ namespace MaxyGames.UNode {
 				else if(data.includingSubTypes) {
 					if(data.Type.IsInterface == true) {
 						if(type.IsCastableTo(data.Type)) {
-							return data.icon;
+							return data.Icon;
 						}
 						continue;
 					}
@@ -1970,6 +1972,10 @@ namespace MaxyGames.UNode {
 		public Texture2D Icon {
 			get {
 				if(m_prevIcon != icon || m_prevColor != colorTint) {
+					if(m_icon != null && m_icon != icon) {
+						// Destroy the previous icon
+						Object.DestroyImmediate(m_icon);
+					}
 					m_prevIcon = icon;
 					m_icon = icon;
 					m_prevColor = colorTint;
@@ -2007,6 +2013,10 @@ namespace MaxyGames.UNode {
 			Texture2D result = new Texture2D(width, height);
 			result.SetPixels(pixels);
 			result.Apply();
+
+			result.hideFlags = HideFlags.DontSave;
+			
+			uNodeUtility.temporaryObjects.Add(result);
 
 			return result;
 		}

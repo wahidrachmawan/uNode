@@ -1583,6 +1583,7 @@ namespace MaxyGames.UNode.Editors {
 					if(scriptGraph.TypeList.references.Count > 0) {
 						newAsset.name = "newClass";
 					}
+					uNodeEditorUtility.RegisterUndo(tabData.owner);
 					AssetDatabase.AddObjectToAsset(newAsset, tabData.owner);
 					scriptGraph.TypeList.AddType(newAsset, scriptGraph);
 					AssetDatabase.SaveAssetIfDirty(tabData.owner);
@@ -1599,6 +1600,7 @@ namespace MaxyGames.UNode.Editors {
 					if(scriptGraph.TypeList.references.Count > 0) {
 						newAsset.name = "newStruct";
 					}
+					uNodeEditorUtility.RegisterUndo(tabData.owner);
 					AssetDatabase.AddObjectToAsset(newAsset, tabData.owner);
 					scriptGraph.TypeList.AddType(newAsset, scriptGraph);
 					AssetDatabase.SaveAssetIfDirty(tabData.owner);
@@ -1615,6 +1617,7 @@ namespace MaxyGames.UNode.Editors {
 					if(scriptGraph.TypeList.references.Count > 0) {
 						newAsset.name = "newInterface";
 					}
+					uNodeEditorUtility.RegisterUndo(tabData.owner);
 					AssetDatabase.AddObjectToAsset(newAsset, tabData.owner);
 					scriptGraph.TypeList.AddType(newAsset, scriptGraph);
 					AssetDatabase.SaveAssetIfDirty(tabData.owner);
@@ -1625,6 +1628,7 @@ namespace MaxyGames.UNode.Editors {
 					if(scriptGraph.TypeList.references.Count > 0) {
 						newAsset.name = "newEnum";
 					}
+					uNodeEditorUtility.RegisterUndo(tabData.owner);
 					AssetDatabase.AddObjectToAsset(newAsset, tabData.owner);
 					scriptGraph.TypeList.AddType(newAsset, scriptGraph);
 					AssetDatabase.SaveAssetIfDirty(tabData.owner);

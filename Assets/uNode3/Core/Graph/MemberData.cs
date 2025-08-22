@@ -323,7 +323,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// Flags ( Public | Instance | Static | NonPublic | FlattenHierarchy)
 		/// </summary>
-		public static readonly BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+		public const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
 		#endregion
 
 		#region Properties

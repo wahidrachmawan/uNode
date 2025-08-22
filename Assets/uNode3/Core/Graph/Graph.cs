@@ -242,6 +242,9 @@ namespace MaxyGames.UNode {
 					OnAfterDeserialize();
 					if(graph == null)
 						SerializeGraph();
+					if(graph == null) {
+						graph = new Graph();
+					}
 				}
 				return graph;
 			}

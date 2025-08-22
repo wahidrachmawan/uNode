@@ -1784,8 +1784,9 @@ namespace MaxyGames.UNode.Editors {
 			foreach(var asset in assets) {
 				if(EditorUtility.IsDirty(asset)) {
 					assetPath.Add(AssetDatabase.GetAssetPath(asset));
+					AssetDatabase.SaveAssetIfDirty(asset);
+					SaveCallback?.Invoke(asset);
 				}
-				AssetDatabase.SaveAssetIfDirty(asset);
 			}
 			EditorReflectionUtility.UpdateRuntimeTypes();
 
@@ -1860,6 +1861,8 @@ namespace MaxyGames.UNode.Editors {
 			SaveAllGraph();
 		}
 
+		public static event Action<Object> SaveCallback;
+
 		public static void SaveGraph(Object graphAsset) {
 			//	if(graphAsset.name != graph.name) { //Ensure the name is same.
 			//		graph.name = graphAsset.name;
@@ -1884,7 +1887,19 @@ namespace MaxyGames.UNode.Editors {
 			//		//scriptData.compiledHash = default;
 			//	}
 			if(EditorUtility.IsPersistent(graphAsset)) {
-				AssetDatabase.SaveAssetIfDirty(graphAsset);
+				if(graphAsset is IScriptGraph scriptGraph) {
+					foreach(var r in scriptGraph.TypeList.references) {
+						if(r == null) continue;
+						if(EditorUtility.IsDirty(r)) {
+							EditorUtility.SetDirty(graphAsset);
+							break;
+						}
+					}
+				}
+				if(EditorUtility.IsDirty(graphAsset)) {
+					AssetDatabase.SaveAssetIfDirty(graphAsset);
+					SaveCallback?.Invoke(graphAsset);
+				}
 			}
 			else {
 				uNodeEditorUtility.MarkDirty(graphAsset);

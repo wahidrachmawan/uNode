@@ -96,6 +96,15 @@ namespace MaxyGames.UNode.Editors {
 		internal static void OnScriptReloaded() {
 			if(onFinishCompiling != null)
 				onFinishCompiling();
+			if(uNodeUtility.temporaryObjects.Count > 0 ) {
+				foreach(var obj in uNodeUtility.temporaryObjects) {
+					if(obj != null && EditorUtility.IsPersistent(obj) == false) {
+						//Make sure to destroy objects that are not destroyed yet when script reloads.
+						UnityEngine.Object.DestroyImmediate(obj);
+					}
+				}
+				uNodeUtility.temporaryObjects.Clear();
+			}
 		}
 	}
 }

@@ -44,7 +44,8 @@ namespace MaxyGames.UNode {
 				}
 				else if(target is IScriptGraphType scriptGraphType) {
 					if(scriptGraphType.ScriptTypeData.scriptGraph == null)
-						throw new Exception("The ScriptGraph asset is null");
+						//throw new Exception("The ScriptGraph asset is null");
+						return string.Empty;
 
 					return scriptGraphType.ScriptTypeData.scriptGraph.Namespace;
 				}

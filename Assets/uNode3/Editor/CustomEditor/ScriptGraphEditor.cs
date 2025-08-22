@@ -19,7 +19,7 @@ namespace MaxyGames.UNode.Editors {
 				using(new EditorGUILayout.VerticalScope("Box")) {
 					foreach(IScriptGraphType type in asset.TypeList) {
 						if(type == null) continue;
-						if(GUILayout.Button(!string.IsNullOrEmpty(type.TypeName) ? asset.name : type.TypeName)) {
+						if(GUILayout.Button(!string.IsNullOrEmpty(type.ScriptName) ? type.ScriptName : !string.IsNullOrEmpty(type.TypeName) ? type.TypeName : asset.name)) {
 							uNodeEditor.Open(type);
 						}
 					}
