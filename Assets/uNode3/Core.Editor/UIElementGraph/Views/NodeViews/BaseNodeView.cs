@@ -415,29 +415,29 @@ namespace MaxyGames.UNode.Editors {
 		public override IEnumerable<UNodeView> GetCarryNodes() {
 			var preference = uNodePreference.GetPreference();
 			bool carry;
-			if(preference.carryNodes) {
-				if(owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
-					carry = false;
+			if(owner.currentEvent != null) {
+				if(preference.carryNodes) {
+					if(owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
+						carry = false;
+					}
+					else {
+						carry = true;
+					}
 				}
 				else {
-					carry = true;
+					if(!owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
+						carry = false;
+					}
+					else {
+						carry = true;
+					}
+				}
+				if(carry) {
+					return UIElementUtility.Nodes.FindNodeToCarry(this).Distinct();
 				}
 			}
-			else {
-				if(!owner.currentEvent.modifiers.HasFlags(EventModifiers.Control | EventModifiers.Command)) {
-					carry = false;
-				}
-				else {
-					carry = true;
-				}
-			}
-			if(carry) {
-				return UIElementUtility.Nodes.FindNodeToCarry(this).Distinct();
-			}
-			else {
-				if(preference.autoCarryInputValue) {
-					return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Distinct();
-				}
+			if(preference.autoCarryInputValue) {
+				return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Distinct();
 			}
 			return null;
 		}

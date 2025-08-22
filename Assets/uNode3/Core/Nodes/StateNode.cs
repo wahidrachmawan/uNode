@@ -133,9 +133,11 @@ namespace MaxyGames.UNode.Nodes {
 					if(evt != null) {
 						if(evt is StateOnEnterEvent) {
 							onEnter += evt.GenerateFlows().AddLineInFirst().Replace("yield ", "");
-						} else if(evt is StateOnExitEvent) {
+						}
+						else if(evt is StateOnExitEvent) {
 							onExit += evt.GenerateFlows().AddLineInFirst();
-						} else {
+						}
+						else {
 							//CG.SetStateInitialization(evt, CG.Routine(CG.LambdaForEvent(evt.GenerateFlows())));
 						}
 					}

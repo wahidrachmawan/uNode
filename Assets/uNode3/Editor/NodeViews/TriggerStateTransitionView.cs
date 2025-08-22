@@ -19,7 +19,7 @@ namespace MaxyGames.UNode.Editors {
 			base.OnSetup();
 			var node = targetNode as Nodes.TriggerStateTransition;
 			m_title = node.GetTitle();
-			var stateNode = (nodeObject.parent as NodeObject)?.node as Nodes.ScriptState;
+			var stateNode = (nodeObject.parent as NodeObject)?.node as IStateNodeWithTransition;
 			if(stateNode != null) {
 				m_title = "Trigger:";
 				button = new Button(() => {
@@ -33,9 +33,10 @@ namespace MaxyGames.UNode.Editors {
 							},
 							onGUIBottom: () => {
 								if(GUILayout.Button("Apply") || Event.current.keyCode == KeyCode.Return) {
+									var state = stateNode as Node;
 									NodeEditorUtility.AddNewNode<Nodes.StateTransition>(
 										stateNode.TransitionContainer, "Transition",
-										new Vector2(stateNode.position.x + (stateNode.position.width / 2), stateNode.position.position.y + (stateNode.position.height / 2) + 50),
+										new Vector2(state.position.x + (state.position.width / 2), state.position.position.y + (state.position.height / 2) + 50),
 										(transition) => {
 											transition.nodeObject.name = name;
 											transition.nodeObject.AddChildNode(new Nodes.TriggerStateTransition());

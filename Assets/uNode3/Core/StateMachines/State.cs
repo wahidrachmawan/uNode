@@ -173,9 +173,18 @@ namespace MaxyGames.StateMachines {
 	/// </summary>
 	public class AnyState : BaseState {
 		/// <summary>
+		/// Callback when any state is updated
+		/// </summary>
+		public Action onUpdate;
+
+		/// <summary>
 		/// Any state is always active when FSM is active
 		/// </summary>
 		public override bool IsActive => FSM != null && FSM.IsActive;
+
+		protected override void OnTick() {
+			onUpdate?.Invoke();
+		}
 	}
 
 	/// <summary>

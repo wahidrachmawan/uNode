@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Nodes {
 		public StateTransition transition {
 			get {
 				if(m_transition == null) {
-					if(nodeObject.parent is NodeObject parent && parent.node is ScriptState) {
+					if(nodeObject.parent is NodeObject parent && parent.node is IStateNodeWithTransition) {
 						if(serializedTransition?.reference is NodeObject) {
 							var target = serializedTransition.reference as NodeObject;
 							if(target.node is StateTransition) {
@@ -56,7 +56,7 @@ namespace MaxyGames.UNode.Nodes {
 		public override void CheckError(ErrorAnalyzer analyzer) {
 			base.CheckError(analyzer);
 			if(transition == null) {
-				if(nodeObject.parent is NodeObject parent && parent.node is ScriptState) {
+				if(nodeObject.parent is NodeObject parent && parent.node is IStateNodeWithTransition) {
 					analyzer.RegisterError(this, "Please assign the transition to trigger");
 					return;
 				}

@@ -73,7 +73,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public static class Feature {
 			public const string SurroundWith = nameof(SurroundWith);
-			public const string Macro = nameof(Macro); 
+			public const string Macro = nameof(Macro);
 			public const string PlaceFit = nameof(PlaceFit);
 			public const string ShowAddNodeContextMenu = nameof(ShowAddNodeContextMenu);
 		}
@@ -498,7 +498,7 @@ namespace MaxyGames.UNode.Editors {
 			var customItems = ItemSelector.MakeCustomTypeItems(generalTypes, "General");
 			var window = ItemSelector.ShowType(
 				graphData.graph,
-				filter, 
+				filter,
 				(m) => {
 					onClick(m.startType);
 				},
@@ -1785,9 +1785,26 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var menu in eventMenus) {
 						if(menu.type.IsDefinedAttribute<StateEventAttribute>()) {
 							if(superNode.node is IStateTransitionNode stateTransition) {
-								if(stateTransition.StateNode is Nodes.AnyStateNode) {
-									if(menu.type == typeof(Nodes.StateOnEnterEvent)) continue;
-									if(menu.type == typeof(Nodes.StateOnExitEvent)) continue;
+								var stateNode = stateTransition.StateNode;
+								if(menu.type == typeof(Nodes.StateOnEnterEvent) && stateNode is not Nodes.INodeWithEnterExitEvent) {
+									continue;
+								}
+								if(menu.type == typeof(Nodes.StateOnExitEvent) && stateNode is not Nodes.INodeWithEnterExitEvent) {
+									continue;
+								}
+								if(menu.type == typeof(Nodes.StateOnUpdateEvent) && stateNode is not Nodes.INodeWithUpdateEvent) {
+									continue;
+								}
+							}
+							else {
+								if(menu.type == typeof(Nodes.StateOnEnterEvent) && superNode.node is not Nodes.INodeWithEnterExitEvent) {
+									continue;
+								}
+								if(menu.type == typeof(Nodes.StateOnExitEvent) && superNode.node is not Nodes.INodeWithEnterExitEvent) {
+									continue;
+								}
+								if(menu.type == typeof(Nodes.StateOnUpdateEvent) && superNode.node is not Nodes.INodeWithUpdateEvent) {
+									continue;
 								}
 							}
 							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
@@ -1798,7 +1815,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					#endregion
 				}
-				if(superNode.node is Nodes.ScriptState) {
+				if(superNode.node is Nodes.ScriptState or Nodes.AnyStateNode) {
 					yield return new ContextMenuItem("Add Trigger Transition", evt => {
 						NodeEditorUtility.AddNewNode<Nodes.TriggerStateTransition>(graphData,
 							"Trigger",

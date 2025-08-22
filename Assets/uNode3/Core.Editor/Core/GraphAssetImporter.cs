@@ -45,7 +45,7 @@ namespace MaxyGames.UNode.Editors {
 				GraphUtility.SaveCallback += static (obj) => {
 					if(obj is ScriptGraph scriptGraph && EditorUtility.IsPersistent(scriptGraph)) {
 						var path = AssetDatabase.GetAssetPath(scriptGraph);
-						if(string.IsNullOrEmpty(path) == false) {
+						if(string.IsNullOrEmpty(path) == false && path.EndsWith(".unodescript")) {
 							WriteToFile(path, scriptGraph);
 						}
 					}
@@ -133,7 +133,7 @@ namespace MaxyGames.UNode.Editors {
 						if(field.IsNotSerialized) continue;
 						if(field.IsPrivate) {
 							// If the field is private, check if it has SerializeField attribute
-							if(field.GetCustomAttribute<SerializeField>() == null) {
+							if(!field.IsDefined(typeof(SerializeField)) && !field.IsDefined(typeof(SerializeReference))) {
 								// If it doesn't have SerializeField, skip it
 								continue;
 							}

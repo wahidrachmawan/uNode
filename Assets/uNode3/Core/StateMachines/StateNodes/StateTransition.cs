@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class StateTransition : Node, ISuperNode, INodeWithEnterExitEvent, INodeWithEventHandler, IStateTransitionNode, INodeWithCustomCanvas {
+	public class StateTransition : Node, ISuperNode, INodeWithEnterExitEvent, INodeWithUpdateEvent, INodeWithEventHandler, IStateTransitionNode, INodeWithCustomCanvas {
 		public IStateNodeWithTransition StateNode {
 			get {
 				return nodeObject.GetNodeInParent<IStateNodeWithTransition>();
@@ -55,6 +55,19 @@ namespace MaxyGames.UNode.Nodes {
 				m_onExit -= value;
 			}
 		}
+		public event System.Action<Flow> OnUpdateCallback {
+			add {
+				if(nodeObject.parent is INodeWithUpdateEvent parent) {
+					parent.OnUpdateCallback -= value;
+					parent.OnUpdateCallback += value;
+				}
+			}
+			remove {
+				if(nodeObject.parent is INodeWithUpdateEvent parent) {
+					parent.OnUpdateCallback -= value;
+				}
+			}
+		}
 
 		protected override void OnRegister() {
 			exit = FlowOutput(nameof(exit)).SetName("");
@@ -90,14 +103,6 @@ namespace MaxyGames.UNode.Nodes {
 		/// </summary>
 		public virtual void OnExit(Flow flow) {
 			m_onExit?.Invoke(flow);
-			////Stop all running coroutine flows
-			//foreach(var element in nodeObject.GetObjectsInChildren(true)) {
-			//	if(element is NodeObject node && node.node is not BaseEventNode) {
-			//		foreach(var port in node.FlowInputs) {
-			//			flow.instance.StopState(port);
-			//		}
-			//	}
-			//}
 		}
 
 		/// <summary>

@@ -6,6 +6,7 @@ namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Yield", "WaitWhile", IsCoroutine = true, hasFlowOutput = true, hasFlowInput = true)]
 	[Description("Waits until condition evaluate to false.")]
 	public class NodeWaitWhile : CoroutineNode, IStackedNode {
+		[Hide]
 		public BlockData data = new BlockData();
 
 		public IEnumerable<NodeObject> StackedNodes => data.GetNodes();
@@ -23,7 +24,8 @@ namespace MaxyGames.UNode.Nodes {
 			if(CG.IsStateFlow(enter)) {
 				CG.SetStateInitialization(enter, () => {
 					return CG.Routine(
-						CG.Routine(CG.SimplifiedLambda(CG.New(typeof(WaitWhile), CG.SimplifiedLambda(data.GenerateConditionCode())))),
+						CG.Invoke(typeof(Runtime.Routine), nameof(Runtime.Routine.WaitWhile), CG.SimplifiedLambda(data.GenerateConditionCode())),
+						//CG.Routine(CG.SimplifiedLambda(CG.New(typeof(WaitWhile), CG.SimplifiedLambda(data.GenerateConditionCode())))),
 						exit.isAssigned ? CG.Routine(CG.GetEvent(exit)) : null
 					);
 				});

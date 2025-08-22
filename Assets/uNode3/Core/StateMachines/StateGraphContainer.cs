@@ -6,13 +6,13 @@ using UnityEngine;
 namespace MaxyGames.UNode {
 	[EventGraph("StateMachine")]
 	public class StateGraphContainer : NodeContainerWithEntry, IEventGraphCanvas, IIcon, IGeneratorPrePostInitializer {
-		//public enum UpdateType {
-		//	Update,
-		//	FixedUpdate,
-		//	LateUpdate,
-		//	Manual,
-		//}
-		//public UpdateType updateType = UpdateType.Update;
+		public enum UpdateType {
+			Update,
+			FixedUpdate,
+			LateUpdate,
+			Manual,
+		}
+		public UpdateType updateType = UpdateType.Update;
 
 		public string Title => name;
 
@@ -58,26 +58,23 @@ namespace MaxyGames.UNode {
 				}
 			};
 			instance.SetUserData(this, fsm);
-			UEvent.Register(UEventID.Update, instance.target as Component, () => {
-				fsm.Tick();
-			});
-			//switch(updateType) {
-			//	case UpdateType.Update:
-			//		UEvent.Register(UEventID.Update, instance.target as Component, () => {
-			//			fsm.Tick();
-			//		});
-			//		break;
-			//	case UpdateType.FixedUpdate:
-			//		UEvent.Register(UEventID.FixedUpdate, instance.target as Component, () => {
-			//			fsm.Tick();
-			//		});
-			//		break;
-			//	case UpdateType.LateUpdate:
-			//		UEvent.Register(UEventID.LateUpdate, instance.target as Component, () => {
-			//			fsm.Tick();
-			//		});
-			//		break;
-			//}
+			switch(updateType) {
+				case UpdateType.Update:
+					UEvent.Register(UEventID.Update, instance.target as Component, () => {
+						fsm.Tick();
+					});
+					break;
+				case UpdateType.FixedUpdate:
+					UEvent.Register(UEventID.FixedUpdate, instance.target as Component, () => {
+						fsm.Tick();
+					});
+					break;
+				case UpdateType.LateUpdate:
+					UEvent.Register(UEventID.LateUpdate, instance.target as Component, () => {
+						fsm.Tick();
+					});
+					break;
+			}
 		}
 
 		void IGeneratorPrePostInitializer.OnPostInitializer() { }
@@ -101,11 +98,9 @@ namespace MaxyGames.UNode {
 						CG.InsertCodeToFunction("Awake", CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.ChangeState), state), int.MaxValue);
 					}
 				}
-
-				CG.InsertCodeToFunction("Update", CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.Tick)));
-				//if(updateType != UpdateType.Manual) {
-				//	CG.InsertCodeToFunction(updateType.ToString(), CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.Tick)));
-				//}
+				if(updateType != UpdateType.Manual) {
+					CG.InsertCodeToFunction(updateType.ToString(), CG.FlowInvoke(fsm, nameof(StateMachines.IStateMachine.Tick)));
+				}
 			});
 		}
 	}

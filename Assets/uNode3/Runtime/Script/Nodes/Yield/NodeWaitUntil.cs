@@ -23,7 +23,8 @@ namespace MaxyGames.UNode.Nodes {
 			if(CG.IsStateFlow(enter)) {
 				CG.SetStateInitialization(enter, () => {
 					return CG.Routine(
-						CG.Routine(CG.SimplifiedLambda(CG.New(typeof(WaitUntil), CG.SimplifiedLambda(data.GenerateConditionCode())))),
+						CG.Invoke(typeof(Runtime.Routine), nameof(Runtime.Routine.WaitUntil), CG.SimplifiedLambda(data.GenerateConditionCode())),
+						//CG.Routine(CG.SimplifiedLambda(CG.New(typeof(WaitUntil), CG.SimplifiedLambda(data.GenerateConditionCode())))),
 						exit.isAssigned ? CG.Routine(CG.GetEvent(exit)) : null
 					);
 				});
