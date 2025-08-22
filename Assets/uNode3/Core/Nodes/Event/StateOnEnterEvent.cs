@@ -9,10 +9,12 @@ namespace MaxyGames.UNode.Nodes {
 	public class StateOnEnterEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			if(nodeObject.parent is NodeObject parentNode && parentNode.node is INodeWithEnterExitEvent state) {
-				state.OnEnterCallback += (flow) => {
-					Trigger(flow);
-				};
+				state.OnEnterCallback += Call;
 			}
+		}
+
+		void Call(Flow flow) {
+			Trigger(flow);
 		}
 
 		public override string GetTitle() => "On State Enter";

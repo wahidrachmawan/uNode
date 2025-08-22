@@ -10,8 +10,12 @@ namespace MaxyGames.UNode.Nodes {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			var state = nodeObject.GetNodeInParent<INodeWithEnterExitEvent>();
 			if(state != null) {
-				state.OnExitCallback += flow => Trigger(flow);
+				state.OnExitCallback += Call;
 			}
+		}
+
+		void Call(Flow flow) {
+			Trigger(flow);
 		}
 
 		public override string GetTitle() => "On State Exit";

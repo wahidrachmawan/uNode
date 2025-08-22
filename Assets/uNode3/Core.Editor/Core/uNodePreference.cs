@@ -171,6 +171,9 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				[Hide(nameof(compileInBackground), false)]
 				[Tooltip("If true, will auto generates script on save graph.")]
 				public bool autoGenerateOnSave;
+				[Hide(nameof(compilationMethod), CompilationMethod.Unity)]
+				[Tooltip("If true, will auto remove generated scripts after build for runtime graphs")]
+				public bool autoRemoveGeneratedScriptAfterBuild;
 
 				[Header("Others")]
 				[Tooltip("Analyze the generated script with Roslyn")]

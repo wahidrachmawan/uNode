@@ -1,5 +1,12 @@
 # Changelog
 
+## v3.2.2
+- Now you can have flow node inside Any State node
+- Added On State Update event to listed for State Machine tick
+- Added ability to change State Machine update type ( Update, Fixed Update, Late Update or Manual )
+- Improved Editor
+- Fixed some bugs
+
 ## v3.2.1
 - Added encapsulate variable to property context menu
 - Added ability to implement interface property

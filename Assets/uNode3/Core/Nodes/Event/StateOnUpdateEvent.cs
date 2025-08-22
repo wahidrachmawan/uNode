@@ -9,10 +9,12 @@ namespace MaxyGames.UNode.Nodes {
 	public class StateOnUpdateEvent : BaseGraphEvent {
 		public override void OnRuntimeInitialize(GraphInstance instance) {
 			if(nodeObject.parent is NodeObject parentNode && parentNode.node is INodeWithUpdateEvent state) {
-				state.OnUpdateCallback += (flow) => {
-					Trigger(flow);
-				};
+				state.OnUpdateCallback += Call;
 			}
+		}
+
+		void Call(Flow flow) {
+			Trigger(flow);
 		}
 
 		public override string GetTitle() => "On State Update";
