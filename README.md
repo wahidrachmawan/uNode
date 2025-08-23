@@ -1,5 +1,5 @@
 <p align="center">
-<img src="images/logo.png">
+<img src="images/logo.png" width="400" height="200">
 </p>
 
 uNode is a powerful visual scripting solution for Unity. It allows you to create complex game logic, AI behaviors, and interactions without writing a single line of code. Whether you're a beginner or an experienced developer, uNode empowers you to build interactive systems using a visual interface.
