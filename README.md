@@ -10,6 +10,7 @@ Download: [latest ](https://github.com/wahidrachmawan/uNode/releases)| [pro vers
 <a href="https://github.com/wahidrachmawan/uNode/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2.0-blue.svg" alt="License: Apache-2.0"></a>
 <a href="https://github.com/wahidrachmawan/uNode/releases/latest"><img src="https://img.shields.io/github/release/wahidrachmawan/uNode.svg" alt="release"></a>
 <a href="https://discord.gg/8ufevvN"><img src="https://img.shields.io/discord/503209099081678860.svg" alt="Discord"></a>
+<img alt="GitHub last commit" src ="https://img.shields.io/github/last-commit/wahidrachmawan/uNode" />
 </p>
 
 ## **Why uNode**
@@ -87,7 +88,7 @@ uNode has 2 options to run the graphs:
 https://github.com/wahidrachmawan/uNode.git?path=Assets/uNode3
 ```
 
-Alternatively, open Packages/manifest.json and add the following to the dependencies block:
+Or, open Packages/manifest.json and add the following to the dependencies block:
 
 ```json
 {
@@ -96,6 +97,13 @@ Alternatively, open Packages/manifest.json and add the following to the dependen
     }
 }
 ```
+
+Or through OpenUM openupm:  
+[![openupm](https://img.shields.io/npm/v/com.maxygames.unode?label=uNode&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.maxygames.unode/)
+
+Or through a Unity Package:
+
+[<img src="https://img.shields.io/npm/v/com.maxygames.unode?label=download&labelColor=green&registry_uri=https://package.openupm.com"/>](http://package-installer.needle.tools/v1/installer/Openupm/com.maxygames.unode?registry=https://package.openupm.com)
 
 ## **Gallery**
 
