@@ -341,6 +341,15 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private string GetDebugName() {
+			if(graphData.graph is IScriptGraphType scriptGraph) {
+				var data = scriptGraph.ScriptTypeData?.scriptGraph?.ScriptData;
+				if(data != null) {
+					if(data.debug == false) {
+						return "Debug: Disable";
+					}
+				}
+			}
+
 			string names = "None";
 
 			if(!GraphDebug.useDebug) {

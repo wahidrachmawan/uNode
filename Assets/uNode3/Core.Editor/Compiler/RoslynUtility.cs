@@ -89,6 +89,9 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
+	/// <summary>
+	/// Utility class for compiling scripts using Roslyn.
+	/// </summary>
 	public static class RoslynUtility {
 		public static IList<Assembly> assemblies;
 
@@ -99,13 +102,26 @@ namespace MaxyGames.UNode.Editors {
 			public static Func<CompilationMethod> compilationMethod;
 			public static string tempAssemblyPath;
 		}
-		#endregion
 
-		#region Compiles
+		/// <summary>
+		/// Compiles a collection of C# script source codes into an assembly using the Roslyn compiler.
+		/// Generates a random assembly name and returns a CompileResult encapsulating
+		/// the compiled assembly bytes, debug symbols (if available), and any compilation errors.
+		/// </summary>
+		/// <param name="scripts">An enumerable collection of C# script source strings to compile.</param>
+		/// <returns>A CompileResult object representing the outcome of the compilation process.</returns>
 		public static CompileResult CompileScript(IEnumerable<string> scripts) {
 			return CompileScript(CachedData.randomAssemblyName, scripts);
 		}
 
+		/// <summary>
+		/// Compiles the provided scripts into an assembly with the specified name.
+		/// </summary>
+		/// <param name="assemblyName">The name of the assembly to be created.</param>
+		/// <param name="scripts">A collection of script source code strings to be compiled.  Cannot be <see langword="null"/>.</param>
+		/// <returns>A <see cref="CompileResult"/> representing the result of the compilation,  including the compiled assembly and any
+		/// diagnostic information.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="scripts"/> is <see langword="null"/>.</exception>
 		public static CompileResult CompileScript(string assemblyName, IEnumerable<string> scripts) {
 			if(scripts == null) {
 				throw new ArgumentNullException(nameof(scripts));
@@ -114,10 +130,25 @@ namespace MaxyGames.UNode.Editors {
 			return DoCompile(assemblyName, trees);
 		}
 
+		/// <summary>
+		/// Compiles the specified source files into an assembly.
+		/// </summary>
+		/// <param name="files">A collection of file paths representing the source files to compile.  Each file must contain valid source code.</param>
+		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation,  including any errors or warnings
+		/// encountered.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="files"/> is <see langword="null"/>.</exception>
 		public static CompileResult CompileFiles(IEnumerable<string> files) {
 			return CompileFiles(CachedData.randomAssemblyName, files);
 		}
 
+		/// <summary>
+		/// Compiles the specified source files into an assembly with the given name.
+		/// </summary>
+		/// <param name="assemblyName">The name of the assembly to be created.</param>
+		/// <param name="files">A collection of file paths representing the source files to compile.  Each file must contain valid source code.</param>
+		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation,  including any errors or warnings
+		/// encountered.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="files"/> is <see langword="null"/>.</exception>
 		public static CompileResult CompileFiles(string assemblyName, IEnumerable<string> files) {
 			if(files == null) {
 				throw new ArgumentNullException(nameof(files));
@@ -126,6 +157,20 @@ namespace MaxyGames.UNode.Editors {
 			return DoCompile(assemblyName, trees, embeddedTexts);
 		}
 
+		/// <summary>
+		/// Compiles the provided C# scripts into an assembly and optionally saves it to the specified path.
+		/// </summary>
+		/// <remarks>This method compiles the provided scripts into a single assembly. If <paramref name="savePath"/>
+		/// is specified, the assembly is saved to the given path. The <paramref name="loadAssembly"/> parameter determines
+		/// whether the compiled assembly is loaded into memory after compilation.</remarks>
+		/// <param name="assemblyName">The name of the assembly to be created. This value is used as the assembly's identifier.</param>
+		/// <param name="scripts">A collection of C# script strings to be compiled. Cannot be <see langword="null"/>.</param>
+		/// <param name="savePath">The file path where the compiled assembly will be saved. If <see langword="null"/> or empty, the assembly will not
+		/// be saved to disk.</param>
+		/// <param name="loadAssembly">A value indicating whether the compiled assembly should be loaded into the current application domain.</param>
+		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation, including any errors or the
+		/// compiled assembly.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="scripts"/> is <see langword="null"/>.</exception>
 		public static CompileResult CompileScriptAndSave(string assemblyName, IEnumerable<string> scripts, string savePath, bool loadAssembly) {
 			if(scripts == null) {
 				throw new ArgumentNullException(nameof(scripts));
@@ -134,6 +179,21 @@ namespace MaxyGames.UNode.Editors {
 			return DoCompileAndSave(assemblyName, trees, savePath, loadAssembly: loadAssembly);
 		}
 
+		/// <summary>
+		/// Compiles the specified source files into an assembly and optionally saves it to the specified path.
+		/// </summary>
+		/// <remarks>This method compiles the provided source files into an assembly using the specified assembly
+		/// name. If <paramref name="savePath"/> is provided, the compiled assembly will be saved to the specified location.
+		/// If <paramref name="loadAssembly"/> is <see langword="true"/>, the compiled assembly will also be loaded into the
+		/// current application domain.</remarks>
+		/// <param name="assemblyName">The name of the assembly to be created.</param>
+		/// <param name="files">A collection of file paths containing the source code to compile. Cannot be <see langword="null"/>.</param>
+		/// <param name="savePath">The file path where the compiled assembly will be saved. If <see langword="null"/> or empty, the assembly will not
+		/// be saved to disk.</param>
+		/// <param name="loadAssembly">A value indicating whether the compiled assembly should be loaded into the current application domain.</param>
+		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation, including any diagnostics and the
+		/// compiled assembly, if applicable.</returns>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="files"/> is <see langword="null"/>.</exception>
 		public static CompileResult CompileFilesAndSave(string assemblyName, IEnumerable<string> files, string savePath, bool loadAssembly) {
 			if(files == null) {
 				throw new ArgumentNullException(nameof(files));
@@ -529,6 +589,14 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		/// <summary>
+		/// Parses the provided C# script and returns its syntax tree as a <see cref="CompilationUnitSyntax"/>.
+		/// </summary>
+		/// <remarks>This method uses the default C# parsing options, including any preprocessor symbols defined by
+		/// the <c>GetPreprocessorSymbols</c> method.</remarks>
+		/// <param name="script">The C# script to parse. Cannot be <see langword="null"/>.</param>
+		/// <returns>The root node of the syntax tree, represented as a <see cref="CompilationUnitSyntax"/>.</returns>
+		/// <exception cref="NullReferenceException">Thrown if <paramref name="script"/> is <see langword="null"/>.</exception>
 		public static CompilationUnitSyntax GetSyntaxTree(string script) {
 			if(script == null) {
 				throw new NullReferenceException("Can't parse, Scripts is null");
@@ -537,6 +605,18 @@ namespace MaxyGames.UNode.Editors {
 			return (CompilationUnitSyntax)tree.GetRoot();
 		}
 
+		/// <summary>
+		/// Parses the provided C# script into a syntax tree and retrieves its semantic model.
+		/// </summary>
+		/// <remarks>This method creates a new compilation using the provided script and optional references. The
+		/// returned <see cref="CompilationUnitSyntax"/> represents the root of the syntax tree for the script, and the
+		/// <paramref name="model"/> provides semantic information for the tree.</remarks>
+		/// <param name="script">The C# script to parse. This parameter cannot be <see langword="null"/>.</param>
+		/// <param name="model">When this method returns, contains the <see cref="SemanticModel"/> associated with the parsed syntax tree.</param>
+		/// <param name="references">An optional collection of additional syntax trees to include in the compilation. If <see langword="null"/>, no
+		/// additional syntax trees are included.</param>
+		/// <returns>The root node of the parsed syntax tree as a <see cref="CompilationUnitSyntax"/>.</returns>
+		/// <exception cref="NullReferenceException">Thrown if <paramref name="script"/> is <see langword="null"/>.</exception>
 		public static CompilationUnitSyntax GetSyntaxTree(string script, out SemanticModel model, IEnumerable<Syntax> references = null) {
 			if(script == null) {
 				throw new NullReferenceException("Can't parse, Scripts is null");
@@ -551,6 +631,16 @@ namespace MaxyGames.UNode.Editors {
 			return (CompilationUnitSyntax)tree.GetRoot();
 		}
 
+		/// <summary>
+		/// Retrieves the line number in the source file where the specified member is declared.
+		/// </summary>
+		/// <remarks>This method parses the source file specified by <paramref name="path"/> to locate the declaration
+		/// of the member represented by <paramref name="info"/>. It supports various member types, including types, fields,
+		/// events, properties, methods, and constructors. If the member is not found in the file, the method returns
+		/// -1.</remarks>
+		/// <param name="info">The <see cref="MemberInfo"/> object representing the member whose line number is to be retrieved.</param>
+		/// <param name="path">The full path to the source file containing the member's declaration.</param>
+		/// <returns>The 1-based line number in the source file where the member is declared, or -1 if the member cannot be found.</returns>
 		public static int GetLineForMember(MemberInfo info, string path) {
 			var syntaxTree = GetSyntaxTree(File.ReadAllText(path), out var model);
 			switch(info.MemberType) {

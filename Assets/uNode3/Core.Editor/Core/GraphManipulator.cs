@@ -1742,7 +1742,7 @@ namespace MaxyGames.UNode.Editors {
 				if(graphData.graph is IStateGraph state && state.CanCreateStateGraph) {
 					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
 					yield return new ContextMenuItem("Add State", evt => {
-						EditorUtility.DisplayDialog("", "This state is obsolete, please use new state machine instead.", "OK");
+						//EditorUtility.DisplayDialog("", "This state is obsolete, please use new state machine instead.", "OK");
 						NodeEditorUtility.AddNewNode<Nodes.StateNode>(graphData,
 							"State",
 							mousePosition);

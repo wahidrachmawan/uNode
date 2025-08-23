@@ -111,14 +111,6 @@ namespace MaxyGames {
 					}
 					if(debugScript && setting.debugValueNode) {
 						return Debug(port, GeneratePort(tPort), setVariable);
-
-						//if (!generatorData.debugMemberMap.ContainsKey(port)) {
-						//	generatorData.debugMemberMap.Add(port, new KeyValuePair<int, string>(generatorData.newDebugMapID,
-						//		Debug(port, "debugValue").AddLineInFirst() +
-						//		("return debugValue;").AddLineInFirst()
-						//	));
-						//}
-						//return KEY_debugGetValueCode + "(" + generatorData.debugMemberMap[port].Key + ", " + GeneratePort(tPort) + ")";
 					}
 					return GeneratePort(tPort);
 				}
@@ -187,9 +179,6 @@ namespace MaxyGames {
 				generatorData.hasError = true;
 				throw;
 			}
-			//if(string.IsNullOrEmpty(data)) {
-			//	Debug.Log("Node not generated data", target);
-			//}
 			if(!isInUngrouped)
 				generatorData.generatedData.Add(port, data);
 			return data;
@@ -202,6 +191,7 @@ namespace MaxyGames {
 			if(!port.isValid)
 				return null;
 			if(generationState.state == State.Classes) {
+				// If we are in classes generation state, we cannot generate port code.
 				throw new Exception("Forbidden to generate port code because it's still in Initialization");
 			}
 			string data;
@@ -231,8 +221,7 @@ namespace MaxyGames {
 								"Error from node:" + node.name + " |Type:" + node.node.GetType() +
 								"\nFrom graph:" + node.graphContainer.GetGraphName(),
 								ex, node));
-						//In case async return error commentaries (See uNode Console).
-						//uNodeDebug.LogError("Error from node:" + target.gameObject.name + " |Type:" + target.GetType(), target);
+						//In case async return error commentaries.
 						return WrapWithInformation($"/*Error from node: {node.name} with id: {node.id} */", node);
 					}
 					UnityEngine.Debug.LogError(
@@ -434,7 +423,7 @@ namespace MaxyGames {
 		/// <param name="flowConnection"></param>
 		/// <returns></returns>
 		public static string FlowFinish(FlowInput input, params FlowOutput[] flowConnection) {
-			return FlowFinish(input, true, false, false, flowConnection);
+			return FlowFinish(input, true, false, flowConnection);
 		}
 
 		/// <summary>
@@ -445,19 +434,7 @@ namespace MaxyGames {
 		/// <param name="flowConnection"></param>
 		/// <returns></returns>
 		public static string FlowFinish(FlowInput input, bool isSuccess, params FlowOutput[] flowConnection) {
-			return FlowFinish(input, isSuccess, true, false, flowConnection);
-		}
-
-		/// <summary>
-		/// Generate finish code for node.
-		/// </summary>
-		/// <param name="node"></param>
-		/// <param name="isSuccess"></param>
-		/// <param name="alwaysHaveReturnValue"></param>
-		/// <param name="flowConnection"></param>
-		/// <returns></returns>
-		public static string FlowFinish(FlowInput input, bool isSuccess, bool alwaysHaveReturnValue, params FlowOutput[] flowConnection) {
-			return FlowFinish(input, isSuccess, alwaysHaveReturnValue, false, flowConnection);
+			return FlowFinish(input, isSuccess, true, flowConnection);
 		}
 
 		/// <summary>
@@ -469,7 +446,7 @@ namespace MaxyGames {
 		/// <param name="breakCoroutine"></param>
 		/// <param name="flowConnection"></param>
 		/// <returns></returns>
-		public static string FlowFinish(FlowInput input, bool isSuccess, bool alwaysHaveReturnValue, bool breakCoroutine = false, params FlowOutput[] flowConnection) {
+		public static string FlowFinish(FlowInput input, bool isSuccess, bool alwaysHaveReturnValue, params FlowOutput[] flowConnection) {
 			string result = null;
 			if(isSuccess) {
 				string success = null;
@@ -478,15 +455,10 @@ namespace MaxyGames {
 				}
 				result = success;
 				if(alwaysHaveReturnValue) {
-					result += GetReturnValue(input, true, breakCoroutine).AddFirst("\n", result);
+					result += GetReturnValue(input, true, false).AddFirst("\n", result);
 				}
 				else {
-					if(breakCoroutine && input.IsSelfCoroutine()) {
-						result = success.Add("\n") + "yield break;";
-					}
-					else {
-						result = success;
-					}
+					result = success;
 				}
 			}
 			else {
@@ -496,15 +468,10 @@ namespace MaxyGames {
 				}
 				result = failure;
 				if(alwaysHaveReturnValue) {
-					result += GetReturnValue(input, false, breakCoroutine).AddFirst("\n", result);
+					result += GetReturnValue(input, false, false).AddFirst("\n", result);
 				}
 				else {
-					if(breakCoroutine && input.IsSelfCoroutine()) {
-						result = failure.Add("\n") + "yield break;";
-					}
-					else {
-						result = failure;
-					}
+					result = failure;
 				}
 			}
 			result = result.AddLineInFirst();
