@@ -118,7 +118,7 @@ namespace MaxyGames.UNode.Editors {
 		void UpdateEdgeLabels() {
 			foreach(var port in outputPorts) {
 				if(port != defaultPort && port.userData is Nodes.NodeSwitch.Data data) {
-					var label = data.value.GetDisplayName(DisplayKind.Default);
+					var label = data.value.GetDisplayName(DisplayKind.Normal);
 					foreach(var edge in port.GetValidEdges()) {
 						edge.SetEdgeLabel(label);
 					}

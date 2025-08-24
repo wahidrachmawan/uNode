@@ -16,4 +16,13 @@ namespace MaxyGames.UNode {
 			this.isElementType = isElementType;
 		}
 	}
+
+	[System.AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = true)]
+	public class GraphGuidAttribute : UnityEngine.PropertyAttribute {
+		public string guid;
+
+		public GraphGuidAttribute(string guid) {
+			this.guid = guid;
+		}
+	}
 }

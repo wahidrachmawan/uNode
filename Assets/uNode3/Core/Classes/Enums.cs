@@ -103,7 +103,7 @@
 	}
 
 	public enum DisplayKind {
-		Default,
+		Normal,
 		Partial,
 		Full,
 	}

@@ -166,6 +166,21 @@ namespace MaxyGames.UNode {
 			return data;
 		}
 
+		public string GetGraphUID(GraphAsset graphAsset) {
+			foreach(var db in graphDatabases) {
+				if(db.asset == graphAsset) {
+					return db.assetGuid;
+				}
+			}
+#if UNITY_EDITOR
+			var path = UnityEditor.AssetDatabase.GetAssetPath(graphAsset);
+			if(!string.IsNullOrEmpty(path)) { 
+				return UnityEditor.AssetDatabase.AssetPathToGUID(path);
+			}
+#endif
+			return string.Empty;
+		}
+
 		private Dictionary<string, IGlobalEvent> globalEventDBMap = new Dictionary<string, IGlobalEvent>();
 		public IGlobalEvent GetGlobalEvent(string guid) {
 			if(!globalEventDBMap.TryGetValue(guid, out var data)) {

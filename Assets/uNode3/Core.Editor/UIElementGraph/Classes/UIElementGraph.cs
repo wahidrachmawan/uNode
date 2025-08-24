@@ -699,8 +699,8 @@ namespace MaxyGames.UNode.Editors {
 								uNodePreference.PreferencesGUI();
 							});
 						});
-						menu.AddItem(new GUIContent("Node Display/Default"), uNodePreference.preferenceData.displayKind == DisplayKind.Default, () => {
-							uNodePreference.preferenceData.displayKind = DisplayKind.Default;
+						menu.AddItem(new GUIContent("Node Display/Normal"), uNodePreference.preferenceData.displayKind == DisplayKind.Normal, () => {
+							uNodePreference.preferenceData.displayKind = DisplayKind.Normal;
 							uNodePreference.SavePreference();
 							uNodeGUIUtility.GUIChangedMajor(null);
 						});
@@ -741,6 +741,11 @@ namespace MaxyGames.UNode.Editors {
 						menu.AddItem(new GUIContent("Node Creator Wizard"), false, () => {
 							NodeCreatorWindow.ShowWindow();
 						});
+#if UNODE_PRO
+						menu.AddItem(new GUIContent("Live C# Preview"), false, () => {
+							uNodeEditorUtility.ProBinding.CallbackShowCSharpPreview?.Invoke();
+						});
+#endif
 						//menu.AddSeparator("");
 						//menu.AddItem(new GUIContent("Import"), false, () => {
 						//	ActionWindow.ShowWindow(() => {

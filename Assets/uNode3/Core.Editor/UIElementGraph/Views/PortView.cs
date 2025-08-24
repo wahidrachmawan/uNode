@@ -314,8 +314,8 @@ namespace MaxyGames.UNode.Editors {
 					return proxyTitleBox.layout.width + 20;
 				}
 			}
-			if(inputView != null && inputView.data.port.UseDefaultValue) {
-				return inputView.layout.width + 20;
+			if(inputView != null && inputView.data.port.UseDefaultValue && inputView.container != null) {
+				return inputView.container.layout.width + 20;
 			}
 			return 0;
 		}

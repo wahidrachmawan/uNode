@@ -22,7 +22,7 @@ namespace MaxyGames.UNode.Editors {
 		public ValueInputData data { get; private set; }
 
 		VisualElement m_Control;
-		VisualElement m_Container;
+		public VisualElement container { get; private set; }
 		VisualElement m_Dot;
 		EdgeControl m_EdgeControl;
 
@@ -39,11 +39,11 @@ namespace MaxyGames.UNode.Editors {
 		void DoUpdate() {
 			var color = edgeColor;
 			if(data.port.UseDefaultValue) {
-				if(m_Container == null) {
+				if(container == null) {
 					InitializeControl();
-				} else if(m_Container.parent == null) {
+				} else if(container.parent == null) {
 					Add(m_EdgeControl);
-					Add(m_Container);
+					Add(container);
 				}
 				m_EdgeControl.inputColor = color;
 				m_EdgeControl.outputColor = color;
@@ -51,10 +51,10 @@ namespace MaxyGames.UNode.Editors {
 					m_Dot.style.backgroundColor = color;
 				}
 				if(UIElementUtility.Theme.coloredPortBorder) {
-					m_Container.style.SetBorderColor(color);
+					container.style.SetBorderColor(color);
 				}
-			} else if(m_Container?.parent != null) {
-				m_Container.RemoveFromHierarchy();
+			} else if(container?.parent != null) {
+				container.RemoveFromHierarchy();
 				m_EdgeControl.RemoveFromHierarchy();
 			}
 		}
@@ -68,13 +68,13 @@ namespace MaxyGames.UNode.Editors {
 			};
 			Add(m_EdgeControl);
 
-			m_Container = new VisualElement { name = "container" };
+			container = new VisualElement { name = "container" };
 			{
 				if(this.data != null) {
 					m_Control = this.data.InstantiateControl();
 					if(m_Control != null) {
 						m_Control.AddToClassList("port-control");
-						m_Container.Add(m_Control);
+						container.Add(m_Control);
 					}
 				}
 
@@ -88,25 +88,25 @@ namespace MaxyGames.UNode.Editors {
 				{
 					slotContainer.Add(slotElement);
 				}
-				m_Container.Add(slotContainer);
+				container.Add(slotContainer);
 			}
-			Add(m_Container);
+			Add(container);
 		}
 
 		private void OnCustomStyleResolved(CustomStyleResolvedEvent evt) {
-			if(m_Container != null && m_Container.visible) {
+			if(container != null && container.visible) {
 				m_EdgeControl.UpdateLayout();
 			}
 		}
 
 		public float GetPortWidth() {
-			if(m_Container == null || m_Container.parent == null)
+			if(container == null || container.parent == null)
 				return 0;
-			return m_Container.layout.width;
+			return container.layout.width;
 		}
 
 		public bool IsControlVisible() {
-			return m_Container != null && m_Container.parent != null;
+			return container != null && container.parent != null;
 		}
 	}
 }

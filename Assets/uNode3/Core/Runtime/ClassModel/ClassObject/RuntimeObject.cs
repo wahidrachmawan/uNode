@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode {
 	#region Base Classes
+	[Serializable]
 	public abstract class BaseRuntimeObject : IRuntimeClass {
 		public abstract string uniqueIdentifier { get; }
 

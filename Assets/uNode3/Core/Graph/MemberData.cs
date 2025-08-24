@@ -761,6 +761,21 @@ namespace MaxyGames.UNode {
 		}
 
 		/// <summary>
+		/// Return true if this member have parameters.
+		/// </summary>
+		public bool HasParameters {
+			get {
+				if(Items != null) {
+					for(int i = 0; i < Items.Length; i++) {
+						if(Items[i].parameters?.Length > 0)
+							return true;
+					}
+				}
+				return false;
+			}
+		}
+
+		/// <summary>
 		/// The all generic type this member have, null if does not.
 		/// </summary>
 		public Type[][] GenericTypes {

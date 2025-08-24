@@ -257,7 +257,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							if(member.Name.StartsWith("get_", StringComparison.Ordinal) || member.Name.StartsWith("set_", StringComparison.Ordinal)) {
 								continue;
 							}
-							if(!graph.GetFunction(
+							if(member.IsAbstract && !graph.GetFunction(
 								member.Name,
 								member.GetGenericArguments().Length,
 								member.GetParameters().Select(item => item.ParameterType).ToArray())) {

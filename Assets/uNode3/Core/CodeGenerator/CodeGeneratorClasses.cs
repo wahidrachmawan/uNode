@@ -1337,6 +1337,34 @@ namespace MaxyGames {
 							result += code.AddFirst("\n", !string.IsNullOrEmpty(result));
 						}
 					}
+					if(generatePureScript == false && ReflectionUtils.IsNativeType(type) == false) {
+						if(type.HasElementType || type.HasImplementInterface(typeof(IList<>))) {
+							var elementType = type.ElementType();
+							if(elementType is RuntimeGraphType graphType) {
+								result += Attribute(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).AddFirst("\n", !string.IsNullOrEmpty(result));
+							}
+						}
+						else {
+							if(type is RuntimeGraphType graphType) {
+								result += Attribute(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).AddFirst("\n", !string.IsNullOrEmpty(result));
+							}
+						}
+						if(modifier != null && modifier.Public && attributes.Any(a => a.attributeType == typeof(SerializeField) || a.attributeType == typeof(SerializeReference)) == false) {
+							if(type.IsCastableTo(typeof(UnityEngine.Object)) == false) {
+								if(type.HasElementType || type.HasImplementInterface(typeof(IList<>))) {
+									var elementType = type.ElementType();
+									if(elementType is RuntimeGraphType graphType) {
+										if(elementType.IsCastableTo(typeof(UnityEngine.Object)) == false) {
+											result += Attribute(typeof(SerializeReference)).AddFirst("\n", !string.IsNullOrEmpty(result));
+										}
+									}
+								}
+								else {
+									result += Attribute(typeof(SerializeReference)).AddFirst("\n", !string.IsNullOrEmpty(result));
+								}
+							}
+						}
+					}
 				}
 				string m = null;
 				if(modifier != null) {
@@ -1745,6 +1773,21 @@ namespace MaxyGames {
 						result += att.GenerateCode().Add(" ");
 					}
 				}
+
+				if(generatePureScript == false && ReflectionUtils.IsNativeType(type) == false) {
+					if(type.HasElementType || type.HasImplementInterface(typeof(IList<>))) {
+						var elementType = type.ElementType();
+						if(elementType is RuntimeGraphType graphType) {
+							result += new AData(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).GenerateCode().Add(" ");
+						}
+					}
+					else {
+						if(type is RuntimeGraphType graphType) {
+							result += new AData(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).GenerateCode().Add(" ");
+						}
+					}
+				}
+
 				switch(refKind) {
 					case RefKind.In:
 						result += "in ";

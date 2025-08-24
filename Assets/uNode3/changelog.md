@@ -4,6 +4,10 @@
 - Now you can have flow node inside Any State node
 - Added On State Update event to listed for State Machine tick
 - Added ability to change State Machine update type ( Update, Fixed Update, Late Update or Manual )
+- Added GraphGuid attribute for referencing runtime graph in inspector, this will be auto added to generated variable when the type is from runtime graphs
+- Added 'Parse Script' menu on right clicking script file to quickly parse c# script to graph
+- Added 'Parse Script to Graph' button in the inspector when selecting c# script
+- Improved C# Parse
 - Improved Editor
 - Fixed some bugs
 

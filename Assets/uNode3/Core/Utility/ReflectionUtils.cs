@@ -1950,6 +1950,11 @@ namespace MaxyGames.UNode {
 						type = GetMemberType(member[0]);
 					}
 					else {
+						if(type.IsByRef) {
+							type = type.GetElementType();
+							i--;
+							continue;
+						}
 						if(throwOnFail) {
 							throw new System.Exception("Member not found at path:" + string.Join('.', path.Select(p => p.GetActualName())) +
 								", maybe you have wrong type, member name changed or wrong target.\ntype:" +

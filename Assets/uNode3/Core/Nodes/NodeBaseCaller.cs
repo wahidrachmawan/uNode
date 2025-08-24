@@ -42,7 +42,7 @@ namespace MaxyGames.UNode {
 		public override string GetRichTitle() {
 			var kind = uNodeUtility.preferredDisplay;
 			if(kind == DisplayKind.Partial)
-				kind = DisplayKind.Default;
+				kind = DisplayKind.Normal;
 			var strs = uNodeUtility.GetNicelyDisplayName(target, kind).Split('.');
 			strs[0] = uNodeUtility.WrapTextWithKeywordColor("base");
 			return string.Join('.', strs);

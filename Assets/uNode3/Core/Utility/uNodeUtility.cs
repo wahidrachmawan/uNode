@@ -80,7 +80,7 @@ namespace MaxyGames.UNode {
 				return preferredDisplay == DisplayKind.Full;
 			}
 		}
-		public static DisplayKind preferredDisplay = DisplayKind.Default;
+		public static DisplayKind preferredDisplay = DisplayKind.Normal;
 
 		/// <summary>
 		/// True if undo / redo action is performed.
