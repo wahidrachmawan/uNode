@@ -308,7 +308,11 @@ namespace MaxyGames.UNode.Editors {
 									NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.NodeReroute node) => {
 										node.kind = Nodes.NodeReroute.RerouteKind.Value;
 										node.Register();
-										var con = Connection.CreateAndConnect(port.GetPortValue(), node.output);
+										var input = port.GetPortValue();
+										if(input is ValueInput valueInput && valueInput.UseDefaultValue) {
+											node.input.AssignToDefault(new(valueInput.DefaultValue));
+										}
+										var con = Connection.CreateAndConnect(input, node.output);
 										NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
 										port.owner.owner.MarkRepaint();
 									});

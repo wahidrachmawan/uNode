@@ -70,7 +70,6 @@ uNode has 2 options to run the graphs:
 * **Development Platforms:** Support all platforms that Unity support.
 * Works on Unity Pro and Free
 * uNode 3 uses of Odin Serializer, therefore API compatibility level **.NET 4.x** is required.
-* uNode 3 is not compatible with uNode 2.
 
 ## **Setup**
 

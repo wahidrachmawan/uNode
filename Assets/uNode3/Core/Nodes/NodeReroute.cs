@@ -49,7 +49,7 @@ namespace MaxyGames.UNode.Nodes {
 					enter.isCoroutine = exit.IsCoroutine;
 					break;
 				case RerouteKind.Value:
-					input = ValueInput(nameof(input), ReturnType, MemberData.None);
+					input = ValueInput(nameof(input), ReturnType);
 					input.canSetValue = () => {
 						var target = input.GetTargetPort();
 						if(target != null) {
@@ -74,6 +74,11 @@ namespace MaxyGames.UNode.Nodes {
 		protected override Type ReturnType() {
 			if(input == null)
 				return typeof(object);
+			if(input.UseDefaultValue) {
+				if(input.DefaultValue.IsTargetingValue && output.hasValidConnections) {
+					return output.connections.First(c => c.isValid).input.type;
+				}
+			}
 			return input.ValueType;
 		}
 
