@@ -290,10 +290,10 @@ namespace MaxyGames.UNode.Editors {
 							if(edge.Input != null) {
 								var port = edge.Input;
 
-								var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
-								Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
-									port.owner.graph.window.rootVisualElement.parent,
-									screenRect - port.owner.graph.window.position.position);
+								var screenRect = port.owner.graphEditor.window.GetMousePositionForMenu(mousePosition);
+								Vector2 pos = port.owner.graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+									port.owner.graphEditor.window.rootVisualElement.parent,
+									screenRect - port.owner.graphEditor.window.position.position);
 								var position = port.owner.owner.contentViewContainer.WorldToLocal(pos);
 								if(port.isFlow) {
 									NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.NodeReroute node) => {
@@ -321,10 +321,10 @@ namespace MaxyGames.UNode.Editors {
 							else if(edge.Output != null) {
 								var port = edge.Output;
 
-								var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
-								Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
-									port.owner.graph.window.rootVisualElement.parent,
-									screenRect - port.owner.graph.window.position.position);
+								var screenRect = port.owner.graphEditor.window.GetMousePositionForMenu(mousePosition);
+								Vector2 pos = port.owner.graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+									port.owner.graphEditor.window.rootVisualElement.parent,
+									screenRect - port.owner.graphEditor.window.position.position);
 								var position = port.owner.owner.contentViewContainer.WorldToLocal(pos);
 								if(port.isFlow) {
 									NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.NodeReroute node) => {
@@ -354,10 +354,10 @@ namespace MaxyGames.UNode.Editors {
 								var port = edge.Input;
 
 								if(port.owner.graphData.IsInMacro) {
-									var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
-									Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
-										port.owner.graph.window.rootVisualElement.parent,
-										screenRect - port.owner.graph.window.position.position);
+									var screenRect = port.owner.graphEditor.window.GetMousePositionForMenu(mousePosition);
+									Vector2 pos = port.owner.graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+										port.owner.graphEditor.window.rootVisualElement.parent,
+										screenRect - port.owner.graphEditor.window.position.position);
 									var position = port.owner.owner.contentViewContainer.WorldToLocal(pos);
 									if(port.isFlow) {
 										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
@@ -385,10 +385,10 @@ namespace MaxyGames.UNode.Editors {
 								var port = edge.Output;
 
 								if(port.owner.graphData.IsInMacro) {
-									var screenRect = port.owner.graph.window.GetMousePositionForMenu(mousePosition);
-									Vector2 pos = port.owner.graph.window.rootVisualElement.ChangeCoordinatesTo(
-										port.owner.graph.window.rootVisualElement.parent,
-										screenRect - port.owner.graph.window.position.position);
+									var screenRect = port.owner.graphEditor.window.GetMousePositionForMenu(mousePosition);
+									Vector2 pos = port.owner.graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
+										port.owner.graphEditor.window.rootVisualElement.parent,
+										screenRect - port.owner.graphEditor.window.position.position);
 									var position = port.owner.owner.contentViewContainer.WorldToLocal(pos);
 									if(port.isFlow) {
 										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {

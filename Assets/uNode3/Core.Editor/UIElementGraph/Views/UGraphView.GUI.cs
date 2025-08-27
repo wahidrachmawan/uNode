@@ -455,6 +455,8 @@ namespace MaxyGames.UNode.Editors {
 		public List<UNodeView> searchedNodes = new List<UNodeView>();
 		[NonSerialized]
 		public UNodeView[] highlightedNodes = new UNodeView[0];
+		[NonSerialized]
+		public List<UNodeView> highlightedReferenceNodes = new();
 		private int frameSearchIndex = 0;
 		private int currentAnimateFrame = 0;
 
@@ -476,6 +478,31 @@ namespace MaxyGames.UNode.Editors {
 			if(searchedNodes.Count > 0) {
 				Frame(new UNodeView[] { searchedNodes[frameSearchIndex] });
 			}
+		}
+
+		public void OnSelectionChanged() {
+			if(graphData.selectedCount == 1) {
+				var selected = graphData.selecteds.FirstOrDefault();
+				if(selected != null) {
+					if(selected is Variable or Property or Function) {
+						HighlightReferenceNodes(selected);
+						return;
+					}
+					if(selected is NodeObject nodeObject) {
+						if(nodeViewsPerNode.TryGetValue(nodeObject, out var view)) {
+							if(view != null) {
+								var @ref = view.OriginalReference;
+								if(@ref != null) {
+									HighlightReferenceNodes(@ref);
+									return;
+								}
+							}
+						}
+						return;
+					}
+				}
+			}
+			ClearHighlightedReferenceNodes();
 		}
 
 		public void OnSearchChanged(GraphSearchQuery query) {
@@ -896,6 +923,29 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
+		}
+
+		public void HighlightReferenceNodes(object reference) {
+			ClearHighlightedReferenceNodes();
+			if(nodes == null)
+				return;
+			foreach(var view in nodeViews) {
+				if(view == null)
+					continue;
+				if(view.selected == false && view.ShouldHighlightReference(reference)) {
+					view.Highlighted = true;
+					highlightedReferenceNodes.Add(view);
+				}
+			}
+		}
+
+		void ClearHighlightedReferenceNodes() {
+			foreach(var n in highlightedReferenceNodes) {
+				if(n != null) {
+					n.Highlighted = false;
+				}
+			}
+			highlightedReferenceNodes.Clear();
 		}
 
 		public void Frame(IEnumerable<NodeObject> nodes) {

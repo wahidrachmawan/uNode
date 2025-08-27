@@ -1428,6 +1428,10 @@ namespace MaxyGames.UNode.Editors {
 			needReloadMainTab = true;
 		}
 
+		public override void OnSelectionChanged() {
+			graphView?.OnSelectionChanged();
+		}
+
 		public override void OnSearchChanged(string search) {
 			base.OnSearchChanged(search);
 			if(graphView != null) {

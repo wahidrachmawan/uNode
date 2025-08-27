@@ -185,6 +185,15 @@ PortView > Image {
     border-radius: 17px 8px 17px 8px;
 }
 
+.highlighted-reference > #selection-border {
+    border-color: #FF8000;
+    border-width: 1px;
+    left: 1px;
+    right: 1px;
+    top: 1px;
+    bottom: 1px;
+}
+
 .compact > #node-border {
     background-color: rgba(63,63,63,0.8);
     border-color: rgba(147,147,147,0.8);

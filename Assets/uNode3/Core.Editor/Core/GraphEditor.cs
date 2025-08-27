@@ -67,6 +67,7 @@ namespace MaxyGames.UNode.Editors {
 		public void SelectionChanged() {
 			uNodeThreadUtility.ExecuteOnce(() => {
 				window?.EditorSelectionChanged();
+				OnSelectionChanged();
 			}, "[GRAPH_SELECTION_CHANGED]");
 		}
 
@@ -134,6 +135,8 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 		}
+
+		public virtual void OnSelectionChanged() { }
 
 		public void Compile() {
 			Compile(true);
@@ -847,6 +850,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public void ClearSelection() {
 			window.ChangeEditorSelection(null);
+			OnSelectionChanged();
 		}
 
 		public void SelectNode(NodeObject node, bool clearSelectedNodes = true) {

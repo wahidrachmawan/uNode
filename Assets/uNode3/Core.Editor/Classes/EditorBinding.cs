@@ -38,7 +38,7 @@ namespace MaxyGames.UNode.Editors {
 		public static string HighlightSyntax(string syntax) {
 			var syntaxHighlighter = EditorBinding.syntaxHighlighter;
 			if(syntaxHighlighter != null) {
-				string highlight = syntaxHighlighter.GetMethod("GetRichText").InvokeOptimized(null, new object[] { syntax }) as string;
+				string highlight = syntaxHighlighter.GetMethod("GetRichText", new[] { typeof(string) }).InvokeOptimized(null, new object[] { syntax }) as string;
 				if(!string.IsNullOrEmpty(highlight)) {
 					return highlight;
 				}
@@ -96,7 +96,7 @@ namespace MaxyGames.UNode.Editors {
 		internal static void OnScriptReloaded() {
 			if(onFinishCompiling != null)
 				onFinishCompiling();
-			if(uNodeUtility.temporaryObjects.Count > 0 ) {
+			if(uNodeUtility.temporaryObjects.Count > 0) {
 				foreach(var obj in uNodeUtility.temporaryObjects) {
 					if(obj != null && EditorUtility.IsPersistent(obj) == false) {
 						//Make sure to destroy objects that are not destroyed yet when script reloads.

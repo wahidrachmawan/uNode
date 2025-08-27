@@ -12,6 +12,38 @@ namespace MaxyGames.UNode.Editors {
 	public class MultipurposeNodeView : BaseNodeView {
 		bool isCompact;
 
+		public override object OriginalReference {
+			get {
+				MultipurposeNode node = nodeObject.node as MultipurposeNode;
+				if(node.target.isDeepTarget == false) {
+					switch(node.target.targetType) {
+						case MemberData.TargetType.uNodeVariable:
+						case MemberData.TargetType.uNodeLocalVariable:
+						case MemberData.TargetType.uNodeFunction:
+						case MemberData.TargetType.uNodeParameter:
+						case MemberData.TargetType.uNodeProperty:
+							return node.target.startItem?.GetReferenceValue();
+						case MemberData.TargetType.Method:
+						case MemberData.TargetType.Field:
+						case MemberData.TargetType.Property:
+						case MemberData.TargetType.Event:
+						case MemberData.TargetType.Constructor:
+							var members = node.target.GetMembers(false);
+							if(members != null && members.Length > 0) {
+								var lastMember = members[members.Length - 1];
+								if(lastMember is IRuntimeMemberWithRef runtime) {
+									return runtime.GetReferenceValue() ?? lastMember;
+								}
+								return lastMember;
+							}
+							break;
+
+					}
+				}
+				return null;
+			}
+		}
+
 		void GoToDefinition() {
 			var node = targetNode as MultipurposeNode;
 			if(node.target.targetType == MemberData.TargetType.uNodeFunction) {

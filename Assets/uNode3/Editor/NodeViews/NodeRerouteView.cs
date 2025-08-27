@@ -2,10 +2,23 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using System.Linq;
 
 namespace MaxyGames.UNode.Editors {
 	[NodeCustomEditor(typeof(Nodes.NodeReroute))]
 	public class NodeRerouteView : BaseNodeView {
+		public override object OriginalReference {
+			get {
+				if(inputPorts.Count > 0) {
+					var tNode = inputPorts[0].GetConnectedNodes().FirstOrDefault();
+					if(tNode is MultipurposeNodeView) {
+						return tNode.OriginalReference;
+					}
+				}
+				return null;
+			}
+		}
+
 		protected override void OnReloadView() {
 			var node = targetNode as Nodes.NodeReroute;
 			InitializePrimaryPort();

@@ -10,7 +10,13 @@ using UnityEditor.Experimental.GraphView;
 using NodeView = UnityEditor.Experimental.GraphView.Node;
 
 namespace MaxyGames.UNode.Editors {
-	public abstract class UNodeView : NodeView {
+	internal interface IHighlightableReference {
+		bool Highlighted { get; set; }
+		bool ShouldHighlightReference(object reference) => OriginalReference != null && OriginalReference == reference;
+		object OriginalReference { get; }
+	}
+
+	public abstract class UNodeView : NodeView, IHighlightableReference {
 		public List<PortView> inputPorts = new List<PortView>();
 		public List<PortView> outputPorts = new List<PortView>();
 
@@ -46,23 +52,51 @@ namespace MaxyGames.UNode.Editors {
 		public PortView primaryOutputValue { get; protected set; }
 
 		public INodeBlock ownerBlock { get; set; }
+		/// <summary>
+		/// The node object that this view is representing.
+		/// </summary>
 		public NodeObject nodeObject { protected set; get; }
 		public Node targetNode => nodeObject.node;
+		/// <summary>
+		/// The graph view that owns this node view.
+		/// </summary>
 		public UGraphView owner { protected set; get; }
+		/// <summary>
+		/// Get the graph editor reference.
+		/// </summary>
+		public UIElementGraph graphEditor {
+			get {
+				return owner.graphEditor;
+			}
+		}
+		/// <summary>
+		/// Get the graph data reference.
+		/// </summary>
 		public GraphEditorData graphData => owner.graphData;
+		/// <summary>
+		/// Should the node view automatically reload when the node data changed?
+		/// </summary>
 		public virtual bool autoReload => false;
+		/// <summary>
+		/// Should the node view fully reload when the node data changed?
+		/// </summary>
 		public virtual bool fullReload => nodeObject == null;
-
-		public bool isNativeGraph => owner.isNativeGraph;
 
 		public VisualElement flowInputContainer { protected set; get; }
 		public VisualElement flowOutputContainer { protected set; get; }
 		public VisualElement controlsContainer { protected set; get; }
 
-		//For Hiding
-		public VisualElement parentElement { get; set; }
+		/// <summary>
+		/// The rect position before the node is hidden.
+		/// </summary>
 		public Rect hidingRect { get; set; }
+		/// <summary>
+		/// Is the node hidden?
+		/// </summary>
 		public bool isHidden => parent == null;
+		/// <summary>
+		/// Is the node a block node?
+		/// </summary>
 		public bool isBlock => ownerBlock != null;
 		public Orientation flowLayout => owner.graphLayout == GraphLayout.Vertical && !isBlock ? Orientation.Vertical : Orientation.Horizontal;
 
@@ -77,11 +111,25 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public UIElementGraph graph {
-			get {
-				return owner.graphEditor;
-			}
+		/// <summary>
+		/// The reference object that can be used to highlight the node view.
+		/// </summary>
+		public virtual object OriginalReference => null;
+
+		/// <summary>
+		/// Highlight the node view.
+		/// </summary>
+		public bool Highlighted {
+			get => ClassListContains("highlighted-reference");
+			set => EnableInClassList("highlighted-reference", value);
 		}
+
+		/// <summary>
+		/// Override this to highlight the node when the reference is matched.
+		/// </summary>
+		/// <param name="reference"></param>
+		/// <returns></returns>
+		public virtual bool ShouldHighlightReference(object reference) => OriginalReference != null && OriginalReference == reference;
 
 		#region Hidden Views
 		class HiddenView : UNodeView {
@@ -157,9 +205,9 @@ namespace MaxyGames.UNode.Editors {
 			OnSetup();
 
 			RegisterCallback<MouseDownEvent>(evt => {
-				var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graph.window);
+				var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 				if(evt.button == 0 && evt.shiftKey && !evt.altKey) {
-					CustomInspector.Inspect(mPos, new GraphEditorData(graph.graphData, nodeObject));
+					CustomInspector.Inspect(mPos, new GraphEditorData(graphEditor.graphData, nodeObject));
 				}
 			});
 			RegisterCallback<MouseOverEvent>((e) => {

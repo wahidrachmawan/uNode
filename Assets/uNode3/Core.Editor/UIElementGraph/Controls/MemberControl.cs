@@ -238,7 +238,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					pos.x -= 200;
 					pos.y += port.node.position.height / 2;
 					stackedActions.Clear();
-					ShowMenu(port, pos, config.owner.graph, filter);
+					ShowMenu(port, pos, config.owner.graphEditor, filter);
 				}
 				else {
 					ItemSelector.ShowWindow(config.targetCanvas, filter, (m) => {

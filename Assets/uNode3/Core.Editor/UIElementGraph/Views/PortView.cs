@@ -656,7 +656,7 @@ namespace MaxyGames.UNode.Editors {
 				port = GetPortValue(),
 				portKind = PortKind.ValueOutput,
 			};
-			var customItems = ItemSelector.MakeCustomItems(commandData, owner.graph, owner.nodeObject, position, () => {
+			var customItems = ItemSelector.MakeCustomItems(commandData, owner.graphEditor, owner.nodeObject, position, () => {
 				portView.owner.owner.MarkRepaint();
 			}, nodeFilter: NodeFilter.ValueOutput).ToList();
 			if(customItems != null) {
@@ -788,7 +788,7 @@ namespace MaxyGames.UNode.Editors {
 #endif
 
 				if(input.isValue) {//Input Value
-					OnDropOutsidePortFromValueInput(portView.GetPortValue<ValueInput>(), position, owner.graph, portView.GetFilter());
+					OnDropOutsidePortFromValueInput(portView.GetPortValue<ValueInput>(), position, owner.graphEditor, portView.GetFilter());
 				}
 				else {//Input Flow
 					OnDropOutsidePortFromFlowInput(position, portView, sidePort);
