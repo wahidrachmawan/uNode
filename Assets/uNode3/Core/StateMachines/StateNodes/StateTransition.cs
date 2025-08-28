@@ -57,13 +57,13 @@ namespace MaxyGames.UNode.Nodes {
 		}
 		public event System.Action<Flow> OnUpdateCallback {
 			add {
-				if(nodeObject.parent is INodeWithUpdateEvent parent) {
+				if(StateNode is INodeWithUpdateEvent parent) {
 					parent.OnUpdateCallback -= value;
 					parent.OnUpdateCallback += value;
 				}
 			}
 			remove {
-				if(nodeObject.parent is INodeWithUpdateEvent parent) {
+				if(StateNode is INodeWithUpdateEvent parent) {
 					parent.OnUpdateCallback -= value;
 				}
 			}

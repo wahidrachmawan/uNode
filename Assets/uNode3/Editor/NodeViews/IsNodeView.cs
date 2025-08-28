@@ -13,20 +13,18 @@ namespace MaxyGames.UNode.Editors {
 	public class IsNodeView : BaseNodeView {
 		protected override void OnReloadView() {
 			base.OnReloadView();
-			if (uNodeUtility.preferredDisplay != DisplayKind.Full) {
-				var control = UIElementUtility.CreateControl(
-					this, 
-					nameof(Nodes.ISNode.type), 
-					filter: new FilterAttribute() { OnlyGetType = true, DisplayRuntimeType = true, ArrayManipulator = true });
-				if(control != null) {
-					var label = control.Query<Label>().First();
-					if(label != null) {
-						label.RemoveFromHierarchy();
-					}
-					AddControl(Direction.Input, control);
+			var control = UIElementUtility.CreateControl(
+				this, 
+				nameof(Nodes.ISNode.type), 
+				filter: new FilterAttribute() { OnlyGetType = true, DisplayRuntimeType = true, ArrayManipulator = true });
+			if(control != null) {
+				var label = control.Query<Label>().First();
+				if(label != null) {
+					label.RemoveFromHierarchy();
 				}
-				ConstructCompactTitle("target", control: control);
+				AddControl(Direction.Input, control);
 			}
+			ConstructCompactTitle("target", control: control);
 		}
 	}
 }
