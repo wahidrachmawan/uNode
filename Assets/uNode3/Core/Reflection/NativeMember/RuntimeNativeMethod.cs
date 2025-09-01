@@ -43,7 +43,10 @@ namespace MaxyGames.UNode {
 						att |= MethodAttributes.Virtual;
 					}
 				}
-				if(owner.IsAbstract && owner.IsSealed) {
+				if(owner.IsInterface) {
+					att |= MethodAttributes.Abstract;
+				}
+				else if(owner.IsAbstract && owner.IsSealed) {
 					att |= MethodAttributes.Static;
 				}
 				return att;
