@@ -103,7 +103,7 @@ namespace MaxyGames.UNode.Editors {
 		public void OnChanged(GraphEditorData editorData) {
 			if(informations != null) {
 				if(editorData.hasSelection) {
-					var ids = editorData.selectedNodes.Select(n => n.id.ToString());
+					var ids = editorData.selecteds.Select(n => n is UGraphElement element ? element.id.ToString() : string.Empty);
 					selectedInfos = informations.Where(info => ids.Contains(info.id)).ToArray();
 					var selections = ids.ToArray();
 					if(selections.Length == oldSelections.Length) {

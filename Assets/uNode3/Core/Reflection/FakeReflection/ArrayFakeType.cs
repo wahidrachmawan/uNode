@@ -244,6 +244,9 @@ namespace MaxyGames.UNode {
 		public Type GetNativeType() {
 			var elementType = ReflectionUtils.GetNativeType(target);
 			if(elementType != null && elementType is not IRuntimeMember) {
+				if(GetArrayRank() == 1) {
+					return elementType.MakeArrayType();
+				}
 				return elementType.MakeArrayType(GetArrayRank());
 			}
 			return null;

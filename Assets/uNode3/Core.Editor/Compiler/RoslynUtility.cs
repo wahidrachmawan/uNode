@@ -929,7 +929,7 @@ namespace MaxyGames.UNode.Editors {
 			if(typeSymbol.Kind == SymbolKind.ArrayType) {
 				var arraySymbol = typeSymbol as IArrayTypeSymbol;
 				var elementType = GetTypeFromTypeSymbol(arraySymbol.ElementType);
-				Type t = elementType.MakeArrayType(arraySymbol.Rank);
+				Type t = arraySymbol.Rank == 1 ? elementType.MakeArrayType() : elementType.MakeArrayType(arraySymbol.Rank);
 				if(isByRef) {
 					t = t.MakeByRefType();
 				}

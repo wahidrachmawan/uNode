@@ -923,7 +923,7 @@ namespace MaxyGames.UNode {
 			else if(type.IsArray) {
 				var elementType = type.GetElementType();
 				if(AutoConstructGenericTypeDefinition(elementType, constructedParameters, out var t)) {
-					result = t.MakeArrayType(type.GetArrayRank());
+					result = type.GetArrayRank() == 1 ? t.MakeArrayType() : t.MakeArrayType(type.GetArrayRank());
 					return true;
 				}
 			}

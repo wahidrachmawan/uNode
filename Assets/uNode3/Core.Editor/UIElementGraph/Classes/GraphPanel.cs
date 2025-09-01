@@ -400,8 +400,7 @@ namespace MaxyGames.UNode.Editors {
 						if(evt.clickCount == 2 || evt.altKey) {
 							var tempName = current.name;
 							GraphUtility.RefactorVariableName(mPos, current, () => {
-								graphData.Refresh();
-								ReloadView();
+								graphEditor.Refresh();
 							});
 						}
 						else if(evt.shiftKey) {
@@ -413,8 +412,7 @@ namespace MaxyGames.UNode.Editors {
 					var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 					evt.menu.AppendAction("Rename", act => {
 						GraphUtility.RefactorVariableName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					});
 					evt.menu.AppendAction("Inspect...", act => {
@@ -426,7 +424,7 @@ namespace MaxyGames.UNode.Editors {
 						var group = current.parent.AddChild(new UGroupElement() { name = "New Group" });
 						group.PlaceBehind(current);
 						current.SetParent(group);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Find All References", act => {
@@ -447,33 +445,33 @@ namespace MaxyGames.UNode.Editors {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Up Variable: " + variable.name);
 						GraphUtility.ReorderMoveUp<VariableContainer>(variable);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Move Down", act => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Up Variable: " + variable.name);
 						GraphUtility.ReorderMoveDown<VariableContainer>(variable);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Duplicate", act => {
 						if(graphData.owner != null)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate Variable: " + current.name);
 						GraphUtility.CopyPaste.Duplicate(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Remove", act => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Variable: " + variable.name);
 						variable.Destroy();
-						ReloadView();
+						graphEditor.Refresh();
 					});
 				};
 				content.removeAction = () => {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Variable: " + current.name);
 					current.Destroy();
-					ReloadView();
+					graphEditor.Refresh();
 				};
 				//contentMap[variable] = content;
 			}
@@ -495,8 +493,7 @@ namespace MaxyGames.UNode.Editors {
 					var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 					if(evt.button == 0 && (evt.clickCount == 2 || evt.altKey)) {
 						GraphUtility.RefactorPropertyName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					}
 					else if(evt.button == 0 && evt.shiftKey) {
@@ -507,8 +504,7 @@ namespace MaxyGames.UNode.Editors {
 					var mPos = (evt.currentTarget as VisualElement).GetScreenMousePosition(evt.localMousePosition, graphEditor.window);
 					evt.menu.AppendAction("Rename", act => {
 						GraphUtility.RefactorPropertyName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					});
 					evt.menu.AppendAction("Inspect...", act => {
@@ -520,7 +516,7 @@ namespace MaxyGames.UNode.Editors {
 						var group = current.parent.AddChild(new UGroupElement() { name = "New Group" });
 						group.PlaceBehind(current);
 						current.SetParent(group);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Find All References", act => {
@@ -619,7 +615,7 @@ namespace MaxyGames.UNode.Editors {
 					evt.menu.AppendAction("Duplicate", act => {
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate Property: " + current.name);
 						GraphUtility.CopyPaste.Duplicate(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Remove", act => {
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Property: " + current.name);
@@ -631,7 +627,6 @@ namespace MaxyGames.UNode.Editors {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Property: " + current.name);
 					current.Destroy();
-					ReloadView();
 					graphEditor.Refresh();
 				};
 			}
@@ -662,8 +657,7 @@ namespace MaxyGames.UNode.Editors {
 					if(evt.button == 0 && (evt.clickCount == 2 || evt.altKey)) {
 						//Rename Function
 						GraphUtility.RefactorFunctionName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					}
 					else if(evt.button == 0 && evt.shiftKey) {
@@ -674,8 +668,7 @@ namespace MaxyGames.UNode.Editors {
 					var mPos = UIElementUtility.GetScreenMousePosition(evt.currentTarget as VisualElement, evt.localMousePosition, graphEditor.window);
 					evt.menu.AppendAction("Rename", (act) => {
 						GraphUtility.RefactorFunctionName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					});
 					evt.menu.AppendAction("Inspect...", (act) => {
@@ -687,7 +680,7 @@ namespace MaxyGames.UNode.Editors {
 						var group = current.parent.AddChild(new UGroupElement() { name = "New Group" });
 						group.PlaceBehind(current);
 						current.SetParent(group);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Find All References", act => {
@@ -702,33 +695,32 @@ namespace MaxyGames.UNode.Editors {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Up Function: " + current.name);
 						GraphUtility.ReorderMoveUp<FunctionContainer>(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Move Down", (act) => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Down Function: " + current.name);
 						GraphUtility.ReorderMoveDown<FunctionContainer>(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Duplicate", act => {
 						if(graphData.owner != null)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate Function: " + current.name);
 						GraphUtility.CopyPaste.Duplicate(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Remove", (act) => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Function: " + current.name);
 						current.Destroy();
-						ReloadView();
+						graphEditor.Refresh();
 					});
 				};
 				content.removeAction = () => {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Function: " + current.name);
 					current.Destroy();
-					ReloadView();
 					graphEditor.Refresh();
 				};
 			}
@@ -770,41 +762,40 @@ namespace MaxyGames.UNode.Editors {
 						var group = current.parent.AddChild(new UGroupElement() { name = "New Group" });
 						group.PlaceBehind(current);
 						current.SetParent(group);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Move Up", (act) => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Up Constructor: " + current.name);
 						GraphUtility.ReorderMoveUp<ConstructorContainer>(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Move Down", (act) => {
 						if(graphData.owner) {
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Down Constructor: " + current.name);
 						}
 						GraphUtility.ReorderMoveDown<ConstructorContainer>(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Duplicate", act => {
 						if(graphData.owner != null)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate Constructor: " + current.name);
 						GraphUtility.CopyPaste.Duplicate(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Remove", (act) => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Constructor: " + current.name);
 						current.Destroy();
-						ReloadView();
+						graphEditor.Refresh();
 					});
 				};
 				content.removeAction = () => {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Constructor: " + current.name);
 					current.Destroy();
-					ReloadView();
 					graphEditor.Refresh();
 				};
 			}
@@ -844,7 +835,6 @@ namespace MaxyGames.UNode.Editors {
 								child.PlaceInFront(graphElement);
 							}
 							graphElement.Destroy();
-							ReloadView();
 							graphEditor.Refresh();
 							return;
 						}
@@ -855,7 +845,7 @@ namespace MaxyGames.UNode.Editors {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Group: " + graphElement.name);
 					graphElement.Destroy();
-					ReloadView();
+					graphEditor.Refresh();
 				};
 			}
 			else if(graphElement is NodeContainer container) {
@@ -882,8 +872,7 @@ namespace MaxyGames.UNode.Editors {
 					if(evt.button == 0 && (evt.clickCount == 2 || evt.altKey)) {
 						//Rename
 						GraphUtility.RefactorElementName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					}
 					else if(evt.button == 0 && evt.shiftKey) {
@@ -894,8 +883,7 @@ namespace MaxyGames.UNode.Editors {
 					var mPos = UIElementUtility.GetScreenMousePosition(evt.currentTarget as VisualElement, evt.localMousePosition, graphEditor.window);
 					evt.menu.AppendAction("Rename", (act) => {
 						GraphUtility.RefactorElementName(mPos, current, () => {
-							graphData.Refresh();
-							ReloadView();
+							graphEditor.Refresh();
 						});
 					});
 					evt.menu.AppendAction("Inspect...", (act) => {
@@ -907,7 +895,7 @@ namespace MaxyGames.UNode.Editors {
 						var group = current.parent.AddChild(new UGroupElement() { name = "New Group" });
 						group.PlaceBehind(current);
 						current.SetParent(group);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					//TODO: add support to find reference
@@ -923,33 +911,32 @@ namespace MaxyGames.UNode.Editors {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Up: " + current.name);
 						GraphUtility.ReorderMoveUp<EventGraphContainer>(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Move Down", (act) => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Down: " + current.name);
 						GraphUtility.ReorderMoveDown<EventGraphContainer>(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendSeparator("");
 					evt.menu.AppendAction("Duplicate", act => {
 						if(graphData.owner != null)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate: " + current.name);
 						GraphUtility.CopyPaste.Duplicate(current);
-						ReloadView();
+						graphEditor.Refresh();
 					});
 					evt.menu.AppendAction("Remove", (act) => {
 						if(graphData.owner)
 							uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove: " + current.name);
 						current.Destroy();
-						ReloadView();
+						graphEditor.Refresh();
 					});
 				};
 				content.removeAction = () => {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove: " + current.name);
 					current.Destroy();
-					ReloadView();
 					graphEditor.Refresh();
 				};
 			}
@@ -963,7 +950,7 @@ namespace MaxyGames.UNode.Editors {
 					if(graphData.owner)
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Remove Element: " + graphElement.name);
 					graphElement.Destroy();
-					ReloadView();
+					graphEditor.Refresh();
 				};
 			}
 		}
@@ -1211,14 +1198,14 @@ namespace MaxyGames.UNode.Editors {
 												scriptGraph.TypeList.AddType(clone as IScriptGraphType, scriptGraph);
 												AssetDatabase.AddObjectToAsset(clone, scriptGraph as UnityEngine.Object);
 												AssetDatabase.SaveAssetIfDirty(scriptGraph as UnityEngine.Object);
-												ReloadView();
+												graphEditor.Refresh();
 											});
 											evt.menu.AppendAction("Remove", act => {
 												Undo.SetCurrentGroupName("Remove classes: " + unityObject);
 												Undo.RegisterFullObjectHierarchyUndo(scriptGraph as UnityEngine.Object, "");
 												Undo.DestroyObjectImmediate(unityObject);
 												scriptGraph.TypeList.RemoveType(unityObject as IScriptGraphType);
-												ReloadView();
+												graphEditor.Refresh();
 											});
 										}
 									}
@@ -1297,7 +1284,7 @@ namespace MaxyGames.UNode.Editors {
 									//var parent = treeView.GetItemDataForId<UnityEngine.Object>(parentId);
 
 								}
-								ReloadView();
+								graphEditor.Refresh();
 							});
 						}
 						else {
@@ -1500,7 +1487,7 @@ namespace MaxyGames.UNode.Editors {
 											uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Up Event: " + eventNode.GetTitle());
 											eventNode.nodeObject.PlaceBehind(treeView.GetItemDataForIndex<BaseEventNode>(index - 1));
 											graphEditor.Refresh();
-											ReloadView();
+											graphEditor.Refresh();
 										}
 									});
 									evt.menu.AppendAction("Move Down", (act) => {
@@ -1508,7 +1495,7 @@ namespace MaxyGames.UNode.Editors {
 											uNodeEditorUtility.RegisterUndo(graphData.owner, "Move Down Event: " + eventNode.GetTitle());
 											eventNode.nodeObject.PlaceInFront(treeView.GetItemDataForIndex<BaseEventNode>(index + 1));
 											graphEditor.Refresh();
-											ReloadView();
+											graphEditor.Refresh();
 										}
 									});
 									evt.menu.AppendSeparator("");

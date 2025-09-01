@@ -47,10 +47,10 @@ namespace MaxyGames.StateMachines {
 			set {
 				if(value != null) {
 					value.FSM = this;
-				}
-				if(value == m_activeState && value.CanTriggerWhenActive == false) {
-					//Return when it is cannot be triggered again while is active
-					return;
+					if(value == m_activeState && value.CanTriggerWhenActive == false) {
+						//Return when it is cannot be triggered again while is active
+						return;
+					}
 				}
 				if(m_transitionState == null) {
 					m_activeState?.Exit();
@@ -111,6 +111,7 @@ namespace MaxyGames.StateMachines {
 			}
 			foreach(var any in AnyStates) {
 				if(any != null) {
+					any.Tick();
 					foreach(var tr in any.transitions) {
 						if(tr.ShouldTransition()) {
 							tr.Transition();
