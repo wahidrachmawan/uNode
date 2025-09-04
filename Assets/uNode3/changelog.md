@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.2.3
+- Improved C# Parse
+- Improved Editor
+- Fixed some bugs
+
 ## v3.2.2
 - Now you can have flow node inside Any State node
 - Added On State Update event to listed for State Machine tick

@@ -169,7 +169,7 @@ namespace MaxyGames.UNode.Nodes {
 			graph.ForeachInChildrens(element => {
 				element.OnRuntimeInitialize(instance);
 			}, true);
-			instance.eventData.PostInitialize(instance);
+			//instance.eventData.PostInitialize(instance);
 
 			var elementData = new LinkedData();
 			int index = 0;

@@ -437,7 +437,14 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(preference.autoCarryInputValue) {
-				return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Distinct();
+				static bool IsCompletelyInsideWithMargin(Rect outer, Rect inner, float margin) {
+					return
+						inner.xMin >= outer.xMin + margin &&
+						inner.yMin >= outer.yMin + margin &&
+						inner.xMax <= outer.xMax - margin &&
+						inner.yMax <= outer.yMax - margin;
+				}
+				return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Where(n => !IsCompletelyInsideWithMargin(this.GetPosition(), n.GetPosition(), -50)).Distinct();
 			}
 			return null;
 		}

@@ -262,10 +262,11 @@ PortView > Image {
 .compact-value #contents > #top > #output {
     border-top-right-radius: 6px;
 }
+  */
 
 .compact-title > #node-border > #title {
-    height: 22px;
-}*/
+    height: 20px;
+}
 
 #node-border > #title {
     justify-content: flex-start;
@@ -430,10 +431,10 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 }
 
 #title > .compact-output > Image {
-    width: 24px;
-    height: 24px;
-    display: none;
-    visibility: hidden;
+    width: 16px;
+    height: 16px;
+ /*   display: none;
+    visibility: hidden;*/
 }
 
 #title > .compact-output > #type {
@@ -447,7 +448,8 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 
 .compact-node > #node-border > #title > #title-icon {
     margin-left: 0;
-    height: 18px;
+    height: 16px;
+    width: 16px;
 }
 
 .compact-node > #node-border > #title > #title-label {

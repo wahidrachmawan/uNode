@@ -544,8 +544,16 @@ namespace MaxyGames.UNode.Editors {
 
 		public override bool IsValid(DragHandlerData data) {
 			if(data is DragHandlerDataForGraphElement d) {
-				if(d.graphData.currentCanvas is not MainGraphContainer || d.graphData.graph is not IStateGraph)
-					return false;
+				if(d.graphData.currentCanvas is MainGraphContainer) {
+					if(d.graphData.graph is not IStateGraph) {
+						return false;
+					}
+				}
+				else if(d.graphData.currentCanvas is NodeObject nodeObject) {
+					if(nodeObject.node is not INodeWithEventHandler) {
+						return false;
+					}
+				}
 				if(d.draggedValue is Variable variable) {
 					return variable.type.IsSubclassOf(typeof(System.Delegate));
 				}

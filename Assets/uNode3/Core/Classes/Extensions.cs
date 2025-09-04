@@ -1559,7 +1559,8 @@ namespace MaxyGames.UNode {
 				}
 				else if(!type.ContainsGenericParameters) {
 					var nm = fullName ? type.FullName : type.Name;
-					return string.Format("{0}<{1}>", nm.Remove(nm.IndexOf('`')),
+					int idx = nm.IndexOf('`');
+					return string.Format("{0}<{1}>", idx >= 0 ? nm.Remove(idx) : nm,
 						string.Join(", ", type.GetGenericArguments().Select(a => DoCSharpTypeName(a, fullName))));
 				}
 			}

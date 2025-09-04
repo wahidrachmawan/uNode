@@ -44,7 +44,7 @@ namespace MaxyGames.UNode.Editors {
 			[Tooltip("When true, right click to move the canvas will be disabled")]
 			public bool disableRightClickMove;
 			[Tooltip("If true, when moving node the input value of the node will be always be carry")]
-			public bool autoCarryInputValue;
+			public bool autoCarryInputValue = true;
 			public bool carryNodes = false;
 			//public bool isDim = true;
 

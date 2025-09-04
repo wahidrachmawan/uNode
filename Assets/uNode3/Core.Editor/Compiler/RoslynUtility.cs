@@ -101,6 +101,7 @@ namespace MaxyGames.UNode.Editors {
 			public static Func<Assembly[]> GetAssemblies;
 			public static Func<CompilationMethod> compilationMethod;
 			public static string tempAssemblyPath;
+			internal static List<MetadataReference> metadataReferences;
 		}
 
 		/// <summary>
@@ -300,9 +301,17 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
-		private static List<MetadataReference> GetMetadataReferences() {
+		private static IEnumerable<MetadataReference> GetMetadataReferences() {
+			if(Data.metadataReferences != null) {
+				if(Data.compilationMethod() == CompilationMethod.Roslyn) {
+					if(File.Exists(Data.tempAssemblyPath)) {
+						return Data.metadataReferences.Append(MetadataReference.CreateFromFile(Data.tempAssemblyPath));
+					}
+				}
+				return Data.metadataReferences;
+			}
 			if(assemblies != null) {
-				List<MetadataReference> result = new List<MetadataReference>();
+				List<MetadataReference> result = new List<MetadataReference>(32);
 				foreach(var assembly in assemblies) {
 					try {
 						if(assembly != null && !string.IsNullOrEmpty(assembly.Location)) {
@@ -314,13 +323,13 @@ namespace MaxyGames.UNode.Editors {
 					}
 					catch { continue; }
 				}
-				return result;
+				return Data.metadataReferences = result;
 			}
 			var defaultReferences = GetDefaultReferences();
 			if(defaultReferences != null) {
-				return defaultReferences;
+				return Data.metadataReferences = defaultReferences;
 			}
-			List<MetadataReference> references = new List<MetadataReference>();
+			List<MetadataReference> references = new List<MetadataReference>(32);
 			foreach(var assembly in Data.GetAssemblies()) {
 				try {
 					if(assembly != null && !string.IsNullOrEmpty(assembly.Location)) {
@@ -332,9 +341,10 @@ namespace MaxyGames.UNode.Editors {
 				}
 				catch { continue; }
 			}
+			Data.metadataReferences = references;
 			if(Data.compilationMethod() == CompilationMethod.Roslyn) {
 				if(File.Exists(Data.tempAssemblyPath)) {
-					references.Add(MetadataReference.CreateFromFile(Data.tempAssemblyPath));
+					return Data.metadataReferences.Append(MetadataReference.CreateFromFile(Data.tempAssemblyPath));
 				}
 			}
 			return references;

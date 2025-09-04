@@ -101,12 +101,6 @@ namespace MaxyGames.UNode {
 			public static ConcurrentDictionary<(IGraph, object), GraphInstance> cachedObjectGraphInstance = new ConcurrentDictionary<(IGraph, object), GraphInstance>();
 		}
 
-		public enum GraphKind {
-			Component,
-			Asset,
-			Object,
-		}
-
 		/// <summary>
 		/// Get or create graph runner
 		/// </summary>
