@@ -1926,11 +1926,11 @@ namespace MaxyGames.UNode.Editors {
 			foreach(var asset in assets) {
 				if(asset == null) continue;
 				if(asset is GraphAsset graphAsset) {
-					if(EditorUtility.IsPersistent(graphAsset) == false) continue;
-					if(db.graphDatabases.Any(g => g.asset == graphAsset)) {
+					if(EditorUtility.IsPersistent(graphAsset) == false || AssetDatabase.IsMainAsset(graphAsset) == false) continue;
+					if(db.runtimeGraphDatabases.Any(g => g.asset == graphAsset)) {
 						continue;
 					}
-					db.graphDatabases.Add(new uNodeDatabase.RuntimeGraphDatabase() {
+					db.runtimeGraphDatabases.Add(new uNodeDatabase.RuntimeGraphDatabase() {
 						asset = graphAsset,
 					});
 				}

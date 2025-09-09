@@ -219,9 +219,12 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private Rect CalculateElementRect(UNodeView elem) {
-			Rect result = elem.ChangeCoordinatesTo(graphView.contentViewContainer, new Rect(0, 0, elem.layout.width, elem.layout.height));
+			Rect result;
 			if(elem.isHidden) {
 				result = new Rect(elem.hidingRect.x, elem.hidingRect.y, elem.hidingRect.width, elem.hidingRect.height);
+			}
+			else {
+				result = elem.ChangeCoordinatesTo(graphView.contentViewContainer, new Rect(0, 0, elem.layout.width, elem.layout.height));
 			}
 			result.x = m_ContentRect.x + (result.x - m_ContentRectLocal.x) * m_ContentRect.width / m_ContentRectLocal.width;
 			result.y = m_ContentRect.y + (result.y - m_ContentRectLocal.y) * m_ContentRect.height / m_ContentRectLocal.height;

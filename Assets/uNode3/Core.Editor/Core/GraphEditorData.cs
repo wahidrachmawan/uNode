@@ -630,7 +630,7 @@ namespace MaxyGames.UNode.Editors {
 						if(_debugObject == null && graph is IReflectionType) {
 							var db = uNodeDatabase.instance;
 							foreach(var (id, map) in GraphDebug.debugData) {
-								var other = db.graphDatabases.FirstOrDefault(data => data.fileUniqueID == id)?.asset;
+								var other = db.runtimeGraphDatabases.FirstOrDefault(data => data.fileUniqueID == id)?.asset;
 								if(other != null) {
 									IGraph inherited = null;
 									for(int i = 0; i < 100; i++) {

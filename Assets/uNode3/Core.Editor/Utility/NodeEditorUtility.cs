@@ -557,12 +557,12 @@ namespace MaxyGames.UNode.Editors {
 			if(leftType == null || rightType == null) return false;
 
 			if(leftType is RuntimeType) {
-				if(rightType is not RuntimeType && uNodeDatabase.nativeGraphTypes.Contains(rightType)) {
+				if(rightType is not RuntimeType && uNodeDatabase.instance.nativeGraphTypes.Contains(rightType)) {
 					rightType = ReflectionUtils.GetRuntimeType(rightType);
 				}
 			}
 			else if(rightType is RuntimeType) {
-				if(leftType is not RuntimeType && uNodeDatabase.nativeGraphTypes.Contains(leftType)) {
+				if(leftType is not RuntimeType && uNodeDatabase.instance.nativeGraphTypes.Contains(leftType)) {
 					leftType = ReflectionUtils.GetRuntimeType(leftType);
 				}
 			}
@@ -676,12 +676,12 @@ namespace MaxyGames.UNode.Editors {
 			bool forceConvert = false) {
 
 			if(leftType is RuntimeType) {
-				if(rightType is not RuntimeType && uNodeDatabase.nativeGraphTypes.Contains(rightType)) {
+				if(rightType is not RuntimeType && uNodeDatabase.instance.nativeGraphTypes.Contains(rightType)) {
 					rightType = ReflectionUtils.GetRuntimeType(rightType);
 				}
 			}
 			else if(rightType is RuntimeType) {
-				if(leftType is not RuntimeType && uNodeDatabase.nativeGraphTypes.Contains(leftType)) {
+				if(leftType is not RuntimeType && uNodeDatabase.instance.nativeGraphTypes.Contains(leftType)) {
 					leftType = ReflectionUtils.GetRuntimeType(leftType);
 				}
 			}

@@ -1433,6 +1433,15 @@ namespace MaxyGames.UNode.Editors {
 							//This make sure to serialize the data.
 							mData.instance = mData.instance;
 						}
+						flag |= AnalizeSerializedObject(mData.StartSerializedType, validation, doAction, analizedHash);
+						flag |= AnalizeSerializedObject(mData.TargetSerializedType, validation, doAction, analizedHash);
+						flag |= AnalizeSerializedObject(mData.Items, validation, doAction, analizedHash);
+						if(mData.serializedInstance != null) {
+							flag |= AnalizeSerializedObject(mData.serializedInstance.serializedType, validation, doAction, analizedHash);
+						}
+						if(flag) {
+							mData.ResetCache();
+						}
 						return flag;
 					}
 					return false;

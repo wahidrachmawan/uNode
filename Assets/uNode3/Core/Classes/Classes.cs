@@ -717,7 +717,7 @@ namespace MaxyGames.UNode {
 						ureference = UnityEditor.EditorUtility.InstanceIDToObject(graphID);
 #endif
 						if(ureference == null) {
-							var db = uNodeDatabase.instance?.graphDatabases;
+							var db = uNodeDatabase.instance?.runtimeGraphDatabases;
 							if(db != null) {
 								foreach(var data in db) {
 									if(data.fileUniqueID == graphID) {
@@ -729,7 +729,7 @@ namespace MaxyGames.UNode {
 						}
 					}
 					else {
-						var db = uNodeDatabase.instance?.graphDatabases;
+						var db = uNodeDatabase.instance?.runtimeGraphDatabases;
 						if(db != null) {
 							foreach(var data in db) {
 								if(data.assetGuid == ids[1]) {

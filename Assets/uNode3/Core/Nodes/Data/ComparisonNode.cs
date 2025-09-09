@@ -26,8 +26,13 @@ namespace MaxyGames.UNode.Nodes {
 					var aType = a.ValueType;
 					var bType = b.ValueType;
 					if(aType != bType) {
-						if(bType == null || b.TargetType.IsTargetingValue() || bType.IsCastableTo(aType) == false) {
-							b.AssignToDefault(MemberData.CreateFromValue(null, aType));
+						if(bType == null || b.TargetType.IsTargetingValue()) {
+							if(bType != null && bType.IsCastableTo(aType)) {
+								b.AssignToDefault(MemberData.CreateFromValue(b.DefaultValue.Get(null, aType), aType));
+							}
+							else {
+								b.AssignToDefault(MemberData.CreateFromValue(null, aType));
+							}
 						}
 					}
 				}

@@ -322,6 +322,7 @@ namespace MaxyGames.UNode.Editors {
 		private ToolbarButton debugButton;
 		private ToolbarButton saveButton;
 		private ToolbarButton frameButton;
+		[SerializeField]
 		private float m_tabbarScroll;
 
 		public static bool richText {
@@ -553,7 +554,7 @@ namespace MaxyGames.UNode.Editors {
 								if(graphData.graph is IReflectionType) {
 									var db = uNodeDatabase.instance;
 									foreach(var (id, map) in GraphDebug.debugData) {
-										var other = db.graphDatabases.FirstOrDefault(data => data.fileUniqueID == id)?.asset;
+										var other = db.runtimeGraphDatabases.FirstOrDefault(data => data.fileUniqueID == id)?.asset;
 										if(other != null) {
 											IGraph inherited = other;
 											while(true) {
@@ -782,20 +783,59 @@ namespace MaxyGames.UNode.Editors {
 							HashSet<(Type type, UGraphElement element)> changedTypes = new();
 							int totalChanged = 0;
 
+							static Type GetRuntimeTypeFromNative(Type type) {
+								if(type == null || type is RuntimeType) {
+									return null;
+								}
+								if(type.IsArray) {
+									var elementType = GetRuntimeTypeFromNative(type.GetElementType());
+									if(elementType != null) {
+										int rank = type.GetArrayRank();
+										if(rank == 1) {
+											return elementType.MakeArrayType();
+										}
+										else {
+											return elementType.MakeArrayType(rank);
+										}
+									}
+									return null;
+								}
+								if(type.IsGenericType) {
+									bool valid = false;
+									var genericTypes = type.GetGenericArguments();
+									for(int i = 0; i < genericTypes.Length; i++) {
+										var gtype = GetRuntimeTypeFromNative(genericTypes[i]);
+										if(gtype != null) {
+											valid = true;
+											genericTypes[i] = gtype;
+										}
+									}
+									if(valid) {
+										return ReflectionUtils.MakeGenericType(type.GetGenericTypeDefinition(), genericTypes);
+									}
+									return null;
+								}
+								var runtimeType = ReflectionUtils.GetRuntimeType(type);
+								if(runtimeType != null && string.IsNullOrEmpty(runtimeType.Name) == false) {
+									return runtimeType;
+								}
+								return null;
+							}
+
 							Debug.Log("Searcing c# type to changed on " + graphAssets.Length + " graph assets");
 							foreach(var asset in graphAssets) {
-								Debug.Log("Searcing on graph: " + asset, asset);
+								//Debug.Log("Searcing on graph: " + asset, asset);
 
 								bool changed = false;
 								UGraphElement uElement = null;
-								GraphUtility.Analizer.AnalizeObject(asset, val => {
+								EditorReflectionUtility.AnalizeSerializedObject(asset, val => {
 									if(val is UGraphElement) {
 										uElement = val as UGraphElement;
 									}
 									if(val is SerializedType serializedType) {
 										if(serializedType.type != null && serializedType.type is not RuntimeType) {
-											var runtimeType = ReflectionUtils.GetRuntimeType(serializedType.nativeType);
-											if(runtimeType != null && string.IsNullOrEmpty(runtimeType.Name) == false) {
+											var runtimeType = GetRuntimeTypeFromNative(serializedType.nativeType);
+											if(runtimeType != null) {
 												if(changed == false) {
 													//Make sure to register undo before any action
 													uNodeEditorUtility.RegisterUndo(uElement.graphContainer, "change c# type to graph type");
@@ -808,12 +848,12 @@ namespace MaxyGames.UNode.Editors {
 										}
 									}
 									else if(val is MemberData member) {
-										if(member.IsTargetingReflection) {
+										if(member.IsTargetingReflection || member.IsTargetingType) {
 											var startType = member.startType;
 											if(startType != null && startType is not RuntimeType) {
-												var runtimeType = ReflectionUtils.GetRuntimeType(startType);
+												var runtimeType = GetRuntimeTypeFromNative(startType);
 
-												if(runtimeType != null && string.IsNullOrEmpty(runtimeType.Name) == false) {
+												if(runtimeType != null) {
 													if(changed == false) {
 														//Make sure to register undo before any action
 														uNodeEditorUtility.RegisterUndo(uElement.graphContainer, "change c# type to graph type");

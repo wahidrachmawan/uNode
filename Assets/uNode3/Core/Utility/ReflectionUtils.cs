@@ -274,11 +274,16 @@ namespace MaxyGames.UNode {
 					return GetRuntimeType(graph.graphContainer);
 				}
 				else if(obj is Type type && type is not RuntimeType) {
-					if(uNodeDatabase.nativeGraphTypes.Contains(type)) {
+					if(uNodeDatabase.instance.nativeGraphTypes.Contains(type)) {
 						var typeName = type.FullName;
-						foreach(var data in uNodeDatabase.instance?.graphDatabases) {
-							if(data.asset != null && data.asset.GetFullGraphName() == typeName) {
-								return GetRuntimeType(data.asset);
+						foreach(var data in uNodeDatabase.instance?.nativeGraphDatabases) {
+							if(data != null && data.ScriptGraph != null) {
+								foreach(var scriptType in data.ScriptGraph.TypeList) {
+									var RType = GetRuntimeType(scriptType);
+									if(RType.FullName == typeName) {
+										return RType;
+									}
+								}
 							}
 						}
 					}
@@ -318,13 +323,23 @@ namespace MaxyGames.UNode {
 					return GetRuntimeType(graph.graphContainer, throwOnNull);
 				}
 				else if(obj is Type type && type is not RuntimeType) {
-					if(uNodeDatabase.nativeGraphTypes.Contains(type)) {
+					if(uNodeDatabase.instance.nativeGraphTypes.Contains(type)) {
 						var typeName = type.FullName;
-						foreach(var data in uNodeDatabase.instance?.graphDatabases) {
-							if(data.asset.GetFullGraphName() == typeName) {
-								return GetRuntimeType(data.asset, throwOnNull);
+						foreach(var data in uNodeDatabase.instance?.nativeGraphDatabases) {
+							if(data != null && data.ScriptGraph != null) {
+								foreach(var scriptType in data.ScriptGraph.TypeList) {
+									var RType = GetRuntimeType(scriptType);
+									if(RType.FullName == typeName) {
+										return RType;
+									}
+								}
 							}
 						}
+						//foreach(var data in uNodeDatabase.instance?.graphDatabases) {
+						//	if(data.asset.GetFullGraphName() == typeName) {
+						//		return GetRuntimeType(data.asset, throwOnNull);
+						//	}
+						//}
 					}
 				}
 				if(throwOnNull)

@@ -59,7 +59,7 @@ namespace MaxyGames.UNode {
 #endif
 			}
 		}
-		public List<RuntimeGraphDatabase> graphDatabases = new List<RuntimeGraphDatabase>();
+		public List<RuntimeGraphDatabase> runtimeGraphDatabases = new List<RuntimeGraphDatabase>();
 
 		[Serializable]
 		public class NativeGraphDatabase {
@@ -117,48 +117,53 @@ namespace MaxyGames.UNode {
 #endif
 		#endregion
 
-		private static HashSet<Type> m_nativeGraphTypes;
-		public static HashSet<Type> nativeGraphTypes {
+		private HashSet<Type> m_nativeGraphTypes;
+		public HashSet<Type> nativeGraphTypes {
 			get {
 				if(m_nativeGraphTypes == null) {
-					var db = uNodeUtility.GetDatabase();
-					if(db == null) {
-						m_nativeGraphTypes = new HashSet<Type>();
-					}
-					else {
-						m_nativeGraphTypes = new HashSet<Type>();
-						foreach(var data in db.nativeGraphDatabases) {
-							if(data.ScriptGraph == null) continue;
-							//foreach(var typeData in data.ScriptGraph.ScriptData.typeDatas) {
-							//	Debug.Log(typeData.typeName + " - " + typeData.typeName.ToType(false));
-							//}
-							foreach(var typeData in data.ScriptGraph.TypeList) {
-								if(typeData is IScriptGraphType scriptGraphType) {
-									var type = scriptGraphType.TypeName.ToType(false);
+					m_nativeGraphTypes = new HashSet<Type>();
+					foreach(var data in nativeGraphDatabases) {
+						if(data.ScriptGraph == null) continue;
+						//foreach(var typeData in data.ScriptGraph.ScriptData.typeDatas) {
+						//	Debug.Log(typeData.typeName + " - " + typeData.typeName.ToType(false));
+						//}
+						foreach(var typeData in data.ScriptGraph.TypeList) {
+							if(typeData is IScriptGraphType scriptGraphType) {
+								var type = scriptGraphType.TypeName.ToType(false);
+								if(type != null) {
+									m_nativeGraphTypes.Add(type);
+									continue;
+								}
+							}
+							if(typeData is IReflectionType reflectionType) {
+								var RType = reflectionType.ReflectionType;
+								if(RType != null) {
+									var type = RType.FullName.ToType(false);
 									if(type != null) {
 										m_nativeGraphTypes.Add(type);
+										continue;
 									}
 								}
 							}
 						}
-						//m_nativeGraphTypes = new HashSet<Type>(
-						//	db.graphDatabases
-						//		.Where(data => data.asset is IScriptGraphType graphType && graphType.TypeName.ToType(false) != null)
-						//		.Select(data => (data.asset as IScriptGraphType).TypeName.ToType(false))
-						//);
 					}
+					//m_nativeGraphTypes = new HashSet<Type>(
+					//	db.graphDatabases
+					//		.Where(data => data.asset is IScriptGraphType graphType && graphType.TypeName.ToType(false) != null)
+					//		.Select(data => (data.asset as IScriptGraphType).TypeName.ToType(false))
+					//);
 				}
 				return m_nativeGraphTypes;
 			}
 		}
 
-		private Dictionary<string, RuntimeGraphDatabase> graphDBMap = new Dictionary<string, RuntimeGraphDatabase>();
+		private Dictionary<string, RuntimeGraphDatabase> m_graphDBMap = new Dictionary<string, RuntimeGraphDatabase>();
 		public RuntimeGraphDatabase GetGraphDatabase(string graphUID) {
-			if (!graphDBMap.TryGetValue(graphUID, out var data)) {
-				foreach (var db in graphDatabases) {
+			if (!m_graphDBMap.TryGetValue(graphUID, out var data)) {
+				foreach (var db in runtimeGraphDatabases) {
 					if (db.asset != null && db.uniqueID == graphUID) {
 						data = db;
-						graphDBMap[graphUID] = data;
+						m_graphDBMap[graphUID] = data;
 						break;
 					}
 				}
@@ -167,7 +172,7 @@ namespace MaxyGames.UNode {
 		}
 
 		public string GetGraphUID(GraphAsset graphAsset) {
-			foreach(var db in graphDatabases) {
+			foreach(var db in runtimeGraphDatabases) {
 				if(db.asset == graphAsset) {
 					return db.assetGuid;
 				}
@@ -181,13 +186,13 @@ namespace MaxyGames.UNode {
 			return string.Empty;
 		}
 
-		private Dictionary<string, IGlobalEvent> globalEventDBMap = new Dictionary<string, IGlobalEvent>();
+		private Dictionary<string, IGlobalEvent> m_globalEventDBMap = new Dictionary<string, IGlobalEvent>();
 		public IGlobalEvent GetGlobalEvent(string guid) {
-			if(!globalEventDBMap.TryGetValue(guid, out var data)) {
+			if(!m_globalEventDBMap.TryGetValue(guid, out var data)) {
 				foreach(var db in globalEventDatabases) {
 					if(db.guid == guid) {
 						data = db.asset as IGlobalEvent;
-						globalEventDBMap[guid] = data;
+						m_globalEventDBMap[guid] = data;
 						break;
 					}
 				}
@@ -197,7 +202,7 @@ namespace MaxyGames.UNode {
 					var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<ScriptableObject>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
 					if(asset is IGlobalEvent evt) {
 						data = evt;
-						globalEventDBMap[guid] = data;
+						m_globalEventDBMap[guid] = data;
 						globalEventDatabases.Add(new RuntimeGlobalEventDatabase() {
 							asset = asset,
 							guid = guid,
@@ -255,9 +260,14 @@ namespace MaxyGames.UNode {
 
 		public static void ClearCache() {
 			if(instance != null) {
-				instance.graphDBMap.Clear();
+				instance.ResetCache();
 			}
+		}
+
+		void ResetCache() {
 			m_nativeGraphTypes = null;
+			m_graphDBMap.Clear();
+			m_globalEventDBMap?.Clear();
 		}
 
 		public static uNodeDatabase instance => uNodeUtility.GetDatabase();

@@ -714,7 +714,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 		private static HashSet<Type> m_cachedIgnoredTypes;
 		public static HashSet<Type> GetIgnoredTypes() {
 			if(preferenceData.autoHideNativeType) {
-				return uNodeDatabase.nativeGraphTypes;
+				return uNodeDatabase.instance.nativeGraphTypes;
 			}
 			else {
 				if(m_cachedIgnoredTypes == null) {

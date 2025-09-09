@@ -2550,6 +2550,14 @@ namespace MaxyGames {
 			else if(obj is MultipurposeMember.MParamInfo) {
 				var param = obj as MultipurposeMember.MParamInfo;
 				if(param.input != null) {
+					if(param.IsOptional && param.info != null && param.input.UseDefaultValue && param.input.isAssigned == false) {
+						if(ReflectionUtils.IsNullOrDefault(param.info.DefaultValue, param.info.ParameterType)) {
+							return "default";
+						}
+						else {
+							return Value(param.info.DefaultValue);
+						}
+					}
 					return GeneratePort(param.input, setVariable: setVariable, autoConvert: autoConvert);
 				}
 				else {

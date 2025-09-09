@@ -106,6 +106,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
+			var zoom = graphView.scale;
 			//Auto hide nodes
 			if(nodeViews != null) {
 				foreach(var node in nodeViews) {
@@ -125,6 +126,7 @@ namespace MaxyGames.UNode.Editors {
 					if(nodeRect.Overlaps(contentRect)) {
 						if(node.parent == null) {
 							graphView.AddElement(node);
+							node.OnZoomUpdated(zoom);
 						}
 					} else if(node.parent != null) {
 						node.hidingRect = node.ChangeCoordinatesTo(graphView.contentViewContainer, node.GetRect());

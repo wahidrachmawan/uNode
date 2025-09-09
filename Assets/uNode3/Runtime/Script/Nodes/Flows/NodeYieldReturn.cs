@@ -55,8 +55,8 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override void CheckError(ErrorAnalyzer analyzer) {
-			if(value.isAssigned && value.ValueType == typeof(Coroutine)) {
-				analyzer.RegisterError(this, "Yielding coroutine is not supported yet.");
+			if(value.isAssigned && value.ValueType == typeof(Coroutine) && nodeObject.graphContainer.IsNativeGraph() == false) {
+				analyzer.RegisterError(this, "Yielding coroutine is not supported on Runtime Graphs.");
 			}
 			base.CheckError(analyzer);
 		}

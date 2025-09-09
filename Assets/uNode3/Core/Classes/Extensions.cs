@@ -1103,7 +1103,6 @@ namespace MaxyGames.UNode {
 		/// Fallback equivalent to .NET's Enum.HasFlag().
 		/// </summary>
 		public static bool HasFlags<T>(this T value, T flag) where T : Enum {
-			//return (Convert.ToInt64(value) & Convert.ToInt64(flag)) != 0;
 			Dictionary<Enum, bool> map = null;
 			lock(_lockObject2) {
 				if(enumsMap.TryGetValue(value, out map)) {
@@ -1484,10 +1483,13 @@ namespace MaxyGames.UNode {
 		/// <returns>A pretty name representation of the type name. If the type cannot be deserialized, the original <paramref
 		/// name="typeName"/> is returned.</returns>
 		public static string PrettyName(this string typeName, bool fullName = false) {
+			// Deserialize the type name to get the actual Type object
 			Type t = TypeSerializer.Deserialize(typeName, false);
 			if(t != null) {
+				// If the type is successfully deserialized, generate its pretty name
 				return t.PrettyName(fullName);
 			}
+			// If deserialization fails, return the original type name
 			return typeName;
 		}
 
@@ -1500,14 +1502,18 @@ namespace MaxyGames.UNode {
 		/// <returns></returns>
 		public static string PrettyName(this Type type, bool fullName, ParameterInfo info) {
 			if(info != null) {
+				// Handle by ref types
 				if(info.ParameterType.IsByRef) {
 					if(info.IsOut) {
+						// Use 'out' modifier for 'out' parameters
 						return CSharpTypeName(type, fullName, RefKind.Out);
 					}
 					else if(info.IsIn) {
+						// Use 'in' modifier for 'in' parameters
 						return CSharpTypeName(type, fullName, RefKind.In);
 					}
 					else {
+						// Use 'ref' modifier for 'ref' parameters
 						return CSharpTypeName(type, fullName, RefKind.Ref);
 					}
 				}
@@ -1532,15 +1538,20 @@ namespace MaxyGames.UNode {
 		private static string CSharpTypeName(Type type, bool fullName = false, RefKind refKind = RefKind.None) {
 			if(type == null)
 				return "null";
+			// Handle by ref types
 			if(type.IsByRef) {
 				switch(refKind) {
 					case RefKind.None:
+						// Default to 'ref' if no specific ref kind is provided
 						return $"&{DoCSharpTypeName(type.GetElementType(), fullName)}";
 					case RefKind.In:
+						// Use 'in' modifier for 'in' parameters
 						return $"in {DoCSharpTypeName(type.GetElementType(), fullName)}";
 					case RefKind.Ref:
+						// Use 'ref' modifier for 'ref' parameters
 						return $"ref {DoCSharpTypeName(type.GetElementType(), fullName)}";
 					case RefKind.Out:
+						// Use 'out' modifier for 'out' parameters
 						return $"out {DoCSharpTypeName(type.GetElementType(), fullName)}";
 				}
 			}
@@ -1550,21 +1561,30 @@ namespace MaxyGames.UNode {
 		private static string DoCSharpTypeName(Type type, bool fullName = false) {
 			if(type == null)
 				return "null";
+			// Handle runtime type
 			if(type is RuntimeType) {
+				// If the type is a RuntimeType, return its name directly
 				return type.Name;
 			}
+			// Handle generic types, and nullable types
 			if(type.IsGenericType) {
+				// Handle nullable types
 				if(type.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+					// Get the underlying type of the nullable type and append a '?' to indicate nullability
 					return string.Format("{0}?", DoCSharpTypeName(Nullable.GetUnderlyingType(type), fullName));
 				}
 				else if(!type.ContainsGenericParameters) {
 					var nm = fullName ? type.FullName : type.Name;
+					// Find the index of the '`' character which indicates the start of generic parameters in the type name
 					int idx = nm.IndexOf('`');
+					// Recursively get the pretty names of the generic arguments and format them into the type name
 					return string.Format("{0}<{1}>", idx >= 0 ? nm.Remove(idx) : nm,
 						string.Join(", ", type.GetGenericArguments().Select(a => DoCSharpTypeName(a, fullName))));
 				}
 			}
+			// Handle array types
 			if(type.IsArray) {
+				// Recursively get the pretty name of the element type and append '[]' to indicate an array
 				return string.Format("{0}[]", DoCSharpTypeName(type.GetElementType(), fullName));
 			}
 

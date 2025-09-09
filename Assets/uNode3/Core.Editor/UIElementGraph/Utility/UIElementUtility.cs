@@ -549,7 +549,7 @@ namespace MaxyGames.UNode.Editors {
 				return nodes.ToList();
 			}
 
-			public static List<UNodeView> FindNodeToCarryOnlyInputs(UNodeView source) {
+			public static IEnumerable<UNodeView> FindNodeToCarryOnlyInputs(UNodeView source) {
 				HashSet<UNodeView> nodes = new HashSet<UNodeView>();
 				nodes.AddRange(FindConnectedNodes(source, includeFlowOutput: false, includeValueInput: true));
 				nodes.Remove(source);
@@ -573,7 +573,7 @@ namespace MaxyGames.UNode.Editors {
 						nodes.Remove(view);
 					}
 				}
-				return nodes.ToList();
+				return nodes;
 			}
 
 			public static HashSet<UNodeView> FindConnectedFlowNodes(UNodeView source, bool includeValueInput = false, bool includeValueOutput = false) {

@@ -32,18 +32,29 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public override bool HasDefaultValue => target.hasDefaultValue;
+
+		public override object DefaultValue => target.defaultValue;
+
+		public override object RawDefaultValue => target.defaultValue;
+
 		public override ParameterAttributes Attributes {
 			get {
+				var result = ParameterAttributes.None;
 				if (target.refKind == RefKind.Out) {
-					return ParameterAttributes.Out;
+					result = ParameterAttributes.Out;
 				}
 				//else if (target.refKind == RefKind.Ref) {
 				//	return ParameterAttributes.Retval;
 				//}
 				else if(target.refKind == RefKind.In) {
-					return ParameterAttributes.In;
+					result = ParameterAttributes.In;
 				}
-				return ParameterAttributes.None;
+				if(target.hasDefaultValue) {
+					result |= ParameterAttributes.HasDefault;
+					result |= ParameterAttributes.Optional;
+				}
+				return result;
 			}
 		}
 	}

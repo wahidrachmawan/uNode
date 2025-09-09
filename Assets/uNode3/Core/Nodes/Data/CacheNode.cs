@@ -22,6 +22,9 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override Type ReturnType() {
+			if(type.isAssigned) {
+				return type.type ?? target.ValueType;
+			}
 			return target.ValueType;
 		}
 
@@ -43,8 +46,15 @@ namespace MaxyGames.UNode.Nodes {
 			var name = this.name;
 			if(CG.CanDeclareLocal(output, exit)) {
 				name = CG.RegisterLocalVariable(this.name, ReturnType());
-				if(ReturnType() == target.ValueType) {
+				if(type.typeKind != SerializedTypeKind.None && target.ValueType == type) {
 					CG.RegisterPort(enter, () => {
+						var right = target.CGValue();
+						if(right == CG.Null) {
+							return CG.Flow(
+								CG.Type(type.type ?? ReturnType()) + " " + name.CGSet(right),
+								CG.FlowFinish(enter, exit)
+							);
+						}
 						return CG.Flow(
 							"var " + name.CGSet(target.CGValue()),
 							CG.FlowFinish(enter, exit)
@@ -52,10 +62,9 @@ namespace MaxyGames.UNode.Nodes {
 					});
 				}
 				else {
-					var type = CG.Type(ReturnType());
 					CG.RegisterPort(enter, () => {
 						return CG.Flow(
-							type + " " + name.CGSet(target.CGValue()),
+							CG.Type(type.type ?? ReturnType()) + " " + name.CGSet(target.CGValue()),
 							CG.FlowFinish(enter, exit)
 						);
 					});

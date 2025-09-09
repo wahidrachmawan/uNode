@@ -573,7 +573,7 @@ namespace MaxyGames.UNode.Editors {
 					controlsContainer.style.visibility = Visibility.Hidden;
 				}
 			}
-			if(zoom > 0.3f) {
+			if(zoom > 0.2f) {
 				foreach(var p in inputPorts) {
 					p.visible = true;
 				}

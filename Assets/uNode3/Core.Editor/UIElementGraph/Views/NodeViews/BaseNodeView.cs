@@ -444,7 +444,27 @@ namespace MaxyGames.UNode.Editors {
 						inner.xMax <= outer.xMax - margin &&
 						inner.yMax <= outer.yMax - margin;
 				}
-				return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Where(n => !IsCompletelyInsideWithMargin(this.GetPosition(), n.GetPosition(), -50)).Distinct();
+				static bool IsConnectedToOthers(NodeObject node, NodeObject source) {
+					foreach(var port in node.ValueOutputs) {
+						foreach(var c in port.connections) {
+							if(c.isValid == false || c.isProxy) continue;
+							if(c.input?.node != source) {
+								if(c.input.node.node is INodeAsEdge)
+									continue;
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+				NodeObject source = this.nodeObject;
+				return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).
+					Where(n => !IsCompletelyInsideWithMargin(this.GetPosition(), n.GetPosition(), -50)).Distinct().
+					TakeWhile(n => {
+						bool flag = IsConnectedToOthers(n.nodeObject, this.nodeObject) == false;
+						source = n.nodeObject;
+						return flag;
+					});
 			}
 			return null;
 		}

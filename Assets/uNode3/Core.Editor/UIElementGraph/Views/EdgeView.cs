@@ -69,12 +69,14 @@ namespace MaxyGames.UNode.Editors {
 										node.kind = Nodes.NodeReroute.RerouteKind.Value;
 										node.Register();
 										if(this is ConversionEdgeView) {
-											node.input.ConnectTo((this as ConversionEdgeView).node.output);
+											node.output.ConnectTo((this as ConversionEdgeView).node.input);
+											node.input.ConnectTo(data.output.GetPortValue());
+											//node.input.ConnectTo((this as ConversionEdgeView).node.output);
 										}
 										else {
 											node.input.ConnectTo(data.output.GetPortValue());
+											data.input.GetPortValue().ConnectTo(node.output);
 										}
-										data.input.GetPortValue().ConnectTo(node.output);
 									}
 								});
 								graph.Refresh();

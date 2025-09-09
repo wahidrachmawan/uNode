@@ -957,9 +957,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 
-				foreach(var node in nodes) {
-					if(node is UNodeView v)
-						v.OnZoomUpdated(scale);
+				foreach(var node in nodeViews) {
+					if(node == null || node.isHidden) continue;
+					node.OnZoomUpdated(scale);
 				}
 				lastZoomLevel = scale;
 			}
@@ -1697,7 +1697,23 @@ namespace MaxyGames.UNode.Editors {
 			#region Edge
 			if(evt.target is EdgeView) {
 				EdgeView edge = evt.target as EdgeView;
-				if(edge is not ConversionEdgeView) {
+				if(edge is ConversionEdgeView conversionEdgeView) {
+					var node = conversionEdgeView.node;
+					if(conversionEdgeView.node != null) {
+						evt.menu.AppendAction("Convert to node", (e) => {
+							uNodeEditorUtility.RegisterUndo(graphData.owner, "Convert to node");
+							NodeEditorUtility.AddNewNode<NodeConvert>(graphData, clickedPos, nodeConvert => {
+								nodeConvert.type = node.type;
+								nodeConvert.Register();
+								nodeConvert.target.ConnectTo(node.input.GetTargetPort());
+								nodeConvert.output.ConnectTo(node.output.GetConnectedPorts().First());
+								node.nodeObject.Destroy();
+							});
+							graphEditor.Refresh();
+						}, DropdownMenuAction.AlwaysEnabled);
+					}
+				}
+				else {
 					evt.menu.AppendAction("Convert to proxy", (e) => {
 						uNodeEditorUtility.RegisterUndo(graphData.owner, "Convert to proxy");
 						edge.connection.isProxy = true;
