@@ -132,6 +132,7 @@ namespace MaxyGames.UNode.Nodes {
 					var state = CG.GetVariableNameByReference(StateNode);
 					string onEnter = null;
 					string onExit = null;
+					string onUpdate = null;
 					foreach(var evt in nodeObject.GetNodesInChildren<BaseGraphEvent>()) {
 						if(evt != null) {
 							if(evt is StateOnEnterEvent) {
@@ -139,6 +140,9 @@ namespace MaxyGames.UNode.Nodes {
 							}
 							else if(evt is StateOnExitEvent) {
 								onExit += evt.GenerateFlows().AddLineInFirst();
+							}
+							else if(evt is StateOnUpdateEvent) {
+								onUpdate += evt.GenerateFlows().AddLineInFirst();
 							}
 							else {
 
@@ -163,10 +167,14 @@ namespace MaxyGames.UNode.Nodes {
 							onExit = CG.Set(state.CGAccess(nameof(StateMachines.State.onExit)), CG.Lambda(onExit), SetType.Add);
 							onExit = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onExit), this);
 						}
+						if(onUpdate != null) {
+							onUpdate = CG.Set(state.CGAccess(nameof(StateMachines.State.onUpdate)), CG.Lambda(onUpdate), SetType.Add);
+							onUpdate = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onUpdate), this);
+						}
 					}
 					if(onEnter != null || onExit != null) {
 						CG.InsertCodeToFunction("Awake", CG.Flow(
-							onEnter, onExit
+							onEnter, onExit, onUpdate
 						));
 					}
 				});

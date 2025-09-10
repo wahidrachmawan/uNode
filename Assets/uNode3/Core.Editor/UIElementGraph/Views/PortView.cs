@@ -158,6 +158,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		public override bool connected => base.connected || portData.portValue.isConnected;
+
 		void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
 
 		}

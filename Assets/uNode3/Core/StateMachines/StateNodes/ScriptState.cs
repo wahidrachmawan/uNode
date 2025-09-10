@@ -37,6 +37,8 @@ namespace MaxyGames.UNode.Nodes {
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Concat(GetTransitions().Select(tr => tr.nodeObject));
 
 		public IEnumerable<StateTransition> GetTransitions() {
+			// Ensure the container is the last sibling so the transition events are executed after the state events
+			transitions.container.SetSiblingIndex(transitions.container.parent.childCount);
 			return transitions.GetFlowNodes<StateTransition>();
 		}
 

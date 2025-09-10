@@ -125,7 +125,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(ReflectionUtils.CanCreateInstance(type)) {
 				if(type == typeof(object)) {
-					variable.defaultValue = "";
+					variable.defaultValue = new object();
 				}
 				else {
 					variable.defaultValue = ReflectionUtils.CreateInstance(type);

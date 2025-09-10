@@ -155,6 +155,11 @@ namespace MaxyGames.UNode.Editors {
 			foreach(var nodeView in nodeViews) {
 				nodeView.InitializeEdge();
 			}
+			//foreach(var nodeView in nodeViews) {
+			//	if(nodeView.ShowExpandButton()) {
+			//		nodeView.expanded = nodeView.nodeObject.nodeExpanded;
+			//	}
+			//}
 		}
 
 		#region Repaint
