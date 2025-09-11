@@ -265,9 +265,17 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 									$@"The graph does not implement interface method: '{type.PrettyName()}' type: '{EditorReflectionUtility.GetPrettyMethodName(member)}'",
 									() => {
 										uNodeEditorUtility.RegisterUndo(graph);
-										NodeEditorUtility.AddNewFunction(graph.GraphData.functionContainer, member.Name, member.ReturnType,
-										member.GetParameters().Select(item => new ParameterData(item)).ToArray(),
-										member.GetGenericArguments().Select(item => item.Name).ToArray());
+										var container = graph.GraphData.functionContainer;
+										var groupName = type.PrettyName();
+										NodeEditorUtility.AddNewFunction(container, member.Name, member.ReturnType,
+											member.GetParameters().Select(item => new ParameterData(item)).ToArray(),
+											member.GetGenericArguments().Select(item => item.Name).ToArray(), func => {
+												var group = container.GetObjectInChildren<UGroupElement>(e => e.name == groupName, findInsideGroup: true);
+												if(group == null) {
+													NodeEditorUtility.AddNewObject<UGroupElement>(groupName, container, g => group = g);
+												}
+												func.SetParent(group);
+											});
 										uNodeGUIUtility.GUIChanged(graph, UIChangeType.Important);
 									});
 							}
@@ -280,7 +288,15 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 									$@"The graph does not implement interface property: '{type.PrettyName()}' type: '{member.PropertyType.PrettyName()}'",
 									() => {
 										uNodeEditorUtility.RegisterUndo(graph);
-										NodeEditorUtility.AddNewProperty(graph.GraphData.propertyContainer, member.Name, member.PropertyType);
+										var container = graph.GraphData.propertyContainer;
+										var groupName = type.PrettyName();
+										NodeEditorUtility.AddNewProperty(graph.GraphData.propertyContainer, member.Name, member.PropertyType, prop => {
+											var group = container.GetObjectInChildren<UGroupElement>(e => e.name == groupName, findInsideGroup: true);
+											if(group == null) {
+												NodeEditorUtility.AddNewObject<UGroupElement>(groupName, container, g => group = g);
+											}
+											prop.SetParent(group);
+										});
 										uNodeGUIUtility.GUIChanged(graph, UIChangeType.Important);
 									});
 							}

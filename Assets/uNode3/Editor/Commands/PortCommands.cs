@@ -370,7 +370,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				Undo.RegisterFullObjectHierarchyUndo(unityObject, "Assign to contructor node");
 			}
 			var position = new Vector2(source.position.x - 100, source.position.y);
-			var type = filter.GetActualType();
+			var type = filter.GetActualType(data.portType);
 			if(type.IsByRef) {
 				type = type.GetElementType();
 			}
@@ -692,7 +692,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
-			type = filter != null ? filter.GetActualType() : typeof(object);
+			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
 			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
 				if(filter != null && filter.SetMember) {
 					return false;
@@ -732,7 +732,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
-			type = filter != null ? filter.GetActualType() : typeof(object);
+			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
 			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
 				if(filter != null && filter.SetMember) {
 					return false;
@@ -781,7 +781,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
-			type = filter != null ? filter.GetActualType() : typeof(object);
+			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
 			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
 				if(filter != null && filter.SetMember) {
 					return false;

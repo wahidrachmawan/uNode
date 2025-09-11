@@ -158,7 +158,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		public override bool connected => base.connected || portData.portValue.isConnected;
+		public override bool connected => base.connected || portData.portValue.hasValidConnections;
 
 		void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
 
@@ -743,52 +743,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 			if(input != null) {//Process if source is input port.
 				PortView portView = input as PortView;
-
-#if false
-				foreach(var node in owner.owner.nodeViews) {
-					if(node != null && node != portView.owner) {
-						if(node.layout.Contains(position)) {
-							if((edge.input as PortView).isFlow) {//Flow
-								foreach(var port in node.outputPorts) {
-									if(port.isFlow) {//Find the first flow port and connect it.
-										uNodeThreadUtility.Queue(() => {
-											edge.input = portView;
-											edge.output = port;
-											owner.owner.Connect(edge as EdgeView, true);
-											owner.owner.MarkRepaint();
-										});
-										return;
-									}
-								}
-							}
-							else {//Input Value
-								FilterAttribute filter = portView.GetFilter();
-								bool flag = true;
-								if(filter.SetMember) {
-									var tNode = portView.GetNodeObject();
-									if(tNode == null || !tNode.CanSetValue()) {
-										flag = false;
-									}
-								}
-								if(flag) {
-									foreach(var port in node.outputPorts) {
-										if(port.isValue && portView.IsValidTarget(port)) {
-											uNodeThreadUtility.Queue(() => {
-												edge.input = portView;
-												edge.output = port;
-												OnDrop(owner.owner, edge);
-											});
-											return;
-										}
-									}
-								}
-							}
-							break;
-						}
-					}
-				}
-#endif
-
 				if(input.isValue) {//Input Value
 					OnDropOutsidePortFromValueInput(portView.GetPortValue<ValueInput>(), position, owner.graphEditor, portView.GetFilter());
 				}
@@ -798,52 +752,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(output != null) {//Process if source is output port.
 				PortView portView = output as PortView;
-
-#if false
-				foreach(var node in owner.owner.nodeViews) {
-					if(node != null && node != portView.owner) {
-						if(node.layout.Contains(position)) {
-							if(output.isFlow) {//Flow
-								foreach(var port in node.inputPorts) {
-									if(port.isFlow) {
-										uNodeThreadUtility.Queue(() => {
-											edge.output = portView;
-											edge.input = port;
-											owner.owner.Connect(edge as EdgeView, true);
-											owner.owner.MarkRepaint();
-										});
-										return;
-									}
-								}
-							}
-							else {//Output Value
-								FilterAttribute filter = portView.GetFilter();
-								bool flag = true;
-								if(filter.SetMember) {
-									//var tNode = portView.GetNode() as Node;
-									//if(tNode == null || !tNode.CanSetValue()) {
-									//	flag = false;
-									//}
-								}
-								if(flag) {
-									foreach(var port in node.inputPorts) {
-										if(port.isValue && portView.IsValidTarget(port)) {
-											uNodeThreadUtility.Queue(() => {
-												edge.output = portView;
-												edge.input = port;
-												OnDrop(owner.owner, edge);
-											});
-											return;
-										}
-									}
-								}
-							}
-							break;
-						}
-					}
-				}
-#endif
-
 				if(output.isFlow) {//Output Flow
 					OnDropOutsidePortFromFlowOutput(position, portView, sidePort);
 				}
@@ -876,13 +784,12 @@ namespace MaxyGames.UNode.Editors {
 				if(port.direction == Direction.Input) {
 					input = port;
 					output = this;
-					filter = port.GetFilter();
 				}
 				else {
 					input = this;
 					output = port;
-					filter = this.GetFilter();
 				}
+				filter = input.GetFilter();
 				var outputPort = output.GetPortValue<ValueOutput>();
 				var inputPort = input.GetPortValue<ValueInput>();
 				if(filter != null) {
@@ -895,7 +802,8 @@ namespace MaxyGames.UNode.Editors {
 						if(types.Count > 1) {
 							return false;
 						}
-						return NodeEditorUtility.CanAutoConvertType(outType, filter.GetActualType(), outputPort, inputPort, owner.graphData.currentCanvas);
+						Type inType = types.Count == 1 ? types[0] : input.GetPortType();
+						return NodeEditorUtility.CanAutoConvertType(outType, inType, outputPort, inputPort, owner.graphData.currentCanvas);
 					}
 					return true;
 				}
@@ -908,7 +816,7 @@ namespace MaxyGames.UNode.Editors {
 			var leftPort = edge.output as PortView;
 			var rightPort = edge.input as PortView;
 
-			Type leftType = leftPort.portData.GetFilter().GetActualType();
+			Type leftType = leftPort.portData.GetFilter().GetActualType(leftPort.GetPortType());
 			NodeEditorUtility.AutoConvertPort(leftType, rightType, leftPort.GetPortValue<ValueOutput>(), rightPort.GetPortValue<ValueInput>(), (node) => {
 				UPort p = null;
 				if(node.nodeObject.primaryValueOutput != null) {
@@ -942,21 +850,23 @@ namespace MaxyGames.UNode.Editors {
 						"Convert if possible", "Continue", "Cancel");
 				}
 				if(option == 0) {
-					var filteredTypes = (edge.input as PortView).portData.GetFilter().GetFilteredTypes();
-					if(filteredTypes.Count > 1) {
-						var menu = new GenericMenu();
-						for(int i = 0; i < filteredTypes.Count; i++) {
-							var t = filteredTypes[i];
-							menu.AddItem(new GUIContent(t.PrettyName(true)), false, () => {
-								uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
-								AutoConvertPort(graph, edge, t);
-							});
+					var filteredTypes = edge.Input.portData.GetFilter().GetFilteredTypes(edge.Output.portType).ToArray();
+					if(filteredTypes?.Length > 0) {
+						if(filteredTypes.Length > 1) {
+							var menu = new GenericMenu();
+							for(int i = 0; i < filteredTypes.Length; i++) {
+								var t = filteredTypes[i];
+								menu.AddItem(new GUIContent(t.PrettyName(true)), false, () => {
+									uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
+									AutoConvertPort(graph, edge, t);
+								});
+							}
+							menu.ShowAsContext();
 						}
-						menu.ShowAsContext();
-					}
-					else {
-						uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
-						AutoConvertPort(graph, edge, filteredTypes[0]);
+						else {
+							uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
+							AutoConvertPort(graph, edge, filteredTypes[0]);
+						}
 					}
 					return;
 				}
@@ -987,21 +897,23 @@ namespace MaxyGames.UNode.Editors {
 					"Convert if possible", "Continue", "Cancel");
 				}
 				if(option == 0) {
-					var filteredTypes = (edge.input as PortView).portData.GetFilter().GetFilteredTypes();
-					if(filteredTypes.Count > 1) {
-						var menu = new GenericMenu();
-						for(int i = 0; i < filteredTypes.Count; i++) {
-							var t = filteredTypes[i];
-							menu.AddItem(new GUIContent(t.PrettyName(true)), false, () => {
-								uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
-								AutoConvertPort(graph, edge, t);
-							});
+					var filteredTypes = edge.Input.portData.GetFilter().GetFilteredTypes(edge.Output.portType).ToArray();
+					if(filteredTypes?.Length > 0) {
+						if(filteredTypes.Length > 1) {
+							var menu = new GenericMenu();
+							for(int i = 0; i < filteredTypes.Length; i++) {
+								var t = filteredTypes[i];
+								menu.AddItem(new GUIContent(t.PrettyName(true)), false, () => {
+									uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
+									AutoConvertPort(graph, edge, t);
+								});
+							}
+							menu.ShowAsContext();
 						}
-						menu.ShowAsContext();
-					}
-					else {
-						uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
-						AutoConvertPort(graph, edge, filteredTypes[0]);
+						else {
+							uNodeEditorUtility.RegisterUndo(graph.graphData.owner, "Connect port");
+							AutoConvertPort(graph, edge, filteredTypes[0]);
+						}
 					}
 					return;
 				}

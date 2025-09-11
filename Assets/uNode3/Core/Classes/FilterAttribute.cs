@@ -207,6 +207,8 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public bool HideSubClassType = true;
 
+		public Func<Type, IEnumerable<Type>> FilteredTypes;
+
 		/// <summary>
 		/// The valid member type to select
 		/// </summary>
@@ -231,7 +233,8 @@ namespace MaxyGames.UNode {
 					flags |= BindingFlags.DeclaredOnly;
 				if(Static && Inherited) {
 					flags |= BindingFlags.FlattenHierarchy;
-				} else if(Static) {
+				}
+				else if(Static) {
 					flags |= BindingFlags.Static;
 				}
 				return flags;
@@ -360,6 +363,7 @@ namespace MaxyGames.UNode {
 			this.VoidType = other.VoidType;
 			this.AllowInterface = other.AllowInterface;
 			this.ValidateType = other.ValidateType;
+			this.FilteredTypes = other.FilteredTypes;
 		}
 		#endregion
 
@@ -372,19 +376,44 @@ namespace MaxyGames.UNode {
 			this.Types = new List<Type>(types);
 		}
 
+		/// <summary>
+		/// Get the actual type of this filter
+		/// </summary>
+		/// <returns></returns>
 		public Type GetActualType() {
 			if(OnlyGetType) {
 				return typeof(Type);
-			} else if(Types != null && Types.Count > 0) {
+			}
+			else if(Types != null && Types.Count > 0) {
 				return Types[0];
 			}
 			return typeof(object);
 		}
 
-		public IList<Type> GetFilteredTypes() {
+		/// <summary>
+		/// Get the actual type of this filter, if the filter has no type it will return the fallback type.
+		/// </summary>
+		/// <param name="fallbackType">
+		/// If the filter has no type, this type will be used instead.
+		/// </param>
+		/// <returns></returns>
+		public Type GetActualType(Type fallbackType) {
+			if(OnlyGetType) {
+				return typeof(Type);
+			}
+			else if(Types != null && Types.Count > 0) {
+				return Types[0];
+			}
+			return fallbackType ?? typeof(object);
+		}
+
+		public IEnumerable<Type> GetFilteredTypes(Type other = null) {
+			if(FilteredTypes != null)
+				return FilteredTypes(other) ?? (OnlyGetType ? new[] { typeof(Type) } : new[] { typeof(object) });
 			if(OnlyGetType) {
 				return new[] { typeof(Type) };
-			} else if(Types != null && Types.Count > 0) {
+			}
+			else if(Types != null && Types.Count > 0) {
 				return Types;
 			}
 			return new[] { typeof(object) };
@@ -793,7 +822,7 @@ namespace MaxyGames.UNode {
 					DisplayValueType = false;
 					DisplayInterfaceType = false;
 					DisplayReferenceType = true;
-				} 
+				}
 				else if((constraints & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0) {//struct constraint
 					DisplayValueType = true;
 					DisplayInterfaceType = false;

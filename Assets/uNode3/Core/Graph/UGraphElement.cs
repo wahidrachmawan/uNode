@@ -7,6 +7,7 @@ using System.Collections;
 namespace MaxyGames.UNode {
 	[Serializable]
 	public class UGroupElement : UGraphElement, IGroup, IIcon {
+		[AllowAssetReference]
 		public Texture2D icon;
 
 		public UGroupElement() {

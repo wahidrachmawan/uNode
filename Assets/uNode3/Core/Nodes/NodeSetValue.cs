@@ -22,64 +22,79 @@ namespace MaxyGames.UNode.Nodes {
 				SetMember = true,
 			};
 			value = ValueInput(nameof(value), () => target.ValueType);
+
 			value.filter = new FilterAttribute() {
+				FilteredTypes = rightType => {
+					return FilterType(this, rightType);
+				},
 				ValidateType = (rightType) => {
-					var leftType = target.ValueType;
-					switch(setType) {
-						case SetType.Add: {
-							var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Addition);
-							for(int i = 0; i < methods.Length; i++) {
-								var param = methods[i].GetParameters();
-								if(param.Length == 2 && param[0].ParameterType == leftType && rightType.IsCastableTo(param[1].ParameterType)) {
-									return true;
-								}
-							}
-							break;
-						}
-						case SetType.Subtract: {
-							var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Subtraction);
-							for(int i = 0; i < methods.Length; i++) {
-								var param = methods[i].GetParameters();
-								if(param.Length == 2 && param[0].ParameterType == leftType && rightType.IsCastableTo(param[1].ParameterType)) {
-									return true;
-								}
-							}
-							break;
-						}
-						case SetType.Divide: {
-							var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Division);
-							for(int i = 0; i < methods.Length; i++) {
-								var param = methods[i].GetParameters();
-								if(param.Length == 2 && param[0].ParameterType == leftType && rightType.IsCastableTo(param[1].ParameterType)) {
-									return true;
-								}
-							}
-							break;
-						}
-						case SetType.Multiply: {
-							var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Multiply);
-							for(int i = 0; i < methods.Length; i++) {
-								var param = methods[i].GetParameters();
-								if(param.Length == 2 && param[0].ParameterType == leftType && rightType.IsCastableTo(param[1].ParameterType)) {
-									return true;
-								}
-							}
-							break;
-						}
-						case SetType.Modulo: {
-							var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Modulus);
-							for(int i = 0; i < methods.Length; i++) {
-								var param = methods[i].GetParameters();
-								if(param.Length == 2 && param[0].ParameterType == leftType && rightType.IsCastableTo(param[1].ParameterType)) {
-									return true;
-								}
-							}
-							break;
+					foreach(var t in FilterType(this, rightType)) {
+						if(rightType.IsCastableTo(t)) {
+							return true;
 						}
 					}
-					return rightType.IsCastableTo(target.ValueType);
+					return false;
 				}
 			};
+
+			static IEnumerable<Type> FilterType(NodeSetValue node, Type rightType) {
+				var leftType = node.target.ValueType;
+
+				yield return leftType;
+
+				switch(node.setType) {
+					case SetType.Add: {
+						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Addition);
+						for(int i = 0; i < methods.Length; i++) {
+							var param = methods[i].GetParameters();
+							if(param.Length == 2 && param[0].ParameterType == leftType) {
+								yield return param[i].ParameterType;
+							}
+						}
+						break;
+					}
+					case SetType.Subtract: {
+						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Subtraction);
+						for(int i = 0; i < methods.Length; i++) {
+							var param = methods[i].GetParameters();
+							if(param.Length == 2 && param[0].ParameterType == leftType) {
+								yield return param[i].ParameterType;
+							}
+						}
+						break;
+					}
+					case SetType.Divide: {
+						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Division);
+						for(int i = 0; i < methods.Length; i++) {
+							var param = methods[i].GetParameters();
+							if(param.Length == 2 && param[0].ParameterType == leftType) {
+								yield return param[i].ParameterType;
+							}
+						}
+						break;
+					}
+					case SetType.Multiply: {
+						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Multiply);
+						for(int i = 0; i < methods.Length; i++) {
+							var param = methods[i].GetParameters();
+							if(param.Length == 2 && param[0].ParameterType == leftType) {
+								yield return param[i].ParameterType;
+							}
+						}
+						break;
+					}
+					case SetType.Modulo: {
+						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Modulus);
+						for(int i = 0; i < methods.Length; i++) {
+							var param = methods[i].GetParameters();
+							if(param.Length == 2 && param[0].ParameterType == leftType) {
+								yield return param[i].ParameterType;
+							}
+						}
+						break;
+					}
+				}
+			}
 		}
 
 		#region Runtime
