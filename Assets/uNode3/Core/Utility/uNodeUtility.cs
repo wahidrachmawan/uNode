@@ -1769,7 +1769,7 @@ namespace MaxyGames.UNode {
 			var db = GetDatabase();
 			if(db != null && graph is IReflectionType reflectionType) {
 				var type = reflectionType.ReflectionType;
-				foreach(var data in db.runtimeGraphDatabases) {
+				foreach(var data in db.graphDatabases) {
 					if(data.asset is IReflectionType rType && rType.ReflectionType.IsSubclassOf(type)) {
 						yield return data.asset;
 					}

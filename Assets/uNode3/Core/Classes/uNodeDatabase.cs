@@ -6,7 +6,7 @@ using UnityEngine;
 namespace MaxyGames.UNode {
 	public class uNodeDatabase : ScriptableObject {
 		[System.Serializable]
-		public class RuntimeGraphDatabase {
+		public class GraphAssetDatabase {
 			[SerializeField]
 			private GraphAsset graph;
 			public GraphAsset asset {
@@ -53,13 +53,13 @@ namespace MaxyGames.UNode {
 			public void Update() {
 #if UNITY_EDITOR
 				if(graph != null) {
-					m_fileGuid = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(asset));
+					m_fileGuid = M_GetGraphGUID(asset);
 					m_fileUniqueID = 0;
 				}
 #endif
 			}
 		}
-		public List<RuntimeGraphDatabase> runtimeGraphDatabases = new List<RuntimeGraphDatabase>();
+		public List<GraphAssetDatabase> graphDatabases = new List<GraphAssetDatabase>();
 
 		[Serializable]
 		public class NativeGraphDatabase {
@@ -118,6 +118,9 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		private HashSet<Type> m_nativeGraphTypes;
+		/// <summary>
+		/// Get all CLR types that's available to the native graphs in the database.
+		/// </summary>
 		public HashSet<Type> nativeGraphTypes {
 			get {
 				if(m_nativeGraphTypes == null) {
@@ -157,11 +160,47 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		private Dictionary<string, RuntimeGraphDatabase> m_graphDBMap = new Dictionary<string, RuntimeGraphDatabase>();
-		public RuntimeGraphDatabase GetGraphDatabase(string graphUID) {
-			if (!m_graphDBMap.TryGetValue(graphUID, out var data)) {
-				foreach (var db in runtimeGraphDatabases) {
-					if (db.asset != null && db.uniqueID == graphUID) {
+		/// <summary>
+		/// Get the graph GUID from the graph asset, the value should be persistence.
+		/// </summary>
+		/// <param name="graphAsset"></param>
+		/// <returns></returns>
+		public string GetGraphGUID(GraphAsset graphAsset) {
+			foreach(var db in graphDatabases) {
+				if(db.asset == graphAsset) {
+					return db.assetGuid;
+				}
+			}
+			return M_GetGraphGUID(graphAsset);
+		}
+
+		private static string M_GetGraphGUID(GraphAsset graphAsset) {
+#if UNITY_EDITOR
+			if(graphAsset != null) {
+				var path = UnityEditor.AssetDatabase.GetAssetPath(graphAsset);
+				if(!string.IsNullOrEmpty(path)) {
+					if(UnityEditor.AssetDatabase.IsMainAsset(graphAsset) == false) {
+						if(UnityEditor.AssetDatabase.TryGetGUIDAndLocalFileIdentifier(graphAsset, out var guid, out long localID)) {
+							return guid + "-" + localID;
+						}
+					}
+					return UnityEditor.AssetDatabase.AssetPathToGUID(path);
+				}
+			}
+#endif
+			return string.Empty;
+		}
+
+		private Dictionary<string, GraphAssetDatabase> m_graphDBMap = new Dictionary<string, GraphAssetDatabase>();
+		/// <summary>
+		/// Get the graph database by unique graph ID, usually the full graph name or the class identifier.
+		/// </summary>
+		/// <param name="graphUID"></param>
+		/// <returns></returns>
+		public GraphAssetDatabase GetGraphDatabase(string graphUID) {
+			if(!m_graphDBMap.TryGetValue(graphUID, out var data)) {
+				foreach(var db in graphDatabases) {
+					if(db.asset != null && db.uniqueID == graphUID) {
 						data = db;
 						m_graphDBMap[graphUID] = data;
 						break;
@@ -171,22 +210,56 @@ namespace MaxyGames.UNode {
 			return data;
 		}
 
-		public string GetGraphUID(GraphAsset graphAsset) {
-			foreach(var db in runtimeGraphDatabases) {
-				if(db.asset == graphAsset) {
-					return db.assetGuid;
+		public GraphAssetDatabase GetGraphDatabase<T>() where T : class {
+			return GetGraphDatabase(typeof(T).FullName);
+		}
+
+		private Dictionary<string, GraphAssetDatabase> m_graphMap = new Dictionary<string, GraphAssetDatabase>();
+		/// <summary>
+		/// Get the graph database by asset GUID
+		/// </summary>
+		/// <param name="assetGuid"></param>
+		/// <returns></returns>
+		public GraphAssetDatabase GetGraphDatabaseByGuid(string assetGuid) {
+			if(!m_graphMap.TryGetValue(assetGuid, out var data)) {
+				foreach(var db in graphDatabases) {
+					if(db.asset != null && db.assetGuid == assetGuid) {
+						data = db;
+						m_graphMap[assetGuid] = data;
+						break;
+					}
 				}
 			}
-#if UNITY_EDITOR
-			var path = UnityEditor.AssetDatabase.GetAssetPath(graphAsset);
-			if(!string.IsNullOrEmpty(path)) { 
-				return UnityEditor.AssetDatabase.AssetPathToGUID(path);
+			return data;
+		}
+
+		/// <summary>
+		/// Get the graph asset by unique graph ID, usually the full graph name or the class identifier.
+		/// </summary>
+		/// <param name="graphUID"></param>
+		/// <param name="throwOnNull"></param>
+		/// <returns></returns>
+		/// <exception cref="System.Exception"></exception>
+		public GraphAsset GetGraphByUID(string graphUID, bool throwOnNull = true) {
+			var data = GetGraphDatabase(graphUID);
+			if(data != null) {
+				return data.asset;
 			}
-#endif
-			return string.Empty;
+			if(throwOnNull) {
+				throw new System.Exception($"There's no graph with id: {graphUID} or maybe the database is outdated if so please refresh the database.");
+			}
+			else {
+				return null;
+			}
 		}
 
 		private Dictionary<string, IGlobalEvent> m_globalEventDBMap = new Dictionary<string, IGlobalEvent>();
+		/// <summary>
+		/// Get the global event by its GUID.
+		/// </summary>
+		/// <param name="guid"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
 		public IGlobalEvent GetGlobalEvent(string guid) {
 			if(!m_globalEventDBMap.TryGetValue(guid, out var data)) {
 				foreach(var db in globalEventDatabases) {
@@ -217,47 +290,9 @@ namespace MaxyGames.UNode {
 			return data;
 		}
 
-//		private Dictionary<string, GraphAsset> m_graphByGUID = new Dictionary<string, GraphAsset>();
-//		public GraphAsset GetGraphByGUID(string guid, bool throwOnNull = true) {
-//			if(!m_graphByGUID.TryGetValue(guid, out var data)) {
-//				foreach(var db in graphDatabases) {
-//					if(db.guid == guid) {
-//						data = db.graph;
-//						m_graphByGUID[guid] = data;
-//						break;
-//					}
-//				}
-//#if UNITY_EDITOR
-//				if(data == null) {
-//					//If inside of Unity Editor, load the event from GUID instead for fix outdated databases.
-//					var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<ScriptableObject>(UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
-//					if(asset is GraphAsset evt) {
-//						data = evt;
-//						m_graphByGUID[guid] = data;
-//					}
-//				}
-//#endif
-//			}
-//			return data;
-//		}
-
-		public GraphAsset GetGraphByUID(string graphUID, bool throwOnNull = true) {
-			var data = GetGraphDatabase(graphUID);
-			if(data != null) {
-				return data.asset;
-			}
-			if(throwOnNull) {
-				throw new System.Exception($"There's no graph with id: {graphUID} or maybe the database is outdated if so please refresh the database.");
-			}
-			else {
-				return null;
-			}
-		}
-
-		public RuntimeGraphDatabase GetGraphDatabase<T>() where T : class {
-			return GetGraphDatabase(typeof(T).FullName);
-		}
-
+		/// <summary>
+		/// Clear the cached data, usually called when the database has changed.
+		/// </summary>
 		public static void ClearCache() {
 			if(instance != null) {
 				instance.ResetCache();
@@ -267,7 +302,8 @@ namespace MaxyGames.UNode {
 		void ResetCache() {
 			m_nativeGraphTypes = null;
 			m_graphDBMap.Clear();
-			m_globalEventDBMap?.Clear();
+			m_graphMap.Clear();
+			m_globalEventDBMap.Clear();
 		}
 
 		public static uNodeDatabase instance => uNodeUtility.GetDatabase();

@@ -1361,12 +1361,12 @@ namespace MaxyGames {
 						if(type.HasElementType || type.HasImplementInterface(typeof(IList<>))) {
 							var elementType = type.ElementType();
 							if(elementType is RuntimeGraphType graphType) {
-								result += Attribute(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).AddFirst("\n", !string.IsNullOrEmpty(result));
+								result += Attribute(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphGUID(graphType.target))).AddFirst("\n", !string.IsNullOrEmpty(result));
 							}
 						}
 						else {
 							if(type is RuntimeGraphType graphType) {
-								result += Attribute(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).AddFirst("\n", !string.IsNullOrEmpty(result));
+								result += Attribute(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphGUID(graphType.target))).AddFirst("\n", !string.IsNullOrEmpty(result));
 							}
 						}
 						if(modifier != null && modifier.Public && attributes.Any(a => a.attributeType == typeof(SerializeField) || a.attributeType == typeof(SerializeReference)) == false) {
@@ -1804,12 +1804,12 @@ namespace MaxyGames {
 					if(type.HasElementType || type.HasImplementInterface(typeof(IList<>))) {
 						var elementType = type.ElementType();
 						if(elementType is RuntimeGraphType graphType) {
-							result += new AData(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).GenerateCode().Add(" ");
+							result += new AData(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphGUID(graphType.target))).GenerateCode().Add(" ");
 						}
 					}
 					else {
 						if(type is RuntimeGraphType graphType) {
-							result += new AData(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphUID(graphType.target))).GenerateCode().Add(" ");
+							result += new AData(typeof(GraphGuidAttribute), Value(uNodeDatabase.instance.GetGraphGUID(graphType.target))).GenerateCode().Add(" ");
 						}
 					}
 				}

@@ -1926,11 +1926,11 @@ namespace MaxyGames.UNode.Editors {
 			foreach(var asset in assets) {
 				if(asset == null) continue;
 				if(asset is GraphAsset graphAsset) {
-					if(EditorUtility.IsPersistent(graphAsset) == false || AssetDatabase.IsMainAsset(graphAsset) == false) continue;
-					if(db.runtimeGraphDatabases.Any(g => g.asset == graphAsset)) {
+					if(EditorUtility.IsPersistent(graphAsset) == false /*|| AssetDatabase.IsMainAsset(graphAsset) == false*/) continue;
+					if(db.graphDatabases.Any(g => g.asset == graphAsset)) {
 						continue;
 					}
-					db.runtimeGraphDatabases.Add(new uNodeDatabase.RuntimeGraphDatabase() {
+					db.graphDatabases.Add(new uNodeDatabase.GraphAssetDatabase() {
 						asset = graphAsset,
 					});
 				}
@@ -1941,6 +1941,20 @@ namespace MaxyGames.UNode.Editors {
 					db.nativeGraphDatabases.Add(new uNodeDatabase.NativeGraphDatabase() {
 						ScriptGraph = scriptGraph,
 					});
+					////Also add all graph asset references
+					//if(scriptGraph.TypeList != null) {
+					//	foreach(var type in scriptGraph.TypeList.references) {
+					//		if(type is GraphAsset graph) {
+					//			if(EditorUtility.IsPersistent(graph) == false) continue;
+					//			if(db.graphDatabases.Any(g => g.asset == graph)) {
+					//				continue;
+					//			}
+					//			db.graphDatabases.Add(new uNodeDatabase.GraphAssetDatabase() {
+					//				asset = graph,
+					//			});
+					//		}
+					//	}
+					//}
 				}
 				else if(asset is UGlobalEvent globalEvent) {
 					if(EditorUtility.IsPersistent(globalEvent) == false) continue;
