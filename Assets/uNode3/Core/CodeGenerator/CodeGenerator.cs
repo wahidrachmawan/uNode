@@ -604,7 +604,7 @@ namespace MaxyGames {
 							mData = new MData(
 								function.name,
 								function.returnType,
-								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind) { 
+								function.parameters.Select(i => new MPData(i.name, i.type, i.refKind) {
 									defaultValue = i.hasDefaultValue && i.isByRef ? Value(i.defaultValue) : null,
 									summary = i.summary,
 								}).ToArray(),
@@ -1208,7 +1208,6 @@ namespace MaxyGames {
 								return string.Join(".", result.ToArray());
 							}
 							else if(member.Name.StartsWith("Get", StringComparison.Ordinal) &&
-								method.GetParameters().Length == 1 &&
 								(i > 0 && ReflectionUtils.GetMemberType(memberInfo[i - 1]).IsArray || i == 0 && mData.startType.IsArray)) {
 
 								if(isRuntime && !ReflectionUtils.IsNativeType(method.ReturnType) && generatePureScript) {
@@ -1231,10 +1230,8 @@ namespace MaxyGames {
 								}
 							}
 							else if(member.Name.StartsWith("Set", StringComparison.Ordinal) &&
-								method.GetParameters().Length == 2 && (i > 0 &&
-								ReflectionUtils.GetMemberType(memberInfo[i - 1]).IsArray || i == 0 && mData.startType.IsArray)) {
-
-								result.Add(member.Name.Replace("Set", "[" + parameterDatas[0] + "]") + " = " + parameterDatas[1]);
+								(i > 0 && ReflectionUtils.GetMemberType(memberInfo[i - 1]).IsArray || i == 0 && mData.startType.IsArray)) {
+								result.Add(member.Name.Replace("Set", "[" + string.Join(", ", parameterDatas.TakeWhile((p, index) => index + 1 < parameterDatas.Length)) + "]") + " = " + parameterDatas[parameterDatas.Length - 1]);
 							}
 							else {
 								result.Add(member.Name + genericData + "(" + data + ")");

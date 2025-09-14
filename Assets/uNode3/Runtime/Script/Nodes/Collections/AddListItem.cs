@@ -2,7 +2,7 @@
 using System.Collections;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Collections.List", "Add Item", icon = typeof(IList), hasFlowInput = true, hasFlowOutput = true, inputs = new[] { typeof(IList) })]
+	[NodeMenu("Collections.List", "Add Item", icon = typeof(IList), hasFlowInput = true, hasFlowOutput = true/*, inputs = new[] { typeof(IList) }*/)]
 	public class AddListItem : FlowNode {
 		public ValueInput target { get; set; }
 		public ValueInput value { get; set; }
@@ -30,6 +30,16 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override string GetRichName() {
 			return target.GetRichName().Add($".Add({value.GetRichName()})");
+		}
+
+		public override void CheckError(ErrorAnalyzer analyzer) {
+			base.CheckError(analyzer);
+			if(target.isAssigned) {
+				var type = target.ValueType;
+				if(type.IsArray) {
+					analyzer.RegisterError(this, "Cannot remove array element");
+				}
+			}
 		}
 	}
 }

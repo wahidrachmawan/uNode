@@ -172,7 +172,7 @@ namespace MaxyGames.UNode.Nodes {
 							onUpdate = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onUpdate), this);
 						}
 					}
-					if(onEnter != null || onExit != null) {
+					if(onEnter != null || onExit != null || onUpdate != null) {
 						CG.InsertCodeToFunction("Awake", CG.Flow(
 							onEnter, onExit, onUpdate
 						));

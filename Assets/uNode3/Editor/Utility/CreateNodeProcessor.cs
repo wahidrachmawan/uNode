@@ -91,7 +91,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				//For array
-				if(method.DeclaringType.IsArray) {
+				if(method.DeclaringType.IsArray && method.DeclaringType.GetArrayRank() == 1) {
 					if(method.Name == "Get") {
 						NodeEditorUtility.AddNewNode<Nodes.GetListItem>(editorData, position, n => {
 							n.EnsureRegistered();

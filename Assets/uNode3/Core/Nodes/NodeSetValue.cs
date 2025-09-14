@@ -48,7 +48,7 @@ namespace MaxyGames.UNode.Nodes {
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
 							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[i].ParameterType;
+								yield return param[1].ParameterType;
 							}
 						}
 						break;
@@ -58,7 +58,7 @@ namespace MaxyGames.UNode.Nodes {
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
 							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[i].ParameterType;
+								yield return param[1].ParameterType;
 							}
 						}
 						break;
@@ -68,7 +68,7 @@ namespace MaxyGames.UNode.Nodes {
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
 							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[i].ParameterType;
+								yield return param[1].ParameterType;
 							}
 						}
 						break;
@@ -78,7 +78,7 @@ namespace MaxyGames.UNode.Nodes {
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
 							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[i].ParameterType;
+								yield return param[1].ParameterType;
 							}
 						}
 						break;
@@ -88,7 +88,7 @@ namespace MaxyGames.UNode.Nodes {
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
 							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[i].ParameterType;
+								yield return param[1].ParameterType;
 							}
 						}
 						break;
