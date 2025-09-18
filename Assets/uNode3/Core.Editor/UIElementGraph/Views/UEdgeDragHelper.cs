@@ -8,12 +8,10 @@ using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
-	public class EdgeDragHelper<TEdge> : EdgeDragHelper where TEdge : Edge, new() {
-		protected List<PortView> m_CompatiblePorts;
+	public class UEdgeDragHelper<TEdge> : EdgeDragHelper<TEdge> where TEdge : Edge, new() {
+		protected new List<PortView> m_CompatiblePorts;
 		private Edge m_GhostEdge;
-		protected UGraphView m_GraphView;
-		protected static NodeAdapter s_nodeAdapter = new NodeAdapter();
-		protected readonly IEdgeConnectorListener m_Listener;
+		protected new UGraphView m_GraphView;
 
 		private IVisualElementScheduledItem m_PanSchedule;
 		private Vector3 m_PanDiff = Vector3.zero;
@@ -26,17 +24,13 @@ namespace MaxyGames.UNode.Editors {
 		internal const float k_MaxSpeedFactor = 2.5f;
 		internal const float k_MaxPanSpeed = k_MaxSpeedFactor * k_PanSpeed;
 
-		public bool resetPositionOnPan { get; set; }
-
-		public EdgeDragHelper(IEdgeConnectorListener listener) {
-			m_Listener = listener;
-			//resetPositionOnPan = true;
-			Reset();
+		public UEdgeDragHelper(IEdgeConnectorListener listener) : base(listener) {
+			resetPositionOnPan = false;
 		}
 
 		public override Edge edgeCandidate { get; set; }
 
-		public override UnityEditor.Experimental.GraphView.Port draggedPort { get; set; }
+		public override Port draggedPort { get; set; }
 
 		public override void Reset(bool didConnect = false) {
 			if(m_CompatiblePorts != null) {

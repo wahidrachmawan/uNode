@@ -9,7 +9,7 @@ using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
 	public class EdgeConnector<TEdge> : EdgeConnector where TEdge : Edge, new() {
-		readonly EdgeDragHelper<TEdge> m_EdgeDragHelper;
+		readonly UEdgeDragHelper<TEdge> m_EdgeDragHelper;
 		Edge m_EdgeCandidate;
 		private bool m_Active;
 		Vector2 m_MouseDownPosition;
@@ -18,7 +18,7 @@ namespace MaxyGames.UNode.Editors {
 		internal const float k_ConnectionDistanceTreshold = 10f;
 
 		public EdgeConnector(IEdgeConnectorListener listener) {
-			m_EdgeDragHelper = new EdgeDragHelper<TEdge>(listener);
+			m_EdgeDragHelper = new UEdgeDragHelper<TEdge>(listener);
 			m_Active = false;
 			activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
 		}

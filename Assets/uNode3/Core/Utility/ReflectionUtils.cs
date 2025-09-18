@@ -2446,7 +2446,7 @@ namespace MaxyGames.UNode {
 				}
 				else if(type.IsArray) {
 					if(type.GetArrayRank() > 1) {
-						throw new NotImplementedException("Multidimensional array currently is not supported.");
+						throw new NotImplementedException("Multidimensional array is not supported.");
 					}
 					return ReflectionUtils.MakeArrayType(replacement(type.GetElementType()));
 				}

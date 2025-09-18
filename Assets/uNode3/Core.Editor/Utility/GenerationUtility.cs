@@ -755,7 +755,7 @@ namespace MaxyGames.UNode.Editors {
 					while(!fileNames.Add(fileName)) {
 						fileName = script.fileName + index;
 					}
-					if(CanCompileScript()) {//Save to temp
+					if(preferenceData.generatorData.compileBeforeSave) {//Save to temp
 						string path;
 						if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
 							Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
@@ -788,7 +788,7 @@ namespace MaxyGames.UNode.Editors {
 						};
 					}
 				}
-				if(CanCompileScript()) {
+				if(preferenceData.generatorData.compileBeforeSave) {
 					watch.Restart();
 					EditorUtility.DisplayProgressBar("Loading", "Compiling", 1);
 					CompileFromFile(paths.ToArray());
