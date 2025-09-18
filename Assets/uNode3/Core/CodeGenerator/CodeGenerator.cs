@@ -1121,9 +1121,14 @@ namespace MaxyGames {
 								}
 							}
 							else if(member.Name.StartsWith("set_", StringComparison.Ordinal)) {
-								if(member.Name.Equals("set_Item") && method.GetParameters().Length == 2) {
+								if(member.Name.Equals("set_Item")) {
 									//Set indexer
-									result.Add("[" + parameterDatas[0] + "] = " + parameterDatas[1]);
+									if(method.GetParameters().Length == 2) {
+										result.Add("[" + parameterDatas[0] + "] = " + parameterDatas[1]);
+									}
+									else {
+										result.Add("[" + string.Join(", ", parameterDatas.TakeWhile((s, idx) => idx < parameterDatas.Length - 1)) + "] = " + parameterDatas[parameterDatas.Length - 1]);
+									}
 								}
 								else {
 									//Set property
