@@ -8,14 +8,33 @@ using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
+	//public abstract class EdgeDragHelper {
+	//	public abstract Edge edgeCandidate { get; set; }
+	//	public abstract Port draggedPort { get; set; }
+	//	public abstract bool HandleMouseDown(MouseDownEvent evt);
+	//	public abstract void HandleMouseMove(MouseMoveEvent evt);
+	//	public abstract void HandleMouseUp(MouseUpEvent evt);
+	//	public abstract void Reset(bool didConnect = false);
+
+	//	internal const int k_PanAreaWidth = 100;
+	//	internal const int k_PanSpeed = 4;
+	//	internal const int k_PanInterval = 10;
+	//	internal const float k_MinSpeedFactor = 0.5f;
+	//	internal const float k_MaxSpeedFactor = 2.5f;
+	//	internal const float k_MaxPanSpeed = k_MaxSpeedFactor * k_PanSpeed;
+	//}
+
 	public class UEdgeDragHelper<TEdge> : EdgeDragHelper<TEdge> where TEdge : Edge, new() {
 		protected new List<PortView> m_CompatiblePorts;
-		private Edge m_GhostEdge;
 		protected new UGraphView m_GraphView;
+		private Edge m_GhostEdge;
 
 		private IVisualElementScheduledItem m_PanSchedule;
 		private Vector3 m_PanDiff = Vector3.zero;
 		private bool m_WasPanned;
+
+		//protected static NodeAdapter s_nodeAdapter = new NodeAdapter();
+		//protected readonly IEdgeConnectorListener m_Listener;
 
 		internal const int k_PanAreaWidth = 100;
 		internal const int k_PanSpeed = 4;
@@ -74,8 +93,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override bool HandleMouseDown(MouseDownEvent evt) {
-			Vector2 mousePosition = evt.mousePosition;
+			return HandlePointerOrMouseDown(evt.mousePosition);
+		}
 
+		private bool HandlePointerOrMouseDown(Vector2 mousePosition) {
 			if((draggedPort == null) || (edgeCandidate == null)) {
 				return false;
 			}
@@ -98,7 +119,8 @@ namespace MaxyGames.UNode.Editors {
 			if(startFromOutput) {
 				edgeCandidate.output = draggedPort;
 				edgeCandidate.input = null;
-			} else {
+			}
+			else {
 				edgeCandidate.output = null;
 				edgeCandidate.input = draggedPort;
 			}
@@ -128,6 +150,7 @@ namespace MaxyGames.UNode.Editors {
 			edgeCandidate.layer = Int32.MaxValue;
 
 			return true;
+
 		}
 
 		internal Vector2 GetEffectivePanSpeed(Vector2 mousePos) {
@@ -149,22 +172,39 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override void HandleMouseMove(MouseMoveEvent evt) {
+			HandlePointerOrMouseMove(evt);
+		}
+
+		private void HandlePointerOrMouseMove(EventBase evt) {
 			var ve = (VisualElement)evt.target;
-			Vector2 gvMousePos = ve.ChangeCoordinatesTo(m_GraphView.contentContainer, evt.localMousePosition);
+			Vector2 localMousePosition;
+			Vector2 mousePosition;
+			if(evt is MouseMoveEvent me) {
+				localMousePosition = me.localMousePosition;
+				mousePosition = me.mousePosition;
+			}
+			else if(evt is PointerMoveEvent pe) {
+				localMousePosition = pe.localPosition;
+				mousePosition = pe.position;
+			}
+			else {
+				return;
+			}
+
+			Vector2 gvMousePos = ve.ChangeCoordinatesTo(m_GraphView.contentContainer, localMousePosition);
 			m_PanDiff = GetEffectivePanSpeed(gvMousePos);
 
 			if(m_PanDiff != Vector3.zero) {
 				m_PanSchedule.Resume();
-			} else {
+			}
+			else {
 				m_PanSchedule.Pause();
 			}
-
-			Vector2 mousePosition = evt.mousePosition;
 
 			edgeCandidate.candidatePosition = mousePosition;
 
 			// Draw ghost edge if possible port exists.
-			var endPort = GetEndPort(evt);
+			var endPort = GetEndPort(evt, mousePosition);
 
 			if(endPort != null) {
 				if(m_GhostEdge == null) {
@@ -180,18 +220,21 @@ namespace MaxyGames.UNode.Editors {
 						m_GhostEdge.output.portCapLit = false;
 					m_GhostEdge.output = endPort;
 					m_GhostEdge.output.portCapLit = true;
-				} else {
+				}
+				else {
 					if(m_GhostEdge.input != null)
 						m_GhostEdge.input.portCapLit = false;
 					m_GhostEdge.input = endPort;
 					m_GhostEdge.input.portCapLit = true;
 					m_GhostEdge.output = edgeCandidate.output;
 				}
-			} else if(m_GhostEdge != null) {
+			}
+			else if(m_GhostEdge != null) {
 				if(edgeCandidate.input == null) {
 					if(m_GhostEdge.input != null)
 						m_GhostEdge.input.portCapLit = false;
-				} else {
+				}
+				else {
 					if(m_GhostEdge.output != null)
 						m_GhostEdge.output.portCapLit = false;
 				}
@@ -201,26 +244,25 @@ namespace MaxyGames.UNode.Editors {
 				m_GhostEdge = null;
 			}
 			if(endPort == null) {
-				IDropTarget dropTarget = GetDropTargetAt(evt.mousePosition, null);
+				IDropTarget dropTarget = GetDropTargetAt(mousePosition, null);
 				if(m_PrevDropTarget != dropTarget) {
 					if(m_PrevDropTarget != null) {
-						using(DragLeaveEvent eexit = DragLeaveEvent.GetPooled(evt)) {
+						using(DragLeaveEvent eexit = GetPooled<DragLeaveEvent>(evt)) {
 							SendDragAndDropEvent(eexit, new List<ISelectable>() { draggedPort }, m_PrevDropTarget, m_GraphView);
 						}
 					}
-
-					using(DragEnterEvent eenter = DragEnterEvent.GetPooled(evt)) {
+					using(DragEnterEvent eenter = GetPooled<DragEnterEvent>(evt)) {
 						SendDragAndDropEvent(eenter, new List<ISelectable>() { draggedPort }, dropTarget, m_GraphView);
 					}
 				}
-
-				using(DragUpdatedEvent eupdated = DragUpdatedEvent.GetPooled(evt)) {
+				using(DragUpdatedEvent eupdated = GetPooled<DragUpdatedEvent>(evt)) {
 					SendDragAndDropEvent(eupdated, new List<ISelectable>() { draggedPort }, dropTarget, m_GraphView);
 				}
 				m_PrevDropTarget = dropTarget;
-			} else {
+			}
+			else {
 				if(m_PrevDropTarget != null) {
-					using(DragLeaveEvent eexit = DragLeaveEvent.GetPooled(evt)) {
+					using(DragLeaveEvent eexit = GetPooled<DragLeaveEvent>(evt)) {
 						SendDragAndDropEvent(eexit, new List<ISelectable>() { draggedPort }, m_PrevDropTarget, m_GraphView);
 					}
 				}
@@ -240,9 +282,22 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override void HandleMouseUp(MouseUpEvent evt) {
+			HandlePointerOrMouseUp(evt);
+		}
+
+		private void HandlePointerOrMouseUp(EventBase evt) {
 			bool didConnect = false;
 
-			Vector2 mousePosition = evt.mousePosition;
+			Vector2 mousePosition;
+			if(evt is PointerUpEvent pe) {
+				mousePosition = pe.position;
+			}
+			else if(evt is MouseUpEvent me) {
+				mousePosition = me.mousePosition;
+			}
+			else {
+				return;
+			}
 
 			// Reset the highlights.
 			foreach(var p in m_GraphView.ports) {
@@ -262,23 +317,31 @@ namespace MaxyGames.UNode.Editors {
 				m_GhostEdge = null;
 			}
 
-			var endPort = GetEndPort(evt);
+			var endPort = GetEndPort(evt, mousePosition);
 			if(endPort == null) {
 				bool flag = true;
 				if(m_PrevDropTarget != null) {
 					if(m_PrevDropTarget.CanAcceptDrop(new List<ISelectable>() { draggedPort })) {
-						using(DragPerformEvent drop = DragPerformEvent.GetPooled(evt)) {
+						using(DragPerformEvent drop = GetPooled<DragPerformEvent>(evt)) {
 							SendDragAndDropEvent(drop, new List<ISelectable>() { draggedPort }, m_PrevDropTarget, m_GraphView);
 						}
 						flag = false;
-					} else {
-						using(DragExitedEvent dexit = DragExitedEvent.GetPooled(evt)) {
+					}
+					else {
+						using(DragExitedEvent dexit = GetPooled<DragExitedEvent>(evt)) {
 							SendDragAndDropEvent(dexit, new List<ISelectable>() { draggedPort }, m_PrevDropTarget, m_GraphView);
 						}
 					}
 				}
 				if(flag && m_Listener != null) {
-					if(evt.modifiers == EventModifiers.Shift) {
+					EventModifiers modifiers = EventModifiers.None;
+					if(evt is IMouseEvent mevt) {
+						modifiers = mevt.modifiers;
+					}
+					else if(evt is IPointerEvent pevt) {
+						modifiers = pevt.modifiers;
+					}
+					if(modifiers == EventModifiers.Shift) {
 						var edge = edgeCandidate as EdgeView;
 						if(edge != null) {
 							if(edge.Input != null) {
@@ -341,7 +404,7 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
-					else if(evt.modifiers == EventModifiers.Alt) {
+					else if(modifiers == EventModifiers.Alt) {
 						var edge = edgeCandidate as EdgeView;
 						if(edge != null) {
 							if(edge.Input != null) {
@@ -361,7 +424,8 @@ namespace MaxyGames.UNode.Editors {
 											NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
 											port.owner.owner.MarkRepaint();
 										});
-									} else {
+									}
+									else {
 										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
 											if(string.IsNullOrWhiteSpace(port.GetName()) == false) {
 												node.nodeObject.name = port.GetName();
@@ -392,7 +456,8 @@ namespace MaxyGames.UNode.Editors {
 											NodeEditorUtility.AutoRerouteAndProxy(con, port.owner.graphData.currentCanvas);
 											port.owner.owner.MarkRepaint();
 										});
-									} else {
+									}
+									else {
 										NodeEditorUtility.AddNewNode(port.owner.graphData, position, (Nodes.MacroPortNode node) => {
 											if(string.IsNullOrWhiteSpace(port.GetName()) == false) {
 												node.nodeObject.name = port.GetName();
@@ -445,7 +510,8 @@ namespace MaxyGames.UNode.Editors {
 						port.ResetPortValue();
 					}
 					edgeCandidate.output = endPort;
-				} else {
+				}
+				else {
 					if(edgeCandidate.input is PortView port) {
 						port.ResetPortValue();
 					}
@@ -453,12 +519,13 @@ namespace MaxyGames.UNode.Editors {
 				}
 				m_Listener.OnDrop(m_GraphView, edgeCandidate);
 				if(m_PrevDropTarget != null) {
-					using(DragExitedEvent dexit = DragExitedEvent.GetPooled(evt)) {
+					using(DragExitedEvent dexit = GetPooled<DragExitedEvent>(evt)) {
 						SendDragAndDropEvent(dexit, new List<ISelectable>() { draggedPort }, m_PrevDropTarget, m_GraphView);
 					}
 				}
 				didConnect = true;
-			} else {
+			}
+			else {
 				edgeCandidate.output = null;
 				edgeCandidate.input = null;
 			}
@@ -482,11 +549,10 @@ namespace MaxyGames.UNode.Editors {
 			m_PrevDropTarget = null;
 		}
 
-		private UnityEditor.Experimental.GraphView.Port GetEndPort(IMouseEvent evt) {
+		private Port GetEndPort(EventBase evt, Vector2 mousePosition) {
 			if(m_GraphView == null)
 				return null;
-			UnityEditor.Experimental.GraphView.Port endPort = null;
-			Vector2 mousePosition = evt.mousePosition;
+			Port endPort = null;
 
 			foreach(var compatiblePort in m_CompatiblePorts) {
 				Rect bounds = compatiblePort.worldBound;
@@ -499,7 +565,8 @@ namespace MaxyGames.UNode.Editors {
 						// by hitboxExtraPadding.
 						bounds.x -= hitboxExtraPadding;
 						bounds.width += hitboxExtraPadding;
-					} else if(compatiblePort.direction == Direction.Output) {
+					}
+					else if(compatiblePort.direction == Direction.Output) {
 						// Just add hitboxExtraPadding to the width.
 						bounds.width += hitboxExtraPadding;
 					}
@@ -514,7 +581,7 @@ namespace MaxyGames.UNode.Editors {
 			if(endPort == null) {
 				var dragPort = draggedPort as PortView;
 				if(dragPort.isFlow) {
-					var target = (evt as EventBase).target as VisualElement;
+					var target = evt.target as VisualElement;
 					List<VisualElement> picked = new List<VisualElement>();
 					target.panel.PickAll(mousePosition, picked);
 					UNodeView node = null;
@@ -534,9 +601,10 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 					}
-				} else {
-					if(GetDropTargetAt(evt.mousePosition, null) == null) {
-						var target = (evt as EventBase).target as VisualElement;
+				}
+				else {
+					if(GetDropTargetAt(mousePosition, null) == null) {
+						var target = evt.target as VisualElement;
 						List<VisualElement> picked = new List<VisualElement>();
 						target.panel.PickAll(mousePosition, picked);
 						UNodeView node = null;
@@ -582,6 +650,34 @@ namespace MaxyGames.UNode.Editors {
 			return endPort;
 		}
 
+		private static T GetPooled<T>(EventBase evt) where T : MouseEventBase<T>, new() {
+			if(evt is IMouseEvent) {
+				var m = typeof(T).GetMethod("GetPooled", MemberData.flags, null, new[] { typeof(IMouseEvent) }, null);
+				return m.Invoke(null, new object[] { evt }) as T;
+			}
+			else if(evt is IPointerEvent) {
+				var m = typeof(T).GetMethod("GetPooled", MemberData.flags, null, new[] { typeof(IPointerEvent) }, null);
+				return m.Invoke(null, new object[] { evt }) as T;
+			}
+			else {
+				throw null;
+			}
+		}
+
+#if UNITY_6000_2_OR_NEWER && !UNITY_6000_2_0 && !UNITY_6000_2_1 && !UNITY_6000_2_2 && !UNITY_6000_2_3 && !UNITY_6000_2_4
+		public override bool HandlePointerDown(PointerDownEvent evt) {
+			return HandlePointerOrMouseDown(evt.position);
+		}
+
+		public override void HandlePointerMove(PointerMoveEvent evt) {
+			HandlePointerOrMouseMove(evt);
+		}
+
+		public override void HandlePointerUp(PointerUpEvent evt) {
+			HandlePointerOrMouseUp(evt);
+		}
+#endif
+
 		#region Drag & Drop
 		IDropTarget m_PrevDropTarget;
 		static void SendDragAndDropEvent(IDragAndDropEvent evt, List<ISelectable> selection, IDropTarget dropTarget, ISelection dragSource) {
@@ -592,9 +688,11 @@ namespace MaxyGames.UNode.Editors {
 			EventBase e = evt as EventBase;
 			if(e.eventTypeId == DragExitedEvent.TypeId()) {
 				dropTarget.DragExited();
-			} else if(e.eventTypeId == DragEnterEvent.TypeId()) {
+			}
+			else if(e.eventTypeId == DragEnterEvent.TypeId()) {
 				dropTarget.DragEnter(evt as DragEnterEvent, selection, dropTarget, dragSource);
-			} else if(e.eventTypeId == DragLeaveEvent.TypeId()) {
+			}
+			else if(e.eventTypeId == DragLeaveEvent.TypeId()) {
 				dropTarget.DragLeave(evt as DragLeaveEvent, selection, dropTarget, dragSource);
 			}
 
@@ -604,7 +702,8 @@ namespace MaxyGames.UNode.Editors {
 
 			if(e.eventTypeId == DragPerformEvent.TypeId()) {
 				dropTarget.DragPerform(evt as DragPerformEvent, selection, dropTarget, dragSource);
-			} else if(e.eventTypeId == DragUpdatedEvent.TypeId()) {
+			}
+			else if(e.eventTypeId == DragUpdatedEvent.TypeId()) {
 				dropTarget.DragUpdated(evt as DragUpdatedEvent, selection, dropTarget, dragSource);
 			}
 		}
@@ -629,7 +728,8 @@ namespace MaxyGames.UNode.Editors {
 				if(dropTarget != null) {
 					if(exclusionList != null && exclusionList.Contains(picked)) {
 						dropTarget = null;
-					} else
+					}
+					else
 						break;
 				}
 			}

@@ -32,11 +32,11 @@ namespace MaxyGames.UNode {
 			this.dynamicType = type;
 			if(accessibility.CanGet()) {
 				get = DefaultGet;
-				canGetValue = () => true;
+				canGetValue = static () => true;
 			}
 			if(accessibility.CanSet()) {
 				set = DefaultSet;
-				canSetValue = () => true;
+				canSetValue = static () => true;
 			}
 		}
 
@@ -67,10 +67,12 @@ namespace MaxyGames.UNode {
 
 		public void AssignGetCallback(Func<Flow, object> get) {
 			this.get = get;
+			canGetValue = static () => true;
 		}
 
 		public void AssignSetCallback(Action<Flow, object> set) {
 			this.set = set;
+			canSetValue = static () => true;
 		}
 
 		public void Restore(ValueOutput other) {

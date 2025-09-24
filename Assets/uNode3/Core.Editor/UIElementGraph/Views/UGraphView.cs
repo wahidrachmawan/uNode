@@ -1714,12 +1714,40 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				else {
-					evt.menu.AppendAction("Convert to proxy", (e) => {
-						uNodeEditorUtility.RegisterUndo(graphData.owner, "Convert to proxy");
-						edge.connection.isProxy = true;
-						graphEditor.GUIChanged();
-						edge.GetSenderPort()?.owner.MarkRepaint();
-						edge.GetReceiverPort()?.owner.MarkRepaint();
+					if(edge.isProxy == false) {
+						evt.menu.AppendAction("Convert to proxy", (e) => {
+							uNodeEditorUtility.RegisterUndo(graphData.owner, "Convert to proxy");
+							edge.connection.isProxy = true;
+							graphEditor.GUIChanged();
+							edge.GetSenderPort()?.owner.MarkRepaint();
+							edge.GetReceiverPort()?.owner.MarkRepaint();
+						}, DropdownMenuAction.AlwaysEnabled);
+					}
+					evt.menu.AppendAction("Reroute", (e) => {
+						uNodeEditorUtility.RegisterUndo(graphData.owner, "Reroute");
+
+						NodeEditorUtility.AddNewNode(graphData, clickedPos, (NodeReroute n) => {
+							if(edge.connection == null || !edge.connection.isValid) {
+								return;
+							}
+							if(edge.isFlow) {
+								n.kind = NodeReroute.RerouteKind.Flow;
+								n.Register();
+								n.enter.ConnectTo(edge.connection.Output);
+								n.exit.ConnectTo(edge.connection.Input);
+							}
+							else {
+								n.kind = NodeReroute.RerouteKind.Value;
+								n.Register();
+								n.input.ConnectTo(edge.connection.Output);
+								n.output.ConnectTo(edge.connection.Input);
+								if(edge.isProxy) {
+									n.input.connections[0].isProxy = true;
+								}
+							}
+						});
+						graphEditor.Refresh();
+
 					}, DropdownMenuAction.AlwaysEnabled);
 				}
 				evt.menu.AppendAction("Remove", (e) => {
@@ -1768,6 +1796,25 @@ namespace MaxyGames.UNode.Editors {
 										edge.connection.isProxy = false;
 									}
 								}
+								graphEditor.Refresh();
+							}, DropdownMenuAction.AlwaysEnabled);
+						}
+						if(port.GetValidEdges().Any()) {
+							evt.menu.AppendAction("Reroute", (act) => {
+								Undo.SetCurrentGroupName("Reroute");
+								port.owner.RegisterUndo();
+								var con = port.GetPortValue().ValidConnections.FirstOrDefault() as ValueConnection;
+								if(con == null) return;
+								NodeEditorUtility.AddNewNode(graphData, clickedPos, (NodeReroute n) => {
+									n.kind = NodeReroute.RerouteKind.Value;
+									n.Register();
+									n.input.ConnectTo(con.output);
+									n.output.ConnectTo(con.input);
+									if(port.IsProxy()) {
+										n.input.connections[0].isProxy = true;
+									}
+								});
+								port.owner.MarkRepaint();
 								graphEditor.Refresh();
 							}, DropdownMenuAction.AlwaysEnabled);
 						}

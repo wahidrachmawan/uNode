@@ -8,6 +8,7 @@ namespace MaxyGames.UNode.Editors {
 	public class EdgeView : Edge {
 		public Connection connection;
 		public bool isProxy => connection != null ? connection.isProxy : false;
+		public bool alwaysVisible;
 		protected IMGUIContainer iMGUIContainer;
 
 		public bool isHidding;
@@ -96,6 +97,9 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void SetEdgeVisible(bool enable) {
+			if(selected || input?.node?.selected == true || output?.node?.selected == true) {
+				enable = true;
+			}
 			edgeControl.visible = enable;
 			if(m_EdgeBubble != null) {
 				m_EdgeBubble.visible = enable;
@@ -496,7 +500,7 @@ namespace MaxyGames.UNode.Editors {
 		public abstract UPort inputPortForNode { get; }
 		public abstract UPort outputPortForNode { get; }
 
-		public EdgeViewWithNode(NodeObject nodeObject) {
+		public EdgeViewWithNode(NodeObject nodeObject) : base() {
 			this.nodeObject = nodeObject;
 		}
 

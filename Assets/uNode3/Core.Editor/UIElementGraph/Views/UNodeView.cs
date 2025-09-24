@@ -211,48 +211,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 			});
 			RegisterCallback<MouseOverEvent>((e) => {
-				for(int i = 0; i < inputPorts.Count; i++) {
-					var edges = inputPorts[i].GetEdges();
-					foreach(var edge in edges) {
-						if(edge == null)
-							continue;
-						if(edge.isProxy) {
-							edge.SetEdgeVisible(true);
-						}
-					}
-				}
-				for(int i = 0; i < outputPorts.Count; i++) {
-					var edges = outputPorts[i].GetEdges();
-					foreach(var edge in edges) {
-						if(edge == null)
-							continue;
-						if(edge.isProxy) {
-							edge.SetEdgeVisible(true);
-						}
-					}
-				}
+				SetProxyEdgeVisible(true);
 			});
 			RegisterCallback<MouseLeaveEvent>((e) => {
-				for(int i = 0; i < inputPorts.Count; i++) {
-					var edges = inputPorts[i].GetEdges();
-					foreach(var edge in edges) {
-						if(edge == null)
-							continue;
-						if(edge.isProxy) {
-							edge.SetEdgeVisible(false);
-						}
-					}
-				}
-				for(int i = 0; i < outputPorts.Count; i++) {
-					var edges = outputPorts[i].GetEdges();
-					foreach(var edge in edges) {
-						if(edge == null)
-							continue;
-						if(edge.isProxy) {
-							edge.SetEdgeVisible(false);
-						}
-					}
-				}
+				if(selected) return;
+				SetProxyEdgeVisible(false);
 			});
 			long trickedFrame = 0;
 			RegisterCallback<KeyDownEvent>(e => {
@@ -265,6 +228,39 @@ namespace MaxyGames.UNode.Editors {
 					Teleport(new Rect(evt.newRect.x + (evt.oldRect.width - evt.newRect.width), evt.newRect.y, evt.newRect.width, evt.newRect.height));
 				}
 			});
+		}
+
+		public override void OnSelected() {
+			base.OnSelected();
+			SetProxyEdgeVisible(true);
+		}
+
+		public override void OnUnselected() {
+			base.OnUnselected();
+			SetProxyEdgeVisible(false);
+		}
+
+		public void SetProxyEdgeVisible(bool visible) {
+			for(int i = 0; i < inputPorts.Count; i++) {
+				var edges = inputPorts[i].GetEdges();
+				foreach(var edge in edges) {
+					if(edge == null)
+						continue;
+					if(edge.isProxy) {
+						edge.SetEdgeVisible(visible);
+					}
+				}
+			}
+			for(int i = 0; i < outputPorts.Count; i++) {
+				var edges = outputPorts[i].GetEdges();
+				foreach(var edge in edges) {
+					if(edge == null)
+						continue;
+					if(edge.isProxy) {
+						edge.SetEdgeVisible(visible);
+					}
+				}
+			}
 		}
 
 		/// <summary>

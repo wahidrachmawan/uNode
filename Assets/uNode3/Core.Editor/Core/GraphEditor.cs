@@ -96,7 +96,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Repaint the graph.
+		/// Repaint the graph window.
 		/// </summary>
 		public void Repaint() {
 			window?.Repaint();

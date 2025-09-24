@@ -43,7 +43,10 @@ namespace MaxyGames.UNode {
 				var param = parameters[i];
 				var port = Node.Utilities.ValueOutput(node, param.id, () => param.Type, PortAccessibility.ReadWrite).SetName(param.name);
 				port.AssignGetCallback((flow) => flow.GetLocalData(null, param));
-				port.AssignSetCallback((flow, value) => flow.SetLocalData(null, param, value));
+				if(param.refKind != RefKind.In) {
+					// If the parameter is not an 'in' or readonly parameter, assign a set callback
+					port.AssignSetCallback((flow, value) => flow.SetLocalData(null, param, value));
+				}
 				if(string.IsNullOrEmpty(param.summary) == false) {
 					port.SetTooltip(param.summary);
 				}

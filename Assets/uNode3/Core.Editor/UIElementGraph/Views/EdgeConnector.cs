@@ -8,6 +8,10 @@ using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
+	//public abstract class EdgeConnector : MouseManipulator {
+	//	public abstract EdgeDragHelper edgeDragHelper { get; }
+	//}
+
 	public class EdgeConnector<TEdge> : EdgeConnector where TEdge : Edge, new() {
 		readonly UEdgeDragHelper<TEdge> m_EdgeDragHelper;
 		Edge m_EdgeCandidate;
@@ -50,7 +54,7 @@ namespace MaxyGames.UNode.Editors {
 				return;
 			}
 
-			var graphElement = target as UnityEditor.Experimental.GraphView.Port;
+			var graphElement = target as Port;
 			if(graphElement == null || !graphElement.ContainsPoint(e.localMousePosition)) {
 				return;
 			}
