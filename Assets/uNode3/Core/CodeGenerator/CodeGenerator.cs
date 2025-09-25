@@ -2554,7 +2554,7 @@ namespace MaxyGames {
 				if(param.input != null) {
 					if(param.IsOptional && param.info != null && param.input.UseDefaultValue && param.input.isAssigned == false) {
 						if(ReflectionUtils.IsNullOrDefault(param.info.DefaultValue, param.info.ParameterType)) {
-							return "default";
+							return $"default({Type(param.info.ParameterType)})";
 						}
 						else {
 							return Value(param.info.DefaultValue);

@@ -1,7 +1,13 @@
 # Changelog
 
+## v3.2.4
+-Improved C# Parser
+-Improved Editor
+-Fixed error in newer unity version
+-Fixed some bugs
+
 ## v3.2.3
-- Improved C# Parse
+- Improved C# Parser
 - Improved Editor
 - Fixed some bugs
 

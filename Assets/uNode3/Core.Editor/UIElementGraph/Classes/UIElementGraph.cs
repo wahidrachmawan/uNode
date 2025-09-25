@@ -865,9 +865,9 @@ namespace MaxyGames.UNode.Editors {
 														for(int i = 0; i < members.Length; i++) {
 															members[i] = ReflectionUtils.GetRuntimeMember(members[i]) ?? members[i];
 														}
+														member.CopyFrom(MemberData.CreateFromMembers(members));
 													}
 													var instance = member.serializedInstance;
-													member.CopyFrom(MemberData.CreateFromMembers(members));
 													if(instance != null)
 														member.serializedInstance.value = instance.serializedValue;
 

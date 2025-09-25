@@ -1899,11 +1899,15 @@ namespace MaxyGames {
 			public string GenerateCode() {
 				string result = null;
 				bool isExtension = false;
+				bool isExtern = false;
 				if(attributes != null && attributes.Count > 0) {
 					foreach(AData attribute in attributes) {
 						if(attribute.attributeType == typeof(System.Runtime.CompilerServices.ExtensionAttribute)) {
 							isExtension = true;
 							continue;
+						}
+						if(attribute.attributeType == typeof(System.Runtime.InteropServices.DllImportAttribute)) {
+							isExtern = true;
 						}
 						string a = attribute.GenerateCode();
 						if(!string.IsNullOrEmpty(a)) {
@@ -1935,6 +1939,9 @@ namespace MaxyGames {
 				}
 				if(modifier != null)
 					result += modifier.GenerateCode();
+				if(isExtern) {
+					result += "extern "; 
+				}
 				result += DeclareType(type) + " " + name;
 				if(genericParameters != null && genericParameters.Count > 0) {
 					result += "<";
@@ -1975,7 +1982,7 @@ namespace MaxyGames {
 						}
 					}
 				}
-				if(modifier != null && modifier.Abstract) {
+				if(isExtern || modifier != null && modifier.Abstract) {
 					result += ");";
 					if(owner != null && includeGraphInformation) {
 						result = WrapWithInformation(result, owner);

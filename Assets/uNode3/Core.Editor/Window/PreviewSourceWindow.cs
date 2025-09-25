@@ -225,7 +225,12 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUILayout.HelpBox(error.errorMessage, error.isWarning ? MessageType.Warning : MessageType.Error);
 				EditorGUILayout.EndVertical();
 				if(Event.current.type == EventType.MouseDown && position.Contains(Event.current.mousePosition)) {
-					uNodeEditor.Highlight(informations, error.errorLine - 1, error.errorColumn - 1);
+					var element = uNodeEditor.GetElementFromScript(null, informations, error.errorLine - 1, error.errorColumn - 1);
+					if(element != null) {
+						uNodeEditor.Highlight(element);
+						uNodeEditor.window?.ChangeEditorSelection(element);
+					}
+					//uNodeEditor.Highlight(informations, error.errorLine - 1, error.errorColumn - 1);
 					// Debug.Log(error.errorMessage);
 					// Debug.Log(pureLines[error.errorLine - 1]);
 					// Debug.Log(pureLines[error.errorLine - 1][error.errorColumn - 1]);
