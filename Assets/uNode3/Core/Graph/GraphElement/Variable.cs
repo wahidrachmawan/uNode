@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public class Variable : UGraphElement, IVariable, IVariableModifier, IAttributeSystem {
 		[HideInInspector]
 		public SerializedValue serializedValue;

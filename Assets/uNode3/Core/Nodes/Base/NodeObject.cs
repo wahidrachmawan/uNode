@@ -92,7 +92,8 @@ namespace MaxyGames.UNode {
 
 		public bool isFilled => data != null && data.Length > 0;
 	}
-
+	
+	[Serializable]
 	public sealed class NodeObject : UGraphElement, ISerializationCallbackReceiver, IErrorCheck, IPrettyName, IRichName, IIcon {
 		[Hide]
 		public bool nodeExpanded = true;
@@ -163,11 +164,14 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		[SerializeReference]
 		private NodePorts<ValueInput> _valueInputs;
 		/// <summary>
 		/// The list of all value input ports
 		/// </summary>
+#if !UNITY_6000_3_OR_NEWER
 		[SerializeField]
+#endif
 		public NodePorts<ValueInput> ValueInputs {
 			get {
 				if(_valueInputs == null)
@@ -180,11 +184,14 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		[SerializeReference]
 		private NodePorts<ValueOutput> _valueOutputs;
 		/// <summary>
 		/// The list of all value output ports
 		/// </summary>
+#if !UNITY_6000_3_OR_NEWER
 		[SerializeField]
+#endif
 		public NodePorts<ValueOutput> ValueOutputs {
 			get {
 				if(_valueOutputs == null)
@@ -197,11 +204,14 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		[SerializeReference]
 		private NodePorts<FlowInput> _flowInputs;
 		/// <summary>
 		/// The list of all flow input ports
 		/// </summary>
+#if !UNITY_6000_3_OR_NEWER
 		[SerializeField]
+#endif
 		public NodePorts<FlowInput> FlowInputs {
 			get {
 				if(_flowInputs == null)
@@ -214,11 +224,14 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		[SerializeReference]
 		private NodePorts<FlowOutput> _flowOutputs;
 		/// <summary>
 		/// The list of all flow output ports
 		/// </summary>
+#if !UNITY_6000_3_OR_NEWER
 		[SerializeField]
+#endif
 		public NodePorts<FlowOutput> FlowOutputs {
 			get {
 				if(_flowOutputs == null)

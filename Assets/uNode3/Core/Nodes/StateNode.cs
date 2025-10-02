@@ -180,6 +180,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public class TransitionContainer : UGraphElement {
 
 	}
