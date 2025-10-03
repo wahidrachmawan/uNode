@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public sealed class Property : UGraphElement, IGraphValue, IPropertyModifier, IAttributeSystem, ISummary {
 		public SerializedType type = typeof(object);
 

@@ -504,6 +504,7 @@ namespace MaxyGames.UNode {
 		public virtual void RegisterEntry(BaseEntryNode node) { }
 	}
 
+	[Serializable]
 	public sealed class VariableContainer : URoot<Variable> {
 		private VariableCollections _collections;
 
@@ -548,6 +549,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public sealed class FunctionContainer : URoot<Function> {
 		private FunctionCollections _collections;
 
@@ -568,8 +570,10 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public sealed class EventGraphContainer : URoot<NodeContainer> { }
 
+	[Serializable]
 	public sealed class MainGraphContainer : NodeContainer, IPrettyName, IIcon {
 		public override bool AllowCoroutine() {
 			var container = graphContainer;
@@ -603,6 +607,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public sealed class ConstructorContainer : URoot<Constructor> {
 		private ConstructorCollections _collections;
 
@@ -623,6 +628,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public sealed class PropertyContainer : URoot<Property> {
 		private PropertyCollections _collections;
 
@@ -901,6 +907,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public sealed class NodePorts<T> : UCollection<T> where T : UPort {
 		private NodeObject _node;
 		public NodeObject node {

@@ -93,6 +93,7 @@ namespace MaxyGames.UNode {
 		public bool isFilled => data != null && data.Length > 0;
 	}
 
+	[Serializable]
 	public sealed class NodeObject : UGraphElement, ISerializationCallbackReceiver, IErrorCheck, IPrettyName, IRichName, IIcon {
 		[Hide]
 		public bool nodeExpanded = true;

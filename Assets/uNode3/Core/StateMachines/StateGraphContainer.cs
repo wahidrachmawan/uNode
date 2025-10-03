@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 namespace MaxyGames.UNode {
-	[EventGraph("StateMachine")]
+	[Serializable, EventGraph("StateMachine")]
 	public class StateGraphContainer : NodeContainerWithEntry, IEventGraphCanvas, IIcon, IGeneratorPrePostInitializer {
 		public enum UpdateType {
 			Update,

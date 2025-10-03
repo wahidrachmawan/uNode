@@ -6,6 +6,7 @@ using System.Collections;
 using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public sealed class Function : BaseFunction, IAttributeSystem, IGenericParameterSystem, IIcon {
 		/// <summary>
 		/// The modifier of this function.

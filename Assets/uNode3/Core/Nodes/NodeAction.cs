@@ -212,6 +212,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public class BlockContainer : UGraphElement {
 
 	}
