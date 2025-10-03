@@ -167,7 +167,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The list of all value input ports
 		/// </summary>
-		[SerializeField]
+		[OdinSerializer.OdinSerialize]
 		public NodePorts<ValueInput> ValueInputs {
 			get {
 				if(_valueInputs == null)
@@ -184,7 +184,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The list of all value output ports
 		/// </summary>
-		[SerializeField]
+		[OdinSerializer.OdinSerialize]
 		public NodePorts<ValueOutput> ValueOutputs {
 			get {
 				if(_valueOutputs == null)
@@ -201,7 +201,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The list of all flow input ports
 		/// </summary>
-		[SerializeField]
+		[OdinSerializer.OdinSerialize]
 		public NodePorts<FlowInput> FlowInputs {
 			get {
 				if(_flowInputs == null)
@@ -218,7 +218,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The list of all flow output ports
 		/// </summary>
-		[SerializeField]
+		[OdinSerializer.OdinSerialize]
 		public NodePorts<FlowOutput> FlowOutputs {
 			get {
 				if(_flowOutputs == null)
