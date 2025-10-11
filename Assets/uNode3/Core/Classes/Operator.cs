@@ -2097,17 +2097,27 @@ namespace MaxyGames.UNode {
 							}
 						}
 						else {
-							var paramTypes = new[] { fromType, type };
-							var method = fromType.FindMethod("op_Implicit", paramTypes, true);
-							if(method == null)
-								method = type.FindMethod("op_Implicit", paramTypes, true);
 							ParameterExpression paramA = Expression.Parameter(typeof(object), "a");
-							func = Expression.Lambda<System.Func<object, object>>(
-									Expression.Convert(
+							try {
+								func = Expression.Lambda<System.Func<object, object>>(
 										Expression.Convert(
-											Expression.Convert(paramA, fromType),
-											type, method),
-										typeof(object)), paramA).Compile();
+											Expression.Convert(
+												Expression.Convert(paramA, fromType),
+												type),
+											typeof(object)), paramA).Compile();
+							}
+							catch {
+								var paramTypes = new[] { fromType, type };
+								var method = fromType.FindMethod("op_Implicit", paramTypes, true);
+								if(method == null)
+									method = type.FindMethod("op_Implicit", paramTypes, true);
+								func = Expression.Lambda<System.Func<object, object>>(
+										Expression.Convert(
+											Expression.Convert(
+												Expression.Convert(paramA, fromType),
+												type, method),
+											typeof(object)), paramA).Compile();
+							}
 						}
 					}
 				}
