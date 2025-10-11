@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable CS0618
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
