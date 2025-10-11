@@ -126,8 +126,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 		}
 
 		private static ItemSelector.CustomItem GetCustomItem(Nodes.MultiArithmeticNode source, Type param1, Type param2, Type declaredType, Type returnType, ArithmeticType operatorType) {
-			param1 = param1.IsByRef ? param1.GetElementType() : param1;
-			param2 = param2.IsByRef ? param2.GetElementType() : param2;
+			if(param1.IsByRef) param1 = param1.GetElementType();
+			if(param2.IsByRef) param2 = param2.GetElementType();
 			return ItemSelector.CustomItem.Create(string.Format(operatorType.ToString() + " ({0}, {1})", param1.PrettyName(), param2.PrettyName()), () => {
 				uNodeEditorUtility.RegisterUndo(source.nodeObject.GetUnityObject());
 				source.operatorKind = operatorType;

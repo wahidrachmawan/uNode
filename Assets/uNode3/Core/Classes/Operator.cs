@@ -574,14 +574,11 @@ namespace MaxyGames.UNode {
 					else {
 						var paramTypes = new[] { fType, tType };
 						var method = fType.GetMethod("op_Addition", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-						if (method == null)
-						{
+						if(method == null) {
 							method = tType.GetMethod("op_Addition", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-							if (method == null)
-							{
+							if(method == null) {
 								method = FindMethod(fType, "op_Addition", paramTypes, true);
-								if (method == null)
-								{
+								if(method == null) {
 									method = FindMethod(tType, "op_Addition", paramTypes, true);
 								}
 							}
