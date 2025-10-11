@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#pragma warning disable CS0618
+using UnityEngine;
 using System;
 using System.Linq;
 using System.Reflection;
