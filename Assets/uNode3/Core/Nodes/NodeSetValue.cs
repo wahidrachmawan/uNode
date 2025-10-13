@@ -47,8 +47,11 @@ namespace MaxyGames.UNode.Nodes {
 						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Addition);
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
-							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[1].ParameterType;
+							var paramType = new [] {
+								param[0].ParameterType.IsByRef ? param[0].ParameterType.GetElementType() : param[0].ParameterType,
+								param[1].ParameterType.IsByRef ? param[1].ParameterType.GetElementType() : param[1].ParameterType };
+							if(param.Length == 2 && paramType[0] == leftType) {
+								yield return paramType[1];
 							}
 						}
 						break;
@@ -57,8 +60,11 @@ namespace MaxyGames.UNode.Nodes {
 						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Subtraction);
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
-							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[1].ParameterType;
+							var paramType = new [] {
+								param[0].ParameterType.IsByRef ? param[0].ParameterType.GetElementType() : param[0].ParameterType,
+								param[1].ParameterType.IsByRef ? param[1].ParameterType.GetElementType() : param[1].ParameterType };
+							if(param.Length == 2 && paramType[0] == leftType) {
+								yield return paramType[1];
 							}
 						}
 						break;
@@ -67,8 +73,11 @@ namespace MaxyGames.UNode.Nodes {
 						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Division);
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
-							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[1].ParameterType;
+							var paramType = new [] {
+								param[0].ParameterType.IsByRef ? param[0].ParameterType.GetElementType() : param[0].ParameterType,
+								param[1].ParameterType.IsByRef ? param[1].ParameterType.GetElementType() : param[1].ParameterType };
+							if(param.Length == 2 && paramType[0] == leftType) {
+								yield return paramType[1];
 							}
 						}
 						break;
@@ -77,8 +86,11 @@ namespace MaxyGames.UNode.Nodes {
 						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Multiply);
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
-							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[1].ParameterType;
+							var paramType = new [] {
+								param[0].ParameterType.IsByRef ? param[0].ParameterType.GetElementType() : param[0].ParameterType,
+								param[1].ParameterType.IsByRef ? param[1].ParameterType.GetElementType() : param[1].ParameterType };
+							if(param.Length == 2 && paramType[0] == leftType) {
+								yield return paramType[1];
 							}
 						}
 						break;
@@ -87,8 +99,11 @@ namespace MaxyGames.UNode.Nodes {
 						var methods = leftType.GetOperatorMethods(OdinSerializer.Utilities.Operator.Modulus);
 						for(int i = 0; i < methods.Length; i++) {
 							var param = methods[i].GetParameters();
-							if(param.Length == 2 && param[0].ParameterType == leftType) {
-								yield return param[1].ParameterType;
+							var paramType = new [] {
+								param[0].ParameterType.IsByRef ? param[0].ParameterType.GetElementType() : param[0].ParameterType,
+								param[1].ParameterType.IsByRef ? param[1].ParameterType.GetElementType() : param[1].ParameterType };
+							if(param.Length == 2 && paramType[0] == leftType) {
+								yield return paramType[1];
 							}
 						}
 						break;

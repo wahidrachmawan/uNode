@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using UnityEngine;
+using MaxyGames.OdinSerializer.Utilities;
 
 namespace MaxyGames.UNode {
 	public static class Operator {
@@ -470,6 +471,8 @@ namespace MaxyGames.UNode {
 
 		static Dictionary<int, Func<object, object, object>> _ListAdd;
 		public static object Add(object a, object b, Type fType, Type tType) {
+			if(fType.IsByRef) fType = fType.GetElementType();
+			if(tType.IsByRef) tType = tType.GetElementType();
 			if(a is string || b is string) {
 				return string.Concat(a, b);
 			}
@@ -492,13 +495,17 @@ namespace MaxyGames.UNode {
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
 			if(!_ListAdd.ContainsKey(uid)) {
 				try {
+					var paramTypes = new[] { fType, tType };
+					var method = fType.FindMethod("op_Addition", paramTypes, true);
+					if(method == null)
+						method = tType.FindMethod("op_Addition", paramTypes, true);
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
 					func = Expression.Lambda<Func<object, object, object>>(
 						Expression.Convert(
 							Expression.Add(
 								Expression.Convert(paramA, fType),
-								Expression.Convert(paramB, tType)),
+								Expression.Convert(paramB, tType), method),
 							typeof(object)),
 						paramA,
 						paramB).Compile();
@@ -567,12 +574,12 @@ namespace MaxyGames.UNode {
 					else {
 						var paramTypes = new[] { fType, tType };
 						var method = fType.GetMethod("op_Addition", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-						if(method == null && fType != tType) {
+						if(method == null) {
 							method = tType.GetMethod("op_Addition", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
 							if(method == null) {
-								method = FindMethod(fType, "op_Addition", paramTypes);
+								method = FindMethod(fType, "op_Addition", paramTypes, true);
 								if(method == null) {
-									method = FindMethod(tType, "op_Addition", paramTypes);
+									method = FindMethod(tType, "op_Addition", paramTypes, true);
 								}
 							}
 						}
@@ -580,9 +587,10 @@ namespace MaxyGames.UNode {
 							bool sameParamType = true;
 							var mParamType = method.GetParameters();
 							for(int i = 0; i < mParamType.Length; i++) {
-								if(mParamType[i].ParameterType != paramTypes[i]) {
+								var parameterType = mParamType[i].ParameterType.IsByRef ? mParamType[i].ParameterType.GetElementType() : mParamType[i].ParameterType;
+								if(parameterType != paramTypes[i]) {
 									sameParamType = false;
-									paramTypes[i] = mParamType[i].ParameterType;
+									paramTypes[i] = parameterType;
 								}
 							}
 							if(sameParamType) {
@@ -611,6 +619,8 @@ namespace MaxyGames.UNode {
 
 		static Dictionary<int, Func<object, object, object>> _ListModulo;
 		public static object Modulo(object a, object b, Type fType, Type tType) {
+			if(fType.IsByRef) fType = fType.GetElementType();
+			if(tType.IsByRef) tType = tType.GetElementType();
 			if(fType != tType) {
 				if(fType.IsPrimitive && tType.IsPrimitive) {
 					if(tType.IsCastableTo(fType)) {
@@ -630,9 +640,13 @@ namespace MaxyGames.UNode {
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
 			if(!_ListModulo.ContainsKey(uid)) {
 				try {
+					var paramTypes = new[] { fType, tType };
+					var method = fType.FindMethod("op_Modulus", paramTypes, true);
+					if(method == null)
+						method = tType.FindMethod("op_Modulus", paramTypes, true);
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
-					func = Expression.Lambda<System.Func<object, object, object>>(Expression.Convert(Expression.Modulo(Expression.Convert(paramA, fType), Expression.Convert(paramB, tType)), typeof(object)), paramA, paramB).Compile();
+					func = Expression.Lambda<System.Func<object, object, object>>(Expression.Convert(Expression.Modulo(Expression.Convert(paramA, fType), Expression.Convert(paramB, tType), method), typeof(object)), paramA, paramB).Compile();
 				}
 				catch {
 					if(fType.IsPrimitive && tType.IsPrimitive) {
@@ -698,7 +712,7 @@ namespace MaxyGames.UNode {
 					else {
 						var paramTypes = new[] { fType, tType };
 						var method = fType.GetMethod("op_Modulus", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-						if(method == null && fType != tType) {
+						if(method == null) {
 							method = tType.GetMethod("op_Modulus", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
 							if(method == null) {
 								method = FindMethod(fType, "op_Modulus", paramTypes);
@@ -711,9 +725,10 @@ namespace MaxyGames.UNode {
 							bool sameParamType = true;
 							var mParamType = method.GetParameters();
 							for(int i = 0; i < mParamType.Length; i++) {
-								if(mParamType[i].ParameterType != paramTypes[i]) {
+								var parameterType = mParamType[i].ParameterType.IsByRef ? mParamType[i].ParameterType.GetElementType() : mParamType[i].ParameterType;
+								if(parameterType != paramTypes[i]) {
 									sameParamType = false;
-									paramTypes[i] = mParamType[i].ParameterType;
+									paramTypes[i] = parameterType;
 								}
 							}
 							if(sameParamType) {
@@ -742,6 +757,8 @@ namespace MaxyGames.UNode {
 
 		static Dictionary<int, Func<object, object, object>> _ListSubtract;
 		public static object Subtract(object a, object b, Type fType, Type tType) {
+			if(fType.IsByRef) fType = fType.GetElementType();
+			if(tType.IsByRef) tType = tType.GetElementType();
 			if(fType != tType) {
 				if(fType.IsPrimitive && tType.IsPrimitive) {
 					if(tType.IsCastableTo(fType)) {
@@ -761,9 +778,13 @@ namespace MaxyGames.UNode {
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
 			if(!_ListSubtract.ContainsKey(uid)) {
 				try {
+					var paramTypes = new[] { fType, tType };
+					var method = fType.FindMethod("op_Subtraction", paramTypes, true);
+					if(method == null)
+						method = tType.FindMethod("op_Subtraction", paramTypes, true);
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
-					func = Expression.Lambda<System.Func<object, object, object>>(Expression.Convert(Expression.Subtract(Expression.Convert(paramA, fType), Expression.Convert(paramB, tType)), typeof(object)), paramA, paramB).Compile();
+					func = Expression.Lambda<System.Func<object, object, object>>(Expression.Convert(Expression.Subtract(Expression.Convert(paramA, fType), Expression.Convert(paramB, tType), method), typeof(object)), paramA, paramB).Compile();
 				}
 				catch {
 					if(fType.IsPrimitive && tType.IsPrimitive) {
@@ -829,12 +850,12 @@ namespace MaxyGames.UNode {
 					else {
 						var paramTypes = new[] { fType, tType };
 						var method = fType.GetMethod("op_Subtraction", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-						if(method == null && fType != tType) {
+						if(method == null) {
 							method = tType.GetMethod("op_Subtraction", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
 							if(method == null) {
-								method = FindMethod(fType, "op_Subtraction", paramTypes);
+								method = FindMethod(fType, "op_Subtraction", paramTypes, true);
 								if(method == null) {
-									method = FindMethod(tType, "op_Subtraction", paramTypes);
+									method = FindMethod(tType, "op_Subtraction", paramTypes, true);
 								}
 							}
 						}
@@ -842,9 +863,10 @@ namespace MaxyGames.UNode {
 							bool sameParamType = true;
 							var mParamType = method.GetParameters();
 							for(int i = 0; i < mParamType.Length; i++) {
-								if(mParamType[i].ParameterType != paramTypes[i]) {
+								var parameterType = mParamType[i].ParameterType.IsByRef ? mParamType[i].ParameterType.GetElementType() : mParamType[i].ParameterType;
+								if(parameterType != paramTypes[i]) {
 									sameParamType = false;
-									paramTypes[i] = mParamType[i].ParameterType;
+									paramTypes[i] = parameterType;
 								}
 							}
 							if(sameParamType) {
@@ -873,6 +895,8 @@ namespace MaxyGames.UNode {
 
 		static Dictionary<int, Func<object, object, object>> _ListDivide;
 		public static object Divide(object a, object b, Type fType, Type tType) {
+			if(fType.IsByRef) fType = fType.GetElementType();
+			if(tType.IsByRef) tType = tType.GetElementType();
 			if(fType != tType) {
 				if(fType.IsPrimitive && tType.IsPrimitive) {
 					if(tType.IsCastableTo(fType)) {
@@ -892,9 +916,13 @@ namespace MaxyGames.UNode {
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
 			if(!_ListDivide.ContainsKey(uid)) {
 				try {
+					var paramTypes = new[] { fType, tType };
+					var method = fType.FindMethod("op_Division", paramTypes, true);
+					if(method == null)
+						method = tType.FindMethod("op_Division", paramTypes, true);
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
-					func = Expression.Lambda<System.Func<object, object, object>>(Expression.Convert(Expression.Divide(Expression.Convert(paramA, fType), Expression.Convert(paramB, tType)), typeof(object)), paramA, paramB).Compile();
+					func = Expression.Lambda<System.Func<object, object, object>>(Expression.Convert(Expression.Divide(Expression.Convert(paramA, fType), Expression.Convert(paramB, tType), method), typeof(object)), paramA, paramB).Compile();
 				}
 				catch {
 					if(fType.IsPrimitive && tType.IsPrimitive) {
@@ -960,7 +988,7 @@ namespace MaxyGames.UNode {
 					else {
 						var paramTypes = new[] { fType, tType };
 						var method = fType.GetMethod("op_Division", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-						if(method == null && fType != tType) {
+						if(method == null) {
 							method = tType.GetMethod("op_Division", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
 							if(method == null) {
 								method = FindMethod(fType, "op_Division", paramTypes);
@@ -973,9 +1001,10 @@ namespace MaxyGames.UNode {
 							bool sameParamType = true;
 							var mParamType = method.GetParameters();
 							for(int i = 0; i < mParamType.Length; i++) {
-								if(mParamType[i].ParameterType != paramTypes[i]) {
+								var parameterType = mParamType[i].ParameterType.IsByRef ? mParamType[i].ParameterType.GetElementType() : mParamType[i].ParameterType;
+								if(parameterType != paramTypes[i]) {
 									sameParamType = false;
-									paramTypes[i] = mParamType[i].ParameterType;
+									paramTypes[i] = parameterType;
 								}
 							}
 							if(sameParamType) {
@@ -1004,6 +1033,8 @@ namespace MaxyGames.UNode {
 
 		static Dictionary<int, Func<object, object, object>> _ListMultiply;
 		public static object Multiply(object a, object b, Type fType, Type tType) {
+			if(fType.IsByRef) fType = fType.GetElementType();
+			if(tType.IsByRef) tType = tType.GetElementType();
 			if(fType != tType) {
 				if(fType.IsPrimitive && tType.IsPrimitive) {
 					if(tType.IsCastableTo(fType)) {
@@ -1023,13 +1054,17 @@ namespace MaxyGames.UNode {
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
 			if(!_ListMultiply.ContainsKey(uid)) {
 				try {
+					var paramTypes = new[] { fType, tType };
+					var method = fType.FindMethod("op_Multiply", paramTypes, true);
+					if(method == null)
+						method = tType.FindMethod("op_Multiply", paramTypes, true);
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
 					func = Expression.Lambda<System.Func<object, object, object>>(
 						Expression.Convert(
 							Expression.Multiply(
 								Expression.Convert(paramA, fType),
-								Expression.Convert(paramB, tType)),
+								Expression.Convert(paramB, tType), method),
 							typeof(object)), paramA, paramB).Compile();
 				}
 				catch {
@@ -1096,12 +1131,12 @@ namespace MaxyGames.UNode {
 					else {
 						var paramTypes = new[] { fType, tType };
 						var method = fType.GetMethod("op_Multiply", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
-						if(method == null && fType != tType) {
+						if(method == null) {
 							method = tType.GetMethod("op_Multiply", BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic, null, paramTypes, null);
 							if(method == null) {
-								method = FindMethod(fType, "op_Multiply", paramTypes);
+								method = FindMethod(fType, "op_Multiply", paramTypes, true);
 								if(method == null) {
-									method = FindMethod(tType, "op_Multiply", paramTypes);
+									method = FindMethod(tType, "op_Multiply", paramTypes, true);
 								}
 							}
 						}
@@ -1109,9 +1144,10 @@ namespace MaxyGames.UNode {
 							bool sameParamType = true;
 							var mParamType = method.GetParameters();
 							for(int i = 0; i < mParamType.Length; i++) {
-								if(mParamType[i].ParameterType != paramTypes[i]) {
+								var parameterType = mParamType[i].ParameterType.IsByRef ? mParamType[i].ParameterType.GetElementType() : mParamType[i].ParameterType;
+								if(parameterType != paramTypes[i]) {
 									sameParamType = false;
-									paramTypes[i] = mParamType[i].ParameterType;
+									paramTypes[i] = parameterType;
 								}
 							}
 							if(sameParamType) {
@@ -1138,23 +1174,31 @@ namespace MaxyGames.UNode {
 			return func(a, b);
 		}
 
-		static MethodInfo FindMethod(Type type, string name, Type[] paramTypes) {
+		public static MethodInfo FindMethod(this Type type, string name, Type[] paramTypes, bool isExactType = false) {
 			var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
 			for(int i = 0; i < methods.Length; i++) {
 				var m = methods[i];
 				if(m.Name == name) {
 					var param = m.GetParameters();
+					bool flag = true;
 					if(param.Length == paramTypes.Length) {
-						bool flag = true;
 						for(int x = 0; x < param.Length; x++) {
-							if(!paramTypes[x].IsCastableTo(param[x].ParameterType)) {
-								flag = false;
-								break;
+							var parameterType = param[x].ParameterType.IsByRef ? param[x].ParameterType.GetElementType() : param[x].ParameterType;
+							if(isExactType && paramTypes[x] == parameterType || !isExactType && paramTypes[x].IsCastableTo(parameterType)) {
+								continue;
 							}
+							flag = false;
+							break;
 						}
-						if(flag) {
-							return m;
+					}
+					else if(param.Length == 1 && m.GetReturnType() != paramTypes[1]) {
+						var parameterType = param[0].ParameterType.IsByRef ? param[0].ParameterType.GetElementType() : param[0].ParameterType;
+						if(isExactType && paramTypes[0] != parameterType || !isExactType && !paramTypes[0].IsCastableTo(parameterType)) {
+							flag = false;
 						}
+					}
+					if(flag) {
+						return m;
 					}
 				}
 			}
@@ -2054,12 +2098,26 @@ namespace MaxyGames.UNode {
 						}
 						else {
 							ParameterExpression paramA = Expression.Parameter(typeof(object), "a");
-							func = Expression.Lambda<System.Func<object, object>>(
-									Expression.Convert(
+							try {
+								func = Expression.Lambda<System.Func<object, object>>(
 										Expression.Convert(
-											Expression.Convert(paramA, fromType),
-											type),
-										typeof(object)), paramA).Compile();
+											Expression.Convert(
+												Expression.Convert(paramA, fromType),
+												type),
+											typeof(object)), paramA).Compile();
+							}
+							catch {
+								var paramTypes = new[] { fromType, type };
+								var method = fromType.FindMethod("op_Implicit", paramTypes, true);
+								if(method == null)
+									method = type.FindMethod("op_Implicit", paramTypes, true);
+								func = Expression.Lambda<System.Func<object, object>>(
+										Expression.Convert(
+											Expression.Convert(
+												Expression.Convert(paramA, fromType),
+												type, method),
+											typeof(object)), paramA).Compile();
+							}
 						}
 					}
 				}

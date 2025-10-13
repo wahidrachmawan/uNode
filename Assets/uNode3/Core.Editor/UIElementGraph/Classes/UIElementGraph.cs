@@ -951,6 +951,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+#pragma warning disable CS0618
 		private void InitTabbar(VisualElement container) {
 			#region Main/Selection Tab
 			if(window.mainTab != null && window.mainTab == window.selectedTab && !window.mainTab.selectedGraphData.IsValidGraph) {
