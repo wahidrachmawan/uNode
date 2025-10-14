@@ -37,8 +37,9 @@ namespace MaxyGames.UNode.Editors {
 								n.EnsureRegistered();
 								var param = method.GetParameters();
 								for(int i = 0; i < param.Length; i++) {
-									n.inputs[i].type = param[i].ParameterType;
-									n.inputs[i].port.AssignToDefault(MemberData.Default(param[i].ParameterType));
+									var paramType = param[i].ParameterType.IsByRef ? param[i].ParameterType.GetElementType() : param[i].ParameterType;
+									n.inputs[i].type = paramType;
+									n.inputs[i].port.AssignToDefault(MemberData.Default(paramType));
 								}
 								n.nodeObject.Register();
 								onCreated?.Invoke(n);
