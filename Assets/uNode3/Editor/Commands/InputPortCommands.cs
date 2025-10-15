@@ -87,37 +87,52 @@ namespace MaxyGames.UNode.Editors.Commands {
 						switch(op.Name) {
 							case "op_Addition": {
 								var parameters = op.GetParameters();
-								if(parameters[0].ParameterType != type && parameters[1].ParameterType != type)
+								var paramType = new [] {
+									parameters[0].ParameterType.IsByRef ? parameters[0].ParameterType.GetElementType() : parameters[0].ParameterType,
+									parameters[1].ParameterType.IsByRef ? parameters[1].ParameterType.GetElementType() : parameters[1].ParameterType};
+								if(paramType[0] != type && paramType[1] != type)
 									break;
-								items.Add(GetItem(type, parameters[0].ParameterType, parameters[1].ParameterType, op.ReturnType, source, ArithmeticType.Add));
+								items.Add(GetItem(type, paramType[0], paramType[1], op.ReturnType, source, ArithmeticType.Add));
 								break;
 							}
 							case "op_Subtraction": {
 								var parameters = op.GetParameters();
-								if(parameters[0].ParameterType != type && parameters[1].ParameterType != type)
+								var paramType = new [] {
+									parameters[0].ParameterType.IsByRef ? parameters[0].ParameterType.GetElementType() : parameters[0].ParameterType,
+									parameters[1].ParameterType.IsByRef ? parameters[1].ParameterType.GetElementType() : parameters[1].ParameterType};
+								if(paramType[0] != type && paramType[1] != type)
 									break;
-								items.Add(GetItem(type, parameters[0].ParameterType, parameters[1].ParameterType, op.ReturnType, source, ArithmeticType.Subtract));
+								items.Add(GetItem(type, paramType[0], paramType[1], op.ReturnType, source, ArithmeticType.Subtract));
 								break;
 							}
 							case "op_Division": {
 								var parameters = op.GetParameters();
-								if(parameters[0].ParameterType != type && parameters[1].ParameterType != type)
+								var paramType = new [] {
+									parameters[0].ParameterType.IsByRef ? parameters[0].ParameterType.GetElementType() : parameters[0].ParameterType,
+									parameters[1].ParameterType.IsByRef ? parameters[1].ParameterType.GetElementType() : parameters[1].ParameterType};
+								if(paramType[0] != type && paramType[1] != type)
 									break;
-								items.Add(GetItem(type, parameters[0].ParameterType, parameters[1].ParameterType, op.ReturnType, source, ArithmeticType.Divide));
+								items.Add(GetItem(type, paramType[0], paramType[1], op.ReturnType, source, ArithmeticType.Divide));
 								break;
 							}
 							case "op_Multiply": {
 								var parameters = op.GetParameters();
-								if(parameters[0].ParameterType != type && parameters[1].ParameterType != type)
+								var paramType = new [] {
+									parameters[0].ParameterType.IsByRef ? parameters[0].ParameterType.GetElementType() : parameters[0].ParameterType,
+									parameters[1].ParameterType.IsByRef ? parameters[1].ParameterType.GetElementType() : parameters[1].ParameterType};
+								if(paramType[0] != type && paramType[1] != type)
 									break;
-								items.Add(GetItem(type, parameters[0].ParameterType, parameters[1].ParameterType, op.ReturnType, source, ArithmeticType.Multiply));
+								items.Add(GetItem(type, paramType[0], paramType[1], op.ReturnType, source, ArithmeticType.Multiply));
 								break;
 							}
 							case "op_Modulus": {
 								var parameters = op.GetParameters();
-								if(parameters[0].ParameterType != type && parameters[1].ParameterType != type)
+								var paramType = new [] {
+									parameters[0].ParameterType.IsByRef ? parameters[0].ParameterType.GetElementType() : parameters[0].ParameterType,
+									parameters[1].ParameterType.IsByRef ? parameters[1].ParameterType.GetElementType() : parameters[1].ParameterType};
+								if(paramType[0] != type && paramType[1] != type)
 									break;
-								items.Add(GetItem(type, parameters[0].ParameterType, parameters[1].ParameterType, op.ReturnType, source, ArithmeticType.Modulo));
+								items.Add(GetItem(type, paramType[0], paramType[1], op.ReturnType, source, ArithmeticType.Modulo));
 								break;
 							}
 						}
