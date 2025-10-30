@@ -2141,6 +2141,25 @@ namespace MaxyGames.UNode.Editors {
 			return fixName;
 		}
 
+		public static string GetUniqueName(string name, Graph graph, Func<UGraphElement, bool> exclusion) {
+			name = uNodeUtility.AutoCorrectName(name);
+			var index = 0;
+			var fixName = name;
+			var variables = graph.variableContainer.GetObjects(true);
+			while(variables.Any(v => v.name == fixName && !exclusion(v))) {
+				fixName = name + (++index);
+			}
+			var properties = graph.propertyContainer.GetObjects(true);
+			while(properties.Any(v => v.name == fixName && !exclusion(v))) {
+				fixName = name + (++index);
+			}
+			var functions = graph.functionContainer.GetObjects(true);
+			while(functions.Any(v => v.name == fixName && !exclusion(v))) {
+				fixName = name + (++index);
+			}
+			return fixName;
+		}
+
 		/// <summary>
 		/// Find all graphs assets ( <see cref="IGraph"/>, <see cref="IScriptGraph"/> )
 		/// </summary>
@@ -2198,6 +2217,27 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static IEnumerable<Object> FindGraphs(Type type) {
 			return uNodeEditorUtility.FindAssetsByType(type);
+		}
+
+		/// <summary>
+		/// Determines whether two functions have the same signature.
+		/// </summary>
+		/// <param name="a">The first function to compare.</param>
+		/// <param name="b">The second function to compare.</param>
+		/// <returns><see langword="true"/> if both functions have the same name and parameter types in the same order; otherwise, <see
+		/// langword="false"/>.</returns>
+		internal static bool AreSameSignature(Function a, Function b) {
+			if(a.name == b.name) {
+				if(a.parameters.Count == b.parameters.Count) {
+					for(int i = 0; i < a.parameters.Count; i++) {
+						if(a.parameters[i].Type != b.parameters[i].Type) {
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
 		}
 		#endregion
 	}

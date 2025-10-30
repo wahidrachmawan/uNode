@@ -30,7 +30,17 @@ namespace MaxyGames.UNode.Editors {
 			if(!string.IsNullOrEmpty(name) && name != value.name) {
 				option.RegisterUndo();
 				if(value is Variable || value is Property || value is Function || value is IEventGraphCanvas) {
-					value.name = uNodeUtility.AutoCorrectName(name);
+					value.name = GraphUtility.GetUniqueName(name, value.graph, element => {
+						if(element == value) {
+							return true;
+						}
+						if(value is Function) {
+							if(element is Function other) {
+								return GraphUtility.AreSameSignature(value as Function, other) == false;
+							}
+						}
+						return false;
+					});
 					uNodeGUIUtility.GUIChangedMajor(value);
 				}
 				else {
