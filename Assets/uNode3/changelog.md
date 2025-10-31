@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.2.5
+-Improved Editor
+-Fixed some bugs
+
 ## v3.2.4
 -Improved C# Parser
 -Improved Editor
