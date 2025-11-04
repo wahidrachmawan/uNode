@@ -675,11 +675,11 @@ namespace MaxyGames.UNode {
 								pType = pType.GetElementType();
 							}
 							if(genericParameterLength > 0) {
-								if(function.parameters[x].Type != null &&  function.parameters[x].Type != pType) {
+								if(function.parameters[x].Type != null && ReflectionUtils.IsTypeEqual(function.parameters[x].Type, pType) == false) {
 									isValid = false;
 									break;
 								}
-							} else if(function.parameters[x].Type != null && !function.parameters[x].Type.IsGenericTypeDefinition &&  function.parameters[x].Type != pType) {
+							} else if(function.parameters[x].Type != null && !function.parameters[x].Type.IsGenericTypeDefinition && ReflectionUtils.IsTypeEqual(function.parameters[x].Type, pType) == false) {
 								isValid = false;
 								break;
 							}

@@ -240,10 +240,11 @@ namespace MaxyGames.UNode {
 			get {
 				if(graph == null) {
 					OnAfterDeserialize();
-					if(graph == null)
-						SerializeGraph();
 					if(graph == null) {
-						graph = new Graph();
+						if(serializedData == null || !serializedData.isFilled) {
+							graph = new Graph();
+						}
+						SerializeGraph();
 					}
 				}
 				return graph;
@@ -288,9 +289,16 @@ namespace MaxyGames.UNode {
 
 		public void OnAfterDeserialize() {
 			if(graph == null || !successDeserialize) {
+				var oldGraph = graph;
 				DeserializeGraph();
 				if(!object.ReferenceEquals(graph, null)) {
 					successDeserialize = true;
+				}
+				else {
+					if(oldGraph != null) {
+						//Mark the old graph to invalid so all reference is redirected to new graph.
+						oldGraph.MarkInvalid();
+					}
 				}
 			}
 			else {
