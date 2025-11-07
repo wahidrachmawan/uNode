@@ -1423,10 +1423,10 @@ namespace MaxyGames {
 					nextNames = nextNames.Remove(0, 1);
 				}
 				str = ParseStartValue(mData, instance, setVariable: setVariable).Add(".", !string.IsNullOrEmpty(nextNames)) + nextNames;
-				if(str.IndexOf("get_", StringComparison.Ordinal) >= 0) {
+				if(str.IndexOf("get_", StringComparison.Ordinal) == 0) {
 					str = str.Replace("get_", "");
 				}
-				else if(str.IndexOf("set_", StringComparison.Ordinal) >= 0) {
+				else if(str.IndexOf("set_", StringComparison.Ordinal) == 0) {
 					str = str.Replace("set_", "");
 				}
 				//if(str.Contains("Item")) {
