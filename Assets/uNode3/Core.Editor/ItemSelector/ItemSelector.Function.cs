@@ -805,13 +805,14 @@ namespace MaxyGames.UNode.Editors {
 				Type[] genericType = method != null ? method.GetGenericArguments() : mType.GetGenericArguments();
 				FilterAttribute F = new FilterAttribute(filter);
 				F.OnlyGetType = true;
+				//F.ValidateType = null;
 				//F.DisplayRuntimeType = false;
 				F.Types = new List<Type>();
 				TypeItem[] typeItems = new TypeItem[genericType.Length];
 				for(int i = 0; i < genericType.Length; i++) {
 					FilterAttribute fil = new FilterAttribute() {
 						OnlyGetType = true,
-						//DisplayRuntimeType = false,
+						DisplayRuntimeType = F.DisplayRuntimeType,
 					};
 					fil.ToFilterGenericConstraints(genericType[i], genericType);
 					int index = i;

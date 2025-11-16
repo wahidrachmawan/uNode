@@ -1700,9 +1700,17 @@ namespace MaxyGames.UNode {
 				if(ReflectionUtils.IsNativeType(from)) {
 					var nt = ReflectionUtils.GetNativeType(from);
 					if(nt != null) {
+						if(ReflectionUtils.IsNativeType(to)) {
+							var ntt = ReflectionUtils.GetNativeType(to);
+							if(ntt != null) {
+								return nt.IsCastableTo(ntt);
+							}
+							goto SKIP; 
+						}
 						return nt.IsCastableTo(to);
 					}
 				}
+			SKIP:
 				if(to.IsInterface) {
 					return from.HasImplementInterface(to);
 				}

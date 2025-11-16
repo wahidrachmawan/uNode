@@ -104,6 +104,12 @@ namespace MaxyGames.UNode.Editors {
 								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
 								var pasteValues = CopyPasteValue.GetElementValue<T>();
 								values.AddRange(pasteValues);
+
+								foreach(var v in pasteValues) {
+									if(v is IValueWithUID vUID) {
+										vUID.GenerateID();
+									}
+								}
 							});
 							menu.AddItem(new GUIContent("Paste as overwrite"), false, () => {
 								//if(unityObject != null)
@@ -138,6 +144,9 @@ namespace MaxyGames.UNode.Editors {
 								var pasteValues = CopyPasteValue.GetElementValue<T>();
 								for(int i = pasteValues.Length - 1; i >= 0; i--) {
 									values.Insert(index, pasteValues[i]);
+									if(pasteValues[i] is IValueWithUID vUID) {
+										vUID.GenerateID();
+									}
 								}
 							});
 						}

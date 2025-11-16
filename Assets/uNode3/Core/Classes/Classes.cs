@@ -1228,11 +1228,17 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	internal interface IValueWithUID {
+		public string ID { get; }
+
+		public void GenerateID();
+	}
+
 	/// <summary>
 	/// This class used to save parameter data
 	/// </summary>
 	[System.Serializable]
-	public class ParameterData {
+	public class ParameterData : IValueWithUID {
 		[SerializeField]
 		private string _id = uNodeUtility.GenerateUID();
 		public string id {
@@ -1271,6 +1277,8 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		string IValueWithUID.ID => id;
+
 		public ParameterData() {
 			type = typeof(object);
 		}
@@ -1299,6 +1307,10 @@ namespace MaxyGames.UNode {
 					refKind = RefKind.Ref;
 				}
 			}
+		}
+
+		void IValueWithUID.GenerateID() {
+			_id = uNodeUtility.GenerateUID();
 		}
 	}
 
