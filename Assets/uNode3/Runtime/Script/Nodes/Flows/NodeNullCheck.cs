@@ -37,6 +37,14 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		protected override string GenerateFlowCode() {
+			if(onNotNull != null && onNotNull.isAssigned) {
+				if(onNull == null || onNull.isAssigned == false) {
+					return CG.If(
+						CG.Compare(value.CGValue(), CG.Null, ComparisonType.NotEqual),
+						CG.FlowFinish(enter, false, CG.IsStateFlow(enter), onNotNull)
+					);
+				}
+			}
 			return CG.If(
 				CG.Compare(value.CGValue(), CG.Null, ComparisonType.Equal),
 				CG.FlowFinish(enter, true, CG.IsStateFlow(enter), onNull),

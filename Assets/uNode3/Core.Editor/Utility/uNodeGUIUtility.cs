@@ -2438,6 +2438,10 @@ namespace MaxyGames.UNode.Editors {
 						EditValueLayouted(new GUIContent(fieldInfo[index].Name), elementValue, fieldInfo[index].FieldType, o => {
 							elementValue = o;
 							fieldInfo[index].SetValueOptimized(oldValue, elementValue);
+							fieldValue = oldValue;
+							if(onChange != null) {
+								onChange(fieldValue);
+							}
 							GUIChanged(unityObject);
 						}, new uNodeUtility.EditValueSettings(settings) {
 							attributes = fieldInfo[index].GetCustomAttributes(true)
