@@ -400,6 +400,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(value is IRuntimeGraphWrapper graphWrapper) {
 						uNodeGUI.DrawRuntimeGraphVariables(graphWrapper);
+						if(GUI.changed) {
+							onChange?.Invoke(value);
+						}
 					}
 				}
 				else {

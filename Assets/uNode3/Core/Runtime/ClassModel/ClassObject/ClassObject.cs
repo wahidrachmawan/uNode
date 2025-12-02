@@ -73,6 +73,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public class ClassObject : BaseRuntimeObject, IIcon, IRuntimeGraphWrapper {
 		/// <summary>
 		/// The target reference object

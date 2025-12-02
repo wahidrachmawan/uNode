@@ -1646,6 +1646,7 @@ namespace MaxyGames.UNode.Editors {
 						if(EditorUtility.DisplayDialog("", "Are you sure to encapsulate public variable? when encapsulate public variable, the variable will became private", "Yes", "Cancel") == false) {
 							return;
 						}
+						variable.modifier.SetPrivate();
 					}
 					NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, uNodeUtility.AutoCorrectName(ObjectNames.NicifyVariableName(variable.name)), variable.type, p => {
 						p.CreateGetter();
