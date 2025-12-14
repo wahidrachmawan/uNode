@@ -17,6 +17,11 @@ namespace MaxyGames.UNode.Editors {
 			Always,
 			Manual,
 		}
+		public enum AutoRefreshOption {
+			Enabled,
+			EnabledOutsidePlaymode,
+			Disabled,
+		}
 
 		public class PreferenceData {
 			[Tooltip("The default access modifier for new variable")]
@@ -25,6 +30,14 @@ namespace MaxyGames.UNode.Editors {
 			public DefaultAccessor newPropertyAccessor;
 			[Tooltip("The default access modifier for new function")]
 			public DefaultAccessor newFunctionAccessor;
+			[Tooltip("Auto refresh assets on compile")]
+			public AutoRefreshOption autoRefresh = AutoRefreshOption.EnabledOutsidePlaymode;
+
+			public bool IsAutoRefreshEnabled {
+				get {
+					return autoRefresh == AutoRefreshOption.Enabled || (autoRefresh == AutoRefreshOption.EnabledOutsidePlaymode && !Application.isPlaying);
+				}
+			}
 
 			//Node snapping
 			[Tooltip("Enable the snapping feature")]
@@ -464,6 +477,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				preferenceData.autoBackupOnSave = EditorGUILayout.Toggle(new GUIContent("Create Backup On Save", "Auto create backup graph on save.\nOnly changed assets are backuped"), preferenceData.autoBackupOnSave);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.maxGraphBackup), preferenceData);
 				// preferenceData.isLocked = EditorGUILayout.Toggle(new GUIContent("Lock Selection"), preferenceData.isLocked);
+				uNodeGUIUtility.ShowField(nameof(preferenceData.autoRefresh), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newVariableAccessor), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newPropertyAccessor), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.newFunctionAccessor), preferenceData);

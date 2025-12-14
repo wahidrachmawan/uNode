@@ -1,14 +1,26 @@
 # Changelog
 
+## v3.2.7
+- Added preference to enable/disable auto refresh after compiling graphs
+- Improved Editor
+- Added Preprocessor node
+- Fixed some warning in newer unity version
+
+## v3.2.6
+- Improved C# Parser
+- Improved Code Generation
+- Improved Editor
+- Fixed some bugs
+
 ## v3.2.5
--Improved Editor
--Fixed some bugs
+- Improved Editor
+- Fixed some bugs
 
 ## v3.2.4
--Improved C# Parser
--Improved Editor
--Fixed error in newer unity version
--Fixed some bugs
+- Improved C# Parser
+- Improved Editor
+- Fixed error in newer unity version
+- Fixed some bugs
 
 ## v3.2.3
 - Improved C# Parser

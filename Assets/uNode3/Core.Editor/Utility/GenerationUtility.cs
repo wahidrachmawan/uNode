@@ -304,8 +304,10 @@ namespace MaxyGames.UNode.Editors {
 						Debug.LogError(result.GetErrorMessage());
 					}
 				} else {
-					AssetDatabase.Refresh();
 					AssetDatabase.SaveAssets();
+					if(uNodePreference.preferenceData.IsAutoRefreshEnabled) {
+						AssetDatabase.Refresh();
+					}
 				}
 				uNodeDatabase.ClearCache();
 				Debug.Log("Successful generating project script, project graphs will run with native c#." +
@@ -393,7 +395,9 @@ namespace MaxyGames.UNode.Editors {
 					});
 				}
 				AssetDatabase.SaveAssets();
-				AssetDatabase.Refresh();
+				if(uNodePreference.preferenceData.IsAutoRefreshEnabled) {
+					AssetDatabase.Refresh();
+				}
 				Debug.Log("Successful generating scenes script, existing scenes graphs will run with native c#." +
 					"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." +
 					"\nRemoving generated scripts will makes the graph to run with reflection again." +
@@ -526,7 +530,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(compiledCount > 0) {
 					AssetDatabase.SaveAssets();
-					AssetDatabase.Refresh();
+					if(uNodePreference.preferenceData.IsAutoRefreshEnabled) {
+						AssetDatabase.Refresh();
+					}
 					Debug.Log("Successful generating prefab script, existing prefab graphs will run with native c#." +
 						"\nCompiled graph count: " + compiledCount +
 						"\nRemember to compiles the graph again if you made a changes to a graphs to keep the script up to date." +
@@ -797,7 +803,9 @@ namespace MaxyGames.UNode.Editors {
 						Debug.LogFormat("Compiling script took {0,8:N3} s.", watch.Elapsed.TotalSeconds);
 				}
 				saveAction?.Invoke();
-				AssetDatabase.Refresh();
+				if(uNodePreference.preferenceData.IsAutoRefreshEnabled) {
+					AssetDatabase.Refresh();
+				}
 				AssetDatabase.SaveAssets();
 				Debug.Log("Successful generating script for C# Graphs in the project.");
 			}
@@ -953,7 +961,9 @@ namespace MaxyGames.UNode.Editors {
 						stream.Close();
 					}
 				}
-				AssetDatabase.Refresh();
+				if(uNodePreference.preferenceData.IsAutoRefreshEnabled) {
+					AssetDatabase.Refresh();
+				}
 				Debug.Log("Script saved to: " + Path.GetFullPath(path));
 				EditorUtility.ClearProgressBar();
 			}
