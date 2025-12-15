@@ -1061,6 +1061,14 @@ namespace MaxyGames.UNode.Editors {
 		/// Show node usages
 		/// </summary>
 		/// <param name="validation"></param>
+		public static void ShowGraphUsages(Func<Object, bool> validation) {
+			ShowReferencesInWindow(new(FindAllGraphAssets().Where(validation)));
+		}
+
+		/// <summary>
+		/// Show node usages
+		/// </summary>
+		/// <param name="validation"></param>
 		public static void ShowNodeUsages(Func<Node, bool> validation) {
 			var references = FindNodeUsages(validation);
 			ShowReferencesInWindow(references);
@@ -1417,6 +1425,14 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+			class UReferenceTreeView : TreeViewItem {
+				public Object reference;
+
+				public UReferenceTreeView(Object reference) : base(reference.GetInstanceID(), -1, uNodeUtility.GetObjectName(reference)) {
+					this.reference = reference;
+				}
+			}
+
 			public class TypeHierarchy {
 				public Type type;
 				public List<TypeHierarchy> nestedTypes = new List<TypeHierarchy>();
@@ -1475,7 +1491,7 @@ namespace MaxyGames.UNode.Editors {
 						else {
 							if(r is Object) {
 								var value = r as Object;
-								root.AddChild(new TreeViewItem(value.GetInstanceID(), -1, uNodeUtility.GetObjectName(value)) {
+								root.AddChild(new UReferenceTreeView(value) {
 									icon = uNodeEditorUtility.GetTypeIcon(value) as Texture2D
 								});
 							}
@@ -1507,13 +1523,13 @@ namespace MaxyGames.UNode.Editors {
 						if(pair.Value.Count > 0) {
 							if(pair.Value.Count == 1 && pair.Value.Contains(pair.Key)) {
 								//TODO: fix me
-								var tree = new TreeViewItem(pair.Key.GetInstanceID(), -1, uNodeUtility.GetObjectName(pair.Key)) {
+								var tree = new UReferenceTreeView(pair.Key) {
 									icon = uNodeEditorUtility.GetTypeIcon(pair.Key) as Texture2D
 								};
 								root.AddChild(tree);
 							}
 							else {
-								var tree = new TreeViewItem(pair.Key.GetInstanceID(), -1, uNodeUtility.GetObjectName(pair.Key)) {
+								var tree = new UReferenceTreeView(pair.Key) {
 									icon = uNodeEditorUtility.GetTypeIcon(pair.Key) as Texture2D
 								};
 								foreach(var val in pair.Value) {
@@ -1615,6 +1631,19 @@ namespace MaxyGames.UNode.Editors {
 							}
 							else {
 								//TODO: highlight element
+							}
+						}
+					}
+					else if(args.item is UReferenceTreeView ureference) {
+						if(evt.button == 0 && evt.clickCount == 2) {
+							if(ureference.reference is IGraph graph) {
+								uNodeEditor.Open(graph);
+							}
+							else if(ureference.reference is IScriptGraph scriptGraph) {
+								uNodeEditor.Open(scriptGraph);
+							}
+							else {
+								EditorGUIUtility.PingObject(ureference.reference);
 							}
 						}
 					}

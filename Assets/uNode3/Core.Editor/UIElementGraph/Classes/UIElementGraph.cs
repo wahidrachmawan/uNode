@@ -904,6 +904,18 @@ namespace MaxyGames.UNode.Editors {
 						menu.AddItem(new GUIContent("Remove All Breakpoints"), false, () => {
 							GraphDebug.Breakpoint.ClearBreakpoints();
 						});
+						menu.AddSeparator("");
+						menu.AddItem(new GUIContent("Find Script Graph (Debug Enabled)"), false, () => {
+							GraphUtility.ShowGraphUsages(obj => {
+								if(obj is IScriptGraph graph) {
+									var data = graph.ScriptData;
+									if(data != null) {
+										return data.debug;
+									}
+								}
+								return false;
+							});
+						});
 						menu.ShowAsContext();
 					}
 				}),

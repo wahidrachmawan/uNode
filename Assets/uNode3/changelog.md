@@ -4,6 +4,7 @@
 - Added preference to enable/disable auto refresh after compiling graphs
 - Improved Editor
 - Added Preprocessor node
+- Added ability to find all script graph with debug enabled
 - Fixed some warning in newer unity version
 
 ## v3.2.6
