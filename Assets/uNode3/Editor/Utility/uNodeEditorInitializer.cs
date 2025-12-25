@@ -193,6 +193,8 @@ namespace MaxyGames.UNode.Editors {
 			});
 
 			uNodeEditor.window?.UndoRedoPerformed();
+			////Ensure to update all types after undo redo
+			//EditorReflectionUtility.UpdateRuntimeTypes();
 			//Update all graph for live edit
 			RuntimeGraphUtility.GraphRunner.UpdateAllRunners();
 		}

@@ -965,13 +965,12 @@ namespace MaxyGames.UNode.Editors {
 					AssetDatabase.Refresh();
 				}
 				Debug.Log("Script saved to: " + Path.GetFullPath(path));
-				EditorUtility.ClearProgressBar();
 			}
 			catch {
-				EditorUtility.ClearProgressBar();
 				Debug.LogError("Aborting Generating C# Script because have error.");
 				throw;
 			} finally {
+				EditorUtility.ClearProgressBar();
 				if(prefabContent != null) {
 					PrefabUtility.UnloadPrefabContents(prefabContent);
 				}

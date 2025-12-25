@@ -1902,6 +1902,13 @@ namespace MaxyGames.UNode {
 						return model.ProxyScriptType.IsCastableTo(to, true);
 					}
 				}
+				if(from.IsEnum) {
+					if(to == typeof(int) || to == typeof(byte) || to == typeof(sbyte) ||
+					   to == typeof(short) || to == typeof(ushort) || to == typeof(uint) ||
+					   to == typeof(long) || to == typeof(ulong)) {
+						return true;
+					}
+				}
 				var baseType = from.BaseType;
 				while(baseType is RuntimeType) {
 					baseType = baseType.BaseType;

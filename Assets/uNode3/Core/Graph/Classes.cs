@@ -504,7 +504,8 @@ namespace MaxyGames.UNode {
 		public virtual void RegisterEntry(BaseEntryNode node) { }
 	}
 
-	public sealed class VariableContainer : URoot<Variable> {
+	public sealed class VariableContainer : URoot<Variable>, ISerializationCallbackReceiver {
+		[NonSerialized]
 		private VariableCollections _collections;
 
 		public VariableCollections collections {
@@ -546,9 +547,18 @@ namespace MaxyGames.UNode {
 			}
 			return null;
 		}
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize() {
+
+		}
+
+		void ISerializationCallbackReceiver.OnAfterDeserialize() {
+			collections?.SetDirty();
+		}
 	}
 
-	public sealed class FunctionContainer : URoot<Function> {
+	public sealed class FunctionContainer : URoot<Function>, ISerializationCallbackReceiver {
+		[NonSerialized]
 		private FunctionCollections _collections;
 
 		public FunctionCollections collections {
@@ -565,6 +575,14 @@ namespace MaxyGames.UNode {
 				_collections.SetDirty();
 			}
 			base.OnChildrenChanged();
+		}
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize() {
+
+		}
+
+		void ISerializationCallbackReceiver.OnAfterDeserialize() {
+			collections?.SetDirty();
 		}
 	}
 
@@ -603,7 +621,8 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	public sealed class ConstructorContainer : URoot<Constructor> {
+	public sealed class ConstructorContainer : URoot<Constructor>, ISerializationCallbackReceiver {
+		[NonSerialized]
 		private ConstructorCollections _collections;
 
 		public ConstructorCollections collections {
@@ -621,9 +640,18 @@ namespace MaxyGames.UNode {
 			}
 			base.OnChildrenChanged();
 		}
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize() {
+
+		}
+
+		void ISerializationCallbackReceiver.OnAfterDeserialize() {
+			collections?.SetDirty();
+		}
 	}
 
-	public sealed class PropertyContainer : URoot<Property> {
+	public sealed class PropertyContainer : URoot<Property>, ISerializationCallbackReceiver {
+		[NonSerialized]
 		private PropertyCollections _collections;
 
 		public PropertyCollections collections {
@@ -653,6 +681,14 @@ namespace MaxyGames.UNode {
 				name = fixName,
 				type = type,
 			});
+		}
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize() {
+
+		}
+
+		void ISerializationCallbackReceiver.OnAfterDeserialize() {
+			collections?.SetDirty();
 		}
 	}
 

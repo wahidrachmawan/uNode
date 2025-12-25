@@ -1217,7 +1217,7 @@ namespace MaxyGames.UNode.Editors {
 			//	DoDrawLinkedVariables(instanceVariables, linkedVariable, publicOnly, unityObject);
 			//}
 			//else {
-			DoDrawLinkedVariables(instanceVariables, linked.GetAllVariables(), publicOnly, unityObject);
+			DoDrawLinkedVariables(instanceVariables, linked.GetAllVariables().ToArray(), publicOnly, unityObject);
 			//}
 		}
 		#endregion

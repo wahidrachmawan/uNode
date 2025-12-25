@@ -1864,12 +1864,13 @@ namespace MaxyGames.UNode.Editors {
 						Debug.LogError($"Error on patching script because type: {typeName} is not found.");
 					}
 				}
-				EditorUtility.ClearProgressBar();
 			}
 			catch {
-				EditorUtility.ClearProgressBar();
 				Debug.LogError("Aborting Generating C# Script because have error.");
 				throw;
+			}
+			finally {
+				EditorUtility.ClearProgressBar();
 			}
 		}
 

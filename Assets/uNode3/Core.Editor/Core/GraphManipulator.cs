@@ -66,6 +66,9 @@ namespace MaxyGames.UNode.Editors {
 
 			public const string OpenItemSelector = nameof(OpenItemSelector);
 			public const string OpenCommand = nameof(OpenCommand);
+
+			public const string CompileGraph = nameof(CompileGraph);
+			public const string CompileCurrentGraph = nameof(CompileCurrentGraph);
 		}
 
 		/// <summary>
@@ -508,7 +511,25 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
+	/// <summary>
+	/// Provides utility methods for handling commands within a graph editor environment.
+	/// </summary>
+	/// <remarks>The <see cref="GraphManipulatorUtility"/> class offers static methods to facilitate command
+	/// processing and manipulation of graph editor instances. It is intended for use in scenarios where commands need to
+	/// be dispatched to registered graph manipulators.</remarks>
 	public static class GraphManipulatorUtility {
+		/// <summary>
+		/// Attempts to handle the specified command using available graph manipulators for the given <see
+		/// cref="GraphEditor"/>.
+		/// </summary>
+		/// <remarks>This method iterates through all registered graph manipulators and attempts to handle the
+		/// specified command. The first manipulator that successfully handles the command will prevent further processing,
+		/// and the method will return <see langword="true"/>. If no manipulator handles the command, the method returns <see
+		/// langword="false"/>.</remarks>
+		/// <param name="graphEditor">The <see cref="GraphEditor"/> instance on which the command should be executed. Cannot be <see langword="null"/>.</param>
+		/// <param name="command">The command to be handled. Cannot be <see langword="null"/> or empty.</param>
+		/// <returns><see langword="true"/> if the command was successfully handled by any manipulator; otherwise, <see
+		/// langword="false"/>.</returns>
 		public static bool HandleCommand(GraphEditor graphEditor, string command) {
 			var manipulators = NodeEditorUtility.FindGraphManipulators();
 			foreach(var manipulator in manipulators) {
@@ -523,6 +544,15 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
+	/// <summary>
+	/// Provides the default implementation for graph manipulation operations within the graph editor environment.
+	/// </summary>
+	/// <remarks><para> <b>DefaultGraphManipulator</b> supplies standard behaviors for creating and managing graph
+	/// elements such as variables, properties, functions, classes, and context menus. It is typically used as a fallback
+	/// or base manipulator when no specialized manipulator is required for a particular graph type. </para> <para> This
+	/// class is intended to be used within the graph editor infrastructure and is not generally instantiated directly by
+	/// user code. It ensures that all standard graph editing features are available, and can be extended or replaced by
+	/// custom manipulators for specialized graph types. </para></remarks>
 	class DefaultGraphManipulator : GraphManipulator {
 		public override int order => int.MaxValue;
 
@@ -2130,6 +2160,169 @@ namespace MaxyGames.UNode.Editors {
 			#endregion
 
 			yield break;
+		}
+
+		public override bool HandleCommand(string command) {
+			if(command == nameof(Command.CompileGraph)) {
+				Compile(true);
+			}
+			else if(command == nameof(Command.CompileCurrentGraph)) {
+				Compile(false);
+			}
+			return false;
+		}
+
+		void Compile(bool openAdditionalMenu) {
+			if(tabData.owner is IScriptGraph) {
+
+			}
+			else {
+				if(graphData.graphSystem == null) return;
+				if(graphData.graphSystem.allowCompileToScript == false) {
+					uNodeEditorUtility.DisplayErrorMessage("The current edited graph doesn't support for compile to c# scripts.");
+					return;
+				}
+				if(graphData.graph is IInstancedGraph) {
+					uNodeEditorUtility.DisplayErrorMessage("The current edited graph doesn't support for compile to c# scripts with this button, instead try use menu: Tools > uNode > Generate C# including Scenes.");
+					return;
+				}
+			}
+			
+			var preferenceData = uNodePreference.preferenceData;
+			if(tabData.owner is IScriptGraph || graphData.graphSystem.isScriptGraph) {
+				if(openAdditionalMenu == false) {
+					graphEditor.window?.GenerateSource();
+					return;
+				}
+				GenericMenu menu = new GenericMenu();
+				if(Application.isPlaying && EditorBinding.patchType != null) {
+					if(graphData.graph != null) {
+						var type = TypeSerializer.Deserialize(uNodeEditorUtility.GetFullScriptName(graphData.graph), false);
+						if(type != null) {
+							menu.AddItem(new GUIContent("Patch Current Graph"), false, () => {
+								if(preferenceData.generatorData.generationMode != GenerationKind.Compatibility) {
+									if(EditorUtility.DisplayDialog(
+										"Warning!",
+										uNodeEditor.MESSAGE_PATCH_WARNING + $"\n\nDo you want to ignore and patch in '{preferenceData.generatorData.generationMode}' mode?",
+										"Yes", "No")) {
+										uNodeEditor.PatchScript(type, tabData);
+									}
+								}
+								else {
+									uNodeEditor.PatchScript(type, tabData);
+								}
+							});
+						}
+						//menu.AddItem(new GUIContent("Patch Project Graphs"), false, () => {
+						//	GenerationUtility.CompileAndPatchProjectGraphs();
+						//});
+						menu.AddSeparator("");
+					}
+				}
+				menu.AddSeparator("");
+				//if(Application.isPlaying) {
+				//	menu.AddDisabledItem(new GUIContent("Compile Current Graph"), false);
+				//	menu.AddDisabledItem(new GUIContent("Compile All C# Graph"), false);
+				//	menu.AddSeparator("");
+				//	menu.AddDisabledItem(new GUIContent("Compile Graphs (Project)"), false);
+				//	menu.AddDisabledItem(new GUIContent("Compile Graphs (Project + Scenes)"), false);
+				//}
+				//else {
+				//}
+				menu.AddItem(new GUIContent("Compile Current Graph"), false, () => {
+					graphEditor.window?.GenerateSource();
+				});
+				menu.AddItem(new GUIContent("Compile Opened C# Graphs"), false, () => {
+					uNodeEditor.AutoSaveCurrentGraph();
+
+					List<IScriptGraph> graphs = new();
+					foreach(var tab in graphEditor.window.tabDatas) {
+						if(tab != null && tab.owner is IScriptGraph) {
+							graphs.Add(tab.owner as IScriptGraph);
+						}
+					}
+					if(graphs.Count > 0)
+						GenerationUtility.GenerateNativeGraphs(graphs);
+				});
+				menu.AddItem(new GUIContent("Compile All C# Graphs in project"), false, () => {
+					if(Application.isPlaying) {
+						uNodeEditorUtility.DisplayErrorMessage("Cannot compile all graph on playmode");
+						return;
+					}
+					uNodeEditor.AutoSaveCurrentGraph();
+					GenerationUtility.GenerateNativeGraphsInProject();
+				});
+				menu.AddSeparator("");
+				menu.AddItem(new GUIContent("Compile Graphs (Project)"), false, () => {
+					uNodeEditor.AutoSaveCurrentGraph();
+					GenerationUtility.GenerateCSharpScript();
+				});
+				menu.AddItem(new GUIContent("Compile Graphs (Project + Scenes)"), false, () => {
+					uNodeEditor.AutoSaveCurrentGraph();
+					GenerationUtility.GenerateCSharpScriptIncludingSceneGraphs();
+				});
+				menu.ShowAsContext();
+				uNodeEditor.AutoSaveCurrentGraph();
+			}
+			else if(graphData.graphSystem.allowAutoCompile) {
+				GenericMenu menu = new GenericMenu();
+				if(Application.isPlaying) {
+					if(graphData.graph != null && EditorBinding.patchType != null) {
+						var type = TypeSerializer.Deserialize(uNodeEditorUtility.GetFullScriptName(graphData.graph), false);
+						if(type != null) {
+							menu.AddItem(new GUIContent("Patch Current Graph"), false, () => {
+								if(preferenceData.generatorData.generationMode != GenerationKind.Compatibility) {
+									if(EditorUtility.DisplayDialog(
+										"Warning!",
+										uNodeEditor.MESSAGE_PATCH_WARNING + $"\n\nDo you want to ignore and patch in '{preferenceData.generatorData.generationMode}' mode?",
+										"Yes", "No")) {
+										uNodeEditor.PatchScript(type, tabData);
+									}
+								}
+								else {
+									uNodeEditor.PatchScript(type, tabData);
+								}
+							});
+						}
+						menu.AddItem(new GUIContent("Patch Project Graphs"), false, () => {
+							if(preferenceData.generatorData.generationMode != GenerationKind.Compatibility) {
+								if(EditorUtility.DisplayDialog(
+									"Warning!",
+									uNodeEditor.MESSAGE_PATCH_WARNING + $"\n\nDo you want to ignore and patch in '{preferenceData.generatorData.generationMode}' mode?",
+									"Yes", "No")) {
+									GenerationUtility.CompileAndPatchProjectGraphs();
+								}
+							}
+							else {
+								GenerationUtility.CompileAndPatchProjectGraphs();
+							}
+						});
+					}
+					menu.AddDisabledItem(new GUIContent("Compile Graphs (Project)"), false);
+					menu.AddDisabledItem(new GUIContent("Compile Graphs (Project + Scenes)"), false);
+				}
+				else {
+					if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
+						menu.AddItem(new GUIContent("Compile Graphs (Project)"), false, () => {
+							uNodeEditor.AutoSaveCurrentGraph();
+							GenerationUtility.GenerateCSharpScript();
+						});
+						menu.AddItem(new GUIContent("Compile Graphs (Project + Scenes)"), false, () => {
+							uNodeEditor.AutoSaveCurrentGraph();
+							GenerationUtility.GenerateCSharpScriptIncludingSceneGraphs();
+						});
+					}
+					else {
+						uNodeEditor.AutoSaveCurrentGraph();
+						GenerationUtility.GenerateCSharpScript();
+						return;
+					}
+				}
+				menu.ShowAsContext();
+			}
+			else {
+				uNodeEditorUtility.DisplayErrorMessage("The current edited graph doesn't support for compile to c# scripts.");
+			}
 		}
 	}
 
