@@ -727,7 +727,7 @@ namespace MaxyGames.UNode.Editors {
 								var value = ReflectionUtils.CreateInstance(type);
 								if(value is NodeContainer container) {
 									uNodeEditorUtility.RegisterUndo(graph);
-									container.name = att.name;
+									container.name = string.IsNullOrEmpty(att.createName) ? att.name : att.createName;
 									container.SetParent(graphData.graphData.eventGraphContainer);
 									postAction?.Invoke();
 									GraphChanged();

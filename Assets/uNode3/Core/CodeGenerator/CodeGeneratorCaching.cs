@@ -212,7 +212,12 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static T GetUserObject<T>(object owner) {
 			if(generatorData.userObjectMap.TryGetValue(owner, out var result)) {
-				return (T)result;
+				try {
+					return (T)result;
+				}
+				catch (InvalidCastException) {
+					throw new Exception($"Cannot cast {result.GetType()} to {typeof(T)}");
+				}
 			}
 			return default(T);
 		}
@@ -225,7 +230,12 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static T GetUserObject<T>(object owner, string key) {
 			if(generatorData.userObjectMap.TryGetValue((owner, key), out var result)) {
-				return (T)result;
+				try {
+					return (T)result;
+				}
+				catch(InvalidCastException) {
+					throw new Exception($"Cannot cast {result.GetType()} to {typeof(T)}");
+				}
 			}
 			return default(T);
 		}

@@ -143,7 +143,12 @@ namespace MaxyGames.UNode.Editors {
 								//	uNodeEditorUtility.RegisterUndo(unityObject, "Paste");
 								var pasteValues = CopyPasteValue.GetElementValue<T>();
 								for(int i = pasteValues.Length - 1; i >= 0; i--) {
-									values.Insert(index, pasteValues[i]);
+									if(index >= 0) {
+										values.Insert(index, pasteValues[i]);
+									}
+									else {
+										values.Add(pasteValues[i]);
+									}
 									if(pasteValues[i] is IValueWithUID vUID) {
 										vUID.GenerateID();
 									}

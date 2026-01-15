@@ -2149,6 +2149,7 @@ namespace MaxyGames {
 					return setting.fileName;
 				}
 			}
+
 			/// <summary>
 			/// The namespace of the script
 			/// </summary>

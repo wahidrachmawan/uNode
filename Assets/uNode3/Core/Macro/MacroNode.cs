@@ -171,6 +171,14 @@ namespace MaxyGames.UNode.Nodes {
 			foreach(var p in inputFlows) {
 				CG.RegisterDependency(p);
 			}
+			foreach(var p in outputValues) {
+				CG.RegisterDependency(p);
+			}
+			for(int i = 0; i < outputFlows.Count; i++) {
+				if(outputFlows[i].exit != null && outputFlows[i].exit.node != null) {
+					CG.RegisterDependency(outputFlows[i].exit.node);
+				}
+			}
 			CG.RegisterPostInitialization(() => {
 				//Initialize Flow Inputs
 				foreach(var p in inputFlows) {

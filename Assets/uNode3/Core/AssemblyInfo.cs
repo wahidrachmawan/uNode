@@ -7,7 +7,6 @@ using UnityEngine;
 [assembly: InternalsVisibleTo("uNode3.Compiler")]
 [assembly: InternalsVisibleTo("uNode3.Pro.Editor")]
 
-
 #if UNITY_6000_3_OR_NEWER
 [assembly: MakeSerializable(typeof(Variable))]
 [assembly: MakeSerializable(typeof(Property))]
@@ -20,5 +19,7 @@ using UnityEngine;
 [assembly: MakeSerializable(typeof(ConstructorContainer))]
 [assembly: MakeSerializable(typeof(MainGraphContainer))]
 [assembly: MakeSerializable(typeof(EventGraphContainer))]
+[assembly: MakeSerializable(typeof(StateGraphContainer))]
+[assembly: MakeSerializable(typeof(TransitionContainer))]
 [assembly: MakeSerializable(typeof(BlockContainer))]
 #endif

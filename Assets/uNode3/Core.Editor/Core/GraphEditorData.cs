@@ -699,6 +699,7 @@ namespace MaxyGames.UNode.Editors {
 		public void Refresh() {
 			if(graph == null)
 				return;
+			UpdateScopes(currentCanvas);
 			if(graph is IRefreshable) {
 				(graph as IRefreshable).Refresh();
 			}

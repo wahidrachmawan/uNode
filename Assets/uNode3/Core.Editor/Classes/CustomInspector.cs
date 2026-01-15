@@ -33,6 +33,19 @@ namespace MaxyGames.UNode.Editors {
 			customEditors.Clear();
 		}
 
+		private static int m_selectedInspector = -1;
+		static int selectedInspector {
+			get {
+				if(m_selectedInspector == -1) {
+					m_selectedInspector = EditorPrefs.GetInt("UNODE_SELECTED_INSPECTOR", 0);
+				}
+				return m_selectedInspector;
+			}
+			set {
+				m_selectedInspector = value;
+				EditorPrefs.SetInt("UNODE_SELECTED_INSPECTOR", value);
+			}
+		}
 		public static void ShowInspector(GraphEditorData editorData, int limitMultiEdit = 5) {
 			//Check if we have select some element or not
 			if(editorData.selectedCount == 0) {
@@ -46,19 +59,32 @@ namespace MaxyGames.UNode.Editors {
 					});
 				}
 				if(editorData.currentCanvas.IsValidElement()) {
-					EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Graph");
-					EditorGUILayout.Space();
-					DrawGraphInspector(editorData.graph);
 					if(editorData.currentCanvas is not MainGraphContainer) {
-						EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-						EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Canvas");
-						EditorGUILayout.Space();
-						var bind = UBind.FromGraphElement(editorData.currentCanvas);
-						if(editorData.currentCanvas is NodeObject nodeObject && nodeObject.node != null) {
-							DrawNodeEditorWithHeader(editorData, nodeObject);
-						} else {
-							UInspector.Draw(new DrawerOption(bind, false, true));
+						var selected = GUILayout.Toolbar(selectedInspector, new string[] { "Graph", "Canvas" });
+						if(selected != selectedInspector) {
+							selectedInspector = selected;
 						}
+						if(selected == 0) {
+							EditorGUILayout.Space();
+							DrawGraphInspector(editorData.graph);
+						}
+						else if(selected == 1) {
+							//EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+							//EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Canvas");
+							EditorGUILayout.Space();
+							var bind = UBind.FromGraphElement(editorData.currentCanvas);
+							if(editorData.currentCanvas is NodeObject nodeObject && nodeObject.node != null) {
+								DrawNodeEditorWithHeader(editorData, nodeObject);
+							}
+							else {
+								UInspector.Draw(new DrawerOption(bind, false, true));
+							}
+						}
+					}
+					else {
+						EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Graph");
+						EditorGUILayout.Space();
+						DrawGraphInspector(editorData.graph);
 					}
 				} else if(editorData.graph != null) {
 					EditorGUI.DropShadowLabel(uNodeGUIUtility.GetRect(), "Graph");

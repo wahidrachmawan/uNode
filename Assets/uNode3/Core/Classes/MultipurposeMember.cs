@@ -154,7 +154,6 @@ namespace MaxyGames.UNode {
 					createOutPort?.Invoke();
 					break;
 				case MemberData.TargetType.uNodeFunction: {
-
 					var reference = target.startItem.GetReferenceValue() as Function;
 					if(reference != null) {
 						createFlowPort?.Invoke();
@@ -166,6 +165,7 @@ namespace MaxyGames.UNode {
 						datas = new MInfo[] {
 							new MInfo()
 						};
+						target.HasRefOrOut = false;
 						for(int i = 0; i < reference.parameters.Count; i++) {
 							var p = reference.parameters[i];
 							var pdata = new MParamInfo() {
@@ -177,6 +177,7 @@ namespace MaxyGames.UNode {
 									node,
 									pathID + "-" + i + "-" + 0, p.Type,
 									PortAccessibility.ReadWrite).SetName(p.name);
+								target.HasRefOrOut = true;
 							}
 							else {
 								pdata.input = Node.Utilities.ValueInput(node, pathID + "-" + i + "-" + 0, p.Type, out var isNew).SetName(p.name);
@@ -184,6 +185,10 @@ namespace MaxyGames.UNode {
 									pdata.input.filter = new FilterAttribute(p.Type) {
 										SetMember = true,
 									};
+									target.HasRefOrOut = true;
+								}
+								else if(pdata.refKind == RefKind.Ref) {
+									target.HasRefOrOut = true;
 								}
 								if(p.IsOptional) {
 									pdata.input.SetOptionalValue(() => p.defaultValue);
@@ -244,6 +249,7 @@ namespace MaxyGames.UNode {
 					}
 					parameters = new List<MParamInfo>();
 					datas = new MInfo[members.Length];
+					target.HasRefOrOut = false;
 					for(int i = 0; i < members.Length; i++) {
 						var m = members[i];
 						var data = new MInfo();
@@ -257,12 +263,14 @@ namespace MaxyGames.UNode {
 								};
 								if(p.IsOut) {
 									pdata.refKind = RefKind.Out;
+									target.HasRefOrOut = true;
 								}
 								else if(p.IsIn) {
 									pdata.refKind = RefKind.In;
 								}
 								else if(p.ParameterType.IsByRef) {
 									pdata.refKind = RefKind.Ref;
+									target.HasRefOrOut = true;
 								}
 								if(preferOutputForParameters && pdata.IsOut) {
 									pdata.output = Node.Utilities.ValueOutput(

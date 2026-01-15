@@ -2046,61 +2046,7 @@ namespace MaxyGames {
 			if(paramInfo.Length > 0) {
 				List<string> dataList = new List<string>();
 				for(int index = 0; index < paramInfo.Length; index++) {
-					var p = parameters[index];
-					string pData = null;
-					if(p.output != null) {
-						if(p.output.isConnected) {
-							pData = "out " + RegisterLocalVariable(p.name, p.type, null, reference: p.output);
-						}
-						else {
-							pData = "out _";
-						}
-					}
-					else {
-						if(paramInfo[index].ParameterType.IsByRef) {
-							if(paramInfo[index].IsOut) {
-								pData += "out ";
-							}
-							else if(paramInfo[index].IsIn) {
-								//There's nothing todo for In modifier
-							}
-							else {
-								pData += "ref ";
-							}
-						}
-						if(pData != null) {
-							bool correct = true;
-							if(p.type != null && p.type.IsValueType) {
-								//TODO: fix me
-								//MemberInfo[] MI = p.GetMembers();
-								//if (MI != null && MI.Length > 1 && ReflectionUtils.GetMemberType(MI[MI.Length - 2]).IsValueType) {
-								//	string varName = GenerateVariableName("tempVar");
-								//	var pVal = Value(p);
-								//	pData += varName + "." + pVal.Remove(pVal.IndexOf(ParseStartValue(p)), ParseStartValue(p).Length + 1).CGSplitMember().Last();
-								//	if (pVal.LastIndexOf(".") >= 0) {
-								//		pVal = pVal.Remove(pVal.LastIndexOf("."));
-								//	}
-								//	enter += Type(ReflectionUtils.GetMemberType(MI[MI.Length - 2])) + " " + varName + " = " + pVal + ";\n";
-								//	exit += pVal + " = " + varName + ";";
-								//	correct = false;
-								//}
-							}
-							if(correct) {
-								if(debugScript && setting.debugValueNode) {
-									setting.debugScript = false;
-									pData += Value(p);
-									setting.debugScript = true;
-								}
-								else {
-									pData += Value(p);
-								}
-							}
-						}
-						else {
-							pData += Value(p);
-						}
-					}
-					dataList.Add(pData);
+					dataList.Add(M_GenerateParameter(parameters[index]));
 				}
 				for(int index = 0; index < dataList.Count; index++) {
 					if(index != 0) {

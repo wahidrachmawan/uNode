@@ -78,6 +78,15 @@ namespace MaxyGames.UNode.Editors {
 			FieldDecorator.DrawDecorators(option.attributes);
 		}
 
+		protected void DrawScriptHeader(Type type) {
+			var monoScript = uNodeEditorUtility.GetMonoScript(type);
+			if(monoScript != null) {
+				EditorGUI.BeginDisabledGroup(true);
+				EditorGUILayout.ObjectField("Script", monoScript, typeof(MonoScript), true);
+				EditorGUI.EndDisabledGroup();
+			}
+		}
+
 		public static void DrawChilds(DrawerOption option) {
 			var fields = EditorReflectionUtility.GetFields(option.property.valueType, option.GetFlags());
 			for(int i = 0; i < fields.Length; i++) {

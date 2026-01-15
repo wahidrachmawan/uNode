@@ -74,7 +74,16 @@ namespace MaxyGames.UNode.Editors {
 			return _data;
 		}
 
-		public static void SaveData() {
+		/// <summary>
+		/// Get the last generated script data
+		/// </summary>
+		/// <param name="graph"></param>
+		/// <returns></returns>
+		public static CachedScriptData GetGraphData(UnityEngine.Object graph) {
+			return GetData().GetGraphData(graph);
+		}
+
+		internal static void SaveData() {
 			if(_data != null)
 				uNodeEditorUtility.SaveEditorData(_data, "GeneratorData");
 		}
@@ -688,7 +697,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#region Delete Generated Script
+		#region Delete Generated Script
 		[MenuItem("Tools/uNode/Delete Generated C# Scripts", false, 30)]
 		public static void DeleteGeneratedCSharpScript() {
 			EditorUtility.DisplayProgressBar("Deleting Generated C# Scripts", "", 1);
@@ -737,6 +746,102 @@ namespace MaxyGames.UNode.Editors {
 			EditorUtility.ClearProgressBar();
 		}
 		#endregion
+
+		private static CG.GeneratedData[] GenerateGraphScripts(
+			UnityEngine.Object[] graphs,
+			bool force = true,
+			string label = "Generating C# Scripts",
+			bool clearProgressOnFinish = true) {
+			try {
+				int count = 0;
+				var objects = graphs;
+				var scripts = objects.Select(gameObject => {
+					count++;
+					return GenerateCSharpScript(gameObject, (progress, text) => {
+						EditorUtility.DisplayProgressBar($"{label} {count}-{objects.Length}", text, progress);
+					});
+				}).Where(s => s != null);
+				return scripts.ToArray();
+			}
+			finally {
+				if(clearProgressOnFinish) {
+					uNodeThreadUtility.QueueOnFrame(() => {
+						EditorUtility.ClearProgressBar();
+					});
+				}
+			}
+		}
+
+		public static CG.GeneratedData[] GenerateScriptForGraphs(UnityEngine.Object[] graphs, string saveFolderName = "Scripts", bool compileScripts = false, string assemblyPath = null, bool enableLogging = true) {
+			try {
+				System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+				watch.Start();
+				var scripts = GenerateGraphScripts(graphs, true);
+				watch.Stop();
+				if(enableLogging)
+					Debug.LogFormat("Generating C# took {0,8:N3} s.", watch.Elapsed.TotalSeconds);
+
+				EditorUtility.DisplayProgressBar("Saving Scripts", "", 1);
+				var dir = "TempScript" + Path.DirectorySeparatorChar + saveFolderName;
+				List<string> scriptPaths = new();
+				Directory.CreateDirectory(dir);
+				foreach(var script in scripts) {
+					string path;
+					if(string.IsNullOrWhiteSpace(script.Namespace) == false) {
+						Directory.CreateDirectory(dir + Path.DirectorySeparatorChar + script.Namespace);
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.Namespace + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
+					else {
+						path = Path.GetFullPath(dir) + Path.DirectorySeparatorChar + script.fileName + ".cs";
+					}
+					var assetPath = AssetDatabase.GetAssetPath(script.graphOwner);
+					if(File.Exists(assetPath.RemoveLast(6).Add("cs"))) {
+						//Skip when the graph has been compiled manually
+						continue;
+					}
+					scriptPaths.Add(path);
+					List<ScriptInformation> informations;
+					var generatedScript = script.ToScript(out informations, true);
+					using(StreamWriter sw = new StreamWriter(path)) {
+						if(informations != null) {
+							uNodeEditor.SavedData.RegisterGraphInfos(informations, script.graphOwner, path);
+						}
+						sw.Write(ConvertLineEnding(generatedScript, Application.platform != RuntimePlatform.WindowsEditor));
+						sw.Close();
+					}
+					if(EditorUtility.IsPersistent(script.graphOwner)) {
+						var scriptData = persistenceData.GetGraphData(script.graphOwner);
+						scriptData.path = path;
+						scriptData.fileHash = uNodeUtility.GetFileHash(AssetDatabase.GetAssetPath(script.graphOwner));
+						scriptData.lastCompiledID = script.GetSettingUID();
+						scriptData.generatedScript = generatedScript;
+						scriptData.Update();
+					}
+					GraphUtility.UpdateDatabase(new[] { script });
+				}
+				if(compileScripts) {
+					EditorUtility.DisplayProgressBar("Compiling Scripts", "", 1);
+					var result = RoslynUtility.CompileFilesAndSave(Path.GetRandomFileName(), scriptPaths, !string.IsNullOrEmpty(assemblyPath) ? assemblyPath : tempAssemblyPath, false);
+					if(result.errors != null && result.errors.Any()) {
+						Debug.LogError(result.GetErrorMessage());
+					}
+				}
+				uNodeDatabase.ClearCache();
+
+				if(uNodePreference.preferenceData.IsAutoRefreshEnabled) {
+					AssetDatabase.Refresh();
+				}
+				AssetDatabase.SaveAssets();
+				if(enableLogging)
+					Debug.Log("Successful generating scripts.");
+				return scripts;
+			}
+			finally {
+				uNodeThreadUtility.QueueOnFrame(() => {
+					EditorUtility.ClearProgressBar();
+				});
+			}
+		}
 
 		public static void GenerateNativeGraphsInProject(bool enableLogging = true) {
 			GenerateNativeGraphs(GraphUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph).Select(g => g as IScriptGraph), enableLogging);
@@ -1140,7 +1245,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#region GenerateCSharpScript
+		#region GenerateCSharpScript
 		public static CG.GeneratedData GenerateCSharpScript(UnityEngine.Object source, Action<float, string> updateProgress = null, Action<CG.GeneratedData> onSuccess = null, Action<CG.GeneratedData> onInitialize = null) {
 			if(source == null) {
 				return null;

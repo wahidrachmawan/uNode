@@ -59,6 +59,7 @@ namespace MaxyGames.UNode.Editors {
 			if(graphData != null) {
 				if(m_prevCanvas != graphData.currentCanvas) {
 					m_prevCanvas = graphData.currentCanvas;
+					graphData.Refresh();
 					OnCanvasChanged();
 				}
 			}
