@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.2.8
+- Improved Code Generation
+- Improved Editor
+- Fixed most of reported bugs
+
 ## v3.2.7
 - Added preference to enable/disable auto refresh after compiling graphs
 - Improved Editor
