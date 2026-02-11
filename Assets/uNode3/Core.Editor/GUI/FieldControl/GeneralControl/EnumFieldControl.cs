@@ -27,10 +27,15 @@ namespace MaxyGames.UNode.Editors.Control {
 			else if(ReflectionUtils.IsTypeEqual(value.GetType(), type) == false) {
 				value = ReflectionUtils.CreateInstance(type);
 			}
-			var oldValue = (Enum)value;
-			var newValue = EditorGUI.EnumPopup(position, label, oldValue);
+			var val = (Enum)value;
+			if(type.IsDefinedAttribute<System.FlagsAttribute>()) {
+				val = EditorGUI.EnumFlagsField(position, label, val);
+			}
+			else {
+				val = EditorGUI.EnumPopup(position, label, val);
+			}
 			if(EditorGUI.EndChangeCheck()) {
-				onChanged(newValue);
+				onChanged(val);
 			}
 		}
 	}

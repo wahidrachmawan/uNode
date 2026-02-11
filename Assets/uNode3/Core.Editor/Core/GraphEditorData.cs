@@ -219,6 +219,15 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// Determines whether the specified scope is present in the set of allowed scopes.
+		/// </summary>
+		/// <param name="scope">The scope to validate. Cannot be <see langword="null"/>.</param>
+		/// <returns><see langword="true"/> if the specified scope is allowed; otherwise, <see langword="false"/>.</returns>
+		public bool IsValidScope(string scope) {
+			return scopes.Contains(scope);
+		}
+
+		/// <summary>
 		/// The all nodes in current canvas
 		/// </summary>
 		public IEnumerable<NodeObject> nodes {

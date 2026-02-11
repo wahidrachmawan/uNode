@@ -1786,6 +1786,8 @@ namespace MaxyGames {
 			public List<AData> attributes;
 			public string defaultValue;
 
+			public bool IsOptional => !string.IsNullOrEmpty(defaultValue);
+
 			public void RegisterAttribute(Type type, params string[] parameters) {
 				if(attributes == null)
 					attributes = new List<AData>();
@@ -1832,9 +1834,9 @@ namespace MaxyGames {
 				else {
 					result += name;
 				}
-				if(string.IsNullOrEmpty(defaultValue) == false) {
-					return result + " = " + defaultValue;
-				}
+				//if(string.IsNullOrEmpty(defaultValue) == false) {
+				//	return result + " = " + defaultValue;
+				//}
 				return result;
 			}
 
@@ -1848,8 +1850,9 @@ namespace MaxyGames {
 				this.name = parameter.name;
 				this.type = parameter.type;
 				this.refKind = parameter.refKind;
+				this.summary = parameter.summary;
 				if(parameter.hasDefaultValue) {
-					this.defaultValue = Value(parameter.defaultValue);
+					this.defaultValue = parameter.hasDefaultValue ? parameter.defaultValue != null ? Value(parameter.defaultValue) : "default" : null;
 				}
 			}
 		}
@@ -1954,21 +1957,26 @@ namespace MaxyGames {
 				}
 				result += "(";
 				if(parameters != null) {
-					int index = 0;
-					bool hasOptional = false;
-					foreach(MPData data in parameters) {
-						if(index != 0) {
+					int optionalIndex = int.MaxValue;
+					for(int i = parameters.Count - 1; i >= 0; i--) {
+						if(parameters[i].IsOptional) {
+							optionalIndex = i;
+						}
+						else {
+							break;
+						}
+					}
+					for(int i = 0; i < parameters.Count; i++) {
+						if(i != 0) {
 							result += ", ";
 						}
 						else if(isExtension) {
 							result += "this ";
 						}
-						result += data.GenerateCode();
-						if(hasOptional && string.IsNullOrEmpty(data.defaultValue)) {
-							result += " = default";
+						result += parameters[i].GenerateCode();
+						if(optionalIndex <= i && parameters[i].IsOptional) {
+							result += " = " + parameters[i].defaultValue;
 						}
-						hasOptional |= string.IsNullOrEmpty(data.defaultValue) == false;
-						index++;
 					}
 				}
 				string genericData = null;

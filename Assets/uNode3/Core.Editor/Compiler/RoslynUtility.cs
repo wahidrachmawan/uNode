@@ -111,8 +111,8 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="scripts">An enumerable collection of C# script source strings to compile.</param>
 		/// <returns>A CompileResult object representing the outcome of the compilation process.</returns>
-		public static CompileResult CompileScript(IEnumerable<string> scripts) {
-			return CompileScript(CachedData.randomAssemblyName, scripts);
+		public static CompileResult CompileScript(IEnumerable<string> scripts, IEnumerable<MetadataReference> metadataReferences = null) {
+			return CompileScript(CachedData.randomAssemblyName, scripts, metadataReferences);
 		}
 
 		/// <summary>
@@ -123,12 +123,12 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns>A <see cref="CompileResult"/> representing the result of the compilation,  including the compiled assembly and any
 		/// diagnostic information.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="scripts"/> is <see langword="null"/>.</exception>
-		public static CompileResult CompileScript(string assemblyName, IEnumerable<string> scripts) {
+		public static CompileResult CompileScript(string assemblyName, IEnumerable<string> scripts, IEnumerable<MetadataReference> metadataReferences = null) {
 			if(scripts == null) {
 				throw new ArgumentNullException(nameof(scripts));
 			}
 			var trees = GetSyntaxTrees(scripts);
-			return DoCompile(assemblyName, trees);
+			return DoCompile(assemblyName, trees, metadataReferences: metadataReferences);
 		}
 
 		/// <summary>
@@ -138,8 +138,8 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation,  including any errors or warnings
 		/// encountered.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="files"/> is <see langword="null"/>.</exception>
-		public static CompileResult CompileFiles(IEnumerable<string> files) {
-			return CompileFiles(CachedData.randomAssemblyName, files);
+		public static CompileResult CompileFiles(IEnumerable<string> files, IEnumerable<MetadataReference> metadataReferences = null) {
+			return CompileFiles(CachedData.randomAssemblyName, files, metadataReferences);
 		}
 
 		/// <summary>
@@ -150,12 +150,12 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation,  including any errors or warnings
 		/// encountered.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="files"/> is <see langword="null"/>.</exception>
-		public static CompileResult CompileFiles(string assemblyName, IEnumerable<string> files) {
+		public static CompileResult CompileFiles(string assemblyName, IEnumerable<string> files, IEnumerable<MetadataReference> metadataReferences = null) {
 			if(files == null) {
 				throw new ArgumentNullException(nameof(files));
 			}
 			var trees = GetSyntaxTreesFromFiles(files, out var embeddedTexts);
-			return DoCompile(assemblyName, trees, embeddedTexts);
+			return DoCompile(assemblyName, trees, embeddedTexts, metadataReferences);
 		}
 
 		/// <summary>
@@ -172,12 +172,12 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation, including any errors or the
 		/// compiled assembly.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="scripts"/> is <see langword="null"/>.</exception>
-		public static CompileResult CompileScriptAndSave(string assemblyName, IEnumerable<string> scripts, string savePath, bool loadAssembly) {
+		public static CompileResult CompileScriptAndSave(string assemblyName, IEnumerable<string> scripts, string savePath, bool loadAssembly, IEnumerable<MetadataReference> metadataReferences = null) {
 			if(scripts == null) {
 				throw new ArgumentNullException(nameof(scripts));
 			}
 			var trees = GetSyntaxTrees(scripts);
-			return DoCompileAndSave(assemblyName, trees, savePath, loadAssembly: loadAssembly);
+			return DoCompileAndSave(assemblyName, trees, savePath, loadAssembly: loadAssembly, metadataReferences: metadataReferences);
 		}
 
 		/// <summary>
@@ -195,12 +195,12 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns>A <see cref="CompileResult"/> object containing the results of the compilation, including any diagnostics and the
 		/// compiled assembly, if applicable.</returns>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="files"/> is <see langword="null"/>.</exception>
-		public static CompileResult CompileFilesAndSave(string assemblyName, IEnumerable<string> files, string savePath, bool loadAssembly) {
+		public static CompileResult CompileFilesAndSave(string assemblyName, IEnumerable<string> files, string savePath, bool loadAssembly, IEnumerable<MetadataReference> metadataReferences = null) {
 			if(files == null) {
 				throw new ArgumentNullException(nameof(files));
 			}
 			var trees = GetSyntaxTreesFromFiles(files, out var embeddedTexts);
-			return DoCompileAndSave(assemblyName, trees, savePath, embeddedTexts, loadAssembly: loadAssembly);
+			return DoCompileAndSave(assemblyName, trees, savePath, embeddedTexts, loadAssembly: loadAssembly, metadataReferences: metadataReferences);
 		}
 		#endregion
 
@@ -233,6 +233,24 @@ namespace MaxyGames.UNode.Editors {
 				}
 				return CachedData.assemblyCSharp;
 			}
+		}
+
+		/// <summary>
+		/// Retrieves the <see cref="UnityEditor.Compilation.Assembly"/> that contains the specified script file path.
+		/// </summary>
+		public static UnityEditor.Compilation.Assembly GetAssemblyFromScriptPath(string path) {
+			UnityEditor.Compilation.Assembly result = null;
+			uNodeThreadUtility.RunOnMainThread(() => {
+				var assemblies = CompilationPipeline.GetAssemblies();
+				for(int i = 0; i < assemblies.Length; i++) {
+					var assembly = assemblies[i];
+					if(assembly.sourceFiles.Contains(path)) {
+						result = assembly;
+						break;
+					}
+				}
+			});
+			return result;
 		}
 
 		private static void AppendSourceGenerators(Assembly assembly, ref List<ISourceGenerator> sourceGenerators, ref List<IIncrementalGenerator> incrementalGenerators) {
@@ -286,6 +304,12 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				sourceGenerators = Array.Empty<ISourceGenerator>();
 				incrementalGenerators = Array.Empty<IIncrementalGenerator>();
+			}
+		}
+
+		internal static IEnumerable<MetadataReference> GetReferences(IEnumerable<string> scriptReferences) {
+			foreach(var reference in scriptReferences) {
+				yield return MetadataReference.CreateFromFile(reference);
 			}
 		}
 
@@ -408,13 +432,14 @@ namespace MaxyGames.UNode.Editors {
 		private static CompileResult DoCompile(
 			string assemblyName,
 			IEnumerable<Syntax> syntaxTrees,
-			List<EmbeddedText> embeddedTexts = null
+			List<EmbeddedText> embeddedTexts = null,
+			IEnumerable<MetadataReference> metadataReferences = null
 			) {
 			CompileResult result = new CompileResult();
 			var compilation = CSharpCompilation.Create(
 				assemblyName,
 				syntaxTrees: syntaxTrees,
-				references: GetMetadataReferences(),
+				references: metadataReferences ?? GetMetadataReferences(),
 				options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug));
 
 			if(Data.useSourceGenerators()) {
@@ -507,13 +532,14 @@ namespace MaxyGames.UNode.Editors {
 			IEnumerable<Syntax> syntaxTrees,
 			string assemblyPath,
 			List<EmbeddedText> embeddedTexts = null,
-			bool loadAssembly = true) {
+			bool loadAssembly = true,
+			IEnumerable<MetadataReference> metadataReferences = null) {
 			CompileResult result = new CompileResult();
 			var option = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug);
 			var compilation = CSharpCompilation.Create(
 				assemblyName,
 				syntaxTrees: syntaxTrees,
-				references: GetMetadataReferences(),
+				references: metadataReferences ?? GetMetadataReferences(),
 				options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug));
 			
 			if(Data.useSourceGenerators()) {
@@ -627,7 +653,10 @@ namespace MaxyGames.UNode.Editors {
 		/// additional syntax trees are included.</param>
 		/// <returns>The root node of the parsed syntax tree as a <see cref="CompilationUnitSyntax"/>.</returns>
 		/// <exception cref="NullReferenceException">Thrown if <paramref name="script"/> is <see langword="null"/>.</exception>
-		public static CompilationUnitSyntax GetSyntaxTree(string script, out SemanticModel model, IEnumerable<Syntax> references = null) {
+		public static CompilationUnitSyntax GetSyntaxTree(string script, 
+			out SemanticModel model, 
+			IEnumerable<Syntax> references = null,
+			IEnumerable<MetadataReference> metadataReferences = null) {
 			if(script == null) {
 				throw new NullReferenceException("Can't parse, Scripts is null");
 			}
@@ -636,7 +665,7 @@ namespace MaxyGames.UNode.Editors {
 			if(references != null) {
 				trees.AddRange(references);
 			}
-			var compilation = CSharpCompilation.Create("CSharpParser", syntaxTrees: trees, references: GetMetadataReferences());
+			var compilation = CSharpCompilation.Create("CSharpParser", syntaxTrees: trees, references: metadataReferences ?? GetMetadataReferences());
 			model = compilation.GetSemanticModel(tree, true);
 			return (CompilationUnitSyntax)tree.GetRoot();
 		}

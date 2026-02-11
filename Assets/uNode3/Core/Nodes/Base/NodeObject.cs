@@ -128,7 +128,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// The node styles
 		/// </summary>
-		public string[] Styles => node.Styles;
+		public string[] Styles => node?.Styles ?? Array.Empty<string>();
 
 		#region Constructors
 		public NodeObject() { }

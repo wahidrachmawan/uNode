@@ -108,6 +108,10 @@ namespace MaxyGames.UNode.Editors {
 	}
 
 	public abstract class UGraphElementDrawer<T> : UGraphElementDrawer where T : UGraphElement {
+		public T GetValue(DrawerOption option) {
+			return GetValue<T>(option.property);
+		}
+
 		public override bool IsValid(Type type, bool layouted) {
 			return type == typeof(T) || type.IsSubclassOf(typeof(T));
 		}

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.Linq;
+using System.IO;
 
 namespace MaxyGames.UNode.Editors {
 	public class PreviewSourceWindow : EditorWindow {
@@ -72,6 +73,7 @@ namespace MaxyGames.UNode.Editors {
 		protected string[] lines;
 		protected string[] pureLines;
 		protected string script;
+		protected string filePath;
 		protected CompileResult compileResult;
 		protected Vector2 scrollPos;
 
@@ -84,6 +86,7 @@ namespace MaxyGames.UNode.Editors {
 				window.pureLines = originalScript.Split('\n');
 				window.script = originalScript;
 				window.compileResult = null;
+				window.filePath = null;
 			}
 			window.titleContent = new GUIContent("C# Preview");
 			window.autoRepaintOnSceneChange = true;
@@ -101,11 +104,16 @@ namespace MaxyGames.UNode.Editors {
 			uNodeEditor.onSelectionChanged -= OnChanged;
 		}
 
+		public void SetScriptFilePath(string path) {
+			filePath = path;
+		}
+
 		public void OnChanged(GraphEditorData editorData) {
 			if(informations != null) {
 				if(editorData.hasSelection) {
 					var ids = editorData.selecteds.Select(n => n is UGraphElement element ? element.id.ToString() : string.Empty);
 					selectedInfos = informations.Where(info => ids.Contains(info.id)).ToArray();
+
 					var selections = ids.ToArray();
 					if(selections.Length == oldSelections.Length) {
 						for(int i = 0; i < selections.Length; i++) {
@@ -121,6 +129,20 @@ namespace MaxyGames.UNode.Editors {
 						selectionChanged = true;
 					}
 				}
+
+				var cachedScriptData = GenerationUtility.GetGraphData(editorData.owner);
+				if(cachedScriptData != null) {
+					filePath = cachedScriptData.path;
+					if(string.IsNullOrEmpty(filePath)) {
+						//In case it is not yet generated.
+						if(editorData.RootOwner is IScriptGraph) {
+							filePath = System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(editorData.RootOwner)) +
+								System.IO.Path.DirectorySeparatorChar +
+								editorData.RootOwner.name + ".cs";
+						}
+					}
+				}
+
 				Repaint();
 			}
 		}
@@ -193,7 +215,15 @@ namespace MaxyGames.UNode.Editors {
 				if(GUILayout.Button("Check Errors", EditorStyles.toolbarButton)) {
 					try {
 						EditorUtility.DisplayProgressBar("Loading", "Compiling Scripts", 1);
-						compileResult = GenerationUtility.CompileScript(script);
+						if(!string.IsNullOrEmpty(filePath)) {
+							var assembly = RoslynUtility.GetAssemblyFromScriptPath(filePath) ?? RoslynUtility.AssemblyCSharp;
+							var tmpPath = GenerationUtility.tempFolder + "/TempScript_Preview.cs";
+							File.WriteAllText(tmpPath, script);
+							compileResult = RoslynUtility.CompileFiles(assembly.sourceFiles.Where(p => p != filePath).Append(tmpPath).Distinct());
+						}
+						else {
+							compileResult = GenerationUtility.CompileScript(script);
+						}
 						if(compileResult.errors != null &&
 							uNodePreference.preferenceData.generatorData.compilationMethod == CompilationMethod.Roslyn &&
 							System.IO.File.Exists(GenerationUtility.tempAssemblyPath)) {

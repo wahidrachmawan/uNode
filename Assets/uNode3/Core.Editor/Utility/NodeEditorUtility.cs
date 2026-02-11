@@ -763,7 +763,7 @@ namespace MaxyGames.UNode.Editors {
 					port.AssignToDefault(MemberData.CreateValueFromType(type));
 					return true;
 				}
-				else if(graphType != null && (graphType == type || type.IsSubclassOf(graphType))) {
+				else if(graphType != null && (graphType == type || type.IsSubclassOf(graphType) && graphType != typeof(ValueType))) {
 					port.AssignToDefault(MemberData.This(graph));
 					return true;
 				}
