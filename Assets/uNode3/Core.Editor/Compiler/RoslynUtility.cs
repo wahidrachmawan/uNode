@@ -238,7 +238,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Retrieves the <see cref="UnityEditor.Compilation.Assembly"/> that contains the specified script file path.
 		/// </summary>
-		public static UnityEditor.Compilation.Assembly GetAssemblyFromScriptPath(string path) {
+		public static UnityEditor.Compilation.Assembly GetCompilationAssemblyFromScriptPath(string path) {
 			UnityEditor.Compilation.Assembly result = null;
 			uNodeThreadUtility.RunOnMainThread(() => {
 				var assemblies = CompilationPipeline.GetAssemblies();
@@ -325,7 +325,7 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
-		private static IEnumerable<MetadataReference> GetMetadataReferences() {
+		public static IEnumerable<MetadataReference> GetMetadataReferences() {
 			if(Data.metadataReferences != null) {
 				if(Data.compilationMethod() == CompilationMethod.Roslyn) {
 					if(File.Exists(Data.tempAssemblyPath)) {
@@ -372,6 +372,13 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			return references;
+		}
+
+
+		public static IEnumerable<MetadataReference> GetMetadataReferences(IEnumerable<string> paths) {
+			foreach(var path in paths) {
+				yield return MetadataReference.CreateFromFile(path);
+			}
 		}
 
 		private static List<string> GetPreprocessorSymbols() {

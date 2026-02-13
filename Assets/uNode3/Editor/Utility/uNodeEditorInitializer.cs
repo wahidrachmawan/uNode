@@ -18,10 +18,15 @@ namespace MaxyGames.UNode.Editors {
 	/// </summary>
 	[InitializeOnLoad]
 	public class uNodeEditorInitializer {
-		static Texture uNodeIcon;
 		static List<int> markedObjects = new List<int>();
 		static HashSet<string> assetGUIDs = new HashSet<string>();
 		static Dictionary<string, Object> markedAssets = new Dictionary<string, UnityEngine.Object>();
+		static Texture uNodeIcon;
+		static Lazy<Texture2D> m_backgroundTexture = new Lazy<Texture2D>(() => {
+			return EditorGUIUtility.isProSkin
+				? uNodeEditorUtility.MakeTexture(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f))   // Dark theme
+				: uNodeEditorUtility.MakeTexture(1, 1, new Color(0.7450981f, 0.7450981f, 0.7450981f, 1f));  // Light theme
+		});
 
 		static uNodeEditorInitializer() {
 			EditorApplication.hierarchyWindowItemOnGUI += HierarchyItem;
@@ -1206,7 +1211,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		private static void DrawCustomIcon(Rect rect, Texture texture, bool isSmall) {
+		private static void DrawCustomIcon(Rect rect, Texture texture, bool isSmall, bool coverBackground = true) {
 			const float LARGE_ICON_SIZE = 128f;
 			if(rect.width > LARGE_ICON_SIZE) {
 				// center the icon if it is zoomed
@@ -1216,6 +1221,9 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				if(isSmall && !IsTreeView(rect))
 					rect = new Rect(rect.x + 3, rect.y, rect.width, rect.height);
+			}
+			if(coverBackground) {
+				GUI.DrawTexture(rect, m_backgroundTexture.Value);
 			}
 			GUI.DrawTexture(rect, texture);
 		}

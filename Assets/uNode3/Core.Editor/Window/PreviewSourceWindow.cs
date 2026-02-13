@@ -70,12 +70,17 @@ namespace MaxyGames.UNode.Editors {
 
 		private string[] oldSelections = Array.Empty<string>();
 		protected bool focus, selectionChanged;
+		[SerializeField]
 		protected string[] lines;
+		[SerializeField]
 		protected string[] pureLines;
+		[SerializeField]
 		protected string script;
+		[SerializeField]
 		protected string filePath;
-		protected CompileResult compileResult;
+		[SerializeField]
 		protected Vector2 scrollPos;
+		protected CompileResult compileResult;
 
 		public static PreviewSourceWindow ShowWindow(string highlightedScript, string originalScript) {
 			window = GetWindow(typeof(PreviewSourceWindow), true) as PreviewSourceWindow;
@@ -136,9 +141,7 @@ namespace MaxyGames.UNode.Editors {
 					if(string.IsNullOrEmpty(filePath)) {
 						//In case it is not yet generated.
 						if(editorData.RootOwner is IScriptGraph) {
-							filePath = System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(editorData.RootOwner)) +
-								System.IO.Path.DirectorySeparatorChar +
-								editorData.RootOwner.name + ".cs";
+							filePath = Path.ChangeExtension(AssetDatabase.GetAssetPath(editorData.RootOwner), ".cs");
 						}
 					}
 				}
@@ -216,10 +219,13 @@ namespace MaxyGames.UNode.Editors {
 					try {
 						EditorUtility.DisplayProgressBar("Loading", "Compiling Scripts", 1);
 						if(!string.IsNullOrEmpty(filePath)) {
-							var assembly = RoslynUtility.GetAssemblyFromScriptPath(filePath) ?? RoslynUtility.AssemblyCSharp;
+							var assembly = RoslynUtility.GetCompilationAssemblyFromScriptPath(filePath) ?? RoslynUtility.AssemblyCSharp;
 							var tmpPath = GenerationUtility.tempFolder + "/TempScript_Preview.cs";
 							File.WriteAllText(tmpPath, script);
-							compileResult = RoslynUtility.CompileFiles(assembly.sourceFiles.Where(p => p != filePath).Append(tmpPath).Distinct());
+							compileResult = RoslynUtility.CompileFiles(
+								assembly.sourceFiles.Where(p => p != filePath).Append(tmpPath).Distinct(),
+								RoslynUtility.GetMetadataReferences(assembly.allReferences)
+							);
 						}
 						else {
 							compileResult = GenerationUtility.CompileScript(script);

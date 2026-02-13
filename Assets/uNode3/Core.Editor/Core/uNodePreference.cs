@@ -921,16 +921,22 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				var rType = type as RuntimeType;
 				return GetIconForType(typeof(TypeIcons.RuntimeTypeIcon));
 			}
-			result = GetTypeSettings().GetIcon(type) ?? GetDefaultIcon(type);
+
+			result = GetTypeSettings().GetIcon(type);
+			if(result == null) {
+				if(type.IsDefinedAttribute(typeof(ICustomIcon))) {
+					var att = type.GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
+					result = att.GetIcon() ?? GetDefaultIcon(type);
+				}
+				else {
+					result = GetDefaultIcon(type);
+				}
+			}
 			if(result != null) {
 				Cached.iconMap[type] = result;
 				return result;
 			}
-			if(type.IsDefinedAttribute(typeof(ICustomIcon))) {
-				var att = type.GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
-				result = att.GetIcon();
-			}
-			else if(type == typeof(TypeIcons.FlowIcon)) {
+			if(type == typeof(TypeIcons.FlowIcon)) {
 				result = uNodeEditorUtility.Icons.flowIcon;
 			}
 			else if(type == typeof(TypeIcons.ValueIcon)) {
