@@ -14,12 +14,23 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			if(actualType is INativeMember) {
 				actualType = (actualType as INativeMember).GetNativeMember() as Type ?? config.type;
 			}
-			EnumField field = new EnumField(config.value as Enum ?? ReflectionUtils.CreateInstance(actualType) as Enum);
-			field.RegisterValueChangedCallback((e) => {
-				config.OnValueChanged(e.newValue);
-				MarkDirtyRepaint();
-			});
-			Add(field);
+			if(actualType.IsDefinedAttribute(typeof(FlagsAttribute))) {
+				EnumFlagsField field = new EnumFlagsField(config.value as Enum ?? ReflectionUtils.CreateInstance(actualType) as Enum);
+				field.RegisterValueChangedCallback((e) => {
+					config.OnValueChanged(e.newValue);
+					MarkDirtyRepaint();
+				});
+				Add(field);
+				return;
+			}
+			{
+				EnumField field = new EnumField(config.value as Enum ?? ReflectionUtils.CreateInstance(actualType) as Enum);
+				field.RegisterValueChangedCallback((e) => {
+					config.OnValueChanged(e.newValue);
+					MarkDirtyRepaint();
+				});
+				Add(field);
+			}
 		}
 	}
 }

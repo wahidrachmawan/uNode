@@ -136,6 +136,15 @@ namespace MaxyGames.StateMachines {
 			any.FSM = this;
 			AnyStates.Add(any);
 		}
+
+		private AnyState m_AnyState;
+		public void RegisterUpdate(Action action) {
+			if(m_AnyState == null) {
+				m_AnyState = new AnyState();
+				RegisterAnyState(m_AnyState);
+			}
+			m_AnyState.onUpdate += action;
+		}
 	}
 }
 

@@ -106,7 +106,7 @@ namespace MaxyGames {
 								attribute.Add(TryParseAttributeData(a));
 							}
 						}
-						generatorData.AddVariable(new VData(var.name, var.type) { modifier = var.modifier, attributes = attribute, reference = var, defaultValue = var.defaultValue });
+						generatorData.AddVariable(new VData(var.name, var.type, autoCorrection: true) { modifier = var.modifier, attributes = attribute, reference = var, defaultValue = var.defaultValue });
 					}
 				}
 				if(graph is IGraphWithProperties) {

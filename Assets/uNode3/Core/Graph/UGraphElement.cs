@@ -208,10 +208,20 @@ namespace MaxyGames.UNode {
 		#endregion
 
 		#region Utility
+		/// <summary>
+		/// Gets the child element at the specified index.
+		/// </summary>
+		/// <param name="index">The zero-based index of the child element to retrieve.</param>
+		/// <returns>The child element at the specified index.</returns>
 		public UGraphElement GetChild(int index) {
 			return childs[index];
 		}
 
+		/// <summary>
+		/// Performs the specified action on each child element, optionally including all descendants recursively.
+		/// </summary>
+		/// <param name="action">The action to perform on each child element.</param>
+		/// <param name="recursive">true to apply the action recursively to all descendants; false to apply only to immediate children.</param>
 		public void ForeachInChildrens(Action<UGraphElement> action, bool recursive = false) {
 			if(recursive) {
 				foreach(var child in childs) {
@@ -224,6 +234,11 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		/// <summary>
+		/// Executes the specified action on each parent element in the hierarchy, starting from the immediate parent and
+		/// traversing upwards.
+		/// </summary>
+		/// <param name="action">The action to perform on each parent UGraphElement.</param>
 		public void ForeachInParents(Action<UGraphElement> action) {
 			if(parent != null) {
 				action(parent);
@@ -401,6 +416,27 @@ namespace MaxyGames.UNode {
 			//In case it is linked graph
 			if(graph?.linkedOwner != null) {
 				return graph.linkedOwner.GetObjectInParent<T>();
+			}
+			return default;
+		}
+
+		/// <summary>
+		/// Searches the parent hierarchy for a UGraphElement that satisfies the specified validation function.
+		/// </summary>
+		/// <remarks>If the element is part of a linked graph, the search continues in the linked owner.</remarks>
+		/// <param name="validation">A function that determines whether a UGraphElement meets the required condition.</param>
+		/// <returns>The first UGraphElement in the parent chain that satisfies the validation function; otherwise, null.</returns>
+		public UGraphElement GetObjectInParent(Predicate<UGraphElement> validation) {
+			var parent = this;
+			while(parent != null) {
+				if(validation(parent)) {
+					return parent;
+				}
+				parent = parent.parent;
+			}
+			//In case it is linked graph
+			if(graph?.linkedOwner != null) {
+				return graph.linkedOwner.GetObjectInParent(validation);
 			}
 			return default;
 		}
@@ -673,6 +709,11 @@ namespace MaxyGames.UNode {
 			OnChildrenChanged();
 		}
 
+		/// <summary>
+		/// Gets the zero-based index of the specified child element within its parent's collection of children.
+		/// </summary>
+		/// <param name="child">The child element whose index is to be found.</param>
+		/// <returns>The zero-based index of the child if found; otherwise, -1.</returns>
 		protected int GetSiblingIndex(UGraphElement child) {
 			for(int i = 0; i < parent.childs.Count; i++) {
 				if(parent.childs[i] == child)

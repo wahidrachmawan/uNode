@@ -613,7 +613,9 @@ namespace MaxyGames.UNode {
 			yield return OnExecutedCoroutine(flow);
 		}
 
-		protected abstract void OnExecuted(Flow flow);
+		protected virtual void OnExecuted(Flow flow) {
+			throw new NotImplementedException("The OnExecuted method is not implemented.");
+		}
 
 		protected virtual IEnumerator OnExecutedCoroutine(Flow flow) {
 			OnExecuted(flow);

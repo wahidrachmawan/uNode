@@ -11,7 +11,12 @@ namespace MaxyGames.UNode.Editors.Drawer {
 		public override void Draw(Rect position, DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property, option.type) as Enum;
-			fieldValue = EditorGUI.EnumPopup(position, option.label, fieldValue);
+			if(option.type.IsDefinedAttribute(typeof(FlagsAttribute))) {
+				fieldValue = EditorGUI.EnumFlagsField(position, option.label, fieldValue);
+			}
+			else {
+				fieldValue = EditorGUI.EnumPopup(position, option.label, fieldValue);
+			}
 			if(EditorGUI.EndChangeCheck()) {
 				option.value = fieldValue;
 				GUI.changed = true;

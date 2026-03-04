@@ -346,6 +346,15 @@ namespace MaxyGames.UNode {
 			optionalValue = () => value;
 		}
 
+		/// <summary>
+		/// Mark the port as optional. An optional port is a port that can be left unassigned and it will use the optional value instead.
+		/// </summary>
+		/// <param name="value"></param>
+		public void MarkAsOptional() {
+			if(optionalValue == null)
+				optionalValue = static () => null;
+		}
+
 		public void Restore(ValueInput other) {
 			if(other.id != id)
 				throw new Exception("Cannot restore port because the id is different.");

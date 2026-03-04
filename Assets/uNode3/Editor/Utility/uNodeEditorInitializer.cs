@@ -22,11 +22,17 @@ namespace MaxyGames.UNode.Editors {
 		static HashSet<string> assetGUIDs = new HashSet<string>();
 		static Dictionary<string, Object> markedAssets = new Dictionary<string, UnityEngine.Object>();
 		static Texture uNodeIcon;
-		static Lazy<Texture2D> m_backgroundTexture = new Lazy<Texture2D>(() => {
-			return EditorGUIUtility.isProSkin
-				? uNodeEditorUtility.MakeTexture(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f))   // Dark theme
-				: uNodeEditorUtility.MakeTexture(1, 1, new Color(0.7450981f, 0.7450981f, 0.7450981f, 1f));  // Light theme
-		});
+		static Texture2D m_backgroundTexture;
+		static Texture2D backgroundTexture {
+			get {
+				if(m_backgroundTexture == null) {
+					 m_backgroundTexture = EditorGUIUtility.isProSkin
+						? uNodeEditorUtility.MakeTexture(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f))   // Dark theme
+						: uNodeEditorUtility.MakeTexture(1, 1, new Color(0.7450981f, 0.7450981f, 0.7450981f, 1f));  // Light theme
+				}
+				return m_backgroundTexture;
+			}
+		}
 
 		static uNodeEditorInitializer() {
 			EditorApplication.hierarchyWindowItemOnGUI += HierarchyItem;
@@ -1223,7 +1229,7 @@ namespace MaxyGames.UNode.Editors {
 					rect = new Rect(rect.x + 3, rect.y, rect.width, rect.height);
 			}
 			if(coverBackground) {
-				GUI.DrawTexture(rect, m_backgroundTexture.Value);
+				GUI.DrawTexture(rect, backgroundTexture);
 			}
 			GUI.DrawTexture(rect, texture);
 		}

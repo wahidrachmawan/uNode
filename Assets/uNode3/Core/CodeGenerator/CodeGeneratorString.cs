@@ -547,6 +547,9 @@ namespace MaxyGames {
 		public static string Attribute(Type type, IEnumerable<string> parameters = null, Dictionary<string, string> initializers = null) {
 			return new AData(type, parameters, initializers).GenerateCode();
 		}
+		public static string Attribute(AttributeData attributeData) {
+			return TryParseAttributeData(attributeData).GenerateCode();
+		}
 		#endregion
 
 		#region Value Generic Invoke

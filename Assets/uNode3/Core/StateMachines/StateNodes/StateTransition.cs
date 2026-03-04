@@ -172,6 +172,28 @@ namespace MaxyGames.UNode.Nodes {
 							onUpdate = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onUpdate), this);
 						}
 					}
+					else {
+						if(onEnter != null) {
+							throw new InvalidOperationException();
+						}
+						if(onExit != null) {
+							throw new InvalidOperationException();
+						}
+						if(onUpdate != null) {
+							var fsm = StateNode.TransitionContainer.GetObjectInParent<StateGraphContainer>();
+							if(fsm != null) {
+								state = CG.GetVariableNameByReference(fsm);
+								if(string.IsNullOrEmpty(state) == false) {
+									onUpdate = CG.If(state.CGAccess(nameof(StateMachines.StateMachine.IsActive)), onUpdate);
+									onUpdate = CG.WrapWithInformation(CG.Flow(CG.Comment($"Transition: {GetTitle()}"), onUpdate), this);
+									CG.InsertCodeToFunction("Awake", CG.Flow(
+										CG.FlowInvoke(state, nameof(StateMachines.StateMachine.RegisterUpdate), CG.Lambda(onUpdate))
+									));
+								}
+							}
+						}
+						return;
+					}
 					if(onEnter != null || onExit != null || onUpdate != null) {
 						CG.InsertCodeToFunction("Awake", CG.Flow(
 							onEnter, onExit, onUpdate

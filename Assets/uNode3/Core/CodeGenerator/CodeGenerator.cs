@@ -2653,7 +2653,37 @@ namespace MaxyGames {
 					return "'" + obj.ToString() + "'";
 				}
 				else if(obj is Enum) {
-					return Type(obj.GetType()) + "." + obj.ToString();
+					static string ToCSharpLiteral(Enum value) {
+						Type type = value.GetType();
+						string typeName = Type(type);
+
+						long longValue = System.Convert.ToInt64(value);
+
+						if(longValue == -1)
+							return $"({typeName})(-1)";
+
+						// If exact defined constant exists
+						if(Enum.IsDefined(type, value))
+							return $"{typeName}.{value}";
+
+						// Handle flags properly
+						if(type.IsDefined(typeof(FlagsAttribute), false)) {
+							var values = Enum.GetValues(type)
+											 .Cast<Enum>()
+											 .Where(v => System.Convert.ToInt64(v) != 0 &&
+														 (longValue & System.Convert.ToInt64(v)) == System.Convert.ToInt64(v))
+											 .ToList();
+
+							if(values.Count > 0) {
+								return string.Join(" | ",
+									values.Select(v => $"{typeName}.{v}"));
+							}
+						}
+
+						// Fallback
+						return $"({typeName}){longValue}";
+					}
+					return ToCSharpLiteral(obj as Enum);
 				}
 				else if(obj is Vector2) {
 					var val = (Vector2)obj;
@@ -3099,7 +3129,7 @@ namespace MaxyGames {
 					}
 				}
 			}
-			var data = new VData(name, type, isInstance: false) {
+			var data = new VData(name, type, isInstance: false, autoCorrection: true) {
 				reference = reference,
 				modifier = new FieldModifier() {
 					Public = false,
@@ -3133,7 +3163,7 @@ namespace MaxyGames {
 					}
 				}
 			}
-			var data = new VData(name, type, isInstance: true) {
+			var data = new VData(name, type, isInstance: true, autoCorrection: true) {
 				reference = reference,
 				modifier = new FieldModifier() {
 					Public = false,

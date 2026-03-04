@@ -405,7 +405,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			foreach(var data in valueInputs) {
-				CG.VData variable = new CG.VData(data.name, typeof(ValuePortDefinition));
+				CG.VData variable = new CG.VData(data.name, typeof(ValuePortDefinition), autoCorrection: true);
 				variable.modifier = new FieldModifier() {
 					Public = true,
 					Static = instanceNode == false,
@@ -464,7 +464,7 @@ namespace MaxyGames.UNode.Editors {
 
 			Dictionary<int, string> enumTypeMap = new();
 			foreach(var data in flowOutputs) {
-				CG.VData variable = new CG.VData(data.name, typeof(FlowPortDefinition));
+				CG.VData variable = new CG.VData(data.name, typeof(FlowPortDefinition), autoCorrection: true);
 				variable.modifier = new FieldModifier() {
 					Public = true,
 					Static = instanceNode == false,

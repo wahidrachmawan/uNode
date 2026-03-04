@@ -199,6 +199,24 @@ namespace MaxyGames.UNode.Editors {
 			reorderable.DoLayoutList();
 		}
 
+		public static void DrawCustomList<T>(Rect rect,
+			List<T> values,
+			string headerLabel,
+			Action<Rect, int, T> drawElement,
+			Action<Rect> add,
+			Action<int> remove,
+			ReorderableList.ReorderCallbackDelegateWithDetails reorder = null,
+			ReorderableList.ElementHeightCallbackDelegate elementHeight = null) {
+			if(values == null) {
+				throw new ArgumentNullException(nameof(values));
+			}
+			ReorderableList reorderable;
+			if(!_reorderabeMap.TryGetValue(values, out reorderable)) {
+				reorderable = GetReorderableList(values, headerLabel, drawElement, add, remove, reorder, elementHeight);
+			}
+			reorderable.DoList(rect);
+		}
+
 		public static ReorderableList GetReorderableList(
 			IList values,
 			string headerLabel,
@@ -442,6 +460,112 @@ namespace MaxyGames.UNode.Editors {
 				});
 		}
 
+		public static void DrawAttribute(Rect rect, 
+			List<AttributeData> values,
+			UnityEngine.Object unityObject,
+			Action<List<AttributeData>> action,
+			AttributeTargets attributeTargets = AttributeTargets.All,
+			string header = "Attributes"
+		) {
+			if(values == null) {
+				values = new();
+				if(action != null) {
+					action(values);
+				}
+			}
+			DrawCustomList(rect, values, header,
+				drawElement: (pos, index, value) => {
+					if(pos.Contains(Event.current.mousePosition) && Event.current.button == 0 && Event.current.clickCount == 2) {
+						FieldsEditorWindow.ShowWindow(values[index], unityObject, delegate (object obj) {
+							return values[(int)obj];
+						}, index);
+					}
+					var attName = values[index].attributeType != null ? values[index].attributeType.prettyName : "null";
+					if(attName.EndsWith("Attribute")) {
+						attName = attName.RemoveLast("Attribute".Length);
+					}
+					var ctor = values[index].constructor;
+					if(ctor?.parameters?.Length > 0) {
+						var parameters = ctor.parameters;
+						string pInfo = null;
+						if(parameters != null && parameters.Length > 0) {
+							for(int i = 0; i < parameters.Length; i++) {
+								if(i != 0) {
+									pInfo += ", ";
+								}
+								pInfo += parameters[i] != null ? parameters[i].value : "null";
+							}
+						}
+						attName += $"({pInfo})";
+					}
+					EditorGUI.LabelField(pos, new GUIContent(attName));
+				},
+				add: (pos) => {
+					var selector = ItemSelector.ShowWindow(unityObject, new FilterAttribute(typeof(Attribute)) {
+						DisplayAbstractType = false,
+						DisplayInterfaceType = false,
+						OnlyGetType = true,
+						ArrayManipulator = false,
+						UnityReference = false,
+						attributeTargets = attributeTargets
+					}, m => {
+						var type = m.startType;
+						var att = new AttributeData() { attributeType = type };
+						if(type != null && !(type.IsAbstract || type.IsInterface)) {
+							var ctor = type.GetConstructors().FirstOrDefault();
+							if(ctor != null) {
+								att.constructor = new ConstructorValueData(ctor);
+							}
+							else {
+								att.constructor = null;
+							}
+						}
+						values.Add(att);
+						if(action != null) {
+							action(values);
+						}
+					});
+					Rect r = pos.ToScreenRect();
+					Vector2 position = new Vector2(r.position.x - selector.position.width, r.position.y);
+					r.position = position;
+					selector.ChangePosition(r);
+				},
+				remove: index => {
+					if(unityObject)
+						uNodeEditorUtility.RegisterUndo(unityObject, "Remove Attribute");
+					values.RemoveAt(index);
+					if(action != null) {
+						action(values);
+					}
+				},
+				reorder: (list, oldIndex, newIndex) => {
+					var val = values[newIndex];
+					values.RemoveAt(newIndex);
+					if(oldIndex >= values.Count) {
+						values.Add(val);
+					}
+					else {
+						values.Insert(oldIndex, val);
+					}
+					if(action != null) {
+						action(values);
+					}
+					if(unityObject)
+						uNodeEditorUtility.RegisterUndo(unityObject, "Reorder List");
+					val = values[oldIndex];
+					values.RemoveAt(oldIndex);
+					if(newIndex >= values.Count) {
+						values.Add(val);
+					}
+					else {
+						values.Insert(newIndex, val);
+					}
+					if(action != null) {
+						action(values);
+					}
+				});
+		}
+
 		public static void DrawAttribute(List<AttributeData> values,
 			UnityEngine.Object unityObject,
 			Action<List<AttributeData>> action,
@@ -454,7 +578,7 @@ namespace MaxyGames.UNode.Editors {
 					action(values);
 				}
 			}
-			DrawCustomList<AttributeData>(values, header,
+			DrawCustomList(values, header,
 				drawElement: (pos, index, value) => {
 					if(pos.Contains(Event.current.mousePosition) && Event.current.button == 0 && Event.current.clickCount == 2) {
 						FieldsEditorWindow.ShowWindow(values[index], unityObject, delegate (object obj) {

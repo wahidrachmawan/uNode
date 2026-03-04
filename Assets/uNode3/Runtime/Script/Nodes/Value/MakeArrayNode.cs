@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		public ValueInput length { get; set; }
 
+		[Serializable]
 		public class PortData {
 			public string id = uNodeUtility.GenerateUID();
 			[System.NonSerialized]
