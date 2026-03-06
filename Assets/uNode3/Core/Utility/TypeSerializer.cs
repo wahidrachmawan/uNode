@@ -10,6 +10,15 @@ namespace MaxyGames.UNode {
 		private static Dictionary<string, Type> types;
 		private static object _lockObject = new object();
 
+#if UNITY_EDITOR
+		private static bool hasUpdateDatabase;
+
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+		static void Init() {
+			hasUpdateDatabase = false;
+		}
+#endif
+
 		public static void CleanCache() {
 			lock(_lockObject) {
 				types = new Dictionary<string, Type>();
@@ -21,6 +30,14 @@ namespace MaxyGames.UNode {
 			if(graph is IReflectionType type) {
 				return type.ReflectionType;
 			}
+#if UNITY_EDITOR
+			if(hasUpdateDatabase == false) {
+				hasUpdateDatabase = true;
+				//In case the graph was removed or database is outdated, try to update the graph database.
+				UnityEditor.EditorApplication.ExecuteMenuItem("Tools/uNode/Update Graph Database");
+				return GetRuntimeType(fullGraphName);
+			}
+#endif
 			return null;
 		}
 

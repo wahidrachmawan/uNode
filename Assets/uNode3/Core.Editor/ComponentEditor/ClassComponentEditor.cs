@@ -124,5 +124,13 @@ namespace MaxyGames.UNode.Editors {
 		public override bool RequiresConstantRepaint() {
 			return Application.isPlaying;
 		}
+
+		[MenuItem("CONTEXT/ClassComponent/Edit Graph...")]
+		private static void ContextMenu(MenuCommand command) {
+			ClassComponent asset = (ClassComponent)command.context;
+			if(asset.target != null) {
+				uNodeEditor.Open(asset.target);
+			}
+		}
 	}
 }

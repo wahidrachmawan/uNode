@@ -37,6 +37,9 @@ namespace MaxyGames.StateMachines {
 		void RegisterAnyState(IState state);
 	}
 
+	/// <summary>
+	/// Represents a finite state machine that manages state transitions and execution flow.
+	/// </summary>
 	public class StateMachine : IStateMachine {
 		[NonSerialized]
 		private IState m_activeState;
@@ -89,6 +92,11 @@ namespace MaxyGames.StateMachines {
 		[NonSerialized]
 		bool m_hasInitialize;
 
+		/// <summary>
+		/// Advances the state machine by processing transitions and updating the active state.
+		/// </summary>
+		/// <remarks>Initializes any states if not already done, handles state transitions, and updates the current
+		/// active state.</remarks>
 		public void Tick() {
 			if(m_hasInitialize == false) {
 				m_hasInitialize = true;
@@ -138,6 +146,10 @@ namespace MaxyGames.StateMachines {
 		}
 
 		private AnyState m_AnyState;
+		/// <summary>
+		/// Registers an action to be invoked during the update phase of the AnyState instance.
+		/// </summary>
+		/// <param name="action">The action to execute on update.</param>
 		public void RegisterUpdate(Action action) {
 			if(m_AnyState == null) {
 				m_AnyState = new AnyState();

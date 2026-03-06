@@ -1541,4 +1541,30 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 	}
+
+	class uNodeAssetProcessor : AssetPostprocessor {
+		static void OnPostprocessAllAssets(
+			string[] importedAssets,
+			string[] deletedAssets,
+			string[] movedAssets,
+			string[] movedFromAssetPaths) {
+			foreach(var path in importedAssets) {
+				if(!path.EndsWith(".asset")) return;
+				var type = AssetDatabase.GetMainAssetTypeAtPath(path);
+				if(type.IsCastableTo(typeof(IScriptGraph)) || type.IsCastableTo(typeof(IGraph))) {
+					var obj = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+					if(obj == null) continue;
+
+					string fileName = Path.GetFileNameWithoutExtension(path);
+					string correctName = uNodeUtility.AutoCorrectName(fileName);
+
+					if(fileName != correctName) {
+						EditorApplication.delayCall += () => {
+							AssetDatabase.RenameAsset(path, correctName);
+						};
+					}
+				}
+			}
+		}
+	}
 }
