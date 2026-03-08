@@ -267,7 +267,8 @@ namespace MaxyGames.UNode.Editors {
 						var instanceType = n.instance.type;
 						if(graphType.IsCastableTo(instanceType) == false && NodeEditorUtility.CanAutoConvertType(graphType, instanceType)) {
 							NodeEditorUtility.AddNewNode<MultipurposeNode>(editorData, new Vector2(position.x - 200, position.y), thisNode => {
-								thisNode.target = MemberData.This(editorData.graph);
+								if(NodeEditorUtility.CanReferenceSelf(editorData.graph))
+									thisNode.target = MemberData.This(editorData.graph);
 								thisNode.Register();
 
 								NodeEditorUtility.AutoConvertPort(graphType, instanceType, thisNode.output, n.instance, convertNode => {

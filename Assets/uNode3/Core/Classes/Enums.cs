@@ -112,4 +112,14 @@
 		Vertical,
 		Horizontal,
 	}
+
+	//[System.Flags]
+	//public enum GraphTypeAttribute {
+	//	NonPublic = 0,
+	//	Public = 0 << 1,
+	//	Abstract = 0 << 2,
+	//	Sealed = 0 << 3,
+	//	Class = 0 << 4,
+	//	Interface = 0 << 5,
+	//}
 }

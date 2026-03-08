@@ -156,7 +156,7 @@ namespace MaxyGames.UNode.Editors {
 									if(graph == null && targetObject is UGraphElement graphElement) {
 										graph = graphElement.graphContainer;
 									}
-									if(graph != null) {
+									if(NodeEditorUtility.CanReferenceSelf(graph)) {
 										var graphType = ReflectionUtils.GetRuntimeType(graph);
 										//TODO: implement auto convert for `this`
 										//if(canvasData != null) {

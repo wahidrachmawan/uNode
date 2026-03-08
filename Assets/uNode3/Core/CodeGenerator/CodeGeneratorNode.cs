@@ -74,7 +74,16 @@ namespace MaxyGames {
 									return result;
 								}
 								else {
-									return generator();
+									var oldState = generationState.contextState;
+									//Mark the current context state for set a value
+									generationState.contextState = ContextState.Set;
+
+									var result = generator();
+
+									//Restore the previous context state
+									generationState.contextState = oldState;
+									//Return the result
+									return result;
 								}
 							}
 						}

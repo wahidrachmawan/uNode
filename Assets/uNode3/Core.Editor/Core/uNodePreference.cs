@@ -233,6 +233,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 							"Assembly-CSharp",
 							"Assembly-CSharp-firstpass",
 							"mscorlib",
+							"Unity.Mathematics",
 						};
 					}
 					if(nodeBrowserNamespaces == null) {

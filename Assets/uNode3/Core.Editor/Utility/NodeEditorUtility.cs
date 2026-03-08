@@ -440,7 +440,7 @@ namespace MaxyGames.UNode.Editors {
 				if(connection is ValueConnection valueConnection) {
 					if(uNodePreference.preferenceData.autoCreateReroute && connection.Input.GetNode() is not Nodes.NodeReroute) {
 						if(!connection.isProxy) {
-							if(connection.Output.node.position.xMin > connection.Input.node.position.xMin) {
+							if(connection.Output.node.position.xMax > connection.Input.node.position.xMin) {
 								var inPortPosition = connection.Input.node.position;
 								NodeEditorUtility.AddNewNode(canvas,
 									new Vector2(
@@ -461,7 +461,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					else if(uNodePreference.preferenceData.autoProxyConnection) {
 						if(!connection.isProxy) {
-							if(connection.Output.node.position.xMin > connection.Input.node.position.xMin) {
+							if(connection.Output.node.position.xMax > connection.Input.node.position.xMin) {
 								valueConnection.isProxy = true;
 							}
 						}
@@ -728,6 +728,10 @@ namespace MaxyGames.UNode.Editors {
 			return parent is ISuperNode;
 		}
 
+		public static bool CanReferenceSelf(IGraph graph) {
+			return graph != null && graph is not IPrivateGraph;
+		}
+
 		/// <summary>
 		/// Auto assign input value ports.
 		/// </summary>
@@ -743,10 +747,12 @@ namespace MaxyGames.UNode.Editors {
 					return false;
 				if(filter == null)
 					filter = FilterAttribute.DefaultTypeFilter;
-				if(type != typeof(object) && type.IsPrimitive == false) {
-					if(graphType.IsCastableTo(type)) {
-						port.AssignToDefault(MemberData.This(graph));
-						return true;
+				if(CanReferenceSelf(graph)) {
+					if(type != typeof(object) && type.IsPrimitive == false) {
+						if(graphType.IsCastableTo(type)) {
+							port.AssignToDefault(MemberData.This(graph));
+							return true;
+						}
 					}
 				}
 				if(type.IsSubclassOf(typeof(Delegate))) {
@@ -763,7 +769,7 @@ namespace MaxyGames.UNode.Editors {
 					port.AssignToDefault(MemberData.CreateValueFromType(type));
 					return true;
 				}
-				else if(graphType != null && (graphType == type || type.IsSubclassOf(graphType) && graphType != typeof(ValueType))) {
+				else if(CanReferenceSelf(graph) && graphType != null && (graphType == type || type.IsSubclassOf(graphType) && graphType != typeof(ValueType))) {
 					port.AssignToDefault(MemberData.This(graph));
 					return true;
 				}

@@ -92,6 +92,13 @@ namespace MaxyGames.UNode {
 		Type InheritType { get; }
 	}
 
+	/// <summary>
+	/// Private graph cannot be reference from other graphs, it also cannot reference itself.
+	/// </summary>
+	public interface IPrivateGraph {
+
+	}
+
 	public interface IReference {
 		object ReferenceValue { get; }
 	}
