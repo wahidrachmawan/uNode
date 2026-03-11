@@ -2465,14 +2465,14 @@ namespace MaxyGames.UNode {
 			Type nonNullableType = leftType.GetNonNullableType();
 			Type nonNullableType2 = rightType.GetNonNullableType();
 			BindingFlags bindingAttr = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-			MethodInfo methodInfo = nonNullableType.GetMethodValidated(name, bindingAttr, null, types, null);
+			MethodInfo methodInfo = GetMethodValidated(nonNullableType, name, bindingAttr, null, types, null);
 			if(methodInfo == null && !AreEquivalent(leftType, rightType)) {
-				methodInfo = nonNullableType2.GetMethodValidated(name, bindingAttr, null, types, null);
+				methodInfo = GetMethodValidated(nonNullableType2, name, bindingAttr, null, types, null);
 			}
 			return methodInfo;
 		}
 
-		private static MethodInfo GetMethodValidated(this Type type, string name, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers) {
+		public static MethodInfo GetMethodValidated(Type type, string name, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers) {
 			MethodInfo method = type.GetMethod(name, bindingAttr, binder, types, modifiers);
 			if(!method.MatchesArgumentTypes(types)) {
 				return null;

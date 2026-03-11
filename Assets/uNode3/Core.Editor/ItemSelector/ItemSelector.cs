@@ -576,7 +576,7 @@ namespace MaxyGames.UNode.Editors {
 						continue;
 					command.graph = graphEditor;
 					command.mousePositionOnCanvas = position;
-					command.filter = data.filter;
+					command.filter = data.filter ?? FilterAttribute.Default;
 					if(command.IsValidPort(node, data)) {
 						yield return ItemSelector.CustomItem.Create(command.name, () => {
 							uNodeEditorUtility.RegisterUndo(graphEditor.graphData.owner, "Connect port");

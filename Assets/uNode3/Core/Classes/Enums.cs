@@ -65,6 +65,89 @@
 		ExclusiveOr,
 	}
 
+	public enum OperatorKind {
+		/// <summary>
+		/// The == operator.
+		/// </summary>
+		Equality,
+		/// <summary>
+		/// The != operator.
+		/// </summary>
+		Inequality,
+		/// <summary>
+		/// The + operator.
+		/// </summary>
+		Addition,
+		/// <summary>
+		/// The - operator.
+		/// </summary>
+		Subtraction,
+		/// <summary>
+		/// The * operator.
+		/// </summary>
+		Multiply,
+		/// <summary>
+		/// The / operator.
+		/// </summary>
+		Division,
+		/// <summary>
+		/// The < operator.
+		/// </summary>
+		LessThan,
+		/// <summary>
+		/// The > operator.
+		/// </summary>
+		GreaterThan,
+		/// <summary>
+		/// The <= operator.
+		/// </summary>
+		LessThanOrEqual,
+		/// <summary>
+		/// The >= operator.
+		/// </summary>
+		GreaterThanOrEqual,
+		/// <summary>
+		/// The % operator.
+		/// </summary>
+		Modulus,
+		/// <summary>
+		/// The >> operator.
+		/// </summary>
+		RightShift,
+		/// <summary>
+		/// The << operator.
+		/// </summary>
+		LeftShift,
+		/// <summary>
+		/// The & operator.
+		/// </summary>
+		BitwiseAnd,
+		/// <summary>
+		/// The | operator.
+		/// </summary>
+		BitwiseOr,
+		/// <summary>
+		/// The ^ operator.
+		/// </summary>
+		ExclusiveOr,
+		/// <summary>
+		/// The ~ operator.
+		/// </summary>
+		BitwiseComplement,
+		/// <summary>
+		/// The && operator.
+		/// </summary>
+		LogicalAnd,
+		/// <summary>
+		/// The || operator.
+		/// </summary>
+		LogicalOr,
+		/// <summary>
+		/// The ! operator.
+		/// </summary>
+		LogicalNot
+	}
+
 	public enum SetType : byte { Change, Add, Subtract, Divide, Multiply, Modulo }
 
 	public enum PortAccessibility : byte { ReadWrite, ReadOnly, WriteOnly }

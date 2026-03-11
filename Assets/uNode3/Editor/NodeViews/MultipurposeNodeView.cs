@@ -44,6 +44,16 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		protected override string NodeTitle {
+			get {
+				MultipurposeNode node = nodeObject.node as MultipurposeNode;
+				if(uNodeUtility.preferredDisplay == DisplayKind.Normal && !node.target.isStatic) {
+					return uNodeUtility.GetNicelyDisplayName(node.target, DisplayKind.Partial);
+				}
+				return base.NodeTitle;
+			}
+		}
+
 		void GoToDefinition() {
 			var node = targetNode as MultipurposeNode;
 			if(node.target.targetType == MemberData.TargetType.uNodeFunction) {
@@ -132,7 +142,7 @@ namespace MaxyGames.UNode.Editors {
 			EnableInClassList(ussClassCompactValue, false);
 			EnableInClassList(ussClassCompactValueMinimalize, false);
 			if(primaryOutputFlow != null || outputControls.Count != 0) {
-				if(uNodeUtility.preferredDisplay == DisplayKind.Partial) {
+				if(uNodeUtility.preferredDisplay == DisplayKind.Partial || uNodeUtility.preferredDisplay == DisplayKind.Normal && !node.target.isStatic) {
 					ConstructCompactTitle(node.instance);
 				}
 				return;
@@ -188,7 +198,7 @@ namespace MaxyGames.UNode.Editors {
 					border.style.SetBorderColor(c);
 				}
 			}
-			else if(uNodeUtility.preferredDisplay == DisplayKind.Partial) {
+			else if(uNodeUtility.preferredDisplay == DisplayKind.Partial || uNodeUtility.preferredDisplay == DisplayKind.Normal && !node.target.isStatic) {
 				ConstructCompactTitle(node.instance);
 				if(primaryOutputValue != null) {
 					EnableInClassList(ussClassCompactTitle, true);

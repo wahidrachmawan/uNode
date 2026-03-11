@@ -20,10 +20,17 @@ namespace MaxyGames.UNode {
 		/// Will auto set the target object to default value when hide.
 		/// </summary>
 		public bool defaultOnHide;
+		private object m_defaultValue;
 		/// <summary>
 		/// The default value to set when hide
 		/// </summary>
-		public object defaultValue;
+		public object defaultValue {
+			get => m_defaultValue;
+			set {
+				m_defaultValue = value;
+				defaultOnHide = true;
+			}
+		}
 		/// <summary>
 		/// Are hide for element type
 		/// </summary>
@@ -37,14 +44,14 @@ namespace MaxyGames.UNode {
 			this.targetField = targetField;
 			this.hideValue = hideValue;
 			this.hideOnSame = hideOnSame;
-			this.defaultOnHide = true;
+			//this.defaultOnHide = true;
 			this.elementType = false;
 		}
 
 		public HideAttribute(string targetField) {
 			this.hideOnSame = true;
 			this.targetField = targetField;
-			this.defaultOnHide = true;
+			//this.defaultOnHide = true;
 			this.elementType = false;
 		}
 	}

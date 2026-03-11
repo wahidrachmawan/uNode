@@ -368,20 +368,16 @@ namespace MaxyGames.UNode.Editors {
 				var outPort = e.output as PortView;
 				if(inPort.isValue) {
 					inPort.ResetPortValue();
-				} else if(outPort.isValue) {
+				} else if(outPort.isFlow) {
 					outPort.ResetPortValue();
 				}
 				//Code below will ensure that the port are up to date
 				MarkRepaint(inPort.GetEdgeOwners());
 				MarkRepaint(outPort.GetEdgeOwners());
-				// if(inPort.owner != null) {
-				// 	inPort.owner.MarkRepaint();
-				// }
-				// if(outPort.owner != null) {
-				// 	outPort.owner.MarkRepaint();
-				// }
 				inPort.owner?.OnPortDisconnected(inPort);
 				outPort.owner?.OnPortDisconnected(outPort);
+				inPort.owner?.MarkRepaint();
+				outPort.owner?.MarkRepaint();
 			}
 
 			if(e?.input?.node != null) {

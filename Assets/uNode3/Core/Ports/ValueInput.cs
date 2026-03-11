@@ -58,6 +58,20 @@ namespace MaxyGames.UNode {
 		/// Get the optional port value
 		/// </summary>
 		public object OptionalValue => optionalValue?.Invoke();
+		/// <summary>
+		/// Indicates whether the value is targeting a variable.
+		/// </summary>
+		public bool IsVariable {
+			get {
+				if(UseDefaultValue) {
+					return defaultValue?.IsTargetingVariable == true;
+				}
+				else {
+					var tPort = GetTargetPort();
+					return tPort?.isVariable == true;
+				}
+			}
+		}
 
 		/// <summary>
 		/// Get target type of the port

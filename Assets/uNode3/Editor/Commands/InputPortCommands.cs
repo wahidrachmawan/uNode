@@ -80,9 +80,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 					continue;
 				}
 				var operators = EditorReflectionUtility.GetOperators(assembly, (op) => {
-					return ns.Contains(op.DeclaringType.Namespace);
+					return ns.Contains(op.DeclaringType.Namespace) || op.DeclaringType == type;
 				});
-				if(operators.Count > 0) {
+				if(operators != null) {
 					foreach(var op in operators) {
 						switch(op.Name) {
 							case "op_Addition": {
@@ -173,7 +173,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override IList<ItemSelector.CustomItem> GetItems(ValueOutput source) {
 			var type = source.type;
 			var items = new List<ItemSelector.CustomItem>();
-			if(type.IsPrimitive && type != typeof(bool) && type != typeof(char)) {//Primitives
+			if(type.IsPrimitive && type != typeof(bool) && type != typeof(char) && type != typeof(float)) {//Primitives
 				items.AddRange(GetCustomItemForPrimitives(type, source));
 			} else {
 				items.Add(GetItem(type, type, type, typeof(bool), source, ComparisonType.Equal));
@@ -188,9 +188,9 @@ namespace MaxyGames.UNode.Editors.Commands {
 					continue;
 				}
 				var operators = EditorReflectionUtility.GetOperators(assembly, (op) => {
-					return ns.Contains(op.DeclaringType.Namespace);
+					return ns.Contains(op.DeclaringType.Namespace) || op.DeclaringType == type;
 				});
-				if(operators.Count > 0) {
+				if(operators != null) {
 					foreach(var op in operators) {
 						switch(op.Name) {
 							//case "op_Equality": {

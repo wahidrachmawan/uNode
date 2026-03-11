@@ -15,6 +15,17 @@ namespace MaxyGames.UNode.Editors {
 
 		private Image compactIcon = null;
 
+		protected virtual string NodeTitle {
+			get {
+				if(UIElementGraph.richText) {
+					return nodeObject.GetRichTitle();
+				}
+				else {
+					return nodeObject.GetTitle();
+				}
+			}
+		}
+
 		#region  Initialization
 		/// <summary>
 		/// Initialize once on created.
@@ -121,12 +132,7 @@ namespace MaxyGames.UNode.Editors {
 		public override void ReloadView() {
 			try {
 				base.ReloadView();
-				if(UIElementGraph.richText) {
-					title = nodeObject.GetRichTitle();
-				}
-				else {
-					title = nodeObject.GetTitle();
-				}
+				title = NodeTitle;
 				if(titleIcon != null)
 					titleIcon.image = uNodeEditorUtility.GetTypeIcon(nodeObject.GetNodeIcon());
 				OnReloadView();

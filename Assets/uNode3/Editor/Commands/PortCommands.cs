@@ -339,7 +339,8 @@ namespace MaxyGames.UNode.Editors.Commands {
 				Undo.RegisterFullObjectHierarchyUndo(unityObject, "To value node");
 			}
 			NodeEditorUtility.AddNewNode<MultipurposeNode>(graph.graphData, null, null, new Vector2(source.position.x - 100, source.position.y), (node) => {
-				node.target = MemberData.CreateFromValue(ReflectionUtils.CreateInstance(filter.Types[0]), filter.Types[0]);
+				var type = data.GetActualPortType();
+				node.target = MemberData.CreateFromValue(ReflectionUtils.CreateInstance(type), type);
 				node.Register();
 				node.output.ConnectTo(data.port);
 			});
@@ -370,7 +371,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				Undo.RegisterFullObjectHierarchyUndo(unityObject, "Assign to contructor node");
 			}
 			var position = new Vector2(source.position.x - 100, source.position.y);
-			var type = filter.GetActualType(data.portType);
+			var type = data.GetActualPortType();
 			if(type.IsByRef) {
 				type = type.GetElementType();
 			}
@@ -413,8 +414,8 @@ namespace MaxyGames.UNode.Editors.Commands {
 			//if(port.isAssigned) {
 			//	return false;
 			//} else 
-			if(filter != null && filter.Types != null && filter.Types.Count > 0) {
-				Type t = filter.GetActualType();
+			if(filter != null) {
+				Type t = data.GetActualPortType();
 				if(ReflectionUtils.CanCreateInstance(t) && !t.IsPrimitive && t != typeof(string)) {
 					return true;
 				}
@@ -457,7 +458,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueOutput)
 				return false;
 			var port = data.port as ValueOutput;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(type != null) {
 				if(type.IsByRef) {
 					type = type.GetElementType();
@@ -502,7 +503,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueOutput)
 				return false;
 			var port = data.port as ValueOutput;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(type != null) {
 				if(type.IsByRef) {
 					type = type.GetElementType();
@@ -548,7 +549,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueOutput)
 				return false;
 			var port = data.port as ValueOutput;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(type != null) {
 				if(type.IsByRef) {
 					type = type.GetElementType();
@@ -593,7 +594,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
 			var port = data.port as ValueInput;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(port.UseDefaultValue && type != null) {
 				if(type.IsByRef) {
 					type = type.GetElementType();
@@ -643,7 +644,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
 			var port = data.port as ValueInput;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(port.UseDefaultValue && type != null) {
 				if(type.IsByRef) {
 					type = type.GetElementType();
@@ -692,7 +693,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
 				if(filter != null && filter.SetMember) {
 					return false;
@@ -732,7 +733,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
 				if(filter != null && filter.SetMember) {
 					return false;
@@ -781,7 +782,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		public override bool IsValidPort(Node source, PortCommandData data) {
 			if(data.portKind != PortKind.ValueInput)
 				return false;
-			type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+			type = data.GetActualPortType();
 			if(/*!data.port.isConnected && */type != null && type.IsCastableTo(typeof(Delegate))) {
 				if(filter != null && filter.SetMember) {
 					return false;
@@ -828,7 +829,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				return false;
 			if(graph.graphData.selectedRoot is ILocalVariableSystem) {
 				var port = data.port as ValueInput;
-				type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+				type = data.GetActualPortType();
 				if(port.UseDefaultValue && type != null) {
 					if(type.IsByRef) {
 						type = type.GetElementType();
@@ -872,7 +873,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				return false;
 			if(graph.graphData.selectedRoot is IParameterSystem) {
 				var port = data.port as ValueInput;
-				type = filter != null ? filter.GetActualType() : data.portType ?? typeof(object);
+				type = data.GetActualPortType();
 				if(port.UseDefaultValue && type != null) {
 					if(type.IsByRef) {
 						type = type.GetElementType();

@@ -258,7 +258,6 @@ namespace MaxyGames.UNode.Editors {
 			return map;
 		}
 
-
 		public static List<MethodInfo> GetExtensionMethods(Assembly assembly, Type extendedType = null, Func<MemberInfo, bool> validation = null) {
 			List<MethodInfo> methods;
 			if(!extensionsMap.TryGetValue(assembly, out methods)) {
@@ -385,7 +384,53 @@ namespace MaxyGames.UNode.Editors {
 			return methods;
 		}
 
-		public static List<MethodInfo> GetOperators(Assembly assembly, Func<MemberInfo, bool> validation = null) {
+		public static IEnumerable<MethodInfo> GetOperators(Type type, OperatorKind kind) {
+			const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+			switch(kind) {
+				case OperatorKind.Addition: {
+					foreach(MethodInfo mi in type.GetMethods(flags)) {
+						if(mi.Name == "op_Addition") {
+							yield return mi;
+						}
+					}
+					yield break;
+				}
+				case OperatorKind.Subtraction: {
+					foreach(MethodInfo mi in type.GetMethods(flags)) {
+						if(mi.Name == "op_Subtraction") {
+							yield return mi;
+						}
+					}
+					yield break;
+				}
+				case OperatorKind.Division: {
+					foreach(MethodInfo mi in type.GetMethods(flags)) {
+						if(mi.Name == "op_Division") {
+							yield return mi;
+						}
+					}
+					yield break;
+				}
+				case OperatorKind.Multiply: {
+					foreach(MethodInfo mi in type.GetMethods(flags)) {
+						if(mi.Name == "op_Multiply") {
+							yield return mi;
+						}
+					}
+					yield break;
+				}
+				case OperatorKind.Modulus: {
+					foreach(MethodInfo mi in type.GetMethods(flags)) {
+						if(mi.Name == "op_Modulus") {
+							yield return mi;
+						}
+					}
+					yield break;
+				}
+			}
+		}
+
+		public static IEnumerable<MethodInfo> GetOperators(Assembly assembly, Func<MemberInfo, bool> validation = null) {
 			List<MethodInfo> methods;
 			if(!operatorsMap.TryGetValue(assembly, out methods)) {
 				methods = new List<MethodInfo>();
@@ -401,19 +446,17 @@ namespace MaxyGames.UNode.Editors {
 				operatorsMap[assembly] = methods;
 			}
 			if(validation == null) {
-				return new List<MethodInfo>(methods);
+				return methods;
 			}
-			List<MethodInfo> infos = new List<MethodInfo>(methods.Count);
-			foreach(MethodInfo mi in methods) {
-				try {
+			IEnumerable<MethodInfo> Validate() {
+				foreach(MethodInfo mi in methods) {
 					MethodInfo method = mi;
 					if(validation(method)) {
-						infos.Add(method);
+						yield return method;
 					}
 				}
-				catch { };
 			}
-			return infos;
+			return Validate();
 		}
 
 		//public static Type[] GetAssemblyTypes(Assembly assembly, string ns) {

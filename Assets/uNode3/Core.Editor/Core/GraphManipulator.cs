@@ -196,6 +196,8 @@ namespace MaxyGames.UNode.Editors {
 		public virtual IEnumerable<ContextMenuItem> ContextMenuForEventGraph(Vector2 mousePosition, NodeContainer value) => null;
 		public virtual IEnumerable<ContextMenuItem> ContextMenuForFunction(Vector2 mousePosition, Function value) => null;
 		public virtual IEnumerable<ContextMenuItem> ContextMenuForNode(Vector2 mousePosition, Node value) => null;
+		public virtual bool ProcessPortConnection(ConnectionContext context) => false;
+		public virtual bool? CanMakeConnection(ConnectionContext context) => null;
 
 		#region Static
 		public static ContextMenuItem[] GetAllMenuForGraph(GraphEditor graphEditor, Vector2 mousePosition) {
@@ -511,6 +513,29 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
+	public readonly struct ConnectionContext {
+		public readonly UPort input;
+		public readonly UPort output;
+
+		public ConnectionContext(UPort input, UPort output) {
+			this.input = input;
+			this.output = output;
+		}
+
+		public void ApplyConnection() {
+			input.ConnectTo(output);
+		}
+
+		public ValueInput ValueInput => input as ValueInput;
+		public ValueOutput ValueOutput => output as ValueOutput;
+		public FlowInput FlowInput => input as FlowInput;
+		public FlowOutput FlowOutput => output as FlowOutput;
+		public bool IsValue => input is ValuePort;
+		public Node InputNode => input.GetNode();
+		public Node OutputNode => output.GetNode();
+		public IGraph Graph => InputNode.nodeObject.graphContainer ?? OutputNode.nodeObject.graphContainer;
+	}
+
 	/// <summary>
 	/// Provides utility methods for handling commands within a graph editor environment.
 	/// </summary>
@@ -538,6 +563,31 @@ namespace MaxyGames.UNode.Editors {
 					if(manipulator.HandleCommand(command)) {
 						return true;
 					}
+				}
+			}
+			return false;
+		}
+
+		public static bool? CanMakeConnection(GraphEditor graphEditor, UPort input, UPort output) {
+			var ctx = new ConnectionContext(input, output);
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				var flag = manipulator.CanMakeConnection(ctx);
+				if(flag != null) {
+					return flag;
+				}
+			}
+			return null;
+		}
+
+		public static bool ProcessPortConnection(GraphEditor graphEditor, UPort input, UPort output) {
+			var ctx = new ConnectionContext(input, output);
+			var manipulators = NodeEditorUtility.FindGraphManipulators();
+			foreach(var manipulator in manipulators) {
+				manipulator.graphEditor = graphEditor;
+				if(manipulator.ProcessPortConnection(ctx)) {
+					return true;
 				}
 			}
 			return false;
@@ -2323,6 +2373,236 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				uNodeEditorUtility.DisplayErrorMessage("The current edited graph doesn't support for compile to c# scripts.");
 			}
+		}
+
+		static bool IsPrimitiveNumber(Type type) {
+			return type == typeof(byte) ||
+				type == typeof(sbyte) ||
+				type == typeof(short) ||
+				type == typeof(ushort) ||
+				type == typeof(int) ||
+				type == typeof(uint) ||
+				type == typeof(long) ||
+				type == typeof(ulong) ||
+				type == typeof(float) ||
+				type == typeof(double) ||
+				type == typeof(decimal);
+		}
+
+		public override bool? CanMakeConnection(ConnectionContext context) {
+			if(context.InputNode is Nodes.MultiArithmeticNode node) {
+				var output = context.ValueOutput;
+				var outputType = output.type;
+				if(outputType.IsPrimitive) {
+					if(IsPrimitiveNumber(outputType)) {
+						return true;
+					}
+					return outputType.IsCastableTo(context.ValueInput.type, true);
+				}
+				//var input = context.ValueInput;
+				var kind = node.operatorKind;
+				switch(kind) {
+					case ArithmeticType.Add: {
+						if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Addition).Any()) {
+							return true;
+						}
+						break;
+					}
+					case ArithmeticType.Divide: {
+						if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Division).Any()) {
+							return true;
+						}
+						break;
+					}
+					case ArithmeticType.Modulo: {
+						if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Modulus).Any()) {
+							return true;
+						}
+						break;
+					}
+					case ArithmeticType.Multiply: {
+						if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Multiply).Any()) {
+							return true;
+						}
+						break;
+					}
+					case ArithmeticType.Subtract: {
+						if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Subtraction).Any()) {
+							return true;
+						}
+						break;
+					}
+				}
+				return outputType.IsCastableTo(context.ValueInput.type, true);
+			}
+			return null;
+		}
+
+		public override bool ProcessPortConnection(ConnectionContext context) {
+			if(context.InputNode is Nodes.MultiArithmeticNode node) {
+				var output = context.ValueOutput;
+				var outputType = output.type;
+				var input = context.ValueInput;
+				var inputType = input.type;
+				if(outputType.IsCastableTo(inputType, true) == false) {
+					for(int i = 0; i < node.inputs.Count; i++) {
+						if(node.inputs[i].port == input) {
+							bool valid = true;
+
+							void Validate(Nodes.MultiArithmeticNode.PortData a, Type typeA, Nodes.MultiArithmeticNode.PortData b, Type typeB, OperatorKind kind) {
+								//var method = ReflectionUtils.GetUserDefinedOperator(typeA, typeB, "op_" + kind.ToString());
+								var method = ReflectionUtils.GetMethodValidated(typeA, "op_" + kind.ToString(), BindingFlags.Public | BindingFlags.Static, null, new[] { typeA, typeB }, null);
+								if(method != null) {
+									var param = method.GetParameters();
+									var p1 = param[0].ParameterType;
+									var p2 = param[1].ParameterType;
+									if(p1 == typeA) {
+										a.type = p1;
+										b.type = p2;
+									}
+									else if(p1 == typeB) {
+										a.type = p2;
+										b.type = p1;
+									}
+									else if(p2 == typeA) {
+										a.type = p1;
+										b.type = p2;
+									}
+									else {
+										a.type = p1;
+										b.type = p2;
+									}
+								}
+								else {
+									valid = false;
+									var operatorsA = EditorReflectionUtility.GetOperators(typeA, kind);
+									var operatorsB = EditorReflectionUtility.GetOperators(typeB, kind);
+									GenericMenu menu = new GenericMenu();
+
+									void AddItem(Type p1, Type p2, bool primitive = false) {
+										if(outputType.IsCastableTo(p1, true) || outputType.IsCastableTo(p2, true)) {
+											if(primitive == false) {
+												if(typeA == p1) {
+													if(typeB.IsCastableTo(p2)) {
+														a.type = p1;
+														b.type = p2;
+														//The operator is valid so leave it as is.
+														context.ApplyConnection();
+														return;
+													}
+												}
+												else if(typeB == p2) {
+													if(typeA.IsCastableTo(p1)) {
+														a.type = p1;
+														b.type = p2;
+														//The operator is valid so leave it as is.
+														context.ApplyConnection();
+														return;
+													}
+												}
+											}
+											menu.AddItem(new GUIContent($"Change operator: {p1.PrettyName()} - {p2.PrettyName()}"), false, () => {
+												if(p1 == typeA) {
+													a.type = p1;
+													b.type = p2;
+												}
+												else if(p1 == typeB) {
+													a.type = p2;
+													b.type = p1;
+												}
+												else if(p2 == typeA) {
+													a.type = p1;
+													b.type = p2;
+												}
+												else {
+													a.type = p1;
+													b.type = p2;
+												}
+												context.ApplyConnection();
+												graphEditor.MarkRepaint(new NodeObject[] { context.InputNode, context.OutputNode });
+											});
+										}
+									}
+
+									if(IsPrimitiveNumber(outputType)) {
+										AddItem(outputType, outputType, true);
+									}
+
+									foreach(var data in operatorsA.Concat(operatorsB).Distinct()) {
+										var op = data;
+										var param = op.GetParameters();
+										var p1 = param[0].ParameterType;
+										var p2 = param[1].ParameterType;
+										AddItem(p1, p2);
+									}
+									if(menu.GetItemCount() > 0) {
+										menu.ShowAsContext();
+									}
+									else {
+										if(EditorUtility.DisplayDialog("", "No compatible operators found.", "Continue", "Cancel")) {
+											valid = true;
+											node.inputs[i].type = outputType;
+										}
+									}
+								}
+							}
+
+							var kind = node.operatorKind;
+							switch(kind) {
+								case ArithmeticType.Add: {
+									if(i == 0) {
+										Validate(node.inputs[0], outputType, node.inputs[1], node.inputs[1].type, OperatorKind.Addition);
+									}
+									else {
+										Validate(node.inputs[i - 1], node.inputs[i - 1].type, node.inputs[i], outputType, OperatorKind.Addition);
+									}
+									break;
+								}
+								case ArithmeticType.Divide: {
+									if(i == 0) {
+										Validate(node.inputs[0], outputType, node.inputs[1], node.inputs[1].type, OperatorKind.Division);
+									}
+									else {
+										Validate(node.inputs[i - 1], node.inputs[i - 1].type, node.inputs[i], outputType, OperatorKind.Division);
+									}
+									break;
+								}
+								case ArithmeticType.Modulo: {
+									if(i == 0) {
+										Validate(node.inputs[0], outputType, node.inputs[1], node.inputs[1].type, OperatorKind.Modulus);
+									}
+									else {
+										Validate(node.inputs[i - 1], node.inputs[i - 1].type, node.inputs[i], outputType, OperatorKind.Modulus);
+									}
+									break;
+								}
+								case ArithmeticType.Multiply: {
+									if(i == 0) {
+										Validate(node.inputs[0], outputType, node.inputs[1], node.inputs[1].type, OperatorKind.Multiply);
+									}
+									else {
+										Validate(node.inputs[i - 1], node.inputs[i - 1].type, node.inputs[i], outputType, OperatorKind.Multiply);
+									}
+									break;
+								}
+								case ArithmeticType.Subtract: {
+									if(i == 0) {
+										Validate(node.inputs[0], outputType, node.inputs[1], node.inputs[1].type, OperatorKind.Subtraction);
+									}
+									else {
+										Validate(node.inputs[i - 1], node.inputs[i - 1].type, node.inputs[i], outputType, OperatorKind.Subtraction);
+									}
+									break;
+								}
+							}
+							if(valid)
+								context.ApplyConnection();
+							return true;
+						}
+					}
+				}
+			}
+			return false;
 		}
 	}
 

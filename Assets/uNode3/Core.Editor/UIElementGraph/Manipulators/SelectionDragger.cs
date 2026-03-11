@@ -14,14 +14,14 @@ namespace MaxyGames.UNode.Editors {
 
 		// selectedElement is used to store a unique selection candidate for cases where user clicks on an item not to
 		// drag it but just to reset the selection -- we only know this after the manipulation has ended
-		UnityEditor.Experimental.GraphView.GraphElement selectedElement { get; set; }
-		UnityEditor.Experimental.GraphView.GraphElement clickedElement { get; set; }
+		GraphElement selectedElement { get; set; }
+		GraphElement clickedElement { get; set; }
 
 		private IMGUIContainer uiContainer;
 
 		private UGraphView m_GraphView;
 		private GraphViewChange m_GraphViewChange;
-		private List<UnityEditor.Experimental.GraphView.GraphElement> m_MovedElements;
+		private List<GraphElement> m_MovedElements;
 
 		public SelectionDragger() {
 			activators.Add(new ManipulatorActivationFilter { button = MouseButton.LeftMouse });
@@ -34,7 +34,7 @@ namespace MaxyGames.UNode.Editors {
 			panSpeed = new Vector2(1, 1);
 			clampToParentEdges = false;
 
-			m_MovedElements = new List<UnityEditor.Experimental.GraphView.GraphElement>();
+			m_MovedElements = new List<GraphElement>();
 			m_GraphViewChange.movedElements = m_MovedElements;
 		}
 
@@ -64,15 +64,22 @@ namespace MaxyGames.UNode.Editors {
 			target.UnregisterCallback<MouseCaptureOutEvent>(OnMouseCaptureOutEvent);
 		}
 
-		class OriginalPos {
-			public Rect pos;
-			public Scope scope;
-			public StackNode stack;
-			public int stackIndex;
-			public bool dragStarted;
+		enum OriginalPosKind {
+			Stack,
+			Regular
 		}
 
-		private Dictionary<UnityEditor.Experimental.GraphView.GraphElement, OriginalPos> m_OriginalPos;
+		class OriginalPos {
+			public Rect pos;
+			public OriginalPosKind kind;
+			public Scope scope;
+			public StackNode stack;
+			public int stackIndex = -1;
+			public bool dragStarted;
+			public (GraphElement element, Rect position)[] elements;
+		}
+
+		private Dictionary<GraphElement, OriginalPos> m_OriginalPos;
 		private Vector2 m_originalMouse;
 
 		#region Drag & Drop
@@ -164,10 +171,10 @@ namespace MaxyGames.UNode.Editors {
 				selectedElement = null;
 
 				// avoid starting a manipulation on a non movable object
-				clickedElement = e.target as UnityEditor.Experimental.GraphView.GraphElement;
+				clickedElement = e.target as GraphElement;
 				if (clickedElement == null) {
 					var ve = e.target as VisualElement;
-					clickedElement = ve.GetFirstAncestorOfType<UnityEditor.Experimental.GraphView.GraphElement>();
+					clickedElement = ve.GetFirstAncestorOfType<GraphElement>();
 					if (clickedElement == null)
 						return;
 				}
@@ -186,9 +193,9 @@ namespace MaxyGames.UNode.Editors {
 
 				selectedElement = clickedElement;
 
-				m_OriginalPos = new Dictionary<UnityEditor.Experimental.GraphView.GraphElement, OriginalPos>();
+				m_OriginalPos = new Dictionary<GraphElement, OriginalPos>();
 
-				var elementsToMove = new HashSet<UnityEditor.Experimental.GraphView.GraphElement>(m_GraphView.selection.OfType<UnityEditor.Experimental.GraphView.GraphElement>());
+				var elementsToMove = new HashSet<GraphElement>(m_GraphView.selection.OfType<GraphElement>());
 
 				// var selectedPlacemats = new HashSet<Placemat>(elementsToMove.OfType<Placemat>());
 				// foreach (var placemat in selectedPlacemats)
@@ -205,16 +212,72 @@ namespace MaxyGames.UNode.Editors {
 						if (stackNode.IsSelected(m_GraphView))
 							continue;
 					}
-
-					Rect geometry = ce.GetPosition();
-					//geometry.width = 0;//For the right node aligment
-					Rect geometryInContentViewSpace = ce.hierarchy.parent.ChangeCoordinatesTo(m_GraphView.contentViewContainer, geometry);
-					m_OriginalPos[ce] = new OriginalPos {
-						pos = geometryInContentViewSpace,
-						scope = ce.GetContainingScope(),
-						stack = stackNode,
-						stackIndex = stackNode != null ? stackNode.IndexOf(ce) : -1
-					};
+					if(stackNode != null) {
+						Rect geometry = ce.GetPosition();
+						//geometry.width = 0;//For the right node aligment
+						Rect geometryInContentViewSpace = ce.hierarchy.parent.ChangeCoordinatesTo(m_GraphView.contentViewContainer, geometry);
+						m_OriginalPos[ce] = new OriginalPos {
+							pos = geometryInContentViewSpace,
+							scope = ce.GetContainingScope(),
+							stack = stackNode,
+							stackIndex = stackNode != null ? stackNode.IndexOf(ce) : -1,
+							kind = OriginalPosKind.Stack,
+						};
+					}
+					else {
+						if(ce is RegionNodeView) {
+							var region = ce as RegionNodeView;
+							var nodes = new List<UNodeView>();
+							foreach(var n in region.owner.graphEditor.nodes) {
+								if(n == null) continue;
+								if(region.owner.nodeViewsPerNode.TryGetValue(n, out var view)) {
+									nodes.Add(view);
+								}
+								if(n.node is Nodes.StateNode state) {
+									foreach(var tr in state.GetTransitions()) {
+										if(tr == null) continue;
+										if(region.owner.nodeViewsPerNode.TryGetValue(n, out var view1)) {
+											nodes.Add(view1);
+										}
+									}
+								}
+							}
+							nodes.RemoveAll((n) => {
+								if(n == null || n == region)
+									return false;
+								Rect targetRect = n.GetPosition();
+								var regionRect = region.GetPosition();
+								if(regionRect.Overlaps(targetRect)) {
+									if(targetRect.x < regionRect.x) {
+										return true;
+									}
+									if(targetRect.y < regionRect.y) {
+										return true;
+									}
+									if(targetRect.x + targetRect.width > regionRect.x + regionRect.width) {
+										return true;
+									}
+									if(targetRect.y + targetRect.height > regionRect.y + regionRect.height) {
+										return true;
+									}
+									return false;
+								}
+								return true;
+							});
+							m_OriginalPos[ce] = new OriginalPos {
+								pos = ce.GetPosition(),
+								scope = ce.GetContainingScope(),
+								kind = OriginalPosKind.Regular,
+								elements = nodes.Select((n, i) => (element: n as GraphElement, position: n.GetPosition())).ToArray(),
+							};
+						} else {
+							m_OriginalPos[ce] = new OriginalPos {
+								pos = ce.GetPosition(),
+								scope = ce.GetContainingScope(),
+								kind = OriginalPosKind.Regular,
+							};
+						}
+					}
 				}
 
 				m_originalMouse = e.mousePosition;
@@ -301,7 +364,7 @@ namespace MaxyGames.UNode.Editors {
 			return selectedElementGeom;
 		}
 
-		void ComputeSnappedRect(ref Rect selectedElementProposedGeom, UnityEditor.Experimental.GraphView.GraphElement element) {
+		void ComputeSnappedRect(ref Rect selectedElementProposedGeom, GraphElement element) {
 			// Check if snapping is paused first: if yes, the snapper will return the original dragging position
 			if (Event.current != null) {
 				m_Snapper.PauseSnap(Event.current.shift);
@@ -378,7 +441,7 @@ namespace MaxyGames.UNode.Editors {
 
 			ComputeSnappedRect(ref selectedElementGeom, selectedElement);
 
-			var groupElementsDraggedOut = e.shiftKey ? new Dictionary<Group, List<UnityEditor.Experimental.GraphView.GraphElement>>() : null;
+			var groupElementsDraggedOut = e.shiftKey ? new Dictionary<Group, List<GraphElement>>() : null;
 			foreach (var v in m_OriginalPos) {
 				var ce = v.Key;
 
@@ -396,7 +459,7 @@ namespace MaxyGames.UNode.Editors {
 						var groupParent = ce.GetContainingScope() as Group;
 						if (groupParent != null) {
 							if (!groupElementsDraggedOut.ContainsKey(groupParent)) {
-								groupElementsDraggedOut[groupParent] = new List<UnityEditor.Experimental.GraphView.GraphElement>();
+								groupElementsDraggedOut[groupParent] = new List<GraphElement>();
 							}
 							groupElementsDraggedOut[groupParent].Add(ce);
 						}
@@ -404,7 +467,7 @@ namespace MaxyGames.UNode.Editors {
 					v.Value.dragStarted = true;
 				}
 
-				SnapOrMoveElement(ce, v.Value.pos, selectedElementGeom);
+				SnapOrMoveElement(ce, v.Value, selectedElementGeom);
 			}
 
 			// // Needed to ensure nodes can be dragged out of multiple groups all at once.
@@ -455,32 +518,70 @@ namespace MaxyGames.UNode.Editors {
 			ComputeSnappedRect(ref selectedElementGeom, selectedElement);
 
 			foreach (var v in m_OriginalPos) {
-				SnapOrMoveElement(v.Key, v.Value.pos, selectedElementGeom);
+				SnapOrMoveElement(v.Key, v.Value, selectedElementGeom);
 			}
 		}
 
-		void SnapOrMoveElement(UnityEditor.Experimental.GraphView.GraphElement element, Rect originalPos, Rect selectedElementGeom) {
+		void SnapOrMoveElement(GraphElement element, OriginalPos originalPos, Rect selectedElementGeom) {
 			if (m_Snapper.IsActive) {
 				Vector2 geomDiff = selectedElementGeom.position - m_OriginalPos[selectedElement].pos.position;
-				Vector2 position = new Vector2(originalPos.x + geomDiff.x, originalPos.y + geomDiff.y);
+				Vector2 position = new Vector2(originalPos.pos.x + geomDiff.x, originalPos.pos.y + geomDiff.y);
 
 				element.SetPosition(new Rect(position, element.layout.size));
+
+				if(originalPos.elements != null) {
+					float xPos = geomDiff.x;
+					float yPos = geomDiff.y;
+					if(xPos != 0 || yPos != 0) {
+						var nodes = originalPos.elements;
+						for(int n = 0; n < nodes.Length; n++) {
+							var pos = nodes[n].element.GetPosition();
+							pos.x = nodes[n].position.x + xPos;
+							pos.y = nodes[n].position.y + yPos;
+							if(nodes[n].element is UNodeView view) {
+								view.Teleport(pos);
+							}
+							else {
+								nodes[n].element.SetPosition(pos);
+							}
+						}
+					}
+				}
 			} else {
 				MoveElement(element, originalPos);
 			}
 		}
 
-		void MoveElement(UnityEditor.Experimental.GraphView.GraphElement element, Rect originalPos) {
+		void MoveElement(GraphElement element, OriginalPos originalPos) {
 			Matrix4x4 g = element.worldTransform;
 			var scale = new Vector3(g.m00, g.m11, g.m22);
 
-			Rect newPos = new Rect(0, 0, originalPos.width, originalPos.height);
+			Rect newPos = new Rect(0, 0, originalPos.pos.width, originalPos.pos.height);
 
 			// Compute the new position of the selected element using the mouse delta position and panning info
-			newPos.x = originalPos.x - (m_MouseDiff.x - m_ItemPanDiff.x) * panSpeed.x / scale.x * element.resolvedStyle.scale.value.x;
-			newPos.y = originalPos.y - (m_MouseDiff.y - m_ItemPanDiff.y) * panSpeed.y / scale.y * element.resolvedStyle.scale.value.y;
+			newPos.x = originalPos.pos.x - (m_MouseDiff.x - m_ItemPanDiff.x) * panSpeed.x / scale.x * element.resolvedStyle.scale.value.x;
+			newPos.y = originalPos.pos.y - (m_MouseDiff.y - m_ItemPanDiff.y) * panSpeed.y / scale.y * element.resolvedStyle.scale.value.y;
 
 			element.SetPosition(m_GraphView.contentViewContainer.ChangeCoordinatesTo(element.hierarchy.parent, newPos));
+
+			if(originalPos.elements != null) {
+				float xPos = newPos.x - originalPos.pos.x;
+				float yPos = newPos.y - originalPos.pos.y;
+				if(xPos != 0 || yPos != 0) {
+					var nodes = originalPos.elements;
+					for(int n = 0; n < nodes.Length; n++) {
+						var pos = nodes[n].element.GetPosition();
+						pos.x = nodes[n].position.x + xPos;
+						pos.y = nodes[n].position.y + yPos;
+						if(nodes[n].element is UNodeView view) {
+							view.Teleport(pos);
+						}
+						else {
+							nodes[n].element.SetPosition(pos);
+						}
+					}
+				}
+			}
 		}
 
 		protected new void OnMouseUp(MouseUpEvent evt) {
@@ -588,7 +689,7 @@ namespace MaxyGames.UNode.Editors {
 				return;
 
 			// Reset the items to their original pos.
-			var groupsElementsToReset = new Dictionary<Scope, List<UnityEditor.Experimental.GraphView.GraphElement>>();
+			var groupsElementsToReset = new Dictionary<Scope, List<GraphElement>>();
 			foreach (var v in m_OriginalPos) {
 				OriginalPos originalPos = v.Value;
 				if (originalPos.stack != null) {
@@ -596,7 +697,7 @@ namespace MaxyGames.UNode.Editors {
 				} else {
 					if (originalPos.scope != null) {
 						if (!groupsElementsToReset.ContainsKey(originalPos.scope)) {
-							groupsElementsToReset[originalPos.scope] = new List<UnityEditor.Experimental.GraphView.GraphElement>();
+							groupsElementsToReset[originalPos.scope] = new List<GraphElement>();
 						}
 						groupsElementsToReset[originalPos.scope].Add(v.Key);
 					}

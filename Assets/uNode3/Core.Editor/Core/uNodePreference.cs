@@ -62,6 +62,8 @@ namespace MaxyGames.UNode.Editors {
 			//public bool isDim = true;
 
 			public DisplayKind displayKind;
+			[Tooltip("The preferred graph layout for new created graph")]
+			public GraphLayout preferredGraphLayout = GraphLayout.Vertical;
 
 			public bool showGrid = true,
 				inEditorDocumentation = true,
@@ -75,6 +77,8 @@ namespace MaxyGames.UNode.Editors {
 			public bool autoCreateReroute = true;
 			[Tooltip("Auto proxy connection")]
 			public bool autoProxyConnection = true;
+			[Tooltip("If true, port will be auto reconnection after deleting node, this will try to connect the input and output port.")]
+			public bool autoReconnection = true;
 			[Tooltip("Auto add missing namespace when adding node to the graph.")]
 			public bool autoAddNamespace;
 			public float debugTransitionSpeed = 0.5f;
@@ -218,13 +222,6 @@ Note: Auto Generate on Buld will always using Unity method.")]
 					version = currentVersion;
 					//Stuff for upgrades
 
-					if(debugTransitionSpeed == 0) {
-						debugTransitionSpeed = 0.5f;
-					}
-					if(maxGraphBackup == 0) {
-						maxGraphBackup = 100;
-					}
-
 					#region Initialization
 					if(includedAssemblies == null) {
 						includedAssemblies = new List<string>() {
@@ -233,7 +230,7 @@ Note: Auto Generate on Buld will always using Unity method.")]
 							"Assembly-CSharp",
 							"Assembly-CSharp-firstpass",
 							"mscorlib",
-							"Unity.Mathematics",
+							//"Unity.Mathematics",
 						};
 					}
 					if(nodeBrowserNamespaces == null) {
@@ -325,10 +322,6 @@ Note: Auto Generate on Buld will always using Unity method.")]
 						};
 					}
 					#endregion
-
-				}
-				if(maxRecentItemsToShow == 0) {
-					maxRecentItemsToShow = 10;
 				}
 			}
 			#endregion
@@ -453,9 +446,11 @@ Note: Auto Generate on Buld will always using Unity method.")]
 
 Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 
+				uNodeGUIUtility.ShowField(nameof(preferenceData.preferredGraphLayout), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoConvertPort), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoCreateReroute), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoProxyConnection), preferenceData);
+				uNodeGUIUtility.ShowField(nameof(preferenceData.autoReconnection), preferenceData);
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoAddNamespace), preferenceData);
 				preferenceData.debugTransitionSpeed = EditorGUILayout.Slider(new GUIContent("Debug Transition Speed"), preferenceData.debugTransitionSpeed, 0.5f, 4);
 

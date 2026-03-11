@@ -148,6 +148,64 @@ namespace MaxyGames {
 					Value(port.id),
 					Value(isSet));
 			}
+			if(port.IsVariable) {
+				var type = port.ValueType ?? port.type;
+				//Check when variable is struct and it is not readonly.
+				if(type.IsValueType && !type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), false)) {
+					var ports = StaticHashPool<UPort>.Allocate();
+
+					static void FindAllSourcePort(UPort sourcePort, HashSet<UPort> ports) {
+						if(sourcePort != null && ports.Add(sourcePort)) {
+							if(sourcePort is ValueOutput valueOutput) {
+								var node = valueOutput.node;
+								foreach(var p in node.FlowInputs) {
+									FindAllSourcePort(p, ports);
+								}
+								if(node.node is IRerouteNode reroute) {
+									FindAllSourcePort(reroute.Input, ports);
+								}
+								//foreach(var p in node.ValueInputs) {
+								//	FindAllSourcePort(p, ports);
+								//}
+							}
+							else if(sourcePort is ValueInput valueInput) {
+								FindAllSourcePort(valueInput.GetTargetPort(), ports);
+							}
+							else if(sourcePort is FlowOutput flowOutput) {
+								var node = flowOutput.node;
+								foreach(var p in node.FlowInputs) {
+									FindAllSourcePort(p, ports);
+								}
+							}
+							else if(sourcePort is FlowInput flowInput) {
+								foreach(var p in flowInput.GetConnectedPorts()) {
+									FindAllSourcePort(p, ports);
+								}
+							}
+						}
+					}
+
+					FindAllSourcePort(port, ports);
+					foreach(var p in ports) {
+						if(p is FlowOutput flowOutput) {
+							if(flowOutput.localFunction) {
+								StaticHashPool<UPort>.Free(ports);
+								//When there's a local function, we skip the debug value as it may cause bug/error when value is mutable.
+								return value;
+							}
+						}
+					}
+					StaticHashPool<UPort>.Free(ports);
+
+					return Invoke(typeof(GraphDebug), nameof(GraphDebug.Value),
+						"ref " + value,
+						GetDebugOwner(),
+						Value(graph.GetGraphID()),
+						Value(port.node.id),
+						Value(port.id),
+						Value(isSet));
+				}
+			}
 			return Invoke(typeof(GraphDebug), nameof(GraphDebug.Value),
 				value,
 				GetDebugOwner(),

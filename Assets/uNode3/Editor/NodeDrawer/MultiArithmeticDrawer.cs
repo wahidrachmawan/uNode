@@ -53,6 +53,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				{//Primitives
 					customItems.AddRange(GetCustomItemForPrimitives(node, typeof(int)));
 					customItems.AddRange(GetCustomItemForPrimitives(node, typeof(float)));
+					//customItems.AddRange(GetCustomItemForPrimitives(node, typeof(long)));
+					//customItems.AddRange(GetCustomItemForPrimitives(node, typeof(double)));
 				}
 				var ns = node.nodeObject.graphContainer.GetUsingNamespaces();
 				var preference = uNodePreference.GetPreference();
@@ -65,7 +67,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					var operators = EditorReflectionUtility.GetOperators(assembly, (op) => {
 						return ns == null || ns.Contains(op.DeclaringType.Namespace);
 					});
-					if(operators.Count > 0) {
+					if(operators != null) {
 						foreach(var op in operators) {
 							switch(op.Name) {
 								case "op_Addition": {

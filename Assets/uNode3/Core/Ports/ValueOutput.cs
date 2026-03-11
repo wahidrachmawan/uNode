@@ -43,6 +43,10 @@ namespace MaxyGames.UNode {
 		internal object DefaultGet(Flow flow) => flow.GetPortData(this);
 		internal void DefaultSet(Flow flow, object value) => flow.SetPortData(this, value);
 
+		/// <summary>
+		/// Enumerates all valid connected input ports.
+		/// </summary>
+		/// <returns>A sequence of connected and valid ValueInput ports.</returns>
 		public IEnumerable<ValueInput> GetConnectedPorts() {
 			if(isConnected) {
 				foreach(var c in connections) {

@@ -780,7 +780,6 @@ namespace MaxyGames.UNode.Editors {
 			if(port.isValue) {
 				PortView input;
 				PortView output;
-				FilterAttribute filter;
 				if(port.direction == Direction.Input) {
 					input = port;
 					output = this;
@@ -789,9 +788,15 @@ namespace MaxyGames.UNode.Editors {
 					input = this;
 					output = port;
 				}
-				filter = input.GetFilter();
 				var outputPort = output.GetPortValue<ValueOutput>();
 				var inputPort = input.GetPortValue<ValueInput>();
+
+				var flag = GraphManipulatorUtility.CanMakeConnection(owner.graphEditor, inputPort, outputPort);
+				if(flag != null) {
+					return flag == true;
+				}
+
+				var filter = input.GetFilter();
 				if(filter != null) {
 					if(filter.SetMember && !output.CanSetValue()) {
 						return false;

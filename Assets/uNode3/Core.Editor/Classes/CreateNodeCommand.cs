@@ -42,4 +42,14 @@ namespace MaxyGames.UNode.Editors {
 			return true;
 		}
 	}
+
+	public abstract class DefaultValueAssignator {
+		public virtual int order {
+			get {
+				return 0;
+			}
+		}
+
+		public abstract bool Process(ValueInput port, Type type, FilterAttribute filter);
+	}
 }

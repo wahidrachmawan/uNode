@@ -23,6 +23,12 @@ namespace MaxyGames.UNode.Editors {
 			window.minSize = new Vector2(300, 250);
 			window.titleContent = new GUIContent("Create New Graph");
 			window.Show();
+			var creators = FindGraphCreators();
+			foreach(var c in creators) {
+				if(c != null) {
+					c.graphLayout = uNodePreference.preferenceData.preferredGraphLayout;
+				}
+			}
 			return window;
 		}
 
@@ -196,7 +202,7 @@ namespace MaxyGames.UNode.Editors {
 
 		protected List<VariableData> graphVariables = new List<VariableData>();
 
-		protected GraphLayout graphLayout = GraphLayout.Vertical;
+		public GraphLayout graphLayout = GraphLayout.Vertical;
 
 		public GraphCreatorWindow window;
 		#endregion

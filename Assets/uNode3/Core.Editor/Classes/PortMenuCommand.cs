@@ -18,6 +18,9 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public FilterAttribute filter;
 
+		/// <summary>
+		/// Gets a value indicating whether only the context menu is available.
+		/// </summary>
 		public virtual bool onlyContextMenu => false;
 
 		/// <summary>
@@ -75,5 +78,11 @@ namespace MaxyGames.UNode.Editors {
 		/// The port kind.
 		/// </summary>
 		public PortKind portKind;
+
+		/// <summary>
+		/// Gets the actual type of the port as determined by the filter.
+		/// </summary>
+		/// <returns>The resolved port type.</returns>
+		public System.Type GetActualPortType() => filter?.GetActualType(portType) ?? portType;
 	}
 }

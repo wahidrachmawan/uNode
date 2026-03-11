@@ -132,7 +132,7 @@ namespace MaxyGames.UNode.Editors {
 					nodes.Add(selected[i] as UNodeView);
 				}
 			}
-			if(nodes.Count > 0) {
+			if(nodes.Count > 0 && uNodePreference.preferenceData.autoReconnection) {
 				Action action = null;
 				foreach(var node in nodes) {
 					var inputPort = UIElementUtility.GetPrimaryFlowInput(node);
@@ -213,6 +213,15 @@ namespace MaxyGames.UNode.Editors {
 						});
 					}
 				}
+				return true;
+			}
+			return false;
+		}
+
+		public override bool HandlePortOnDrop(UGraphView graphView, EdgeView edge) {
+			if(GraphManipulatorUtility.ProcessPortConnection(graphView.graphEditor, edge.Input.GetPortValue(), edge.Output.GetPortValue())) {
+				graphView.MarkRepaint(new[] { edge.Input.GetNodeObject(), edge.Output.GetNodeObject() });
+				graphView.MarkRepaint();
 				return true;
 			}
 			return false;

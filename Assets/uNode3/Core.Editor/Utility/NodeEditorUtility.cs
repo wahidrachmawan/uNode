@@ -674,7 +674,9 @@ namespace MaxyGames.UNode.Editors {
 			UGraphElement canvas,
 			FilterAttribute filter = null,
 			bool forceConvert = false) {
-
+			if(output == null || input == null) {
+				return false;
+			}
 			if(leftType is RuntimeType) {
 				if(rightType is not RuntimeType && uNodeDatabase.instance.nativeGraphTypes.Contains(rightType)) {
 					rightType = ReflectionUtils.GetRuntimeType(rightType);
@@ -738,57 +740,8 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="nodeObject"></param>
 		public static void AutoAssignNodePorts(NodeObject nodeObject) {
 			if(nodeObject == null || nodeObject.node == null) return;
-
-			var graph = nodeObject.graphContainer;
-			var graphType = graph.GetGraphType();
-
-			bool AssignNodePort(ValueInput port, Type type, FilterAttribute filter) {
-				if(port == null || type == null || port.IsOptional)
-					return false;
-				if(filter == null)
-					filter = FilterAttribute.DefaultTypeFilter;
-				if(CanReferenceSelf(graph)) {
-					if(type != typeof(object) && type.IsPrimitive == false) {
-						if(graphType.IsCastableTo(type)) {
-							port.AssignToDefault(MemberData.This(graph));
-							return true;
-						}
-					}
-				}
-				if(type.IsSubclassOf(typeof(Delegate))) {
-					if(CanAddNode(nodeObject.parent)) {
-						AddNewNode<Nodes.NodeLambda>(nodeObject.parent, "Lambda", null, new Vector2(nodeObject.position.x - 150, nodeObject.position.y), (nod) => {
-							nod.delegateType = type;
-							nod.Register();
-							port.ConnectTo(nod.output);
-						}, setUndoGroup: false);
-						return true;
-					}
-				}
-				else if(filter.IsValidTypeForValueConstant(type) && ReflectionUtils.CanCreateInstance(type)) {
-					port.AssignToDefault(MemberData.CreateValueFromType(type));
-					return true;
-				}
-				else if(CanReferenceSelf(graph) && graphType != null && (graphType == type || type.IsSubclassOf(graphType) && graphType != typeof(ValueType))) {
-					port.AssignToDefault(MemberData.This(graph));
-					return true;
-				}
-				//else if(CanAutoConvertType(graphType, type)) {
-				//	AddNewNode<MultipurposeNode>(nodeObject.parent, new Vector2(nodeObject.position.x - 200, nodeObject.position.y), thisNode => {
-				//		thisNode.target = MemberData.This(graph);
-				//		thisNode.Register();
-
-				//		AutoConvertPort(graphType, type, thisNode.output, port, convertNode => {
-				//			port.ConnectTo(GetPort<ValueOutput>(convertNode));
-				//		}, nodeObject.parent);
-				//	});
-				//	return true;
-				//}
-				return false;
-			}
-
 			foreach(var port in nodeObject.ValueInputs) {
-				if(!port.isAssigned && port.CanGetValue()) {
+				if(!port.isConnected && port.CanGetValue() && port.DefaultValue.IsTargetingValue && ReflectionUtils.IsNullOrDefault(port.DefaultValue.Get(null))) {
 					var type = port.type;
 					if(port.filter != null) {
 						if(port.filter.SetMember) {
@@ -797,13 +750,13 @@ namespace MaxyGames.UNode.Editors {
 						var types = port.filter.Types;
 						if(types.Count > 0) {
 							for(int i = 0; i < types.Count; i++) {
-								if(AssignNodePort(port, types[i], port.filter)) {
+								if(AssignDefaultValueForPort(port, types[i], port.filter)) {
 									continue;
 								}
 							}
 						}
 					}
-					AssignNodePort(port, type, port.filter);
+					AssignDefaultValueForPort(port, type, port.filter);
 				}
 			}
 		}
@@ -1069,6 +1022,97 @@ namespace MaxyGames.UNode.Editors {
 				});
 			}
 			return _customGraphCommands;
+		}
+
+		private static List<DefaultValueAssignator> _defaultVaueAssignator;
+		private static List<DefaultValueAssignator> FindDefaultValueAssignator() {
+			if(_defaultVaueAssignator == null) {
+				_defaultVaueAssignator = EditorReflectionUtility.GetListOfType<DefaultValueAssignator>();
+				_defaultVaueAssignator.Sort((x, y) => {
+					return CompareUtility.Compare(x.order, y.order);
+				});
+			}
+			return _defaultVaueAssignator;
+		}
+
+		/// <summary>
+		/// Attempts to assign a default value to the specified port using available assignators.
+		/// </summary>
+		/// <param name="port">The value input port to assign a default value to.</param>
+		/// <param name="type">The type of the value to assign.</param>
+		/// <param name="filter">A filter attribute used to determine assignator applicability.</param>
+		/// <returns>true if a default value was assigned; otherwise, false.</returns>
+		public static bool AssignDefaultValueForPort(ValueInput port, Type type, FilterAttribute filter) {
+			if(port == null || type == null)
+				return false;
+			if(filter == null)
+				filter = FilterAttribute.Default;
+
+			if(port.IsOptional) {
+				if(port.isAssigned == false)
+					port.AssignToDefault(MemberData.None);
+				return false;
+			}
+
+			// If the port is already connected, we cannot assign a default value.
+			if(port.isConnected) {
+				return false;
+			}
+
+			// First, try to assign a default value using custom assignators.
+			var objs = FindDefaultValueAssignator();
+			foreach(var obj in objs) {
+				if(obj.Process(port, type, filter)) {
+					return true;
+				}
+			}
+
+			// If the port is already assigned, we cannot assign a default value.
+			if(port.isAssigned) {
+				return false;
+			}
+
+			var nodeObject = port.node;
+			var graph = nodeObject.graphContainer;
+			var graphType = graph.GetGraphType();
+			if(CanReferenceSelf(graph)) {
+				if(type != typeof(object) && type.IsPrimitive == false) {
+					if(graphType.IsCastableTo(type)) {
+						port.AssignToDefault(MemberData.This(graph));
+						return true;
+					}
+				}
+			}
+			if(type.IsSubclassOf(typeof(Delegate))) {
+				if(CanAddNode(nodeObject.parent)) {
+					AddNewNode<Nodes.NodeLambda>(nodeObject.parent, "Lambda", null, new Vector2(nodeObject.position.x - 150, nodeObject.position.y), (nod) => {
+						nod.delegateType = type;
+						nod.Register();
+						port.ConnectTo(nod.output);
+					}, setUndoGroup: false);
+					return true;
+				}
+			}
+			else if(filter.IsValidTypeForValueConstant(type) && ReflectionUtils.CanCreateInstance(type)) {
+				port.AssignToDefault(MemberData.CreateValueFromType(type));
+				return true;
+			}
+			else if(CanReferenceSelf(graph) && graphType != null && (graphType == type || type.IsSubclassOf(graphType) && graphType != typeof(ValueType))) {
+				port.AssignToDefault(MemberData.This(graph));
+				return true;
+			}
+			//else if(CanAutoConvertType(graphType, type)) {
+			//	AddNewNode<MultipurposeNode>(nodeObject.parent, new Vector2(nodeObject.position.x - 200, nodeObject.position.y), thisNode => {
+			//		thisNode.target = MemberData.This(graph);
+			//		thisNode.Register();
+
+			//		AutoConvertPort(graphType, type, thisNode.output, port, convertNode => {
+			//			port.ConnectTo(GetPort<ValueOutput>(convertNode));
+			//		}, nodeObject.parent);
+			//	});
+			//	return true;
+			//}
+			return false;
 		}
 
 		private static List<INodeItemCommand> _createNodeMenuCommands;

@@ -1948,10 +1948,12 @@ namespace MaxyGames.UNode {
 					if(map == null) {
 						map = new Dictionary<Type, bool>();
 					}
-					map[to] = from != typeof(bool) && to != typeof(bool);
+					var resulz = from != typeof(bool) && to != typeof(bool);
+					map[to] = resulz;
 					castableMap2[from] = map;
+					return resulz;
 				}
-				return false; // IntPtr, UIntPtr, Enum, Boolean
+				//return false; // IntPtr, UIntPtr, Enum, Boolean
 			}
 			if(from.IsInterface && to.IsSealed == false) {
 				lock(_lockObject) {

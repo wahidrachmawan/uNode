@@ -9,8 +9,8 @@ using MaxyGames.OdinSerializer.Utilities;
 namespace MaxyGames.UNode {
 	public static class Operator {
 		#region Const
-		private const string OP_Equality = "op_Equality";
-		private const string OP_Inequality = "op_Inequality";
+		public const string OP_Equality = "op_Equality";
+		public const string OP_Inequality = "op_Inequality";
 		#endregion
 
 		#region Validation

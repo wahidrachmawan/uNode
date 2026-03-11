@@ -425,6 +425,56 @@ namespace MaxyGames.UNode {
 			return value;
 		}
 
+		/// <summary>
+		/// Call this function to debug EventNode that using value node.
+		/// </summary>
+		public static ref T Value<T>(ref T value, object owner, int objectUID, int nodeUID, string portID, bool isSet = false) {
+			if(!useDebug || uNodeUtility.isPlaying == false)
+				return ref value;
+			if(owner is ValueType) {
+				//If the owner of value is struct then we use the type instead
+				owner = owner.GetType();
+			}
+			if(!debugData.TryGetValue(objectUID, out var debugMap)) {
+				debugMap = new ConditionalWeakTable<object, DebugData>();
+				debugData[objectUID] = debugMap;
+			}
+			if(!debugMap.TryGetValue(owner, out var data)) {
+				data = new DebugData();
+				debugMap.AddOrUpdate(owner, data);
+
+#if UNODE_PRO
+				if(debugMessage.datas.TryGetValue(objectUID, out var messageData)) {
+					data.messageData = messageData;
+				}
+#endif
+			}
+			var id = nodeUID + portID;
+			data.valueConnectionDebug[id] = new DebugValue() {
+				time = debugTime,
+				frame = uNodeThreadUtility.playingFrame,
+				value = value,
+				isSet = isSet,
+			};
+#if UNODE_PRO
+			if(data.messageData != null) {
+				if(data.messageData.valueMessages.TryGetValue(nodeUID, out var map)) {
+					if(map.TryGetValue(portID, out var message)) {
+						var graphID = objectUID;
+						var valueMessage = value == null ? "null" : value.ToString();
+						if(string.IsNullOrEmpty(message)) {
+							Debug.Log(GraphException.GetMessage(valueMessage, graphID, nodeUID, owner));
+						}
+						else {
+							Debug.Log(GraphException.GetMessage(message + ": " + valueMessage, graphID, nodeUID, owner));
+						}
+					}
+				}
+			}
+#endif
+			return ref value;
+		}
+
 		public static void Flow(object owner, int objectUID, int nodeUID, string portID) {
 			if(!useDebug || uNodeUtility.isPlaying == false)
 				return;

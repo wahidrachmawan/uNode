@@ -58,6 +58,12 @@ namespace MaxyGames.UNode.Nodes {
 						return false;
 					};
 					output = PrimaryValueOutput(nameof(output)).SetName("Out");
+					if(input.isAssigned && input.hasValidConnections) {
+						var tPort = input.GetTargetPort();
+						if(tPort?.isVariable == true) {
+							output.isVariable = true;
+						}
+					}
 					break;
 			}
 		}
