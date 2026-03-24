@@ -31,11 +31,13 @@ namespace MaxyGames.UNode {
 		}
 
 		public override MethodInfo GetGetMethod(bool nonPublic) {
-			return null;
+			//TODO: proper handling for GetGetMethod for fake properties
+			return target.GetGetMethod(nonPublic);
 		}
 
 		public override MethodInfo GetSetMethod(bool nonPublic) {
-			return null;
+			//TODO: proper handling for GetSetMethod for fake properties
+			return target.GetSetMethod(nonPublic);
 		}
 
 		public override string ToString() {

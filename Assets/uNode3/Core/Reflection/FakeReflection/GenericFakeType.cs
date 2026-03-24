@@ -174,18 +174,38 @@ namespace MaxyGames.UNode {
 				switch(member.MemberType) {
 					case MemberTypes.Field: {
 						var field = member as FieldInfo;
-						var fType = field.FieldType;
-						if(fType.IsGenericParameter) {
+						var mType = field.FieldType;
+						if(mType.IsGenericParameter) {
 							field = target.GetField(field.Name, flags);
 							if(field == null) {
 								break;
 							}
-							declaredMembers[member] = new FakeField(this, field, genericParameters[IndexOf(gArgs, p => p.Name == fType.Name)]);
+							declaredMembers[member] = new FakeField(this, field, genericParameters[IndexOf(gArgs, p => p.Name == mType.Name)]);
 						}
-						else if(fType.ContainsGenericParameters) {
+						else if(mType.ContainsGenericParameters) {
 							field = target.GetField(field.Name, flags);
 							if(field == null) {
 								break;
+							}
+							if(mType.IsByRef) {
+								var elementType = mType.GetElementType();
+								if(elementType.IsGenericParameter) {
+									declaredMembers[field] = new FakeField(this, field, genericParameters[IndexOf(gArgs, p => p.Name == elementType.Name)].MakeByRefType());
+								}
+								break;
+							}
+							if(mType.IsArray) {
+								var elementType = mType.GetElementType();
+								var arrayRank = mType.GetArrayRank();
+								if(arrayRank == 1 && elementType.IsGenericParameter) {
+									declaredMembers[field] = new FakeField(
+										this,
+										field,
+										ReflectionFaker.FakeArrayType(genericParameters[IndexOf(gArgs, p => p.Name == elementType.Name)])
+									);
+									break;
+								}
+								//TODO: support for multi-dimensional array
 							}
 							declaredMembers[field] = null;
 						}
@@ -193,18 +213,42 @@ namespace MaxyGames.UNode {
 					}
 					case MemberTypes.Property: {
 						var property = member as PropertyInfo;
-						var pType = property.PropertyType;
-						if(pType.IsGenericParameter) {
+						var mType = property.PropertyType;
+						if(mType.IsGenericParameter) {
 							property = target.GetProperty(property.Name, flags);
 							if(property == null) {
 								break;
 							}
-							declaredMembers[member] = new FakeProperty(this, property, genericParameters[IndexOf(gArgs, p => p.Name == pType.Name)]);
+							declaredMembers[member] = new FakeProperty(this, property, genericParameters[IndexOf(gArgs, p => p.Name == mType.Name)]);
 						}
-						else if(pType.ContainsGenericParameters) {
+						else if(mType.ContainsGenericParameters) {
 							property = target.GetProperty(property.Name, flags);
 							if(property == null) {
 								break;
+							}
+							//if(pType.IsConstructedGenericType) {
+							//	declaredMembers[member] = member;
+							//	break;
+							//}
+							if(mType.IsByRef) {
+								var elementType = mType.GetElementType();
+								if(elementType.IsGenericParameter) {
+									declaredMembers[property] = new FakeProperty(this, property, genericParameters[IndexOf(gArgs, p => p.Name == elementType.Name)].MakeByRefType());
+								}
+								break;
+							}
+							if(mType.IsArray) {
+								var elementType = mType.GetElementType();
+								var arrayRank = mType.GetArrayRank();
+								if(arrayRank == 1 && elementType.IsGenericParameter) {
+									declaredMembers[property] = new FakeProperty(
+										this, 
+										property, 
+										ReflectionFaker.FakeArrayType(genericParameters[IndexOf(gArgs, p => p.Name == elementType.Name)])
+									);
+									break;
+								}
+								//TODO: support for multi-dimensional array
 							}
 							declaredMembers[property] = null;
 						}
@@ -516,6 +560,7 @@ namespace MaxyGames.UNode {
 					case MemberTypes.Event: {
 						var evt = target.GetEvent(member.Name, flags);
 						if(evt != null) {
+							//TODO: support for event with generic parameters
 							declaredMembers[evt] = null;
 						}
 						break;
