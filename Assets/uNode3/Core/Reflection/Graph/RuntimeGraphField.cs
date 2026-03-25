@@ -16,26 +16,28 @@ namespace MaxyGames.UNode {
 			get {
 				var modifier = target.reference?.modifier;
 				if(modifier != null) {
+					FieldAttributes att;
 					if(modifier.isPublic) {
-						if(modifier.Static || owner.IsAbstract && owner.IsSealed) {
-							return FieldAttributes.Public | FieldAttributes.Static;
-						}
-						return FieldAttributes.Public;
+						att = FieldAttributes.Public;
 					}
 					else if(modifier.isProtected) {
 						if(modifier.Internal) {
-							return FieldAttributes.FamORAssem;
+							att = FieldAttributes.FamORAssem;
 						}
 						else {
-							return FieldAttributes.Family;
+							att = FieldAttributes.Family;
 						}
 					}
 					else {
-						if(modifier.Static || owner.IsAbstract && owner.IsSealed) {
-							return FieldAttributes.Private | FieldAttributes.Static;
-						}
-						return FieldAttributes.Private;
+						att = FieldAttributes.Private;
 					}
+					if(owner.IsAbstract && owner.IsSealed) {
+						att |= FieldAttributes.Static;
+					}
+					if(modifier.ReadOnly) {
+						att |= FieldAttributes.InitOnly;
+					}
+					return att;
 				}
 				return base.Attributes;
 			}

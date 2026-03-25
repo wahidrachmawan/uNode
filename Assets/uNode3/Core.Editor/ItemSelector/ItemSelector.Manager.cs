@@ -921,6 +921,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public void ReloadInBackground() {
 				if(hasSearch) {
+					treeHightlights.Clear();
 					isReloading = true;
 					List<TreeViewItem> treeViews;
 					if(isDeep) {

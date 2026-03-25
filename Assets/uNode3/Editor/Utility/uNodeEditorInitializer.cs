@@ -753,8 +753,19 @@ namespace MaxyGames.UNode.Editors {
 				XmlDoc.LoadDocInBackground();
 			});
 
-			DragAndDrop.AddDropHandler(HierarchyDropHandler);
+#if UNITY_6000_3_OR_NEWER
+			static DragAndDropVisualMode DropHandler(EntityId dropTargetEntityId, HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform) {
+				return HierarchyDropHandler(EditorUtility.EntityIdToObject(dropTargetEntityId) as GameObject, dropMode, parentForDraggedObjects, perform);
+			};
+			DragAndDrop.AddDropHandlerV2(DropHandler);
+			DragAndDrop.AddDropHandlerV2(InspectorWindowDrag);
+#else
+			static DragAndDropVisualMode DropHandler(int dropTargetId, HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform) {
+				return HierarchyDropHandler(EditorUtility.InstanceIDToObject(dropTargetId) as GameObject, dropMode, parentForDraggedObjects, perform);
+			};
+			DragAndDrop.AddDropHandler(DropHandler);
 			DragAndDrop.AddDropHandler(InspectorWindowDrag);
+#endif
 
 			Update();
 		}
@@ -874,9 +885,8 @@ namespace MaxyGames.UNode.Editors {
 			return DragAndDropVisualMode.None;
 		}
 
-		private static DragAndDropVisualMode HierarchyDropHandler(int dropTargetInstanceID, HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform) {
+		private static DragAndDropVisualMode HierarchyDropHandler(GameObject dropTarget, HierarchyDropFlags dropMode, Transform parentForDraggedObjects, bool perform) {
 			void DoDrop(string name, Func<GameObject, Component> addComponent) {
-				var dropTarget = EditorUtility.InstanceIDToObject(dropTargetInstanceID) as GameObject;
 				switch(dropMode) {
 					case HierarchyDropFlags.DropBetween: {
 						if(dropTarget != null) {

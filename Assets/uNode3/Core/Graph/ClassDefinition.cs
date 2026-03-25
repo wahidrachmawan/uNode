@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public abstract class ClassDefinitionModel {
 		/// <summary>
 		/// The title of a model

@@ -305,37 +305,44 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static Texture GetIcon(MemberInfo member) {
+		internal static Type GetTypeForIcon(MemberInfo member) {
 			switch(member.MemberType) {
 				case MemberTypes.Constructor:
 				case MemberTypes.Method:
-					return GetTypeIcon(typeof(TypeIcons.MethodIcon));
+					return typeof(TypeIcons.MethodIcon);
 				case MemberTypes.Field:
 				case MemberTypes.Event:
-					return GetTypeIcon(typeof(TypeIcons.FieldIcon));
+					return typeof(TypeIcons.FieldIcon);
 				case MemberTypes.NestedType:
 				case MemberTypes.TypeInfo:
 					Type type = member as Type;
 					if(type is ICustomIcon) {
-						return GetTypeIcon(type);
+						return type;
 					}
 					if(type.IsClass) {
 						if(type.IsCastableTo(typeof(Delegate))) {
-							return GetTypeIcon(typeof(TypeIcons.DelegateIcon));
+							return typeof(TypeIcons.DelegateIcon);
 						}
-						return GetTypeIcon(typeof(TypeIcons.ClassIcon));
-					} else if(type.IsInterface) {
-						return GetTypeIcon(typeof(TypeIcons.InterfaceIcon));
-					} else if(type.IsEnum) {
-						return GetTypeIcon(typeof(TypeIcons.EnumIcon));
-					} else {
-						return GetTypeIcon(typeof(TypeIcons.StructureIcon));
+						return typeof(TypeIcons.ClassIcon);
+					}
+					else if(type.IsInterface) {
+						return typeof(TypeIcons.InterfaceIcon);
+					}
+					else if(type.IsEnum) {
+						return typeof(TypeIcons.EnumIcon);
+					}
+					else {
+						return typeof(TypeIcons.StructureIcon);
 					}
 				case MemberTypes.Property:
-					return GetTypeIcon(typeof(TypeIcons.PropertyIcon));
+					return typeof(TypeIcons.PropertyIcon);
 				default:
-					return GetTypeIcon(typeof(TypeIcons.KeywordIcon));
+					return typeof(TypeIcons.KeywordIcon);
 			}
+		}
+
+		public static Texture GetIcon(MemberInfo member) {
+			return GetTypeIcon(GetTypeForIcon(member));
 		}
 
 		public static Texture GetIcon(MemberData member) {

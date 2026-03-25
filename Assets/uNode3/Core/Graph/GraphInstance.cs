@@ -416,14 +416,15 @@ namespace MaxyGames.UNode {
 		/// <returns></returns>
 		public T GetValidNode<T>(T element) where T : Node {
 			if(element.IsValid == false) {
-				if(elementDatas.TryGetValue(element.nodeObject.runtimeID, out var data)) {
+				NodeObject nodeObject = element.prevNodeObject ?? element.nodeObject;
+				if(elementDatas.TryGetValue(nodeObject.runtimeID, out var data)) {
 					if(data.owner.reference is NodeObject node && node is T result) {
 						return result;
 					}
 				}
-				var graphData = element.nodeObject.graphContainer.GraphData;
+				var graphData = nodeObject.graphContainer.GraphData;
 				if(graphData != null) {
-					var validElement = graphData.GetElementByID(element.id);
+					var validElement = graphData.GetElementByID(nodeObject.id);
 					if(validElement is NodeObject node && node.node is T result) {
 						//For any subsequent operation is using lookup.
 						GetOrCreateElementDataValue(validElement);

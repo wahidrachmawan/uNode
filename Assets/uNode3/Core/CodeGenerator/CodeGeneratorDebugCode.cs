@@ -148,7 +148,7 @@ namespace MaxyGames {
 					Value(port.id),
 					Value(isSet));
 			}
-			if(port.IsVariable) {
+			if(port.IsVariable && port.CanSetValue()) {
 				var type = port.ValueType ?? port.type;
 				//Check when variable is struct and it is not readonly.
 				if(type.IsValueType && !type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), false)) {
@@ -164,9 +164,6 @@ namespace MaxyGames {
 								if(node.node is IRerouteNode reroute) {
 									FindAllSourcePort(reroute.Input, ports);
 								}
-								//foreach(var p in node.ValueInputs) {
-								//	FindAllSourcePort(p, ports);
-								//}
 							}
 							else if(sourcePort is ValueInput valueInput) {
 								FindAllSourcePort(valueInput.GetTargetPort(), ports);
@@ -213,25 +210,6 @@ namespace MaxyGames {
 				Value(port.node.id),
 				Value(port.id),
 				Value(isSet));
-		}
-
-		/// <summary>
-		/// Generate debug code.
-		/// </summary>
-		/// <param name="comp"></param>
-		/// <param name="transition"></param>
-		/// <returns></returns>
-		public static string Debug(NodeObject comp, TransitionEvent transition) {
-			//TODO: fix me debug transition
-			//string data = setting.debugPreprocessor ? "\n#if UNITY_EDITOR" : "";
-			//data += FlowInvoke(typeof(GraphDebug), nameof(GraphDebug.Transition),
-			//	"this",
-			//	Value(uNodeUtility.GetObjectID(graph)),
-			//	Value(uNodeUtility.GetObjectID(transition))).AddLineInFirst();
-			//if(setting.debugPreprocessor)
-			//	data += "#endif".AddLineInFirst();
-			//return data;
-			return null;
 		}
 	}
 }

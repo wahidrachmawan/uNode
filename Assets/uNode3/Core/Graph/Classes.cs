@@ -157,6 +157,7 @@ namespace MaxyGames.UNode {
 		public override object ReferenceValue => GetGraphElement();
 	}
 
+	[Serializable]
 	public abstract class UReference<T> : UReference where T : UGraphElement {
 		public override bool isValid => reference != null && _referece.IsValid;
 
@@ -982,6 +983,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class ValuePort : UPort {
 		protected Type _type;
 		[NonSerialized]
@@ -1097,6 +1099,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	[Serializable]
 	public abstract class FlowPort : UPort {
 		[SerializeReference]
 		public List<FlowConnection> connections = new List<FlowConnection>();

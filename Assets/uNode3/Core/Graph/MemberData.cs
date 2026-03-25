@@ -1288,6 +1288,11 @@ namespace MaxyGames.UNode {
 						}
 						return true;
 					case TargetType.Field:
+						members = GetMembers(false);
+						if(members != null && members.Length > 0) {
+							return ReflectionUtils.CanSetMemberValue(members[members.Length - 1]);
+						}
+						return true;
 					case TargetType.Event:
 						return true;
 					case TargetType.Property:
@@ -2271,7 +2276,7 @@ namespace MaxyGames.UNode {
 		/// <param name="type"></param>
 		/// <returns></returns>
 		public static MemberData CreateFromValue(object value, Type type) {
-			if(object.ReferenceEquals(value, null) && type.IsValueType) {
+			if(object.ReferenceEquals(value, null) && type.IsValueType && !(type.IsByRef || type.IsByRefLike)) {
 				value = ReflectionUtils.CreateInstance(type);
 			}
 			var m = new MemberData(value);

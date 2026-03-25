@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	[Serializable]
 	public abstract class Connection : IDisposable {
 		public bool isProxy;
 

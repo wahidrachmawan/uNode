@@ -509,9 +509,6 @@ namespace MaxyGames {
 		public static string FlowTransitionFinish(TransitionEvent transition, bool? state = true) {
 			if(transition != null) {
 				string result = StopEvent(transition.node.enter, state);
-				if(debugScript) {
-					result += Debug(transition.node, transition);
-				}
 				return result + Flow(transition.exit, false).AddLineInFirst();
 			}
 			throw new ArgumentNullException(nameof(transition));

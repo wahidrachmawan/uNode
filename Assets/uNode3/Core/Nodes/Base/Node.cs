@@ -21,6 +21,9 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public Rect position { get => nodeObject.position; set => nodeObject.position = value; }
 
+		[NonSerialized]
+		internal NodeObject prevNodeObject;
+		[NonSerialized]
 		private NodeObject _nodeObject;
 		/// <summary>
 		/// The node object that is bound to this.
@@ -35,6 +38,12 @@ namespace MaxyGames.UNode {
 				return _nodeObject;
 			}
 			set {
+				if(value == null) {
+					prevNodeObject = _nodeObject;
+				}
+				else {
+					prevNodeObject = null;
+				}
 				_nodeObject = value;
 			}
 		}

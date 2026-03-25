@@ -342,6 +342,9 @@ namespace MaxyGames.UNode.Editors {
 				if(option.removeOtherConnections) {
 					foreach(var element in allElements) {
 						if(element is NodeObject nodeObject) {
+							//Skip removing other connections when node is reroute
+							if(nodeObject.node is IRerouteNode) continue;
+							//Try remove other connections
 							foreach(var con in nodeObject.Connections.ToArray()) {
 								if(!allElements.Contains(con.Input.node) || !allElements.Contains(con.Output.node)) {
 									con.Disconnect();

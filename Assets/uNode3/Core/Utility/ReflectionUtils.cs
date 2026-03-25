@@ -1118,7 +1118,11 @@ namespace MaxyGames.UNode {
 			if(type == typeof(void)) {
 				return false;
 			}
-			if(type == typeof(string) || type.IsPrimitive || type.IsValueType)
+			if(type == typeof(string) || type.IsPrimitive)
+				return true;
+			if(type.IsByRef || type.IsByRefLike)
+				return false;
+			if(type.IsValueType)
 				return true;
 			if(type.IsInterface || type.IsAbstract || type.ContainsGenericParameters)
 				return false;

@@ -741,7 +741,9 @@ namespace MaxyGames.UNode.Editors {
 		public static void AutoAssignNodePorts(NodeObject nodeObject) {
 			if(nodeObject == null || nodeObject.node == null) return;
 			foreach(var port in nodeObject.ValueInputs) {
-				if(!port.isConnected && port.CanGetValue() && port.DefaultValue.IsTargetingValue && ReflectionUtils.IsNullOrDefault(port.DefaultValue.Get(null))) {
+				if(port != null && !port.isConnected && port.CanGetValue() && 
+					port.DefaultValue != null && port.DefaultValue.IsTargetingValue && ReflectionUtils.IsNullOrDefault(port.DefaultValue.Get(null))) {
+
 					var type = port.type;
 					if(port.filter != null) {
 						if(port.filter.SetMember) {

@@ -16,7 +16,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 		protected override void DoDraw(DrawerOption option) {
 			var value = option.value as Variable;
 			var container = value.graphContainer;
-			if(container.GetGraphInheritType() != typeof(ValueType)) {
+			if(container.GetGraphInheritType() != typeof(ValueType) || value.modifier.Const) {
 				UInspector.Draw(new DrawerOption() {
 					property = option.property[nameof(Variable.serializedValue)],
 					label = new GUIContent("Default Value"),

@@ -129,11 +129,11 @@ namespace MaxyGames.UNode {
 
 		public bool IsValidScopes(params string[] scopes) {
 			for(int i=0;i< scopes.Length;i++) {
-				if(!IsValidScope(scopes[i])) {
-					return false;
+				if(IsValidScope(scopes[i])) {
+					return true;
 				}
 			}
-			return true;
+			return scopes == null || scopes.Length == 0;
 		}
 		#endregion
 	}

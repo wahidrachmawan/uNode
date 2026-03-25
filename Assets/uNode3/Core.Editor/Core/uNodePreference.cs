@@ -1026,7 +1026,12 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			// 	result = GetIconForType(typeof(TypeIcons.BugIcon));
 			// } 
 			else {
-				result = uNodeEditorUtility.GetIcon(type);
+				var t = uNodeEditorUtility.GetTypeForIcon(type);
+				//For avoid recursion
+				if(t == type) {
+					t = typeof(object);
+				}
+				result = GetIconForType(t);
 			}
 			return Cached.iconMap[type] = result;
 		}

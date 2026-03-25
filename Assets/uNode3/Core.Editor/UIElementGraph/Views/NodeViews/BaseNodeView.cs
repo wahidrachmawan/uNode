@@ -450,27 +450,75 @@ namespace MaxyGames.UNode.Editors {
 						inner.xMax <= outer.xMax - margin &&
 						inner.yMax <= outer.yMax - margin;
 				}
-				static bool IsConnectedToOthers(NodeObject node, NodeObject source) {
-					foreach(var port in node.ValueOutputs) {
-						foreach(var c in port.connections) {
-							if(c.isValid == false || c.isProxy) continue;
-							if(c.input?.node != source) {
-								if(c.input.node.node is INodeAsEdge)
-									continue;
-								return true;
+				//static bool IsConnectedToOthers(NodeObject node, NodeObject source) {
+				//	foreach(var port in node.ValueOutputs) {
+				//		foreach(var c in port.connections) {
+				//			if(c.isValid == false || c.isProxy) continue;
+				//			if(c.input?.node != source) {
+				//				if(c.input.node.node is INodeAsEdge)
+				//					continue;
+				//				return true;
+				//			}
+				//		}
+				//	}
+				//	return false;
+				//}
+				HashSet<UNodeView> nodes = new();
+				void FindInputs(UNodeView view) {
+					var node = view.nodeObject;
+					if(node.ValueOutputs.Count(p => p.hasValidConnections) > 0) {
+						int count = 0;
+						foreach(var port in node.ValueOutputs) {
+							foreach(var c in port.connections) {
+								if(c.isValid && c.isProxy == false) {
+									count++;
+								}
+								if(count > 1) {
+									return;
+								}
 							}
 						}
 					}
-					return false;
+					if(node.FlowInputs.Count(p => p.hasValidConnections) > 0) {
+						return;
+					}
+					if(node.FlowOutputs.Count(p => p.hasValidConnections) > 0) {
+						return;
+					}
+					if(node.ValueInputs.Count(p => p.hasValidConnections && p.connections.Any(c => c.isValid && c.isProxy == false)) > 1) {
+						return;
+					}
+					if(view == null || nodes.Add(view) == false) return;
+					foreach(var port in node.ValueInputs) {
+						if(port.hasValidConnections && port.connections.Any(c => c.isValid && c.isProxy == false)) {
+							var n = port.GetTargetNode();
+							if(n != null) {
+								view = owner.GetNodeView(n);
+								FindInputs(view);
+							}
+							break;
+						}
+					}
 				}
-				NodeObject source = this.nodeObject;
-				return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).
-					Where(n => !IsCompletelyInsideWithMargin(this.GetPosition(), n.GetPosition(), -50)).Distinct().
-					TakeWhile(n => {
-						bool flag = IsConnectedToOthers(n.nodeObject, this.nodeObject) == false;
-						source = n.nodeObject;
-						return flag;
-					});
+				foreach(var port in nodeObject.ValueInputs) {
+					if(port.isConnected) {
+						foreach(var c in port.connections) {
+							if(c.isValid && c.isProxy == false) {
+								var view = owner.GetNodeView(c.output.node);
+								FindInputs(view);
+							}
+						}
+					}
+				}
+				return nodes.Where(n => !IsCompletelyInsideWithMargin(this.GetPosition(), n.GetPosition(), -50));
+				//NodeObject source = this.nodeObject;
+				//return UIElementUtility.Nodes.FindNodeToCarryOnlyInputs(this).Distinct().
+				//	//Where(n => !IsCompletelyInsideWithMargin(this.GetPosition(), n.GetPosition(), -50)).
+				//	TakeWhile(n => {
+				//		bool flag = IsConnectedToOthers(n.nodeObject, this.nodeObject) == false;
+				//		source = n.nodeObject;
+				//		return flag;
+				//	});
 			}
 			return null;
 		}

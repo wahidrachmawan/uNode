@@ -241,7 +241,17 @@ namespace MaxyGames.UNode.Editors {
 				get => manager.searchString;
 				set => manager.searchString = value;
 			}
-			public SearchFilter searchFilter = SearchFilter.All;
+			public SearchFilter m_searchFilter = SearchFilter.All;
+			public SearchFilter searchFilter {
+				get => m_searchFilter;
+				set {
+					if(m_searchFilter != value) {
+						m_searchFilter = value;
+						if(manager.isReloading == false)
+							manager.ReloadInBackground();
+					}
+				}
+			}
 
 			private SearchKind m_searchKind = SearchKind.Contains;
 			private SearchKind m_deepSearchKind = SearchKind.Contains;
@@ -254,17 +264,25 @@ namespace MaxyGames.UNode.Editors {
 				}
 				set {
 					if(manager != null && manager.isDeep) {
-						m_deepSearchKind = value;
-						if(uNodePreference.preferenceData.m_itemDeepSearchKind != (int)value) {
-							uNodePreference.preferenceData.m_itemDeepSearchKind = (int)value;
-							uNodePreference.SavePreference();
+						if(m_deepSearchKind != value) {
+							m_deepSearchKind = value;
+							if(uNodePreference.preferenceData.m_itemDeepSearchKind != (int)value) {
+								uNodePreference.preferenceData.m_itemDeepSearchKind = (int)value;
+								uNodePreference.SavePreference();
+							}
+							if(manager.isReloading == false)
+								manager.ReloadInBackground();
 						}
 					}
 					else {
-						m_searchKind = value;
-						if(uNodePreference.preferenceData.m_itemSearchKind != (int)value) {
-							uNodePreference.preferenceData.m_itemSearchKind = (int)value;
-							uNodePreference.SavePreference();
+						if(m_searchKind != value) {
+							m_searchKind = value;
+							if(uNodePreference.preferenceData.m_itemSearchKind != (int)value) {
+								uNodePreference.preferenceData.m_itemSearchKind = (int)value;
+								uNodePreference.SavePreference();
+							}
+							if(manager.isReloading == false)
+								manager.ReloadInBackground();
 						}
 					}
 				}

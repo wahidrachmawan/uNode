@@ -70,9 +70,14 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					};
 					if(config.value == null) {
 						if(config.type.IsValueType) {
-							//Ensure to initialize value for value type since value type cannot be null
-							config.value = ReflectionUtils.CreateInstance(config.type);
-							member.CopyFrom(MemberData.CreateFromValue(config.value));
+							if(ReflectionUtils.CanCreateInstance(config.type)) {
+								//Ensure to initialize value for value type since value type cannot be null
+								config.value = ReflectionUtils.CreateInstance(config.type);
+								member.CopyFrom(MemberData.CreateFromValue(config.value));
+							}
+							else {
+								member.CopyFrom(MemberData.None);
+							}
 						}
 					}
 					else if(config.value.GetType().IsCastableTo(targetType) == false) {
