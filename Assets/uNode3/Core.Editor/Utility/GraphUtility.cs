@@ -346,6 +346,8 @@ namespace MaxyGames.UNode.Editors {
 							if(nodeObject.node is IRerouteNode) continue;
 							//Try remove other connections
 							foreach(var con in nodeObject.Connections.ToArray()) {
+								//Skip proxy connection
+								if(con.isProxy) continue;
 								if(!allElements.Contains(con.Input.node) || !allElements.Contains(con.Output.node)) {
 									con.Disconnect();
 								}

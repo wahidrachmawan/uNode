@@ -104,18 +104,54 @@ namespace MaxyGames.UNode.Editors {
 							break;
 						}
 						else {
+							object tValue = null;
 							var tField = fields.FirstOrDefault(f => f.Name == att.targetField);
 							if(tField != null) {
-								var tValue = tField.GetValueOptimized(option.property.value);
-								if(tValue != null) {
-									bool isHide = false;
-									bool same = true;
-									Type targetRefType = tValue.GetType();
-									if(targetRefType == typeof(MemberData)) {
-										var fieldVal = tValue as MemberData;
-										if(fieldVal != null) {
-											if(att.hideValue == null) {
-												same = (!fieldVal.isAssigned || !fieldVal.TargetSerializedType.isFilled);
+								tValue = tField.GetValueOptimized(option.property.value);
+							}
+							else {
+								var member = option.property.valueType.GetMemberCached(att.targetField);
+								if(member is PropertyInfo) {
+									tValue = (member as PropertyInfo).GetValueOptimized(option.property.value);
+								}
+								else if(member is MethodInfo) {
+									tValue = (member as MethodInfo).InvokeOptimized(option.property.value);
+								}
+								else {
+									throw new Exception("Invalid target field for HideAttribute: " + att.targetField);
+								}
+							}
+
+							bool isHide = false;
+							if(tValue != null) {
+								bool same = true;
+								Type targetRefType = tValue.GetType();
+								if(targetRefType == typeof(MemberData)) {
+									var fieldVal = tValue as MemberData;
+									if(fieldVal != null) {
+										if(att.hideValue == null) {
+											same = (!fieldVal.isAssigned || !fieldVal.TargetSerializedType.isFilled);
+											if(att.hideOnSame && same) {
+												isHide = true;
+											}
+											else if(!att.hideOnSame && !same) {
+												isHide = true;
+											}
+										}
+										else if(att.hideValue != null && (!att.hideOnSame || fieldVal.isAssigned && fieldVal.TargetSerializedType.isFilled)) {
+											Type validType = fieldVal.type;
+											if(validType != null) {
+												if(att.elementType && (validType.IsArray || validType.IsGenericType)) {
+													if(validType.IsArray) {
+														validType = validType.GetElementType();
+													}
+													else {
+														validType = validType.GetGenericArguments()[0];
+													}
+												}
+											}
+											if(att.hideValue is Type) {
+												same = ((Type)att.hideValue) == validType || validType.IsCastableTo((Type)att.hideValue);
 												if(att.hideOnSame && same) {
 													isHide = true;
 												}
@@ -123,70 +159,53 @@ namespace MaxyGames.UNode.Editors {
 													isHide = true;
 												}
 											}
-											else if(att.hideValue != null && (!att.hideOnSame || fieldVal.isAssigned && fieldVal.TargetSerializedType.isFilled)) {
-												Type validType = fieldVal.type;
-												if(validType != null) {
-													if(att.elementType && (validType.IsArray || validType.IsGenericType)) {
-														if(validType.IsArray) {
-															validType = validType.GetElementType();
-														}
-														else {
-															validType = validType.GetGenericArguments()[0];
-														}
-													}
-												}
-												if(att.hideValue is Type) {
-													same = ((Type)att.hideValue) == validType || validType.IsCastableTo((Type)att.hideValue);
+											else if(att.hideValue is Type[]) {
+												Type[] hT = att.hideValue as Type[];
+												for(int x = 0; x < hT.Length; x++) {
+													same = hT[x] == validType || validType.IsCastableTo(hT[x]);
 													if(att.hideOnSame && same) {
 														isHide = true;
+														break;
 													}
-													else if(!att.hideOnSame && !same) {
-														isHide = true;
-													}
-												}
-												else if(att.hideValue is Type[]) {
-													Type[] hT = att.hideValue as Type[];
-													for(int x = 0; x < hT.Length; x++) {
-														same = hT[x] == validType || validType.IsCastableTo(hT[x]);
-														if(att.hideOnSame && same) {
+													else if(!att.hideOnSame) {
+														if(!same) {
 															isHide = true;
-															break;
+															continue;
 														}
-														else if(!att.hideOnSame) {
-															if(!same) {
-																isHide = true;
-																continue;
-															}
-															else {
-																isHide = false;
-																break;
-															}
+														else {
+															isHide = false;
+															break;
 														}
 													}
 												}
 											}
 										}
 									}
-									else {
-										same = tValue.Equals(att.hideValue);
-										if(att.hideOnSame && same) {
-											isHide = true;
-										}
-										else if(!att.hideOnSame && !same) {
-											isHide = true;
-										}
-									}
-									if(isHide) {
-										if(att.defaultOnHide && tValue != att.defaultValue) {
-											fields[i].SetValueOptimized(option.property.value, att.defaultValue);
-										}
-										hide = true;
-										break;
-									}
 								}
 								else {
-									throw null;
+									same = tValue.Equals(att.hideValue);
+									if(att.hideOnSame && same) {
+										isHide = true;
+									}
+									else if(!att.hideOnSame && !same) {
+										isHide = true;
+									}
 								}
+							}
+							else {
+								if(att.hideOnSame && att.hideValue == null) {
+									isHide = true;
+								}
+								else if(!att.hideOnSame && att.hideValue != null) {
+									isHide = true;
+								}
+							}
+							if(isHide) {
+								if(att.defaultOnHide && tValue != att.defaultValue) {
+									fields[i].SetValueOptimized(option.property.value, att.defaultValue);
+								}
+								hide = true;
+								break;
 							}
 						}
 					}

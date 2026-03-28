@@ -253,6 +253,15 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
+		/// Determines whether the specified flow input port is registered in the generator data.
+		/// </summary>
+		/// <param name="port">The flow input port to check for registration.</param>
+		/// <returns>true if the port is registered; otherwise, false.</returns>
+		public static bool IsFlowRegistered(FlowInput port) {
+			return generatorData.regularNodes.Contains(port) || generatorData.stateNodes.Contains(port);
+		}
+
+		/// <summary>
 		/// Is the node is registered as Lambda flow?
 		/// </summary>
 		/// <param name="port"></param>

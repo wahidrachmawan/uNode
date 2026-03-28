@@ -601,6 +601,10 @@ namespace MaxyGames {
 				if(!allowYieldStatement && target.IsSelfCoroutine()) {
 					throw new Exception("The current block doesn't allow coroutines / yield statements");
 				}
+				if(generatorData.regularNodes.Contains(target) == false) {
+					//In case the node is not registered as regular node and state node it is possibile that the node is not used in the graph, so we will leave it as null.
+					return CG.WrapWithInformation(CG.Comment("Node is not connected from Entry or Event"), target);
+				}
 				throw new GraphException($"Forbidden to generate state code for port: {port.name} because it is not registered as State port.\nEnsure to register it using {nameof(CG)}.{nameof(CG.RegisterAsStateFlow)}\nFrom node: {target.node.GetTitle()}", target.node);
 			}
 			return debug + RunEvent(target);

@@ -10,6 +10,7 @@ namespace MaxyGames.UNode {
 		/// The target field name
 		/// </summary>
 		public string targetField;
+
 		/// <summary>
 		/// The value for hide
 		/// </summary>
@@ -20,6 +21,7 @@ namespace MaxyGames.UNode {
 		/// Will auto set the target object to default value when hide.
 		/// </summary>
 		public bool defaultOnHide;
+
 		private object m_defaultValue;
 		/// <summary>
 		/// The default value to set when hide

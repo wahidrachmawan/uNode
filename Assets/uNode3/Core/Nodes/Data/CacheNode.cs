@@ -11,6 +11,35 @@ namespace MaxyGames.UNode.Nodes {
 	public class CacheNode : FlowAndValueNode {
 		public SerializedType type = SerializedType.None;
 		public bool compactView;
+		[Hide(nameof(IsSupportConstant), false)]
+		public bool constant;
+		[Hide(nameof(IsSupportByRef), false)]
+		public bool byRef;
+
+		private bool IsSupportByRef() {
+			if(target.IsVariable) {
+				if(target.ValueType?.IsValueType == true) {
+					return true;
+				}
+			}
+			else if(target.ValueType?.IsByRef == true) {
+				return true;
+			}
+			return false;
+		}
+
+		private bool IsSupportConstant() {
+			if(target.UseDefaultValue) {
+				static bool IsSupportType(Type type) {
+					if(type == null) return false;
+					return type.IsPrimitive || type == typeof(string) || type == typeof(decimal);
+				}
+				if(target.DefaultValue.IsTargetingValue && IsSupportType(target.DefaultValue.type) && (type.typeKind == SerializedTypeKind.None || IsSupportType(type))) {
+					return true;
+				}
+			}
+			return false;
+		}
 
 		public ValueInput target { get; set; }
 
@@ -46,7 +75,23 @@ namespace MaxyGames.UNode.Nodes {
 			var name = this.name;
 			if(CG.CanDeclareLocal(output, exit)) {
 				name = CG.RegisterLocalVariable(this.name, ReturnType());
-				if(type.typeKind != SerializedTypeKind.None && target.ValueType == type) {
+				if(constant && IsSupportConstant()) {
+					CG.RegisterPort(enter, () => {
+						return CG.Flow(
+							"const " + CG.Type(type.type ?? ReturnType()) + " " + name.CGSet(target.CGValue()),
+							CG.FlowFinish(enter, exit)
+						);
+					});
+				}
+				else if(byRef && IsSupportByRef()) {
+					CG.RegisterPort(enter, () => {
+						return CG.Flow(
+							"ref " + CG.Type(type.type ?? ReturnType()) + " " + name.CGSet("ref " + target.CGValue()),
+							CG.FlowFinish(enter, exit)
+						);
+					});
+				}
+				else if(type.typeKind != SerializedTypeKind.None && target.ValueType == type) {
 					CG.RegisterPort(enter, () => {
 						var right = target.CGValue();
 						if(right == CG.Null) {

@@ -1437,34 +1437,47 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			if(targetField == null || !field.IsDefined(typeof(HideAttribute), true))
 				return false;
-			foreach(HideAttribute hideA in ((HideAttribute[])field.GetCustomAttributes(typeof(HideAttribute), true))) {
-				if(string.IsNullOrEmpty(hideA.targetField)) {
-					if(hideA.defaultOnHide && field.GetValueOptimized(targetField) != hideA.defaultValue) {
-						field.SetValueOptimized(targetField, hideA.defaultValue);
+			foreach(var att in field.GetCustomAttributes<HideAttribute>()) {
+				if(string.IsNullOrEmpty(att.targetField)) {
+					if(att.defaultOnHide && field.GetValueOptimized(targetField) != att.defaultValue) {
+						field.SetValueOptimized(targetField, att.defaultValue);
 					}
 					return true;
 				}
-				object targetRef = ReflectionUtils.GetFieldValue(targetField, hideA.targetField);
+				var member = field.DeclaringType.GetMemberCached(att.targetField);
+				object targetRef;
+				if(member is FieldInfo) {
+					targetRef = (member as FieldInfo).GetValueOptimized(targetField);
+				}
+				else if(member is PropertyInfo) {
+					targetRef = (member as PropertyInfo).GetValueOptimized(targetField);
+				}
+				else if(member is MethodInfo) {
+					targetRef = (member as MethodInfo).InvokeOptimized(targetField);
+				}
+				else {
+					throw new Exception("Invalid target field for HideAttribute: " + att.targetField);
+				}
+				bool isHide = false;
 				if(targetRef != null) {
-					bool isHide = false;
 					bool same = true;
 					Type targetRefType = targetRef.GetType();
 					if(targetRefType == typeof(MemberData)) {
 						var fieldVal = targetRef as MemberData;
 						if(fieldVal != null) {
-							if(hideA.hideValue == null) {
+							if(att.hideValue == null) {
 								same = (!fieldVal.isAssigned || !fieldVal.TargetSerializedType.isFilled);
-								if(hideA.hideOnSame && same) {
+								if(att.hideOnSame && same) {
 									isHide = true;
 								}
-								else if(!hideA.hideOnSame && !same) {
+								else if(!att.hideOnSame && !same) {
 									isHide = true;
 								}
 							}
-							else if(hideA.hideValue != null && (!hideA.hideOnSame || fieldVal.isAssigned && fieldVal.TargetSerializedType.isFilled)) {
+							else if(att.hideValue != null && (!att.hideOnSame || fieldVal.isAssigned && fieldVal.TargetSerializedType.isFilled)) {
 								Type validType = fieldVal.type;
 								if(validType != null) {
-									if(hideA.elementType && (validType.IsArray || validType.IsGenericType)) {
+									if(att.elementType && (validType.IsArray || validType.IsGenericType)) {
 										if(validType.IsArray) {
 											validType = validType.GetElementType();
 										}
@@ -1473,24 +1486,24 @@ namespace MaxyGames.UNode.Editors {
 										}
 									}
 								}
-								if(hideA.hideValue is Type) {
-									same = ((Type)hideA.hideValue) == validType || validType.IsCastableTo((Type)hideA.hideValue);
-									if(hideA.hideOnSame && same) {
+								if(att.hideValue is Type) {
+									same = ((Type)att.hideValue) == validType || validType.IsCastableTo((Type)att.hideValue);
+									if(att.hideOnSame && same) {
 										isHide = true;
 									}
-									else if(!hideA.hideOnSame && !same) {
+									else if(!att.hideOnSame && !same) {
 										isHide = true;
 									}
 								}
-								else if(hideA.hideValue is Type[]) {
-									Type[] hT = hideA.hideValue as Type[];
+								else if(att.hideValue is Type[]) {
+									Type[] hT = att.hideValue as Type[];
 									for(int i = 0; i < hT.Length; i++) {
 										same = hT[i] == validType || validType.IsCastableTo(hT[i]);
-										if(hideA.hideOnSame && same) {
+										if(att.hideOnSame && same) {
 											isHide = true;
 											break;
 										}
-										else if(!hideA.hideOnSame) {
+										else if(!att.hideOnSame) {
 											if(!same) {
 												isHide = true;
 												continue;
@@ -1506,20 +1519,28 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 					else {
-						same = targetRef.Equals(hideA.hideValue);
-						if(hideA.hideOnSame && same) {
+						same = targetRef.Equals(att.hideValue);
+						if(att.hideOnSame && same) {
 							isHide = true;
 						}
-						else if(!hideA.hideOnSame && !same) {
+						else if(!att.hideOnSame && !same) {
 							isHide = true;
 						}
 					}
-					if(isHide) {
-						if(hideA.defaultOnHide && field.GetValueOptimized(targetField) != hideA.defaultValue) {
-							field.SetValueOptimized(targetField, hideA.defaultValue);
-						}
-						return true;
+				}
+				else {
+					if(att.hideOnSame && att.hideValue == null) {
+						isHide = true;
 					}
+					else if(!att.hideOnSame && att.hideValue != null) {
+						isHide = true;
+					}
+				}
+				if(isHide) {
+					if(att.defaultOnHide && field.GetValueOptimized(targetField) != att.defaultValue) {
+						field.SetValueOptimized(targetField, att.defaultValue);
+					}
+					return true;
 				}
 			}
 			return false;
