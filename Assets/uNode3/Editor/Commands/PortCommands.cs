@@ -941,7 +941,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 			}
 		}
 
-		public override int order => 100;
+		public override int order => 0;
 
 		public override void OnClick(Node source, PortCommandData data, Vector2 mousePosition) {
 			NodeEditorUtility.AddNewNode(graph.graphData, mousePositionOnCanvas, (CacheNode n) => {

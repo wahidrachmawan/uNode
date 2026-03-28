@@ -141,23 +141,27 @@ namespace MaxyGames.UNode.Editors.Drawer {
 											continue;
 										}
 										var t = ReflectionUtils.GetMemberType(v);
-										bool valid = true;
+										MultipurposeMember.InitializerData value = null;
 										foreach(var vv in initializers) {
 											if(v.Name == vv.name) {
-												valid = false;
+												value = vv;
 												break;
 											}
 										}
-										if(valid) {
-											menu.AddItem(new GUIContent("Add Field/" + v.Name), false, () => {
+										menu.AddItem(new GUIContent("=> " + v.Name), value != null, () => {
+											if(value == null) {
 												uNodeEditorUtility.RegisterUndo(option.unityObject, "Add Field:" + v.Name);
 												initializers.Add(new MultipurposeMember.InitializerData() {
 													name = v.Name,
 													type = t,
 												});
-												uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-											});
-										}
+											}
+											else {
+												uNodeEditorUtility.RegisterUndo(option.unityObject, "Remove Field:" + v.Name);
+												initializers.Remove(value);
+											}
+											uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+										});
 									}
 								}
 								menu.ShowAsContext();

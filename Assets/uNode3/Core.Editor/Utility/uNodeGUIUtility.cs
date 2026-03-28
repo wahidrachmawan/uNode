@@ -1313,7 +1313,8 @@ namespace MaxyGames.UNode.Editors {
 							GUIChanged(unityObject);
 						}, cVal);
 					}
-					foreach(var v in fields) {
+					foreach(var info in fields) {
+						var v = info;
 						if(v is FieldInfo field) {
 							if(field.Attributes.HasFlags(FieldAttributes.InitOnly))
 								continue;
@@ -1327,31 +1328,37 @@ namespace MaxyGames.UNode.Editors {
 							continue;
 						}
 						var t = ReflectionUtils.GetMemberType(v);
-						bool valid = true;
+						ParameterValueData value = null;
 						foreach(var vv in init) {
 							if(v.Name == vv.name) {
-								valid = false;
+								value = vv;
 								break;
 							}
 						}
-						if(valid) {
-							menu.AddItem(new GUIContent("Add Field/" + v.Name), false, delegate (object obj) {
+						menu.AddItem(new GUIContent("=> " + v.Name), value != null, delegate (object obj) {
+							var ctor = obj as ConstructorValueData;
+							if(value == null) {
 								uNodeEditorUtility.RegisterUndo(unityObject, "Add Field:" + v.Name);
-								var ctor = obj as ConstructorValueData;
 								uNodeUtility.AddArray(ref ctor.initializer, new ParameterValueData(v.Name, t));
-								onChanged(ctor);
-								GUIChanged(unityObject);
-							}, cVal);
-						}
-					}
-					foreach(var v in init) {
-						menu.AddItem(new GUIContent("Remove Field/" + v.name), false, delegate (object obj) {
-							uNodeEditorUtility.RegisterUndo(unityObject, "Remove Field:" + v.name);
-							var ctor = (obj as object[])[0] as ConstructorValueData;
-							uNodeUtility.RemoveArray(ref ctor.initializer, (obj as object[])[1] as ParameterValueData);
+							}
+							else {
+								uNodeEditorUtility.RegisterUndo(unityObject, "Remove Field:" + v.Name);
+								uNodeUtility.RemoveArray(ref ctor.initializer, value);
+							}
 							onChanged(ctor);
 							GUIChanged(unityObject);
-						}, new object[] { cVal, v });
+						}, cVal);
+					}
+					foreach(var v in init) {
+						if(fields.Any(f => f.Name == v.name) == false) {
+							menu.AddItem(new GUIContent("Remove Incorrect Field/" + v.name), false, delegate (object obj) {
+								uNodeEditorUtility.RegisterUndo(unityObject, "Remove Field:" + v.name);
+								var ctor = (obj as object[])[0] as ConstructorValueData;
+								uNodeUtility.RemoveArray(ref ctor.initializer, (obj as object[])[1] as ParameterValueData);
+								onChanged(ctor);
+								GUIChanged(unityObject);
+							}, new object[] { cVal, v });
+						}
 					}
 				}
 				menu.ShowAsContext();
@@ -1528,11 +1535,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 			GUIContent buttonLabel = new GUIContent();
 			if(type == null) {
-				buttonLabel.text = "Unassigned";
+				buttonLabel.text = "(NULL)";
 			}
 			else {
 				buttonLabel.text = type.prettyName;
 				buttonLabel.tooltip = type.typeName;
+				buttonLabel.image = uNodeEditorUtility.GetTypeIcon(type.type);
 			}
 			position = EditorGUI.PrefixLabel(position, label);
 			position.width -= 20;
@@ -1569,10 +1577,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 			GUIContent buttonLabel = new GUIContent();
 			if(type == null) {
-				buttonLabel.text = "Unassigned";
+				buttonLabel.text = "(NULL)";
 			}
 			else {
 				buttonLabel.text = type.PrettyName();
+				buttonLabel.image = uNodeEditorUtility.GetTypeIcon(type);
 			}
 			position = EditorGUI.PrefixLabel(position, label);
 			position.width -= 20;
@@ -1610,7 +1619,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			GUIContent buttonLabel = new GUIContent();
 			if(type == null) {
-				buttonLabel.text = "Unassigned";
+				buttonLabel.text = "(NULL)";
 			}
 			else {
 				buttonLabel.text = type.prettyName;
@@ -1657,10 +1666,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 			GUIContent buttonLabel = new GUIContent();
 			if(type == null) {
-				buttonLabel.text = "Unassigned";
+				buttonLabel.text = "(NULL)";
 			}
 			else {
 				buttonLabel.text = type.PrettyName();
+				buttonLabel.image = uNodeEditorUtility.GetTypeIcon(type);
 			}
 			position = EditorGUI.PrefixLabel(position, label);
 			position.width -= 20;
@@ -2136,43 +2146,52 @@ namespace MaxyGames.UNode.Editors {
 				if(oldValue is string) {
 					t = TypeSerializer.Deserialize(oldValue as string, false);
 				}
-				if(EditorGUI.DropdownButton(position, new GUIContent(t != null ?
-					t.PrettyName(true) : string.IsNullOrEmpty(oldValue as string) ?
-					"null" : "Missing Type", t != null ? t.PrettyName(true) : null), FocusType.Keyboard) && Event.current.button == 0) {
-					GUI.changed = false;
-					if(Event.current.button == 0) {
-						FilterAttribute filter = ReflectionUtils.GetAttribute<FilterAttribute>(fieldAttribute);
-						if(filter == null)
-							filter = new FilterAttribute();
-						filter.OnlyGetType = true;
-						filter.UnityReference = false;
-						TypeBuilderWindow.Show(position, unityObject, filter, delegate (MemberData[] members) {
-							uNodeEditorUtility.RegisterUndo(unityObject, "");
-							oldValue = members[0].startType;
-							if(onChange != null) {
-								onChange(oldValue);
-							}
-							GUIChanged(unityObject);
-						}, t);
+				DrawTypeDrawer(position, t, label, type => {
+					uNodeEditorUtility.RegisterUndo(unityObject, "");
+					oldValue = type;
+					fieldValue = oldValue;
+					if(onChange != null) {
+						onChange(fieldValue);
 					}
-					else {
-						AutoCompleteWindow.CreateWindow(GUIToScreenRect(position), (items) => {
-							var member = CompletionEvaluator.CompletionsToMemberData(items);
-							if(member != null) {
-								uNodeEditorUtility.RegisterUndo(unityObject, "");
-								oldValue = member.startType;
-								if(onChange != null) {
-									onChange(oldValue);
-								}
-								GUIChanged(unityObject);
-								return true;
-							}
-							return false;
-						}, new CompletionEvaluator.CompletionSetting() {
-							validCompletionKind = CompletionKind.Type | CompletionKind.Namespace | CompletionKind.Keyword,
-						});
-					}
-				}
+					GUIChanged(unityObject);
+				}, ReflectionUtils.GetAttribute<FilterAttribute>(fieldAttribute), unityObject);
+				//if(EditorGUI.DropdownButton(position, new GUIContent(t != null ?
+				//	t.PrettyName(true) : string.IsNullOrEmpty(oldValue as string) ?
+				//	"null" : "Missing Type", t != null ? t.PrettyName(true) : null), FocusType.Keyboard) && Event.current.button == 0) {
+				//	GUI.changed = false;
+				//	if(Event.current.button == 0) {
+				//		FilterAttribute filter = ReflectionUtils.GetAttribute<FilterAttribute>(fieldAttribute);
+				//		if(filter == null)
+				//			filter = new FilterAttribute();
+				//		filter.OnlyGetType = true;
+				//		filter.UnityReference = false;
+				//		TypeBuilderWindow.Show(position, unityObject, filter, delegate (MemberData[] members) {
+				//			uNodeEditorUtility.RegisterUndo(unityObject, "");
+				//			oldValue = members[0].startType;
+				//			if(onChange != null) {
+				//				onChange(oldValue);
+				//			}
+				//			GUIChanged(unityObject);
+				//		}, t);
+				//	}
+				//	else {
+				//		AutoCompleteWindow.CreateWindow(GUIToScreenRect(position), (items) => {
+				//			var member = CompletionEvaluator.CompletionsToMemberData(items);
+				//			if(member != null) {
+				//				uNodeEditorUtility.RegisterUndo(unityObject, "");
+				//				oldValue = member.startType;
+				//				if(onChange != null) {
+				//					onChange(oldValue);
+				//				}
+				//				GUIChanged(unityObject);
+				//				return true;
+				//			}
+				//			return false;
+				//		}, new CompletionEvaluator.CompletionSetting() {
+				//			validCompletionKind = CompletionKind.Type | CompletionKind.Namespace | CompletionKind.Keyword,
+				//		});
+				//	}
+				//}
 				if(EditorGUI.EndChangeCheck()) {
 					uNodeEditorUtility.RegisterUndo(unityObject, "");
 					fieldValue = oldValue;
@@ -2478,46 +2497,55 @@ namespace MaxyGames.UNode.Editors {
 					t = TypeSerializer.Deserialize(oldValue as string, false);
 				}
 				Rect rect = GetRect();
-				rect = EditorGUI.PrefixLabel(rect, label);
-				if(EditorGUI.DropdownButton(rect, new GUIContent(t != null ?
-					t.PrettyName(true) : string.IsNullOrEmpty(oldValue as string) ?
-					"null" : "Missing Type", t != null ? t.PrettyName(true) : null), FocusType.Keyboard) && Event.current.button == 0) {
-					GUI.changed = false;
-					if(Event.current.button == 0) {
-						FilterAttribute filter = ReflectionUtils.GetAttribute<FilterAttribute>(fieldAttribute);
-						if(filter == null)
-							filter = new FilterAttribute();
-						filter.OnlyGetType = true;
-						filter.UnityReference = false;
-						TypeBuilderWindow.Show(rect, unityObject, filter, delegate (MemberData[] members) {
-							uNodeEditorUtility.RegisterUndo(unityObject, "");
-							oldValue = members[0].startType;
-							fieldValue = oldValue;
-							if(onChange != null) {
-								onChange(fieldValue);
-							}
-							GUIChanged(unityObject);
-						}, t);
+				DrawTypeDrawer(rect, t, label, type => {
+					uNodeEditorUtility.RegisterUndo(unityObject, "");
+					oldValue = type;
+					fieldValue = oldValue;
+					if(onChange != null) {
+						onChange(fieldValue);
 					}
-					else {
-						AutoCompleteWindow.CreateWindow(GUIToScreenRect(rect), (items) => {
-							var member = CompletionEvaluator.CompletionsToMemberData(items);
-							if(member != null) {
-								uNodeEditorUtility.RegisterUndo(unityObject, "");
-								oldValue = member.startType;
-								fieldValue = oldValue;
-								if(onChange != null) {
-									onChange(fieldValue);
-								}
-								GUIChanged(unityObject);
-								return true;
-							}
-							return false;
-						}, new CompletionEvaluator.CompletionSetting() {
-							validCompletionKind = CompletionKind.Type | CompletionKind.Namespace | CompletionKind.Keyword,
-						});
-					}
-				}
+					GUIChanged(unityObject);
+				}, ReflectionUtils.GetAttribute<FilterAttribute>(fieldAttribute), unityObject);
+				//rect = EditorGUI.PrefixLabel(rect, label);
+				//if(EditorGUI.DropdownButton(rect, new GUIContent(t != null ?
+				//	t.PrettyName(true) : string.IsNullOrEmpty(oldValue as string) ?
+				//	"null" : "Missing Type", t != null ? t.PrettyName(true) : null), FocusType.Keyboard) && Event.current.button == 0) {
+				//	GUI.changed = false;
+				//	if(Event.current.button == 0) {
+				//		FilterAttribute filter = ReflectionUtils.GetAttribute<FilterAttribute>(fieldAttribute);
+				//		if(filter == null)
+				//			filter = new FilterAttribute();
+				//		filter.OnlyGetType = true;
+				//		filter.UnityReference = false;
+				//		TypeBuilderWindow.Show(rect, unityObject, filter, delegate (MemberData[] members) {
+				//			uNodeEditorUtility.RegisterUndo(unityObject, "");
+				//			oldValue = members[0].startType;
+				//			fieldValue = oldValue;
+				//			if(onChange != null) {
+				//				onChange(fieldValue);
+				//			}
+				//			GUIChanged(unityObject);
+				//		}, t);
+				//	}
+				//	else {
+				//		AutoCompleteWindow.CreateWindow(GUIToScreenRect(rect), (items) => {
+				//			var member = CompletionEvaluator.CompletionsToMemberData(items);
+				//			if(member != null) {
+				//				uNodeEditorUtility.RegisterUndo(unityObject, "");
+				//				oldValue = member.startType;
+				//				fieldValue = oldValue;
+				//				if(onChange != null) {
+				//					onChange(fieldValue);
+				//				}
+				//				GUIChanged(unityObject);
+				//				return true;
+				//			}
+				//			return false;
+				//		}, new CompletionEvaluator.CompletionSetting() {
+				//			validCompletionKind = CompletionKind.Type | CompletionKind.Namespace | CompletionKind.Keyword,
+				//		});
+				//	}
+				//}
 				EditorGUI.EndChangeCheck();
 			}
 			else if(type.IsArray) {

@@ -107,32 +107,37 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							continue;
 						}
 						var t = ReflectionUtils.GetMemberType(v);
-						bool valid = true;
+						Nodes.ExposedNode.OutputData value = null;
 						foreach(var vv in node.outputDatas) {
 							if(v.Name == vv.name) {
-								valid = false;
+								value = vv;
 								break;
 							}
 						}
-						if(valid) {
-							menu.AddItem(new GUIContent("Add Field/" + v.Name), false, delegate () {
-								uNodeEditorUtility.RegisterUndo(node.nodeObject.GetUnityObject(), "Add Field:" + v.Name);
+						menu.AddItem(new GUIContent("=> " + v.Name), value != null, delegate () {
+							uNodeEditorUtility.RegisterUndo(node.nodeObject.GetUnityObject(), "Add Field:" + v.Name);
+							if(value == null) {
 								node.outputDatas.Add(new Nodes.ExposedNode.OutputData() {
 									name = v.Name,
 									type = t,
 								});
-								uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-							});
-						}
+							}
+							else {
+								node.outputDatas.Remove(value);
+							}
+							uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+						});
 					}
 					for(int i = 0; i < node.outputDatas.Count; i++) {
 						var v = node.outputDatas[i];
-						menu.AddItem(new GUIContent("Remove Field/" + v.name), false, delegate (object obj) {
-							uNodeEditorUtility.RegisterUndo(node.nodeObject.GetUnityObject(), "Remove Field:" + v.name);
-							node.outputDatas.Remove(v);
-							node.Register();
-							uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-						}, v);
+						if(fields.Any(f => f.Name == v.name) == false) {
+							menu.AddItem(new GUIContent("Remove Incorrect Field/" + v.name), false, delegate (object obj) {
+								uNodeEditorUtility.RegisterUndo(node.nodeObject.GetUnityObject(), "Remove Field:" + v.name);
+								node.outputDatas.Remove(v);
+								node.Register();
+								uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
+							}, v);
+						}
 					}
 					menu.ShowAsContext();
 				},

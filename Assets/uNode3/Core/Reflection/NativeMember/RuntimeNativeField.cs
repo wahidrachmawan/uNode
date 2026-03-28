@@ -50,10 +50,10 @@ namespace MaxyGames.UNode {
 					if(reference.modifier.Static) {
 						att |= FieldAttributes.Static;
 					}
-					else if(owner.IsAbstract && owner.IsSealed) {
+					else if(owner.IsAbstract && owner.IsSealed || reference.modifier.Const) {
 						att |= FieldAttributes.Static;
 					}
-					if(reference.modifier.ReadOnly) {
+					if(reference.modifier.ReadOnly || reference.modifier.Const) {
 						att |= FieldAttributes.InitOnly;
 					}
 					return att;

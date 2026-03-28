@@ -1394,7 +1394,7 @@ namespace MaxyGames {
 				string vType;
 				if(reference is Variable) {
 					vType = Type((reference as Variable).type);
-					isGeneric = (reference as Variable).isOpenGeneric;
+					isGeneric = (reference as Variable).IsOpenGeneric;
 				}
 				else {
 					vType = Type(type);
@@ -1423,7 +1423,7 @@ namespace MaxyGames {
 					}
 				}
 				else {
-					if(!ReflectionUtils.IsNullOrDefault(defaultValue) && !(graph is IClassGraph classGraph && classGraph.InheritType == typeof(ValueType))) {
+					if(modifier?.Const == true || !ReflectionUtils.IsNullOrDefault(defaultValue) && !(graph is IClassGraph classGraph && classGraph.InheritType == typeof(ValueType))) {
 						if(defaultValue is IGraph obj && obj != graph) {
 							result += (m + vType + " " + name + " = " + Value(defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
 						}

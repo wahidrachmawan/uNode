@@ -230,7 +230,7 @@ namespace MaxyGames.UNode {
 					if(returnType != typeof(void)) {
 						createOutPort?.Invoke();
 					}
-					if(target.targetType == MemberData.TargetType.uNodeFunction || lastMember is MethodBase) {
+					if(target.targetType == MemberData.TargetType.uNodeFunction || lastMember is MethodBase && lastMember.Name != "get_Item") {
 						createFlowPort?.Invoke();
 					}
 					if(createInstancePort && !target.isStatic && target.IsTargetingReflection) {

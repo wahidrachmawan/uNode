@@ -219,7 +219,9 @@ namespace MaxyGames.UNode.Editors {
 		public static UnityEditor.Compilation.Assembly AssemblyCSharp {
 			get {
 				if(CachedData.assemblyCSharp == null && CachedData.hasDefaultAssembly == null) {
-					CachedData.hasDefaultAssembly = false;
+					if(uNodeThreadUtility.frame > 100) {
+						CachedData.hasDefaultAssembly = false;
+					}
 					uNodeThreadUtility.RunOnMainThread(() => {
 						var assemblies = CompilationPipeline.GetAssemblies();
 						for(int i = 0; i < assemblies.Length; i++) {
@@ -234,6 +236,28 @@ namespace MaxyGames.UNode.Editors {
 				return CachedData.assemblyCSharp;
 			}
 		}
+
+		///// <summary>
+		///// Retrieves the default scripting define symbols for the current build target group.
+		///// </summary>
+		///// <returns>An array of strings containing the scripting define symbols.</returns>
+		//public static string[] GetDefaultDefines() {
+		//	if(AssemblyCSharp != null) {
+		//		return AssemblyCSharp.defines;
+		//	}
+		//	UnityEditor.BuildTargetGroup group = UnityEditor.EditorUserBuildSettings.selectedBuildTargetGroup;
+		//	UnityEditor.PlayerSettings.GetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.FromBuildTargetGroup(group), out var result);
+		//	return result;
+		//}
+
+		//public static IEnumerable<string> GetDefaultAssemblyReferences() {
+		//	if(AssemblyCSharp != null) {
+		//		return AssemblyCSharp.allReferences;
+		//	}
+		//	//var buildTarget = UnityEditor.EditorUserBuildSettings.activeBuildTarget;
+		//	//UnityEditor.PluginImporter[] plugins = UnityEditor.PluginImporter.GetImporters(buildTarget);
+		//	return CompilationPipeline.GetAssemblies().Select(asm => asm.outputPath);
+		//}
 
 		/// <summary>
 		/// Retrieves the <see cref="UnityEditor.Compilation.Assembly"/> that contains the specified script file path.

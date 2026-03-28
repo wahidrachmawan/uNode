@@ -224,17 +224,19 @@ namespace MaxyGames.UNode.Editors {
 					});
 					d.graphEditor.Refresh();
 				}, DropdownMenuAction.AlwaysEnabled);
-				yield return new DropdownMenuAction("Set", evt => {
-					NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (Nodes.NodeSetValue n) {
-						n.EnsureRegistered();
-						var mData = MemberData.CreateFromValue(obj);
-						n.target.AssignToDefault(mData);
-						if(mData.type != null) {
-							n.value.AssignToDefault(MemberData.Default(mData.type));
-						}
-					});
-					d.graphEditor.Refresh();
-				}, DropdownMenuAction.AlwaysEnabled);
+				if(obj.IsReadOnly == false) {
+					yield return new DropdownMenuAction("Set", evt => {
+						NodeEditorUtility.AddNewNode(d.graphData, obj.name, null, d.mousePositionOnCanvas, delegate (Nodes.NodeSetValue n) {
+							n.EnsureRegistered();
+							var mData = MemberData.CreateFromValue(obj);
+							n.target.AssignToDefault(mData);
+							if(mData.type != null) {
+								n.value.AssignToDefault(MemberData.Default(mData.type));
+							}
+						});
+						d.graphEditor.Refresh();
+					}, DropdownMenuAction.AlwaysEnabled);
+				}
 			}
 			yield break;
 		}

@@ -742,7 +742,9 @@ namespace MaxyGames.UNode.Editors {
 			if(nodeObject == null || nodeObject.node == null) return;
 			foreach(var port in nodeObject.ValueInputs) {
 				if(port != null && !port.isConnected && port.CanGetValue() && 
-					port.DefaultValue != null && port.DefaultValue.IsTargetingValue && ReflectionUtils.IsNullOrDefault(port.DefaultValue.Get(null))) {
+					(port.DefaultValue == null || 
+					port.DefaultValue.isAssigned == false || 
+					port.DefaultValue.IsTargetingValue && ReflectionUtils.IsNullOrDefault(port.DefaultValue.Get(null)))) {
 
 					var type = port.type;
 					if(port.filter != null) {
@@ -1343,11 +1345,11 @@ namespace MaxyGames.UNode.Editors {
 			if(nodeFilter == NodeFilter.None)
 				return true;
 			if(nodeFilter.HasFlags(NodeFilter.FlowInput)) {
-				if(menuItem.hasFlowInput == false)
+				if(menuItem.hasFlowOutput == false)
 					return false;
 			}
 			if(nodeFilter.HasFlags(NodeFilter.FlowOutput)) {
-				if(menuItem.hasFlowOutput == false)
+				if(menuItem.hasFlowInput == false)
 					return false;
 			}
 			if(nodeFilter.HasFlags(NodeFilter.ValueInput)) {

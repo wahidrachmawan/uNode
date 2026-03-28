@@ -35,7 +35,8 @@ namespace MaxyGames.UNode {
 			}
 		}
 
-		public bool isOpenGeneric => serializedValue?.serializedType.isOpenGeneric ?? false;
+		public bool IsReadOnly => modifier != null && (modifier.ReadOnly || modifier.Const);
+		public bool IsOpenGeneric => serializedValue?.serializedType.isOpenGeneric ?? false;
 
 		public object defaultValue {
 			get {

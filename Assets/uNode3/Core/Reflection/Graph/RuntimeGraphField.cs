@@ -34,7 +34,7 @@ namespace MaxyGames.UNode {
 					if(owner.IsAbstract && owner.IsSealed) {
 						att |= FieldAttributes.Static;
 					}
-					if(modifier.ReadOnly) {
+					if(modifier.ReadOnly || modifier.Const) {
 						att |= FieldAttributes.InitOnly;
 					}
 					return att;

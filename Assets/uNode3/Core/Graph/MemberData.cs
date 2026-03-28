@@ -1324,8 +1324,13 @@ namespace MaxyGames.UNode {
 								return ReflectionUtils.CanSetMemberValue(members[members.Length - 1]);
 							}
 						}
-						else
+						else {
+							var reference = startItem.GetReferenceValue() as Variable;
+							if(reference != null) {
+								return reference.IsReadOnly == false;
+							}
 							return true;
+						}
 						break;
 				}
 			}

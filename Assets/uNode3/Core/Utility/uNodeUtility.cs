@@ -1018,6 +1018,15 @@ namespace MaxyGames.UNode {
 								}
 							}
 							else if(i + 1 == mTarget.Items.Length) {
+								var nm = mTarget.Items[i].GetActualName();
+								if(nm == "get_Item") {
+									result += "Get Item".WrapWithColor(typeColor);
+									continue;
+								}
+								else if(nm == "set_Item") {
+									result += "Set Item".WrapWithColor(typeColor);
+									continue;
+								}
 								result += mTarget.Items[i].GetActualName().WrapWithColor(typeColor);
 							}
 							else {
@@ -1177,6 +1186,15 @@ namespace MaxyGames.UNode {
 							}
 						}
 						else if(i + 1 == member.Items.Length) {
+							var nm = member.Items[i].GetActualName();
+							if(nm == "get_Item") {
+								result += "Get Item".WrapWithColor(typeColor);
+								continue;
+							}
+							else if(nm == "set_Item") {
+								result += "Set Item".WrapWithColor(typeColor);
+								continue;
+							}
 							result += member.Items[i].GetActualName().WrapWithColor(typeColor);
 						}
 						else {

@@ -2390,7 +2390,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override bool? CanMakeConnection(ConnectionContext context) {
-			if(context.InputNode is Nodes.MultiArithmeticNode node) {
+			if(context.InputNode is Nodes.MultiArithmeticNode) {
+				var node = context.InputNode as Nodes.MultiArithmeticNode;
 				var output = context.ValueOutput;
 				var outputType = output.type;
 				if(outputType.IsPrimitive) {
@@ -2435,11 +2436,64 @@ namespace MaxyGames.UNode.Editors {
 				}
 				return outputType.IsCastableTo(context.ValueInput.type, true);
 			}
+			//TODO: smart auto
+			//if(context.InputNode is Nodes.ComparisonNode) {
+			//	var node = context.InputNode as Nodes.ComparisonNode;
+			//	var output = context.ValueOutput;
+			//	var outputType = output.type;
+			//	if(outputType.IsPrimitive) {
+			//		if(IsPrimitiveNumber(outputType)) {
+			//			return true;
+			//		}
+			//		return outputType.IsCastableTo(node.inputType, true);
+			//	}
+			//	var kind = node.operatorKind;
+			//	switch(kind) {
+			//		case ComparisonType.Equal: {
+			//			if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Equality).Any()) {
+			//				return true;
+			//			}
+			//			break;
+			//		}
+			//		case ComparisonType.NotEqual: {
+			//			if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.Inequality).Any()) {
+			//				return true;
+			//			}
+			//			break;
+			//		}
+			//		case ComparisonType.GreaterThan: {
+			//			if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.GreaterThan).Any()) {
+			//				return true;
+			//			}
+			//			break;
+			//		}
+			//		case ComparisonType.GreaterThanOrEqual: {
+			//			if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.GreaterThanOrEqual).Any()) {
+			//				return true;
+			//			}
+			//			break;
+			//		}
+			//		case ComparisonType.LessThan: {
+			//			if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.LessThan).Any()) {
+			//				return true;
+			//			}
+			//			break;
+			//		}
+			//		case ComparisonType.LessThanOrEqual: {
+			//			if(EditorReflectionUtility.GetOperators(outputType, OperatorKind.LessThanOrEqual).Any()) {
+			//				return true;
+			//			}
+			//			break;
+			//		}
+			//	}
+			//	return outputType.IsCastableTo(context.ValueInput.type, true);
+			//}
 			return null;
 		}
 
 		public override bool ProcessPortConnection(ConnectionContext context) {
-			if(context.InputNode is Nodes.MultiArithmeticNode node) {
+			if(context.InputNode is Nodes.MultiArithmeticNode) {
+				var node = context.InputNode as Nodes.MultiArithmeticNode;
 				var output = context.ValueOutput;
 				var outputType = output.type;
 				var input = context.ValueInput;

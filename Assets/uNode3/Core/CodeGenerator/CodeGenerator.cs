@@ -676,7 +676,7 @@ namespace MaxyGames {
 				//	result += (ParseType(vdata.type) + " " + GetVariableName(vdata) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
 				//	continue;
 				//}
-				if(vdata.isOpenGeneric) {
+				if(vdata.IsOpenGeneric) {
 					string vType = Type(vdata.type);
 					if(vdata.defaultValue != null) {
 						result += (vType + " " + GetVariableName(vdata) + $" = default({vType});").AddFirst("\n", !string.IsNullOrEmpty(result));
@@ -2444,6 +2444,9 @@ namespace MaxyGames {
 			}
 			else if(obj is MemberData) {
 				return Value(obj as MemberData, setVariable: setVariable, autoConvert: autoConvert);
+			}
+			else if(obj is SerializedType) {
+				return Value((obj as SerializedType).type, initializer, autoConvert, setVariable);
 			}
 			else if(obj is ValueInput) {
 				var port = obj as ValueInput;
