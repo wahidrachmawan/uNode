@@ -62,6 +62,52 @@ namespace MaxyGames.UNode.Editors {
 			set => editorData.usingNamespaces = value;
 		}
 
+		public ItemSelector SetCustomItems(List<CustomItem> items, bool defaultExpandState = true) {
+			this.customItems = items;
+			this.customItemDefaultExpandState = defaultExpandState;
+			return this;
+		}
+
+		public ItemSelector SetFavoriteHandler(Func<List<CustomItem>> handler) {
+			this.favoriteHandler = handler;
+			return this;
+		}
+
+		public ItemSelector SetUsingNamespaces(IEnumerable<string> namespaces) {
+			this.usingNamespaces = new HashSet<string>(namespaces);
+			return this;
+		}
+
+		public ItemSelector SetFilter(FilterAttribute filter) {
+			this.filter = filter;
+			return this;
+		}
+
+		public ItemSelector SetDisplayNoneItem(bool display) {
+			this.displayNoneOption = display;
+			return this;
+		}
+
+		public ItemSelector SetDisplayCustomVariable(bool display) {
+			this.displayCustomVariable = display;
+			return this;
+		}
+
+		public ItemSelector SetDisplayGeneralType(bool display) {
+			this.displayGeneralType = display;
+			return this;
+		}
+
+		public ItemSelector SetDisplayRecentItem(bool display) {
+			this.displayRecentItem = display;
+			return this;
+		}
+
+		public ItemSelector SetDisplayDefaultItem(bool display) {
+			this.displayDefaultItem = display;
+			return this;
+		}
+
 		#region PrivateFields
 		private FilterAttribute filter {
 			get => editorData.filter;
@@ -377,28 +423,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static List<CustomItem> MakeCustomItemsForInstancedType<T>(Action<object> onClick, bool allowSceneObject) where T : UnityEngine.Object {
-			var items = new List<CustomItem>();
-			//TODO: fixme
-			//if (typeof(T).IsCastableTo(typeof(Component))) {
-			//	List<T> components;
-			//	if(typeof(T).IsCastableTo(typeof(uNodeComponentSystem))) {
-			//		components = GraphUtility.FindGraphComponents<T>();
-			//	} else {
-			//		components = uNodeEditorUtility.FindComponentInPrefabs<T>();
-			//	}
-			//	foreach (var c in components) {
-			//		if (c is Component comp) {
-			//			items.Add(ItemSelector.CustomItem.Create($"{comp.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Project", icon: uNodeEditorUtility.GetTypeIcon(c)));
-			//		}
-			//	}
-			//	if (allowSceneObject) {
-			//		var objs = GameObject.FindObjectsOfType<T>();
-			//		foreach (var c in objs) {
-			//			items.Add(ItemSelector.CustomItem.Create($"{(c as Component).gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: uNodeEditorUtility.GetTypeIcon(c)));
-			//		}
-			//	}
-			//}
-			return items;
+			return MakeCustomItemsForInstancedType(typeof(T), onClick, allowSceneObject);
 		}
 
 		public static List<CustomItem> MakeCustomItemsForInstancedType(Type type, Action<object> onClick, bool allowSceneObject) {
@@ -407,7 +432,8 @@ namespace MaxyGames.UNode.Editors {
 			if (type.IsCastableTo(typeof(Component))) {
 				var components = uNodeEditorUtility.FindComponentInPrefabs<IRuntimeComponent>();
 				foreach (var c in components) {
-					if (c is IGraph) continue; //Ensure to continue if it's a graph
+					//if (c is IGraph) continue; //Ensure to continue if it's a graph
+
 					if(c.IsTypeOf(type) == false) continue;
 					items.Add(ItemSelector.CustomItem.Create($"{(c as Component).gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Project", icon: icon));
 				}
@@ -422,7 +448,8 @@ namespace MaxyGames.UNode.Editors {
 			else if (type.IsCastableTo(typeof(ScriptableObject))) {
 				var assets = uNodeEditorUtility.FindAssetsByType<ScriptableObject>();
 				foreach (var c in assets) {
-					if(c is IGraph) continue; //Ensure to continue if it's a graph
+					//if(c is IGraph) continue; //Ensure to continue if it's a graph
+
 					if(c.IsTypeOf(type) == false) continue; 
 					items.Add(ItemSelector.CustomItem.Create($"{c.name} ({type.Name})", onClick, c, "Project", icon: icon));
 				}

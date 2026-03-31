@@ -1092,7 +1092,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		static GraphAsset draggedUNODE;
 		static void HierarchyItem(int instanceID, Rect selectionRect) {
 			//Show uNode Icon
 			if(uNodeIcon != null) {
@@ -1105,75 +1104,21 @@ namespace MaxyGames.UNode.Editors {
 					GUI.Label(r, uNodeIcon);
 				}
 			}
-			//HandleDragAndDropEvents();
+		}
+
+		private static void HandleDragAndDropEvents() {
 			//if(Event.current.type == EventType.DragUpdated) {
 			//	if(DragAndDrop.objectReferences?.Length == 1) {
 			//		var obj = DragAndDrop.objectReferences[0];
-			//		if(obj is GraphAsset graphAsset) {
-			//			DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+			//		if(obj is GraphAsset && !(obj is IIndependentGraph)) {
+			//			Event.current.type = EventType.MouseDrag;
+			//			DragAndDrop.PrepareStartDrag();
+			//			DragAndDrop.objectReferences = new Object[0];
+			//			DragAndDrop.StartDrag("Drag uNode");
 			//			Event.current.Use();
 			//		}
 			//	}
 			//}
-			//Drag & Drop
-			//if(Event.current.type == EventType.DragPerform) {
-			//	if(DragAndDrop.objectReferences?.Length == 1) {
-			//		var obj = DragAndDrop.objectReferences[0];
-			//		if(obj is GraphAsset graphAsset) {
-			//			//var comp = (obj as GameObject).GetComponent<uNodeRoot>();
-			//			//if(comp is uNodeRuntime) {
-			//			//	//if(EditorUtility.DisplayDialog("", "Do you want to Instantiate the Prefab or Spawn the graph?", "Prefab", "Graph")) {
-			//			//	//	comp = null;
-			//			//	//	PrefabUtility.InstantiatePrefab(comp);
-			//			//	//	Event.current.Use();
-			//			//	//}
-			//			//	return;
-			//			//}
-			//			//if(comp != null && (comp is IClassComponent || comp is IGraphWithUnityEvent)) 
-			//			{
-			//				draggedUNODE = graphAsset;
-			//				DragAndDrop.AcceptDrag();
-			//				Event.current.Use();
-			//				EditorApplication.delayCall += () => {
-			//					if(draggedUNODE != null && draggedUNODE is ClassDefinition co && co.InheritType.IsCastableTo(typeof(MonoBehaviour))) {
-			//						var gameObject = new GameObject(draggedUNODE.GetGraphName());
-			//						var spawner = gameObject.AddComponent<ClassComponent>();
-			//						spawner.target = co;
-			//						Selection.objects = new Object[] { gameObject };
-			//						draggedUNODE = null;
-			//					}
-			//				};
-			//			}
-			//		}
-			//	}
-			//}
-
-			//if(draggedUNODE != null && draggedUNODE is ClassDefinition co && co.InheritType.IsCastableTo(typeof(MonoBehaviour))) {
-			//	if(selectionRect.Contains(Event.current.mousePosition)) {
-			//		var gameObject = EditorUtility.InstanceIDToObject(instanceID) as GameObject;
-			//		if(gameObject != null) {
-			//			var spawner = gameObject.AddComponent<ClassComponent>();
-			//			spawner.target = co;
-			//			Selection.objects = new Object[] { gameObject };
-			//			draggedUNODE = null;
-			//		}
-			//	}
-			//}
-		}
-
-		private static void HandleDragAndDropEvents() {
-			if(Event.current.type == EventType.DragUpdated) {
-				if(DragAndDrop.objectReferences?.Length == 1) {
-					var obj = DragAndDrop.objectReferences[0];
-					if(obj is GraphAsset && !(obj is IIndependentGraph)) {
-						Event.current.type = EventType.MouseDrag;
-						DragAndDrop.PrepareStartDrag();
-						DragAndDrop.objectReferences = new Object[0];
-						DragAndDrop.StartDrag("Drag uNode");
-						Event.current.Use();
-					}
-				}
-			}
 		}
 
 		private static void OnSceneGUI(SceneView obj) {

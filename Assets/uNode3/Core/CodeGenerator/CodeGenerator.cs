@@ -1484,6 +1484,14 @@ namespace MaxyGames {
 			return $"typeof({type})";
 		}
 
+		public static string Typeof(ITypeGraph type) {
+			return $"typeof({Type(type)})";
+		}
+
+		public static string Type(ITypeGraph graph) {
+			return DoParseType(graph.FullGraphName);
+		}
+
 		/// <summary>
 		/// Function to get correct code for type
 		/// </summary>
@@ -1616,6 +1624,26 @@ namespace MaxyGames {
 				return result;
 			}
 			return type.FullName.Replace('+', '.');
+		}
+
+		private static string DoParseType(string type) {
+			if(setting.fullTypeName) {
+				return type.Replace('+', '.');
+			}
+			var ns = string.Join('.', type.Split('.').SkipLast(1));
+			if(setting.usingNamespace.Contains(ns)) {
+				string result = type.Replace('+', '.').Remove(0, type.Length + 1);
+				string firstName = result.Split('.')[0];
+				generatorData.ValidateTypes(ns, setting.usingNamespace, t => {
+					if(t.Name.Equals(firstName, StringComparison.Ordinal)) {
+						result = type.Replace('+', '.');
+						return true;
+					}
+					return false;
+				});
+				return result;
+			}
+			return type.Replace('+', '.');
 		}
 
 		/// <summary>

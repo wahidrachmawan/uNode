@@ -17,6 +17,8 @@ namespace MaxyGames.UNode.Nodes {
 		[HideInInspector]
 		public List<Data> inputs = new List<Data>();
 
+		private const bool cacheEvent = true;
+
 		public override string GetTitle() {
 			if(target != null) {
 				return "Trigger: " + target.EventName;
@@ -48,17 +50,44 @@ namespace MaxyGames.UNode.Nodes {
 
 		protected override string GenerateFlowCode() {
 #if UNITY_EDITOR
-			var assetID = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(target));
-			return CG.Flow(
-				CG.Invoke(
-					typeof(uNodeUtility),
-					nameof(uNodeUtility.GetGlobalEvent),
-					CG.Value(assetID)).
-					CGFlowInvoke(
-						nameof(IGlobalEvent.Trigger),
-						CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
-					),
-				CG.FlowFinish(enter, exit));
+			// If the graph is MonoBehaviour, we can cache the event to avoid call GetGlobalEvent every time.
+			if(cacheEvent && nodeObject.graphContainer.GetGraphType().IsCastableTo(typeof(MonoBehaviour))) {
+				var result = CG.GetUserObject<string>((target, "TRIGGER_EVENT"));
+				if(result == null) {
+					var assetID = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(target));
+					var nm = CG.RegisterPrivateVariable("m_Event_" + target.EventName, target.GetType());
+					CG.InsertCodeToFunction("Awake", 
+						CG.Set(
+							nm, 
+							CG.Invoke(
+								typeof(uNodeUtility), 
+								nameof(uNodeUtility.GetGlobalEvent),
+								CG.Value(assetID))
+							.CGConvert(target.GetType())), 
+						int.MinValue);
+					result = CG.Flow(
+						nm.CGFlowInvoke(
+							nameof(IGlobalEvent.Trigger),
+							CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+						),
+						CG.FlowFinish(enter, exit));
+					CG.RegisterUserObject((target, "TRIGGER_EVENT"), result);
+				}
+				return result;
+			}
+			else {
+				var assetID = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(target));
+				return CG.Flow(
+					CG.Invoke(
+						typeof(uNodeUtility),
+						nameof(uNodeUtility.GetGlobalEvent),
+						CG.Value(assetID)).
+						CGFlowInvoke(
+							nameof(IGlobalEvent.Trigger),
+							CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+						),
+					CG.FlowFinish(enter, exit));
+			}
 			
 #else
 			throw null;
