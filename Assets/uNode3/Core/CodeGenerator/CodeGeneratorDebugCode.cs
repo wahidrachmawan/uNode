@@ -148,10 +148,10 @@ namespace MaxyGames {
 					Value(port.id),
 					Value(isSet));
 			}
-			if(port.IsVariable && port.CanSetValue()) {
-				var type = port.ValueType ?? port.type;
+			var type = port.ValueType ?? port.type;
+			if(port.CanSetValue() || type.IsByRef) {
 				//Check when variable is struct and it is not readonly.
-				if(type.IsValueType && !type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), false)) {
+				if((port.IsVariable && type.IsValueType || type.IsByRef && type.ElementType().IsValueType) && !type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), false)) {
 					var ports = StaticHashPool<UPort>.Allocate();
 
 					static void FindAllSourcePort(UPort sourcePort, HashSet<UPort> ports) {

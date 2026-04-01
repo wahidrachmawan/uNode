@@ -831,7 +831,8 @@ namespace MaxyGames.UNode.Editors {
 					p = node.nodeObject.ValueOutputs.FirstOrDefault();
 				}
 				if(p != null) {
-					p.ConnectTo(rightPort.GetPortValue());
+					var con = p.ConnectTo(rightPort.GetPortValue());
+					NodeEditorUtility.AutoRerouteAndProxy(con, owner.graphData.currentCanvas);
 				}
 				leftPort.owner.MarkRepaint();
 				rightPort.owner.MarkRepaint();

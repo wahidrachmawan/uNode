@@ -97,8 +97,8 @@ namespace MaxyGames.UNode {
 		/// connection logic. Ensure that both ports are valid and compatible before calling this method.</remarks>
 		/// <param name="source">The source port to connect from. Cannot be <c>null</c>.</param>
 		/// <param name="destination">The destination port to connect to. Cannot be <c>null</c>.</param>
-		public static void ConnectTo(this UPort source, UPort destination) {
-			Connection.CreateAndConnect(source, destination);
+		public static Connection ConnectTo(this UPort source, UPort destination) {
+			return Connection.CreateAndConnect(source, destination);
 		}
 
 		/// <summary>
@@ -122,8 +122,10 @@ namespace MaxyGames.UNode {
 		/// method.</remarks>
 		/// <param name="source">The source <see cref="UPort"/> to initiate the connection from.</param>
 		/// <param name="destination">The destination <see cref="UPort"/> to connect to.</param>
-		public static void ConnectToAsProxy(this UPort source, UPort destination) {
-			Connection.CreateAndConnect(source, destination).isProxy = true;
+		public static Connection ConnectToAsProxy(this UPort source, UPort destination) {
+			var result = Connection.CreateAndConnect(source, destination);
+			result.isProxy = true;
+			return result;
 		}
 
 		/// <summary>
@@ -1611,6 +1613,21 @@ namespace MaxyGames.UNode {
 		public static bool CanSet(this PortAccessibility accessibility) {
 			return accessibility == PortAccessibility.ReadWrite || accessibility == PortAccessibility.WriteOnly;
 		}
+
+		#region Strings
+		/// <summary>
+		/// Converts the first character of the string to lowercase, using camel case formatting.
+		/// </summary>
+		/// <param name="input">The string to convert.</param>
+		/// <returns>A string with the first character converted to lowercase, or the original string if it is null, empty, or already
+		/// starts with a lowercase letter.</returns>
+		public static string ToCamelCase(this string input) {
+			if(string.IsNullOrEmpty(input)) return input;
+			if(char.IsLower(input[0])) return input;
+
+			return char.ToLower(input[0]) + input.Substring(1);
+		}
+		#endregion
 
 		#region Utility
 		/// <summary>

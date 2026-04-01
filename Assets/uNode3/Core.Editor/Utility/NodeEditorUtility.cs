@@ -440,12 +440,40 @@ namespace MaxyGames.UNode.Editors {
 				if(connection is ValueConnection valueConnection) {
 					if(uNodePreference.preferenceData.autoCreateReroute && connection.Input.GetNode() is not Nodes.NodeReroute) {
 						if(!connection.isProxy) {
-							if(connection.Output.node.position.xMax > connection.Input.node.position.xMin) {
+							float xMax = connection.Output.node.position.xMax;
+							float xMin = connection.Input.node.position.xMin;
+							if(connection.Output.GetNode() is Nodes.NodeValueConverter valueConverter) {
+								var output = connection.Output.node.ValueInputs.FirstOrDefault()?.ValidConnections.FirstOrDefault()?.Output;
+								if(output != null) {
+									xMax = output.node.position.xMax;
+									if(xMax > xMin) {
+										var inPortPosition = connection.Input.node.position;
+										NodeEditorUtility.AddNewNode<Nodes.NodeConvert>(canvas, new Vector2(inPortPosition.x - 100, inPortPosition.y), nodeConvert => {
+											nodeConvert.type = valueConverter.type;
+											nodeConvert.Register();
+											nodeConvert.target.ConnectTo(valueConverter.input.GetTargetPort());
+											nodeConvert.output.ConnectTo(valueConverter.output.GetConnectedPorts().First());
+											valueConverter.nodeObject.Destroy();
+
+											NodeEditorUtility.AddNewNode(canvas, new Vector2(inPortPosition.x - 200, inPortPosition.y),
+												(Nodes.NodeReroute n) => {
+													n.kind = Nodes.NodeReroute.RerouteKind.Value;
+													n.Register();
+													n.input.ConnectTo(nodeConvert.target.GetTargetPort());
+													n.output.ConnectTo(nodeConvert.target);
+													if(uNodePreference.preferenceData.autoProxyConnection) {
+														n.input.connections[0].isProxy = true;
+													}
+												}
+											);
+										});
+										return;
+									}
+								}
+							}
+							if(xMax > xMin) {
 								var inPortPosition = connection.Input.node.position;
-								NodeEditorUtility.AddNewNode(canvas,
-									new Vector2(
-										inPortPosition.x - 100,
-										inPortPosition.y),
+								NodeEditorUtility.AddNewNode(canvas, new Vector2(inPortPosition.x - 100, inPortPosition.y),
 									(Nodes.NodeReroute n) => {
 										n.kind = Nodes.NodeReroute.RerouteKind.Value;
 										n.Register();
@@ -456,6 +484,7 @@ namespace MaxyGames.UNode.Editors {
 										}
 									}
 								);
+								return;
 							}
 						}
 					}

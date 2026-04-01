@@ -44,6 +44,9 @@ namespace MaxyGames {
 					}
 				}
 				if(port.UseDefaultValue) {
+					if(port.DefaultValue.isAssigned == false) {
+						throw new GraphException($"Unassigned port: {port.name} on node: {port.node.GetTitle()}", port.node);
+					}
 					if(port.IsOptional && (port.DefaultValue == null || port.DefaultValue.targetType == MemberData.TargetType.None)) {
 						return Value(port.OptionalValue, setVariable: setVariable, autoConvert: autoConvert);
 					}
