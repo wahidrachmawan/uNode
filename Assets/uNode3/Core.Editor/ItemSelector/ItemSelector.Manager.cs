@@ -510,6 +510,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			public void SelectTree(TreeViewItem tree) {
+				{
+					var map = PersistenceData.Instance.itemUsedCount;
+					map.TryGetValue(tree.id, out var usedCount);
+					map[tree.id] = ++usedCount;
+				}
 				if(tree is TypeTreeView) {
 					var type = (tree as TypeTreeView).type;
 
@@ -1015,7 +1020,6 @@ namespace MaxyGames.UNode.Editors {
 							selectedTree = null;
 							state.scrollPos = default;
 							Reload();
-
 							float highestScore = -1;
 							TreeViewItem highestScoreTree = null;
 							//void TraverseTree(TreeViewItem tree) {
@@ -1049,9 +1053,15 @@ namespace MaxyGames.UNode.Editors {
 							//	}
 							//}
 
-							static float GetScore(IRelevanceItem relevance, int depth) {
+							var usedCount = PersistenceData.Instance.itemUsedCount;
+							float GetScore(int id, IRelevanceItem relevance, int depth) {
 								var score = relevance.Score;
 								if(score > 0) {
+									if(score >= 0.5f) {
+										if(usedCount.TryGetValue(id, out var count)) {
+											score += MathF.Min(0.02f * count, 0.5f);
+										}
+									}
 									if(relevance is SelectorCustomTreeView or NodeTreeView) {
 										//Give a little boost to custom tree since they are more likely to be what user is looking for.
 										score += Mathf.Clamp01(0.5f - (0.05f * depth));
@@ -1066,7 +1076,7 @@ namespace MaxyGames.UNode.Editors {
 							foreach(var tree in GetRows()) {
 								//TraverseTree(tree);
 								if(tree is IRelevanceItem relevance) {
-									var score = GetScore(relevance, tree.depth);
+									var score = GetScore(tree.id, relevance, tree.depth);
 									if(score > highestScore) {
 										highestScore = score;
 										highestScoreTree = tree;
@@ -1081,7 +1091,7 @@ namespace MaxyGames.UNode.Editors {
 										highestScore -= 0.5f;
 										foreach(var tree in GetRows()) {
 											if(tree is MemberTreeView mTree) { 
-												var score = GetScore(mTree, tree.depth);
+												var score = GetScore(tree.id, mTree, tree.depth);
 												if(usingNamespaces.Contains(ReflectionUtils.GetDeclaringType(mTree.member).Namespace) == false) {
 													continue;
 												}

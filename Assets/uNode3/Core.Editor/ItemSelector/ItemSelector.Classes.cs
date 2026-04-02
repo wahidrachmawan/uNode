@@ -234,6 +234,36 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		public class PersistenceData {
+			public Dictionary<int, int> itemUsedCount = new();
+
+			private const string key = "ItemSelector_PersistenceData";
+
+			private static PersistenceData m_instance;
+			public static PersistenceData Instance {
+				get {
+					if(m_instance == null) {
+						m_instance = uNodeEditorUtility.LoadEditorData<PersistenceData>(key);
+						if(m_instance == null) {
+							m_instance = new PersistenceData();
+							Save();
+						}
+					}
+					else if(uNodeEditorUtility.IsEditorDataExist(key) == false) {
+						m_instance = new PersistenceData();
+						Save();
+					}
+					return m_instance;
+				}
+			}
+
+			public static void Save() {
+				if(m_instance != null) {
+					uNodeEditorUtility.SaveEditorData(m_instance, key);
+				}
+			}
+		}
+
 		public class Data : IDisposable {
 			public EditorWindow window;
 			public Rect windowRect;
@@ -324,6 +354,7 @@ namespace MaxyGames.UNode.Editors {
 			public void Dispose() {
 				setup.Dispose();
 				manager?.Dispose();
+				PersistenceData.Save();
 			}
 
 			public void Select(MemberData value) {

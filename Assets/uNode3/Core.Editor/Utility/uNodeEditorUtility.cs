@@ -1292,6 +1292,12 @@ namespace MaxyGames.UNode.Editors {
 			return value;
 		}
 
+		public static bool IsEditorDataExist(string fileName) {
+			char separator = Path.DirectorySeparatorChar;
+			string path = uNodePreference.preferenceDirectory + separator + fileName + ".byte";
+			return File.Exists(path);
+		}
+
 		/// <summary>
 		/// Save editor data.
 		/// </summary>
