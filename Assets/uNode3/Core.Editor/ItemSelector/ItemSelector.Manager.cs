@@ -16,6 +16,11 @@ namespace MaxyGames.UNode.Editors {
 			public TreeViewItem tree;
 			public Vector2 scrollPos;
 			public string searchString;
+			public RelevanceData relevanceData;
+		}
+
+		public class RelevanceData {
+			public List<TreeViewItem> originalSearchTrees;
 		}
 
 		public sealed class Manager : TreeView, IDisposable {
@@ -54,11 +59,13 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+			public RelevanceData relevanceData;
 			private string _searchString;
 			public new string searchString {
 				get => _searchString;
 				set {
 					treeHightlights.Clear();
+					relevanceData = null;
 					if(_searchString != value) {
 						_searchString = value;
 						ReloadInBackground();
@@ -234,6 +241,9 @@ namespace MaxyGames.UNode.Editors {
 				}
 				#region Draw Row
 				Rect labelRect = args.rowRect;
+				if(relevanceData != null) {
+					labelRect.height /= 2;
+				}
 				var indent = GetContentIndent(args.item);
 				labelRect.x += indent - 16;
 				labelRect.width -= indent - 16;
@@ -498,6 +508,74 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				style.Draw(position, label, false, false, false, false);
+
+				if(relevanceData != null) {
+					style = EditorStyles.miniLabel;
+					position.x = 16;
+					position.y += position.height;
+					if(tree is MemberTreeView memberTree) {
+						if(memberTree.member is Type) {
+							var type = memberTree.member as Type;
+							if(!string.IsNullOrEmpty(type.Namespace)) {
+								var content = new GUIContent(type.Namespace, uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.NamespaceIcon)));
+								style.Draw(position, content, false, false, false, false);
+							}
+						}
+						else {
+							var type = ReflectionUtils.GetDeclaringType(memberTree.member);
+							var content = new GUIContent(type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(type));
+							style.Draw(position, content, false, false, false, false);
+						}
+					}
+					else {
+						TreeViewItem originalTree = null;
+						void TraverseOriginalTree(TreeViewItem t) {
+							if(t.id == tree.id) {
+								originalTree = t;
+								return;
+							}
+							if(t.children != null) {
+								foreach(var c in t.children) {
+									TraverseOriginalTree(c);
+									if(originalTree != null) {
+										return;
+									}
+								}
+							}
+						}
+						foreach(var child in relevanceData.originalSearchTrees) {
+							TraverseOriginalTree(child);
+							if(originalTree != null) {
+								break;
+							}
+						}
+						if(originalTree != null) {
+							var list = StaticListPool<GUIContent>.Allocate();
+
+							var parent = originalTree.parent;
+							while(parent != null) {
+								list.Add(new GUIContent(parent.displayName, parent.icon));
+								parent = parent.parent;
+								if(list.Count > 10) {
+									break;
+								}
+							}
+
+							var next = style.CalcSize(new GUIContent(">"));
+							for(int i = list.Count - 1; i >= 0; i--) {
+								var content = list[i];
+								var size = style.CalcSize(content);
+								style.Draw(new Rect(position.x, position.y, size.x, position.height), content, false, false, false, false);
+								position.x += size.x;
+								if(i > 0 && i + 1 < list.Count) {
+									style.Draw(new Rect(position.x, position.y, next.x, position.height), new GUIContent(">"), false, false, false, false);
+									position.x += next.x;
+								}
+							}
+							StaticListPool<GUIContent>.Free(list);
+						}
+					}
+				}
 			}
 
 			#region Select & Next
@@ -506,6 +584,7 @@ namespace MaxyGames.UNode.Editors {
 					tree = tree,
 					searchString = searchString,
 					scrollPos = state.scrollPos,
+					relevanceData = relevanceData,
 				});
 			}
 
@@ -637,8 +716,11 @@ namespace MaxyGames.UNode.Editors {
 			private void DoNextTree(TreeViewItem tree) {
 				DoAddNestedTree(tree);
 				_searchString = string.Empty;
+				relevanceData = null;
+				GUI.FocusControl(null);
 				editorData.searchField.SetFocus();
 				Reload();
+				OffsetSelection(0, 0);
 				window?.Focus();
 			}
 
@@ -649,6 +731,7 @@ namespace MaxyGames.UNode.Editors {
 					searchString = lastData.searchString;
 					editorData.searchField.SetFocus();
 					state.scrollPos = lastData.scrollPos;
+					relevanceData = lastData.relevanceData;
 					Reload();
 				}
 			}
@@ -985,7 +1068,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			#endregion
 
-				#region Reload
+			#region Reload
 			public void Reload(List<TreeViewItem> trees) {
 				this.treeViews = trees;
 				Reload();
@@ -997,6 +1080,7 @@ namespace MaxyGames.UNode.Editors {
 			public void ReloadInBackground() {
 				if(hasSearch) {
 					treeHightlights.Clear();
+					relevanceData = null;
 					isReloading = true;
 					List<TreeViewItem> treeViews;
 					if(isDeep) {
@@ -1006,52 +1090,14 @@ namespace MaxyGames.UNode.Editors {
 						treeViews = new List<TreeViewItem>(this.treeViews);
 					}
 					{
-						var duplicates = new Dictionary<TreeViewItem, TreeViewItem>();
 						for(int i = 0; i < treeViews.Count; i++) {
-							treeViews[i] = DuplicateTree(treeViews[i], duplicates);
+							treeViews[i] = DuplicateTree(treeViews[i]);
 						}
 					}
 					treeSearch.deepSearch = true;
 					treeSearch.manager = this;
 					treeSearch.SearchInBackground(treeViews, searchString, editorData.searchKind, editorData.searchFilter, (trees) => {
 						uNodeThreadUtility.Queue(() => {
-							isReloading = false;
-							searchedTrees = trees;
-							selectedTree = null;
-							state.scrollPos = default;
-							Reload();
-							float highestScore = -1;
-							TreeViewItem highestScoreTree = null;
-							//void TraverseTree(TreeViewItem tree) {
-							//	if(tree is IRelevanceItem relevance) {
-							//		var score = relevance.Score;
-							//		if(score > highestScore) {
-							//			highestScore = score;
-							//			highestScoreTree = tree;
-							//		}
-							//	}
-							//	if(tree.hasChildren) {
-							//		foreach(var child in tree.children) {
-							//			TraverseTree(child);
-							//		}
-							//		//if(tree is SelectorCategoryTreeView) {
-							//		//	var item = tree as SelectorCategoryTreeView;
-							//		//	if(item.childTrees != null) {
-							//		//		foreach(var child in item.childTrees) {
-							//		//			TraverseTree(child);
-							//		//		}
-							//		//	}
-							//		//}
-							//		//else if(tree is SelectorSearchTreeView) {
-							//		//	var item = tree as SelectorSearchTreeView;
-							//		//	if(item.treeViews != null) {
-							//		//		foreach(var child in item.treeViews) {
-							//		//			TraverseTree(child);
-							//		//		}
-							//		//	}
-							//		//}
-							//	}
-							//}
 
 							var usedCount = PersistenceData.Instance.itemUsedCount;
 							float GetScore(int id, IRelevanceItem relevance, int depth) {
@@ -1059,12 +1105,12 @@ namespace MaxyGames.UNode.Editors {
 								if(score > 0) {
 									if(score >= 0.5f) {
 										if(usedCount.TryGetValue(id, out var count)) {
-											score += MathF.Min(0.02f * count, 0.5f);
+											score += MathF.Min(0.02f * count, 1);
 										}
 									}
 									if(relevance is SelectorCustomTreeView or NodeTreeView) {
 										//Give a little boost to custom tree since they are more likely to be what user is looking for.
-										score += Mathf.Clamp01(0.5f - (0.05f * depth));
+										score += Mathf.Clamp01(0.8f - (0.05f * depth));
 									}
 									else {
 										score += Mathf.Clamp01(0.5f - (0.1f * depth));
@@ -1072,6 +1118,60 @@ namespace MaxyGames.UNode.Editors {
 								}
 								return score;
 							}
+
+							if(editorData.searchKind == SearchKind.Relevant) {
+								relevanceData = new RelevanceData();
+								relevanceData.originalSearchTrees = trees;
+								List<TreeViewItem> relevanceTrees = new();
+								var usingNamespaces = editorData.usingNamespaces;
+								void TraverseTree(TreeViewItem tree) {
+									if(tree is IRelevanceItem relevance) {
+										var score = GetScore(tree.id, relevance, tree.depth);
+										if(score > 0) {
+											if(tree is MemberTreeView aMember) {
+												if(usingNamespaces != null && usingNamespaces.Contains(ReflectionUtils.GetDeclaringType(aMember.member).Namespace) == false) {
+													score -= 0.2f;
+												}
+											}
+											relevance.Score = score;
+											relevanceTrees.Add(DuplicateTree(tree, false));
+										}
+									}
+									if(tree.hasChildren) {
+										foreach(var child in tree.children) {
+											TraverseTree(child);
+										}
+									}
+								}
+								foreach(var tree in trees) {
+									TraverseTree(tree);
+								}
+								string query = searchString.ToLower();
+								relevanceTrees.Sort((a, b) => {
+
+									float scoreA = (a as IRelevanceItem).Score;
+									float scoreB = (b as IRelevanceItem).Score;
+
+									return scoreB.CompareTo(scoreA);
+								});
+								trees = relevanceTrees;
+							}
+
+							isReloading = false;
+							searchedTrees = trees;
+							selectedTree = null;
+							state.scrollPos = default;
+
+							Reload();
+
+							if(editorData.searchKind == SearchKind.Relevant) {
+								selectedTree = GetRows().FirstOrDefault();
+								return;
+							}
+
+							float highestScore = -1;
+							TreeViewItem highestScoreTree = null;
+
 
 							foreach(var tree in GetRows()) {
 								//TraverseTree(tree);
@@ -1118,20 +1218,23 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			TreeViewItem DuplicateTree(TreeViewItem tree, Dictionary<TreeViewItem, TreeViewItem> duplicatedTrees = null) {
+			TreeViewItem DuplicateTree(TreeViewItem tree, bool includeChildren = true, Dictionary < TreeViewItem, TreeViewItem> duplicatedTrees = null) {
 				if(duplicatedTrees == null) {
 					duplicatedTrees = new Dictionary<TreeViewItem, TreeViewItem>();
 				}
 				if(!duplicatedTrees.TryGetValue(tree, out var result)) {
-					List<TreeViewItem> children = tree.children;
-					if((children == null || children.Count == 0) && tree is SelectorCategoryTreeView) {
-						var item = tree as SelectorCategoryTreeView;
-						children = item.childTrees ?? item.children;
-					}
-					if(children != null) {
-						children = new List<TreeViewItem>(children);
-						for(int i = 0; i < children.Count; i++) {
-							children[i] = DuplicateTree(children[i], duplicatedTrees);
+					List<TreeViewItem> children = null;
+					if(includeChildren) {
+						children = tree.children;
+						if((children == null || children.Count == 0) && tree is SelectorCategoryTreeView) {
+							var item = tree as SelectorCategoryTreeView;
+							children = item.childTrees ?? item.children;
+						}
+						if(children != null) {
+							children = new List<TreeViewItem>(children);
+							for(int i = 0; i < children.Count; i++) {
+								children[i] = DuplicateTree(children[i], includeChildren, duplicatedTrees);
+							}
 						}
 					}
 					if(tree is SelectorCategoryTreeView) {
@@ -1227,6 +1330,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 					else {
 						throw new Exception("Unsupported duplicate tree: " + tree.GetType());
+					}
+					if(tree is IRelevanceItem relevance) {
+						(result as IRelevanceItem).Score = relevance.Score;
 					}
 					duplicatedTrees.Add(tree, result);
 				}
@@ -1449,6 +1555,13 @@ namespace MaxyGames.UNode.Editors {
 
 			protected override bool CanMultiSelect(TreeViewItem item) {
 				return false;
+			}
+
+			protected override float GetCustomRowHeight(int row, TreeViewItem item) {
+				if(relevanceData != null) {
+					return base.GetCustomRowHeight(row, item) * 2;
+				}
+				return base.GetCustomRowHeight(row, item);
 			}
 
 			#region Others
