@@ -46,7 +46,7 @@ namespace MaxyGames.UNode.Editors {
 
 			editorData.window = this;
 			editorData.searchField = new SearchField();
-			editorData.searchField.downOrUpArrowKeyPressed += treeManager.SetFocusAndEnsureSelectedItem;
+			//editorData.searchField.downOrUpArrowKeyPressed += treeManager.SetFocusAndEnsureSelectedItem;
 			editorData.searchField.autoSetFocusOnFindCommand = true;
 			window = this;
 			uNodeThreadUtility.Queue(DoSetup);

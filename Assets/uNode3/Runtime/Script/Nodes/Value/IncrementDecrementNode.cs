@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Data", "Increment-Decrement", inputs = new[] { typeof(int), typeof(float), typeof(double), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint) })]
+	[NodeMenu("Data", "Increment Decrement {++} {--}", inputs = new[] { typeof(int), typeof(float), typeof(double), typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(long), typeof(ulong), typeof(uint) })]
 	public class IncrementDecrementNode : FlowAndValueNode {
 		public bool isDecrement;
 		public bool isPrefix;

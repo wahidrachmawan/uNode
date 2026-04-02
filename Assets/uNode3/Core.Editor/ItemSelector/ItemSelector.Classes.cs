@@ -11,9 +11,11 @@ using Object = UnityEngine.Object;
 using UnityEditor.IMGUI.Controls;
 
 namespace MaxyGames.UNode.Editors {
+	public interface ICategoryTreeItem { }
+
 	public partial class ItemSelector {
 		#region TreeView
-		internal class SelectorSearchTreeView : TreeViewItem {
+		internal class SelectorSearchTreeView : TreeViewItem, ICategoryTreeItem {
 			public Func<Action<SearchProgress>, List<TreeViewItem>> treeViews;
 
 			public SelectorSearchTreeView() {
@@ -25,7 +27,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public class SelectorCategoryTreeView : TreeViewItem {
+		public class SelectorCategoryTreeView : TreeViewItem, ICategoryTreeItem {
 			public string category;
 			public string description;
 			public bool hideOnSearch;
@@ -119,7 +121,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		internal class SelectorCustomTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType {
+		internal class SelectorCustomTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
 			public readonly CustomItem item;
 
 			public string DisplayName {
@@ -148,6 +150,8 @@ namespace MaxyGames.UNode.Editors {
 					return null;
 				}
 			}
+
+			public float Score { get; set; }
 
 			public SelectorCustomTreeView() {
 
@@ -188,7 +192,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		internal class SelectorMemberTreeView : TreeViewItem, ISelectorItemWithValue, ISelectorItemWithType {
+		internal class SelectorMemberTreeView : TreeViewItem, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
 			public MemberData member;
 
 			public SelectorMemberTreeView() {
@@ -202,6 +206,8 @@ namespace MaxyGames.UNode.Editors {
 			public object ItemValue => member;
 
 			public Type ItemType => member.type;
+
+			public float Score { get; set; }
 		}
 
 		//public abstract class SelectorTreeView : TreeViewItem {
@@ -1125,7 +1131,12 @@ namespace MaxyGames.UNode.Editors {
 				return null;
 			}
 
-			public static List<MemberTreeView> CreateItemsFromType(Type type, FilterAttribute filter, bool declaredOnly = false, Func<MemberInfo, bool> validation = null) {
+
+			public static List<MemberTreeView> CreateItemsFromType(Type type, FilterAttribute filter, bool declaredOnly, Func<MemberInfo, bool> validation) {
+				return CreateItemsFromType(type, filter, declaredOnly, (m) => validation(m) ? 1 : 0);
+			}
+
+			public static List<MemberTreeView> CreateItemsFromType(Type type, FilterAttribute filter, bool declaredOnly = false, Func<MemberInfo, float> validation = null) {
 				var result = new List<MemberTreeView>();
 				if(type == null)
 					return result;
@@ -1142,9 +1153,11 @@ namespace MaxyGames.UNode.Editors {
 						runtimeType.Update();
 						MemberInfo[] members = runtimeType.GetMembers(flags);
 						for(int i = 0; i < members.Length; i++) {
-							if(validation == null || validation(members[i])) {
+							var score = validation?.Invoke(members[i]) ?? 0;
+							if(score >= 0) {
 								var item = CreateItemFromMember(members[i], filter);
 								if(item != null) {
+									item.Score = score;
 									result.Add(item);
 								}
 							}
@@ -1187,21 +1200,26 @@ namespace MaxyGames.UNode.Editors {
 					if(filter.Static && !filter.SetMember && filter.ValidMemberType.HasFlags(MemberTypes.Constructor) &&
 						!type.IsCastableTo(typeof(Delegate)) && !type.IsSubclassOf(typeof(Component))) {
 						BindingFlags flag = BindingFlags.Public | BindingFlags.Instance;
+
 						if(type.IsValueType && type.IsPrimitive == false && type != typeof(void)) {
 							//flag |= BindingFlags.Static | BindingFlags.NonPublic;
 							var defaultCtor = ReflectionUtils.GetDefaultConstructor(type);
-							if(validation == null || validation(defaultCtor)) {
+							var score = validation?.Invoke(defaultCtor) ?? 0;
+							if(score >= 0) {
 								var item = CreateItemFromMember(defaultCtor, filter);
 								if(item != null) {
+									item.Score = score;
 									result.Add(item);
 								}
 							}
 						}
 						ConstructorInfo[] ctor = type.GetConstructors(flag);
 						for(int i = ctor.Length - 1; i >= 0; i--) {
-							if(validation == null || validation(ctor[i])) {
+							var score = validation?.Invoke(ctor[i]) ?? 0;
+							if(score >= 0) {
 								var item = CreateItemFromMember(ctor[i], filter);
 								if(item != null) {
+									item.Score = score;
 									result.Add(item);
 								}
 							}
@@ -1209,8 +1227,26 @@ namespace MaxyGames.UNode.Editors {
 					}
 					for(int i = 0; i < members.Length; i++) {
 						var member = members[i];
-						if(member.MemberType != MemberTypes.Constructor && (validation == null || validation(member))) {
+						if(member.MemberType != MemberTypes.Constructor) {
+							if(declaredOnly) {
+								static bool IsOverrideM(MethodInfo method) {
+									return method.IsVirtual &&
+										   method.GetBaseDefinition().DeclaringType != method.DeclaringType;
+								}
+								static bool IsOverrideP(PropertyInfo property) {
+									var accessor = property.GetMethod ?? property.SetMethod;
+									if(accessor == null) return false;
 
+									return accessor.IsVirtual &&
+										   accessor.GetBaseDefinition().DeclaringType != accessor.DeclaringType;
+								}
+								if(member is MethodInfo method && IsOverrideM(method)) {
+									continue;
+								}
+								else if(member is PropertyInfo property && IsOverrideP(property)) {
+									continue;
+								}
+							}
 							//TODO: implement group method with same names
 							////Grouping same method names
 							//if(member.MemberType == MemberTypes.Method) {
@@ -1227,10 +1263,13 @@ namespace MaxyGames.UNode.Editors {
 							//		continue;
 							//	}
 							//}
-
-							var item = CreateItemFromMember(member, filter);
-							if(item != null) {
-								result.Add(item);
+							var score = validation?.Invoke(member) ?? 0;
+							if(score >= 0) {
+								var item = CreateItemFromMember(member, filter);
+								if(item != null) {
+									item.Score = score;
+									result.Add(item);
+								}
 							}
 						}
 					}

@@ -31,8 +31,8 @@ namespace MaxyGames.UNode.Editors {
 
 		private List<MemberTreeView> members;
 
-		internal void Search(Func<MemberInfo, bool> validation) {
-			children = new List<TreeViewItem>(ItemSelector.TreeFunction.CreateItemsFromType(type, filter, true, validation));
+		internal void Search(Func<MemberInfo, float> scoring) {
+			children = new List<TreeViewItem>(ItemSelector.TreeFunction.CreateItemsFromType(type, filter, true, scoring));
 		}
 
 		public void Expand(bool enable) {
@@ -79,7 +79,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	public class MemberTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType {
+	public class MemberTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
 		public MemberInfo member;
 		public object instance;
 
@@ -105,6 +105,8 @@ namespace MaxyGames.UNode.Editors {
 		public object ItemValue => member;
 
 		public Type ItemType => ReflectionUtils.GetMemberType(member);
+
+		public float Score { get; set; }
 
 		public MemberTreeView() {
 
@@ -137,7 +139,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-	internal class NodeTreeView : TreeViewItem, ISelectorItemWithValue {
+	internal class NodeTreeView : TreeViewItem, ISelectorItemWithValue, IRelevanceItem {
 		public SelectorItemNodeTreeData data;
 
 		public NodeTreeView() {
@@ -149,6 +151,8 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public object ItemValue => data;
+
+		public float Score { get; set; }
 	}
 
 	public class SelectorItemNodeTreeData {

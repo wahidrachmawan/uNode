@@ -159,6 +159,13 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		void HandleEvent(Event evt) {
+			if(!editorData.manager.HasFocus()) {
+				editorData.manager.OnKeyEvent();
+				//if(evt.isKey && evt.type == EventType.KeyDown && (evt.keyCode == KeyCode.DownArrow || evt.keyCode == KeyCode.UpArrow)) {
+				//	editorData.searchField.SetFocus();
+				//	return;
+				//}
+			}
 			if(!editorData.searchField.HasFocus()) {
 				if(evt.isKey && evt.type == EventType.KeyUp) {
 					if(evt.modifiers == EventModifiers.Control && evt.keyCode == KeyCode.A) {

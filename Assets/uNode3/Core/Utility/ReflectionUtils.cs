@@ -2170,6 +2170,15 @@ namespace MaxyGames.UNode {
 			return false;
 		}
 
+		public static Type GetDeclaringType(MemberInfo member) {
+			if(member == null)
+				throw new ArgumentNullException(nameof(member));
+			if(member is Type) {
+				return member as Type;
+			}
+			return member.DeclaringType;
+		}
+
 		public static Type GetMemberType(MemberInfo member) {
 			if(member == null)
 				throw new ArgumentNullException(nameof(member));

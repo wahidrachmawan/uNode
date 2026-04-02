@@ -41,6 +41,18 @@ namespace MaxyGames.UNode.Editors {
 
 			private TooltipWindow tooltipWindow;
 			private TreeViewItem hoveredTree;
+			private TreeViewItem m_selectedTree;
+			public TreeViewItem selectedTree {
+				get {
+					return m_selectedTree;
+				}
+				set {
+					m_selectedTree = value;
+					if(value != null) {
+						FrameItem(value.id);
+					}
+				}
+			}
 
 			private string _searchString;
 			public new string searchString {
@@ -83,53 +95,63 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			protected override void KeyEvent() {
+				OnKeyEvent();
+			}
+
+			public void OnKeyEvent() {
 				Event evt = Event.current;
 				if(evt.type == EventType.KeyDown) {
-					var selections = GetSelection();
-					if(selections.Count > 0) {
-						var tree = GetRows().FirstOrDefault(i => i.id == selections[0]);
-						if(tree != null) {
-							if(evt.keyCode == KeyCode.Return) {
-								if(editorData.CanSelectTree(tree)) {
-									SelectTree(tree);
+					TreeViewItem tree = selectedTree;
+					if(tree != null) {
+						if(evt.keyCode == KeyCode.Return) {
+							if(editorData.CanSelectTree(tree)) {
+								SelectTree(tree);
+								evt.Use();
+							}
+						}
+						else if(evt.keyCode == KeyCode.RightArrow) {
+							if(editorData.CanNextTree(tree)) {
+								NextTree(tree);
+								evt.Use();
+							}
+							else if(CanChangeExpandTree(tree)) {
+								if(!IsExpanded(tree.id)) {
+									SetExpanded(tree.id, true);
+									ReloadInBackground();
 									evt.Use();
 								}
 							}
-							else if(evt.keyCode == KeyCode.RightArrow) {
-								if(editorData.CanNextTree(tree)) {
-									NextTree(tree);
+						}
+						else if(evt.keyCode == KeyCode.LeftArrow) {
+							if(CanChangeExpandTree(tree)) {
+								if(IsExpanded(tree.id)) {
+									SetExpanded(tree.id, false);
+									Reload();
 									evt.Use();
-								}
-								else if(CanChangeExpandTree(tree)) {
-									if(!IsExpanded(tree.id)) {
-										SetExpanded(tree.id, true);
-										ReloadInBackground();
-										evt.Use();
-									}
+									return;
 								}
 							}
-							else if(evt.keyCode == KeyCode.LeftArrow) {
-								if(CanChangeExpandTree(tree)) {
-									if(IsExpanded(tree.id)) {
-										SetExpanded(tree.id, false);
-										Reload();
-										evt.Use();
-										return;
-									}
-								}
-								if(HasFocus() && tree.depth == 0 && isDeep) {
-									Back();
-									evt.Use();
-								}
+							if(HasFocus() && tree.depth == 0 && isDeep) {
+								Back();
+								evt.Use();
 							}
-							else if(evt.keyCode == KeyCode.DownArrow) {
-								OffsetSelection(1, tree.id);
-								SetFocusAndEnsureSelectedItem();
-							}
-							else if(evt.keyCode == KeyCode.UpArrow) {
-								OffsetSelection(-1, tree.id);
-								SetFocusAndEnsureSelectedItem();
-							}
+						}
+						else if(evt.keyCode == KeyCode.DownArrow) {
+							OffsetSelection(1, tree.id);
+						}
+						else if(evt.keyCode == KeyCode.UpArrow) {
+							OffsetSelection(-1, tree.id);
+						}
+						//if(selectedTree is IRelevanceItem relevance) {
+						//	Debug.Log(relevance.Score + " : " + selectedTree.GetType());
+						//}
+					}
+					else {
+						if(evt.keyCode == KeyCode.DownArrow) {
+							OffsetSelection(1, 0);
+						}
+						else if(evt.keyCode == KeyCode.UpArrow) {
+							OffsetSelection(-1, 0);
 						}
 					}
 				}
@@ -139,40 +161,55 @@ namespace MaxyGames.UNode.Editors {
 				var rows = GetRows();
 				if(rows.Count != 0) {
 					var tree = rows.FirstOrDefault(t => t.id == id);
+					if(tree == null) {
+						tree = rows.FirstOrDefault();
+					}
 					if(tree != null) {
 						int indexOfID = rows.IndexOf(tree);
 						int num = Mathf.Clamp(indexOfID + offset, 0, rows.Count - 1);
-						while(rows[num] == null || rows[num] is SelectorCategoryTreeView) {
+						while(rows[num] == null || rows[num] is ICategoryTreeItem) {
 							if(offset > 0) {
 								if(num + 1 < rows.Count - 1)
 									num++;
-								else
-									return;
+								else {
+									num = indexOfID;
+									break;
+								}
 							}
 							else {
-								if(num - 1 > 0)
+								if(num > 0)
 									num--;
-								else
-									return;
+								else {
+									num = indexOfID;
+									break;
+								}
 							}
 						}
 						Event.current.Use();
-						SetSelection(new int[] { rows[num].id });
+						selectedTree = rows[num];
 					}
 				}
 			}
 
 			protected override void RowGUI(RowGUIArgs args) {
-				if(editorData.RowRepaintGUI(new ItemRowGUIArgs() { item = args.item, label = args.label, row = args.row, rowRect = args.rowRect, manager = this })) {
-					//In case there's custom row gui.
-					return;
-				}
 				Event evt = Event.current;
 				if(args.rowRect.Contains(evt.mousePosition)) {
 					if(evt.type == EventType.MouseMove) {
-						SetSelection(new int[] { args.item.id });
+						selectedTree = args.item;
 					}
 					//SetFocus();
+				}
+				if(args.item == selectedTree) {
+					bool isDark = EditorGUIUtility.isProSkin;
+
+					Color bgColor = isDark
+						? new Color(0.24f, 0.48f, 0.90f, 0.5f)  
+						: new Color(0.24f, 0.49f, 0.90f, 0.5f);
+					EditorGUI.DrawRect(args.rowRect, bgColor);
+				}
+				if(editorData.RowRepaintGUI(new ItemRowGUIArgs() { item = args.item, label = args.label, row = args.row, rowRect = args.rowRect, manager = this })) {
+					//In case there's custom row gui.
+					return;
 				}
 				if(evt.type == EventType.Repaint) {
 					#region Tooltip
@@ -415,7 +452,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			#endregion
 
-			private void DrawLabel(TreeViewItem tree, GUIStyle style, Rect position, GUIContent label) {
+			public void DrawLabel(TreeViewItem tree, GUIStyle style, Rect position, GUIContent label) {
 				if(hasSearch) {
 					if(!treeHightlights.TryGetValue(tree.id, out var hightlight)) {
 						hightlight = new TreeHightlight();
@@ -448,7 +485,7 @@ namespace MaxyGames.UNode.Editors {
 							foreach(var pair in hightlight.hightlight) {
 								var first = pair.Key;
 								var last = pair.Value;
-								if(first >= 0 && (first + last) < label.text.Length) {
+								if(first >= 0 && (first + last) <= label.text.Length) {
 									string str = label.text;
 									string s1 = str[..first];
 									string s2 = str.Substring(first, last);
@@ -910,7 +947,40 @@ namespace MaxyGames.UNode.Editors {
 			}
 			#endregion
 
-			#region Reload
+			#region Hiding
+			public new void SetSelection(IList<int> selectedIDs) {
+				if(selectedIDs.Count == 1) {
+					var tree = GetRows().FirstOrDefault(x => x.id == selectedIDs[0]);
+					selectedTree = tree;
+					return;
+				}
+				else if(selectedIDs.Count == 0) {
+					selectedTree = null;
+					return;
+				}
+				throw null;
+			}
+
+			public new IList<int> GetSelection() {
+				if(selectedTree == null) {
+					return Array.Empty<int>();
+				}
+				else {
+					return new[] { selectedTree.id };
+				}
+			}
+
+			public new bool HasSelection() {
+				return selectedTree != null;
+			}
+
+			protected override void SelectionChanged(IList<int> selectedIds) {
+				base.SetSelection(Array.Empty<int>());
+				SetSelection(selectedIds);
+			}
+			#endregion
+
+				#region Reload
 			public void Reload(List<TreeViewItem> trees) {
 				this.treeViews = trees;
 				Reload();
@@ -942,7 +1012,92 @@ namespace MaxyGames.UNode.Editors {
 						uNodeThreadUtility.Queue(() => {
 							isReloading = false;
 							searchedTrees = trees;
+							selectedTree = null;
+							state.scrollPos = default;
 							Reload();
+
+							float highestScore = -1;
+							TreeViewItem highestScoreTree = null;
+							//void TraverseTree(TreeViewItem tree) {
+							//	if(tree is IRelevanceItem relevance) {
+							//		var score = relevance.Score;
+							//		if(score > highestScore) {
+							//			highestScore = score;
+							//			highestScoreTree = tree;
+							//		}
+							//	}
+							//	if(tree.hasChildren) {
+							//		foreach(var child in tree.children) {
+							//			TraverseTree(child);
+							//		}
+							//		//if(tree is SelectorCategoryTreeView) {
+							//		//	var item = tree as SelectorCategoryTreeView;
+							//		//	if(item.childTrees != null) {
+							//		//		foreach(var child in item.childTrees) {
+							//		//			TraverseTree(child);
+							//		//		}
+							//		//	}
+							//		//}
+							//		//else if(tree is SelectorSearchTreeView) {
+							//		//	var item = tree as SelectorSearchTreeView;
+							//		//	if(item.treeViews != null) {
+							//		//		foreach(var child in item.treeViews) {
+							//		//			TraverseTree(child);
+							//		//		}
+							//		//	}
+							//		//}
+							//	}
+							//}
+
+							static float GetScore(IRelevanceItem relevance, int depth) {
+								var score = relevance.Score;
+								if(score > 0) {
+									if(relevance is SelectorCustomTreeView or NodeTreeView) {
+										//Give a little boost to custom tree since they are more likely to be what user is looking for.
+										score += Mathf.Clamp01(0.5f - (0.05f * depth));
+									}
+									else {
+										score += Mathf.Clamp01(0.5f - (0.1f * depth));
+									}
+								}
+								return score;
+							}
+
+							foreach(var tree in GetRows()) {
+								//TraverseTree(tree);
+								if(tree is IRelevanceItem relevance) {
+									var score = GetScore(relevance, tree.depth);
+									if(score > highestScore) {
+										highestScore = score;
+										highestScoreTree = tree;
+									}
+								}
+							}
+							if(highestScoreTree != null) {
+								if(highestScoreTree is MemberTreeView memberTree) {
+									var usingNamespaces = editorData.usingNamespaces;
+									//In case the highest score doesn't contain relevance namespaces then we re-iterate to find better items
+									if(usingNamespaces != null && usingNamespaces.Contains(ReflectionUtils.GetDeclaringType(memberTree.member).Namespace) == false) {
+										highestScore -= 0.5f;
+										foreach(var tree in GetRows()) {
+											if(tree is MemberTreeView mTree) { 
+												var score = GetScore(mTree, tree.depth);
+												if(usingNamespaces.Contains(ReflectionUtils.GetDeclaringType(mTree.member).Namespace) == false) {
+													continue;
+												}
+												if(score > highestScore) {
+													highestScore = score;
+													highestScoreTree = tree;
+												}
+											}
+										}
+									}
+								}
+								selectedTree = highestScoreTree;
+								//if(searchString.Length >= 3) {
+								//	Debug.Log(highestScore);
+								//}
+							}
 						});
 					});
 				}

@@ -9,13 +9,17 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using UnityEditor.IMGUI.Controls;
-using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MaxyGames.UNode.Editors {
+	public interface IRelevanceItem {
+		public float Score { get; set; }
+	}
+
 	public partial class ItemSelector {
 		#region Search
 		abstract class TreeSearcher {
-			public virtual bool IsMatchSearch(TreeViewItem tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+			public virtual float IsMatchSearch(TreeViewItem tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
 				if(tree is MemberTreeView memberTree && !(memberTree.member is Type)) {
 					return IsMatchSearch(memberTree.member, memberTree.displayName, splittedStrings, searchKind, searchFilter);
 				}
@@ -51,18 +55,21 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(!flag) {
-					return false;
+					return -1;
 				}
 				var str = tree.displayName;
+				float score = -1;
 				for(int i = 0; i < splittedStrings.Length; i++) {
-					if(!IsMatchSearch(str, splittedStrings[i], searchKind)) {
-						return false;
+					var s = ScoreSearch(str, splittedStrings[i], searchKind);
+					if(s < 0) {
+						return s;
 					}
+					score = MathF.Max(score, s) + (i * 0.1f);
 				}
-				return true;
+				return score;
 			}
 
-			public virtual bool IsMatchSearch(MemberInfo member, string typeName, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+			public virtual float IsMatchSearch(MemberInfo member, string typeName, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
 				bool flag = true;
 				switch(searchFilter) {
 					case SearchFilter.Function:
@@ -79,7 +86,7 @@ namespace MaxyGames.UNode.Editors {
 						break;
 				}
 				if(!flag) {
-					return false;
+					return -1;
 				}
 				var str = member.Name;
 				if(member is Type) {
@@ -90,44 +97,125 @@ namespace MaxyGames.UNode.Editors {
 				else {
 					str = member.Name;
 					if(splittedStrings.Length > 1) {
-						//if(string.IsNullOrEmpty(splittedStrings[1]))
-						//	return false;
-						if(!IsMatchSearch(typeName, splittedStrings[0], searchKind)) {
+						var score = ScoreSearch(typeName, splittedStrings[0], searchKind);
+						if(score < 0) {
 							for(int i = 0; i < splittedStrings.Length; i++) {
 								if(i == 0 && member is ConstructorInfo) {
 									str = member.DeclaringType.Name;
-									if(IsMatchSearch("new", splittedStrings[i], SearchKind.Startwith)) {
+									var sc = ScoreSearch("new", splittedStrings[i], SearchKind.Startwith);
+									if(sc >= 0) {
+										score = MathF.Max(score, sc);
 										continue;
 									}
 								}
-								if(!IsMatchSearch(str, splittedStrings[i], searchKind)) {
-									return false;
+								var s = ScoreSearch(str, splittedStrings[i], searchKind);
+								if(s < 0) {
+									return s;
 								}
+								score = MathF.Max(score, s) + (i * 0.1f);
 							}
-							return true;
+							return score;
 						}
 						for(int i = 1; i < splittedStrings.Length; i++) {
-							if(!IsMatchSearch(str, splittedStrings[i], searchKind)) {
-								return false;
+							var s = ScoreSearch(str, splittedStrings[i], searchKind);
+							if(s < 0) {
+								return s;
 							}
+							score = MathF.Max(score, s) + (i * 0.1f);
 						}
-						return true;
+						return score;
 					}
 				}
-				for(int i = 0; i < splittedStrings.Length; i++) {
-					if(!IsMatchSearch(str, splittedStrings[i], searchKind)) {
-						return false;
+				{
+					float score = -1;
+					for(int i = 0; i < splittedStrings.Length; i++) {
+						var s = ScoreSearch(str, splittedStrings[i], searchKind);
+						if(s < 0) {
+							return s;
+						}
+						score = MathF.Max(score, s) + (i * 0.1f);
 					}
+					return score;
 				}
-				return true;
 			}
 
-			public virtual bool IsMatchSearch(string str, string searchString, SearchKind searchKind) {
+			public virtual float ScoreSearch(string str, string searchString, SearchKind searchKind) {
+				if(string.IsNullOrEmpty(searchString))
+					return 0;
+				switch(searchKind) {
+					case SearchKind.Relevant:
+						return Relevance(searchString, str);
+					case SearchKind.Contains: {
+						if(str.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0) {
+							static float Score(string target, string query) {
+								if(string.IsNullOrEmpty(target) || string.IsNullOrEmpty(query))
+									return 0f;
+
+								target = target.ToLowerInvariant();
+								query = query.ToLowerInvariant();
+
+								int tLen = target.Length;
+								int qLen = query.Length;
+
+								int match = 0;
+								int ti = 0;
+
+								// subsequence match
+								for(int qi = 0; qi < qLen; qi++) {
+									char qc = query[qi];
+									while(ti < tLen) {
+										if(target[ti++] == qc) {
+											match++;
+											break;
+										}
+									}
+								}
+
+								// Base ratio
+								float ratio = (float)match / Math.Max(tLen, qLen);
+
+								// Prefix bonus (important for member search)
+								if(target.StartsWith(query))
+									ratio += 0.3f;
+
+								// Contains bonus
+								if(target.Contains(query))
+									ratio += 0.2f;
+
+								// Clamp
+								return Math.Min(ratio, 1f);
+							}
+							return Score(str, searchString);
+						}
+						break;
+					}
+					case SearchKind.Endwith: {
+						if(str.EndsWith(searchString, StringComparison.OrdinalIgnoreCase)) {
+							if(searchString.Length > str.Length) return 0;
+							return (float)searchString.Length / (float)str.Length;
+						}
+						break;
+					}
+					case SearchKind.Startwith: {
+						if(str.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)) {
+							if(searchString.Length > str.Length) return 0;
+							return (float)searchString.Length / (float)str.Length;
+						}
+						break;
+					}
+					case SearchKind.Equal:
+						if(str.Equals(searchString, StringComparison.OrdinalIgnoreCase)) {
+							return 1;
+						}
+						break;
+				}
+				return -1;
+			}
+
+			public static bool IsMatch(string str, string searchString, SearchKind searchKind) {
 				if(string.IsNullOrEmpty(searchString))
 					return true;
 				switch(searchKind) {
-					case SearchKind.Relevant:
-						return Matches(searchString, str);
 					case SearchKind.Contains:
 						return str.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0;
 					case SearchKind.Endwith:
@@ -267,6 +355,18 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+			public static float Score(string query, string haystack, SearchKind searchKind) {
+				switch(searchKind) {
+					case SearchKind.Relevant:
+						return Relevance(query, haystack);
+					case SearchKind.Contains: {
+
+						break;
+					}
+				}
+				return -1;
+			}
+
 			public static float Relevance(string query, string haystack) {
 				// Configurable score weights
 				var strictWeight = 1;
@@ -289,14 +389,6 @@ namespace MaxyGames.UNode.Editors {
 				var maxWeight = scoreWeight + shortnessWeight;
 				var totalWeight = (score.Value * scoreWeight) + (shortness * shortnessWeight);
 				return totalWeight / maxWeight;
-			}
-
-			public static bool Matches(string query, string haystack) {
-				return Matches(Relevance(query, haystack));
-			}
-
-			public static bool Matches(float relevance) {
-				return relevance > 0;
 			}
 
 			public static List<(int start, int end)> HighlightQueryPositions(string haystack, string query) {
@@ -385,7 +477,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						return false;
 					case SearchKind.Startwith:
-						if(IsMatchSearch(str, searchString, searchKind)) {
+						if(IsMatch(str, searchString, searchKind)) {
 							first = 0;
 							last = searchString.Length;
 							hightlight.hightlight.Add(new KeyValuePair<int, int>(first, last));
@@ -393,7 +485,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 						break;
 					case SearchKind.Equal:
-						if(IsMatchSearch(str, searchString, searchKind)) {
+						if(IsMatch(str, searchString, searchKind)) {
 							first = 0;
 							last = searchString.Length;
 							hightlight.hightlight.Add(new KeyValuePair<int, int>(first, last));
@@ -442,7 +534,7 @@ namespace MaxyGames.UNode.Editors {
 				return strs;
 			}
 
-			public override bool IsMatchSearch(MemberInfo member, string typeName, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+			public override float IsMatchSearch(MemberInfo member, string typeName, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
 				bool flag = true;
 				switch(searchFilter) {
 					case SearchFilter.Function:
@@ -459,7 +551,7 @@ namespace MaxyGames.UNode.Editors {
 						break;
 				}
 				if(!flag) {
-					return false;
+					return -1;
 				}
 				var str = member.Name;
 				if(member is Type) {
@@ -477,25 +569,25 @@ namespace MaxyGames.UNode.Editors {
 						if(!IsMatchSearchCapital(GetSplittedUpperCase(typeName), splittedCapital[0])) {
 							for(int i = 0; i < splittedCapital.Length; i++) {
 								if(i == 0 && member is ConstructorInfo) {
-									if(IsMatchSearch("new", splittedStrings[i], SearchKind.Startwith)) {
+									if(IsMatch("new", splittedStrings[i], SearchKind.Startwith)) {
 										continue;
 									}
 								}
 								if(!IsMatchSearchCapital(split, splittedCapital[i])) {
-									return false;
+									return -1;
 								}
 							}
-							return true;
+							return 1;
 						}
 						for(int i = 1; i < splittedCapital.Length; i++) {
 							if(!IsMatchSearchCapital(split, splittedCapital[i])) {
-								return false;
+								return -1;
 							}
 						}
-						return true;
+						return 1;
 					}
 				}
-				return IsMatchSearchCapital(str);
+				return IsMatchSearchCapital(str) ? 1 : 0;
 			}
 
 			protected override bool Hightlight(TreeViewItem tree, SearchParam searchParam, ref TreeHightlight hightlight) {
@@ -548,14 +640,14 @@ namespace MaxyGames.UNode.Editors {
 					return false;
 				}
 				for(int x = 0; x < split2.Count; x++) {
-					if(!IsMatchSearch(split[x], split2[x], SearchKind.Startwith)) {
+					if(IsMatch(split[x], split2[x], SearchKind.Startwith)) {
 						return false;
 					}
 				}
 				return true;
 			}
 
-			public override bool IsMatchSearch(TreeViewItem tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+			public override float IsMatchSearch(TreeViewItem tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
 				if(tree is MemberTreeView memberTree && !(memberTree.member is Type)) {
 					return IsMatchSearch(memberTree.member, memberTree.displayName, splittedStrings, searchKind, searchFilter);
 				}
@@ -591,29 +683,32 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(!flag) {
-					return false;
+					return -1;
 				}
 				var str = tree.displayName;
 				{
 					var split = GetSplittedUpperCase(str);
 					for(int i = 0; i < splittedCapital.Length; i++) {
 						if(split.Count < splittedCapital[i].Count) {
-							return false;
+							return -1;
 						}
 						for(int x = 0; x < splittedCapital[i].Count; x++) {
-							if(!IsMatchSearch(split[x], splittedCapital[i][x], SearchKind.Startwith)) {
-								return false;
+							if(!IsMatch(split[x], splittedCapital[i][x], SearchKind.Startwith)) {
+								return -1;
 							}
 						}
 					}
 				}
-				return true;
+				return 1;
 			}
 
-			public override bool IsMatchSearch(string str, string searchString, SearchKind searchKind) {
+			public override float ScoreSearch(string str, string searchString, SearchKind searchKind) {
 				if(string.IsNullOrEmpty(searchString))
-					return true;
-				return str.StartsWith(searchString, StringComparison.OrdinalIgnoreCase);
+					return 0;
+				if(str.StartsWith(searchString, StringComparison.OrdinalIgnoreCase)) {
+					return (float)searchString.Length / str.Length;
+				}
+				return -1;
 			}
 		}
 
@@ -841,11 +936,16 @@ namespace MaxyGames.UNode.Editors {
 					var item = tree as TypeTreeView;
 					if(!item.type.IsEnum && searchParam.searchString.Length >= MinWordForDeepTypeSearch) {
 						if(searchParam.splittedStrings.Length < 2 || !string.IsNullOrEmpty(searchParam.splittedStrings[1])) {
-							if(!searchParam.isUsingDot || searcher.IsMatchSearch(tree.displayName, searchParam.splittedStrings[0], searchParam.searchKind)) {
+							if(!searchParam.isUsingDot || searcher.ScoreSearch(item.displayName, searchParam.splittedStrings[0], searchParam.searchKind) >= 0) {
 								item.Search((member) => {
-									return searcher.IsMatchSearch(member, tree.displayName, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
+									return searcher.IsMatchSearch(member, item.displayName, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
 								});
-								return tree.hasChildren && tree.children.Count > 0 || searcher.IsMatchSearch(tree, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
+								if(tree.hasChildren && tree.children.Count > 0) {
+									return true;
+								}
+								var score = searcher.IsMatchSearch(tree, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
+								item.Score = score;
+								return score >= 0;
 							}
 						}
 					}
@@ -908,7 +1008,14 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-				return tree is SelectorSearchTreeView || tree.hasChildren && tree.children.Count > 0 || searcher.IsMatchSearch(tree, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
+				if(tree is SelectorSearchTreeView || tree.hasChildren && tree.children.Count > 0) {
+					return true;
+				}
+				var sc = searcher.IsMatchSearch(tree, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
+				if(tree is IRelevanceItem relevance) {
+					relevance.Score = sc;
+				}
+				return sc >= 0;
 			}
 
 			void AssignFilter(TreeViewItem tree, FilterAttribute filter) {
