@@ -649,7 +649,7 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var item in customItems) {
 						var categ = categTrees.FirstOrDefault(t => t.category == item.category);
 						if(categ == null) {
-							categ = new SelectorCategoryTreeView(item.category, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + item.category), -1);
+							categ = new SelectorCategoryTreeView(item.category, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + item.category), BonusRelevantScore.FavoritesScore);
 							categ.expanded = true;
 							categTrees.Add(categ);
 						}
@@ -678,12 +678,12 @@ namespace MaxyGames.UNode.Editors {
 				}
 				typeTrees.Sort((x, y) => string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase));
 				memberTrees.Sort((x, y) => string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase));
-				var typeCategory = new SelectorCategoryTreeView("Types", "", uNodeEditorUtility.GetUIDFromString("[TYPES]"), -1);
+				var typeCategory = new SelectorCategoryTreeView("Types", "", uNodeEditorUtility.GetUIDFromString("[TYPES]"));
 				typeCategory.expanded = true;
 				foreach(var tree in typeTrees) {
 					typeCategory.AddChild(tree);
 				}
-				var memberCategory = new SelectorCategoryTreeView("Members", "", uNodeEditorUtility.GetUIDFromString("[MEMBERS]"), -1);
+				var memberCategory = new SelectorCategoryTreeView("Members", "", uNodeEditorUtility.GetUIDFromString("[MEMBERS]"));
 				memberCategory.expanded = true;
 				foreach(var tree in memberTrees) {
 					memberCategory.AddChild(tree);
@@ -699,7 +699,7 @@ namespace MaxyGames.UNode.Editors {
 					nsTrees.Add(new NamespaceTreeView(fav, uNodeEditorUtility.GetUIDFromString("[NS-FAV]" + fav), -1));
 				}
 				nsTrees.Sort((x, y) => string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase));
-				var nsCategory = new SelectorCategoryTreeView("Namespaces", "", uNodeEditorUtility.GetUIDFromString("[NS]"), -1);
+				var nsCategory = new SelectorCategoryTreeView("Namespaces", "", uNodeEditorUtility.GetUIDFromString("[NS]"));
 				nsCategory.expanded = true;
 				foreach(var tree in nsTrees) {
 					nsCategory.AddChild(tree);

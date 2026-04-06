@@ -365,6 +365,69 @@ namespace MaxyGames {
 		}
 		#endregion
 
+		#region Increment 
+		/// <summary>
+		/// Returns a string representing the increment operation for the specified variable.
+		/// </summary>
+		/// <param name="value">The variable name to increment.</param>
+		/// <param name="post">true to use post-increment (value++); false to use pre-increment (++value);.</param>
+		/// <returns>A string containing the increment expression.</returns>
+		public static string IncrementExpression(string value, bool post = true) {
+			if(post) {
+				return $"{value}++;";
+			}
+			else {
+				return $"++{value};";
+			}
+		}
+
+		/// <summary>
+		/// Generates a string representing a post-decrement or pre-decrement operation for the specified variable name.
+		/// </summary>
+		/// <param name="value">The variable name to decrement.</param>
+		/// <param name="post">true to use post-decrement (value--); false to use pre-decrement (--value);.</param>
+		/// <returns>A string containing the decrement expression.</returns>
+		public static string DecrementExpression(string value, bool post = true) {
+			if(post) {
+				return $"{value}--;";
+			}
+			else {
+				return $"--{value};";
+			}
+		}
+
+		/// <summary>
+		/// Returns a string representing the increment operation applied to the specified value in either postfix or prefix
+		/// form.
+		/// </summary>
+		/// <param name="value">The value to be incremented.</param>
+		/// <param name="post">true for postfix increment; false for prefix increment.</param>
+		/// <returns>A string with the increment operator applied to the value.</returns>
+		public static string IncrementValue(string value, bool post = true) {
+			if(post) {
+				return $"{value}++";
+			}
+			else {
+				return $"++{value}";
+			}
+		}
+
+		/// <summary>
+		/// Appends or prepends the decrement operator (--) to the specified value as a string.
+		/// </summary>
+		/// <param name="value">The value to which the decrement operator is applied.</param>
+		/// <param name="post">true to append the operator after the value; false to prepend it.</param>
+		/// <returns>A string with the decrement operator applied to the value.</returns>
+		public static string DecrementValue(string value, bool post = true) {
+			if(post) {
+				return $"{value}--";
+			}
+			else {
+				return $"--{value}";
+			}
+		}
+		#endregion
+
 		#region Access Code
 		/// <summary>
 		/// Generate access code.

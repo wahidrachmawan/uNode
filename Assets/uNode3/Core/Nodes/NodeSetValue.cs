@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using MaxyGames.OdinSerializer.Utilities;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Set Value",hasFlowInput = true, hasFlowOutput = true, inputs = new[] { typeof(object)})]
+	[NodeMenu("Flow", "Set Value (=)",hasFlowInput = true, hasFlowOutput = true, inputs = new[] { typeof(object)})]
 	[Description("Change a value")]
 	public class NodeSetValue : FlowNode {
 		public SetType setType;

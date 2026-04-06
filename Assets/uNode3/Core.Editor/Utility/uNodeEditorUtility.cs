@@ -305,6 +305,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Determines the icon type associated with the specified member for display purposes.
+		/// </summary>
+		/// <param name="member">The member for which to retrieve the icon type.</param>
+		/// <returns>A Type representing the icon associated with the specified member.</returns>
 		internal static Type GetTypeForIcon(MemberInfo member) {
 			switch(member.MemberType) {
 				case MemberTypes.Constructor:
@@ -341,10 +346,20 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Retrieves the icon associated with the specified member.
+		/// </summary>
+		/// <param name="member">The member for which to retrieve the icon.</param>
+		/// <returns>A texture representing the icon for the specified member.</returns>
 		public static Texture GetIcon(MemberInfo member) {
 			return GetTypeIcon(GetTypeForIcon(member));
 		}
 
+		/// <summary>
+		/// Retrieves the appropriate icon for the specified member based on its target type.
+		/// </summary>
+		/// <param name="member">The member data used to determine the icon.</param>
+		/// <returns>A texture representing the icon for the specified member.</returns>
 		public static Texture GetIcon(MemberData member) {
 			switch(member.targetType) {
 				case MemberData.TargetType.Self:
@@ -410,10 +425,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Return a icon for the object.
+		/// Retrieves the icon associated with the specified object, using custom or type-based logic.
 		/// </summary>
-		/// <param name="obj"></param>
-		/// <returns></returns>
+		/// <param name="obj">The object for which to retrieve an icon.</param>
+		/// <returns>A texture representing the icon for the specified object.</returns>
 		public static Texture GetTypeIcon(object obj) {
 			if(obj is ICustomIcon) {
 				var icon = (obj as ICustomIcon).GetIcon();
@@ -433,10 +448,10 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Return a icon for the type.
+		/// Retrieves the icon associated with the specified type.
 		/// </summary>
-		/// <param name="type"></param>
-		/// <returns></returns>
+		/// <param name="type">The type for which to get the icon.</param>
+		/// <returns>A Texture representing the icon for the specified type.</returns>
 		public static Texture GetTypeIcon(Type type) {
 			return uNodePreference.GetIconForType(type);
 		}
@@ -525,37 +540,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		#region Transfroms
-		/// <summary>
-		/// Get the prefab transfrom.
-		/// </summary>
-		/// <param name="from">The transform to find</param>
-		/// <param name="rootFrom">The root transfrom from</param>
-		/// <param name="rootPrefab">The root transfrom for find it's child</param>
-		/// <returns></returns>
-		public static Transform GetPrefabTransform(Transform from, Transform rootFrom, Transform rootPrefab) {
-			if(from == rootFrom) {
-				return rootPrefab;
-			}
-			List<int> indexChild = new List<int>();
-			Transform t = from;
-			while(t.parent != null) {
-				indexChild.Insert(0, t.GetSiblingIndex());
-				if(t.parent == rootFrom) {
-					break;
-				}
-				t = t.parent;
-			}
-			t = rootPrefab;
-			foreach(var index in indexChild) {
-				if(t.childCount <= index)
-					return null;
-				t = t.GetChild(index);
-			}
-			return t;
-		}
-		#endregion
-
 		#region Others
 		public static bool DisplayRequiredProVersion(string feature = "") {
 			if(uNodeUtility.IsProVersion) {
@@ -634,6 +618,15 @@ namespace MaxyGames.UNode.Editors {
 			process.Start();
 		}
 
+		/// <summary>
+		/// Determines whether the specified type is considered serializable according to predefined criteria, including
+		/// primitives, strings, certain Unity types, and specific generic and array types.
+		/// </summary>
+		/// <remarks>Supports common .NET types and Unity-specific types such as Vector2, Color, and AnimationCurve.
+		/// Only single-dimensional arrays and generic lists with serializable element types are considered
+		/// serializable.</remarks>
+		/// <param name="type">The type to evaluate for serializability.</param>
+		/// <returns>true if the type is considered serializable; otherwise, false.</returns>
 		public static bool IsTypeSerializable(Type type) {
 			if(type.IsPrimitive) {
 				return true;
@@ -720,6 +713,11 @@ namespace MaxyGames.UNode.Editors {
 			return _uNodePath;
 		}
 
+		/// <summary>
+		/// Returns the relative Unity asset path for a given absolute file path.
+		/// </summary>
+		/// <param name="absolutePath">The absolute file path to convert.</param>
+		/// <returns>The relative asset path starting with 'Assets', or an empty string if the path is not within the Unity project.</returns>
 		public static string GetRelativePath(string absolutePath) {
 			if(absolutePath.Replace('\\', '/').StartsWith(Application.dataPath)) {
 				return "Assets" + absolutePath.Substring(Application.dataPath.Length);
@@ -727,20 +725,26 @@ namespace MaxyGames.UNode.Editors {
 			return string.Empty;
 		}
 
+		/// <summary>
+		/// Determines whether the specified UnityEngine.Object is stored on disk as an asset.
+		/// </summary>
+		/// <param name="target">The object to check for persistence.</param>
+		/// <returns>true if the object is persistent; otherwise, false.</returns>
+		public static bool IsPersistent(UnityEngine.Object target) {
+			if(target == null)
+				return false;
+			return EditorUtility.IsPersistent(target);
+		}
+
+		/// <summary>
+		/// Determines whether the specified UnityEngine.Object exists in the current scene rather than as a persistent asset.
+		/// </summary>
+		/// <param name="target">The UnityEngine.Object to evaluate.</param>
+		/// <returns>true if the object is a scene object; otherwise, false.</returns>
 		public static bool IsSceneObject(UnityEngine.Object target) {
 			if(target == null)
 				return false;
 			if(!EditorUtility.IsPersistent(target)) {
-				//Transform root = null;
-				//if(target is Component) {
-				//	root = (target as Component).transform.root;
-				//} else if(target is GameObject) {
-				//	root = (target as GameObject).transform.root;
-				//}
-				//if(root != null && root.gameObject.name.StartsWith(GraphUtility.KEY_TEMP_OBJECT)) {
-				//	//Ensure to return false when the target is a temporary object
-				//	return false;
-				//}
 				return true;
 			}
 			return false;
@@ -764,44 +768,6 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static int GetUIDFromString(string str) {
 			return uNodeUtility.GetHashCode(str);
-		}
-
-		/// <summary>
-		/// Get unique name for graph variable, property, and function
-		/// </summary>
-		/// <param name="name"></param>
-		/// <param name="graph"></param>
-		/// <returns></returns>
-		public static string GetUniqueNameForGraph(string name, Graph graph) {
-			string result = name;
-			//int index = 1;
-			//bool hasSameName = false;
-			//do {
-			//	if(hasSameName) {
-			//		result = name + index;
-			//		index++;
-			//	}
-			//	hasSameName = false;
-			//	foreach(var var in graph.Variables) {
-			//		if(var.Name.Equals(result)) {
-			//			hasSameName = true;
-			//			break;
-			//		}
-			//	}
-			//	foreach(var var in graph.Properties) {
-			//		if(var.Name.Equals(result)) {
-			//			hasSameName = true;
-			//			break;
-			//		}
-			//	}
-			//	foreach(var var in graph.Functions) {
-			//		if(var.Name.Equals(result)) {
-			//			hasSameName = true;
-			//			break;
-			//		}
-			//	}
-			//} while(hasSameName);
-			return result;
 		}
 
 		/// <summary>
@@ -854,30 +820,43 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		/// <summary>
+		/// Registers an undo operation for the specified graph element.
+		/// </summary>
+		/// <param name="graphElement">The graph element to register for undo.</param>
+		/// <param name="name">The name to associate with the undo operation.</param>
 		public static void RegisterUndo(UGraphElement graphElement, string name = "") {
 			if(graphElement == null) return;
 			RegisterUndo(graphElement.graphContainer, name);
 		}
 
+		/// <summary>
+		/// Registers an undo operation for the specified graph object.
+		/// </summary>
+		/// <param name="graph">The graph object to register for undo.</param>
+		/// <param name="name">The name of the undo operation. Optional.</param>
 		public static void RegisterUndo(IGraph graph, string name = "") {
 			var obj = graph as UnityEngine.Object;
 			if(obj == null) return;
 			RegisterUndo(obj, name);
 		}
 
+		/// <summary>
+		/// Registers an undo operation for the specified Unity object and marks it as dirty for editing.
+		/// </summary>
+		/// <param name="obj">The Unity object to register for undo.</param>
+		/// <param name="name">The name of the undo operation. Optional.</param>
 		public static void RegisterUndo(UnityEngine.Object obj, string name = "") {
 			if(obj == null) return;
 			Undo.RegisterCompleteObjectUndo(obj, name);
 			MarkDirty(obj);
-			//if(IsPrefabInstance(obj)) {
-			//	uNodeThreadUtility.Queue(() => {
-			//		if(obj != null) {
-			//			PrefabUtility.RecordPrefabInstancePropertyModifications(obj);
-			//		}
-			//	});
-			//}
 		}
 
+		/// <summary>
+		/// Retrieves the MonoScript associated with the specified object instance.
+		/// </summary>
+		/// <param name="instance">The object instance for which to retrieve the MonoScript.</param>
+		/// <returns>The MonoScript associated with the instance, or null if not found.</returns>
 		public static MonoScript GetMonoScript(object instance) {
 			if(instance != null) {
 				if(instance is MonoBehaviour) {
@@ -890,6 +869,11 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
+		/// <summary>
+		/// Retrieves the MonoScript associated with the specified type from the collection of MonoScripts.
+		/// </summary>
+		/// <param name="type">The Type to search for in the MonoScripts collection.</param>
+		/// <returns>The MonoScript corresponding to the specified type, or null if not found.</returns>
 		public static MonoScript GetMonoScript(Type type) {
 			foreach(var s in MonoScripts) {
 				if(s != null && s.GetClass() == type) {
@@ -900,6 +884,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static System.Text.RegularExpressions.Regex _removeHTMLTagRx = new System.Text.RegularExpressions.Regex("<[^>]*>");
+		/// <summary>
+		/// Removes all HTML tags from the specified string.
+		/// </summary>
+		/// <param name="str">The input string that may contain HTML tags.</param>
+		/// <returns>A string with all HTML tags removed. Returns the original string if it is null or empty.</returns>
 		public static string RemoveHTMLTag(string str) {
 			if(string.IsNullOrEmpty(str)) {
 				return str;
@@ -1176,6 +1165,11 @@ namespace MaxyGames.UNode.Editors {
 			return result;
 		}
 
+		/// <summary>
+		/// Determines whether the specified type is a numeric type.
+		/// </summary>
+		/// <param name="type">The type to evaluate.</param>
+		/// <returns>true if the type is numeric; otherwise, false.</returns>
 		public static bool IsNumericType(Type type) {
 			switch(Type.GetTypeCode(type)) {
 				case TypeCode.Byte:
@@ -1220,53 +1214,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Save prefab asset.
+		/// Serializes the specified value and saves it to a file in the user preference directory.
 		/// </summary>
-		/// <param name="gameObject"></param>
-		/// <param name="prefab"></param>
-		public static GameObject SavePrefabAsset(GameObject gameObject, GameObject prefab) {
-			if(IsPrefabInstance(gameObject)) {
-				PrefabUtility.ApplyPrefabInstance(gameObject, InteractionMode.AutomatedAction);
-				return prefab;
-			}
-			if(gameObject != null && prefab != null && !string.IsNullOrEmpty(AssetDatabase.GetAssetPath(prefab))) {
-				var result = PrefabUtility.SaveAsPrefabAsset(gameObject, AssetDatabase.GetAssetPath(prefab));
-				MarkDirty(prefab);
-				return result;
-			} else {
-				return null;
-			}
-		}
-
-		public static void UnlockPrefabInstance(GameObject gameObject) {
-			if (gameObject != null && PrefabUtility.IsPartOfNonAssetPrefabInstance(gameObject)) {
-				PrefabUtility.UnpackPrefabInstance(gameObject, PrefabUnpackMode.OutermostRoot, InteractionMode.AutomatedAction);
-			}
-		}
-
-		/// <summary>
-		/// Set the transform parent.
-		/// </summary>
-		/// <param name="from"></param>
-		/// <param name="to"></param>
-		public static void SetParent(Transform from, Transform to) {
-			if(!from || !to)
-				return;
-			if(IsPrefab(to)) {
-				Transform tr = PrefabUtility.InstantiatePrefab(to) as Transform;
-				from.SetParent(tr);
-				SavePrefabAsset(tr.root.gameObject, to.root.gameObject);
-				UnityEngine.Object.DestroyImmediate(tr.root.gameObject);
-			} else {
-				from.SetParent(to);
-			}
-		}
-
-		/// <summary>
-		/// Save editor data.
-		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="fileName"></param>
+		/// <typeparam name="T">The type of the value to serialize.</typeparam>
+		/// <param name="value">The object to serialize and save.</param>
+		/// <param name="fileName">The name of the file (without extension) to save the serialized data to.</param>
 		public static void SaveEditorData<T>(T value, string fileName) {
 			Directory.CreateDirectory(uNodePreference.preferenceDirectory);
 			char separator = Path.DirectorySeparatorChar;
@@ -1275,11 +1227,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
-		/// Load editor data.
+		/// Loads and deserializes editor data of the specified type from a file.
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
+		/// <typeparam name="T">The type of the data to load.</typeparam>
+		/// <param name="fileName">The name of the file to load, without extension.</param>
+		/// <returns>The deserialized data if the file exists; otherwise, the default value for the type.</returns>
 		public static T LoadEditorData<T>(string fileName) {
 			char separator = Path.DirectorySeparatorChar;
 			string path = uNodePreference.preferenceDirectory + separator + fileName + ".byte";

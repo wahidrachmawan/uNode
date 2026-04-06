@@ -9,7 +9,6 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using UnityEditor.IMGUI.Controls;
-using System.Text.RegularExpressions;
 
 namespace MaxyGames.UNode.Editors {
 	public interface IRelevanceItem {
@@ -237,6 +236,22 @@ namespace MaxyGames.UNode.Editors {
 				return char.IsWhiteSpace(c) || char.IsSymbol(c) || char.IsPunctuation(c);
 			}
 
+			public static bool IsDelimiterAllowed(char c) {
+				switch(c) {
+					case '-':
+					case '+':
+					case '*':
+					case '/':
+					case '%':
+					case '^':
+					case '!':
+					case '?':
+					case '=':
+						return true;
+				}
+				return false;
+			}
+
 			public static bool IsWordBeginning(char? previous, char current, char? next) {
 				var isFirst = previous == null;
 				var isLast = next == null;
@@ -283,11 +298,46 @@ namespace MaxyGames.UNode.Editors {
 				for(var queryIndex = 0; queryIndex < query.Length; queryIndex++) {
 					var queryCharacter = query[queryIndex];
 
+					var matched = false;
+
 					if(IsWordDelimiter(queryCharacter)) {
+						if(IsDelimiterAllowed(queryCharacter)) {
+
+							for(; haystackIndex < haystack.Length; haystackIndex++) {
+								var haystackCharacter = haystack[haystackIndex];
+
+								var matchesLoose = Compare(queryCharacter, haystackCharacter);
+								var matchesStrict = matchesLoose && (isStreaking || IsWordBeginning(haystack, haystackIndex));
+
+								var matches = strictOnly ? matchesStrict : matchesLoose;
+
+								if(matches) {
+									score += matchesStrict ? strictWeight : looseWeight;
+									matched = true;
+
+									if(indices != null) {
+										indices[haystackIndex] = true;
+									}
+
+									isStreaking = true;
+									haystackIndex++;
+									break;
+								}
+								else {
+									isStreaking = false;
+								}
+							}
+
+							if(matched) {
+								matchedAny = true;
+							}
+							else {
+								return false;
+							}
+						}
 						continue;
 					}
 
-					var matched = false;
 
 					for(; haystackIndex < haystack.Length; haystackIndex++) {
 						var haystackCharacter = haystack[haystackIndex];
@@ -712,7 +762,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		struct SearchParam {
+		readonly struct SearchParam {
 			public readonly string searchString;
 			public readonly string[] splittedStrings;
 			public readonly bool isUsingDot;
@@ -936,16 +986,21 @@ namespace MaxyGames.UNode.Editors {
 					var item = tree as TypeTreeView;
 					if(!item.type.IsEnum && searchParam.searchString.Length >= MinWordForDeepTypeSearch) {
 						if(searchParam.splittedStrings.Length < 2 || !string.IsNullOrEmpty(searchParam.splittedStrings[1])) {
-							if(!searchParam.isUsingDot || searcher.ScoreSearch(item.displayName, searchParam.splittedStrings[0], searchParam.searchKind) >= 0) {
+							float score = searcher.ScoreSearch(item.displayName, searchParam.splittedStrings[0], searchParam.searchKind);
+							if(score >= 0 || !searchParam.isUsingDot) {
 								item.Search((member) => {
 									return searcher.IsMatchSearch(member, item.displayName, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
 								});
-								if(tree.hasChildren && tree.children.Count > 0) {
-									return true;
+								if(score >= 0.5f) {
+									score -= 0.2f;
 								}
-								var score = searcher.IsMatchSearch(tree, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
 								item.Score = score;
-								return score >= 0;
+								if(searchParam.searchKind != SearchKind.Relevant) {
+									if(tree.hasChildren && tree.children.Count > 0) {
+										return true;
+									}
+								}
+								return score >= 0 && (searchParam.searchFilter == SearchFilter.All || searchParam.searchFilter == SearchFilter.Type);
 							}
 						}
 					}
@@ -1013,6 +1068,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 				var sc = searcher.IsMatchSearch(tree, searchParam.splittedStrings, searchParam.searchKind, searchParam.searchFilter);
 				if(tree is IRelevanceItem relevance) {
+					if(tree is TypeTreeView) {
+						if(sc >= 0.5f) {
+							sc -= 0.2f;
+						}
+					}
 					relevance.Score = sc;
 				}
 				return sc >= 0;

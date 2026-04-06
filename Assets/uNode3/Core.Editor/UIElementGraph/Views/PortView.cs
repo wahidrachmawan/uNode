@@ -540,19 +540,9 @@ namespace MaxyGames.UNode.Editors {
 
 
 		
-		static List<Action> stackedActions = new List<Action>();
+		readonly static List<Action> stackedActions = new List<Action>();
 
-		static void PopStackedAction() {
-			if(stackedActions.Count > 0) {
-				uNodeThreadUtility.Queue(static () => {
-					var action = stackedActions[stackedActions.Count - 1];
-					stackedActions.RemoveAt(stackedActions.Count - 1);
-					action?.Invoke();
-				});
-			}
-		}
-
-		private static void OnDropOutsidePortFromValueInput(ValueInput portView, Vector2 position, GraphEditor graphEditor, FilterAttribute filter) {
+		private static void OnDropOutsidePortFromValueInput(ValueInput input, Vector2 position, GraphEditor graphEditor, FilterAttribute filter) {
 			FilterAttribute FA = filter;
 			var types = FA.Types;
 			FA = new FilterAttribute(FA) {
@@ -567,38 +557,79 @@ namespace MaxyGames.UNode.Editors {
 				},
 				// DisplayDefaultStaticType = false
 			};
-			List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
+
 			var editorData = graphEditor.graphData;
-			var portType = portView.type;
+			var portType = input.type;
 			PortCommandData commandData = new PortCommandData() {
 				portType = portType,
-				portName = portView.name,
-				port = portView,
+				portName = input.name,
+				port = input,
 				portKind = PortKind.ValueInput,
 				filter = filter,
 			};
-			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, graphEditor, portView.node, position, () => {
+			List<ItemSelector.CustomItem> customItems = new();
+
+			customItems.AddRange(ItemSelector.MakeCustomItems(commandData, graphEditor, input.node, position, () => {
 				graphEditor.Repaint();
 			}, types));
-			var win = graphEditor.ShowNodeMenu(position, FA, (n) => {
-				void ExecuteStackedAction(NodeObject nodeObject) {
-					if(nodeObject.ValueInputs.Count > 0) {
-						if(Event.current != null) {
-							if(Event.current.control) {
-								for(int i = nodeObject.ValueInputs.Count - 1; i >= 0; i--) {
-									var port = nodeObject.ValueInputs[i];
-									if(port.hasValidConnections == false) {
-										stackedActions.Add(() => {
-											OnDropOutsidePortFromValueInput(port, new Vector2(position.x - 200, position.y), graphEditor, port.filter ?? new FilterAttribute(port.type));
-										});
-									}
+
+			var contextualPorts = NodeEditorUtility.FindContextualOutputPorts(input.node);
+			foreach(var port in contextualPorts) {
+				if(filter.SetMember) {
+					if(port.CanSetValue() == false)
+						continue;
+				}
+				if(filter.IsValidType(port.type) == false)
+					continue;
+				if(port.GetNode() is BaseEntryNode entry && entry.nodeObject.parent is IParameterSystem) {
+					//Skip in case the output is parameter
+					continue;
+				}
+				customItems.Add(ItemSelector.CustomItem.Create(port.title, () => {
+					NodeEditorUtility.AddNewNode<Nodes.NodeReroute>(editorData, position, node => {
+						node.kind = Nodes.NodeReroute.RerouteKind.Value;
+						node.Register();
+						node.input.ConnectToAsProxy(port);
+						node.output.ConnectTo(input);
+						graphEditor.ReloadView();
+					});
+				}, 
+					"@Ports", 
+					uNodeEditorUtility.GetTypeIcon(port.type), 
+					new GUIContent($"{port.node.GetTitle()} => {port.title}\nNode: {port.node.name}\nNode ID: {port.node.id}", 
+					uNodeEditorUtility.GetTypeIcon(port.node.GetNodeIcon())))
+				);
+			}
+
+			static void PopStackedAction() {
+				if(stackedActions.Count > 0) {
+					uNodeThreadUtility.Queue(static () => {
+						var action = stackedActions[stackedActions.Count - 1];
+						stackedActions.RemoveAt(stackedActions.Count - 1);
+						action?.Invoke();
+					});
+				}
+			}
+
+			void ExecuteStackedAction(NodeObject nodeObject) {
+				if(nodeObject.ValueInputs.Count > 0) {
+					if(Event.current != null) {
+						if(Event.current.control) {
+							for(int i = nodeObject.ValueInputs.Count - 1; i >= 0; i--) {
+								var port = nodeObject.ValueInputs[i];
+								if(port.hasValidConnections == false) {
+									stackedActions.Add(() => {
+										OnDropOutsidePortFromValueInput(port, new Vector2(position.x - 200, position.y), graphEditor, port.filter ?? new FilterAttribute(port.type));
+									});
 								}
 							}
 						}
 					}
-					PopStackedAction();
 				}
+				PopStackedAction();
+			}
 
+			var win = graphEditor.ShowNodeMenu(position, FA, (n) => {
 				if(n.nodeObject.CanGetValue()) {
 					if(n is MultipurposeNode mNode) {
 						var type = mNode.nodeObject.ReturnType();
@@ -614,18 +645,18 @@ namespace MaxyGames.UNode.Editors {
 								type,
 								rightType,
 								NodeEditorUtility.GetPort<ValueOutput>(n),
-								NodeEditorUtility.GetPort<ValueInput>(portView.node),
+								NodeEditorUtility.GetPort<ValueInput>(input.node),
 								(node) => {
-									portView.ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
+									input.ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
 								}, editorData.currentCanvas, new FilterAttribute(rightType));
 							ExecuteStackedAction(n);
 							return;
 						}
 					}
-					portView.ConnectTo(n.nodeObject.primaryValueOutput);
+					input.ConnectTo(n.nodeObject.primaryValueOutput);
 					ExecuteStackedAction(n);
 				}
-			}, NodeFilter.ValueInput, stackCreateNode: false, additionalItems: customItems, expandedCategory: new[] { "@", "Data" });
+			}, NodeFilter.ValueInput, stackCreateNode: false, additionalItems: customItems, expandedCategory: new[] { "@", "Data", "@Ports" });
 			win.editorData.selectIconCallback = (tree) => {
 				if(tree is ISelectorItemWithType selectorItemWithType) {
 					var itemType = selectorItemWithType.ItemType;

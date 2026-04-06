@@ -327,7 +327,9 @@ Note: Auto Generate on Buld will always using Unity method.")]
 			#endregion
 
 			#region Hidden Preferences
+			[SerializeField]
 			internal int m_itemSearchKind;
+			[SerializeField]
 			internal int m_itemDeepSearchKind;
 			#endregion
 		}

@@ -222,7 +222,7 @@ namespace MaxyGames.UNode.Editors {
 					n.Register();
 					NodeEditorUtility.AddNewNode(graphData, "Set", null, position, delegate (Nodes.NodeSetValue setNode) {
 						setNode.Register();
-						NodeEditorUtility.ConnectPort(setNode.target, n.output);
+						setNode.target.ConnectTo(n.output);
 						if(mData.type != null) {
 							setNode.value.AssignToDefault(MemberData.Default(member.FieldType));
 						}
@@ -260,7 +260,7 @@ namespace MaxyGames.UNode.Editors {
 						n.Register();
 						NodeEditorUtility.AddNewNode(graphData, "Set", null, position, delegate (Nodes.NodeSetValue setNode) {
 							setNode.Register();
-							NodeEditorUtility.ConnectPort(setNode.target, n.output);
+							setNode.target.ConnectTo(n.output);
 							if(mData.type != null) {
 								setNode.value.AssignToDefault(MemberData.Default(member.PropertyType));
 							}

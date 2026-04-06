@@ -698,7 +698,7 @@ namespace MaxyGames.UNode.Editors {
 									if(action != null) {
 										action(namespaces);
 									}
-									if(unityObject && uNodeEditorUtility.IsPrefab(unityObject)) {
+									if(unityObject) {
 										uNodeEditorUtility.MarkDirty(unityObject);
 									}
 								}, "Namespaces"));
@@ -720,7 +720,7 @@ namespace MaxyGames.UNode.Editors {
 					if(action != null) {
 						action(namespaces);
 					}
-					if(unityObject && uNodeEditorUtility.IsPrefab(unityObject)) {
+					if(unityObject) {
 						uNodeEditorUtility.MarkDirty(unityObject);
 					}
 				});
@@ -777,7 +777,7 @@ namespace MaxyGames.UNode.Editors {
 							uNodeEditorUtility.RegisterUndo(system as UnityEngine.Object, "Add Interface");
 						interfaces.Add(member.startType);
 						onChanged?.Invoke();
-						if(system as UnityEngine.Object && uNodeEditorUtility.IsPrefab(system as UnityEngine.Object)) {
+						if(system as UnityEngine.Object) {
 							uNodeEditorUtility.MarkDirty(system as UnityEngine.Object);
 						}
 					});
@@ -791,7 +791,7 @@ namespace MaxyGames.UNode.Editors {
 						uNodeEditorUtility.RegisterUndo(system as UnityEngine.Object, "Remove Interface: " + interfaces[list.index].prettyName);
 					interfaces.RemoveAt(list.index);
 					onChanged?.Invoke();
-					if(system as UnityEngine.Object && uNodeEditorUtility.IsPrefab(system as UnityEngine.Object)) {
+					if(system as UnityEngine.Object) {
 						uNodeEditorUtility.MarkDirty(system as UnityEngine.Object);
 					}
 				};

@@ -63,8 +63,7 @@ namespace MaxyGames.UNode.Editors {
 							DragAndDrop.visualMode == DragAndDropVisualMode.None &&
 							DragAndDrop.objectReferences.Length > 0) {
 
-							bool isPrefab = uNodeEditorUtility.IsPrefab(node.owner.graphEditor.graphData.owner);
-							if(isPrefab) {
+							if(uNodeEditorUtility.IsPersistent(node.owner.graphEditor.graphData.owner)) {
 								if(DragAndDrop.GetGenericData("uNode") != null) {
 									var generic = DragAndDrop.GetGenericData("uNode");
 									if(generic is UnityEngine.Object && uNodeEditorUtility.IsSceneObject(generic as UnityEngine.Object)) {

@@ -10,6 +10,8 @@ namespace MaxyGames.UNode.Nodes {
 	[Description("The foreach statement repeats a body of embedded statements for each element in an array or a generic type.")]
 	public class ForeachLoop : FlowNode {
 		public bool deconstructValue = true;
+		public string itemName;
+		public string indexName;
 
 		public class DeconstructData {
 			public string id = uNodeUtility.GenerateUID();
@@ -25,6 +27,7 @@ namespace MaxyGames.UNode.Nodes {
 		public FlowOutput body { get; private set; }
 		public ValueInput collection { get; set; }
 		public ValueOutput output { get; set; }
+		public ValueOutput index { get; set; }
 
 		private MethodInfo deconstructMethod;
 
@@ -46,6 +49,8 @@ namespace MaxyGames.UNode.Nodes {
 				},
 			};
 		}
+
+		public bool IsDeconstructing => deconstructValue && collection != null && collection.hasValidConnections && CanDeconstruct(collection.ValueType.ElementType());
 
 		protected override void OnRegister() {
 			body = FlowOutput(nameof(body));
@@ -105,7 +110,12 @@ namespace MaxyGames.UNode.Nodes {
 				}
 			} 
 			else {
-				output = ValueOutput(nameof(output), ReturnType);
+				output = ValueOutput(nameof(output), ReturnType).SetName(string.IsNullOrEmpty(itemName) ? "Item" : itemName);
+				output.isVariable = true;
+			}
+			index = ValueOutput(nameof(index), typeof(int), PortAccessibility.ReadOnly);
+			if(string.IsNullOrEmpty(indexName) == false) {
+				index.SetName(indexName);
 			}
 			base.OnRegister();
 			exit.SetName("Exit");
@@ -162,7 +172,11 @@ namespace MaxyGames.UNode.Nodes {
 		protected override void OnExecuted(Flow flow) {
 			IEnumerable lObj = collection.GetValue<IEnumerable>(flow);
 			if(lObj != null) {
+				int idx = 0;
 				foreach(object obj in lObj) {
+					if(index.isConnected) {
+						flow.SetPortData(index, idx++);
+					}
 					if(!body.isConnected)
 						continue;
 					UpdateLoopValue(flow, obj);
@@ -187,7 +201,11 @@ namespace MaxyGames.UNode.Nodes {
 		protected override IEnumerator OnExecutedCoroutine(Flow flow) {
 			IEnumerable lObj = collection.GetValue<IEnumerable>(flow);
 			if(lObj != null) {
+				int idx = 0;
 				foreach(object obj in lObj) {
+					if(index.isConnected) {
+						flow.SetPortData(index, idx++);
+					}
 					if(!body.isConnected)
 						continue;
 					UpdateLoopValue(flow, obj);
@@ -225,9 +243,11 @@ namespace MaxyGames.UNode.Nodes {
 					}
 				}
 			} else {
-				var vName = CG.RegisterVariable(output, "loopValue");
+				var vName = CG.RegisterVariable(output, string.IsNullOrEmpty(itemName) ? "loopValue" : itemName);
 				CG.RegisterPort(output, () => vName);
 			}
+			var iName = CG.RegisterVariable(index, string.IsNullOrEmpty(indexName) ? "index" : indexName);
+			CG.RegisterPort(index, () => iName);
 		}
 
 		protected override string GenerateFlowCode() {
@@ -275,7 +295,11 @@ namespace MaxyGames.UNode.Nodes {
 							paramDatas[i] = "_";
 						}
 					}
+					if(index.isConnected) {
+						additionalContents += CG.IncrementExpression(CG.GetVariableName(index));
+					}
 					return CG.Flow(
+							index.isConnected ? CG.DeclareVariable(CG.GetVariableName(index), CG.Value(-1)) : null,
 							CG.Condition("foreach", "var (" + string.Join(", ", paramDatas) + ") in " + targetCollection, additionalContents + contents),
 							CG.FlowFinish(enter, exit)
 						);
@@ -315,7 +339,11 @@ namespace MaxyGames.UNode.Nodes {
 					else {
 						loopType = CG.Type(elementType) + " ";
 					}
+					if(index.isConnected) {
+						additionalContents += CG.IncrementExpression(CG.GetVariableName(index));
+					}
 					return CG.Flow(
+							index.isConnected ? CG.DeclareVariable(CG.GetVariableName(index), CG.Value(-1)) : null,
 							CG.Condition("foreach", loopType + vName + " in " + targetCollection, additionalContents + contents),
 							CG.FlowFinish(enter, exit)
 						);

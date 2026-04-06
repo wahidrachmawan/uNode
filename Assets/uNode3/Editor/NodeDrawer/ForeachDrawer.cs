@@ -13,6 +13,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
 
 			UInspector.Draw(option.property[nameof(node.deconstructValue)]);
 
+			if(node.IsDeconstructing == false) {
+				UInspector.Draw(option.property[nameof(node.itemName)]);
+			}
+			UInspector.Draw(option.property[nameof(node.indexName)]);
+
 			if(node.output == null) {
 				using(new EditorGUILayout.VerticalScope()) {
 					foreach(var data in node.deconstructDatas) {

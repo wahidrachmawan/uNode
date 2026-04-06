@@ -58,7 +58,7 @@ namespace MaxyGames.UNode.Editors {
 			editorData.setup.Setup((progress) => {
 				if(progress == 1) {
 					uNodeThreadUtility.Queue(() => {
-						UnityEngine.Profiling.Profiler.BeginSample("AAA");
+						UnityEngine.Profiling.Profiler.BeginSample("Setup ItemSelector");
 						var categories = new List<TreeViewItem>();
 						if(CustomTrees != null) {
 							foreach(var tree in CustomTrees) {
@@ -66,9 +66,9 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 						if(displayDefaultItem) {
-							var categoryTree = new SelectorCategoryTreeView("#", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#"), -1);
+							var categoryTree = new SelectorCategoryTreeView("#", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#"));
 							categories.Add(categoryTree);
-							var recentTree = new SelectorCategoryTreeView("Recently", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#Recently"), -1);
+							var recentTree = new SelectorCategoryTreeView("Recently", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#Recently"));
 							recentTree.hideOnSearch = true;
 							categories.Add(recentTree);
 							if(displayNoneOption && filter.IsValidTarget(MemberData.TargetType.Null)) {
@@ -195,7 +195,7 @@ namespace MaxyGames.UNode.Editors {
 										sp.info = "Setup Items";
 										for(int i = 0; i < allTypes.Count; i++) {
 											var pair = allTypes[i];
-											var nsTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[CATEG-SEARCH]" + pair.Key), -1);
+											var nsTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[CATEG-SEARCH]" + pair.Key));
 											foreach(var type in pair.Value) {
 												nsTree.AddChild(new TypeTreeView(type, type.GetHashCode(), -1));
 											}
@@ -237,13 +237,13 @@ namespace MaxyGames.UNode.Editors {
 								}, "Favorites", uNodeEditorUtility.GetUIDFromString("[fav]"), -1) {
 									icon = uNodeGUIStyle.favoriteIconOn
 								});
-								var namespaceTrees = new SelectorCategoryTreeView("Types", "", uNodeEditorUtility.GetUIDFromString("[NS]"), -1);
+								var namespaceTrees = new SelectorCategoryTreeView("Types", "", uNodeEditorUtility.GetUIDFromString("[NS]"));
 								namespaceTrees.expanded = true;
 
 								var hideUnselectedItem = uNodePreference.preferenceData.itemSelectorShowUnselectedTypes == false && filter.OnlyGetType;
 
 								if(displayGeneralType) {
-									var categTree = new SelectorCategoryTreeView("General", "", uNodeEditorUtility.GetUIDFromString("[GENERAL]"), -1);
+									var categTree = new SelectorCategoryTreeView("General", "", uNodeEditorUtility.GetUIDFromString("[GENERAL]"));
 									var items = TreeFunction.GetGeneralTrees();
 									items.ForEach(tree => {
 										if(hideUnselectedItem && !M_CanSelectType(tree.type, filter))
@@ -278,7 +278,7 @@ namespace MaxyGames.UNode.Editors {
 										list.Add(item);
 									}
 									foreach(var pair in runtimeTypes) {
-										var categTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[RT]" + pair.Key), -1);
+										var categTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[RT]" + pair.Key));
 										var items = pair.Value;
 										items.ForEach(tree => categTree.AddChild(tree));
 										if(categTree.hasChildren) {
@@ -290,7 +290,7 @@ namespace MaxyGames.UNode.Editors {
 								//Get the type lists
 								var typeList = editorData.setup.typeList;
 								foreach(var pair in typeList) {
-									var nsTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + pair.Key), -1);
+									var nsTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + pair.Key));
 									foreach(var type in pair.Value) {
 										if(hideUnselectedItem && !M_CanSelectType(type, filter)) {
 											//Skip any unselectable types
@@ -321,7 +321,7 @@ namespace MaxyGames.UNode.Editors {
 								sp.info = "Setup Items";
 								for(int i = 0; i < allTypes.Count; i++) {
 									var pair = allTypes[i];
-									var nsTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[FAV-NS-SEARCH]" + pair.Key), -1);
+									var nsTree = new SelectorCategoryTreeView(pair.Key, "", uNodeEditorUtility.GetUIDFromString("[FAV-NS-SEARCH]" + pair.Key), BonusRelevantScore.FavoritesScore);
 									foreach(var type in pair.Value) {
 										nsTree.AddChild(new TypeTreeView(type, type.GetHashCode(), -1));
 									}

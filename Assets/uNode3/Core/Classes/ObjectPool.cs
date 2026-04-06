@@ -120,6 +120,12 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	public static class StaticListPool {
+		public static List<object> Allocate() => StaticListPool<object>.Allocate();
+		public static List<T> Allocate<T>() => StaticListPool<T>.Allocate();
+		public static void Free<T>(List<T> obj) => StaticListPool<T>.Free(obj);
+	}
+
 	public static class StaticListPool<T> {
 		public readonly static ObjectPool<List<T>> pool = new ObjectPool<List<T>>(Construct, null, OnFree);
 
@@ -138,6 +144,12 @@ namespace MaxyGames.UNode {
 		static void OnFree(List<T> value) {
 			value.Clear();
 		}
+	}
+
+	public static class StaticHashPool {
+		public static HashSet<object> Allocate() => StaticHashPool<object>.Allocate();
+		public static HashSet<T> Allocate<T>() => StaticHashPool<T>.Allocate();
+		public static void Free<T>(HashSet<T> obj) => StaticHashPool<T>.Free(obj);
 	}
 
 	public static class StaticHashPool<T> {

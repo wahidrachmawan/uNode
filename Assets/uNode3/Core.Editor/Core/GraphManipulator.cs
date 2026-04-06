@@ -1787,7 +1787,7 @@ namespace MaxyGames.UNode.Editors {
 						node.EnsureRegistered();
 						NodeEditorUtility.AddNewNode(graphData, new Vector2(node.nodeObject.position.x, node.position.y), delegate (Nodes.NodeSetValue n) {
 							n.EnsureRegistered();
-							NodeEditorUtility.ConnectPort(n.target, node.nodeObject.primaryValueOutput);
+							n.target.ConnectTo(node.nodeObject.primaryValueOutput);
 							n.value.AssignToDefault(MemberData.Default(n.target.type));
 						});
 						node.nodeObject.SetPosition(new Vector2(node.position.x - 150, node.position.y - 100));

@@ -211,6 +211,13 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Ports
+		/// <summary>
+		/// Retrieves the first port of the specified type from the given node.
+		/// </summary>
+		/// <typeparam name="T">The type of port to retrieve. Must inherit from UPort.</typeparam>
+		/// <param name="node">The node from which to retrieve the port.</param>
+		/// <returns>The first port of the specified type, or null if none is found.</returns>
+		/// <exception cref="InvalidOperationException">Thrown when the specified type parameter is not a supported port type.</exception>
 		public static T GetPort<T>(NodeObject node) where T : UPort {
 			if(typeof(T) == typeof(ValueInput)) {
 				return node.ValueInputs.FirstOrDefault() as T;
@@ -289,12 +296,41 @@ namespace MaxyGames.UNode.Editors {
 			node.RegisterPort(port);
 		}
 
-		public static void ConnectPort(FlowInput input, FlowOutput output) {
-			FlowConnection.CreateAndConnect(input, output);
+		public static ValueOutput[] FindContextualOutputPorts(NodeObject node) {
+			var nodes = StaticHashPool.Allocate<NodeObject>();
+			var ports = StaticListPool.Allocate<ValueOutput>();
+			try {
+				FindContextualOutputPorts(node, nodes, ports);
+				return ports.ToArray();
+			}
+			finally {
+				StaticHashPool.Free(nodes);
+				StaticListPool.Free(ports);
+			}
 		}
 
-		public static void ConnectPort(ValueInput input, ValueOutput output) {
-			ValueConnection.CreateAndConnect(input, output);
+		private static void FindContextualOutputPorts(NodeObject node, HashSet<NodeObject> nodes, List<ValueOutput> outputs, bool afterFlow = false) {
+			if(nodes.Add(node)) {
+				foreach(var port in node.FlowInputs) {
+					foreach(var tport in port.GetConnectedPorts()) {
+						if(tport.isValid) {
+							FindContextualOutputPorts(tport.node, nodes, outputs, true);
+						}
+					}
+				}
+				foreach(var port in node.ValueOutputs) {
+					if(afterFlow) {
+						outputs.Add(port);
+					}
+					else {
+						foreach(var tport in port.GetConnectedPorts()) {
+							if(tport.isValid) {
+								FindContextualOutputPorts(tport.node, nodes, outputs, afterFlow);
+							}
+						}
+					}
+				}
+			}
 		}
 		#endregion
 

@@ -11,7 +11,53 @@ using Object = UnityEngine.Object;
 using UnityEditor.IMGUI.Controls;
 
 namespace MaxyGames.UNode.Editors {
-	public interface ICategoryTreeItem { }
+	public interface ICategoryTreeItem {
+		float GetSearchBonusScore(string searchString) => 0;
+	}
+
+	internal static class BonusRelevantScore {
+		public const float SelfScore = 0.5f;
+		public const float InheritScore = 0.25f;
+		public const float ParameterScore = 0.75f;
+		public const float LocalVariableScore = 1f;
+		public const float FavoritesScore = 1f;
+
+		public static class Config {
+			/// <summary>
+			/// The minimal relevant score for adding all others bonus score ( used count, relevant bonus, etc )
+			/// </summary>
+			public const float MinRelevantScore = 0.3f;
+			/// <summary>
+			/// The minimal score for add bonus to used count
+			/// </summary>
+			public const float MinScoreForAddBonusToUsedCount = 0.5f;
+			/// <summary>
+			/// The minimal score for adding additional bonuses
+			/// </summary>
+			public const float MinScoreForAdditionalBonus = 0.7f;
+			/// <summary>
+			/// Max bonus score added to global used count
+			/// </summary>
+			public const float MaxGlobalUsedCountBonus = 0.5f;
+			/// <summary>
+			/// Max bonus score added to specific used count
+			/// </summary>
+			public const float MaxSpecificUsedCountBonus = 2f;
+			/// <summary>
+			/// The half score bonus added to global used count
+			/// </summary>
+			public const float HalfGlobalUsedCountBonus = 0.3f;
+			/// <summary>
+			/// The half score bonus added to specific used count
+			/// </summary>
+			public const float HalfSpecificUsedCountBonus = 1f;
+			/// <summary>
+			/// The score for irrelevant context, like a member that's show when the namespace is not contains on using namespaces.
+			/// This should be negative.
+			/// </summary>
+			public const float ScoreForIrrelevantContext = -0.5f;
+		}
+	}
 
 	public partial class ItemSelector {
 		#region TreeView
@@ -31,6 +77,7 @@ namespace MaxyGames.UNode.Editors {
 			public string category;
 			public string description;
 			public bool hideOnSearch;
+			public float bonusScore;
 
 			internal List<TreeViewItem> childTrees;
 
@@ -62,18 +109,23 @@ namespace MaxyGames.UNode.Editors {
 					return childTrees != null && childTrees.Count > 0 || base.hasChildren;
 				}
 			}
+
+			public float GetSearchBonusScore(string searchString) => bonusScore;
+
 			public SelectorCategoryTreeView() {
 
 			}
 
-			public SelectorCategoryTreeView(string category, int id, int depth) : base(id, depth, category) {
+			public SelectorCategoryTreeView(string category, int id, float bonusScore = 0) : base(id, -1, category) {
 				this.category = category;
+				this.bonusScore = bonusScore;
 				Init();
 			}
 
-			public SelectorCategoryTreeView(string category, string description, int id, int depth) : base(id, depth, category) {
+			public SelectorCategoryTreeView(string category, string description, int id, float bonusScore = 0) : base(id, -1, category) {
 				this.category = category;
 				this.description = description;
+				this.bonusScore = bonusScore;
 				Init();
 			}
 
@@ -225,6 +277,7 @@ namespace MaxyGames.UNode.Editors {
 			Relevant,
 		}
 
+		[Flags]
 		public enum SearchFilter {
 			All,
 			Function,
@@ -236,6 +289,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public class PersistenceData {
 			public Dictionary<int, int> itemUsedCount = new();
+			public Dictionary<(string key, int id), int> searchedItemUsedCount = new();
 
 			private const string key = "ItemSelector_PersistenceData";
 
@@ -260,6 +314,16 @@ namespace MaxyGames.UNode.Editors {
 			public static void Save() {
 				if(m_instance != null) {
 					uNodeEditorUtility.SaveEditorData(m_instance, key);
+				}
+			}
+
+			[System.Runtime.Serialization.OnDeserialized]
+			private void OnDeserialized() {
+				if(itemUsedCount == null) {
+					itemUsedCount = new();
+				}
+				if(searchedItemUsedCount == null) {
+					searchedItemUsedCount = new();
 				}
 			}
 		}
@@ -1335,7 +1399,7 @@ namespace MaxyGames.UNode.Editors {
 							if(localVariable != null && localVariable.Any()) {
 								var itemData = new List<GraphItem>(localVariable.Select(item => new GraphItem(item, LVS)));
 								itemData.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-								var categTree = new SelectorCategoryTreeView("Local Variable", "", uNodeEditorUtility.GetUIDFromString("[Local-Variable]"), -1);
+								var categTree = new SelectorCategoryTreeView("Local Variable", "", uNodeEditorUtility.GetUIDFromString("[Local-Variable]"), BonusRelevantScore.LocalVariableScore);
 								categTree.expanded = true;
 								itemData.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 								result.Add(categTree);
@@ -1357,14 +1421,17 @@ namespace MaxyGames.UNode.Editors {
 							graphItem.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 							RemoveIncorrectGraphItem(graphItem, filter);
 							if(graphItem != null && graphItem.Count > 0) {
-								var categTree = new SelectorCategoryTreeView("Graph (Self)", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-SELF]"), -1);
+								var categTree = new SelectorCategoryTreeView("Graph (Self)", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-SELF]"), BonusRelevantScore.SelfScore) {
+									bonusScore = 1f,
+									expanded = true,
+								};
 								categTree.expanded = true;
 								graphItem.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 								result.Add(categTree);
 							}
 						}
 						if(graph.graphContainer is IClassGraph && filter.Inherited) {
-							var tree = CreateTargetItem(graph.graphContainer, "Graph Inherit Member", filter);
+							var tree = CreateTargetItem(graph.graphContainer, "Graph Inherit Member", filter, bonusScore: 0.5f);
 							if(tree != null) {
 								tree.expanded = false;
 								result.Add(tree);
@@ -1387,7 +1454,9 @@ namespace MaxyGames.UNode.Editors {
 					itemData.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 					RemoveIncorrectGraphItem(itemData, filter);
 					if(itemData.Count > 0) {
-						var categTree = new SelectorCategoryTreeView("Graph (Target)", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-TARGET]"), -1);
+						var categTree = new SelectorCategoryTreeView("Graph (Target)", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-TARGET]"), BonusRelevantScore.SelfScore) {
+							bonusScore = 1,
+						};
 						itemData.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 						result.Add(categTree);
 					}
@@ -1405,7 +1474,7 @@ namespace MaxyGames.UNode.Editors {
 					if(itemData.Count > 0) {
 						itemData.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 						RemoveIncorrectGraphItem(itemData, filter);
-						var categTree = new SelectorCategoryTreeView("Target", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-TARGET]"), -1);
+						var categTree = new SelectorCategoryTreeView("Target", "", uNodeEditorUtility.GetUIDFromString("[GRAPH-TARGET]"), BonusRelevantScore.SelfScore);
 						itemData.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 						result.Add(categTree);
 					}
@@ -1451,7 +1520,7 @@ namespace MaxyGames.UNode.Editors {
 									p += '.';
 								p += path[i];
 								if(!trees.TryGetValue(p, out var cTree)) {
-									cTree = new SelectorCategoryTreeView(path[i], "", uNodeEditorUtility.GetUIDFromString("[CITEM]" + p), -1);
+									cTree = new SelectorCategoryTreeView(path[i], "", uNodeEditorUtility.GetUIDFromString("[CITEM]" + p));
 									if(tree != null) {
 										tree.AddChild(cTree);
 									}
@@ -1520,7 +1589,7 @@ namespace MaxyGames.UNode.Editors {
 						RemoveIncorrectGraphItem(graphItems, filter);
 						if(graphItems != null && graphItems.Count > 0) {
 							graphItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-							var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), -1);
+							var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), BonusRelevantScore.ParameterScore);
 							categTree.expanded = true;
 							graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 							result.Add(categTree);
@@ -1538,7 +1607,7 @@ namespace MaxyGames.UNode.Editors {
 							RemoveIncorrectGraphItem(graphItems, filter);
 							if(graphItems != null && graphItems.Count > 0) {
 								graphItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-								var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), -1);
+								var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), BonusRelevantScore.ParameterScore);
 								categTree.expanded = true;
 								graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 								result.Add(categTree);
@@ -1553,7 +1622,7 @@ namespace MaxyGames.UNode.Editors {
 								RemoveIncorrectGraphItem(graphItems, filter);
 								if(graphItems != null && graphItems.Count > 0) {
 									graphItems.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-									var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), -1);
+									var categTree = new SelectorCategoryTreeView("Parameter", "", uNodeEditorUtility.GetUIDFromString("[Parameter]"), BonusRelevantScore.ParameterScore);
 									categTree.expanded = true;
 									graphItems.ForEach(item => categTree.AddChild(new SelectorCustomTreeView(item, item.GetHashCode(), -1)));
 									result.Add(categTree);
@@ -1565,7 +1634,7 @@ namespace MaxyGames.UNode.Editors {
 				return result;
 			}
 
-			public static SelectorCategoryTreeView CreateTargetItem(object targetValue, string category, FilterAttribute filter, Type targetType = null) {
+			public static SelectorCategoryTreeView CreateTargetItem(object targetValue, string category, FilterAttribute filter, Type targetType = null, float bonusScore = 0) {
 				if(targetValue == null && targetType == null) return null;
 				if(targetType == null) {
 					targetType = targetValue.GetType();
@@ -1575,7 +1644,7 @@ namespace MaxyGames.UNode.Editors {
 					if(targetType == null)
 						return null;
 				}
-				var categoryTree = new SelectorCategoryTreeView(category, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + category), -1);
+				var categoryTree = new SelectorCategoryTreeView(category, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + category), bonusScore);
 				//var instance = new MemberData(targetValue, MemberData.TargetType.Self);
 				if(targetValue is IGraph) {
 					if(targetValue is IClassGraph) {
