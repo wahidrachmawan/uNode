@@ -10,10 +10,11 @@ namespace MaxyGames.UNode.Editors.Drawer {
     public class ForeachDrawer : NodeDrawer<Nodes.ForeachLoop> {
 		public override void DrawLayouted(DrawerOption option) {
 			var node = GetNode(option);
-
-			UInspector.Draw(option.property[nameof(node.deconstructValue)]);
-
-			if(node.IsDeconstructing == false) {
+			bool canDeconstruct = node.CanDeconstruct();
+			if(canDeconstruct) {
+				UInspector.Draw(option.property[nameof(node.deconstructValue)]);
+			}
+			if(node.deconstructValue == false || canDeconstruct == false) {
 				UInspector.Draw(option.property[nameof(node.itemName)]);
 			}
 			UInspector.Draw(option.property[nameof(node.indexName)]);

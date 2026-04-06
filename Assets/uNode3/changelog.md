@@ -3,6 +3,7 @@
 ## v3.2.9
 -Added option to enable/disable auto reconnection of port upon deleting node in preference
 -Added option to change preferred graph layout in preference
+-Added index output in foreach node
 -Improved Code Generation
 -Improved Editor
 -Fixed most of reported bugs

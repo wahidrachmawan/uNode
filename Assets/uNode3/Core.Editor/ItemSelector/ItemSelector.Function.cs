@@ -68,9 +68,7 @@ namespace MaxyGames.UNode.Editors {
 						if(displayDefaultItem) {
 							var categoryTree = new SelectorCategoryTreeView("#", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#"));
 							categories.Add(categoryTree);
-							var recentTree = new SelectorCategoryTreeView("Recently", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#Recently"));
-							recentTree.hideOnSearch = true;
-							categories.Add(recentTree);
+
 							if(displayNoneOption && filter.IsValidTarget(MemberData.TargetType.Null)) {
 								categoryTree.AddChild(new SelectorMemberTreeView(MemberData.None, "None", uNodeEditorUtility.GetUIDFromString("#None")) {
 									icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.NullTypeIcon)) as Texture2D
@@ -82,34 +80,12 @@ namespace MaxyGames.UNode.Editors {
 										icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.NullTypeIcon)) as Texture2D
 									});
 								}
-								//if(!filter.OnlyGetType && filter.IsValidTarget(MemberData.TargetType.Values) &&
-								//	(filter.Types == null || filter.Types.Count != 1 || filter.Types[0] != typeof(Type))) {
-								//	categoryTree.AddChild(new SelectorCallbackTreeView((cRect) => {
-								//		var screenRect = cRect.ToScreenRect();
-								//		FilterAttribute F = new FilterAttribute(filter);
-								//		F.OnlyGetType = true;
-								//		ItemSelector w = null;
-								//		Action<MemberData> action = delegate (MemberData m) {
-								//			if(w != null) {
-								//				w.Close();
-								//				//EditorGUIUtility.ExitGUI();
-								//			}
-								//			if(filter.CanManipulateArray()) {
-								//				TypeSelectorWindow.ShowAsNew(Rect.zero, F, delegate (MemberData[] members) {
-								//					Select(members[0]);
-								//				}, m).ChangePosition(screenRect);
-								//			}
-								//			else {
-								//				Select(m);
-								//			}
-								//		};
-								//		w = ShowAsNew(targetObject, F, action, true).ChangePosition(cRect);
-								//	}, "Values", uNodeEditorUtility.GetUIDFromString("#Values"), -1) {
-								//		icon = uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.ValueIcon)) as Texture2D
-								//	});
-								//}
 							}
 							if(displayRecentItem) {
+								var recentTree = new SelectorCategoryTreeView("Recently", "", uNodeEditorUtility.GetUIDFromString("[CATEG]#Recently"));
+								recentTree.hideOnSearch = true;
+								categories.Add(recentTree);
+
 								var listRecentItems = new List<TreeViewItem>();
 								if(uNodeEditor.SavedData.recentItems != null) {
 									foreach(var recent in uNodeEditor.SavedData.recentItems) {

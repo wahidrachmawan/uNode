@@ -1174,6 +1174,10 @@ namespace MaxyGames.UNode.Editors {
 							var usingNamespaces = editorData.usingNamespaces;
 							float bonusScore = 0;
 							void TraverseTree(TreeViewItem tree) {
+								if(tree is TypeTreeView && editorData.searchFilter != SearchFilter.All && editorData.searchFilter != SearchFilter.Type) {
+									//Skip if filter is not valid
+									return;
+								}
 								if(tree is IRelevanceItem relevance) {
 									var score = GetScore(tree.id, relevance, tree.depth);
 									if(score >= BonusRelevantScore.Config.MinRelevantScore) {

@@ -995,12 +995,10 @@ namespace MaxyGames.UNode.Editors {
 									score -= 0.2f;
 								}
 								item.Score = score;
-								if(searchParam.searchKind != SearchKind.Relevant) {
-									if(tree.hasChildren && tree.children.Count > 0) {
-										return true;
-									}
+								if(tree.hasChildren && tree.children.Count > 0) {
+									return true;
 								}
-								return score >= 0 && (searchParam.searchFilter == SearchFilter.All || searchParam.searchFilter == SearchFilter.Type);
+								return score >= 0;
 							}
 						}
 					}
@@ -1008,6 +1006,9 @@ namespace MaxyGames.UNode.Editors {
 				else if(tree is SelectorCategoryTreeView) {
 					var item = tree as SelectorCategoryTreeView;
 					item.expanded = true;
+					if(item.hideOnSearch) {
+						return false;
+					}
 				}
 				else if(tree is SelectorSearchTreeView) {
 					var item = tree as SelectorSearchTreeView;

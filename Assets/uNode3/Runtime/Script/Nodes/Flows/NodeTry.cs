@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	[NodeMenu("Flow", "Try-Catch-Finally")]
+	[NodeMenu("Flow", "Try Catch Finally")]
 	public class NodeTry : FlowNode {
 		[System.NonSerialized]
 		public FlowOutput Try;
@@ -177,7 +177,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override string GetTitle() {
-			return "Try-Catch-Finally";
+			return "Try Catch";
 		}
 
 		protected override bool IsCoroutine() {

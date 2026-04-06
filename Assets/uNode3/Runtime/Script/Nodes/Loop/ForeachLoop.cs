@@ -50,13 +50,11 @@ namespace MaxyGames.UNode.Nodes {
 			};
 		}
 
-		public bool IsDeconstructing => deconstructValue && collection != null && collection.hasValidConnections && CanDeconstruct(collection.ValueType.ElementType());
-
 		protected override void OnRegister() {
 			body = FlowOutput(nameof(body));
 			collection = ValueInput<IEnumerable>(nameof(collection));
 			collection.filter = filter;
-			if(deconstructValue && collection.hasValidConnections && CanDeconstruct(collection.ValueType.ElementType())) {
+			if(deconstructValue && CanDeconstruct()) {
 				output = null;
 				var type = collection.ValueType.ElementType();
 				if(deconstructDatas == null)
@@ -121,7 +119,11 @@ namespace MaxyGames.UNode.Nodes {
 			exit.SetName("Exit");
 		}
 
-		private bool CanDeconstruct(Type type) {
+		public bool CanDeconstruct() {
+			return collection != null && collection.hasValidConnections && CanDeconstruct(collection.ValueType.ElementType());
+		}
+
+		private static bool CanDeconstruct(Type type) {
 			if(type == null) return false;
 			if(type.GetMemberCached(nameof(KeyValuePair<int, int>.Deconstruct)) is MethodInfo) {
 				return true;
