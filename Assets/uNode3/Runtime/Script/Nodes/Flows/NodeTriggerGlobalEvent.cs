@@ -86,9 +86,7 @@ namespace MaxyGames.UNode.Nodes {
 						CG.Value(assetID)).
 						CGFlowInvoke(
 							nameof(IGlobalEvent.Trigger),
-							target.GetType() == typeof(UGlobalEventAction) ? string.Empty
-							: target.GetType() == typeof(UGlobalEventCustom) ? CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
-							: CG.GeneratePort(inputs[0].port)
+							CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
 						),
 					CG.FlowFinish(enter, exit));
 			}
