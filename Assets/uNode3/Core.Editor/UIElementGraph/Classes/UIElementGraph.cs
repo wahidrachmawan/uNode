@@ -1829,12 +1829,6 @@ namespace MaxyGames.UNode.Editors {
 			if(graphPanelView?.parent != null) {
 				graphPanelView.RemoveFromHierarchy();
 			}
-			//if(leftPanelSplitter?.parent != null) {
-			//	leftPanelSplitter.RemoveFromHierarchy();
-			//}
-			//if(rightPanelSplitter?.parent != null) {
-			//	rightPanelSplitter.RemoveFromHierarchy();
-			//}
 		}
 
 		void DrawMainTabGUI() {
@@ -1863,9 +1857,6 @@ namespace MaxyGames.UNode.Editors {
 				else {
 					if(uNodeEditorUtility.IsPrefab(Selection.activeGameObject)) {
 						var comp = Selection.activeGameObject.GetComponent<IInstancedGraph>();
-						//if(comp is uNodeRuntime) {
-						//	EditorGUILayout.HelpBox(string.Format("To edit graph or create a new uNode graph with \'{0}\', please open the prefab", Selection.activeGameObject.name), MessageType.Info);
-						//}
 						if(comp != null && comp.OriginalGraph != null) {
 							if(GUILayout.Button(new GUIContent("Edit Graph"))) {
 								uNodeEditor.Open(comp.OriginalGraph);

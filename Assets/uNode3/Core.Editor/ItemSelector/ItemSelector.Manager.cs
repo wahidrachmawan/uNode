@@ -222,7 +222,7 @@ namespace MaxyGames.UNode.Editors {
 				Event evt = Event.current;
 				if(args.rowRect.Contains(evt.mousePosition)) {
 					if(evt.type == EventType.MouseMove) {
-						selectedTree = args.item;
+						m_selectedTree = args.item;
 					}
 					//SetFocus();
 				}

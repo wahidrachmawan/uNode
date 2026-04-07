@@ -355,7 +355,10 @@ namespace MaxyGames.UNode.Editors {
 					icon = typeof(TypeIcons.ClassIcon);
 				}
 				EditorGUILayout.BeginHorizontal();
-				GUI.DrawTexture(uNodeGUIUtility.GetRect(GUILayout.Width(32), GUILayout.Height(32)), uNodeEditorUtility.GetTypeIcon(icon));
+				GUI.DrawTexture(
+					uNodeGUIUtility.GetRect(GUILayout.Width(32), GUILayout.Height(32)), 
+					uNodeEditorUtility.GetTypeIcon(icon) ?? uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.ClassIcon))
+				);
 				EditorGUILayout.BeginVertical();
 				EditorGUILayout.BeginHorizontal();
 				var asset = graph as UnityEngine.Object;
