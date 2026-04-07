@@ -68,7 +68,9 @@ namespace MaxyGames.UNode.Nodes {
 					result = CG.Flow(
 						nm.CGFlowInvoke(
 							nameof(IGlobalEvent.Trigger),
-							CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+							target.GetType() == typeof(UGlobalEventAction) ? string.Empty
+							: target.GetType() == typeof(UGlobalEventCustom) ? CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+							: CG.GeneratePort(inputs[0].port)
 						),
 						CG.FlowFinish(enter, exit));
 					CG.RegisterUserObject((target, "TRIGGER_EVENT"), result);
@@ -84,7 +86,9 @@ namespace MaxyGames.UNode.Nodes {
 						CG.Value(assetID)).
 						CGFlowInvoke(
 							nameof(IGlobalEvent.Trigger),
-							CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+							target.GetType() == typeof(UGlobalEventAction) ? string.Empty
+							: target.GetType() == typeof(UGlobalEventCustom) ? CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+							: CG.GeneratePort(inputs[0].port)
 						),
 					CG.FlowFinish(enter, exit));
 			}
