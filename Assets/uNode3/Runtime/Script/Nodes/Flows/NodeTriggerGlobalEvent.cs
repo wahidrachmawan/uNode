@@ -53,10 +53,10 @@ namespace MaxyGames.UNode.Nodes {
 #if UNITY_EDITOR
 			// If the graph is MonoBehaviour, we can cache the event to avoid call GetGlobalEvent every time.
 			if(cacheEvent && nodeObject.graphContainer.GetGraphType().IsCastableTo(typeof(MonoBehaviour))) {
-				var eventField = CG.GetUserObject<string>(this, CachedEventFieldKey);
+				var eventField = CG.GetUserObject<string>(target, CachedEventFieldKey);
 				if(eventField == null) {
 					var assetID = UnityEditor.AssetDatabase.AssetPathToGUID(UnityEditor.AssetDatabase.GetAssetPath(target));
-					eventField = CG.RegisterPrivateVariable("m_Event_" + target.EventName, target.GetType(), reference: this);
+					eventField = CG.RegisterPrivateVariable("m_Event_" + target.EventName, target.GetType(), reference: target);
 					CG.InsertCodeToFunction("Awake", 
 						CG.Set(
 							eventField, 
@@ -66,14 +66,45 @@ namespace MaxyGames.UNode.Nodes {
 								CG.Value(assetID))
 							.CGConvert(target.GetType())), 
 						int.MinValue);
-					CG.RegisterUserObject(eventField, this, CachedEventFieldKey);
+					CG.RegisterUserObject(eventField, target, CachedEventFieldKey);
+				}
+				if(target is IGlobalEvent globalEvent) {
+					var count = globalEvent.ParameterCount;
+					Type[] parameterTypes = new Type[count];
+					for(int i = 0; i < count; i++) {
+						parameterTypes[i] = globalEvent.GetParameterType(i);
+					}
+					var method = target.GetType().GetMethod(nameof(globalEvent.Trigger), MemberData.flags, null, parameterTypes, null);
+					if(method != null) {
+						return CG.Flow(
+							eventField.CGFlowInvoke(
+								nameof(IGlobalEvent.Trigger),
+								inputs.Select(p => CG.GeneratePort(p.port)).ToArray()
+							),
+							CG.FlowFinish(enter, exit));
+					}
+					else {
+						method = target.GetType().GetMethod(nameof(globalEvent.Trigger), MemberData.flags);
+						if(method != null) {
+							var parameters = method.GetParameters();
+							if(parameters.Length == 1 && parameters[0].ParameterType == typeof(object[])) {
+								return CG.Flow(
+									eventField.CGFlowInvoke(
+										nameof(IGlobalEvent.Trigger),
+										CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
+									),
+									CG.FlowFinish(enter, exit));
+							}
+							//else {
+							//	throw new Exception("Unsupported event type: " + target.GetType());
+							//}
+						}
+					}
 				}
 				return CG.Flow(
 					eventField.CGFlowInvoke(
-						nameof(IGlobalEvent.Trigger),
-						target.GetType() == typeof(UGlobalEventAction) ? string.Empty
-						: target.GetType() == typeof(UGlobalEventCustom) ? CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
-						: CG.GeneratePort(inputs[0].port)
+						nameof(UGlobalEvent.TriggerWeak),
+						CG.MakeArray(typeof(object), inputs.Select(p => CG.GeneratePort(p.port)).ToArray())
 					),
 					CG.FlowFinish(enter, exit));
 			}
