@@ -59,6 +59,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override void OnNodeRemoved() {
+			base.OnNodeRemoved();
 			foreach(var tr in transitionViews) {
 				owner.RemoveView(tr);
 			}

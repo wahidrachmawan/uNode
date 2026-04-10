@@ -273,11 +273,15 @@ namespace MaxyGames.UNode.Editors {
 			Initialize(owner);
 			var bind = UBind.FromGraphElement(node);
 			if(bind != null) {
-				bind.childValueChanged += (bind) => {
-					MarkRepaint();
-				};
+				bind.childValueChanged += OnValueChanged;
 			}
 			ReloadView();
+		}
+
+		private void OnValueChanged(UBind bind) {
+			if(nodeObject.IsValid) {
+				MarkRepaint();
+			}
 		}
 
 		/// <summary>
@@ -610,6 +614,13 @@ namespace MaxyGames.UNode.Editors {
 		/// Called when node will be removed/deleted
 		/// </summary>
 		public virtual void OnNodeRemoved() { }
+
+		internal void Dispose() {
+			var bind = UBind.FromGraphElement(nodeObject);
+			if(bind != null) {
+				bind.childValueChanged -= OnValueChanged;
+			}
+		}
 
 		/// <summary>
 		/// Called on any value changed.

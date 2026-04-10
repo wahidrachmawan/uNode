@@ -188,13 +188,29 @@ namespace MaxyGames.UNode {
 		[IconPath("Icons/IconDice")]
 		public class RandomIcon { }
 
+		[IconPath("Icons/IconFlow")]
 		public class FlowIcon { }
+
+		[IconPath("Icons/IconValueWhite")]
 		public class ValueIcon { }
+
+		[IconPath("Icons/IconFlowDivide")]
 		public class BranchIcon { }
+
+		[IconPath("Icons/IconTime")]
 		public class ClockIcon { }
+
+
+		[IconPath("Icons/IconRepeat")]
 		public class RepeatIcon { }
+
+		[IconPath("Icons/IconRepeatOnce")]
 		public class RepeatOnceIcon { }
+
+		[IconPath("Icons/IconFlowDivide")]
 		public class SwitchIcon { }
+
+		[IconPath("Icons/IconRotate")]
 		public class RotationIcon { }
 
 		[IconPath("Icons/calculator")]
@@ -203,7 +219,9 @@ namespace MaxyGames.UNode {
 		[IconPath("Icons/IconScriptCode")]
 		public class ScriptCodeIcon { }
 
+		[IconPath("Icons/mouse_pc")]
 		public class MouseIcon { }
+		[IconPath("Icons/IconEvent")]
 		public class EventIcon { }
 
 		[IconPath("Icons/IconInput")]
@@ -221,6 +239,9 @@ namespace MaxyGames.UNode {
 		[IconPath("Icons/IconFloat")]
 		public class FloatIcon { }
 
+		[IconPath("Icons/IconValueRed")]
+		public class BoolIcon { }
+
 		[IconPath("Icons/IconVector2")]
 		public class Vector2Icon { }
 
@@ -229,6 +250,30 @@ namespace MaxyGames.UNode {
 
 		[IconPath("Icons/IconVector4")]
 		public class Vector4Icon { }
+
+		[IconPath("Icons/IconColor")]
+		public class ColorIcon { }
+
+		[IconPath("Icons/IconRotate")]
+		public class QuaternionIcon { }
+
+		[IconPath("Icons/IconValueBlue")]
+		public class ObjectIcon { }
+
+		[IconPath("Icons/IconObject")]
+		public class UnityObjectIcon { }
+
+		[IconPath("Icons/IconValueGreen")]
+		public class SystemTypeIcon { }
+
+		[IconPath("Icons/IconList")]
+		public class ListIcon { }
+
+		[IconPath("Icons/book_key")]
+		public class DictionaryIcon { }
+
+		[IconPath("Icons/date")]
+		public class DateIcon { }
 
 		[IconPath("Icons/key")]
 		public class KeyTypeIcon { }

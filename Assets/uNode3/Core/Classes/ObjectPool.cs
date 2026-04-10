@@ -126,6 +126,35 @@ namespace MaxyGames.UNode {
 		public static void Free<T>(List<T> obj) => StaticListPool<T>.Free(obj);
 	}
 
+	public interface IObjectPool {
+		void OnFree();
+	}
+
+	public static class StaticObjectPool {
+		public static T Allocate<T>() where T : class, IObjectPool, new() => StaticObjectPool<T>.Allocate();
+		public static void Free<T>(T obj) where T : class, IObjectPool, new() => StaticObjectPool<T>.Free(obj);
+	}
+
+	public static class StaticObjectPool<T> where T : class, IObjectPool, new() {
+		public readonly static ObjectPool<T> pool = new ObjectPool<T>(Construct, null, OnFree);
+
+		public static T Allocate() {
+			return pool.Allocate();
+		}
+
+		public static void Free(T obj) {
+			pool.Free(obj);
+		}
+
+		static T Construct() {
+			return new T();
+		}
+
+		static void OnFree(T value) {
+			value.OnFree();
+		}
+	}
+
 	public static class StaticListPool<T> {
 		public readonly static ObjectPool<List<T>> pool = new ObjectPool<List<T>>(Construct, null, OnFree);
 

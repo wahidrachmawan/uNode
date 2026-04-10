@@ -20,10 +20,10 @@ namespace MaxyGames.UNode.Editors {
 		public MinimapView miniMap;
 
 		public List<UNodeView> nodeViews = new List<UNodeView>();
-		public Dictionary<NodeObject, UNodeView> nodeViewsPerNode = new Dictionary<NodeObject, UNodeView>();
+		public Dictionary<NodeObject, UNodeView> nodeViewsPerNode = new();
 		public List<EdgeView> edgeViews = new List<EdgeView>();
 
-		public Dictionary<NodeObject, UNodeView> cachedNodeMap = new Dictionary<NodeObject, UNodeView>();
+		public Dictionary<NodeObject, UNodeView> cachedNodeMap = new();
 
 		/// <summary>
 		/// The editor data of the graph
@@ -870,7 +870,7 @@ namespace MaxyGames.UNode.Editors {
 				graphEditor.ClearSelection();
 				foreach(var selectable in this.selection.ToArray()) {
 					if(onlyNodes) {
-						if(selectable is not BaseNodeView) {
+						if(selectable is not UNodeView) {
 							base.RemoveFromSelection(selectable);
 							continue;
 						}
@@ -897,7 +897,13 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 					else if(selectable is UNodeView) {
-						graphEditor.Select((selectable as UNodeView).GetSelectableObject());
+						var element = (selectable as UNodeView).GetSelectableObject();
+						if(element is NodeObject) {
+							graphEditor.SelectNode(element as NodeObject, false);
+						}
+						else {
+							graphEditor.Select(element);
+						}
 						AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
 					}
 				}
@@ -2044,6 +2050,8 @@ namespace MaxyGames.UNode.Editors {
 				catch(Exception ex) {
 					Debug.LogException(ex);
 				}
+				node.Dispose();
+
 				foreach(var p in node.inputPorts) {
 					if(p == null)
 						continue;

@@ -495,17 +495,18 @@ namespace MaxyGames.UNode.Editors {
 	}
 
 	public abstract class EdgeViewWithNode : EdgeView {
-		public readonly NodeObject nodeObject;
+		public readonly UNodeView view;
+		public NodeObject nodeObject => view.nodeObject;
 
 		public abstract UPort inputPortForNode { get; }
 		public abstract UPort outputPortForNode { get; }
 
-		public EdgeViewWithNode(NodeObject nodeObject) : base() {
-			this.nodeObject = nodeObject;
+		public EdgeViewWithNode(UNodeView view) : base() {
+			this.view = view;
 		}
 
-		public EdgeViewWithNode(NodeObject nodeObject, EdgeData edgeData) : base(edgeData) {
-			this.nodeObject = nodeObject;
+		public EdgeViewWithNode(UNodeView view, EdgeData edgeData) : base(edgeData) {
+			this.view = view;
 		}
 
 		protected void InitializeView() {
@@ -552,15 +553,17 @@ namespace MaxyGames.UNode.Editors {
 
 		public override void Disconnect() {
 			base.Disconnect();
+			nodeObject.ClearConnections();
 			nodeObject.Destroy();
+			view.owner.RemoveView(view);
 		}
 	}
 
 	public class ConversionEdgeView : EdgeViewWithNode {
 		public Nodes.NodeValueConverter node;
 
-		public ConversionEdgeView(Nodes.NodeValueConverter node, EdgeData edgeData) : base(node, edgeData) {
-			this.node = node;
+		public ConversionEdgeView(UNodeView view, EdgeData edgeData) : base(view, edgeData) {
+			this.node = (Nodes.NodeValueConverter)view.targetNode;
 			InitializeView();
 		}
 

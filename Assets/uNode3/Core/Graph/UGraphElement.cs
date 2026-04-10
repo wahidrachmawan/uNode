@@ -203,6 +203,15 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		internal ref RuntimeGraphID runtimeIDAsRef {
+			get {
+				if(m_runtimeID == default) {
+					m_runtimeID = new RuntimeGraphID(graphContainer.GetHashCode(), id);
+				}
+				return ref m_runtimeID;
+			}
+		}
+
 		//For debugging purpose, don't remove this
 		internal string DebugDisplay => GraphException.GetMessage(this);
 		#endregion
@@ -798,4 +807,28 @@ namespace MaxyGames.UNode {
 		}
 		#endregion
 	}
+
+	//public readonly struct GraphElementID : IEquatable<GraphElementID> {
+	//	public readonly int graphID;
+	//	public readonly int elementID;
+	//	public GraphElementID(int graphID, int elementID) {
+	//		this.graphID = graphID;
+	//		this.elementID = elementID;
+	//	}
+
+	//	public bool Equals(GraphElementID other) {
+	//		return graphID == other.graphID && elementID == other.elementID;
+	//	}
+
+	//	public override string ToString() {
+	//		return $"GC:{graphID} E:{elementID}";
+	//	}
+
+	//	public static implicit operator GraphElementID(UGraphElement element) {
+	//		if(element == null) {
+	//			return default;
+	//		}
+	//		return new GraphElementID(element.graphContainer.GetHashCode(), element.id);
+	//	}
+	//}
 }

@@ -89,14 +89,14 @@ namespace MaxyGames.UNode.Nodes {
 			if(target.isAssigned) {
 				object val = target.GetValue(flow);
 				if(val == null) {
-					val = new MemberData.Event(target.DefaultValue.CreateRuntimeEvent(), null);
+					val = new MemberData.Event(target.DefaultValue.CreateRuntimeEvent(), flow.instance);
 				}
 				if(val is MemberData.Event) {
 					MemberData.Event e = val as MemberData.Event;
 					if(e.eventInfo != null) {
 						if(m_Delegate == null) {
 							if(e.eventInfo is RuntimeEvent) {
-								var returnType = target.type.GetMethod("Invoke").ReturnType;
+								var returnType = target.ValueType.GetMethod("Invoke").ReturnType;
 								m_Delegate = new MemberData.EventCallback((obj => {
 									if(nodeObject == null)
 										return null;
@@ -206,13 +206,13 @@ namespace MaxyGames.UNode.Nodes {
 				if(target.ValueType.IsCastableTo(typeof(UnityEventBase))) {
 					return target.CGValue().CGInvoke("AddListener", GenerateEventCodes()).AddSemicolon();
 				}
-				return CG.Set(target, GenerateEventCodes(), SetType.Add, target.type);
+				return CG.Set(target, GenerateEventCodes(), SetType.Add, target.ValueType);
 			});
 			CG.RegisterPort(unregister, () => {
 				if(target.ValueType.IsCastableTo(typeof(UnityEventBase))) {
 					return target.CGValue().CGInvoke("RemoveListener", GenerateEventCodes()).AddSemicolon();
 				}
-				return CG.Set(target, GenerateEventCodes(), SetType.Subtract, target.type);
+				return CG.Set(target, GenerateEventCodes(), SetType.Subtract, target.ValueType);
 			});
 		}
 

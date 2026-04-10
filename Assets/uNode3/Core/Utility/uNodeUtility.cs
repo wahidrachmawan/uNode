@@ -1854,11 +1854,13 @@ namespace MaxyGames.UNode {
 		}
 
 		static System.Threading.Thread mainThread;
+
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
 		internal static void Init() {
 			mainThread = System.Threading.Thread.CurrentThread;
 		}
 
+		// This is used to store temporary objects that should be destroyed when exiting play mode or recompiling scripts, to prevent memory leak.
 		internal static List<Object> temporaryObjects = new List<Object>();
 
 		public static bool IsInMainThread => System.Threading.Thread.CurrentThread == mainThread;

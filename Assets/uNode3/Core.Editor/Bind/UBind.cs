@@ -95,7 +95,11 @@ namespace MaxyGames.UNode.Editors {
 				} else if(!object.Equals(val, lastValue)) {
 					var previousValue = lastValue;
 					lastValue = val;
-					OnValueChange(previousValue, val);
+					//if(previousValue is Node n && n.id == -1) {
+					//	//If the previous value is a node with id -1, it means the node is destroyed, so we don't need to call OnValueChange.
+					//	return val;
+					//}
+					//OnValueChange(previousValue, val);
 				}
 				return val;
 			}

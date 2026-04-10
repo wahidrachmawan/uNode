@@ -169,7 +169,8 @@ namespace MaxyGames.UNode {
 			}
 			else {
 				var runner = new RegularGraphRunner(instance, Entry.enter);
-				var flow = runner.New();
+				var flow = StaticObjectPool.Allocate<RegularFlow>();
+				flow.Initialize(runner.port, runner);
 
 				InitializeParameterAndLocalVariable(flow);
 
@@ -192,6 +193,8 @@ namespace MaxyGames.UNode {
 						return js.value;
 					}
 				}
+
+				StaticObjectPool.Free(flow);
 				return null;
 			}
 		}

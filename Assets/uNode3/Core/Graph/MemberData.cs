@@ -1923,6 +1923,9 @@ namespace MaxyGames.UNode {
 							if(!isDeepTarget) {
 								var reference = startItem?.reference as VariableRef;
 								if(reference != null) {
+									if(uNodeUtility.isPlaying) {
+										return reference.type;
+									}
 									return type = reference.type;
 								}
 							}
@@ -1931,6 +1934,9 @@ namespace MaxyGames.UNode {
 							if(!isDeepTarget) {
 								var reference = startItem?.reference as PropertyRef;
 								if(reference != null) {
+									if(uNodeUtility.isPlaying) {
+										return reference.ReturnType();
+									}
 									return type = reference.ReturnType();
 								}
 							}
@@ -1939,6 +1945,9 @@ namespace MaxyGames.UNode {
 							if(!isDeepTarget) {
 								var reference = startItem?.reference as FunctionRef;
 								if(reference != null) {
+									if(uNodeUtility.isPlaying) {
+										return reference.ReturnType();
+									}
 									return type = reference.ReturnType();
 								}
 							}

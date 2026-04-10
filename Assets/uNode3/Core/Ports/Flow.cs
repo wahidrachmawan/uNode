@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace MaxyGames.UNode {
 	public abstract class GraphRuntimeData {
-		public readonly GraphInstance instance;
+		public GraphInstance instance;
 
 		public IGraph graph => instance.graph;
 		public object target => instance.target;
@@ -188,6 +188,7 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		[NonSerialized]
 		protected bool hasCalled;
+
 		public StateType currentState {
 			get {
 				if(!finished && hasCalled) {
@@ -325,6 +326,13 @@ namespace MaxyGames.UNode {
 				Next((FlowPort)nexts[i]);
 			}
 		}
+
+		protected void Reset() {
+			state = StateType.Success;
+			finished = false;
+			hasCalled = false;
+			instance = null;
+		}
 	}
 
 	public abstract class GraphRunner : GraphRuntimeData {
@@ -372,12 +380,12 @@ namespace MaxyGames.UNode {
 		private Dictionary<(RuntimeGraphID, object), object> localDatas2 = new Dictionary<(RuntimeGraphID, object), object>();
 
 		public override void SetLocalData(UGraphElement owner, object value) {
-			localDatas[owner.runtimeID] = value;
+			localDatas[owner.runtimeIDAsRef] = value;
 		}
 
 		public override object GetLocalData(UGraphElement owner) {
-			if(!localDatas.TryGetValue(owner.runtimeID, out var data)) {
-				localDatas[owner.runtimeID] = data;
+			if(!localDatas.TryGetValue(owner.runtimeIDAsRef, out var data)) {
+				localDatas[owner.runtimeIDAsRef] = data;
 			}
 			return data;
 		}
@@ -394,7 +402,7 @@ namespace MaxyGames.UNode {
 		public override object GetLocalData(UGraphElement owner, object key) {
 			RuntimeGraphID id;
 			if(object.ReferenceEquals(owner, null) == false)
-				id = owner.runtimeID;
+				id = owner.runtimeIDAsRef;
 			else
 				id = default;
 			if(!localDatas2.TryGetValue((id, key), out var data)) {
@@ -406,7 +414,7 @@ namespace MaxyGames.UNode {
 		private Dictionary<RuntimeGraphID, RuntimeLocalValue> elementDatas = new Dictionary<RuntimeGraphID, RuntimeLocalValue>();
 
 		public override RuntimeLocalValue GetOrCreateLocalDataValue(NodeObject owner) {
-			var id = owner.runtimeID;
+			ref var id = ref owner.runtimeIDAsRef;
 			if(!elementDatas.TryGetValue(id, out var data)) {
 				data = new RuntimeLocalValue(this, owner);
 				elementDatas[id] = data;
@@ -1175,9 +1183,13 @@ FINISH:
 		public RegularFlow New() => new RegularFlow(port, this);
 	}
 
-	public class RegularFlow : Flow {
-		public readonly FlowInput port;
-		public readonly RegularGraphRunner runner;
+	public class RegularFlow : Flow, IObjectPool {
+		public FlowInput port;
+		public RegularGraphRunner runner;
+
+		private Queue<FlowPort> nextFlows = new Queue<FlowPort>(4);
+
+		public RegularFlow() : base(null) { }
 
 		public RegularFlow(FlowInput port, RegularGraphRunner runner) : base(runner.instance) {
 			this.port = port;
@@ -1186,10 +1198,14 @@ FINISH:
 
 		public override GraphRunner graphRunner => runner;
 
-		private Queue<FlowPort> nextFlows = new Queue<FlowPort>(4);
-
 		//For debugging purpose, don't remove this
 		internal string DebugDisplay => GraphException.GetMessage(port?.node, instance.target);
+
+		internal void Initialize(FlowInput port, RegularGraphRunner runner) {
+			this.port = port;
+			this.runner = runner;
+			this.instance = runner.instance;
+		}
 
 		public override void Next(FlowPort port) {
 			nextFlows.Enqueue(port);
@@ -1221,8 +1237,10 @@ FINISH:
 					if(nextFlow == null) {
 						continue;
 					}
-					var flow = new RegularFlow(nextFlow, runner);
+					var flow = StaticObjectPool.Allocate<RegularFlow>();
+					flow.Initialize(nextFlow, runner);
 					flow.Run();
+					StaticObjectPool.Free(flow);
 					if(flow.jumpStatement != null) {
 						jumpStatement = flow.jumpStatement;
 						break;
@@ -1281,9 +1299,13 @@ FINISH:
 					GraphDebug.Flow(instance.target, node.graphContainer.GetGraphID(), node.id, output.id);
 				}
 #endif
-				var flow = new RegularFlow(targetFlow, runner);
+				var flow = StaticObjectPool.Allocate<RegularFlow>();
+				
+				flow.Initialize(targetFlow, runner);
 				flow.Run();
 				jump = flow.jumpStatement;
+
+				StaticObjectPool.Free(flow);
 			}
 			else {
 				jump = null;
@@ -1320,13 +1342,23 @@ FINISH:
 					GraphDebug.Flow(instance.target, node.graphContainer.GetGraphID(), node.id, output.id);
 				}
 #endif
-				var flow = new RegularFlow(targetFlow, runner);
+				var flow = StaticObjectPool.Allocate<RegularFlow>();
+				flow.Initialize(targetFlow, runner);
 				flow.Run();
+				StaticObjectPool.Free(flow);
 			}
 		}
 
 		public override void Stop() {
 			throw new NotSupportedException();
+		}
+
+		void IObjectPool.OnFree() {
+			port = null;
+			runner = null;
+			jumpStatement = null;
+			nextFlows.Clear();
+			Reset();
 		}
 	}
 }

@@ -82,5 +82,18 @@ namespace MaxyGames.UNode {
 			}
 			return false;
 		}
+
+		public override void OnPortChanged() {
+			base.OnPortChanged();
+			if(isConnected) {
+				//Remove invalid connection
+				for(int i = 0; i < connections.Count; i++) {
+					if(connections[i].isValid == false) {
+						connections[i].Disconnect();
+						i--;
+					}
+				}
+			}
+		}
 	}
 }

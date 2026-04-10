@@ -493,7 +493,7 @@ namespace MaxyGames.UNode {
 			}
 			Func<object, object, object> func;
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
-			if(!_ListAdd.ContainsKey(uid)) {
+			if(!_ListAdd.TryGetValue(uid, out func)) {
 				try {
 					var paramTypes = new[] { fType, tType };
 					var method = fType.FindMethod("op_Addition", paramTypes, true);
@@ -611,9 +611,6 @@ namespace MaxyGames.UNode {
 				}
 				_ListAdd.Add(uid, func);
 			}
-			else {
-				func = _ListAdd[uid];
-			}
 			return func(a, b);
 		}
 
@@ -638,7 +635,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, object> func;
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
-			if(!_ListModulo.ContainsKey(uid)) {
+			if(!_ListModulo.TryGetValue(uid, out func)) {
 				try {
 					var paramTypes = new[] { fType, tType };
 					var method = fType.FindMethod("op_Modulus", paramTypes, true);
@@ -749,9 +746,6 @@ namespace MaxyGames.UNode {
 				}
 				_ListModulo.Add(uid, func);
 			}
-			else {
-				func = _ListModulo[uid];
-			}
 			return func(a, b);
 		}
 
@@ -776,7 +770,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, object> func;
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
-			if(!_ListSubtract.ContainsKey(uid)) {
+			if(!_ListSubtract.TryGetValue(uid, out func)) {
 				try {
 					var paramTypes = new[] { fType, tType };
 					var method = fType.FindMethod("op_Subtraction", paramTypes, true);
@@ -887,9 +881,6 @@ namespace MaxyGames.UNode {
 				}
 				_ListSubtract.Add(uid, func);
 			}
-			else {
-				func = _ListSubtract[uid];
-			}
 			return func(a, b);
 		}
 
@@ -914,7 +905,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, object> func;
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
-			if(!_ListDivide.ContainsKey(uid)) {
+			if(!_ListDivide.TryGetValue(uid, out func)) {
 				try {
 					var paramTypes = new[] { fType, tType };
 					var method = fType.FindMethod("op_Division", paramTypes, true);
@@ -1025,9 +1016,6 @@ namespace MaxyGames.UNode {
 				}
 				_ListDivide.Add(uid, func);
 			}
-			else {
-				func = _ListDivide[uid];
-			}
 			return func(a, b);
 		}
 
@@ -1052,7 +1040,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, object> func;
 			var uid = uNodeUtility.GetHashCode(fType.GetHashCode(), tType.GetHashCode());
-			if(!_ListMultiply.ContainsKey(uid)) {
+			if(!_ListMultiply.TryGetValue(uid, out func)) {
 				try {
 					var paramTypes = new[] { fType, tType };
 					var method = fType.FindMethod("op_Multiply", paramTypes, true);
@@ -1167,9 +1155,6 @@ namespace MaxyGames.UNode {
 					}
 				}
 				_ListMultiply.Add(uid, func);
-			}
-			else {
-				func = _ListMultiply[uid];
 			}
 			return func(a, b);
 		}
@@ -1325,7 +1310,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, bool> func;
 			var uid = uNodeUtility.GetHashCode(aType.GetHashCode(), bType.GetHashCode());
-			if(!_listGreaterThan.ContainsKey(uid)) {
+			if(!_listGreaterThan.TryGetValue(uid, out func)) {
 				try {
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
@@ -1431,9 +1416,6 @@ namespace MaxyGames.UNode {
 				}
 				_listGreaterThan.Add(uid, func);
 			}
-			else {
-				func = _listGreaterThan[uid];
-			}
 			return func(a, b);
 		}
 
@@ -1455,7 +1437,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, bool> func;
 			var uid = uNodeUtility.GetHashCode(aType.GetHashCode(), bType.GetHashCode());
-			if(!_listLessThan.ContainsKey(uid)) {
+			if(!_listLessThan.TryGetValue(uid, out func)) {
 				try {
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
@@ -1561,9 +1543,6 @@ namespace MaxyGames.UNode {
 				}
 				_listLessThan.Add(uid, func);
 			}
-			else {
-				func = _listLessThan[uid];
-			}
 			return func(a, b);
 		}
 
@@ -1585,7 +1564,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, bool> func;
 			var uid = uNodeUtility.GetHashCode(aType.GetHashCode(), bType.GetHashCode());
-			if(!_listGreaterThanOrEqual.ContainsKey(uid)) {
+			if(!_listGreaterThanOrEqual.TryGetValue(uid, out func)) {
 				try {
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
@@ -1691,9 +1670,6 @@ namespace MaxyGames.UNode {
 				}
 				_listGreaterThanOrEqual.Add(uid, func);
 			}
-			else {
-				func = _listGreaterThanOrEqual[uid];
-			}
 			return func(a, b);
 		}
 
@@ -1715,7 +1691,7 @@ namespace MaxyGames.UNode {
 			}
 			System.Func<object, object, bool> func;
 			var uid = uNodeUtility.GetHashCode(aType.GetHashCode(), bType.GetHashCode());
-			if(!_listLessThanOrEqual.ContainsKey(uid)) {
+			if(!_listLessThanOrEqual.TryGetValue(uid, out func)) {
 				try {
 					ParameterExpression paramA = Expression.Parameter(typeof(object), "a"),
 						paramB = Expression.Parameter(typeof(object), "b");
@@ -1820,9 +1796,6 @@ namespace MaxyGames.UNode {
 					}
 				}
 				_listLessThanOrEqual.Add(uid, func);
-			}
-			else {
-				func = _listLessThanOrEqual[uid];
 			}
 			return func(a, b);
 		}

@@ -575,6 +575,12 @@ namespace MaxyGames.UNode {
 			base.OnDestroy();
 		}
 
+		internal void ClearConnections() {
+			foreach(var con in Connections.ToArray()) {
+				con.Disconnect();
+			}
+		}
+
 		public IEnumerable<Connection> Connections {
 			get {
 				foreach(var port in ValueInputs) {

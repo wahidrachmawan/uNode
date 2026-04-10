@@ -1047,6 +1047,8 @@ namespace MaxyGames.UNode {
 		/// </summary>
 		public bool IsAutoType => autoType?.Invoke() == true;
 
+		public override bool isConnected => connections?.Count > 0;
+
 		/// <summary>
 		/// Set the type of the port
 		/// </summary>
@@ -1103,6 +1105,8 @@ namespace MaxyGames.UNode {
 	public abstract class FlowPort : UPort {
 		[SerializeReference]
 		public List<FlowConnection> connections = new List<FlowConnection>();
+
+		public override bool isConnected => connections?.Count > 0;
 
 		protected FlowPort(NodeObject node) : base(node) { }
 

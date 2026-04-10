@@ -404,6 +404,9 @@ namespace MaxyGames.UNode.Editors {
 		public static void ClearCache() {
 			if(uNodeEditor.window != null && uNodeEditor.window.graphEditor is UIElementGraph graph) {
 				if(graph != null && graph.graphView != null) {
+					foreach(var (_, view) in graph.graphView.cachedNodeMap) {
+						view?.Dispose();
+					}
 					graph.graphView.cachedNodeMap.Clear();
 					//uNodeEditor.window?.Refresh(true);
 				}
@@ -419,11 +422,13 @@ namespace MaxyGames.UNode.Editors {
 				if(graph != null && graph.graphView != null) {
 					List<NodeObject> keys = new List<NodeObject>();
 					foreach(var pair in graph.graphView.cachedNodeMap) {
-						if(pair.Key != null && pair.Key.graphContainer == graphRef) {
+						if(pair.Key.graph != null && pair.Key.graphContainer == graphRef) {
 							keys.Add(pair.Key);
+							pair.Value.Dispose();
 						}
 					}
 					foreach(var key in keys) {
+						if(key == null) continue;
 						graph.graphView.cachedNodeMap.Remove(key);
 					}
 					if(graph.graphView.graphData?.graph == graphRef) {
@@ -436,6 +441,9 @@ namespace MaxyGames.UNode.Editors {
 		public static void ClearCache(NodeObject nodeRef) {
 			if(uNodeEditor.window != null && uNodeEditor.window.graphEditor is UIElementGraph graph) {
 				if(graph != null && graph.graphView != null) {
+					if(graph.graphView.cachedNodeMap.TryGetValue(nodeRef, out var view)) {
+						view?.Dispose();
+					}
 					graph.graphView.cachedNodeMap.Remove(nodeRef);
 					if(graph.graphView.graphData?.graphData == nodeRef.graph) {
 						graph.graphView.FullReload();

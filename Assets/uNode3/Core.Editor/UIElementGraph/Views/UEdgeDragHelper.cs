@@ -498,6 +498,11 @@ namespace MaxyGames.UNode.Editors {
 				// Restore the previous input and output
 				edgeCandidate.input = oldInput;
 				edgeCandidate.output = oldOutput;
+				if(endPort == null) {
+					if(edgeCandidate is EdgeViewWithNode edgeViewWithNode) {
+						edgeViewWithNode.Disconnect();
+					}
+				}
 			}
 			// otherwise, if it is an temporary edge then just remove it as it is not already known my the model
 			else {

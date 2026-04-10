@@ -567,12 +567,19 @@ namespace MaxyGames.UNode {
 		public FlowInput enter;
 
 		protected virtual bool IsCoroutine() => IsSelfCoroutine();
-		protected virtual bool IsSelfCoroutine() {
-			if(this.GetType().IsDefined(typeof(NodeMenu))) {
-				var att = this.GetType().GetCustomAttribute<NodeMenu>();
-				return att.IsCoroutine;
+
+		private bool? _isSelfCoroutineCache = null;
+		private bool HasIsCoroutineAttribute {
+			get {
+				if(_isSelfCoroutineCache == null) {
+					_isSelfCoroutineCache = this.GetType().IsDefined(typeof(NodeMenu)) && this.GetType().GetCustomAttribute<NodeMenu>().IsCoroutine;
+				}
+				return _isSelfCoroutineCache.Value;
 			}
-			return false;
+		}
+
+		protected virtual bool IsSelfCoroutine() {
+			return HasIsCoroutineAttribute;
 		}
 
 		protected override void OnRegister() {

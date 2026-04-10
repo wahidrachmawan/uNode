@@ -73,13 +73,16 @@ namespace MaxyGames.UNode.Editors {
 					}
 					var nView = graph.GetNodeView(valueConverter);
 					if(nView != null) {
-						valueConverter.position = edgeData.input.owner.GetPosition();
-						valueConverter.nodeObject.position.x -= 50;
-						nView.HideElement();
-						nView.SetDisplay(false);
-					}
-					if(valueConverter.input.hasValidConnections) {
-						return new ConversionEdgeView(valueConverter, new EdgeData(null, edgeData.input, PortUtility.GetPort(valueConverter.input.connections[0].output, graph)));
+						if(valueConverter.input.hasValidConnections) {
+							valueConverter.position = edgeData.input.owner.GetPosition();
+							valueConverter.nodeObject.position.x -= 50;
+							nView.HideElement();
+							nView.SetDisplay(false);
+							return new ConversionEdgeView(nView, new EdgeData(null, edgeData.input, PortUtility.GetPort(valueConverter.input.connections[0].output, graph)));
+						}
+						else {
+							return null;
+						}
 					}
 				}
 			}

@@ -841,6 +841,9 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			public static Dictionary<Type, Color> colorMap = new Dictionary<Type, Color>();
 			public static Dictionary<Type, Texture> iconMap = new Dictionary<Type, Texture>();
 
+			public static List<(Type, Texture)> staticIconCache = new List<(Type, Texture)>();
+			public static List<(Type, Color)> staticColorCache = new List<(Type, Color)>();
+
 			public static EditorThemeTypeSettings _defaultThemeTypeSetting;
 			public static EditorThemeTypeSettings defaultThemeTypeSetting {
 				get {
@@ -859,9 +862,37 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			Cached.nodeGraph = null;
 		}
 
-		public static void OnThemeChanged() {
+		private static void OnThemeChanged() {
 			Cached.colorMap.Clear();
 			Cached.iconMap.Clear();
+			foreach(var (key, value) in Cached.staticIconCache) {
+				Cached.iconMap[key] = value;
+			}
+			foreach(var (key, value) in Cached.staticColorCache) {
+				Cached.colorMap[key] = value;
+			}
+		}
+
+		/// <summary>
+		/// Register a static icon for a type, this is the default icon for the type and can be overrided by the themes.
+		/// This should be called after domain reload for act as default icon, otherwise it can override the theme icon.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="icon"></param>
+		public static void RegisterTypeStaticIcon(Type type, Texture icon) {
+			Cached.staticIconCache.Add((type, icon));
+			Cached.iconMap[type] = icon;
+		}
+
+		/// <summary>
+		/// Register a static color for a type, this is the default color for the type and can be overrided by the themes.
+		/// This should be called after domain reload for act as default color, otherwise it can override the theme color.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="color"></param>
+		public static void RegisterTypeStaticColor(Type type, Color color) {
+			Cached.staticColorCache.Add((type, color));
+			Cached.colorMap[type] = color;
 		}
 
 		private static EditorThemeTypeSettings GetTypeSettings() {
@@ -917,7 +948,7 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			//}
 			if(type is RuntimeType) {
 				if(type.IsArray || type.IsGenericType) {
-					return uNodeEditorUtility.Icons.listIcon;
+					return GetIconForType(typeof(TypeIcons.ListIcon));
 				}
 				var rType = type as RuntimeType;
 				return GetIconForType(typeof(TypeIcons.RuntimeTypeIcon));
@@ -937,38 +968,11 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				Cached.iconMap[type] = result;
 				return result;
 			}
-			if(type == typeof(TypeIcons.FlowIcon)) {
-				result = uNodeEditorUtility.Icons.flowIcon;
-			}
-			else if(type == typeof(TypeIcons.ValueIcon)) {
-				result = uNodeEditorUtility.Icons.valueIcon;
-			}
-			else if(type == typeof(TypeIcons.BranchIcon)) {
-				result = uNodeEditorUtility.Icons.divideIcon;
-			}
-			else if(type == typeof(TypeIcons.ClockIcon)) {
-				result = uNodeEditorUtility.Icons.clockIcon;
-			}
-			else if(type == typeof(TypeIcons.RepeatIcon)) {
-				result = uNodeEditorUtility.Icons.repeatIcon;
-			}
-			else if(type == typeof(TypeIcons.RepeatOnceIcon)) {
-				result = uNodeEditorUtility.Icons.repeatOnceIcon;
-			}
-			else if(type == typeof(TypeIcons.SwitchIcon)) {
-				result = uNodeEditorUtility.Icons.divideIcon;
-			}
-			else if(type == typeof(TypeIcons.MouseIcon)) {
-				result = uNodeEditorUtility.Icons.mouseIcon;
-			}
-			else if(type == typeof(TypeIcons.EventIcon)) {
-				result = uNodeEditorUtility.Icons.eventIcon;
-			}
-			else if(type == typeof(TypeIcons.RotationIcon) || type == typeof(Quaternion)) {
-				result = uNodeEditorUtility.Icons.rotateIcon;
+			if(type == typeof(Quaternion)) {
+				result = GetIconForType(typeof(TypeIcons.QuaternionIcon));
 			}
 			else if(type == typeof(Color) || type == typeof(Color32)) {
-				result = uNodeEditorUtility.Icons.colorIcon;
+				result = GetIconForType(typeof(TypeIcons.ColorIcon));
 			}
 			else if(type == typeof(int)) {
 				result = GetIconForType(typeof(TypeIcons.IntegerIcon));
@@ -986,22 +990,22 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				result = GetIconForType(typeof(TypeIcons.Vector4Icon));
 			}
 			else if(type.IsCastableTo(typeof(UnityEngine.Object))) {
-				result = uNodeEditorUtility.Icons.objectIcon;
+				result = GetIconForType(typeof(TypeIcons.UnityObjectIcon));
 			}
 			else if(type.IsCastableTo(typeof(System.Collections.IList))) {
-				result = uNodeEditorUtility.Icons.listIcon;
+				result = GetIconForType(typeof(TypeIcons.ListIcon));
 			}
 			else if(type.IsCastableTo(typeof(System.Collections.IDictionary))) {
-				result = uNodeEditorUtility.Icons.bookIcon;
+				result = GetIconForType(typeof(TypeIcons.DictionaryIcon));
 			}
 			else if(type == typeof(void)) {
 				result = GetIconForType(typeof(TypeIcons.VoidIcon));
 			}
 			else if(type.IsCastableTo(typeof(KeyValuePair<,>))) {
-				result = uNodeEditorUtility.Icons.keyIcon;
+				result = GetIconForType(typeof(TypeIcons.KeyTypeIcon));
 			}
 			else if(type == typeof(DateTime) || type == typeof(Time)) {
-				result = uNodeEditorUtility.Icons.dateIcon;
+				result = GetIconForType(typeof(TypeIcons.DateIcon));
 			}
 			else if(type.IsInterface) {
 				result = GetIconForType(typeof(TypeIcons.InterfaceIcon));
@@ -1010,16 +1014,16 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				result = GetIconForType(typeof(TypeIcons.EnumIcon));
 			}
 			else if(type == typeof(object)) {
-				result = uNodeEditorUtility.Icons.valueBlueIcon;
+				result = GetIconForType(typeof(TypeIcons.ObjectIcon));
 			}
 			else if(type == typeof(bool)) {
-				result = uNodeEditorUtility.Icons.valueYellowRed;
+				result = GetIconForType(typeof(TypeIcons.BoolIcon));
 			}
 			else if(type == typeof(string)) {
 				result = GetIconForType(typeof(TypeIcons.StringIcon));
 			}
 			else if(type == typeof(Type)) {
-				result = uNodeEditorUtility.Icons.valueGreenIcon;
+				result = GetIconForType(typeof(TypeIcons.SystemTypeIcon));
 			}
 			else if(type == typeof(UnityEngine.Random) || type == typeof(System.Random)) {
 				result = GetIconForType(typeof(TypeIcons.RandomIcon));

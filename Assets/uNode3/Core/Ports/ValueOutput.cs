@@ -91,5 +91,18 @@ namespace MaxyGames.UNode {
 			dynamicType = other.dynamicType;
 			//OnChanged = other.OnChanged;
 		}
+
+		public override void OnPortChanged() {
+			base.OnPortChanged();
+			if(isConnected) {
+				// Remove invalid connections
+				for(int i = 0; i < connections.Count; i++) {
+					if(connections[i].isValid == false) {
+						connections[i].Disconnect();
+						i--;
+					}
+				}
+			}
+		}
 	}
 }

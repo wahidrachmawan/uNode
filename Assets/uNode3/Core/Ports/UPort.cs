@@ -132,7 +132,7 @@ namespace MaxyGames.UNode {
 		/// <summary>
 		/// True if the port is connected
 		/// </summary>
-		public bool isConnected => Connections.Any();
+		public virtual bool isConnected => Connections.Any();
 		/// <summary>
 		/// True if the port has a valid connection
 		/// </summary>
@@ -213,7 +213,7 @@ namespace MaxyGames.UNode {
 		[NonSerialized]
 		protected Action<UPort> OnChanged;
 
-		public void OnPortChanged() {
+		public virtual void OnPortChanged() {
 			OnChanged?.Invoke(this);
 		}
 

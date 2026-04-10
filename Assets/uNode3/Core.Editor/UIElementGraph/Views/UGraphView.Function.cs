@@ -222,6 +222,13 @@ namespace MaxyGames.UNode.Editors {
 			if(!requiredReload) {
 				requiredReload = true;
 				repaintProgress?.Stop();
+
+				foreach(var key in cachedNodeMap.Keys.ToList()) {
+					if(key.IsValid == false) {
+						cachedNodeMap.Remove(key);
+					}
+				}
+
 				var isUndoRedo = uNodeUtility.undoRedoPerformed;
 				uNodeThreadUtility.ExecuteOnce(() => {
 					int currID = ++reloadID;
@@ -441,10 +448,10 @@ namespace MaxyGames.UNode.Editors {
 
 		void RemoveNodeViews(bool includingCache) {
 			foreach(var nodeView in nodeViews) {
-				if(!nodeView.isBlock)
-					RemoveElement(nodeView);
 				if(includingCache)
 					cachedNodeMap.Remove(nodeView.nodeObject);
+				if(!nodeView.isBlock)
+					RemoveElement(nodeView);
 			}
 			nodeViews.Clear();
 			nodeViewsPerNode.Clear();
@@ -452,10 +459,10 @@ namespace MaxyGames.UNode.Editors {
 
 		public void RemoveView(UNodeView view) {
 			if(view == null) return;
-			RemoveElement(view);
 			cachedNodeMap.Remove(view.nodeObject);
 			nodeViewsPerNode.Remove(view.nodeObject);
 			nodeViews.Remove(view);
+			RemoveElement(view);
 		}
 
 		public void RemoveEdges() {

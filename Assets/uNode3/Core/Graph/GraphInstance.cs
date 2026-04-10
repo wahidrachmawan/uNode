@@ -45,7 +45,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	internal readonly struct RuntimeGraphID {
+	internal readonly struct RuntimeGraphID : IEquatable<RuntimeGraphID> {
 		public readonly int graphID;
 		public readonly int elementID;
 		public readonly int objectID;
@@ -63,6 +63,10 @@ namespace MaxyGames.UNode {
 
 		public override int GetHashCode() {
 			return HashCode.Combine(graphID, elementID, objectID);
+		}
+
+		public bool Equals(RuntimeGraphID other) {
+			return graphID == other.graphID && elementID == other.elementID && objectID == other.objectID;
 		}
 
 		public static bool operator ==(RuntimeGraphID lhs, RuntimeGraphID rhs) {
@@ -271,12 +275,12 @@ namespace MaxyGames.UNode {
 
 		#region Custom Data
 		public void SetUserData(UGraphElement owner, object value) {
-			customDatas[owner.runtimeID] = value;
+			customDatas[owner.runtimeIDAsRef] = value;
 		}
 
 		public object GetUserData(UGraphElement owner) {
-			if(!customDatas.TryGetValue(owner.runtimeID, out var data)) {
-				customDatas[owner.runtimeID] = data;
+			if(!customDatas.TryGetValue(owner.runtimeIDAsRef, out var data)) {
+				customDatas[owner.runtimeIDAsRef] = data;
 			}
 			return data;
 		}
@@ -284,7 +288,7 @@ namespace MaxyGames.UNode {
 		public void SetUserData(UGraphElement owner, object key, object value) {
 			RuntimeGraphID id;
 			if(object.ReferenceEquals(owner, null) == false)
-				id = owner.runtimeID;
+				id = owner.runtimeIDAsRef;
 			else
 				id = default;
 			customDatas2[(id, key)] = value;
@@ -293,7 +297,7 @@ namespace MaxyGames.UNode {
 		public object GetUserData(UGraphElement owner, object key) {
 			RuntimeGraphID id;
 			if(object.ReferenceEquals(owner, null) == false)
-				id = owner.runtimeID;
+				id = owner.runtimeIDAsRef;
 			else
 				id = default;
 			if(!customDatas2.TryGetValue((id, key), out var data)) {
@@ -390,7 +394,7 @@ namespace MaxyGames.UNode {
 		/// <returns></returns>
 		public T GetValidElement<T>(T element) where T : UGraphElement {
 			if(element.IsValid == false) {
-				if(elementDatas.TryGetValue(element.runtimeID, out var data)) {
+				if(elementDatas.TryGetValue(element.runtimeIDAsRef, out var data)) {
 					return data.owner.reference as T;
 				}
 				var graphData = element.graphContainer.GraphData;
@@ -417,7 +421,7 @@ namespace MaxyGames.UNode {
 		public T GetValidNode<T>(T element) where T : Node {
 			if(element.IsValid == false) {
 				NodeObject nodeObject = element.prevNodeObject ?? element.nodeObject;
-				if(elementDatas.TryGetValue(nodeObject.runtimeID, out var data)) {
+				if(elementDatas.TryGetValue(nodeObject.runtimeIDAsRef, out var data)) {
 					if(data.owner.reference is NodeObject node && node is T result) {
 						return result;
 					}
@@ -476,7 +480,7 @@ namespace MaxyGames.UNode {
 		/// <returns></returns>
 		public ValueOutput GetValidPort(ValueOutput port) {
 			if(port.node.IsValid == false) {
-				if(elementDatas.TryGetValue(port.node.runtimeID, out var data)) {
+				if(elementDatas.TryGetValue(port.node.runtimeIDAsRef, out var data)) {
 					if(data.owner.reference is NodeObject node) {
 						return node.GetValueOutput(port.id);
 					}
@@ -500,7 +504,7 @@ namespace MaxyGames.UNode {
 		/// <returns></returns>
 		public ValueInput GetValidPort(ValueInput port) {
 			if(port.node.IsValid == false) {
-				if(elementDatas.TryGetValue(port.node.runtimeID, out var data)) {
+				if(elementDatas.TryGetValue(port.node.runtimeIDAsRef, out var data)) {
 					if(data.owner.reference is NodeObject node) {
 						return node.GetValueInput(port.id);
 					}
@@ -518,10 +522,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private RuntimeLocalValue GetOrCreateElementDataValue(UGraphElement owner) {
-			var id = owner.runtimeID;
-			if(!elementDatas.TryGetValue(id, out var data)) {
+			if(!elementDatas.TryGetValue(owner.runtimeIDAsRef, out var data)) {
 				data = new RuntimeLocalValue(this, owner);
-				elementDatas[id] = data;
+				elementDatas[owner.runtimeIDAsRef] = data;
 			}
 			return data;
 		}
@@ -551,11 +554,11 @@ namespace MaxyGames.UNode {
 		}
 
 		public bool HasElementData(UGraphElement owner) {
-			return elementDatas.TryGetValue(owner.runtimeID, out var _);
+			return elementDatas.ContainsKey(owner.runtimeIDAsRef);
 		}
 
 		public T GetOrCreateElementData<T>(UGraphElement owner) where T : new() {
-			var id = owner.runtimeID;
+			ref var id = ref owner.runtimeIDAsRef;
 			if(!elementDatas.TryGetValue(id, out var data)) {
 				data = new RuntimeLocalValue(this, owner);
 				data.value = new T();
