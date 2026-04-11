@@ -6,8 +6,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
-using UnityEditor.Experimental.GraphView;
-using NodeView = UnityEditor.Experimental.GraphView.Node;
 using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode.Editors {

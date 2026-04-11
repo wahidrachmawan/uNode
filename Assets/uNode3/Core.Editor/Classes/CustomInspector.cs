@@ -299,7 +299,10 @@ namespace MaxyGames.UNode.Editors {
 					icon = typeof(TypeIcons.EnumIcon);
 				}
 				EditorGUILayout.BeginHorizontal();
-				GUI.DrawTexture(uNodeGUIUtility.GetRect(GUILayout.Width(32), GUILayout.Height(32)), uNodeEditorUtility.GetTypeIcon(icon));
+				GUI.DrawTexture(
+					uNodeGUIUtility.GetRect(GUILayout.Width(32), GUILayout.Height(32)),
+					uNodeEditorUtility.GetTypeIcon(icon) ?? uNodeEditorUtility.GetTypeIcon(typeof(TypeIcons.EnumIcon))
+				);
 				EditorGUILayout.BeginVertical();
 				EditorGUILayout.BeginHorizontal();
 				if(AssetDatabase.IsSubAsset(asset)) {

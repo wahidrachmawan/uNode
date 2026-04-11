@@ -782,31 +782,35 @@ namespace MaxyGames.UNode.Editors {
 				if(item is UNodeView) {
 					var view = item as UNodeView;
 					nodes.Add(view.nodeObject);
-					if(view != null) {
-						foreach(var p in view.inputPorts) {
-							var edges = p.GetValidEdges();
-							foreach(var e in edges) {
-								if(e is ConversionEdgeView) {
-									var ce = e as ConversionEdgeView;
-									nodes.Add(ce.node.nodeObject);
+				}
+			}
+			foreach(var item in selection) {
+				if(item is UNodeView) {
+					var view = item as UNodeView;
+					foreach(var p in view.inputPorts) {
+						var edges = p.GetValidEdges();
+						foreach(var e in edges) {
+							if(e is EdgeViewWithNode) {
+								var edge = e as EdgeViewWithNode;
+								if(edge.Output != null) {
+									var other = edge.Output.GetNodeObject();
+									if(nodes.Contains(other)) {
+										nodes.Add(edge.nodeObject);
+									}
 								}
 							}
 						}
-						//foreach(var p in view.outputPorts) {
-						//	var edges = p.GetValidEdges();
-						//	foreach(var e in edges) {
-						//		if(e is ConversionEdgeView) {
-						//			var ce = e as ConversionEdgeView;
-						//			nodes.Add(ce.node);
-						//		}
-						//	}
-						//}
 					}
+					//foreach(var p in view.outputPorts) {
+					//	var edges = p.GetValidEdges();
+					//	foreach(var e in edges) {
+					//		if(e is ConversionEdgeView) {
+					//			var ce = e as ConversionEdgeView;
+					//			nodes.Add(ce.node);
+					//		}
+					//	}
+					//}
 				}
-				else {
-
-				}
-
 			}
 			if(nodes.Count > 0) {
 				GraphUtility.CopyPaste.Copy(nodes.ToArray());
@@ -820,26 +824,35 @@ namespace MaxyGames.UNode.Editors {
 				if(n is not NodeObject node || node.node is TransitionEvent)
 					continue;
 				nodes.Add(node);
-				var view = GetNodeView(node);
-				if(view != null) {
-					foreach(var p in view.inputPorts) {
-						var edges = p.GetValidEdges();
-						foreach(var e in edges) {
-							if(e is ConversionEdgeView) {
-								var ce = e as ConversionEdgeView;
-								nodes.Add(ce.node.nodeObject);
+			}
+			foreach(var n in nodes.ToArray()) {
+				if(n is NodeObject node) {
+					var view = GetNodeView(node);
+					if(view != null) {
+						foreach(var p in view.inputPorts) {
+							var edges = p.GetValidEdges();
+							foreach(var e in edges) {
+								if(e is EdgeViewWithNode) {
+									var edge = e as EdgeViewWithNode;
+									if(edge.Output != null) {
+										var other = edge.Output.GetNodeObject();
+										if(nodes.Contains(other)) {
+											nodes.Add(edge.nodeObject);
+										}
+									}
+								}
 							}
 						}
+						//foreach(var p in view.outputPorts) {
+						//	var edges = p.GetValidEdges();
+						//	foreach(var e in edges) {
+						//		if(e is ConversionEdgeView) {
+						//			var ce = e as ConversionEdgeView;
+						//			nodes.Add(ce.node);
+						//		}
+						//	}
+						//}
 					}
-					//foreach(var p in view.outputPorts) {
-					//	var edges = p.GetValidEdges();
-					//	foreach(var e in edges) {
-					//		if(e is ConversionEdgeView) {
-					//			var ce = e as ConversionEdgeView;
-					//			nodes.Add(ce.node);
-					//		}
-					//	}
-					//}
 				}
 			}
 			GraphUtility.CopyPaste.Copy(nodes.ToArray());
@@ -877,7 +890,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					if(selectable is BaseNodeView) {
 						graphEditor.SelectNode((selectable as BaseNodeView).nodeObject, false);
-						AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
+						AutoHideGraphElement.RegisterViewToIgnore(selectable as NodeView);
 					}
 					else if(selectable is EdgeView) {
 						var edge = (selectable as EdgeView);
@@ -904,7 +917,7 @@ namespace MaxyGames.UNode.Editors {
 						else {
 							graphEditor.Select(element);
 						}
-						AutoHideGraphElement.RegisterNodeToIgnore(selectable as NodeView);
+						AutoHideGraphElement.RegisterViewToIgnore(selectable as NodeView);
 					}
 				}
 			}, "[GRAPH_ADD_SELECTIONS]");
@@ -914,7 +927,7 @@ namespace MaxyGames.UNode.Editors {
 			base.RemoveFromSelection(selectable);
 			if(selectable is BaseNodeView) {
 				graphEditor.Unselect((selectable as BaseNodeView).nodeObject);
-				AutoHideGraphElement.UnregisterNodeToIgnore(selectable as NodeView);
+				AutoHideGraphElement.UnregisterViewToIgnore(selectable as NodeView);
 			}
 		}
 

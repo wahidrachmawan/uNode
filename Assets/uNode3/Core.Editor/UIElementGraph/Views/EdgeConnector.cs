@@ -69,7 +69,7 @@ namespace MaxyGames.UNode.Editors {
 			if(m_EdgeDragHelper.HandleMouseDown(e)) {
 				m_Active = true;
 				target.CaptureMouse();
-				AutoHideGraphElement.RegisterNodeToIgnore(graphElement.node);
+				AutoHideGraphElement.RegisterViewToIgnore(graphElement.node);
 
 				e.StopPropagation();
 			} else {
@@ -149,7 +149,7 @@ namespace MaxyGames.UNode.Editors {
 			m_EdgeCandidate = null;
 
 			m_EdgeDragHelper.Reset();
-			AutoHideGraphElement.ClearIgnoredNodes();
+			AutoHideGraphElement.ClearIgnoredViews();
 		}
 
 		bool CanPerformConnection(Vector2 mousePosition) {

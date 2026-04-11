@@ -9,13 +9,25 @@ namespace MaxyGames.UNode.Editors {
 	/// The class for auto hiding the graph elements from the current view to boost the performance.
 	/// </summary>
 	public static class AutoHideGraphElement {
-		static readonly HashSet<NodeView> ignoredNodes = new HashSet<NodeView>();
+		static readonly HashSet<NodeView> ignoredNodes = new();
+		static readonly HashSet<Edge> ignoredEdges = new();
+
+		public static void RegisterViewToIgnore(Edge edge) {
+			if(edge != null) {
+				ignoredEdges.Add(edge);
+			}
+		}
+		public static void UnregisterViewToIgnore(Edge edge) {
+			if(edge != null) {
+				ignoredEdges.Remove(edge);
+			}
+		}
 
 		/// <summary>
 		/// Register a node to ignore from auto hide
 		/// </summary>
 		/// <param name="node"></param>
-		public static void RegisterNodeToIgnore(NodeView node) {
+		public static void RegisterViewToIgnore(NodeView node) {
 			if(node != null) {
 				ignoredNodes.Add(node);
 			}
@@ -25,7 +37,7 @@ namespace MaxyGames.UNode.Editors {
 		/// Unregister a node to ignore from auto hide
 		/// </summary>
 		/// <param name="node"></param>
-		public static void UnregisterNodeToIgnore(NodeView node) {
+		public static void UnregisterViewToIgnore(NodeView node) {
 			if(node != null) {
 				ignoredNodes.Remove(node);
 			}
@@ -34,8 +46,9 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Clear the ignored nodes from auto hide
 		/// </summary>
-		public static void ClearIgnoredNodes() {
+		public static void ClearIgnoredViews() {
 			ignoredNodes.Clear();
+			ignoredEdges.Clear();
 		}
 
 		/// <summary>
@@ -88,7 +101,7 @@ namespace MaxyGames.UNode.Editors {
 					} else {
 						edgeRect = edgeControl.ChangeCoordinatesTo(graphView, edgeControl.GetRect());
 					}
-					if(edgeRect.Overlaps(contentRect)) {
+					if(edgeRect.Overlaps(contentRect) || ignoredEdges.Contains(edge)) {
 						if(edge.parent == null && edge.isHidding) {
 							graphView.AddElement(edge);
 							postAction += edge.UpdateEndPoints;

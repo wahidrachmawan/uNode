@@ -89,6 +89,7 @@ namespace MaxyGames.UNode.Editors {
 			m_GhostEdge = null;
 			edgeCandidate = null;
 
+			m_GraphView?.UnregisterCallback<PointerMoveEvent>(M_OnPointerMoveEvent);
 			m_GraphView = null;
 		}
 
@@ -149,6 +150,8 @@ namespace MaxyGames.UNode.Editors {
 
 			edgeCandidate.layer = Int32.MaxValue;
 
+			AutoHideGraphElement.RegisterViewToIgnore(edgeCandidate);
+
 			return true;
 
 		}
@@ -175,6 +178,24 @@ namespace MaxyGames.UNode.Editors {
 			HandlePointerOrMouseMove(evt);
 		}
 
+		void M_OnPointerMoveEvent(PointerMoveEvent evt) {
+			if(evt.button == -1) {
+				Cleanup();
+				PostCleanup();
+				if(edgeCandidate != null) {
+					edgeCandidate.input = null;
+					edgeCandidate.output = null;
+
+					edgeCandidate.ResetLayer();
+				}
+
+				m_PrevDropTarget = null;
+				edgeCandidate = null;
+				m_CompatiblePorts = null;
+				Reset();
+			}
+		}
+
 		private void HandlePointerOrMouseMove(EventBase evt) {
 			var ve = (VisualElement)evt.target;
 			Vector2 localMousePosition;
@@ -196,9 +217,13 @@ namespace MaxyGames.UNode.Editors {
 
 			if(m_PanDiff != Vector3.zero) {
 				m_PanSchedule.Resume();
+
+				m_GraphView.RegisterCallback<PointerMoveEvent>(M_OnPointerMoveEvent);
 			}
 			else {
 				m_PanSchedule.Pause();
+
+				m_GraphView.UnregisterCallback<PointerMoveEvent>(M_OnPointerMoveEvent);
 			}
 
 			edgeCandidate.candidatePosition = mousePosition;
@@ -285,6 +310,61 @@ namespace MaxyGames.UNode.Editors {
 			HandlePointerOrMouseUp(evt);
 		}
 
+		private void Cleanup() {
+			edgeCandidate.SetEnabled(true);
+
+			if(edgeCandidate.input != null) {
+				edgeCandidate.input.portCapLit = false;
+			}
+
+			if(edgeCandidate.output != null) {
+				edgeCandidate.output.portCapLit = false;
+			}
+
+			AutoHideGraphElement.ClearIgnoredViews();
+
+			// Clean up ghost edges.
+			if(m_GhostEdge != null) {
+				if(m_GhostEdge.input != null)
+					m_GhostEdge.input.portCapLit = false;
+				if(m_GhostEdge.output != null)
+					m_GhostEdge.output.portCapLit = false;
+
+				m_GraphView.RemoveElement(m_GhostEdge);
+				m_GhostEdge.input = null;
+				m_GhostEdge.output = null;
+				m_GhostEdge = null;
+			}
+
+			// Reset the highlights.
+			foreach(var p in m_GraphView.ports) {
+				p.OnStopEdgeDragging();
+			}
+		}
+
+		private void PostCleanup() {
+			// If it is an existing valid edge then delete and notify the model (using DeleteElements()).
+			if(edgeCandidate.input != null && edgeCandidate.output != null) {
+				// Save the current input and output before deleting the edge as they will be reset
+				var oldInput = edgeCandidate.input;
+				var oldOutput = edgeCandidate.output;
+
+				m_GraphView.DeleteElements(new[] { edgeCandidate });
+
+				// Restore the previous input and output
+				edgeCandidate.input = oldInput;
+				edgeCandidate.output = oldOutput;
+
+				if(edgeCandidate is EdgeViewWithNode edgeViewWithNode) {
+					edgeViewWithNode.Disconnect();
+				}
+			}
+			// otherwise, if it is an temporary edge then just remove it as it is not already known my the model
+			else {
+				m_GraphView.RemoveElement(edgeCandidate);
+			}
+		}
+
 		private void HandlePointerOrMouseUp(EventBase evt) {
 			bool didConnect = false;
 
@@ -299,23 +379,7 @@ namespace MaxyGames.UNode.Editors {
 				return;
 			}
 
-			// Reset the highlights.
-			foreach(var p in m_GraphView.ports) {
-				p.OnStopEdgeDragging();
-			}
-
-			// Clean up ghost edges.
-			if(m_GhostEdge != null) {
-				if(m_GhostEdge.input != null)
-					m_GhostEdge.input.portCapLit = false;
-				if(m_GhostEdge.output != null)
-					m_GhostEdge.output.portCapLit = false;
-
-				m_GraphView.RemoveElement(m_GhostEdge);
-				m_GhostEdge.input = null;
-				m_GhostEdge.output = null;
-				m_GhostEdge = null;
-			}
+			Cleanup();
 
 			var endPort = GetEndPort(evt, mousePosition);
 			if(endPort == null) {
@@ -479,35 +543,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			edgeCandidate.SetEnabled(true);
-
-			if(edgeCandidate.input != null)
-				edgeCandidate.input.portCapLit = false;
-
-			if(edgeCandidate.output != null)
-				edgeCandidate.output.portCapLit = false;
-
-			// If it is an existing valid edge then delete and notify the model (using DeleteElements()).
-			if(edgeCandidate.input != null && edgeCandidate.output != null) {
-				// Save the current input and output before deleting the edge as they will be reset
-				var oldInput = edgeCandidate.input;
-				var oldOutput = edgeCandidate.output;
-
-				m_GraphView.DeleteElements(new[] { edgeCandidate });
-
-				// Restore the previous input and output
-				edgeCandidate.input = oldInput;
-				edgeCandidate.output = oldOutput;
-				if(endPort == null) {
-					if(edgeCandidate is EdgeViewWithNode edgeViewWithNode) {
-						edgeViewWithNode.Disconnect();
-					}
-				}
-			}
-			// otherwise, if it is an temporary edge then just remove it as it is not already known my the model
-			else {
-				m_GraphView.RemoveElement(edgeCandidate);
-			}
+			PostCleanup();
 
 			if(endPort != null) {
 				if(endPort.direction == Direction.Output) {

@@ -297,10 +297,6 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				e.connection = Connection.CreateAndConnect(inPort.GetPortValue(), outPort.GetPortValue());
-				//if(e.connection != null && e.connection.isValid) {
-				//	e.connection.Connect();
-				//} else {
-				//}
 				if(uNodePreference.preferenceData.autoCreateReroute && inPort.GetNode() is not Nodes.NodeReroute) {
 					if(graphLayout == GraphLayout.Vertical) {
 						var con = e.connection;

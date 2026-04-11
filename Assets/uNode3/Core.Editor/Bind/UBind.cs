@@ -100,6 +100,9 @@ namespace MaxyGames.UNode.Editors {
 					//	return val;
 					//}
 					//OnValueChange(previousValue, val);
+					//if(previousValue is ValueType || val is ValueType) {
+					//	OnValueChange(previousValue, val);
+					//}
 				}
 				return val;
 			}
