@@ -958,7 +958,10 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			if(result == null) {
 				if(type.IsDefinedAttribute(typeof(ICustomIcon))) {
 					var att = type.GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
-					result = att.GetIcon() ?? GetDefaultIcon(type);
+					result = att.GetIcon();
+					if(result == null) {
+						result = GetDefaultIcon(type);
+					}
 				}
 				else {
 					result = GetDefaultIcon(type);
@@ -1034,12 +1037,24 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			else {
 				var t = uNodeEditorUtility.GetTypeForIcon(type);
 				//For avoid recursion
-				if(t == type) {
-					t = typeof(object);
+				if(t == type || t != null) {
+					var att = typeof(TypeIcons.ObjectIcon).GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
+					result = att.GetIcon();
+
+					if(result == null) {
+						result = GetCSScriptIcon();
+					}
+					return Cached.iconMap[type] = result;
 				}
-				result = GetIconForType(t);
+				else {
+					result = GetIconForType(t);
+				}
 			}
 			return Cached.iconMap[type] = result;
+		}
+
+		private static Texture GetCSScriptIcon() {
+			return EditorGUIUtility.IconContent("cs Script Icon").image;
 		}
 
 		private static Texture GetScriptTypeIcon(string scriptName) {

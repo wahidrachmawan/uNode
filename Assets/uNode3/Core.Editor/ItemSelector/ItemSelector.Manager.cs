@@ -1197,10 +1197,10 @@ namespace MaxyGames.UNode.Editors {
 											//Give a bonus score to items that are already relevant to make sure they are prioritized over less relevant items.
 											score += bonusScore * MathF.Min(score, 1);
 										}
-										if(score > 0) {
-											relevance.Score = score;
-											relevanceTrees.Add(DuplicateTree(tree, false));
-										}
+									}
+									if(score > 0) {
+										relevance.Score = score;
+										relevanceTrees.Add(DuplicateTree(tree, false));
 									}
 								}
 								if(tree.hasChildren) {

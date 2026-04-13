@@ -506,7 +506,7 @@ namespace MaxyGames.UNode {
 				return value;
 			}
 			else if(value.GetType().IsValueType) {
-				return (T)ReflectionUtils.ValuePassing(value);
+				return (T)(object)value;
 			}
 			return Deserialize<T>(Serialize(value, out var references), references);
 		}

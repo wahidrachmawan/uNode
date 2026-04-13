@@ -25,6 +25,11 @@ namespace MaxyGames.UNode {
 				if(hasInitialize == false) {
 					hasInitialize = true;
 					texture = Resources.Load<Texture>(path);
+//#if UNITY_EDITOR
+//					if(texture == null) {
+//						texture = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture>(path);
+//					}
+//#endif
 				}
 				return texture;
 			}

@@ -558,10 +558,18 @@ namespace MaxyGames.UNode.Editors {
 				}
 				Texture icon = uNodeEditorUtility.GetIcon(member);
 				contents.Add(new GUIContent(displayName, icon));
+				if(member is not Type) {
+					var declaredType = ReflectionUtils.GetDeclaringType(member);
+					contents.Add(new GUIContent(declaredType.PrettyName(true), uNodeEditorUtility.GetTypeIcon(declaredType)));
+					if(declaredType.Assembly != null) {
+						contents.Add(new GUIContent("Assembly: " + declaredType.Assembly.GetName().Name));
+					}
+				}
 				contents.Add(new GUIContent("Target	: " + member.MemberType));
 				contents.Add(new GUIContent("Static	: " + ReflectionUtils.GetMemberIsStatic(member)));
+
 				var mType = ReflectionUtils.GetMemberType(member);
-				contents.Add(new GUIContent("Return	: " + mType.PrettyName(true), uNodeEditorUtility.GetTypeIcon(mType)));
+				contents.Add(new GUIContent("<b>Return	: </b>" + mType.PrettyName(true), uNodeEditorUtility.GetTypeIcon(mType)));
 				if(XmlDoc.hasLoadDoc) {
 					if(member is ISummary summary) {
 						if(!string.IsNullOrEmpty(summary.GetSummary())) {
@@ -633,9 +641,9 @@ namespace MaxyGames.UNode.Editors {
 					contents.Add(new GUIContent(item.displayName, icon));
 					//contents.Add(new GUIContent("Target		: Type"));
 					//contents.Add(new GUIContent("Static		: True"));
-					contents.Add(new GUIContent("Type	: " + item.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.type)));
+					contents.Add(new GUIContent(item.type.PrettyName(true), uNodeEditorUtility.GetTypeIcon(item.type)));
 					if(item.type.Assembly != null) {
-						contents.Add(new GUIContent("Assembly	: " + item.type.Assembly.GetName().Name));
+						contents.Add(new GUIContent("Assembly: " + item.type.Assembly.GetName().Name));
 					}
 					contents.AddRange(LoadDoc(item.type));
 				}
