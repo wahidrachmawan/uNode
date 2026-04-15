@@ -1240,11 +1240,12 @@ FINISH:
 					var flow = StaticObjectPool.Allocate<RegularFlow>();
 					flow.Initialize(nextFlow, runner);
 					flow.Run();
-					StaticObjectPool.Free(flow);
 					if(flow.jumpStatement != null) {
 						jumpStatement = flow.jumpStatement;
+						StaticObjectPool.Free(flow);
 						break;
 					}
+					StaticObjectPool.Free(flow);
 				}
 				AfterRun();
 			}
