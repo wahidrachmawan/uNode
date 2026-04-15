@@ -941,11 +941,6 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 					return GetIconForType(icon);
 				}
 			}
-			//else if(type.IsSubclassOf(typeof(Delegate))) {
-			//	result = GetIconForType(typeof(Delegate));
-			//	_iconsMap[type] = result;
-			//	return result;
-			//}
 			if(type is RuntimeType) {
 				if(type.IsArray || type.IsGenericType) {
 					return GetIconForType(typeof(TypeIcons.ListIcon));
@@ -1030,6 +1025,11 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			}
 			else if(type == typeof(UnityEngine.Random) || type == typeof(System.Random)) {
 				result = GetIconForType(typeof(TypeIcons.RandomIcon));
+			}
+			else if(type == typeof(Delegate) || type.IsSubclassOf(typeof(Delegate))) {
+				result = GetIconForType(typeof(TypeIcons.DelegateIcon));
+				Cached.iconMap[type] = result;
+				return result;
 			}
 			// else if(type == typeof(UnityEngine.Debug)) {
 			// 	result = GetIconForType(typeof(TypeIcons.BugIcon));

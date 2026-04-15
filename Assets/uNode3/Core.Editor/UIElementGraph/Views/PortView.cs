@@ -822,7 +822,7 @@ namespace MaxyGames.UNode.Editors {
 				var outputPort = output.GetPortValue<ValueOutput>();
 				var inputPort = input.GetPortValue<ValueInput>();
 
-				var flag = GraphManipulatorUtility.CanMakeConnection(owner.graphEditor, inputPort, outputPort);
+				var flag = GraphManipulatorUtility.CanMakeConnection(owner.graphEditor, inputPort, outputPort, input == this);
 				if(flag != null) {
 					return flag == true;
 				}
@@ -968,7 +968,7 @@ namespace MaxyGames.UNode.Editors {
 			var edgeView = edge as EdgeView;
 			var ugraphView = graphView as UGraphView;
 			foreach(var p in UGraphView.GraphProcessor) {
-				if(p.HandlePortOnDrop(ugraphView, edgeView)) {
+				if(p.HandlePortOnDrop(ugraphView, edgeView, edgeView.input == this)) {
 					return;
 				}
 			}

@@ -35,7 +35,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="graphView"></param>
 		/// <param name="edge"></param>
 		/// <returns></returns>
-		public virtual bool HandlePortOnDrop(UGraphView graphView, EdgeView edge) => false;
+		public virtual bool HandlePortOnDrop(UGraphView graphView, EdgeView edge, bool dropToOutput) => false;
 
 		/// <summary>
 		/// Handle the default port on drop event
@@ -221,9 +221,11 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public override bool HandlePortOnDrop(UGraphView graphView, EdgeView edge) {
-			if(GraphManipulatorUtility.ProcessPortConnection(graphView.graphEditor, edge.Input.GetPortValue(), edge.Output.GetPortValue())) {
-				graphView.MarkRepaint(new[] { edge.Input.GetNodeObject(), edge.Output.GetNodeObject() });
+		public override bool HandlePortOnDrop(UGraphView graphView, EdgeView edge, bool dropToOutput) {
+			var input = edge.Input.GetPortValue();
+			var output = edge.Output.GetPortValue();
+			if(GraphManipulatorUtility.ProcessPortConnection(graphView.graphEditor, input, output, dropToOutput)) {
+				graphView.MarkRepaint(new[] { input.node, output.node });
 				graphView.MarkRepaint();
 				return true;
 			}

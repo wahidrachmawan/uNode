@@ -516,14 +516,54 @@ namespace MaxyGames.UNode.Editors {
 	public readonly struct ConnectionContext {
 		public readonly UPort input;
 		public readonly UPort output;
+		public readonly GraphEditor graphEditor;
+		public readonly bool dropToOutput;
+		public readonly bool isValid;
 
-		public ConnectionContext(UPort input, UPort output) {
+		public ConnectionContext(UPort input, UPort output, GraphEditor graphEditor, bool dropToOutput) {
 			this.input = input;
 			this.output = output;
+			this.graphEditor = graphEditor;
+			this.dropToOutput = dropToOutput;
+			if(input is FlowInput && output is FlowOutput) {
+				isValid = true;
+			}
+			else if(input is ValueInput inp && output is ValueOutput ot) {
+				isValid = ot.type.IsCastableTo(inp.type);
+			}
+			else {
+				isValid = false;
+			}
 		}
 
 		public void ApplyConnection() {
+			if(graphEditor != null) {
+				foreach(var con in input.Connections) {
+					if(con.isValid) {
+						graphEditor.MarkRepaint(con.Output.node);
+					}
+				}
+				graphEditor.MarkRepaint(input.node);
+				graphEditor.MarkRepaint(output.node);
+			}
 			input.ConnectTo(output);
+		}
+
+		public void ApplyConnection(UPort input, UPort output) {
+			if(graphEditor != null) {
+				foreach(var con in input.Connections) {
+					if(con.isValid) {
+						graphEditor.MarkRepaint(con.Output.node);
+					}
+				}
+				graphEditor.MarkRepaint(input.node);
+				graphEditor.MarkRepaint(output.node);
+			}
+			input.ConnectTo(output);
+		}
+
+		public void RegisterUndo(string name = "Connect port") {
+			uNodeEditorUtility.RegisterUndo(input.node.GetUnityObject() ?? output.node.GetUnityObject(), name);
 		}
 
 		public ValueInput ValueInput => input as ValueInput;
@@ -568,8 +608,8 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public static bool? CanMakeConnection(GraphEditor graphEditor, UPort input, UPort output) {
-			var ctx = new ConnectionContext(input, output);
+		public static bool? CanMakeConnection(GraphEditor graphEditor, UPort input, UPort output, bool dragFromInput) {
+			var ctx = new ConnectionContext(input, output, graphEditor, dragFromInput);
 			var manipulators = NodeEditorUtility.FindGraphManipulators();
 			foreach(var manipulator in manipulators) {
 				manipulator.graphEditor = graphEditor;
@@ -581,8 +621,8 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
-		public static bool ProcessPortConnection(GraphEditor graphEditor, UPort input, UPort output) {
-			var ctx = new ConnectionContext(input, output);
+		public static bool ProcessPortConnection(GraphEditor graphEditor, UPort input, UPort output, bool dropToOutput) {
+			var ctx = new ConnectionContext(input, output, graphEditor, dropToOutput);
 			var manipulators = NodeEditorUtility.FindGraphManipulators();
 			foreach(var manipulator in manipulators) {
 				manipulator.graphEditor = graphEditor;
@@ -2436,6 +2476,57 @@ namespace MaxyGames.UNode.Editors {
 				}
 				return outputType.IsCastableTo(context.ValueInput.type, true);
 			}
+			if(context.isValid) {
+				return null;
+			}
+			if(context.dropToOutput == false) {
+				if(context.input is ValueInput) {
+					if(context.InputNode is MultipurposeNode) {
+						var mNode = context.InputNode as MultipurposeNode;
+						if(context.input != mNode.instance && mNode.target.IsTargetingReflection) {
+							var members = mNode.target.GetMembers(false);
+							if(members != null && members[members.Length - 1] is MethodInfo method) {
+								if(method.IsGenericMethod) {
+									var methodBase = method.GetGenericMethodDefinition();
+									Type[] types = new Type[mNode.parameters.Count];
+									for(int i = 0; i < types.Length; i++) {
+										var param = mNode.parameters[i];
+										if(context.input == param.input) {
+											types[i] = context.ValueOutput.type;
+
+											var methodResult = EditorReflectionUtility.GenericResolver.Resolve(methodBase, null, types);
+											if(methodResult != null) {
+												return true;
+											}
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if(context.ValueOutput.IsPrimaryPort() && context.ValueInput.type != typeof(object)) {
+				var inputType = context.ValueInput.type;
+				if(inputType.IsArray == false) {
+					if(context.OutputNode is MultipurposeNode) {
+						var mNode = context.OutputNode as MultipurposeNode;
+						if(mNode.target.IsTargetingReflection) {
+							var members = mNode.target.GetMembers(false);
+							if(members != null && members[members.Length - 1] is MethodInfo method) {
+								if(method.IsGenericMethod) {
+									var methodBase = method.GetGenericMethodDefinition();
+									var methodResult = EditorReflectionUtility.GenericResolver.Resolve(methodBase, inputType, null);
+									if(methodResult != null) {
+										return methodResult.ReturnType.IsCastableTo(inputType);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			//TODO: smart auto
 			//if(context.InputNode is Nodes.ComparisonNode) {
 			//	var node = context.InputNode as Nodes.ComparisonNode;
@@ -2540,6 +2631,7 @@ namespace MaxyGames.UNode.Editors {
 													if(typeB.IsCastableTo(p2)) {
 														a.type = p1;
 														b.type = p2;
+														context.RegisterUndo();
 														//The operator is valid so leave it as is.
 														context.ApplyConnection();
 														return;
@@ -2549,6 +2641,7 @@ namespace MaxyGames.UNode.Editors {
 													if(typeA.IsCastableTo(p1)) {
 														a.type = p1;
 														b.type = p2;
+														context.RegisterUndo();
 														//The operator is valid so leave it as is.
 														context.ApplyConnection();
 														return;
@@ -2572,6 +2665,7 @@ namespace MaxyGames.UNode.Editors {
 													a.type = p1;
 													b.type = p2;
 												}
+												context.RegisterUndo();
 												context.ApplyConnection();
 												graphEditor.MarkRepaint(new NodeObject[] { context.InputNode, context.OutputNode });
 											});
@@ -2649,11 +2743,119 @@ namespace MaxyGames.UNode.Editors {
 									break;
 								}
 							}
-							if(valid)
+							if(valid) {
+								context.RegisterUndo();
 								context.ApplyConnection();
+							}
 							return true;
 						}
 					}
+				}
+			}
+			if(context.isValid) {
+				return false;
+			}
+			if(context.dropToOutput == false) {
+				if(context.input is ValueInput) {
+					bool hasUndo = false;
+					bool Resolve(MultipurposeNode node, ValueInput input, ValueOutput output) {
+						if(input != node.instance && node.target.IsTargetingReflection) {
+							var members = node.target.GetMembers(false);
+							if(members != null && members[members.Length - 1] is MethodInfo method) {
+								if(method.IsGenericMethod) {
+									var methodBase = method.GetGenericMethodDefinition();
+									Type[] types = new Type[node.parameters.Count];
+									for(int i = 0; i < types.Length; i++) {
+										var param = node.parameters[i];
+										if(input == param.input) {
+											types[i] = output.type;
+
+											var methodResult = EditorReflectionUtility.GenericResolver.Resolve(methodBase, null, types);
+											if(methodResult != null) {
+												if(hasUndo == false) {
+													hasUndo = true;
+													context.RegisterUndo();
+												}
+												members[members.Length - 1] = methodResult;
+												node.target.CopyFrom(MemberData.CreateFromMembers(members));
+												context.ApplyConnection(input, output);
+												node.Register();
+
+												//Nested resolve
+												if(node.output != null) {
+													foreach(var inPort in node.output.GetConnectedPorts().ToArray()) {
+														if(node.output.type.IsCastableTo(inPort.type) == false && inPort.GetNode() is MultipurposeNode tNode) {
+															//Resolve the next connected nodes
+															Resolve(tNode, inPort, node.output);
+														}
+													}
+												}
+
+												return true;
+											}
+											break;
+										}
+									}
+								}
+							}
+						}
+						return false;
+					}
+
+					if(context.InputNode is MultipurposeNode) {
+						var mNode = context.InputNode as MultipurposeNode;
+						if(Resolve(mNode, context.input as ValueInput, context.output as ValueOutput)) {
+							return true;
+						}
+					}
+				}
+			}
+			if(context.ValueOutput.IsPrimaryPort() && context.ValueInput.type != typeof(object)) {
+
+				bool hasUndo = false;
+				bool Resolve(ValueInput input, ValueOutput output) {
+					if(output.GetNode() is MultipurposeNode node) {
+						var inputType = input.type;
+						if(output.type.IsCastableTo(inputType) == false && inputType.IsArray == false && node.target.IsTargetingReflection) {
+							var members = node.target.GetMembers(false);
+							if(members != null && members[members.Length - 1] is MethodInfo method) {
+								if(method.IsGenericMethod) {
+									var methodBase = method.GetGenericMethodDefinition();
+									var methodResult = EditorReflectionUtility.GenericResolver.Resolve(methodBase, inputType, null);
+									if(methodResult != null) {
+										if(hasUndo == false) {
+											hasUndo = true;
+											context.RegisterUndo();
+										}
+										members[members.Length - 1] = methodResult;
+										node.target.CopyFrom(MemberData.CreateFromMembers(members));
+										context.ApplyConnection(input, output);
+										node.Register();
+
+										//Nested resolve
+										if(context.dropToOutput == false) {
+											foreach(var param in node.parameters) {
+												if(param.info != null && param.input != null && param.input.type != typeof(object)) {
+													var outPort = param.input.GetTargetPort();
+													if(outPort != null && outPort.IsPrimaryPort()) {
+														//Resolve the next connected nodes
+														Resolve(param.input, outPort);
+													}
+												}
+											}
+										}
+
+										return true;
+									}
+								}
+							}
+						}
+					}
+					return false;
+				}
+
+				if(Resolve(context.ValueInput, context.ValueOutput)) {
+					return true;
 				}
 			}
 			return false;

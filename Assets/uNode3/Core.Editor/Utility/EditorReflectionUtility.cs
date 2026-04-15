@@ -377,7 +377,8 @@ namespace MaxyGames.UNode.Editors {
 							infos.Add(method);
 						}
 					}
-					catch { };
+					catch { }
+					;
 				}
 				return infos;
 			}
@@ -1656,6 +1657,214 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			public ReflectionItem() { }
+		}
+
+		public static class GenericResolver {
+			public static MethodInfo Resolve(MethodInfo method, Type outputType, Type[] inputTypes) {
+				if(!method.IsGenericMethodDefinition)
+					return method;
+
+				var ctx = new GenericContext();
+
+				// 1. Infer from OUTPUT
+				if(outputType != null) {
+					if(!TypeMatcher.Match(method.ReturnType, outputType, ctx))
+						return null;
+				}
+
+				if(inputTypes != null) {
+					// 2. Infer from INPUTS
+					var parameters = method.GetParameters();
+
+					for(int i = 0; i < parameters.Length && i < inputTypes.Length; i++) {
+						var pType = parameters[i].ParameterType;
+						var aType = inputTypes[i];
+
+						if(aType == null)
+							continue;
+
+						if(!TypeMatcher.Match(pType, aType, ctx))
+							return null;
+					}
+				}
+
+				// 3. Build generic arguments (PARTIAL SUPPORT)
+				var genericParams = method.GetGenericArguments();
+				var finalTypes = new Type[genericParams.Length];
+
+				for(int i = 0; i < genericParams.Length; i++) {
+					var resolved = ctx.Get(genericParams[i].Name);
+
+					if(resolved == null) {
+						// Partial inference allowed → fallback
+						resolved = typeof(object);
+					}
+
+					finalTypes[i] = resolved;
+				}
+
+				// 4. Validate constraints
+				if(!ConstraintValidator.Validate(method, ctx))
+					return null;
+
+				// 5. Create method
+				try {
+					return method.MakeGenericMethod(finalTypes);
+				}
+				catch {
+					return null;
+				}
+			}
+
+			static class ConstraintValidator {
+				public static bool Validate(MethodInfo method, GenericContext ctx) {
+					var genericParams = method.GetGenericArguments();
+
+					foreach(var gp in genericParams) {
+						var actual = ctx.Get(gp.Name);
+						if(actual == null)
+							continue; // allow partial
+
+						actual = TypeUtils.UnwrapNullable(actual);
+
+						var attrs = gp.GenericParameterAttributes;
+
+						if(attrs.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint) && actual.IsValueType)
+							return false;
+
+						if(attrs.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint) && !actual.IsValueType)
+							return false;
+
+						foreach(var constraint in gp.GetGenericParameterConstraints()) {
+							Type resolvedConstraint = constraint;
+
+							if(constraint.IsGenericParameter) {
+								resolvedConstraint = ctx.Get(constraint.Name);
+								if(resolvedConstraint == null)
+									continue;
+							}
+
+							if(!resolvedConstraint.IsAssignableFrom(actual))
+								return false;
+						}
+					}
+
+					return true;
+				}
+			}
+
+			class GenericContext {
+				private readonly Dictionary<string, Type> map = new();
+
+				public bool TrySet(string name, Type type) {
+					if(type == null)
+						return true;
+
+					if(map.TryGetValue(name, out var existing)) {
+						var merged = TypeUtils.FindCommonType(existing, type);
+						if(merged == null)
+							return false;
+
+						map[name] = merged;
+						return true;
+					}
+
+					map[name] = type;
+					return true;
+				}
+
+				public Type Get(string name) {
+					map.TryGetValue(name, out var t);
+					return t;
+				}
+
+				public bool Has(string name) => map.ContainsKey(name);
+
+				public Dictionary<string, Type> GetAll() => map;
+			}
+
+			static class TypeMatcher {
+				public static bool Match(Type pattern, Type actual, GenericContext ctx) {
+					if(pattern == null || actual == null)
+						return false;
+
+					pattern = TypeUtils.UnwrapNullable(pattern);
+					actual = TypeUtils.UnwrapNullable(actual);
+
+					// Generic parameter (T)
+					if(pattern.IsGenericParameter) {
+						return ctx.TrySet(pattern.Name, actual);
+					}
+
+					// Array
+					if(pattern.IsArray && actual.IsArray) {
+						return Match(pattern.GetElementType(), actual.GetElementType(), ctx);
+					}
+
+					// Try direct generic match
+					if(pattern.IsGenericType) {
+						foreach(var candidate in TypeUtils.GetAllTypes(actual)) {
+							if(!candidate.IsGenericType)
+								continue;
+
+							if(candidate.GetGenericTypeDefinition() != pattern.GetGenericTypeDefinition())
+								continue;
+
+							var pArgs = pattern.GetGenericArguments();
+							var aArgs = candidate.GetGenericArguments();
+
+							for(int i = 0; i < pArgs.Length; i++) {
+								if(!Match(pArgs[i], aArgs[i], ctx))
+									return false;
+							}
+
+							return true;
+						}
+					}
+
+					// Fallback assignable
+					return pattern.IsAssignableFrom(actual);
+				}
+			}
+
+			static class TypeUtils {
+				public static Type FindCommonType(Type a, Type b) {
+					if(a == b) return a;
+
+					if(a.IsAssignableFrom(b)) return a;
+					if(b.IsAssignableFrom(a)) return b;
+
+					// Walk base types
+					var current = a;
+					while(current != null) {
+						if(current.IsAssignableFrom(b))
+							return current;
+
+						current = current.BaseType;
+					}
+
+					return typeof(object); // fallback
+				}
+
+				public static IEnumerable<Type> GetAllTypes(Type type) {
+					if(type == null) yield break;
+
+					yield return type;
+
+					foreach(var i in type.GetInterfaces())
+						yield return i;
+
+					var current = type.BaseType;
+					while(current != null) {
+						yield return current;
+						current = current.BaseType;
+					}
+				}
+
+				public static Type UnwrapNullable(Type t) {
+					return Nullable.GetUnderlyingType(t) ?? t;
+				}
+			}
 		}
 	}
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode {
 	[Serializable]
-	public partial class MemberData : IGraphValue, IValueReference {
+	public partial class MemberData : IGraphValue, IValueReference, ISerializationCallbackReceiver {
 		#region Classes
 		[Serializable]
 		public class ItemData {
@@ -2175,6 +2175,15 @@ namespace MaxyGames.UNode {
 		private Type[][] _parameterTypes;
 		[NonSerialized]
 		private Type[][] _genericTypes;
+
+
+		void ISerializationCallbackReceiver.OnBeforeSerialize() {
+
+		}
+
+		void ISerializationCallbackReceiver.OnAfterDeserialize() {
+			ResetCache();
+		}
 		#endregion
 
 		#region Static Functions
