@@ -186,6 +186,7 @@ namespace MaxyGames.UNode {
 
 				if(rType != null && rType != typeof(void)) {
 					var js = flow.jumpStatement;
+					StaticObjectPool.Free(flow);
 					if(js == null || js.jumpType != JumpStatementType.Return) {
 						throw new Exception("No return value in function:" + name);
 					}
