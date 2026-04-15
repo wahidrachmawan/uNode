@@ -1,4 +1,3 @@
-#pragma warning disable
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -25,10 +24,10 @@ namespace MaxyGames.UNode.GenericResolver {
 			func = (obj, parameters) => {
 				switch(parameters.Length) {
 					case 0: {
-						return Object.FindObjectsOfType(nativeCompType).Where(item => compType.IsInstanceOfType(item)).FirstOrDefault();
+						return Object.FindObjectsByType(nativeCompType).Where(item => compType.IsInstanceOfType(item)).FirstOrDefault();
 					}
 					case 1: {
-						return Object.FindObjectsOfType(nativeCompType, parameters[0].ConvertTo<bool>()).Where(item => compType.IsInstanceOfType(item)).FirstOrDefault();
+						return Object.FindObjectsByType(nativeCompType, parameters[0].ConvertTo<FindObjectsInactive>()).Where(item => compType.IsInstanceOfType(item)).FirstOrDefault();
 					}
 				}
 				throw new InvalidOperationException();

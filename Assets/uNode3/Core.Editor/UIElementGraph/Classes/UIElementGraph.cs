@@ -574,9 +574,7 @@ namespace MaxyGames.UNode.Editors {
 								}
 							}
 
-#pragma warning disable
-							var objs = GameObject.FindObjectsOfType<MonoBehaviour>();
-#pragma warning restore
+							var objs = GameObject.FindObjectsByType<MonoBehaviour>();
 							int counts = 0;
 							foreach(var obj in objs) {
 								if(counts > 250)
@@ -663,7 +661,11 @@ namespace MaxyGames.UNode.Editors {
 			var selectBtn = new ToolbarButton(() => {
 				if(tabData.owner != null) {
 					EditorGUIUtility.PingObject(tabData.owner);
+//#if UNITY_6000_4_OR_NEWER
+					//Selection.entityIds = new [] { editorData.owner.GetEntityId() };
+//#else
 					//Selection.instanceIDs = new int[] { editorData.owner.GetInstanceID() };
+//#endif
 				}
 			}) {
 				text = "Select",
@@ -963,7 +965,6 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#pragma warning disable CS0618
 		private void InitTabbar(VisualElement container) {
 			#region Main/Selection Tab
 			if(window.mainTab != null && window.mainTab == window.selectedTab && !window.mainTab.selectedGraphData.IsValidGraph) {
@@ -990,7 +991,11 @@ namespace MaxyGames.UNode.Editors {
 				}, DropdownMenuAction.AlwaysEnabled);
 				evt.menu.AppendAction("Select Object", (act) => {
 					EditorGUIUtility.PingObject(window.mainTab.owner);
+#if UNITY_6000_4_OR_NEWER
+					Selection.entityIds = new [] { window.mainTab.owner.GetEntityId() };
+#else
 					Selection.instanceIDs = new int[] { window.mainTab.owner.GetInstanceID() };
+#endif
 					ReloadTabbar();
 				}, DropdownMenuAction.AlwaysEnabled);
 			}));
@@ -1010,7 +1015,11 @@ namespace MaxyGames.UNode.Editors {
 					}
 					else if(tabData.owner == null) {
 						if(!object.ReferenceEquals(tabData.owner, null) &&
+#if UNITY_6000_4_OR_NEWER
+							EditorUtility.EntityIdToObject(tabData.owner.GetEntityId()) is UnityEngine.Object unityObject &&
+#else
 							EditorUtility.InstanceIDToObject(tabData.owner.GetInstanceID()) is UnityEngine.Object unityObject &&
+#endif
 							unityObject is IGraph graph) {
 
 							var newTabData = new uNodeEditor.TabData(unityObject);
@@ -1150,7 +1159,11 @@ namespace MaxyGames.UNode.Editors {
 					}, DropdownMenuAction.AlwaysEnabled);
 					evt.menu.AppendAction("Select Object", (act) => {
 						EditorGUIUtility.PingObject(tabData.owner);
+#if UNITY_6000_4_OR_NEWER
+						Selection.entityIds = new [] { tabData.owner.GetEntityId() };
+#else
 						Selection.instanceIDs = new int[] { tabData.owner.GetInstanceID() };
+#endif
 						ReloadTabbar();
 					}, DropdownMenuAction.AlwaysEnabled);
 				}));

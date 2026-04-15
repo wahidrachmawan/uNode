@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -715,7 +714,11 @@ namespace MaxyGames.UNode {
 					UnityEngine.Object ureference = null;
 					if(int.TryParse(ids[0], out var id) && int.TryParse(ids[1], out var graphID)) {
 #if UNITY_EDITOR
+#if UNITY_6000_4_OR_NEWER
+						ureference = UnityEditor.EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)graphID));
+#else
 						ureference = UnityEditor.EditorUtility.InstanceIDToObject(graphID);
+#endif
 #endif
 						if(ureference == null) {
 							var db = uNodeDatabase.instance?.graphDatabases;

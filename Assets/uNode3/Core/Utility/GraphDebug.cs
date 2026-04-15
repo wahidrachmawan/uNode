@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -252,7 +251,11 @@ namespace MaxyGames.UNode {
 			}
 #if UNITY_EDITOR
 			else if(int.TryParse(id, out var result)) {
+#if UNITY_6000_4_OR_NEWER
+				return UnityEditor.EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)result));
+#else
 				return UnityEditor.EditorUtility.InstanceIDToObject(result);
+#endif
 			}
 #endif
 			return null;

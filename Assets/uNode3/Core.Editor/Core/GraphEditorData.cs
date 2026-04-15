@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -615,7 +614,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(debugObject == null && !object.ReferenceEquals(debugObject, null)) {
 					//This is for fix null reference after exiting playmode
+#if UNITY_6000_4_OR_NEWER
+					var obj = UnityEditor.EditorUtility.EntityIdToObject(debugObject.GetEntityId());
+#else
 					var obj = UnityEditor.EditorUtility.InstanceIDToObject(debugObject.GetHashCode());
+#endif
 					if(obj != null) {
 						debugObject = obj;
 					}

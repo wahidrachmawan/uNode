@@ -102,7 +102,11 @@ namespace MaxyGames {
 						int ctorCount = 0;
 						ThreadingUtil.Do(() => {
 							className = graph.GetFullGraphName().Split('.').LastOrDefault();
+#if UNITY_6000_4_OR_NEWER
+							if(string.IsNullOrEmpty(classes.name) && className == "_" + Mathf.Abs(classes.GetHashCode())) {
+#else
 							if(string.IsNullOrEmpty(classes.name) && className == "_" + Mathf.Abs(classes.GetInstanceID())) {
+#endif
 								className = classes.name;
 							}
 							className = uNodeUtility.AutoCorrectName(className);

@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using System.Linq;
@@ -1404,7 +1403,11 @@ namespace MaxyGames.UNode.Editors {
 			ShowReferencesInWindow(references);
 		}
 
+#if UNITY_6000_2_OR_NEWER
+		internal class ReferenceTree : TreeView<int> {
+#else
 		internal class ReferenceTree : TreeView {
+#endif
 			private List<object> m_references;
 			public List<object> references {
 				get => m_references;
@@ -1420,20 +1423,36 @@ namespace MaxyGames.UNode.Editors {
 			}
 			public Dictionary<IGraph, Dictionary<UGraphElement, uNodeUtility.GraphErrorData>> errors;
 
+#if UNITY_6000_2_OR_NEWER
+			class ReferenceTreeView : TreeViewItem<int> {
+#else
 			class ReferenceTreeView : TreeViewItem {
+#endif
 				public UGraphElement reference;
 				public List<(string, Texture)> paths;
 
+#if UNITY_6000_4_OR_NEWER
+				public ReferenceTreeView(UGraphElement reference) : base(uNodeEditorUtility.GetUIDFromString("R:" + (reference.graphContainer as Object).GetHashCode() + "-" + reference.id), -1, reference.name) {
+#else
 				public ReferenceTreeView(UGraphElement reference) : base(uNodeEditorUtility.GetUIDFromString("R:" + (reference.graphContainer as Object).GetInstanceID() + "-" + reference.id), -1, reference.name) {
+#endif
 					this.reference = reference;
 					paths = ErrorCheckWindow.GetElementPathWithIcon(reference, richText: true);
 				}
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			class UReferenceTreeView : TreeViewItem<int> {
+#else
 			class UReferenceTreeView : TreeViewItem {
+#endif
 				public Object reference;
 
+#if UNITY_6000_4_OR_NEWER
+				public UReferenceTreeView(Object reference) : base(reference.GetHashCode(), -1, uNodeUtility.GetObjectName(reference)) {
+#else
 				public UReferenceTreeView(Object reference) : base(reference.GetInstanceID(), -1, uNodeUtility.GetObjectName(reference)) {
+#endif
 					this.reference = reference;
 				}
 			}
@@ -1443,7 +1462,11 @@ namespace MaxyGames.UNode.Editors {
 				public List<TypeHierarchy> nestedTypes = new List<TypeHierarchy>();
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			class ErrorTreeView : TreeViewItem<int> {
+#else
 			class ErrorTreeView : TreeViewItem {
+#endif
 				public ErrorMessage error;
 
 				public ErrorTreeView(ErrorMessage error) : base(error.GetHashCode(), -1, error.message) {
@@ -1451,21 +1474,34 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			public ReferenceTree(List<object> references) : base(new TreeViewState<int>()) {
+#else
 			public ReferenceTree(List<object> references) : base(new TreeViewState()) {
+#endif
 				showBorder = true;
 				showAlternatingRowBackgrounds = true;
 				this.references = new List<object>(references);
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			public ReferenceTree(Dictionary<IGraph, Dictionary<UGraphElement, uNodeUtility.GraphErrorData>> errors) : base(new TreeViewState<int>()) {
+#else
 			public ReferenceTree(Dictionary<IGraph, Dictionary<UGraphElement, uNodeUtility.GraphErrorData>> errors) : base(new TreeViewState()) {
+#endif
 				this.errors = errors;
 				showBorder = true;
 				showAlternatingRowBackgrounds = true;
 				Reload();
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected override TreeViewItem<int> BuildRoot() {
+				var root = new TreeViewItem<int> { id = 0, depth = -1 };
+#else
 			protected override TreeViewItem BuildRoot() {
 				var root = new TreeViewItem { id = 0, depth = -1 };
+#endif
 				if(references != null) {
 					var map = new Dictionary<Object, HashSet<object>>();
 					foreach(var r in references) {
@@ -1508,7 +1544,11 @@ namespace MaxyGames.UNode.Editors {
 								});
 							}
 							else if(r is TypeHierarchy hierarchy) {
+#if UNITY_6000_2_OR_NEWER
+								void Recursive(TypeHierarchy hierarchy, TreeViewItem<int> tree) {
+#else
 								void Recursive(TypeHierarchy hierarchy, TreeViewItem tree) {
+#endif
 									var value = hierarchy.type;
 									var parent = new TypeTreeView(value) {
 										displayName = value.FullName,
@@ -1553,7 +1593,13 @@ namespace MaxyGames.UNode.Editors {
 						if(pair.Key == null)
 							continue;
 						if(pair.Key is Object obj && pair.Value.Count > 0) {
+#if UNITY_6000_4_OR_NEWER
+							var tree = new TreeViewItem<int>(obj.GetHashCode(), -1, pair.Key.GetGraphName()) {
+#elif UNITY_6000_2_OR_NEWER
+							var tree = new TreeViewItem<int>(obj.GetInstanceID(), -1, pair.Key.GetGraphName()) {
+#else
 							var tree = new TreeViewItem(obj.GetInstanceID(), -1, pair.Key.GetGraphName()) {
+#endif
 								icon = uNodeEditorUtility.GetTypeIcon(pair.Key) as Texture2D
 							};
 							foreach(var (element, errorData) in pair.Value) {
@@ -1573,7 +1619,11 @@ namespace MaxyGames.UNode.Editors {
 					root.children.Sort((x, y) => string.Compare(x.displayName, y.displayName));
 				}
 				else {
+#if UNITY_6000_2_OR_NEWER
+					root.children = new List<TreeViewItem<int>>();
+#else
 					root.children = new List<TreeViewItem>();
+#endif
 				}
 				SetupDepthsFromParentsAndChildren(root);
 				return root;

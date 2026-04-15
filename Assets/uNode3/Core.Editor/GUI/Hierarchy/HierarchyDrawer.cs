@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -26,7 +25,11 @@ namespace MaxyGames.UNode.Editors {
 			return tree;
 		}
 
+#if UNITY_6000_2_OR_NEWER
+		public virtual void AddChildNodes(NodeObject nodeComponent, TreeViewItem<int> parentTree, IList<TreeViewItem<int>> rows) {
+#else
 		public virtual void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentTree, IList<TreeViewItem> rows) {
+#endif
 			foreach(var port in nodeComponent.FlowOutputs) {
 				if(port.isNextFlow) {
 					manager.AddNodeTree(port, parentTree, rows, false);
@@ -106,7 +109,11 @@ namespace MaxyGames.UNode.Editors {
 			return type == typeof(Nodes.StateNode);
 		}
 
+#if UNITY_6000_2_OR_NEWER
+		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem<int> parentItem, IList<TreeViewItem<int>> rows) {
+#else
 		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentItem, IList<TreeViewItem> rows) {
+#endif
 			var node = nodeComponent.node as Nodes.StateNode;
 			var flows = node.NestedFlowNodes;
 			if(flows.Any()) {
@@ -150,7 +157,11 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
+#if UNITY_6000_2_OR_NEWER
+		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem<int> parentItem, IList<TreeViewItem<int>> rows) {
+#else
 		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentItem, IList<TreeViewItem> rows) {
+#endif
 			var macroPort = nodeComponent.node as Nodes.MacroPortNode;
 			manager.AddNodeTree(macroPort.exit, macroPort.kind == PortKind.FlowInput ? parentItem : parentItem.parent, rows, macroPort.kind == PortKind.FlowInput);
 		}

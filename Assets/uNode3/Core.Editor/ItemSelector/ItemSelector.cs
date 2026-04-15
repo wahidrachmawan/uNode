@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -411,7 +410,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if (allowSceneObject) {
-					var objs = GameObject.FindObjectsOfType<MonoBehaviour>();
+					var objs = GameObject.FindObjectsByType<MonoBehaviour>();
 					foreach (var c in objs) {
 						if (c.GetType().IsCastableTo(type) && (validation == null || validation(c))) {
 							items.Add(ItemSelector.CustomItem.Create($"{c.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: uNodeEditorUtility.GetTypeIcon(c)));
@@ -438,7 +437,7 @@ namespace MaxyGames.UNode.Editors {
 					items.Add(ItemSelector.CustomItem.Create($"{(c as Component).gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Project", icon: icon));
 				}
 				if (allowSceneObject) {
-					var objs = GameObject.FindObjectsOfType<MonoBehaviour>();
+					var objs = GameObject.FindObjectsByType<MonoBehaviour>();
 					foreach (var c in objs) {
 						if(c.IsTypeOf(type) == false) continue;
 						items.Add(ItemSelector.CustomItem.Create($"{c.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: icon));
@@ -471,7 +470,7 @@ namespace MaxyGames.UNode.Editors {
 					//}
 				}
 				if (allowSceneObject) {
-					var objs = GameObject.FindObjectsOfType<MonoBehaviour>();
+					var objs = GameObject.FindObjectsByType<MonoBehaviour>();
 					foreach (var c in objs) {
 						if(c.IsTypeOf(type) == false) continue;
 						items.Add(ItemSelector.CustomItem.Create($"{c.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: icon));
@@ -640,8 +639,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+#if UNITY_6000_2_OR_NEWER
+		public static List<TreeViewItem<int>> MakeFavoriteTrees(Func<List<CustomItem>> favoriteHandler, FilterAttribute filter) {
+			var result = new List<TreeViewItem<int>>();
+#else
 		public static List<TreeViewItem> MakeFavoriteTrees(Func<List<CustomItem>> favoriteHandler, FilterAttribute filter) {
 			var result = new List<TreeViewItem>();
+#endif
 			if(favoriteHandler != null) {
 				var customItems = favoriteHandler();
 				if(customItems != null) {

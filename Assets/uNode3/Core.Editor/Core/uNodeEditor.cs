@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 using UnityEditor.IMGUI.Controls;
 
 namespace MaxyGames.UNode.Editors {
@@ -17,27 +15,50 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Classes
-		public class GraphExplorerTree : UnityEditor.IMGUI.Controls.TreeView {
+#if UNITY_6000_2_OR_NEWER
+		public class GraphExplorerTree : TreeView<int> {
+#else
+		public class GraphExplorerTree : TreeView {
+#endif
 			public HierarchyGraphTree selected;
 
+#if UNITY_6000_2_OR_NEWER
+			Dictionary<int, TreeViewItem<int>> treeMap;
+			public GraphExplorerTree() : base(new TreeViewState<int>()) {
+#else
 			Dictionary<int, TreeViewItem> treeMap;
 
 			public GraphExplorerTree() : base(new TreeViewState()) {
+#endif
 				showAlternatingRowBackgrounds = true;
 				showBorder = true;
 				Reload();
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected override TreeViewItem<int> BuildRoot() {
+				return new TreeViewItem<int> { id = 0, depth = -1 };
+#else
 			protected override TreeViewItem BuildRoot() {
 				return new TreeViewItem { id = 0, depth = -1 };
+#endif
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected override bool CanChangeExpandedState(TreeViewItem<int> item) {
+#else
 			protected override bool CanChangeExpandedState(TreeViewItem item) {
+#endif
 				return false;
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected override IList<TreeViewItem<int>> BuildRows(TreeViewItem<int> root) {
+				var rows = GetRows() ?? new List<TreeViewItem<int>>();
+#else
 			protected override IList<TreeViewItem> BuildRows(TreeViewItem root) {
 				var rows = GetRows() ?? new List<TreeViewItem>();
+#endif
 				rows.Clear();
 				var assets = GraphUtility.FindAllGraphAssets();
 				var graphDic = new Dictionary<string, List<(string, UnityEngine.Object)>>();
@@ -65,11 +86,19 @@ namespace MaxyGames.UNode.Editors {
 				}
 				var dic = graphDic.ToList();
 				dic.Sort((x, y) => string.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
+#if UNITY_6000_2_OR_NEWER
+				treeMap = new Dictionary<int, TreeViewItem<int>>();
+#else
 				treeMap = new Dictionary<int, TreeViewItem>();
+#endif
 				foreach(var pair in dic) {
 					var graphs = pair.Value;
 					graphs.Sort((x, y) => string.Compare(x.Item1, y.Item1, StringComparison.OrdinalIgnoreCase));
+#if UNITY_6000_2_OR_NEWER
+					TreeViewItem<int> nsTree = root;
+#else
 					TreeViewItem nsTree = root;
+#endif
 					if(!hasSearch) {
 						nsTree = new HiearchyNamespaceTree(string.IsNullOrEmpty(pair.Key) ? "global" : pair.Key, -1);
 						root.AddChild(nsTree);
@@ -79,7 +108,11 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var (displayName, asset) in graphs) {
 						if(hasSearch) {
 							if(displayName.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0) {
+#if UNITY_6000_2_OR_NEWER
+								TreeViewItem<int> tree;
+#else
 								TreeViewItem tree;
+#endif
 								if(asset is GraphAsset graph) {
 									tree = new HierarchyGraphTree(graph, -1);
 									if(!string.IsNullOrEmpty(graph.GraphData.comment)) {
@@ -147,7 +180,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected override bool CanMultiSelect(TreeViewItem<int> item) {
+#else
 			protected override bool CanMultiSelect(TreeViewItem item) {
+#endif
 				return false;
 			}
 
@@ -743,7 +780,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private void OnBreakPointHit(object owner, int graphID, int nodeID) {
+#if UNITY_6000_4_OR_NEWER
+			var obj = EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)graphID));
+#else
 			var obj = EditorUtility.InstanceIDToObject(graphID);
+#endif
 			if(obj == null) {
 				foreach(var g in GraphUtility.FindAllGraphAssets()) {
 					if(g is IGraph && uNodeUtility.GetObjectID(g) == graphID) {
@@ -1135,7 +1176,11 @@ namespace MaxyGames.UNode.Editors {
 			if(SavedData.rightVisibility == false) {
 				inspectorWrapper = ScriptableObject.CreateInstance<CustomInspector>();
 				inspectorWrapper.editorData = new GraphEditorData(graphData);
+#if UNITY_6000_4_OR_NEWER
+				Selection.entityIds = new EntityId[] { inspectorWrapper.GetEntityId() };
+#else
 				Selection.instanceIDs = new int[] { inspectorWrapper.GetInstanceID() };
+#endif
 			}
 			else if(inspectorWrapper != null && Selection.activeObject == inspectorWrapper) {
 				inspectorWrapper.editorData = null;
@@ -1415,7 +1460,11 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 						else if(info.ownerID != 0) {
+#if UNITY_6000_4_OR_NEWER
+							var obj = EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)info.ownerID));
+#else
 							var obj = EditorUtility.InstanceIDToObject(info.ownerID);
+#endif
 							if(obj is IGraph g) {
 								element = g.GetGraphElement(id);
 								if(element == null && int.TryParse(info.ghostID, out var gID)) {
@@ -1520,7 +1569,11 @@ namespace MaxyGames.UNode.Editors {
 							}
 						}
 						else if(info.ownerID != 0) {
+#if UNITY_6000_4_OR_NEWER
+							var obj = EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)info.ownerID));
+#else
 							var obj = EditorUtility.InstanceIDToObject(info.ownerID);
+#endif
 							if(obj is IGraph g) {
 								element = g.GetGraphElement(id);
 								if(element == null && int.TryParse(info.ghostID, out var gID)) {
