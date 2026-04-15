@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System;
 using System.Collections;
@@ -18,7 +17,11 @@ namespace MaxyGames.UNode.Editors {
 	/// </summary>
 	[InitializeOnLoad]
 	public class uNodeEditorInitializer {
+#if UNITY_6000_4_OR_NEWER
+		static List<EntityId> markedObjects = new List<EntityId>();
+#else
 		static List<int> markedObjects = new List<int>();
+#endif
 		static HashSet<string> assetGUIDs = new HashSet<string>();
 		static Dictionary<string, Object> markedAssets = new Dictionary<string, UnityEngine.Object>();
 		static Texture uNodeIcon;
@@ -26,7 +29,7 @@ namespace MaxyGames.UNode.Editors {
 		static Texture2D backgroundTexture {
 			get {
 				if(m_backgroundTexture == null) {
-					 m_backgroundTexture = EditorGUIUtility.isProSkin
+					m_backgroundTexture = EditorGUIUtility.isProSkin
 						? uNodeEditorUtility.MakeTexture(1, 1, new Color(0.2f, 0.2f, 0.2f, 1f))   // Dark theme
 						: uNodeEditorUtility.MakeTexture(1, 1, new Color(0.7450981f, 0.7450981f, 0.7450981f, 1f));  // Light theme
 				}
@@ -35,8 +38,13 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		static uNodeEditorInitializer() {
+#if UNITY_6000_4_OR_NEWER
+			EditorApplication.hierarchyWindowItemByEntityIdOnGUI += HierarchyItem;
+			EditorApplication.projectWindowItemByEntityIdOnGUI += ProjectItem;
+#else
 			EditorApplication.hierarchyWindowItemOnGUI += HierarchyItem;
 			EditorApplication.projectWindowItemInstanceOnGUI += ProjectItem;
+#endif
 			SceneView.duringSceneGui += OnSceneGUI;
 			EditorApplication.update += Update;
 			EditorApplication.update += ShowWelcomeScreen;
@@ -1085,13 +1093,32 @@ namespace MaxyGames.UNode.Editors {
 
 		static void FindObjectToMark(Transform transform) {
 			if(transform.GetComponent<IRuntimeClass>() != null) {
+#if UNITY_6000_4_OR_NEWER
+				markedObjects.Add(transform.gameObject.GetEntityId());
+#else
 				markedObjects.Add(transform.gameObject.GetInstanceID());
+#endif
 			}
 			foreach(Transform t in transform) {
 				FindObjectToMark(t);
 			}
 		}
 
+#if UNITY_6000_4_OR_NEWER
+		static void HierarchyItem(EntityId entityId, Rect selectionRect) {
+			//Show uNode Icon
+			if(uNodeIcon != null) {
+				Rect r = new Rect(selectionRect);
+				r.x += r.width - 4;
+				//r.x -= 5;
+				r.width = 18;
+
+				if(markedObjects.Contains(entityId)) {
+					GUI.Label(r, uNodeIcon);
+				}
+			}
+		}
+#else
 		static void HierarchyItem(int instanceID, Rect selectionRect) {
 			//Show uNode Icon
 			if(uNodeIcon != null) {
@@ -1105,6 +1132,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 		}
+#endif
 
 		private static void HandleDragAndDropEvents() {
 			//if(Event.current.type == EventType.DragUpdated) {
@@ -1125,11 +1153,19 @@ namespace MaxyGames.UNode.Editors {
 			HandleDragAndDropEvents();
 		}
 
+#if UNITY_6000_4_OR_NEWER
+		private static void ProjectItem(EntityId entityId, Rect rect) {
+			HandleDragAndDropEvents();
+			if(uNodeIcon == null)
+				return;
+			var obj = EditorUtility.EntityIdToObject(entityId);
+#else
 		private static void ProjectItem(int instanceID, Rect rect) {
 			HandleDragAndDropEvents();
 			if(uNodeIcon == null)
 				return;
 			var obj = EditorUtility.InstanceIDToObject(instanceID);
+#endif
 			if(obj is not ICustomIcon && obj is not IScriptGraph && obj is not IIcon) {
 				obj = null;
 			}
@@ -1436,7 +1472,11 @@ namespace MaxyGames.UNode.Editors {
 	static class uNodeAssetHandler {
 		[OnOpenAsset(int.MinValue)]
 		public static bool OpenEditor(int instanceID, int line) {
+#if UNITY_6000_4_OR_NEWER
+			Object obj = EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)instanceID));
+#else
 			Object obj = EditorUtility.InstanceIDToObject(instanceID);
+#endif
 			//if(obj is GameObject) {
 			//	GameObject go = obj as GameObject;
 			//	var graph = go.GetComponent<IGraph>();

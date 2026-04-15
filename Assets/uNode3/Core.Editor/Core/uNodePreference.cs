@@ -1,5 +1,4 @@
-﻿#pragma warning disable
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -370,7 +369,9 @@ Note: Auto Generate on Buld will always using Unity method.")]
 
 		private static int selectedMenu = 0;
 
+#pragma warning disable CS0618 // Type or member is obsolete
 		[PreferenceItem("uNode")]
+#pragma warning restore CS0618 // Type or member is obsolete
 		public static void PreferencesGUI() {
 			Initialize();
 			selectedMenu = GUILayout.Toolbar(selectedMenu, new string[] { "Graph", "Editor", "Type", "Code Generation" });

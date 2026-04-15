@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +17,11 @@ namespace MaxyGames.UNode.Editors {
 	public partial class ItemSelector {
 		#region Search
 		abstract class TreeSearcher {
+#if UNITY_6000_2_OR_NEWER
+			public virtual float IsMatchSearch(TreeViewItem<int> tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+#else
 			public virtual float IsMatchSearch(TreeViewItem tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+#endif
 				if(tree is MemberTreeView memberTree && !(memberTree.member is Type)) {
 					return IsMatchSearch(memberTree.member, memberTree.displayName, splittedStrings, searchKind, searchFilter);
 				}
@@ -474,7 +477,11 @@ namespace MaxyGames.UNode.Editors {
 				return positions;
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			public bool Hightlight(TreeViewItem<int> tree, string searchString, SearchKind searchKind, ref TreeHightlight hightlight) {
+#else
 			public bool Hightlight(TreeViewItem tree, string searchString, SearchKind searchKind, ref TreeHightlight hightlight) {
+#endif
 				var splittedStrings = searchString.Split(new[] { '.', ' ' });
 				if(splittedStrings.Length > 0 && splittedStrings[0].EndsWith("[]", StringComparison.Ordinal)) {
 					searchString = searchString.Remove(splittedStrings[0].Length - 2, 2);
@@ -483,7 +490,11 @@ namespace MaxyGames.UNode.Editors {
 				return Hightlight(tree, param, ref hightlight);
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected virtual bool Hightlight(TreeViewItem<int> tree, SearchParam searchParam, ref TreeHightlight hightlight) {
+#else
 			protected virtual bool Hightlight(TreeViewItem tree, SearchParam searchParam, ref TreeHightlight hightlight) {
+#endif
 				var str = tree.displayName;
 				if(tree is MemberTreeView memberTree) {
 					var member = memberTree.member;
@@ -640,7 +651,11 @@ namespace MaxyGames.UNode.Editors {
 				return IsMatchSearchCapital(str) ? 1 : 0;
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			protected override bool Hightlight(TreeViewItem<int> tree, SearchParam searchParam, ref TreeHightlight hightlight) {
+#else
 			protected override bool Hightlight(TreeViewItem tree, SearchParam searchParam, ref TreeHightlight hightlight) {
+#endif
 				var str = tree.displayName;
 				HightlightCapital(str, ref hightlight);
 				return hightlight.hightlight.Count > 0;
@@ -697,7 +712,11 @@ namespace MaxyGames.UNode.Editors {
 				return true;
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			public override float IsMatchSearch(TreeViewItem<int> tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+#else
 			public override float IsMatchSearch(TreeViewItem tree, string[] splittedStrings, SearchKind searchKind, SearchFilter searchFilter) {
+#endif
 				if(tree is MemberTreeView memberTree && !(memberTree.member is Type)) {
 					return IsMatchSearch(memberTree.member, memberTree.displayName, splittedStrings, searchKind, searchFilter);
 				}
@@ -803,13 +822,21 @@ namespace MaxyGames.UNode.Editors {
 
 		#region Filter
 		class TreeFilter {
+#if UNITY_6000_2_OR_NEWER
+			public virtual List<TreeViewItem<int>> DoFilter(List<TreeViewItem<int>> treeViews) {
+#else
 			public virtual List<TreeViewItem> DoFilter(List<TreeViewItem> treeViews) {
+#endif
 				return treeViews;
 			}
 		}
 
 		class TreeArrayFilter : TreeFilter {
+#if UNITY_6000_2_OR_NEWER
+			public override List<TreeViewItem<int>> DoFilter(List<TreeViewItem<int>> treeViews) {
+#else
 			public override List<TreeViewItem> DoFilter(List<TreeViewItem> treeViews) {
+#endif
 				for(int i = 0; i < treeViews.Count; i++) {
 					if((treeViews[i] = DoFilter(treeViews[i])) == null) {
 						treeViews.RemoveAt(i);
@@ -819,7 +846,11 @@ namespace MaxyGames.UNode.Editors {
 				return treeViews;
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			private TreeViewItem<int> DoFilter(TreeViewItem<int> tree) {
+#else
 			private TreeViewItem DoFilter(TreeViewItem tree) {
+#endif
 				if(tree is MemberTreeView) {
 					var item = tree as TypeTreeView;
 					if(item != null) {
@@ -892,11 +923,19 @@ namespace MaxyGames.UNode.Editors {
 			public List<SearchProgress> progresses;
 			public Manager manager;
 
+#if UNITY_6000_2_OR_NEWER
+			public bool Hightlight(TreeViewItem<int> tree, string searchString, SearchKind searchKind, SearchFilter searchFilter, ref TreeHightlight hightlight) {
+#else
 			public bool Hightlight(TreeViewItem tree, string searchString, SearchKind searchKind, SearchFilter searchFilter, ref TreeHightlight hightlight) {
+#endif
 				return GetSearcher(searchString, searchKind, searchFilter).Hightlight(tree, searchString, searchKind, ref hightlight);
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			public void SearchInBackground(List<TreeViewItem<int>> treeViews, string searchString, SearchKind searchKind, SearchFilter searchFilter, Action<List<TreeViewItem<int>>> onFinished) {
+#else
 			public void SearchInBackground(List<TreeViewItem> treeViews, string searchString, SearchKind searchKind, SearchFilter searchFilter, Action<List<TreeViewItem>> onFinished) {
+#endif
 				Terminate();
 				if(searchThread == null && !string.IsNullOrEmpty(searchString)) {
 					searchThread = new Thread(new ParameterizedThreadStart(DoSearchMember));
@@ -907,8 +946,13 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			public List<TreeViewItem<int>> Search(List<TreeViewItem<int>> treeViews, string searchString, SearchKind searchKind, SearchFilter searchFilter) {
+				var result = new List<TreeViewItem<int>>();
+#else
 			public List<TreeViewItem> Search(List<TreeViewItem> treeViews, string searchString, SearchKind searchKind, SearchFilter searchFilter) {
 				var result = new List<TreeViewItem>();
+#endif
 				try {
 					GetTreeFilter(ref searchString).DoFilter(treeViews);
 					var searcher = GetSearcher(searchString, searchKind, searchFilter);
@@ -954,13 +998,25 @@ namespace MaxyGames.UNode.Editors {
 						this.progresses = progresses;
 					}
 					var objs = obj as object[];
+#if UNITY_6000_2_OR_NEWER
+					var treeViews = objs[0] as List<TreeViewItem<int>>;
+#else
 					var treeViews = objs[0] as List<TreeViewItem>;
+#endif
 					var searchString = objs[1] as string;
 					var searchKind = (SearchKind)objs[2];
 					var searchFilter = (SearchFilter)objs[3];
+#if UNITY_6000_2_OR_NEWER
+					var onFinished = objs[4] as Action<List<TreeViewItem<int>>>;
+#else
 					var onFinished = objs[4] as Action<List<TreeViewItem>>;
+#endif
 					var progress = new SearchProgress();
+#if UNITY_6000_2_OR_NEWER
+					var result = new List<TreeViewItem<int>>();
+#else
 					var result = new List<TreeViewItem>();
+#endif
 					progresses.Add(progress);
 					GetTreeFilter(ref searchString).DoFilter(treeViews);
 					var searcher = GetSearcher(searchString, searchKind, searchFilter);
@@ -981,7 +1037,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			bool IsValidSearch(TreeViewItem<int> tree, SearchParam searchParam, List<SearchProgress> progresses, TreeSearcher searcher, int depth = 1) {
+#else
 			bool IsValidSearch(TreeViewItem tree, SearchParam searchParam, List<SearchProgress> progresses, TreeSearcher searcher, int depth = 1) {
+#endif
 				if(tree is TypeTreeView && deepSearch) {
 					var item = tree as TypeTreeView;
 					if(!item.type.IsEnum && searchParam.searchString.Length >= MinWordForDeepTypeSearch) {
@@ -1079,7 +1139,11 @@ namespace MaxyGames.UNode.Editors {
 				return sc >= 0;
 			}
 
+#if UNITY_6000_2_OR_NEWER
+			void AssignFilter(TreeViewItem<int> tree, FilterAttribute filter) {
+#else
 			void AssignFilter(TreeViewItem tree, FilterAttribute filter) {
+#endif
 				if(tree is TypeTreeView typeTree) {
 					typeTree.filter = filter;
 				}

@@ -1,5 +1,4 @@
-﻿#pragma warning disable CS0618
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System;
 using System.Linq;
@@ -332,7 +331,11 @@ namespace MaxyGames.UNode.Editors {
 #if UNODE_PRO
 			if(clickedInfo != null) {
 				if(int.TryParse(clickedInfo.id, out var id)) {
+#if UNITY_6000_4_OR_NEWER
+					var obj = EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)clickedInfo.ownerID));
+#else
 					var obj = EditorUtility.InstanceIDToObject(clickedInfo.ownerID);
+#endif
 					if(obj is IGraph graph) {
 						var element = graph.GetGraphElement(id);
 						if(element == null && int.TryParse(clickedInfo.ghostID, out var gID)) {

@@ -1,5 +1,4 @@
-﻿#pragma warning disable
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
+using UnityEditor.Build;
 
 namespace MaxyGames.UNode.Editors {
 	/// <summary>
@@ -1078,20 +1078,20 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void AddDefineSymbols(IEnumerable<string> symbols) {
-			string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+			string definesString = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
 			List<string> allDefines = definesString.Split(';').ToList();
 			allDefines.AddRange(symbols.Except(allDefines));
-			PlayerSettings.SetScriptingDefineSymbolsForGroup(
-				EditorUserBuildSettings.selectedBuildTargetGroup,
+			PlayerSettings.SetScriptingDefineSymbols(
+				NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup),
 				string.Join(";", allDefines.ToArray()));
 		}
 
 		public static void RemoveDefineSymbols(IEnumerable<string> symbols) {
-			string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+			string definesString = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
 			List<string> allDefines = definesString.Split(';').ToList();
 			allDefines.RemoveAll(d => symbols.Contains(d));
-			PlayerSettings.SetScriptingDefineSymbolsForGroup(
-				EditorUserBuildSettings.selectedBuildTargetGroup,
+			PlayerSettings.SetScriptingDefineSymbols(
+				NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup),
 				string.Join(";", allDefines.ToArray()));
 		}
 #endregion
