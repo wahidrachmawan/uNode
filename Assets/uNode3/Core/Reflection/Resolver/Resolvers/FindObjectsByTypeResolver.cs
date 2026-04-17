@@ -1,4 +1,4 @@
-#pragma warning disable
+#if UNITY_6000_4_OR_NEWER
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -6,16 +6,15 @@ using System.Globalization;
 using System.Reflection;
 using MaxyGames.UNode;
 using MaxyGames.UNode.GenericResolver;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
-//Object.FindObjectOfType<T>()
-//Object.FindObjectOfType<T>(bool)
-[assembly: RegisterGenericMethodResolver(typeof(FindObjectOfTypeResolver), typeof(Object), nameof(Object.FindObjectOfType))]
-[assembly: RegisterGenericMethodResolver(typeof(FindObjectOfTypeResolver), typeof(Object), nameof(Object.FindObjectOfType), new[] { typeof(bool) })]
+//Object.FindObjectsByType<T>()
+//Object.FindObjectsByType<T>(UnityEngine.FindObjectsInactive)
+[assembly: RegisterGenericMethodResolver(typeof(FindObjectsOfTypeResolver), typeof(Object), nameof(Object.FindObjectsByType))]
+[assembly: RegisterGenericMethodResolver(typeof(FindObjectsOfTypeResolver), typeof(Object), nameof(Object.FindObjectsByType), new[] { typeof(UnityEngine.FindObjectsInactive) })]
 
 namespace MaxyGames.UNode.GenericResolver {
-	public class FindObjectOfTypeResolver : GenericMethodResolver {
+	public class FindObjectsByTypeResolver : GenericMethodResolver {
 		private Func<object, object[], object> func;
 
 		protected override void OnRuntimeInitialize() {
@@ -25,10 +24,20 @@ namespace MaxyGames.UNode.GenericResolver {
 			func = (obj, parameters) => {
 				switch(parameters.Length) {
 					case 0: {
-						return Object.FindObjectsOfType(nativeCompType).Where(item => compType.IsInstanceOfType(item)).FirstOrDefault();
+						var array = Object.FindObjectsByType(nativeCompType).Where(item => compType.IsInstanceOfType(item)).ToArray();
+						var result = Array.CreateInstance(nativeCompType, array.Length);
+						for(int i = 0; i < array.Length; i++) {
+							result.SetValue(array[i], i);
+						}
+						return result;
 					}
 					case 1: {
-						return Object.FindObjectsOfType(nativeCompType, parameters[0].ConvertTo<bool>()).Where(item => compType.IsInstanceOfType(item)).FirstOrDefault();
+						var array = Object.FindObjectsByType(nativeCompType, parameters[0].ConvertTo<UnityEngine.FindObjectsInactive>()).Where(item => compType.IsInstanceOfType(item)).ToArray();
+						var result = Array.CreateInstance(nativeCompType, array.Length);
+						for(int i = 0; i < array.Length; i++) {
+							result.SetValue(array[i], i);
+						}
+						return result;
 					}
 				}
 				throw new InvalidOperationException();
@@ -51,11 +60,12 @@ namespace MaxyGames.UNode.GenericResolver {
 			string item = CG.GenerateNewName("item");
 			//Do generate code and add it to member list
 			members.Add(
-				CG.Invoke(string.Empty, nameof(Object.FindObjectsOfType), new[] { nativeCompType }, parameters)
+				CG.Invoke(string.Empty, nameof(Object.FindObjectsByType), new[] { nativeCompType }, parameters)
 				.CGInvoke(nameof(Enumerable.Where), CG.SimplifiedLambda(new string[] { item }, item.CGInvoke(nameof(Extensions.IsTypeOf), CG.GetUniqueNameForType(compType as RuntimeType))))
 				//.CGInvoke(nameof(Enumerable.Select), CG.SimplifiedLambda(new string[] { item }, CG.As(item, nativeCompType)))
-				.CGInvoke(nameof(Enumerable.FirstOrDefault))
+				.CGInvoke(nameof(Enumerable.ToArray))
 			);
 		}
 	}
 }
+#endif

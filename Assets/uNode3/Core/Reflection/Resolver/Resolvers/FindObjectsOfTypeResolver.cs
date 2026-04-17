@@ -1,3 +1,4 @@
+#pragma warning disable
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -5,7 +6,6 @@ using System.Globalization;
 using System.Reflection;
 using MaxyGames.UNode;
 using MaxyGames.UNode.GenericResolver;
-using UnityEngine;
 using Object = UnityEngine.Object;
 
 //Object.FindObjectsOfType<T>()
@@ -24,7 +24,7 @@ namespace MaxyGames.UNode.GenericResolver {
 			func = (obj, parameters) => {
 				switch(parameters.Length) {
 					case 0: {
-						var array = Object.FindObjectsByType(nativeCompType).Where(item => compType.IsInstanceOfType(item)).ToArray();
+						var array = Object.FindObjectsOfType(nativeCompType).Where(item => compType.IsInstanceOfType(item)).ToArray();
 						var result = Array.CreateInstance(nativeCompType, array.Length);
 						for(int i = 0; i < array.Length; i++) {
 							result.SetValue(array[i], i);
@@ -32,7 +32,7 @@ namespace MaxyGames.UNode.GenericResolver {
 						return result;
 					}
 					case 1: {
-						var array = Object.FindObjectsByType(nativeCompType, parameters[0].ConvertTo<FindObjectsInactive>()).Where(item => compType.IsInstanceOfType(item)).ToArray();
+						var array = Object.FindObjectsOfType(nativeCompType, parameters[0].ConvertTo<bool>()).Where(item => compType.IsInstanceOfType(item)).ToArray();
 						var result = Array.CreateInstance(nativeCompType, array.Length);
 						for(int i = 0; i < array.Length; i++) {
 							result.SetValue(array[i], i);

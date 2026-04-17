@@ -410,8 +410,12 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if (allowSceneObject) {
+#if UNITY_6000_4_OR_NEWER
 					var objs = GameObject.FindObjectsByType<MonoBehaviour>();
-					foreach (var c in objs) {
+#else
+					var objs = GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+#endif
+					foreach(var c in objs) {
 						if (c.GetType().IsCastableTo(type) && (validation == null || validation(c))) {
 							items.Add(ItemSelector.CustomItem.Create($"{c.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: uNodeEditorUtility.GetTypeIcon(c)));
 						}
@@ -437,7 +441,11 @@ namespace MaxyGames.UNode.Editors {
 					items.Add(ItemSelector.CustomItem.Create($"{(c as Component).gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Project", icon: icon));
 				}
 				if (allowSceneObject) {
+#if UNITY_6000_4_OR_NEWER
 					var objs = GameObject.FindObjectsByType<MonoBehaviour>();
+#else
+					var objs = GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+#endif
 					foreach (var c in objs) {
 						if(c.IsTypeOf(type) == false) continue;
 						items.Add(ItemSelector.CustomItem.Create($"{c.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: icon));
@@ -470,8 +478,12 @@ namespace MaxyGames.UNode.Editors {
 					//}
 				}
 				if (allowSceneObject) {
+#if UNITY_6000_4_OR_NEWER
 					var objs = GameObject.FindObjectsByType<MonoBehaviour>();
-					foreach (var c in objs) {
+#else
+					var objs = GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+#endif
+					foreach(var c in objs) {
 						if(c.IsTypeOf(type) == false) continue;
 						items.Add(ItemSelector.CustomItem.Create($"{c.gameObject.name} ({c.GetType().PrettyName()})", onClick, c, "Scene", icon: icon));
 						//if (c is IInstancedGraph instancedGraph && instancedGraph.OriginalGraph as Object) {

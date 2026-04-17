@@ -437,7 +437,11 @@ namespace MaxyGames.UNode.Editors {
 				uNodeThreadUtility.Update();
 			}
 			var currentScene = EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(sceneAsset));
+#if UNITY_6000_4_OR_NEWER
 			var graphs = GameObject.FindObjectsByType<GraphComponent>();
+#else
+			var graphs = GameObject.FindObjectsByType<GraphComponent>(FindObjectsSortMode.None);
+#endif
 			var scripts = new List<CG.GeneratedData>();
 			int current = 0;
 			foreach(var graph in graphs) {

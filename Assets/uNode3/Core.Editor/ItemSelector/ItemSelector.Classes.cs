@@ -9,6 +9,16 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using UnityEditor.IMGUI.Controls;
 
+#if UNITY_6000_2_OR_NEWER
+using TView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#else
+using TView = UnityEditor.IMGUI.Controls.TreeView;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
+
 namespace MaxyGames.UNode.Editors {
 	public interface ICategoryTreeItem {
 		float GetSearchBonusScore(string searchString) => 0;
@@ -60,42 +70,25 @@ namespace MaxyGames.UNode.Editors {
 
 	public partial class ItemSelector {
 		#region TreeView
-#if UNITY_6000_2_OR_NEWER
-		internal class SelectorSearchTreeView : TreeViewItem<int>, ICategoryTreeItem {
-			public Func<Action<SearchProgress>, List<TreeViewItem<int>>> treeViews;
-#else
-		internal class SelectorSearchTreeView : TreeViewItem, ICategoryTreeItem {
-			public Func<Action<SearchProgress>, List<TreeViewItem>> treeViews;
-#endif
+		internal class SelectorSearchTreeView : TViewItem, ICategoryTreeItem {
+			public Func<Action<SearchProgress>, List<TViewItem>> treeViews;
 
 			public SelectorSearchTreeView() {
 
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public SelectorSearchTreeView(Func<Action<SearchProgress>, List<TreeViewItem<int>>> treeViews, string displayName, int id, int depth) : base(id, depth, displayName) {
-#else
-			public SelectorSearchTreeView(Func<Action<SearchProgress>, List<TreeViewItem>> treeViews, string displayName, int id, int depth) : base(id, depth, displayName) {
-#endif
+			public SelectorSearchTreeView(Func<Action<SearchProgress>, List<TViewItem>> treeViews, string displayName, int id, int depth) : base(id, depth, displayName) {
 				this.treeViews = treeViews;
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public class SelectorCategoryTreeView : TreeViewItem<int>, ICategoryTreeItem {
-#else
-		public class SelectorCategoryTreeView : TreeViewItem, ICategoryTreeItem {
-#endif
+		public class SelectorCategoryTreeView : TViewItem, ICategoryTreeItem {
 			public string category;
 			public string description;
 			public bool hideOnSearch;
 			public float bonusScore;
 
-#if UNITY_6000_2_OR_NEWER
-			internal List<TreeViewItem<int>> childTrees;
-#else
-			internal List<TreeViewItem> childTrees;
-#endif
+			internal List<TViewItem> childTrees;
 
 			private bool isExpanded = false;
 			public bool expanded {
@@ -111,11 +104,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					else if(childTrees == null) {
 						childTrees = base.children;
-#if UNITY_6000_2_OR_NEWER
-						base.children = new List<TreeViewItem<int>>();
-#else
-						base.children = new List<TreeViewItem>();
-#endif
+						base.children = new();
 					}
 					isExpanded = value;
 				}
@@ -161,11 +150,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				else {
 					if(childTrees == null) {
-#if UNITY_6000_2_OR_NEWER
-						childTrees = new List<TreeViewItem<int>>();
-#else
-						childTrees = new List<TreeViewItem>();
-#endif
+						childTrees = new();
 					}
 					child.parent = this;
 					childTrees.Add(child);
@@ -173,11 +158,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		internal class SelectorNamespaceTreeView : TreeViewItem<int> {
-#else
-		internal class SelectorNamespaceTreeView : TreeViewItem {
-#endif
+		internal class SelectorNamespaceTreeView : TViewItem {
 			public string Namespace;
 
 			public SelectorNamespaceTreeView() {
@@ -189,32 +170,19 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		internal class SelectorGroupedTreeView : TreeViewItem<int> {
-			public Func<List<TreeViewItem<int>>> treeViews;
-#else
-		internal class SelectorGroupedTreeView : TreeViewItem {
-			public Func<List<TreeViewItem>> treeViews;
-#endif
+		internal class SelectorGroupedTreeView : TViewItem {
+			public Func<List<TViewItem>> treeViews;
 
 			public SelectorGroupedTreeView() {
 
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public SelectorGroupedTreeView(Func<List<TreeViewItem<int>>> treeViews, string displayName, int id, int depth) : base(id, depth, displayName) {
-#else
-			public SelectorGroupedTreeView(Func<List<TreeViewItem>> treeViews, string displayName, int id, int depth) : base(id, depth, displayName) {
-#endif
+			public SelectorGroupedTreeView(Func<List<TViewItem>> treeViews, string displayName, int id, int depth) : base(id, depth, displayName) {
 				this.treeViews = treeViews;
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		internal class SelectorCustomTreeView : TreeViewItem<int>, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
-#else
-		internal class SelectorCustomTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
-#endif
+		internal class SelectorCustomTreeView : TViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
 			public readonly CustomItem item;
 
 			public string DisplayName {
@@ -285,11 +253,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		internal class SelectorMemberTreeView : TreeViewItem<int>, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
-#else
-		internal class SelectorMemberTreeView : TreeViewItem, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
-#endif
+		internal class SelectorMemberTreeView : TViewItem, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
 			public MemberData member;
 
 			public SelectorMemberTreeView() {
@@ -443,11 +407,7 @@ namespace MaxyGames.UNode.Editors {
 			/// <summary>
 			/// The custom icon for can select callback
 			/// </summary>
-#if UNITY_6000_2_OR_NEWER
-			public Func<TreeViewItem<int>, Texture> selectIconCallback;
-#else
-			public Func<TreeViewItem, Texture> selectIconCallback; 
-#endif
+			public Func<TViewItem, Texture> selectIconCallback; 
 
 			public Object targetUnityObject {
 				get {
@@ -477,11 +437,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public bool CanSelectTree(TreeViewItem<int> tree) {
-#else
-			public bool CanSelectTree(TreeViewItem tree) {
-#endif
+			public bool CanSelectTree(TViewItem tree) {
 				if(tree is TypeTreeView) {
 					var item = tree as TypeTreeView;
 					return M_CanSelectType(item.type, filter);
@@ -518,11 +474,7 @@ namespace MaxyGames.UNode.Editors {
 				return filter == null || filter.IsValidType(type);
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public bool CanNextTree(TreeViewItem<int> tree) {
-#else
-			public bool CanNextTree(TreeViewItem tree) {
-#endif
+			public bool CanNextTree(TViewItem tree) {
 				if(tree is TypeTreeView) {
 					var item = tree as TypeTreeView;
 					var type = item.type;
@@ -565,11 +517,7 @@ namespace MaxyGames.UNode.Editors {
 			/// <summary>
 			/// Item for the current row being handled in TreeView.RowGUI.
 			/// </summary>
-#if UNITY_6000_2_OR_NEWER
-			public TreeViewItem<int> item;
-#else
-			public TreeViewItem item;
-#endif
+			public TViewItem item;
 
 			/// <summary>
 			/// Label used for text rendering of the item displayName. Note this is an empty
@@ -948,11 +896,7 @@ namespace MaxyGames.UNode.Editors {
 				return member;
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public override IEnumerable<TreeViewItem<int>> GetDeepItems(Data selector) {
-#else
-			public override IEnumerable<TreeViewItem> GetDeepItems(Data selector) {
-#endif
+			public override IEnumerable<TViewItem> GetDeepItems(Data selector) {
 				return TreeFunction.CreateItemsFromType(item.memberType, selector.filter);
 			}
 
@@ -1090,11 +1034,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public override IEnumerable<TreeViewItem<int>> GetDeepItems(Data selector) {
-#else
-			public override IEnumerable<TreeViewItem> GetDeepItems(Data selector) {
-#endif
+			public override IEnumerable<TViewItem> GetDeepItems(Data selector) {
 				return TreeFunction.CreateItemsFromType(item.type, selector.filter);
 			}
 		}
@@ -1129,11 +1069,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public virtual bool IsValidSearchFilter(SearchFilter filter) => true;
 
-#if UNITY_6000_2_OR_NEWER
-			public virtual IEnumerable<TreeViewItem<int>> GetDeepItems(Data selector) => null;
-#else
-			public virtual IEnumerable<TreeViewItem> GetDeepItems(Data selector) => null;
-#endif
+			public virtual IEnumerable<TViewItem> GetDeepItems(Data selector) => null;
 
 			public virtual IEnumerable<GUIContent> GetTooltipContents() {
 				if(tooltip != null && !string.IsNullOrEmpty(tooltip.text)) {
@@ -1446,13 +1382,8 @@ namespace MaxyGames.UNode.Editors {
 				return result;
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public static List<TreeViewItem<int>> CreateGraphItem(object targetObject, FilterAttribute filter) {
-				List<TreeViewItem<int>> result = new List<TreeViewItem<int>>();
-#else
-			public static List<TreeViewItem> CreateGraphItem(object targetObject, FilterAttribute filter) {
-				List<TreeViewItem> result = new List<TreeViewItem>();
-#endif
+			public static List<TViewItem> CreateGraphItem(object targetObject, FilterAttribute filter) {
+				List<TViewItem> result = new List<TViewItem>();
 				Graph graph = null;
 				//List<IGraphWithVariables> variableSystems = null;
 				if(targetObject != null) {
@@ -1585,13 +1516,8 @@ namespace MaxyGames.UNode.Editors {
 				return result;
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public static List<TreeViewItem<int>> CreateCustomItem(List<CustomItem> customItems, bool expanded = true) {
-				var result = new List<TreeViewItem<int>>();
-#else
-			public static List<TreeViewItem> CreateCustomItem(List<CustomItem> customItems, bool expanded = true) {
-				var result = new List<TreeViewItem>();
-#endif
+			public static List<TViewItem> CreateCustomItem(List<CustomItem> customItems, bool expanded = true) {
+				var result = new List<TViewItem>();
 				if(customItems != null && customItems.Count > 0) {
 					Dictionary<string, SelectorCategoryTreeView> trees = new Dictionary<string, SelectorCategoryTreeView>();
 					//customItems.Sort((x, y) => CompareUtility.Compare(x.category, y.category, x.name, y.name));
@@ -1638,11 +1564,7 @@ namespace MaxyGames.UNode.Editors {
 				return result;
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public static List<TreeViewItem<int>> CreateRootItem(object targetObject, FilterAttribute filter) {
-#else
-			public static List<TreeViewItem> CreateRootItem(object targetObject, FilterAttribute filter) {
-#endif
+			public static List<TViewItem> CreateRootItem(object targetObject, FilterAttribute filter) {
 				UGraphElement element;
 				if(targetObject is UGraphElement) {
 					element = targetObject as UGraphElement;
@@ -1651,15 +1573,9 @@ namespace MaxyGames.UNode.Editors {
 					element = (targetObject as IGraph).GraphData;
 				}
 				else {
-#if UNITY_6000_2_OR_NEWER
-					return new List<TreeViewItem<int>>();
+					return new List<TViewItem>();
 				}
-				var result = new List<TreeViewItem<int>>();
-#else
-					return new List<TreeViewItem>();
-				}
-				var result = new List<TreeViewItem>();
-#endif
+				var result = new List<TViewItem>();
 				if(element != null) {
 					Function function = element.GetObjectInParent<Function>();
 					if(function != null) {

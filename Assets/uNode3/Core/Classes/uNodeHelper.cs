@@ -512,6 +512,25 @@ namespace MaxyGames.UNode {
 			return null;
 		}
 
+		public static bool TryGetGeneratedComponent(this Component component, Type type, out BaseRuntimeBehaviour comp) {
+			comp = component.GetGeneratedComponent(type);
+			return comp != null;
+		}
+
+		public static bool TryGetGeneratedComponent(this GameObject gameObject, Type type, out BaseRuntimeBehaviour comp) {
+			comp = gameObject.GetGeneratedComponent(type);
+			return comp != null;
+		}
+
+		public static bool TryGetGeneratedComponent(this Component component, string uniqueID, out BaseRuntimeBehaviour comp) {
+			comp = component.GetGeneratedComponent(uniqueID);
+			return comp != null;
+		}
+
+		public static bool TryGetGeneratedComponent(this GameObject gameObject, string uniqueID, out BaseRuntimeBehaviour comp) {
+			comp = gameObject.GetGeneratedComponent(uniqueID);
+			return comp != null;
+		}
 
 		/// <summary>
 		/// Get Generated Class Component

@@ -5,13 +5,19 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using TView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#else
+using TView = UnityEditor.IMGUI.Controls.TreeView;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
+
 namespace MaxyGames.UNode.Editors {
 	#region TreeViews
-#if UNITY_6000_2_OR_NEWER
-	internal class HiearchyNamespaceTree : TreeViewItem<int> {
-#else
-	internal class HiearchyNamespaceTree : TreeViewItem {
-#endif
+	internal class HiearchyNamespaceTree : TViewItem {
 		public HiearchyNamespaceTree() {
 
 		}
@@ -21,11 +27,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class HierarchyGraphTree : TreeViewItem<int> {
-#else
-	public class HierarchyGraphTree : TreeViewItem {
-#endif
+	public class HierarchyGraphTree : TViewItem {
 		public GraphAsset graph;
 
 		public HierarchyGraphTree() {
@@ -38,32 +40,19 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchySummaryTree : TreeViewItem<int> {
-		public TreeViewItem<int> owner;
-#else
-	internal class HierarchySummaryTree : TreeViewItem {
-		public TreeViewItem owner;
-#endif
+	internal class HierarchySummaryTree : TViewItem {
+		public TViewItem owner;
 
 		public HierarchySummaryTree() {
 
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public HierarchySummaryTree(string displayName, TreeViewItem<int> owner, int depth = -1) : base(uNodeEditorUtility.GetUIDFromString(owner.id.ToString() + "[SUMMARY]"), depth, displayName) {
-#else
-		public HierarchySummaryTree(string displayName, TreeViewItem owner, int depth = -1) : base(uNodeEditorUtility.GetUIDFromString(owner.id.ToString() + "[SUMMARY]"), depth, displayName) {
-#endif
+		public HierarchySummaryTree(string displayName, TViewItem owner, int depth = -1) : base(uNodeEditorUtility.GetUIDFromString(owner.id.ToString() + "[SUMMARY]"), depth, displayName) {
 			this.owner = owner;
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchyVariableSystemTree : TreeViewItem<int> {
-#else
-	internal class HierarchyVariableSystemTree : TreeViewItem {
-#endif
+	internal class HierarchyVariableSystemTree : TViewItem {
 		public VariableContainer variableSystem;
 
 		public HierarchyVariableSystemTree() {
@@ -76,11 +65,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchyVariableTree : TreeViewItem<int> {
-#else
-	internal class HierarchyVariableTree : TreeViewItem {
-#endif
+	internal class HierarchyVariableTree : TViewItem {
 		public Variable variable;
 
 		public HierarchyVariableTree() {
@@ -93,11 +78,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchyPropertySystemTree : TreeViewItem<int> {
-#else
-	internal class HierarchyPropertySystemTree : TreeViewItem {
-#endif
+	internal class HierarchyPropertySystemTree : TViewItem {
 		public PropertyContainer propertySystem;
 
 		public HierarchyPropertySystemTree() {
@@ -110,11 +91,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchyPropertyTree : TreeViewItem<int> {
-#else
-	internal class HierarchyPropertyTree : TreeViewItem {
-#endif
+	internal class HierarchyPropertyTree : TViewItem {
 		public Property property;
 
 		public HierarchyPropertyTree() {
@@ -127,11 +104,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchyFunctionSystemTree : TreeViewItem<int> {
-#else
-	internal class HierarchyFunctionSystemTree : TreeViewItem {
-#endif
+	internal class HierarchyFunctionSystemTree : TViewItem {
 		public FunctionContainer functionSystem;
 
 		public HierarchyFunctionSystemTree() {
@@ -144,11 +117,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class HierarchyFunctionTree : TreeViewItem<int> {
-#else
-	internal class HierarchyFunctionTree : TreeViewItem {
-#endif
+	internal class HierarchyFunctionTree : TViewItem {
 		public Function function;
 
 		public HierarchyFunctionTree() {
@@ -161,11 +130,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class HierarchyNodeTree : TreeViewItem<int> {
-#else
-	public class HierarchyNodeTree : TreeViewItem {
-#endif
+	public class HierarchyNodeTree : TViewItem {
 		public NodeObject node;
 
 		public HierarchyNodeTree() {
@@ -177,11 +142,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class HierarchyTransitionTree : TreeViewItem<int> {
-#else
-	public class HierarchyTransitionTree : TreeViewItem {
-#endif
+	public class HierarchyTransitionTree : TViewItem {
 		public TransitionEvent transition;
 
 		public HierarchyTransitionTree() {
@@ -193,11 +154,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class HierarchyRefNodeTree : TreeViewItem<int> {
-#else
-	public class HierarchyRefNodeTree : TreeViewItem {
-#endif
+	public class HierarchyRefNodeTree : TViewItem {
 		public HierarchyNodeTree tree;
 
 		public HierarchyRefNodeTree() {
@@ -210,11 +167,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class HierarchyPortTree : TreeViewItem<int> {
-#else
-	public class HierarchyPortTree : TreeViewItem {
-#endif
+	public class HierarchyPortTree : TViewItem {
 		public FlowInput port;
 		public NodeObject node;
 
@@ -228,11 +181,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class HierarchyFlowTree : TreeViewItem<int> {
-#else
-	public class HierarchyFlowTree : TreeViewItem {
-#endif
+	public class HierarchyFlowTree : TViewItem {
 		public NodeObject owner;
 		public FlowPort flow;
 
@@ -247,11 +196,7 @@ namespace MaxyGames.UNode.Editors {
 	}
 	#endregion
 
-#if UNITY_6000_2_OR_NEWER
-	public class GraphHierarchyTree : TreeView<int> {
-#else
-	public class GraphHierarchyTree : TreeView {
-#endif
+	public class GraphHierarchyTree : TView {
 		public uNodeEditor graphEditor;
 		public GraphEditorData graphData => graphEditor?.graphData;
 
@@ -261,11 +206,7 @@ namespace MaxyGames.UNode.Editors {
 		private Dictionary<NodeObject, HierarchyNodeTree> nodeTreesMap = new Dictionary<NodeObject, HierarchyNodeTree>();
 		private Dictionary<FlowInput, HierarchyPortTree> flowPortsMap = new Dictionary<FlowInput, HierarchyPortTree>();
 
-#if UNITY_6000_2_OR_NEWER
-		public GraphHierarchyTree(TreeViewState<int> state) : base(state) {
-#else
-		public GraphHierarchyTree(TreeViewState state) : base(state) {
-#endif
+		public GraphHierarchyTree(TViewState state) : base(state) {
 			graphEditor = uNodeEditor.window;
 			showAlternatingRowBackgrounds = true;
 			showBorder = true;
@@ -283,24 +224,13 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override TreeViewItem<int> BuildRoot() {
-			return new TreeViewItem<int> { id = 0, depth = -1 };
-#else
-		protected override TreeViewItem BuildRoot() {
-			return new TreeViewItem { id = 0, depth = -1 };
-#endif
+		protected override TViewItem BuildRoot() {
+			return new TViewItem { id = 0, depth = -1 };
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override IList<TreeViewItem<int>> BuildRows(TreeViewItem<int> root) {
+		protected override IList<TViewItem> BuildRows(TViewItem root) {
 			graphEditor = uNodeEditor.window;
-			var rows = GetRows() ?? new List<TreeViewItem<int>>();
-#else
-		protected override IList<TreeViewItem> BuildRows(TreeViewItem root) {
-			graphEditor = uNodeEditor.window;
-			var rows = GetRows() ?? new List<TreeViewItem>();
-#endif
+			var rows = GetRows() ?? new List<TViewItem>();
 			rows.Clear();
 			nodeTreesMap.Clear();
 			flowPortsMap.Clear();
@@ -328,11 +258,7 @@ namespace MaxyGames.UNode.Editors {
 			return rows;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		private void AddSummary(string summary, TreeViewItem<int> owner, TreeViewItem<int> parent, IList<TreeViewItem<int>> rows) {
-#else
-		private void AddSummary(string summary, TreeViewItem owner, TreeViewItem parent, IList<TreeViewItem> rows) {
-#endif
+		private void AddSummary(string summary, TViewItem owner, TViewItem parent, IList<TViewItem> rows) {
 			if(string.IsNullOrEmpty(summary))
 				return;
 			var strs = summary.Split('\n');
@@ -367,11 +293,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		void CreateTreeElement(UGraphElement element, TreeViewItem<int> parent, IList<TreeViewItem<int>> rows) {
-#else
-		void CreateTreeElement(UGraphElement element, TreeViewItem parent, IList<TreeViewItem> rows) {
-#endif
+		void CreateTreeElement(UGraphElement element, TViewItem parent, IList<TViewItem> rows) {
 			if(element is Variable) {
 				var variable = element as Variable;
 				var childItem = new HierarchyVariableTree(variable, uNodeEditorUtility.GetUIDFromString($"V:{variable.id}"), -1);
@@ -470,11 +392,7 @@ namespace MaxyGames.UNode.Editors {
 				rows.Insert(rows.Count - (rows.Count - prevCount), childItem);
 			}
 			else if(element is NodeContainer) {
-#if UNITY_6000_2_OR_NEWER
-				var childItem = new TreeViewItem<int>(-1) {
-#else
-				var childItem = new TreeViewItem(-1) {
-#endif
+				var childItem = new TViewItem(-1) {
 					displayName = element.name,
 					icon = uNodeEditorUtility.GetTypeIcon(element) as Texture2D,
 				};
@@ -513,11 +431,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			else {
-#if UNITY_6000_2_OR_NEWER
-				var childItem = new TreeViewItem<int>(-1) {
-#else
-				var childItem = new TreeViewItem(-1) {
-#endif
+				var childItem = new TViewItem(-1) {
 					displayName = element.name,
 					icon = uNodeEditorUtility.GetTypeIcon(element) as Texture2D,
 				};
@@ -563,22 +477,14 @@ namespace MaxyGames.UNode.Editors {
 			base.SelectionChanged(selectedIds);
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override bool CanChangeExpandedState(TreeViewItem<int> item) {
-#else
-		protected override bool CanChangeExpandedState(TreeViewItem item) {
-#endif
+		protected override bool CanChangeExpandedState(TViewItem item) {
 			if(!string.IsNullOrEmpty(searchString) || item is HierarchyFlowTree || item is HierarchyNodeTree || item is HierarchyPortTree || item is HierarchyTransitionTree) {
 				return false;
 			}
 			return item.hasChildren;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override bool CanMultiSelect(TreeViewItem<int> item) {
-#else
-		protected override bool CanMultiSelect(TreeViewItem item) {
-#endif
+		protected override bool CanMultiSelect(TViewItem item) {
 			return false;
 		}
 
@@ -729,11 +635,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		#region Private Functions
-#if UNITY_6000_2_OR_NEWER
-		private void ContextClick(TreeViewItem<int> tree, Event evt) {
-#else
-		private void ContextClick(TreeViewItem tree, Event evt) {
-#endif
+		private void ContextClick(TViewItem tree, Event evt) {
 			if(tree is HierarchyNodeTree nodeTree) {
 				var node = nodeTree.node;
 				var mPOS = GUIUtility.GUIToScreenPoint(evt.mousePosition);
@@ -776,11 +678,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		private void DrawHighlightedBackground(TreeViewItem<int> tree, Rect position) {
-#else
-		private void DrawHighlightedBackground(TreeViewItem tree, Rect position) {
-#endif
+		private void DrawHighlightedBackground(TViewItem tree, Rect position) {
 			if(tree is HierarchyNodeTree) {
 				var nTree = tree as HierarchyNodeTree;
 				if(nTree.node == refSelectedTree) {
@@ -797,11 +695,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		private bool HighlightTree(TreeViewItem<int> tree) {
-#else
-		private bool HighlightTree(TreeViewItem tree) {
-#endif
+		private bool HighlightTree(TViewItem tree) {
 			if(tree is HierarchyNodeTree) {
 				var node = (tree as HierarchyNodeTree).node;
 				uNodeEditor.Highlight(node);
@@ -832,11 +726,7 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Functions
-#if UNITY_6000_2_OR_NEWER
-		private void Inspect(TreeViewItem<int> treeView, Vector2 position) {
-#else
-		private void Inspect(TreeViewItem treeView, Vector2 position) {
-#endif
+		private void Inspect(TViewItem treeView, Vector2 position) {
 			if(treeView is HierarchyNodeTree nodeTree) {
 				CustomInspector.Inspect(position, new GraphEditorData(graph as UnityEngine.Object, new[] { nodeTree.node }));
 			}
@@ -851,11 +741,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public bool AddNodeTree(TreeViewItem<int> tree, TreeViewItem<int> parentTree, IList<TreeViewItem<int>> rows, bool isChildren = true) {
-#else
-		public bool AddNodeTree(TreeViewItem tree, TreeViewItem parentTree, IList<TreeViewItem> rows, bool isChildren = true) {
-#endif
+		public bool AddNodeTree(TViewItem tree, TViewItem parentTree, IList<TViewItem> rows, bool isChildren = true) {
 			if(tree == null || parentTree == null)
 				return false;
 			if(isChildren) {
@@ -880,11 +766,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public bool AddNodeTree(FlowPort flow, TreeViewItem<int> parentTree, IList<TreeViewItem<int>> rows, bool isChildren = true) {
-#else
-		public bool AddNodeTree(FlowPort flow, TreeViewItem parentTree, IList<TreeViewItem> rows, bool isChildren = true) {
-#endif
+		public bool AddNodeTree(FlowPort flow, TViewItem parentTree, IList<TViewItem> rows, bool isChildren = true) {
 			if(flow.hasValidConnections) {
 				if(flow is FlowOutput flowOutput) {
 					var n = flowOutput.GetTargetNode();
@@ -926,11 +808,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public void AddNodes(NodeObject nodeComponent, TreeViewItem<int> parentItem, IList<TreeViewItem<int>> rows, bool isChildren = true) {
-#else
-		public void AddNodes(NodeObject nodeComponent, TreeViewItem parentItem, IList<TreeViewItem> rows, bool isChildren = true) {
-#endif
+		public void AddNodes(NodeObject nodeComponent, TViewItem parentItem, IList<TViewItem> rows, bool isChildren = true) {
 			if(nodeTreesMap.TryGetValue(nodeComponent, out var childItem)) {
 				var tree = new HierarchyRefNodeTree(childItem, -1);
 				if(isChildren) {

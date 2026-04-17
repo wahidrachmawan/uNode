@@ -8,6 +8,16 @@ using UnityEditor;
 using UnityEngine;
 using UnityEditor.IMGUI.Controls;
 
+#if UNITY_6000_2_OR_NEWER
+using TView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#else
+using TView = UnityEditor.IMGUI.Controls.TreeView;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
+
 namespace MaxyGames.UNode.Editors {
 	public partial class uNodeEditor : EditorWindow {
 		#region Const
@@ -15,50 +25,27 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Classes
-#if UNITY_6000_2_OR_NEWER
-		public class GraphExplorerTree : TreeView<int> {
-#else
-		public class GraphExplorerTree : TreeView {
-#endif
+		public class GraphExplorerTree : TView {
 			public HierarchyGraphTree selected;
 
-#if UNITY_6000_2_OR_NEWER
-			Dictionary<int, TreeViewItem<int>> treeMap;
-			public GraphExplorerTree() : base(new TreeViewState<int>()) {
-#else
-			Dictionary<int, TreeViewItem> treeMap;
+			Dictionary<int, TViewItem> treeMap;
 
-			public GraphExplorerTree() : base(new TreeViewState()) {
-#endif
+			public GraphExplorerTree() : base(new TViewState()) {
 				showAlternatingRowBackgrounds = true;
 				showBorder = true;
 				Reload();
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			protected override TreeViewItem<int> BuildRoot() {
-				return new TreeViewItem<int> { id = 0, depth = -1 };
-#else
-			protected override TreeViewItem BuildRoot() {
-				return new TreeViewItem { id = 0, depth = -1 };
-#endif
+			protected override TViewItem BuildRoot() {
+				return new TViewItem { id = 0, depth = -1 };
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			protected override bool CanChangeExpandedState(TreeViewItem<int> item) {
-#else
-			protected override bool CanChangeExpandedState(TreeViewItem item) {
-#endif
+			protected override bool CanChangeExpandedState(TViewItem item) {
 				return false;
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			protected override IList<TreeViewItem<int>> BuildRows(TreeViewItem<int> root) {
-				var rows = GetRows() ?? new List<TreeViewItem<int>>();
-#else
-			protected override IList<TreeViewItem> BuildRows(TreeViewItem root) {
-				var rows = GetRows() ?? new List<TreeViewItem>();
-#endif
+			protected override IList<TViewItem> BuildRows(TViewItem root) {
+				var rows = GetRows() ?? new List<TViewItem>();
 				rows.Clear();
 				var assets = GraphUtility.FindAllGraphAssets();
 				var graphDic = new Dictionary<string, List<(string, UnityEngine.Object)>>();
@@ -86,19 +73,11 @@ namespace MaxyGames.UNode.Editors {
 				}
 				var dic = graphDic.ToList();
 				dic.Sort((x, y) => string.Compare(x.Key, y.Key, StringComparison.OrdinalIgnoreCase));
-#if UNITY_6000_2_OR_NEWER
-				treeMap = new Dictionary<int, TreeViewItem<int>>();
-#else
-				treeMap = new Dictionary<int, TreeViewItem>();
-#endif
+				treeMap = new Dictionary<int, TViewItem>();
 				foreach(var pair in dic) {
 					var graphs = pair.Value;
 					graphs.Sort((x, y) => string.Compare(x.Item1, y.Item1, StringComparison.OrdinalIgnoreCase));
-#if UNITY_6000_2_OR_NEWER
-					TreeViewItem<int> nsTree = root;
-#else
-					TreeViewItem nsTree = root;
-#endif
+					TViewItem nsTree = root;
 					if(!hasSearch) {
 						nsTree = new HiearchyNamespaceTree(string.IsNullOrEmpty(pair.Key) ? "global" : pair.Key, -1);
 						root.AddChild(nsTree);
@@ -108,11 +87,7 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var (displayName, asset) in graphs) {
 						if(hasSearch) {
 							if(displayName.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0) {
-#if UNITY_6000_2_OR_NEWER
-								TreeViewItem<int> tree;
-#else
-								TreeViewItem tree;
-#endif
+								TViewItem tree;
 								if(asset is GraphAsset graph) {
 									tree = new HierarchyGraphTree(graph, -1);
 									if(!string.IsNullOrEmpty(graph.GraphData.comment)) {
@@ -180,11 +155,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			protected override bool CanMultiSelect(TreeViewItem<int> item) {
-#else
-			protected override bool CanMultiSelect(TreeViewItem item) {
-#endif
+			protected override bool CanMultiSelect(TViewItem item) {
 				return false;
 			}
 

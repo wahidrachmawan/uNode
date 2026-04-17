@@ -574,7 +574,11 @@ namespace MaxyGames.UNode.Editors {
 								}
 							}
 
+#if UNITY_6000_4_OR_NEWER
 							var objs = GameObject.FindObjectsByType<MonoBehaviour>();
+#else
+							var objs = GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+#endif
 							int counts = 0;
 							foreach(var obj in objs) {
 								if(counts > 250)
@@ -619,7 +623,7 @@ namespace MaxyGames.UNode.Editors {
 				})
 			};
 			toolbar.Add(debugButton);
-			#endregion
+#endregion
 
 			frameButton = new ToolbarButton(() => {
 				FrameGraph();
