@@ -9,6 +9,16 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using UnityEditor.IMGUI.Controls;
 
+#if UNITY_6000_2_OR_NEWER
+using TView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#else
+using TView = UnityEditor.IMGUI.Controls.TreeView;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
+
 namespace MaxyGames.UNode.Editors {
 	public partial class ItemSelector {
 		#region Setup
@@ -51,22 +61,14 @@ namespace MaxyGames.UNode.Editors {
 			uNodeThreadUtility.Queue(DoSetup);
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public List<TreeViewItem<int>> CustomTrees { get; set; }
-#else
-		public List<TreeViewItem> CustomTrees { get; set; }
-#endif
+		public List<TViewItem> CustomTrees { get; set; }
 
 		void DoSetup() {
 			editorData.setup.Setup((progress) => {
 				if(progress == 1) {
 					uNodeThreadUtility.Queue(() => {
 						UnityEngine.Profiling.Profiler.BeginSample("Setup ItemSelector");
-#if UNITY_6000_2_OR_NEWER
-						var categories = new List<TreeViewItem<int>>();
-#else
-						var categories = new List<TreeViewItem>();
-#endif
+						var categories = new List<TViewItem>();
 						if(CustomTrees != null) {
 							foreach(var tree in CustomTrees) {
 								categories.Add(tree);
@@ -93,11 +95,7 @@ namespace MaxyGames.UNode.Editors {
 								recentTree.hideOnSearch = true;
 								categories.Add(recentTree);
 
-#if UNITY_6000_2_OR_NEWER
-								var listRecentItems = new List<TreeViewItem<int>>();
-#else
-								var listRecentItems = new List<TreeViewItem>();
-#endif
+								var listRecentItems = new List<TViewItem>();
 								if(uNodeEditor.SavedData.recentItems != null) {
 									foreach(var recent in uNodeEditor.SavedData.recentItems) {
 										try {
@@ -171,17 +169,9 @@ namespace MaxyGames.UNode.Editors {
 							categories.AddRange(TreeFunction.CreateCustomItem(customItems, expanded: m_defaultExpandedItems == null && customItemDefaultExpandState));
 							if(filter.DisplayDefaultStaticType) {
 								categoryTree.AddChild(new SelectorGroupedTreeView(() => {
-#if UNITY_6000_2_OR_NEWER
-									var result = new List<TreeViewItem<int>>();
-#else
-									var result = new List<TreeViewItem>();
-#endif
+									var result = new List<TViewItem>();
 									result.Add(new SelectorSearchTreeView((prog) => {
-#if UNITY_6000_2_OR_NEWER
-										var treeResult = new List<TreeViewItem<int>>();
-#else
-										var treeResult = new List<TreeViewItem>();
-#endif
+										var treeResult = new List<TViewItem>();
 										var sp = new SearchProgress();
 										prog?.Invoke(sp);
 										var allTypes = GetAllTypes((currProgress) => {
@@ -306,11 +296,7 @@ namespace MaxyGames.UNode.Editors {
 						categories.RemoveAll(tree => tree == null || !tree.hasChildren);
 						if(displayDefaultItem) {
 							categories.Insert(0, new SelectorSearchTreeView((prog) => {
-#if UNITY_6000_2_OR_NEWER
-								var treeResult = new List<TreeViewItem<int>>();
-#else
-								var treeResult = new List<TreeViewItem>();
-#endif
+								var treeResult = new List<TViewItem>();
 								var sp = new SearchProgress();
 								prog?.Invoke(sp);
 								var namespaces = uNodeEditor.SavedData.favoriteNamespaces;
@@ -650,11 +636,7 @@ namespace MaxyGames.UNode.Editors {
 				return contents;
 			}
 
-#if UNITY_6000_2_OR_NEWER
-			public static List<GUIContent> GetTooltipContents(TreeViewItem<int> tree, bool onlyGetType = false) {
-#else
-			public static List<GUIContent> GetTooltipContents(TreeViewItem tree, bool onlyGetType = false) {
-#endif
+			public static List<GUIContent> GetTooltipContents(TViewItem tree, bool onlyGetType = false) {
 				List<GUIContent> contents = new List<GUIContent>();
 				if(tree is TypeTreeView) {
 					var item = tree as TypeTreeView;
@@ -761,11 +743,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-#if UNITY_6000_2_OR_NEWER
-		static string GetPrettyTreeName(TreeViewItem<int> tree) {
-#else
-		static string GetPrettyTreeName(TreeViewItem tree) {
-#endif
+		static string GetPrettyTreeName(TViewItem tree) {
 			if(tree is MemberTreeView) {
 				var member = (tree as MemberTreeView).member;
 				if(member is Type) {

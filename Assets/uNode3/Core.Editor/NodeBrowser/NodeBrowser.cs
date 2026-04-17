@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Xml;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +6,16 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
+
+#if UNITY_6000_2_OR_NEWER
+using TView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#else
+using TView = UnityEditor.IMGUI.Controls.TreeView;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
 
 namespace MaxyGames.UNode.Editors {
 	#region TreeViews
@@ -31,11 +40,7 @@ namespace MaxyGames.UNode.Editors {
 		private List<MemberTreeView> members;
 
 		internal void Search(Func<MemberInfo, float> scoring) {
-#if UNITY_6000_2_OR_NEWER
-			children = new List<TreeViewItem<int>>(ItemSelector.TreeFunction.CreateItemsFromType(type, filter, true, scoring));
-#else
-			children = new List<TreeViewItem>(ItemSelector.TreeFunction.CreateItemsFromType(type, filter, true, scoring));
-#endif
+			children = new List<TViewItem>(ItemSelector.TreeFunction.CreateItemsFromType(type, filter, true, scoring));
 		}
 
 		public void Expand(bool enable) {
@@ -44,11 +49,7 @@ namespace MaxyGames.UNode.Editors {
 					members = ItemSelector.TreeFunction.CreateItemsFromType(type, filter, true);
 				}
 				if(members != null) {
-#if UNITY_6000_2_OR_NEWER
-					children = new List<TreeViewItem<int>>(members);
-#else
-					children = new List<TreeViewItem>(members);
-#endif
+					children = new List<TViewItem>(members);
 				}
 			} else {
 				children = null;
@@ -74,11 +75,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class NamespaceTreeView : TreeViewItem<int>, ISelectorItem {
-#else
-	internal class NamespaceTreeView : TreeViewItem, ISelectorItem {
-#endif
+	internal class NamespaceTreeView : TViewItem, ISelectorItem {
 		public string Namespace;
 
 		public NamespaceTreeView() {
@@ -90,11 +87,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class MemberTreeView : TreeViewItem<int>, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
-#else
-	public class MemberTreeView : TreeViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
-#endif
+	public class MemberTreeView : TViewItem, IDisplayName, ISelectorItemWithValue, ISelectorItemWithType, IRelevanceItem {
 		public MemberInfo member;
 		public object instance;
 
@@ -154,11 +147,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	internal class NodeTreeView : TreeViewItem<int>, ISelectorItemWithValue, IRelevanceItem {
-#else
-	internal class NodeTreeView : TreeViewItem, ISelectorItemWithValue, IRelevanceItem {
-#endif
+	internal class NodeTreeView : TViewItem, ISelectorItemWithValue, IRelevanceItem {
 		public SelectorItemNodeTreeData data;
 
 		public NodeTreeView() {
@@ -183,11 +172,7 @@ namespace MaxyGames.UNode.Editors {
 	#endregion
 
 	[System.Serializable]
-#if UNITY_6000_2_OR_NEWER
-	public class BrowserState : TreeViewState<int> {
-#else
-	public class BrowserState : TreeViewState {
-#endif
+	public class BrowserState : TViewState {
 		public enum TypeKind {
 			All,
 			Function,
@@ -201,11 +186,7 @@ namespace MaxyGames.UNode.Editors {
 		public string searchText;
 	}
 
-#if UNITY_6000_2_OR_NEWER
-	public class NodeBrowser : TreeView<int> {
-#else
-	public class NodeBrowser : TreeView {
-#endif
+	public class NodeBrowser : TView {
 		public EditorWindow window;
 
 		private string _searchString;
@@ -461,30 +442,16 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-#if UNITY_6000_2_OR_NEWER
-		protected override TreeViewItem<int> BuildRoot() {
-			return new TreeViewItem<int> { id = 0, depth = -1 };
-#else
-		protected override TreeViewItem BuildRoot() {
-			return new TreeViewItem { id = 0, depth = -1 };
-#endif
+		protected override TViewItem BuildRoot() {
+			return new TViewItem { id = 0, depth = -1 };
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override IList<TreeViewItem<int>> BuildRows(TreeViewItem<int> root) {
-			var rows = GetRows() ?? new List<TreeViewItem<int>>();
-#else
-		protected override IList<TreeViewItem> BuildRows(TreeViewItem root) {
-			var rows = GetRows() ?? new List<TreeViewItem>();
-#endif
+		protected override IList<TViewItem> BuildRows(TViewItem root) {
+			var rows = GetRows() ?? new List<TViewItem>();
 			rows.Clear();
 			bool isSearching = !string.IsNullOrEmpty(searchString);
 			{//Node
-#if UNITY_6000_2_OR_NEWER
-				var item = new TreeViewItem<int>(uNodeEditorUtility.GetUIDFromString("[NODES]"), -1, "Nodes");
-#else
-				var item = new TreeViewItem(uNodeEditorUtility.GetUIDFromString("[NODES]"), -1, "Nodes");
-#endif
+				var item = new TViewItem(uNodeEditorUtility.GetUIDFromString("[NODES]"), -1, "Nodes");
 				if(isSearching || IsExpanded(item.id)) {
 					//Init menu
 					var menus = NodeEditorUtility.FindNodeMenu();
@@ -541,11 +508,7 @@ namespace MaxyGames.UNode.Editors {
 			return rows;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override bool CanChangeExpandedState(TreeViewItem<int> item) {
-#else
-		protected override bool CanChangeExpandedState(TreeViewItem item) {
-#endif
+		protected override bool CanChangeExpandedState(TViewItem item) {
 			if(!string.IsNullOrEmpty(searchString)) {
 				return false;
 			}
@@ -578,20 +541,11 @@ namespace MaxyGames.UNode.Editors {
 			return members;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		void AddNodes(List<SelectorItemNodeTreeData> nodes, TreeViewItem<int> item, IList<TreeViewItem<int>> rows) {
-#else
-		void AddNodes(List<SelectorItemNodeTreeData> nodes, TreeViewItem item, IList<TreeViewItem> rows) {
-#endif
+		void AddNodes(List<SelectorItemNodeTreeData> nodes, TViewItem item, IList<TViewItem> rows) {
 			bool isSearching = !string.IsNullOrEmpty(searchString);
 			if(item.children == null)
-#if UNITY_6000_2_OR_NEWER
-				item.children = new List<TreeViewItem<int>>();
-			TreeViewItem<int> lastCategoryTree = null;
-#else
-				item.children = new List<TreeViewItem>();
-			TreeViewItem lastCategoryTree = null;
-#endif
+				item.children = new List<TViewItem>();
+			TViewItem lastCategoryTree = null;
 			int prevCount = rows.Count;
 			for(int i = 0; i < nodes.Count; ++i) {
 				var node = nodes[i];
@@ -603,11 +557,7 @@ namespace MaxyGames.UNode.Editors {
 							prevCount = rows.Count;
 						}
 					}
-#if UNITY_6000_2_OR_NEWER
-					var childItem = new TreeViewItem<int>(uNodeEditorUtility.GetUIDFromString("[CATEG]" + node.category), -1, node.category);
-#else
-					var childItem = new TreeViewItem(uNodeEditorUtility.GetUIDFromString("[CATEG]" + node.category), -1, node.category);
-#endif
+					var childItem = new TViewItem(uNodeEditorUtility.GetUIDFromString("[CATEG]" + node.category), -1, node.category);
 					lastCategoryTree = childItem;
 					if(!isSearching && !IsExpanded(childItem.id)) {
 						childItem.children = CreateChildListForCollapsedParent();
@@ -632,18 +582,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		void AddChildrenType(List<Type> types, TreeViewItem<int> item, IList<TreeViewItem<int>> rows) {
-#else
-		void AddChildrenType(List<Type> types, TreeViewItem item, IList<TreeViewItem> rows) {
-#endif
+		void AddChildrenType(List<Type> types, TViewItem item, IList<TViewItem> rows) {
 			bool isSearching = !string.IsNullOrEmpty(searchString);
 			if(item.children == null)
-#if UNITY_6000_2_OR_NEWER
-				item.children = new List<TreeViewItem<int>>();
-#else
-				item.children = new List<TreeViewItem>();
-#endif
+				item.children = new List<TViewItem>();
 			for(int i = 0; i < types.Count; ++i) {
 				int prevCount = rows.Count;
 				var type = types[i];
@@ -668,18 +610,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		void AddChildrenMember(List<MemberInfo> members, TreeViewItem<int> item, IList<TreeViewItem<int>> rows) {
-#else
-		void AddChildrenMember(List<MemberInfo> members, TreeViewItem item, IList<TreeViewItem> rows) {
-#endif
+		void AddChildrenMember(List<MemberInfo> members, TViewItem item, IList<TViewItem> rows) {
 			bool isSearching = !string.IsNullOrEmpty(searchString);
 			if(item.children == null)
-#if UNITY_6000_2_OR_NEWER
-				item.children = new List<TreeViewItem<int>>();
-#else
-				item.children = new List<TreeViewItem>();
-#endif
+				item.children = new List<TViewItem>();
 			for(int i = 0; i < members.Count; ++i) {
 				var member = members[i];
 				if(member.MemberType == MemberTypes.Method &&
@@ -712,11 +646,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 
-#if UNITY_6000_2_OR_NEWER
-		private TreeViewItem<int> hoverItem, lastHoverItem;
-#else
-		private TreeViewItem hoverItem, lastHoverItem;
-#endif
+		private TViewItem hoverItem, lastHoverItem;
 		protected override void RowGUI(RowGUIArgs args) {
 			Event evt = Event.current;
 			if(evt.type == EventType.Repaint) {
@@ -775,13 +705,8 @@ namespace MaxyGames.UNode.Editors {
 
 		protected bool IsMatchSearch(object obj, string search) {
 			string name = obj.ToString();
-#if UNITY_6000_2_OR_NEWER
-			if(obj is TreeViewItem<int>) {
-				name = (obj as TreeViewItem<int>).displayName;
-#else
-			if(obj is TreeViewItem) {
-				name = (obj as TreeViewItem).displayName;
-#endif
+			if(obj is TViewItem) {
+				name = (obj as TViewItem).displayName;
 			} else if(obj is MemberInfo) {
 				MemberInfo member = obj as MemberInfo;
 				switch(browserState.typeKind) {
@@ -818,11 +743,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		protected override bool CanMultiSelect(TreeViewItem<int> item) {
-#else
-		protected override bool CanMultiSelect(TreeViewItem item) {
-#endif
+		protected override bool CanMultiSelect(TViewItem item) {
 			return false;
 		}
 
@@ -902,11 +823,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public void Frame(int id, bool frame, bool ping, bool animated) {
 			//Frame
-#if UNITY_6000_2_OR_NEWER
-			var field = typeof(TreeView<int>).GetField("m_TreeView", MemberData.flags);
-#else
-			var field = typeof(TreeView).GetField("m_TreeView", MemberData.flags);
-#endif
+			var field = typeof(TView).GetField("m_TreeView", MemberData.flags);
 			if(field != null) {
 				var tv = field.GetValueOptimized(this);
 				var frameM = field.FieldType.GetMethod(

@@ -5,6 +5,16 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
+#if UNITY_6000_2_OR_NEWER
+using TView = UnityEditor.IMGUI.Controls.TreeView<int>;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem<int>;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
+#else
+using TView = UnityEditor.IMGUI.Controls.TreeView;
+using TViewItem = UnityEditor.IMGUI.Controls.TreeViewItem;
+using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
+#endif
+
 namespace MaxyGames.UNode.Editors {
 	public abstract class HierarchyDrawer {
 		public GraphHierarchyTree manager;
@@ -25,11 +35,7 @@ namespace MaxyGames.UNode.Editors {
 			return tree;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public virtual void AddChildNodes(NodeObject nodeComponent, TreeViewItem<int> parentTree, IList<TreeViewItem<int>> rows) {
-#else
-		public virtual void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentTree, IList<TreeViewItem> rows) {
-#endif
+		public virtual void AddChildNodes(NodeObject nodeComponent, TViewItem parentTree, IList<TViewItem> rows) {
 			foreach(var port in nodeComponent.FlowOutputs) {
 				if(port.isNextFlow) {
 					manager.AddNodeTree(port, parentTree, rows, false);
@@ -109,11 +115,7 @@ namespace MaxyGames.UNode.Editors {
 			return type == typeof(Nodes.StateNode);
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem<int> parentItem, IList<TreeViewItem<int>> rows) {
-#else
-		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentItem, IList<TreeViewItem> rows) {
-#endif
+		public override void AddChildNodes(NodeObject nodeComponent, TViewItem parentItem, IList<TViewItem> rows) {
 			var node = nodeComponent.node as Nodes.StateNode;
 			var flows = node.NestedFlowNodes;
 			if(flows.Any()) {
@@ -157,11 +159,7 @@ namespace MaxyGames.UNode.Editors {
 			return null;
 		}
 
-#if UNITY_6000_2_OR_NEWER
-		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem<int> parentItem, IList<TreeViewItem<int>> rows) {
-#else
-		public override void AddChildNodes(NodeObject nodeComponent, TreeViewItem parentItem, IList<TreeViewItem> rows) {
-#endif
+		public override void AddChildNodes(NodeObject nodeComponent, TViewItem parentItem, IList<TViewItem> rows) {
 			var macroPort = nodeComponent.node as Nodes.MacroPortNode;
 			manager.AddNodeTree(macroPort.exit, macroPort.kind == PortKind.FlowInput ? parentItem : parentItem.parent, rows, macroPort.kind == PortKind.FlowInput);
 		}
