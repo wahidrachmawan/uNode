@@ -248,6 +248,8 @@ namespace MaxyGames.UNode {
 		RuntimeType ReflectionType { get; }
 	}
 
+	public interface IReflectionGraph : IGraph { }
+
 	/// <summary>
 	/// A independent graph that have its own namespace and using namespace data
 	/// </summary>

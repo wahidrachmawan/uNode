@@ -13,7 +13,7 @@ namespace MaxyGames.UNode {
 		isScriptGraph = false,
 		inherithFrom =typeof(RuntimeBehaviour),
 		generationKind = GenerationKind.Performance)]
-	public class GraphSingleton : GraphAsset, IClassGraph, IStateGraph, ISingletonGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IGraphWithEventGraph, IIndependentGraph, IClassIdentifier, IReflectionType {
+	public class GraphSingleton : GraphAsset, IClassGraph, IStateGraph, ISingletonGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IGraphWithEventGraph, IIndependentGraph, IClassIdentifier, IReflectionType, IReflectionGraph {
 		public string @namespace;
 		public List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections", "System.Collections.Generic" };
 

@@ -342,12 +342,18 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private string GetDebugName() {
-			if(graphData.graph is IScriptGraphType scriptGraph) {
-				var data = scriptGraph.ScriptTypeData?.scriptGraph?.ScriptData;
+			if(graphData.RootOwner is IScriptGraph scriptGraph) {
+				var data = scriptGraph?.ScriptData;
 				if(data != null) {
 					if(data.debug == false) {
-						return "Debug: Disable";
+						return "C# Debug: Disable";
 					}
+				}
+			}
+			else if(graphData.graph is not IReflectionGraph && graphData.graph is ITypeWithScriptData scriptData) {
+				var data = scriptData.ScriptData;
+				if(data.debug == false || data.compileToScript == false) {
+					return "C# Debug: Disable";
 				}
 			}
 
@@ -665,11 +671,6 @@ namespace MaxyGames.UNode.Editors {
 			var selectBtn = new ToolbarButton(() => {
 				if(tabData.owner != null) {
 					EditorGUIUtility.PingObject(tabData.owner);
-//#if UNITY_6000_4_OR_NEWER
-					//Selection.entityIds = new [] { editorData.owner.GetEntityId() };
-//#else
-					//Selection.instanceIDs = new int[] { editorData.owner.GetInstanceID() };
-//#endif
 				}
 			}) {
 				text = "Select",
@@ -722,11 +723,6 @@ namespace MaxyGames.UNode.Editors {
 							uNodeGUIUtility.GUIChangedMajor(null);
 						});
 						menu.AddSeparator("");
-						//menu.AddItem(new GUIContent("Code Generator Options"), false, () => {
-						//	ActionWindow.ShowWindow(() => {
-						//		ShowGenerateCSharpGUI();
-						//	});
-						//});
 						//menu.AddItem(new GUIContent("Graph Explorer"), false, () => {
 						//	ExplorerWindow.ShowWindow();
 						//});
@@ -753,17 +749,6 @@ namespace MaxyGames.UNode.Editors {
 							uNodeEditorUtility.ProBinding.CallbackShowCSharpPreview?.Invoke();
 						});
 #endif
-						//menu.AddSeparator("");
-						//menu.AddItem(new GUIContent("Import"), false, () => {
-						//	ActionWindow.ShowWindow(() => {
-						//		ShowImportGUI();
-						//	});
-						//});
-						//menu.AddItem(new GUIContent("Export"), false, () => {
-						//	ActionWindow.ShowWindow(() => {
-						//		ShowExportGUI();
-						//	});
-						//});
 						menu.AddSeparator("");
 						//menu.AddItem(new GUIContent("Fix missing members"), false, () => {
 						//	RefactorWindow.Refactor(editorData.graph);

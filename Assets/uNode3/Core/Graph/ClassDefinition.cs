@@ -65,7 +65,7 @@ namespace MaxyGames.UNode {
 		allowAutoCompile = true,
 		isScriptGraph = false,
 		generationKind = GenerationKind.Performance)]
-	public class ClassDefinition : GraphAsset, IClassDefinition, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IStateGraph, IIndependentGraph, IClassIdentifier, IReflectionType, IInterfaceSystem, IGraphWithEventGraph {
+	public class ClassDefinition : GraphAsset, IClassDefinition, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IStateGraph, IIndependentGraph, IClassIdentifier, IReflectionType, IInterfaceSystem, IGraphWithEventGraph, IReflectionGraph {
 		public string @namespace;
 		public List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections", "System.Collections.Generic" };
 

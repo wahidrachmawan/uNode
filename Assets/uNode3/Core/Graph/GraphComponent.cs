@@ -14,7 +14,7 @@ namespace MaxyGames.UNode {
 		inherithFrom = typeof(RuntimeBehaviour),
 		generationKind = GenerationKind.Compatibility)]
 	[AddComponentMenu("uNode/Graph Component")]
-	public class GraphComponent : BaseRuntimeBehaviour, IInstancedGraph, IClassGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IGraphWithEventGraph, IStateGraph, IIndependentGraph, IRuntimeGraph {
+	public class GraphComponent : BaseRuntimeBehaviour, IInstancedGraph, IClassGraph, IGraphWithVariables, IGraphWithProperties, IGraphWithFunctions, IGraphWithEventGraph, IStateGraph, IIndependentGraph, IRuntimeGraph, IReflectionGraph {
 		[SerializeField]
 		protected string graphName;
 		public List<string> usingNamespaces = new List<string>() { "UnityEngine", "System.Collections", "System.Collections.Generic" };

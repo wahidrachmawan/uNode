@@ -47,7 +47,7 @@ namespace MaxyGames.UNode.Editors {
 		protected override string NodeTitle {
 			get {
 				MultipurposeNode node = nodeObject.node as MultipurposeNode;
-				if(uNodeUtility.preferredDisplay == DisplayKind.Normal && !node.target.isStatic) {
+				if(node.GetType() == typeof(MultipurposeNode) && uNodeUtility.preferredDisplay == DisplayKind.Normal && !node.target.isStatic) {
 					return uNodeUtility.GetNicelyDisplayName(node.target, DisplayKind.Partial);
 				}
 				return base.NodeTitle;
