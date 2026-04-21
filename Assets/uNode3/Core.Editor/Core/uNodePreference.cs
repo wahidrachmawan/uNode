@@ -842,6 +842,16 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			public static Dictionary<Type, Color> colorMap = new Dictionary<Type, Color>();
 			public static Dictionary<Type, Texture> iconMap = new Dictionary<Type, Texture>();
 
+			private static TypeIcons.BaseAssemblyTypeIconAttribute[] m_assemblyTypeIconAttributes;
+			public static TypeIcons.BaseAssemblyTypeIconAttribute[] assemblyTypeIconAttributes {
+				get {
+					if(m_assemblyTypeIconAttributes == null) {
+						m_assemblyTypeIconAttributes = ReflectionUtils.GetAssemblyAttributes<TypeIcons.BaseAssemblyTypeIconAttribute>().ToArray();
+					}
+					return m_assemblyTypeIconAttributes;
+				}
+			}
+
 			public static List<(Type, Texture)> staticIconCache = new List<(Type, Texture)>();
 			public static List<(Type, Color)> staticColorCache = new List<(Type, Color)>();
 
@@ -1036,9 +1046,15 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			// 	result = GetIconForType(typeof(TypeIcons.BugIcon));
 			// } 
 			else {
+				foreach(var att in Cached.assemblyTypeIconAttributes) {
+					result = att.GetIcon(type);
+					if(result != null) {
+						return Cached.iconMap[type] = result;
+					}
+				}
 				var t = uNodeEditorUtility.GetTypeForIcon(type);
 				//For avoid recursion
-				if(t == type || t != null) {
+				if(t == type || t == null) {
 					var att = typeof(TypeIcons.ObjectIcon).GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
 					result = att.GetIcon();
 
@@ -1049,6 +1065,9 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 				}
 				else {
 					result = GetIconForType(t);
+					if(result == null) {
+						result = GetCSScriptIcon();
+					}
 				}
 			}
 			return Cached.iconMap[type] = result;

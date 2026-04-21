@@ -105,10 +105,9 @@ namespace MaxyGames.UNode.Nodes {
 			string iterator = CG.SetValue(vName, CG.Value(step), iteratorSetType);
 			if(!string.IsNullOrEmpty(data) && !string.IsNullOrEmpty(iterator)) {
 				var content = CG.FlowFinish(enter, exit);
-				data = CG.For(CG.DeclareVariable(index, indexType, CG.Value(start), body).RemoveSemicolon(), data, iterator,
+				return CG.For(CG.DeclareVariable(index, indexType, CG.Value(start), body).RemoveSemicolon(), data, iterator,
 					CG.Flow(body)) +
-					content.AddFirst("\n");
-				return data;
+					content.AddLineInFirst();
 			}
 			return null;
 		}

@@ -16,7 +16,6 @@ namespace MaxyGames.UNode {
 		private static Dictionary<Assembly, Type[]> assemblyTypeMap = new Dictionary<Assembly, Type[]>();
 		private static Dictionary<Type, ConstructorInfo> defaultTypeConstructor = new Dictionary<Type, ConstructorInfo>();
 
-
 		private static Assembly[] loadedAssemblies, assemblies;
 		private static Assembly[] runtimeAssembly = new Assembly[0];
 		private static HashSet<Assembly> loadedRuntimeAssemblies = new HashSet<Assembly>();
@@ -46,8 +45,9 @@ namespace MaxyGames.UNode {
 		public static void RegisterRuntimeAssembly(Assembly assembly) {
 			if(assembly == null)
 				return;
-			uNodeUtility.AddArrayAt(ref runtimeAssembly, assembly, 0);
-			loadedRuntimeAssemblies.Add(assembly);
+			if(loadedRuntimeAssemblies.Add(assembly)) {
+				uNodeUtility.AddArrayAt(ref runtimeAssembly, assembly, 0);
+			}
 		}
 
 		/// <summary>

@@ -9,7 +9,11 @@ using System.Reflection;
 namespace MaxyGames.UNode.Editors {
 	public static class UInspector {
 		public static void Draw(UBind property) {
-			Draw(property, label: null);
+			Draw(property, false, true, null);
+		}
+
+		public static void Draw(UBind property, GUIContent label) {
+			Draw(property, false, true, label);
 		}
 
 		public static void Draw(DrawerOption option) {

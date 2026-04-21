@@ -3,8 +3,8 @@ using UnityEditor;
 
 namespace MaxyGames.UNode.Editors {
 	public class About : EditorWindow {
-		public const string version = "3.2.9";
-		public const float compilerVersion = 3.29f;
+		public const string version = "3.2.10";
+		public const float compilerVersion = 3.2_10f;
 
 		GUIStyle PublisherNameStyle, headerStyle, infoStyle;
 		GUIStyle ToolBarStyle;

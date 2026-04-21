@@ -100,6 +100,74 @@ namespace MaxyGames.UNode {
 			#endregion
 		}
 
+		public interface ITypeIconFilter {
+			bool IsValid(Type type);
+		}
+
+		public abstract class BaseAssemblyTypeIconAttribute : Attribute {
+			public abstract Texture GetIcon(Type type);
+		}
+
+		[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+		public class RegisterIconGuidAttribute : BaseAssemblyTypeIconAttribute {
+			public Type type;
+			public bool includeInherit;
+			public Type typeFilter;
+
+			public string guid;
+			public Color colorTint;
+
+			private Texture texture;
+			private bool hasInitialize;
+			private ITypeIconFilter filter;
+
+			public RegisterIconGuidAttribute(Type type, string guid, bool includeInherit = false) {
+				this.type = type;
+				this.guid = guid;
+				this.includeInherit = includeInherit;
+			}
+
+			public RegisterIconGuidAttribute(Type type, string guid, float redTint, float greenTint, float blueTint, float alphaTint = 1, bool includeInherit = false) {
+				this.type = type;
+				this.guid = guid;
+				this.includeInherit = includeInherit;
+				this.colorTint = new Color(redTint, greenTint, blueTint, alphaTint);
+			}
+
+			public override Texture GetIcon(Type type) {
+#if UNITY_EDITOR
+				if(type == null || type == this.type || includeInherit && type.IsCastableTo(this.type)) {
+					if(typeFilter != null) {
+						if(filter == null) {
+							filter = Activator.CreateInstance(typeFilter) as ITypeIconFilter;
+						}
+						if(filter != null && filter.IsValid(type) == false) {
+							return null;
+						}
+					}
+					if(hasInitialize == false) {
+						hasInitialize = true;
+						var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+						if(string.IsNullOrEmpty(path) == false) {
+							var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+							if(colorTint != default) {
+								if(asset.isReadable == false) {
+									Debug.LogError($"Attempt to tint texture: {asset} which is not readable, please make the texture readable in the Texture Import Settings", asset);
+								}
+								else {
+									asset = uNodeUtility.TintTexture(asset, colorTint);
+								}
+							}
+							texture = asset;
+						}
+					}
+					return texture;
+				}
+#endif
+				return null;
+			}
+		}
+
 		static readonly Dictionary<Texture, Type> typeMap = new Dictionary<Texture, Type>();
 
 		/// <summary>

@@ -1816,6 +1816,33 @@ namespace MaxyGames.UNode {
 			return SerializerUtility.Duplicate(value);
 		}
 
+		public static Texture2D TintTexture(Texture2D texture2D, Color tint) {
+			// cache variables
+			int width = texture2D.width;
+			int height = texture2D.height;
+			Color[] pixels = new Color[width * height];
+			int pixelIndex = 0;
+
+			// iterate through each pixel
+			for(int i = 0; i < width; i++) {
+				for(int j = 0; j < height; j++) {
+					pixels[pixelIndex] = texture2D.GetPixel(j, i) * tint;
+					pixelIndex++;
+				}
+			}
+
+			// build a new texture from the pixels
+			Texture2D result = new Texture2D(width, height);
+			result.SetPixels(pixels);
+			result.Apply();
+
+			result.hideFlags = HideFlags.DontSave;
+
+			uNodeUtility.temporaryObjects.Add(result);
+
+			return result;
+		}
+
 		public static bool IsValidAsyncType(Type type) {
 			if(type == typeof(void))
 				return true;
@@ -2004,7 +2031,7 @@ namespace MaxyGames.UNode {
 							Debug.LogError($"Attempt to tint texture: {icon} which is not readable, please make the texture readable in the Texture Import Settings", icon);
 						}
 						else {
-							m_icon = TintTexture(icon, colorTint);
+							m_icon = uNodeUtility.TintTexture(icon, colorTint);
 						}
 					}
 				}
@@ -2013,33 +2040,6 @@ namespace MaxyGames.UNode {
 		}
 
 		public Type Type => type.type;
-
-		private static Texture2D TintTexture(Texture2D texture2D, Color tint) {
-			// cache variables
-			int width = texture2D.width;
-			int height = texture2D.height;
-			Color[] pixels = new Color[width * height];
-			int pixelIndex = 0;
-
-			// iterate through each pixel
-			for(int i = 0; i < width; i++) {
-				for(int j = 0; j < height; j++) {
-					pixels[pixelIndex] = texture2D.GetPixel(j, i) * tint;
-					pixelIndex++;
-				}
-			}
-
-			// build a new texture from the pixels
-			Texture2D result = new Texture2D(width, height);
-			result.SetPixels(pixels);
-			result.Apply();
-
-			result.hideFlags = HideFlags.DontSave;
-			
-			uNodeUtility.temporaryObjects.Add(result);
-
-			return result;
-		}
 	}
 
 	/// <summary>
