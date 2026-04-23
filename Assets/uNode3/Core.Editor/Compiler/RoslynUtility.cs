@@ -209,7 +209,6 @@ namespace MaxyGames.UNode.Editors {
 			public static bool? hasDefaultAssembly;
 			public static UnityEditor.Compilation.Assembly assemblyCSharp;
 
-			public static ISourceGenerator[] sourceGenerators;
 			public static IIncrementalGenerator[] incrementalGenerators;
 
 			static int _index;
@@ -277,17 +276,16 @@ namespace MaxyGames.UNode.Editors {
 			return result;
 		}
 
-		private static void AppendSourceGenerators(Assembly assembly, ref List<ISourceGenerator> sourceGenerators, ref List<IIncrementalGenerator> incrementalGenerators) {
+		private static void AppendSourceGenerators(Assembly assembly, ref List<IIncrementalGenerator> incrementalGenerators) {
 			try {
 				foreach(var type in assembly.GetTypes()) {
 					if(typeof(ISourceGenerator).IsAssignableFrom(type)) {
 						if(ReflectionUtils.CanCreateInstance(type)) {
-							sourceGenerators.Add(ReflectionUtils.CreateInstance(type) as ISourceGenerator);
+							incrementalGenerators.Add((ReflectionUtils.CreateInstance(type) as ISourceGenerator).AsIncrementalGenerator());
 						}
 					}
 					else if(typeof(IIncrementalGenerator).IsAssignableFrom(type)) {
 						if(ReflectionUtils.CanCreateInstance(type)) {
-							sourceGenerators.Add((ReflectionUtils.CreateInstance(type) as IIncrementalGenerator).AsSourceGenerator());
 							incrementalGenerators.Add(ReflectionUtils.CreateInstance(type) as IIncrementalGenerator);
 						}
 					}
@@ -303,7 +301,7 @@ namespace MaxyGames.UNode.Editors {
 #endif
 		}
 
-		private static void GetRoslynGenerators(out ISourceGenerator[] sourceGenerators, out IIncrementalGenerator[] incrementalGenerators) {
+		private static void GetRoslynGenerators(out IIncrementalGenerator[] incrementalGenerators) {
 			//if(SourceGenData.sourceGenerators != null) {
 			//	sourceGenerators = SourceGenData.sourceGenerators;
 			//	incrementalGenerators = SourceGenData.incrementalGenerators;
@@ -312,21 +310,20 @@ namespace MaxyGames.UNode.Editors {
 				var assembly = AssemblyCSharp;
 				var paths = assembly.compilerOptions.RoslynAnalyzerDllPaths.ToHashSet();
 
-				List<ISourceGenerator> sGenerators = new List<ISourceGenerator>();
 				List<IIncrementalGenerator> iGenerators = new List<IIncrementalGenerator>();
 				List<Assembly> assemblies = new List<Assembly>();
 				foreach(var path in paths) {
+					if(path.EndsWith("CodeFixes.dll", StringComparison.Ordinal))
+						continue;
 					assemblies.Add(Assembly.Load(File.ReadAllBytes(path)));
 				}
 				foreach(var ass in assemblies) {
-					AppendSourceGenerators(ass, ref sGenerators, ref iGenerators);
+					AppendSourceGenerators(ass, ref iGenerators);
 					ReflectionUtils.RegisterPrivateLoadedAssembly(ass);
 				}
-				CachedData.sourceGenerators = sourceGenerators = sGenerators.ToArray();
 				CachedData.incrementalGenerators = incrementalGenerators = iGenerators.ToArray();
 			}
 			else {
-				sourceGenerators = Array.Empty<ISourceGenerator>();
 				incrementalGenerators = Array.Empty<IIncrementalGenerator>();
 			}
 		}
@@ -474,8 +471,8 @@ namespace MaxyGames.UNode.Editors {
 				options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug));
 
 			if(Data.useSourceGenerators()) {
-				GetRoslynGenerators(out var sourceGenerators, out _);
-				CSharpGeneratorDriver.Create(sourceGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
+				GetRoslynGenerators(out var incrementalGenerators);
+				CSharpGeneratorDriver.Create(incrementalGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
 				compilation = compilationUpdated as CSharpCompilation;
 			}
 			using(var assemblyStream = new MemoryStream())
@@ -574,8 +571,8 @@ namespace MaxyGames.UNode.Editors {
 				options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug));
 			
 			if(Data.useSourceGenerators()) {
-				GetRoslynGenerators(out var sourceGenerators, out _);
-				CSharpGeneratorDriver.Create(sourceGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
+				GetRoslynGenerators(out var incrementalGenerators);
+				CSharpGeneratorDriver.Create(incrementalGenerators).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
 				compilation = compilationUpdated as CSharpCompilation;
 			}
 			using(var assemblyStream = new MemoryStream())

@@ -278,9 +278,6 @@ namespace MaxyGames {
 		public static bool IsStateFlow(FlowInput port) {
 			if (port == null)
 				return false;
-#if UNODE_DEV
-			
-#endif
 			return generatorData.stateNodes.Contains(port);
 		}
 

@@ -1,0 +1,22 @@
+{
+    "name": "MaxyGames.CompilerRunner",
+    "rootNamespace": "MaxyGames.CompilerRunner",
+    "references": [
+        "GUID:acc0f0663d7265e4bb62dd68c81486c7"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Microsoft.CodeAnalysis.dll",
+        "Microsoft.CodeAnalysis.CSharp.dll",
+        "System.Collections.Immutable.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
