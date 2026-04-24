@@ -10,9 +10,10 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using System.IO.Pipes;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace MaxyGames.CodeCompiler {
-	public class Program {
+	static class Program {
 		static readonly string mainPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		static readonly string runnerConfigPath = Path.Combine(mainPath, "Runner.config");
 		static readonly string runnerPidPath = Path.Combine(mainPath, "Runner.pid");
@@ -31,7 +32,6 @@ namespace MaxyGames.CodeCompiler {
 				Console.CancelKeyPress += (sender, e) => {
 					OnClose();
 				};
-				List<(string path, string fullname)> allReferences = new();
 				foreach(var line in File.ReadAllLines(runnerConfigPath)) {
 					AssemblyReferences.AddReference(line);
 				}
@@ -66,39 +66,38 @@ namespace MaxyGames.CodeCompiler {
 			}
 			else {
 				while(true) {
-					var pipeServer = new NamedPipeServerStream(CodeCompiler.PipeName, PipeDirection.In, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+					var pipeServer = new NamedPipeServerStream(CodeCompiler.PipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 					Console.WriteLine("Waiting for connection...");
 					pipeServer.WaitForConnection();
-					var clientTask = Task.Run(async () => {
-						await HandleClientAsync(pipeServer);
+					Task.Run(async () => {
+						try {
+							await HandleClientAsync(pipeServer);
+						}
+						finally {
+							pipeServer.Dispose(); 
+						}
 					});
-					_clientTask.Add(clientTask);
+					//_clientTask.Add(clientTask);
 				}
 			}
 		}
 
-		private static List<Task> _clientTask = new List<Task>();
+		//private static List<Task> _clientTask = new List<Task>();
 
 		private static async Task HandleClientAsync(NamedPipeServerStream pipeServer) {
-			using(var reader = new StreamReader(pipeServer)) {
-				string line = await reader.ReadLineAsync();
-				if(File.Exists(line)) {
-					var option = CodeCompiler.GetOption(File.ReadAllText(line));
+			var data = await PipeHelper.ReceiveStringAsync(pipeServer);
+			var option = CodeCompiler.GetOption(data);
+			Console.WriteLine("Compiling: " + option.AssemblyName);
 
-					Console.WriteLine("Compiling: " + option.AssemblyName);
+			var result = CodeCompiler.Run(option);
 
-					var result = CodeCompiler.Run(option);
-					
-					Console.WriteLine($"Compilation {(result.Success ? "succeeded" : "failed")}");
-					if(!result.Success) {
-						Console.WriteLine("Errors:");
-						foreach(var error in result.Errors) {
-							Console.WriteLine(error);
-						}
-					}
-				}
-				else {
-					Console.WriteLine($"File not found: {line}");
+			await PipeHelper.SendStringAsync(pipeServer, CodeCompiler.Serialize(result));
+
+			Console.WriteLine($"Compilation {(result.Success ? "succeeded" : "failed")}");
+			if(!result.Success) {
+				Console.WriteLine("Errors:");
+				foreach(var error in result.Errors) {
+					Console.WriteLine(error);
 				}
 			}
 		}
@@ -143,6 +142,11 @@ namespace MaxyGames.CodeCompiler {
 			try {
 				if(File.Exists(path) == false) {
 					//Console.WriteLine($"Reference file not found: {path}");
+					return;
+				}
+				var index = allReferences.FindIndex(r => r.path == path);
+				if(index >= 0) {
+					//Console.WriteLine($"Reference already added: {path}");
 					return;
 				}
 				var assemblyName = AssemblyName.GetAssemblyName(path);
@@ -343,8 +347,8 @@ namespace MaxyGames.CodeCompiler {
 			embeddedTexts = new List<EmbeddedText>();
 			foreach(var path in paths) {
 				var script = File.ReadAllText(path);
-				var buffer = System.Text.Encoding.UTF8.GetBytes(script);
-				var sourceText = SourceText.From(buffer, buffer.Length, System.Text.Encoding.UTF8, canBeEmbedded: true);
+				var buffer = Encoding.UTF8.GetBytes(script);
+				var sourceText = SourceText.From(buffer, buffer.Length, Encoding.UTF8, canBeEmbedded: true);
 				var tree = CSharpSyntaxTree.ParseText(
 						sourceText,
 						options: new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols),
@@ -449,5 +453,32 @@ namespace MaxyGames.CodeCompiler {
 		public bool RunILPP { get; set; }
 
 		public OptimizationLevel OptimizationLevel { get; set; } = OptimizationLevel.Debug;
+	}
+}
+
+namespace MaxyGames {
+	public static class PipeHelper {
+		public static async Task SendStringAsync(Stream pipe, string message) {
+			byte[] data = Encoding.UTF8.GetBytes(message);
+			byte[] lenBytes = BitConverter.GetBytes(data.Length);
+			await pipe.WriteAsync(lenBytes, 0, 4);
+			await pipe.WriteAsync(data, 0, data.Length);
+			await pipe.FlushAsync();
+		}
+
+		public static async Task<string> ReceiveStringAsync(Stream pipe) {
+			byte[] lenBuf = new byte[4];
+			int read = 0;
+			while(read < 4)
+				read += await pipe.ReadAsync(lenBuf, read, 4 - read);
+			int length = BitConverter.ToInt32(lenBuf, 0);
+
+			byte[] buffer = new byte[length];
+			read = 0;
+			while(read < length)
+				read += await pipe.ReadAsync(buffer, read, length - read);
+
+			return Encoding.UTF8.GetString(buffer);
+		}
 	}
 }

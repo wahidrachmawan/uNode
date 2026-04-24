@@ -12,7 +12,7 @@ using System.Threading;
 namespace MaxyGames.CompilerBuilder {
 	[InitializeOnLoad]
 	public static class RoslynCodeCompiler {
-		public const string RuntimeConfig = @"{
+		const string RuntimeConfig = @"{
 	""runtimeOptions"": {
 		""tfm"": ""net6.0"",
 		""rollForward"": ""LatestMinor"",
@@ -22,17 +22,31 @@ namespace MaxyGames.CompilerBuilder {
 		}
 	}
 }";
-		public const string RunnerExecutablePath = "Library/uNodeRoslynCompiler/Runner.exe";
+		public const string RunnerExecutablePath = "Library/uNodeRoslynCompiler/Runner.dll";
 		public const string RunnerDirectoryPath = "Library/uNodeRoslynCompiler";
 
 		static RoslynCodeCompiler() {
-			//EditorApplication.delayCall += () => {
-			//	if(!File.Exists(RunnerExecutablePath)) {
-			//		Build();
-			//	}
-			//};
-			EditorApplication.quitting -= Close;
-			EditorApplication.quitting += Close;
+			EditorApplication.quitting -= CloseCodeCompiler;
+			EditorApplication.quitting += CloseCodeCompiler;
+
+			if(EditorUtility.scriptCompilationFailed == false && SessionState.GetBool("uNode_RoslynCodeCompilerInitialized", false) == false) {
+				var codeCompilerName = typeof(MaxyGames.CodeCompiler.CodeCompiler).Assembly.GetName().Name;
+				var codeCompilerAssembly = CompilationPipeline.GetAssemblies(AssembliesType.Editor).FirstOrDefault(asm => asm.name == codeCompilerName);
+				if(codeCompilerAssembly != null) {
+					new Thread(() => {
+						Build(RunnerExecutablePath, codeCompilerAssembly);
+						EditorApplication.delayCall += () => {
+							SessionState.SetBool("uNode_RoslynCodeCompilerInitialized", true);
+							//if(File.Exists(RunnerExecutablePath)) {
+							//	Debug.Log("Roslyn Code Compiler initialized successfully.");
+							//}
+							//else {
+							//	Debug.LogError("Failed to initialize Roslyn Code Compiler.");
+							//}
+						};
+					}).Start();
+				}
+			}
 		}
 
 #if UNODE_DEV
@@ -48,6 +62,11 @@ namespace MaxyGames.CompilerBuilder {
 		}
 #endif
 
+		/// <summary>
+		/// Runs the code compiler with the specified options, building the runner executable if necessary.
+		/// </summary>
+		/// <param name="option">The options to use for the code compilation.</param>
+		/// <param name="onComplete">An optional callback invoked with the compilation result.</param>
 		public static void Run(CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete = null) {
 			if(!File.Exists(RunnerExecutablePath)) {
 				Debug.Log("Runner not found, building...");
@@ -59,6 +78,10 @@ namespace MaxyGames.CompilerBuilder {
 		static void Build(string outputPath) {
 			var codeCompilerName = typeof(MaxyGames.CodeCompiler.CodeCompiler).Assembly.GetName().Name;
 			var codeCompilerAssembly = CompilationPipeline.GetAssemblies(AssembliesType.Editor).FirstOrDefault(asm => asm.name == codeCompilerName);
+			Build(outputPath, codeCompilerAssembly);
+		}
+
+		static void Build(string outputPath, Assembly codeCompilerAssembly) {
 			if(codeCompilerAssembly == null) {
 				Debug.LogError("CodeCompiler assembly not found");
 				return;
@@ -83,15 +106,16 @@ namespace MaxyGames.CompilerBuilder {
 			CreateConfigFile(outputPath);
 			CreateCompilerOptionFile(outputPath);
 
+#if UNODE_DEV
 			Debug.Log("Runner built successfully on: " + outputPath);
+#endif
 		}
 
 		static void Run(string runnerPath, CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete = null) {
 			if(File.Exists(runnerPath)) {
 				string pidPath = Path.Combine(RunnerDirectoryPath, "Runner.pid");
 
-				void RequestCompile() => SendOptionFile(
-					Path.Combine(Path.GetDirectoryName(option.OutputPath), Path.ChangeExtension(Path.GetFileName(option.OutputPath), "option")),
+				void RequestCompile() => SendData(
 					option,
 					onComplete ?? OnCompileComplete
 				);
@@ -111,6 +135,12 @@ namespace MaxyGames.CompilerBuilder {
 					File.Delete(pidPath);
 				}
 				CreateConfigFile(RunnerExecutablePath);
+
+				if(Directory.Exists(Path.Combine(RunnerDirectoryPath, "Output"))) {
+					// Clean up old output to prevent confusion
+					Directory.Delete(Path.Combine(RunnerDirectoryPath, "Output"), true);
+				}
+
 #if UNITY_EDITOR_WIN && !UNODE_DEV && false
 				System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
 					FileName = Path.GetFullPath(runnerPath),
@@ -221,7 +251,9 @@ namespace MaxyGames.CompilerBuilder {
 				AssemblyName = assemblyName,
 				Defines = assembly.defines,
 				OutputPath = Path.GetFullPath(Path.Combine(RunnerDirectoryPath, $"Output/Assembly{Interlocked.Increment(ref id)}.dll")),
+#if UNODE_DEV
 				OutputResultPath = Path.GetFullPath(Path.Combine(RunnerDirectoryPath, $"Output/Assembly{id}.result")),
+#endif
 				References = assembly.allReferences.Select(path => Path.GetFullPath(path)).ToArray(),
 				SourceFiles = assembly.sourceFiles.Select(path => Path.GetFullPath(path)).ToArray(),
 				ScriptCompilerOptions = new CodeCompiler.ScriptCompilerOptions() {
@@ -247,82 +279,38 @@ namespace MaxyGames.CompilerBuilder {
 			);
 		}
 
-		public static void Close() {
-			var pidPath = Path.Combine(RunnerDirectoryPath, "Runner.pid");
-			if(File.Exists(pidPath)) {
-				int pid = int.Parse(File.ReadAllText(pidPath));
-				try {
-					var proc = System.Diagnostics.Process.GetProcessById(pid);
-					proc.Kill();
-				}
-				catch { }
-				File.Delete(pidPath);
-			}
+		#region SendData
+		private static void SendData(CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete) {
+			new Thread(() => SendDataAsync(option, onComplete)).Start();
 		}
 
-		static void OnCompileComplete(CodeCompiler.CodeCompilerResult result) {
-			if(result.Success) {
-				if(result.ILPPApplied) {
-					Debug.Log("Compilation succeeded with ILPP applied");
-				}
-				else {
-					Debug.Log("Compilation succeeded");
-				}
-			}
-			else {
-				Debug.LogError("Compilation failed");
-				foreach(var error in result.Errors) {
-					Debug.LogError(error);
-				}
-			}
-		}
+		private static async void SendDataAsync(CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete) {
+#if UNODE_DEV
+			Debug.Log("Sending compilation request to runner...");
+			var stopwatch = new System.Diagnostics.Stopwatch();
+			stopwatch.Start();
+#endif
 
-		private static void SendOptionFile(string optionPath, CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete) {
-			optionPath = Path.GetFullPath(optionPath);
-			Directory.CreateDirectory(Path.GetDirectoryName(optionPath));
-			File.WriteAllText(optionPath, CodeCompiler.CodeCompiler.Serialize(option));
-
-			if(File.Exists(option.OutputResultPath)) {
+			if(string.IsNullOrEmpty(option.OutputResultPath) == false && File.Exists(option.OutputResultPath)) {
 				// Ensure old result file is deleted before compilation to prevent reading stale results
 				File.Delete(option.OutputResultPath);
 			}
-
-			using var pipeClient = new System.IO.Pipes.NamedPipeClientStream(".", CodeCompiler.CodeCompiler.PipeName, System.IO.Pipes.PipeDirection.Out);
+			using var pipeClient = new System.IO.Pipes.NamedPipeClientStream(".", CodeCompiler.CodeCompiler.PipeName, System.IO.Pipes.PipeDirection.InOut);
 			pipeClient.Connect(1000);
 
-			using var writer = new StreamWriter(pipeClient, System.Text.Encoding.UTF8);
-			writer.Write(optionPath);
-			writer.Flush();
+			await PipeHelper.SendStringAsync(pipeClient, CodeCompiler.CodeCompiler.Serialize(option));
 
-			var times = DateTime.Now.Ticks;
-			new Thread(async () => {
-				while(pipeClient.IsConnected) {
-					await System.Threading.Tasks.Task.Delay(10);
-				}
-				while(!File.Exists(option.OutputResultPath)) {
-					if(DateTime.Now.Ticks - times > 30 * TimeSpan.TicksPerSecond) {
-						Debug.LogError("Compilation timed out");
-						return;
-					}
-					await System.Threading.Tasks.Task.Delay(1);
-				}
-				const int maxRetries = 5;
-				const int delayMs = 100;
-				for(int i = 0; i < maxRetries; i++) {
-					try {
-						var result = CodeCompiler.CodeCompiler.Deserialize<CodeCompiler.CodeCompilerResult>(File.ReadAllText(option.OutputResultPath));
-						onComplete?.Invoke(result);
-						return;
-					}
-					catch(IOException) {
-						if(i == maxRetries - 1)
-							throw;
-						Thread.Sleep(delayMs);
-					}
-				}
-			}).Start();
+			var resultString = await PipeHelper.ReceiveStringAsync(pipeClient);
+			var result = CodeCompiler.CodeCompiler.Deserialize<CodeCompiler.CodeCompilerResult>(resultString);
+			onComplete?.Invoke(result);
+
+#if UNODE_DEV
+			Debug.Log("Elapsed time: " + stopwatch.ElapsedMilliseconds + " ms");
+#endif
 		}
+		#endregion
 
+		#region Dotnet
 		static string dotnetPath;
 		static string FindDotnetExecutable() {
 			if(dotnetPath == null) {
@@ -385,6 +373,39 @@ namespace MaxyGames.CompilerBuilder {
 			catch { }
 			return false;
 		}
+		#endregion
+
+		#region Callback
+		static void CloseCodeCompiler() {
+			var pidPath = Path.Combine(RunnerDirectoryPath, "Runner.pid");
+			if(File.Exists(pidPath)) {
+				int pid = int.Parse(File.ReadAllText(pidPath));
+				try {
+					var proc = System.Diagnostics.Process.GetProcessById(pid);
+					proc.Kill();
+				}
+				catch { }
+				File.Delete(pidPath);
+			}
+		}
+
+		static void OnCompileComplete(CodeCompiler.CodeCompilerResult result) {
+			if(result.Success) {
+				if(result.ILPPApplied) {
+					Debug.Log("Compilation succeeded with ILPP applied");
+				}
+				else {
+					Debug.Log("Compilation succeeded");
+				}
+			}
+			else {
+				Debug.LogError("Compilation failed");
+				foreach(var error in result.Errors) {
+					Debug.LogError(error);
+				}
+			}
+		}
+		#endregion
 
 		private class CachedData {
 			internal static Assembly assemblyCSharp;
