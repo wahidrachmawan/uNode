@@ -108,13 +108,22 @@ namespace MaxyGames.CodeCompiler {
 			public AssemblyName name;
 			public string path;
 			public string fullname;
+
+			private DateTime _lastWriteTime;
 			private Assembly _assembly;
 			public Assembly assembly {
 				get {
-					if(_assembly == null) {
+					var lastWriteTime = File.GetLastWriteTime(path);
+					if(_assembly == null || lastWriteTime != _lastWriteTime) {
 						try {
-							Console.WriteLine("() => Resolving assembly: " + fullname);
-							_assembly = Assembly.LoadFile(path);
+							if(lastWriteTime != _lastWriteTime) {
+								Console.WriteLine("() => Resolving assembly: " + fullname);
+							}
+							else {
+								Console.WriteLine("() => Re-resolving assembly: " + fullname);
+							}
+							_lastWriteTime = lastWriteTime;
+							_assembly = Assembly.Load(File.ReadAllBytes(path));
 						}
 						catch(Exception ex) {
 							Console.WriteLine($"Failed to load assembly: {path}");
@@ -138,12 +147,19 @@ namespace MaxyGames.CodeCompiler {
 			}
 		}
 
+		//static string[] excludedAssemblies = new[] { "Unity.UNodeECS.CodeGen.dll", "Unity.CodeCompiler.CodeGen.dll" };
 		public static void AddReference(string path) {
 			try {
 				if(File.Exists(path) == false) {
 					//Console.WriteLine($"Reference file not found: {path}");
 					return;
 				}
+				//for(int i = 0; i < excludedAssemblies.Length; i++) {
+				//	if(path.EndsWith(excludedAssemblies[i])) {
+				//		//This to make sure we skip the codegen assembly
+				//		return;
+				//	}
+				//}
 				var index = allReferences.FindIndex(r => r.path == path);
 				if(index >= 0) {
 					//Console.WriteLine($"Reference already added: {path}");

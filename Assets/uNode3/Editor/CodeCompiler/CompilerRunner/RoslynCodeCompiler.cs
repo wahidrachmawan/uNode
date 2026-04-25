@@ -28,25 +28,6 @@ namespace MaxyGames.CompilerBuilder {
 		static RoslynCodeCompiler() {
 			EditorApplication.quitting -= CloseCodeCompiler;
 			EditorApplication.quitting += CloseCodeCompiler;
-
-			if(EditorUtility.scriptCompilationFailed == false && SessionState.GetBool("uNode_RoslynCodeCompilerInitialized", false) == false) {
-				var codeCompilerName = typeof(MaxyGames.CodeCompiler.CodeCompiler).Assembly.GetName().Name;
-				var codeCompilerAssembly = CompilationPipeline.GetAssemblies(AssembliesType.Editor).FirstOrDefault(asm => asm.name == codeCompilerName);
-				if(codeCompilerAssembly != null) {
-					new Thread(() => {
-						Build(RunnerExecutablePath, codeCompilerAssembly);
-						EditorApplication.delayCall += () => {
-							SessionState.SetBool("uNode_RoslynCodeCompilerInitialized", true);
-							//if(File.Exists(RunnerExecutablePath)) {
-							//	Debug.Log("Roslyn Code Compiler initialized successfully.");
-							//}
-							//else {
-							//	Debug.LogError("Failed to initialize Roslyn Code Compiler.");
-							//}
-						};
-					}).Start();
-				}
-			}
 		}
 
 #if UNODE_DEV
@@ -68,10 +49,11 @@ namespace MaxyGames.CompilerBuilder {
 		/// <param name="option">The options to use for the code compilation.</param>
 		/// <param name="onComplete">An optional callback invoked with the compilation result.</param>
 		public static void Run(CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete = null) {
-			if(!File.Exists(RunnerExecutablePath)) {
-				Debug.Log("Runner not found, building...");
-				Build(RunnerExecutablePath);
-			}
+			//if(!File.Exists(RunnerExecutablePath)) {
+			//	Debug.Log("Runner not found, building...");
+			//	Build(RunnerExecutablePath);
+			//}
+			EnsureCompilerHasBuild();
 			Run(RunnerExecutablePath, option, onComplete);
 		}
 
@@ -137,8 +119,11 @@ namespace MaxyGames.CompilerBuilder {
 				CreateConfigFile(RunnerExecutablePath);
 
 				if(Directory.Exists(Path.Combine(RunnerDirectoryPath, "Output"))) {
-					// Clean up old output to prevent confusion
-					Directory.Delete(Path.Combine(RunnerDirectoryPath, "Output"), true);
+					try {
+						// Clean up old output to prevent confusion
+						Directory.Delete(Path.Combine(RunnerDirectoryPath, "Output"), true);
+					}
+					catch { }
 				}
 
 #if UNITY_EDITOR_WIN && !UNODE_DEV && false
@@ -406,6 +391,33 @@ namespace MaxyGames.CompilerBuilder {
 			}
 		}
 		#endregion
+
+		static void EnsureCompilerHasBuild() {
+			if(SessionState.GetBool("uNode_RoslynCodeCompilerInitialized", false) == false) {
+#if UNODE_DEV
+				Debug.Log("Building compiler runner...");
+#endif
+				Build(RunnerExecutablePath);
+				SessionState.SetBool("uNode_RoslynCodeCompilerInitialized", true);
+
+				//var codeCompilerName = typeof(MaxyGames.CodeCompiler.CodeCompiler).Assembly.GetName().Name;
+				//var codeCompilerAssembly = CompilationPipeline.GetAssemblies(AssembliesType.Editor).FirstOrDefault(asm => asm.name == codeCompilerName);
+				//if(codeCompilerAssembly != null) {
+				//	new Thread(() => {
+				//		Build(RunnerExecutablePath, codeCompilerAssembly);
+				//		EditorApplication.delayCall += () => {
+				//			SessionState.SetBool("uNode_RoslynCodeCompilerInitialized", true);
+				//			//if(File.Exists(RunnerExecutablePath)) {
+				//			//	Debug.Log("Roslyn Code Compiler initialized successfully.");
+				//			//}
+				//			//else {
+				//			//	Debug.LogError("Failed to initialize Roslyn Code Compiler.");
+				//			//}
+				//		};
+				//	}).Start();
+				//}
+			}
+		}
 
 		private class CachedData {
 			internal static Assembly assemblyCSharp;

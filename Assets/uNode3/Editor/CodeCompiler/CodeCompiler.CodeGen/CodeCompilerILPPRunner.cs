@@ -24,20 +24,52 @@ namespace MaxyGames.CodeCompiler {
 					}
 				}
 			}
-			foreach(var v in ilpp) {
-				//if(v.GetType().Name == "BurstILPostProcessor") continue;
-				if(v.WillProcess(compiledAssembly)) {
-					var iLPostProcessResult = v.Process(compiledAssembly);
-					if(iLPostProcessResult == null) {
-						continue;
-					}
-					if(iLPostProcessResult.InMemoryAssembly != null) {
-						if(iLPostProcessResult.InMemoryAssembly.PeData == null) {
-							Console.WriteLine("ILPostProcessor produced an assembly without PE data");
+
+			void Process(ILPostProcessor v) {
+				try {
+					if(v.WillProcess(compiledAssembly)) {
+						Console.WriteLine("\n\nProcessing ILPP: " + v.GetType().FullName);
+
+						var iLPostProcessResult = v.Process(compiledAssembly);
+
+						if(iLPostProcessResult == null) {
+							Console.WriteLine("Result is null");
+							return;
 						}
-						compiledAssembly.InMemoryAssembly = iLPostProcessResult.InMemoryAssembly;
+						if(iLPostProcessResult.InMemoryAssembly != null) {
+							if(iLPostProcessResult.InMemoryAssembly.PeData == null) {
+								Console.WriteLine("ILPostProcessor produced an assembly without PE data");
+							}
+							compiledAssembly.InMemoryAssembly = iLPostProcessResult.InMemoryAssembly;
+						}
+						else {
+							Console.WriteLine("Result InMemoryAssembly is null");
+						}
+						if(iLPostProcessResult.Diagnostics?.Count > 0) {
+							Console.WriteLine("----------DIAGONISTICS-------------");
+							foreach(var diag in iLPostProcessResult.Diagnostics) {
+								Console.WriteLine($"[{diag.DiagnosticType}]{diag.MessageData}\n\tOn file: {diag.File} ({diag.Line}-{diag.Column})");
+							}
+						}
 					}
 				}
+				catch {
+					Console.WriteLine("Error on processing ILPP: " + v.GetType().FullName);
+				}
+			}
+
+			ILPostProcessor burstILPP = null;
+			//Environment.SetEnvironmentVariable("UNITY_BURST_DEBUG", "3");
+			foreach(var v in ilpp) {
+				if(v.GetType().Name == "BurstILPostProcessor") {
+					burstILPP = v;
+					continue;
+				}
+				//if(v.GetType().Name == "EntitiesILPostProcessors") continue;
+				Process(v);
+			}
+			if(burstILPP != null) {
+				Process(burstILPP);
 			}
 			rawAssembly = compiledAssembly.InMemoryAssembly.PeData;
 			rawPdb = compiledAssembly.InMemoryAssembly.PdbData;
