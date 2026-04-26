@@ -104,6 +104,10 @@ namespace MaxyGames.UNode {
 			bool IsValid(Type type);
 		}
 
+		public interface ITypeIconSelector {
+			Texture GetIcon(Type type);
+		}
+
 		public abstract class BaseAssemblyTypeIconAttribute : Attribute {
 			public abstract Texture GetIcon(Type type);
 		}
@@ -112,7 +116,14 @@ namespace MaxyGames.UNode {
 		public class RegisterIconGuidAttribute : BaseAssemblyTypeIconAttribute {
 			public Type type;
 			public bool includeInherit;
+			/// <summary>
+			/// The value must implement <see cref="ITypeIconFilter"/>
+			/// </summary>
 			public Type typeFilter;
+			/// <summary>
+			/// The value must implement <see cref="ITypeIconSelector"/>
+			/// </summary>
+			public Type typeIconSelector;
 
 			public string guid;
 			public Color colorTint;
@@ -120,6 +131,7 @@ namespace MaxyGames.UNode {
 			private Texture texture;
 			private bool hasInitialize;
 			private ITypeIconFilter filter;
+			private ITypeIconSelector iconSelector;
 
 			public RegisterIconGuidAttribute(Type type, string guid, bool includeInherit = false) {
 				this.type = type;
@@ -136,13 +148,24 @@ namespace MaxyGames.UNode {
 
 			public override Texture GetIcon(Type type) {
 #if UNITY_EDITOR
-				if(type == null || type == this.type || includeInherit && type.IsCastableTo(this.type)) {
+				if(type == null || this.type == null || type == this.type || includeInherit && type.IsCastableTo(this.type)) {
 					if(typeFilter != null) {
 						if(filter == null) {
 							filter = Activator.CreateInstance(typeFilter) as ITypeIconFilter;
 						}
 						if(filter != null && filter.IsValid(type) == false) {
 							return null;
+						}
+					}
+					if(typeIconSelector != null) {
+						if(iconSelector == null) {
+							iconSelector = Activator.CreateInstance(typeIconSelector) as ITypeIconSelector;
+						}
+						if(iconSelector != null) {
+							var result = iconSelector.GetIcon(type);
+							if(result != null) {
+								return result;
+							}
 						}
 					}
 					if(hasInitialize == false) {

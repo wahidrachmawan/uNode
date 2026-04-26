@@ -547,14 +547,14 @@ namespace MaxyGames.UNode.Editors {
 			var types = FA.Types;
 			FA = new FilterAttribute(FA) {
 				MaxMethodParam = int.MaxValue,
-				ValidateType = (type) => {
+				ValidateType = filter.ValidateType ?? ((type) => {
 					for(int i = 0; i < types.Count; i++) {
 						if(NodeEditorUtility.CanAutoConvertType(type, types[i])) {
 							return true;
 						}
 					}
 					return false;
-				},
+				}),
 				// DisplayDefaultStaticType = false
 			};
 

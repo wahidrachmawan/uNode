@@ -2392,6 +2392,7 @@ namespace MaxyGames.UNode.Editors {
 					menu.AddDisabledItem(new GUIContent("Compile Graphs (Project + Scenes)"), false);
 				}
 				else {
+					GenerationUtility.MarkGraphDirty(tabData.owner);
 					if(preferenceData.generatorData.compilationMethod == CompilationMethod.Unity) {
 						menu.AddItem(new GUIContent("Compile Graphs (Project)"), false, () => {
 							uNodeEditor.AutoSaveCurrentGraph();

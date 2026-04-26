@@ -25,8 +25,6 @@ namespace MaxyGames.UNode.Nodes {
 		[HideInInspector]
 		public List<PortData> parameters = new List<PortData>();
 
-		private System.Delegate m_Delegate;
-
 		private Type _registeredType;
 
 		protected override void OnRegister() {
@@ -91,6 +89,7 @@ namespace MaxyGames.UNode.Nodes {
 				if(val == null) {
 					val = new MemberData.Event(target.DefaultValue.CreateRuntimeEvent(), flow.instance);
 				}
+				System.Delegate m_Delegate = null;
 				if(val is MemberData.Event) {
 					MemberData.Event e = val as MemberData.Event;
 					if(e.eventInfo != null) {
@@ -179,10 +178,14 @@ namespace MaxyGames.UNode.Nodes {
 					}
 					throw new Exception("Invalid target value: " + val);
 				}
+				if(m_Delegate != null) {
+					flow.SetElementData(this, m_Delegate);
+				}
 			}
 		}
 
 		private void OnUnregister(Flow flow) {
+			var m_Delegate = flow.GetElementData<System.Delegate>(this);
 			if(m_Delegate != null && target.isAssigned) {
 				object val = target.GetValue(flow);
 				if(val is MemberData.Event) {
@@ -346,7 +349,7 @@ namespace MaxyGames.UNode.Nodes {
 				var method = CG.GetUserObject<CG.MData>(this);
 				if(method == null) {
 					method = CG.generatorData.AddNewGeneratedMethod(
-						"EventHookDelegate",
+						CG.GenerateNewName("EventHookDelegate"),
 						delegateReturnType,
 						types.Select((t, index) => new CG.MPData(parameterNames[index], t)).ToArray());
 					method.AddCode(contents);

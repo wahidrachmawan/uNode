@@ -371,7 +371,7 @@ namespace MaxyGames.UNode {
 
 		public override RuntimeTypeHandle TypeHandle => default;
 
-		public override bool IsConstructedGenericType => true;
+		public override bool IsConstructedGenericType => false;
 
 		public override int GetHashCode() {
 			return RuntimeHelpers.GetHashCode(this);

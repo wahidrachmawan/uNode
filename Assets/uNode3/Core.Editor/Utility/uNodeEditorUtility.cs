@@ -103,10 +103,15 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUIUtility_GetIconForObject = typeof(EditorGUIUtility).GetMethod("GetIconForObject", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
 			}
 
+			/// <summary>
+			/// Get Icon by guid
+			/// </summary>
+			/// <param name="guid"></param>
+			/// <returns></returns>
 			public static Texture2D GetIconByGuid(string guid) {
-				var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+				var path = AssetDatabase.GUIDToAssetPath(guid);
 				if(string.IsNullOrEmpty(path) == false) {
-					var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+					var asset = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
 					return asset;
 				}
 				return null;
