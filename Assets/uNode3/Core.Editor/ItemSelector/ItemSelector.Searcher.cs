@@ -986,6 +986,9 @@ namespace MaxyGames.UNode.Editors {
 								if(tree.hasChildren && tree.children.Count > 0) {
 									return true;
 								}
+								if(searchParam.splittedStrings.Length > 1) {
+									return false;
+								}
 								return score >= 0;
 							}
 						}

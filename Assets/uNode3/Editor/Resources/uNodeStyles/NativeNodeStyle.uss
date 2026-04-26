@@ -176,10 +176,10 @@ PortView > Image {
     padding-bottom: 0;
 }
 
-.compact-node > #node-border > #contents > #divider {
+/*.compact-node > #node-border > #contents > #divider {
     height: 0;
     position: Absolute;
-}
+}*/
 
 .compact > #selection-border {
     border-radius: 17px 8px 17px 8px;
@@ -405,7 +405,7 @@ NodeJumpStatementView > #node-border.empty > #inside > #contents {
 
 #title > .compact-input {
     padding-right: 0;
-    padding-left: 2px;
+    /*padding-left: 4px;*/
     align-self: center;
 }
 

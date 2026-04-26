@@ -1181,6 +1181,7 @@ namespace MaxyGames.UNode.Editors {
 							relevanceData = new RelevanceData();
 							relevanceData.originalSearchTrees = trees;
 							List<TViewItem> relevanceTrees = new();
+							bool hasSpace = searchString.Contains(' ') || searchString.Contains('.');
 							var usingNamespaces = editorData.usingNamespaces;
 							float bonusScore = 0;
 							void TraverseTree(TViewItem tree) {
@@ -1200,6 +1201,13 @@ namespace MaxyGames.UNode.Editors {
 												}
 												if(usedCount2.TryGetValue((searchString, tree.id), out count)) {
 													score -= MathF.Min(0.01f * count, BonusRelevantScore.Config.HalfSpecificUsedCountBonus);
+												}
+											}
+											if(tree is TypeTreeView && !hasSpace) {
+												score += 0.2f;
+												if(string.Equals(tree.displayName, searchString, StringComparison.OrdinalIgnoreCase)) {
+													//In case match whole word
+													score += 1f;
 												}
 											}
 										}
