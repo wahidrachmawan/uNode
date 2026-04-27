@@ -386,7 +386,7 @@ namespace MaxyGames.CompilerBuilder {
 			else {
 				Debug.LogError("Compilation failed");
 				foreach(var error in result.Errors) {
-					Debug.LogError(error);
+					Debug.LogError(error.message);
 				}
 			}
 		}

@@ -55,7 +55,7 @@ namespace MaxyGames.CodeCompiler {
 						if(!result.Success) {
 							Console.WriteLine("Errors:");
 							foreach(var error in result.Errors) {
-								Console.WriteLine(error);
+								Console.WriteLine(error.message);
 							}
 						}
 					}
@@ -97,7 +97,7 @@ namespace MaxyGames.CodeCompiler {
 			if(!result.Success) {
 				Console.WriteLine("Errors:");
 				foreach(var error in result.Errors) {
-					Console.WriteLine(error);
+					Console.WriteLine(error.message);
 				}
 			}
 		}
@@ -325,8 +325,30 @@ namespace MaxyGames.CodeCompiler {
 				CodeCompilerResult result = new CodeCompilerResult() {
 					OutputPath = option.OutputPath,
 					Success = emitResult.Success,
-					Errors = emitResult.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).Select(d => d.ToString()).ToList()
 				};
+				foreach(var d in emitResult.Diagnostics) {
+					string errorMessage = d.GetMessage();
+					int column = 0;
+					int line = 0;
+					string fileName = string.Empty;
+					if(d.Location != null && d.Location.IsInSource && (d.Location.GetLineSpan().IsValid || d.Location.GetMappedLineSpan().IsValid)) {
+						var span = d.Location.GetMappedLineSpan().IsValid ? d.Location.GetMappedLineSpan() : d.Location.GetLineSpan();
+						line = span.Span.Start.Line + 1;
+						column = span.Span.Start.Character + 1;
+						fileName = d.Location.SourceTree?.FilePath;
+						if(d.Location.IsInSource) {
+							errorMessage += " | source script: " + d.Location.SourceTree.ToString().Substring(d.Location.SourceSpan.Start, d.Location.SourceSpan.Length);
+						}
+					}
+					result.Errors.Add(new CompileError() {
+						errorColumn = column,
+						errorLine = line,
+						fileName = fileName,
+						errorNumber = d.Id,
+						isWarning = d.Severity == DiagnosticSeverity.Warning,
+						errorText = errorMessage
+					});
+				}
 				if(emitResult.Success) {
 					string directory = Path.GetDirectoryName(option.OutputPath);
 
@@ -380,64 +402,97 @@ namespace MaxyGames.CodeCompiler {
 		}
 
 		public static T Deserialize<T>(string xml) {
-			var reader = new StringReader(xml);
-			var serializer = new XmlSerializer(typeof(T));
-			var result = (T)serializer.Deserialize(reader);
-			return result;
+			return XmlSerialization<T>.Deserialize(xml);
 		}
 
 		public static string Serialize<T>(T obj) {
-			var writer = new StringWriter();
-			var serializer = new XmlSerializer(typeof(T));
-			serializer.Serialize(writer, obj);
-			return writer.ToString();
+			return XmlSerialization<T>.Serialize(obj);
+		}
+
+		static class XmlSerialization<T> {
+			private static readonly XmlSerializer serializer = new(typeof(T));
+
+			public static T Deserialize(string xml) {
+				var reader = new StringReader(xml);
+				var result = (T)serializer.Deserialize(reader);
+				return result;
+			}
+
+			public static string Serialize(T obj) {
+				var writer = new StringWriter();
+				serializer.Serialize(writer, obj);
+				return writer.ToString();
+			}
 		}
 	}
 
-	public enum RunnerMode {
-		Compile,
-		Run,
-	}
+	//public enum RunnerMode {
+	//	Compile,
+	//	Run,
+	//}
 
-	[Serializable]
-	public class RunnerConfig {
-		public RunnerMode Mode { get; set; }
-		public CodeCompilerOption CompilerOption { get; set; }
-		public RunOption RunOption { get; set; }
-	}
+	//[Serializable]
+	//public class RunnerConfig {
+	//	public RunnerMode Mode;
+	//	public CodeCompilerOption CompilerOption;
+	//	public RunOption RunOption;
+	//}
 
-	[Serializable]
-	public class RunOption {
-		public string AssemblyPath { get; set; }
-		public string TypeName { get; set; }
-		public string MethodName { get; set; }
-		public object[] Parameters { get; set; } = new object[0];
-	}
+	//[Serializable]
+	//public class RunOption {
+	//	public string AssemblyPath { get; set; }
+	//	public string TypeName { get; set; }
+	//	public string MethodName { get; set; }
+	//	public object[] Parameters { get; set; } = new object[0];
+	//}
 
-	[Serializable]
-	public class RunResult {
-		public object ReturnValue { get; set; }
-		public bool Success { get; set; }
-		public string ErrorMessage { get; set; }
-	}
+	//[Serializable]
+	//public class RunResult {
+	//	public object ReturnValue;
+	//	public bool Success { get; set; }
+	//	public string ErrorMessage { get; set; }
+	//}
 
 	[Serializable]
 	public class CodeCompilerOption {
-		public string OutputPath { get; set; }
-		public string OutputResultPath { get; set; }
-		public string AssemblyName { get; set; }
-		public string[] References { get; set; } = new string[0];
-		public string[] SourceFiles { get; set; } = new string[0];
-		public string[] Defines { get; set; } = new string[0];
-		public ScriptCompilerOptions ScriptCompilerOptions { get; set; } = new ScriptCompilerOptions();
+		public string OutputPath;
+		public string OutputResultPath;
+		public string AssemblyName;
+		public string[] References = new string[0];
+		public string[] SourceFiles = new string[0];
+		public string[] Defines = new string[0];
+		public ScriptCompilerOptions ScriptCompilerOptions = new ScriptCompilerOptions();
 	}
 
 	[Serializable]
 	public class CodeCompilerResult {
-		public string OutputPath { get; set; }
-		public bool Success { get; set; }
-		public bool ILPPApplied { get; set; }
-		public List<string> Errors { get; set; } = new List<string>();
+		public string OutputPath;
+		public bool Success;
+		public bool ILPPApplied;
+		public List<CompileError> Errors = new List<CompileError>();
+	}
+
+	[Serializable]
+	public class CompileError {
+		public string fileName;
+		public bool isWarning;
+		public string errorText;
+		public string errorNumber;
+		public int errorLine;
+		public int errorColumn;
+
+		public string message {
+			get {
+				if(string.IsNullOrEmpty(fileName)) {
+					return $"({errorNumber}): {errorText}\nin line: {errorLine}:{errorColumn}";
+				}
+				string path = Directory.GetCurrentDirectory();
+				if(fileName.StartsWith(path)) {
+					return $"({errorNumber}): {errorText}\nin line: {errorLine}:{errorColumn} (at {fileName.Remove(0, path.Length + 1).Replace("\\", "/")}:{errorLine})";
+				}
+				return $"({errorNumber}): {errorText}\nin line: {errorLine}:{errorColumn}\nin file: {fileName}";
+			}
+		}
 	}
 
 	[Serializable]
@@ -445,30 +500,28 @@ namespace MaxyGames.CodeCompiler {
 		/// <summary>
 		/// Stores the path to the Roslyn ruleset file.
 		/// </summary>
-		public string RoslynAnalyzerRulesetPath { get; set; }
-
+		public string RoslynAnalyzerRulesetPath;
 		/// <summary>
 		/// Stores the paths to the .dll files.
 		/// </summary>
-		public string[] RoslynAnalyzerDllPaths { get; set; }
-
+		public string[] RoslynAnalyzerDllPaths;
 		/// <summary>
 		/// Stores the paths to the Roslyn Analyzer additional files.
 		/// </summary>
-		public string[] RoslynAdditionalFilePaths { get; set; }
-
+		public string[] RoslynAdditionalFilePaths;
 		/// <summary>
 		/// Stores the path to the Roslyn global config file.
 		/// </summary>
-		public string AnalyzerConfigPath { get; set; }
-
+		public string AnalyzerConfigPath;
 		/// <summary>
 		/// Allow 'unsafe' code when compiling scripts.
 		/// </summary>
-		public bool AllowUnsafeCode { get; set; }
-		public bool RunILPP { get; set; }
-
-		public OptimizationLevel OptimizationLevel { get; set; } = OptimizationLevel.Debug;
+		public bool AllowUnsafeCode;
+		/// <summary>
+		/// Run IL Post Processor after compile
+		/// </summary>
+		public bool RunILPP;
+		public OptimizationLevel OptimizationLevel = OptimizationLevel.Debug;
 	}
 }
 
@@ -476,6 +529,13 @@ namespace MaxyGames {
 	public static class PipeHelper {
 		public static async Task SendStringAsync(Stream pipe, string message) {
 			byte[] data = Encoding.UTF8.GetBytes(message);
+			byte[] lenBytes = BitConverter.GetBytes(data.Length);
+			await pipe.WriteAsync(lenBytes, 0, 4);
+			await pipe.WriteAsync(data, 0, data.Length);
+			await pipe.FlushAsync();
+		}
+
+		public static async Task SendDataAsync(Stream pipe, byte[] data) {
 			byte[] lenBytes = BitConverter.GetBytes(data.Length);
 			await pipe.WriteAsync(lenBytes, 0, 4);
 			await pipe.WriteAsync(data, 0, data.Length);
@@ -495,6 +555,21 @@ namespace MaxyGames {
 				read += await pipe.ReadAsync(buffer, read, length - read);
 
 			return Encoding.UTF8.GetString(buffer);
+		}
+
+		public static async Task<byte[]> ReceiveDataAsync(Stream pipe) {
+			byte[] lenBuf = new byte[4];
+			int read = 0;
+			while(read < 4)
+				read += await pipe.ReadAsync(lenBuf, read, 4 - read);
+			int length = BitConverter.ToInt32(lenBuf, 0);
+
+			byte[] buffer = new byte[length];
+			read = 0;
+			while(read < length)
+				read += await pipe.ReadAsync(buffer, read, length - read);
+
+			return buffer;
 		}
 	}
 }

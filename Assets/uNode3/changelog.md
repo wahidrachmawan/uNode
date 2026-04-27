@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.2.10
+-Added auto change generic method when connecting incompatible port type.
+-Improved searching relevance nodes.
+-Improved Editor
+-Fixed some bugs
+
 ## v3.2.9
 - Added option to enable/disable auto reconnection of port upon deleting node in preference
 - Added option to change preferred graph layout in preference

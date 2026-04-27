@@ -1203,11 +1203,19 @@ namespace MaxyGames.UNode.Editors {
 													score -= MathF.Min(0.01f * count, BonusRelevantScore.Config.HalfSpecificUsedCountBonus);
 												}
 											}
-											if(tree is TypeTreeView && !hasSpace) {
-												score += 0.2f;
-												if(string.Equals(tree.displayName, searchString, StringComparison.OrdinalIgnoreCase)) {
-													//In case match whole word
-													score += 1f;
+											if(tree is TypeTreeView) {
+												if(hasSpace) {
+													if(aMember.member.MemberType == MemberTypes.TypeInfo) {
+														//We think if query has space key, the user need to find member but not a type so we decrease the score to make type irrelevant. 
+														score -= 0.4f;
+													}
+												}
+												else {
+													score += 0.2f;
+													if(string.Equals(tree.displayName, searchString, StringComparison.OrdinalIgnoreCase)) {
+														//In case match whole word
+														score += 1f;
+													}
 												}
 											}
 										}
