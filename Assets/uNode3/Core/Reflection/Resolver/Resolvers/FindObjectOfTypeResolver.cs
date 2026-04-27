@@ -1,4 +1,6 @@
 #pragma warning disable
+//We don't need this from Unity 6.4+
+#if !UNITY_6000_4_OR_NEWER
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -59,3 +61,4 @@ namespace MaxyGames.UNode.GenericResolver {
 		}
 	}
 }
+#endif

@@ -1,4 +1,4 @@
-#if UNITY_6000_2_OR_NEWER
+#if UNITY_6000_4_OR_NEWER
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -11,8 +11,8 @@ using Object = UnityEngine.Object;
 
 //Object.FindAnyObjectByType<T>()
 //Object.FindAnyObjectByType<T>(FindObjectsInactive)
-[assembly: RegisterGenericMethodResolver(typeof(FindObjectOfTypeResolver), typeof(Object), nameof(Object.FindAnyObjectByType))]
-[assembly: RegisterGenericMethodResolver(typeof(FindObjectOfTypeResolver), typeof(Object), nameof(Object.FindAnyObjectByType), new[] { typeof(FindObjectsInactive) })]
+[assembly: RegisterGenericMethodResolver(typeof(FindAnyObjectByTypeResolver), typeof(Object), nameof(Object.FindAnyObjectByType))]
+[assembly: RegisterGenericMethodResolver(typeof(FindAnyObjectByTypeResolver), typeof(Object), nameof(Object.FindAnyObjectByType), new[] { typeof(FindObjectsInactive) })]
 
 namespace MaxyGames.UNode.GenericResolver {
 	public class FindAnyObjectByTypeResolver : GenericMethodResolver {

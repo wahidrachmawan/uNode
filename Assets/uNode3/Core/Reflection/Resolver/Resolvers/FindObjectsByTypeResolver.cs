@@ -10,8 +10,8 @@ using Object = UnityEngine.Object;
 
 //Object.FindObjectsByType<T>()
 //Object.FindObjectsByType<T>(UnityEngine.FindObjectsInactive)
-[assembly: RegisterGenericMethodResolver(typeof(FindObjectsOfTypeResolver), typeof(Object), nameof(Object.FindObjectsByType))]
-[assembly: RegisterGenericMethodResolver(typeof(FindObjectsOfTypeResolver), typeof(Object), nameof(Object.FindObjectsByType), new[] { typeof(UnityEngine.FindObjectsInactive) })]
+[assembly: RegisterGenericMethodResolver(typeof(FindObjectsByTypeResolver), typeof(Object), nameof(Object.FindObjectsByType))]
+[assembly: RegisterGenericMethodResolver(typeof(FindObjectsByTypeResolver), typeof(Object), nameof(Object.FindObjectsByType), new[] { typeof(UnityEngine.FindObjectsInactive) })]
 
 namespace MaxyGames.UNode.GenericResolver {
 	public class FindObjectsByTypeResolver : GenericMethodResolver {
