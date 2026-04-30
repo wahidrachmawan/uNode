@@ -33,10 +33,10 @@ namespace MaxyGames.UNode {
 
 		public override void OnGeneratorInitialize() {
 			if(output != null && output.hasValidConnections) {
-				member.OnGeneratorInitialize(output.ValidConnections.SelectMany(c => c.Input.node.FlowOutputs).ToArray());
+				member.OnGeneratorInitialize(output.ValidConnections.SelectMany(c => c.Input.node.FlowOutputs));
 			}
 			else {
-				member.OnGeneratorInitialize(exit);
+				member.OnGeneratorInitialize(new[] { exit });
 			}
 			CG.RegisterPort(enter, () => {
 				return CG.Flow(CG.Value(member).AddSemicolon(), CG.FlowFinish(enter, exit));

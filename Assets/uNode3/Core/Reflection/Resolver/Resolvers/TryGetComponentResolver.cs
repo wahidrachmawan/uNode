@@ -50,10 +50,10 @@ namespace MaxyGames.UNode.GenericResolver {
 			var compType = RuntimeMethodInfo.GetGenericArguments()[0];
 			//Do generate code and add it to member list
 			if(CG.generatePureScript) {
-				members.Add(CG.Invoke(string.Empty, nameof(uNodeHelper.TryGetGeneratedComponent), new[] { compType }));
+				members.Add(CG.Invoke(string.Empty, nameof(uNodeHelper.TryGetGeneratedComponent), new[] { compType }, parameters));
 			}
 			else {
-				members.Add(CG.Invoke(string.Empty, nameof(uNodeHelper.TryGetGeneratedComponent), new[] { CG.GetUniqueNameForType(compType as RuntimeType) }));
+				members.Add(CG.Invoke(string.Empty, nameof(uNodeHelper.TryGetGeneratedComponent), new[] { CG.GetUniqueNameForType(compType as RuntimeType) }.Concat(parameters).ToArray()));
 			}
 		}
 	}

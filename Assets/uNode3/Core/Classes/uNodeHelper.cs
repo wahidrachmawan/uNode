@@ -435,6 +435,20 @@ namespace MaxyGames.UNode {
 		/// <param name="gameObject"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponent<T>(this GameObject gameObject) {
+			//var comps = gameObject.GetComponents(typeof(IRuntimeComponent));
+			//foreach(var c in comps) {
+			//	if(c is T rezult) {
+			//		return rezult;
+			//	}
+			//	else if(c is IRuntimeClassContainer) {
+			//		var result = (c as IRuntimeClassContainer).RuntimeClass;
+			//		if(result is T) {
+			//			return (T)result;
+			//		}
+			//	}
+			//}
+
+
 			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
@@ -461,6 +475,19 @@ namespace MaxyGames.UNode {
 		/// <param name="component"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponent<T>(this Component component) {
+			//var comps = component.GetComponents(typeof(IRuntimeComponent));
+			//foreach(var c in comps) {
+			//	if(c is T rezult) {
+			//		return rezult;
+			//	}
+			//	else if(c is IRuntimeClassContainer) {
+			//		var result = (c as IRuntimeClassContainer).RuntimeClass;
+			//		if(result is T) {
+			//			return (T)result;
+			//		}
+			//	}
+			//}
+
 			var uniqueIdentifier = typeof(T).FullName;
 			if(typeof(T).IsInterface) {
 				uniqueIdentifier = "i:" + uniqueIdentifier;
@@ -529,6 +556,16 @@ namespace MaxyGames.UNode {
 
 		public static bool TryGetGeneratedComponent(this GameObject gameObject, string uniqueID, out BaseRuntimeBehaviour comp) {
 			comp = gameObject.GetGeneratedComponent(uniqueID);
+			return comp != null;
+		}
+
+		public static bool TryGetGeneratedComponent<T>(this Component component, out T comp) {
+			comp = component.GetGeneratedComponent<T>();
+			return comp != null;
+		}
+
+		public static bool TryGetGeneratedComponent<T>(this GameObject gameObject, out T comp) {
+			comp = gameObject.GetGeneratedComponent<T>();
 			return comp != null;
 		}
 

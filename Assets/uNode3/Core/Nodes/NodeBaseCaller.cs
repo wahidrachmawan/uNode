@@ -10,7 +10,12 @@ namespace MaxyGames.UNode {
 
 		public override void OnGeneratorInitialize() {
 			target.instance = null;
-			member.OnGeneratorInitialize(exit);
+			if(output != null && output.hasValidConnections) {
+				member.OnGeneratorInitialize(output.ValidConnections.SelectMany(c => c.Input.node.FlowOutputs));
+			}
+			else {
+				member.OnGeneratorInitialize(new[] { exit });
+			}
 			CG.RegisterPort(enter, () => {
 				var members = member.target.GetMembers(false);
 				if(members != null && members.Length > 0) {

@@ -117,7 +117,7 @@ namespace MaxyGames.UNode {
 
 		public List<MParamInfo> parameters { get; private set; }
 
-		public void OnGeneratorInitialize(params FlowOutput[] flows) {
+		public void OnGeneratorInitialize(IEnumerable<FlowOutput> flows) {
 			if(parameters != null) {
 				CG.RegisterPostInitialization(() => {
 					foreach(var p in parameters) {
