@@ -149,6 +149,7 @@ namespace MaxyGames.UNode.Editors {
 								var port = p;
 								if(port.GetNodeObject() != targetOutput.GetNodeObject()) {
 									action += () => {
+										if(port.GetPortValue().isValid == false || targetOutput.GetPortValue().isValid == false) return;
 										port.owner.owner.Connect(port, targetOutput, true);
 									};
 								}
@@ -168,6 +169,7 @@ namespace MaxyGames.UNode.Editors {
 										var port = p;
 										if(nodes.Contains(port.owner) == false) {
 											action += () => {
+												if(port.GetPortValue().isValid == false || inputEdge.GetReceiverPort().GetPortValue().isValid == false) return;
 												if(inputEdge.isProxy) {
 													if(inputEdge is ConversionEdgeView) {
 														port.GetPortValue().ConnectToAsProxy(((inputEdge as ConversionEdgeView).node).output);

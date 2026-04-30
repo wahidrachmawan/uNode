@@ -9,8 +9,8 @@ using UnityEngine;
 
 //GameObject.TryGetComponent<T>()
 //Component.TryGetComponent<T>()
-[assembly: RegisterGenericMethodResolver(typeof(TryGetComponentResolver), typeof(GameObject), nameof(GameObject.TryGetComponent))]
-[assembly: RegisterGenericMethodResolver(typeof(TryGetComponentResolver), typeof(Component), nameof(Component.TryGetComponent))]
+[assembly: RegisterGenericMethodResolver(typeof(TryGetComponentResolver), typeof(GameObject), nameof(GameObject.TryGetComponent), parameterCount = 1)]
+[assembly: RegisterGenericMethodResolver(typeof(TryGetComponentResolver), typeof(Component), nameof(Component.TryGetComponent), parameterCount = 1)]
 
 namespace MaxyGames.UNode.GenericResolver {
 	public class TryGetComponentResolver : GenericMethodResolver {

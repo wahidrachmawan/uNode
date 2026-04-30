@@ -104,10 +104,15 @@ namespace MaxyGames.UNode {
 					var atts = ReflectionUtils.GetAssemblyAttributes<RegisterGenericMethodResolverAttribute>();
 					if(atts != null) {
 						foreach(var a in atts) {
-							if(_resolvers.ContainsKey(a.MethodInfo)) {
-								Debug.LogWarning("Multiple resolver found for method: " + a.MethodInfo);
+							try {
+								if(_resolvers.ContainsKey(a.MethodInfo)) {
+									Debug.LogWarning("Multiple resolver found for method: " + a.MethodInfo);
+								}
+								_resolvers[a.MethodInfo] = a;
 							}
-							_resolvers[a.MethodInfo] = a;
+							catch(Exception ex) {
+								Debug.LogException(ex);
+							}
 						}
 					}
 				}
@@ -146,6 +151,7 @@ namespace MaxyGames.UNode {
 		public Type CLRType;
 		public string methodName;
 		public int genericParameterCount;
+		public int parameterCount;
 		public Type[] parameterTypes;
 
 		public RegisterGenericMethodResolverAttribute(Type resolver, Type CLRType, string methodName, int genericParameterCount, params Type[] parameterTypes) {
@@ -159,24 +165,93 @@ namespace MaxyGames.UNode {
 			this.methodName = methodName;
 			this.genericParameterCount = genericParameterCount;
 			this.parameterTypes = parameterTypes;
+			if(parameterTypes != null) {
+				parameterCount = parameterTypes.Length;
+			}
 		}
 
-		public RegisterGenericMethodResolverAttribute(Type resolver, Type CLRType, string methodName, params Type[] parameterTypes) {
+		public RegisterGenericMethodResolverAttribute(Type resolver, Type CLRType, string methodName) {
+			if(resolver.IsAbstract) {
+				throw new Exception("Resolver cannot be abstract");
+			}
 			this.resolver = resolver;
 			this.CLRType = CLRType;
 			this.methodName = methodName;
 			this.genericParameterCount = 1;
+			this.parameterCount = 0;
+		}
+
+		public RegisterGenericMethodResolverAttribute(Type resolver, Type CLRType, string methodName, params Type[] parameterTypes) {
+			if(resolver.IsAbstract) {
+				throw new Exception("Resolver cannot be abstract");
+			}
+			this.resolver = resolver;
+			this.CLRType = CLRType;
+			this.methodName = methodName;
+			this.genericParameterCount = 1;
+			this.parameterCount = parameterTypes != null ? parameterTypes.Length : -1;
 			this.parameterTypes = parameterTypes;
+		}
+
+		public RegisterGenericMethodResolverAttribute(Type resolver, Type CLRType, string methodName, int genericParameterCount, int parameterCount) {
+			if(genericParameterCount <= 0)
+				throw new Exception("Generic Parameter Count must grater than zero");
+			if(resolver.IsAbstract) {
+				throw new Exception("Resolver cannot be abstract");
+			}
+			this.resolver = resolver;
+			this.CLRType = CLRType;
+			this.methodName = methodName;
+			this.genericParameterCount = 1;
+			this.parameterCount = parameterCount;
 		}
 
 		private MethodInfo methodInfo;
 		public MethodInfo MethodInfo {
 			get {
 				if(methodInfo == null) {
-					methodInfo = CLRType.GetMethod(methodName, genericParameterCount, parameterTypes);
-					if(methodInfo == null) {
-						throw new Exception($"Couldn't resolve generic method resolver for method in: {CLRType.PrettyName(true)}.{methodName}<{genericParameterCount}>({string.Join(", ", parameterTypes.Select(item => item.PrettyName(true)))})\nThe resolver is: {resolver.PrettyName(true)}");
+					if(parameterCount == 0) {
+						var info = CLRType.GetMethod(methodName, genericParameterCount, Type.EmptyTypes);
+						if(info != null) {
+							methodInfo = info;
+							return info;
+						}
 					}
+					else {
+						var infos = CLRType.GetMethods(MemberData.flags);
+						if(infos != null) {
+							for(int i = 0; i < infos.Length; i++) {
+								if(infos[i].Name == methodName) {
+									var parameters = infos[i].GetParameters();
+									if(parameters.Length != parameterCount) continue;
+									if(infos[i].GetGenericArguments().Length != genericParameterCount) continue;
+									if(parameterTypes != null) {
+										if(parameters.Length != parameterTypes.Length) continue;
+										for(int x = 0; x < parameters.Length; x++) {
+											//if(x >= parameterTypes.Length) break;
+											if(parameterTypes[x] == null) continue;
+											if(parameterTypes[x] != parameters[x].ParameterType) {
+												if(parameters[x].ParameterType.IsGenericParameter) {
+													//If parameter is generic parameter and candidate parameter is not an object type then we skip this method.
+													if(parameterTypes[x] != typeof(object)) {
+														goto NEXT;
+													}
+												}
+												else {
+													goto NEXT;
+												}
+											}
+										}
+									}
+									methodInfo = infos[i];
+									return methodInfo;
+
+								NEXT: continue;
+								}
+							}
+						}
+					}
+					throw new Exception($"Couldn't resolve generic method resolver for method in: {CLRType.PrettyName(true)}.{methodName}<{genericParameterCount}>({string.Join(", ", (parameterTypes != null ? parameterTypes.Select(item => item.PrettyName(true)) : string.Empty))})\nThe resolver is: {resolver.PrettyName(true)}");
 				}
 				return methodInfo;
 			}
