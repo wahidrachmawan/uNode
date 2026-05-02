@@ -963,6 +963,8 @@ namespace MaxyGames.UNode {
 		/// <returns></returns>
 		public static bool IsNativeType(Type type) {
 			if(type is IRuntimeMember) {
+				if(type.IsByRef)
+					return IsNativeType(type.GetElementType());
 				if(type is INativeMember) {
 					return true;
 				}

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Profiling;
 using System;
 using System.Reflection;
 using System.Collections;
@@ -435,36 +434,36 @@ namespace MaxyGames.UNode {
 		/// <param name="gameObject"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponent<T>(this GameObject gameObject) {
-			//var comps = gameObject.GetComponents(typeof(IRuntimeComponent));
-			//foreach(var c in comps) {
-			//	if(c is T rezult) {
-			//		return rezult;
-			//	}
-			//	else if(c is IRuntimeClassContainer) {
-			//		var result = (c as IRuntimeClassContainer).RuntimeClass;
-			//		if(result is T) {
-			//			return (T)result;
-			//		}
-			//	}
-			//}
-
-
-			var uniqueIdentifier = typeof(T).FullName;
-			if(typeof(T).IsInterface) {
-				uniqueIdentifier = "i:" + uniqueIdentifier;
-			}
-			object comp = GetGeneratedComponent(gameObject, uniqueIdentifier);
-			if(comp != null) {
-				if(comp is T) {
-					return (T)comp;
+			var comps = gameObject.GetComponents(typeof(IRuntimeComponent));
+			foreach(var c in comps) {
+				if(c is T rezult) {
+					return rezult;
 				}
-				else if(comp is IRuntimeClassContainer) {
-					var result = (comp as IRuntimeClassContainer).RuntimeClass;
+				else if(c is IRuntimeClassContainer) {
+					var result = (c as IRuntimeClassContainer).RuntimeClass;
 					if(result is T) {
 						return (T)result;
 					}
 				}
 			}
+
+
+			//var uniqueIdentifier = typeof(T).FullName;
+			//if(typeof(T).IsInterface) {
+			//	uniqueIdentifier = "i:" + uniqueIdentifier;
+			//}
+			//object comp = GetGeneratedComponent(gameObject, uniqueIdentifier);
+			//if(comp != null) {
+			//	if(comp is T) {
+			//		return (T)comp;
+			//	}
+			//	else if(comp is IRuntimeClassContainer) {
+			//		var result = (comp as IRuntimeClassContainer).RuntimeClass;
+			//		if(result is T) {
+			//			return (T)result;
+			//		}
+			//	}
+			//}
 			return default;
 		}
 
@@ -475,35 +474,35 @@ namespace MaxyGames.UNode {
 		/// <param name="component"></param>
 		/// <returns></returns>
 		public static T GetGeneratedComponent<T>(this Component component) {
-			//var comps = component.GetComponents(typeof(IRuntimeComponent));
-			//foreach(var c in comps) {
-			//	if(c is T rezult) {
-			//		return rezult;
-			//	}
-			//	else if(c is IRuntimeClassContainer) {
-			//		var result = (c as IRuntimeClassContainer).RuntimeClass;
-			//		if(result is T) {
-			//			return (T)result;
-			//		}
-			//	}
-			//}
-
-			var uniqueIdentifier = typeof(T).FullName;
-			if(typeof(T).IsInterface) {
-				uniqueIdentifier = "i:" + uniqueIdentifier;
-			}
-			object comp = GetGeneratedComponent(component, uniqueIdentifier);
-			if(comp != null) {
-				if(comp is T) {
-					return (T)comp;
+			var comps = component.GetComponents(typeof(IRuntimeComponent));
+			foreach(var c in comps) {
+				if(c is T rezult) {
+					return rezult;
 				}
-				else if(comp is IRuntimeClassContainer) {
-					var result = (comp as IRuntimeClassContainer).RuntimeClass;
+				else if(c is IRuntimeClassContainer) {
+					var result = (c as IRuntimeClassContainer).RuntimeClass;
 					if(result is T) {
 						return (T)result;
 					}
 				}
 			}
+
+			//var uniqueIdentifier = typeof(T).FullName;
+			//if(typeof(T).IsInterface) {
+			//	uniqueIdentifier = "i:" + uniqueIdentifier;
+			//}
+			//object comp = GetGeneratedComponent(component, uniqueIdentifier);
+			//if(comp != null) {
+			//	if(comp is T) {
+			//		return (T)comp;
+			//	}
+			//	else if(comp is IRuntimeClassContainer) {
+			//		var result = (comp as IRuntimeClassContainer).RuntimeClass;
+			//		if(result is T) {
+			//			return (T)result;
+			//		}
+			//	}
+			//}
 			return default;
 		}
 
@@ -561,12 +560,12 @@ namespace MaxyGames.UNode {
 
 		public static bool TryGetGeneratedComponent<T>(this Component component, out T comp) {
 			comp = component.GetGeneratedComponent<T>();
-			return comp != null;
+			return comp as UnityEngine.Object;
 		}
 
 		public static bool TryGetGeneratedComponent<T>(this GameObject gameObject, out T comp) {
 			comp = gameObject.GetGeneratedComponent<T>();
-			return comp != null;
+			return comp as UnityEngine.Object;
 		}
 
 		/// <summary>

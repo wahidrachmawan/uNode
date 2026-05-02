@@ -705,6 +705,29 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
+		#region Others
+		/// <summary>
+		/// Get all entry nodes for the current canvas
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<NodeObject> GetEntryNodes() {
+			var canvas = currentCanvas;
+			if(canvas is INodeContainerWithEntry container) {
+				foreach(var entry in container.GetEntryNodes()) {
+					yield return entry;
+				}
+			}
+			else if(canvas is NodeObject nodeObject) {
+				if(nodeObject.node is INodeContainerWithEntry containerWithEntry) {
+					foreach(var entry in containerWithEntry.GetEntryNodes()) {
+						yield return entry;
+					}
+				}
+			}
+			yield break;
+		}
+		#endregion
+
 		/// <summary>
 		/// Refresh editor data.
 		/// </summary>

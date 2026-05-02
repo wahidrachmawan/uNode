@@ -51,7 +51,13 @@ namespace MaxyGames.UNode.Editors {
 		private GraphDragger graphDragger = new GraphDragger();
 		private GridBackground gridBackground;
 		private bool autoHideNodes = true, hasInitialize;
+		private Data m_Data = new Data();
 		#endregion
+
+		class Data {
+			public bool needRefreshDimStatus;
+			public List<UNodeView> dimmedNodes = new();
+		}
 
 		#region Properties
 		private static List<UIGraphProcessor> _Processor;
@@ -112,6 +118,53 @@ namespace MaxyGames.UNode.Editors {
 			this.AddManipulator(new SelectionDragger());
 			this.AddManipulator(new RectangleSelector());
 			this.AddManipulator(new FreehandSelector());
+			this.schedule.Execute(() => {
+				if(m_Data.needRefreshDimStatus && requiredReload == false) {
+					m_Data.needRefreshDimStatus = false;
+
+					var dimmedNodes = m_Data.dimmedNodes;
+					foreach(var view in dimmedNodes) {
+						view.RemoveFromClassList(UNodeView.ussClassDimmedNode);
+					}
+					dimmedNodes.Clear();
+
+					if(uNodePreference.preferenceData.dimUnusedNodes == false) return;
+
+					var hash = StaticHashPool.Allocate<UNodeView>();
+					try {
+						void FindConnections(UNodeView view) {
+							if(hash.Add(view)) {
+								foreach(var port in view.inputPorts) {
+									if(port.isFlow) continue;
+									foreach(var other in port.GetConnectedNodes()) {
+										FindConnections(other);
+									}
+								}
+								foreach(var port in view.outputPorts) {
+									if(port.isValue) continue;
+									foreach(var other in port.GetConnectedNodes()) {
+										FindConnections(other);
+									}
+								}
+							}
+						}
+						foreach(var entry in graphData.GetEntryNodes()) {
+							var view = GetNodeView(entry);
+							if(view == null) continue;
+							FindConnections(view);
+						}
+						foreach(var view in nodeViews) {
+							if(hash.Contains(view) == false) {
+								view.AddToClassList(UNodeView.ussClassDimmedNode);
+								dimmedNodes.Add(view);
+							}
+						}
+					}
+					finally {
+						StaticHashPool.Free(hash);
+					}
+				}
+			}).Every(500);
 		}
 		#endregion
 
@@ -2069,9 +2122,7 @@ namespace MaxyGames.UNode.Editors {
 					if(p == null)
 						continue;
 					var connections = p.GetConnectedNodes();
-					if(connections.Count > 0) {
-						MarkRepaint(connections.ToArray());
-					}
+					MarkRepaint(connections.ToArray());
 					foreach(var edge in p.GetEdges()) {
 						if(edge.isValid || edge.isGhostEdge) {
 							edge.Disconnect();
@@ -2082,9 +2133,7 @@ namespace MaxyGames.UNode.Editors {
 					if(p == null)
 						continue;
 					var connections = p.GetConnectedNodes();
-					if(connections.Count > 0) {
-						MarkRepaint(connections.ToArray());
-					}
+					MarkRepaint(connections.ToArray());
 					foreach(var edge in p.GetEdges()) {
 						if(edge.isValid || edge.isGhostEdge) {
 							edge.Disconnect();

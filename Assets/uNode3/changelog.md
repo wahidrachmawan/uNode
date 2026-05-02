@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.2.11
+- Added ability to dim unused nodes
+- Fixed some bugs
+
 ## v3.2.10
 - Added auto change generic method when connecting incompatible port type.
 - Improved searching relevance nodes.

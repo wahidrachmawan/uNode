@@ -24,6 +24,7 @@ namespace MaxyGames.CompilerBuilder {
 }";
 		public const string RunnerExecutablePath = "Library/uNodeRoslynCompiler/Runner.dll";
 		public const string RunnerDirectoryPath = "Library/uNodeRoslynCompiler";
+		//private static readonly bool useExistingDll = true;
 
 		static RoslynCodeCompiler() {
 			EditorApplication.quitting -= CloseCodeCompiler;
@@ -68,7 +69,18 @@ namespace MaxyGames.CompilerBuilder {
 				Debug.LogError("CodeCompiler assembly not found");
 				return;
 			}
-
+			//if(useExistingDll) {
+			//	var dllLocation = Path.GetFullPath(codeCompilerAssembly.outputPath);
+			//	var pdbLocation = Path.ChangeExtension(dllLocation, ".dll");
+			//	if(File.Exists(dllLocation)) {
+			//		File.Copy(dllLocation, outputPath);
+			//		if(File.Exists(pdbLocation)) {
+			//			File.Copy(pdbLocation, Path.ChangeExtension(outputPath, ".pdb"));
+			//		}
+			//	}
+			//}
+			//else {
+			//}
 			var references = codeCompilerAssembly.allReferences;
 			var sourceTrees = CodeCompiler.CodeCompiler.GetSyntaxTreesFromFiles(codeCompilerAssembly.sourceFiles, out _, codeCompilerAssembly.defines);
 
@@ -393,7 +405,7 @@ namespace MaxyGames.CompilerBuilder {
 		#endregion
 
 		static void EnsureCompilerHasBuild() {
-			if(SessionState.GetBool("uNode_RoslynCodeCompilerInitialized", false) == false) {
+			if(SessionState.GetBool("uNode_RoslynCodeCompilerInitialized", false) == false || File.Exists(RunnerExecutablePath) == false) {
 #if UNODE_DEV
 				Debug.Log("Building compiler runner...");
 #endif

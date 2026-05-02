@@ -187,6 +187,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		public override object GetValue(Flow flow) {
 			System.Delegate m_Delegate = null;
+			flow = flow.CreateDelegateFlow();
 			if(methodInfo.ReturnType == typeof(void)) {
 				m_Delegate = CustomDelegate.CreateActionDelegate((obj) => {
 					if(nodeObject == null)

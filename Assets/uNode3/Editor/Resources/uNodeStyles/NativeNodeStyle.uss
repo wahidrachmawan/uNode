@@ -245,6 +245,10 @@ PortView > Image {
 #node-border {
     overflow: visible;
 }
+
+.dimmed-node > #node-border {
+    opacity: 0.6;
+}
 /*
 #contents > #top > #input {
     flex-shrink: 1;

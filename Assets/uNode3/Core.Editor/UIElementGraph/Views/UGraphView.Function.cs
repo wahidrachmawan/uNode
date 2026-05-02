@@ -277,6 +277,7 @@ namespace MaxyGames.UNode.Editors {
 									AutoHideGraphElement.UpdateVisibility(this);
 									if(reloadID == currID)
 										isLoading = false;
+									OnAfterRepaint();
 								});
 							});
 						}, 
@@ -312,6 +313,7 @@ namespace MaxyGames.UNode.Editors {
 						_needReloadedViews.Clear();
 					}
 					needReloadNodes = false;
+					OnAfterRepaint();
 				});
 			}
 			foreach(var v in views) {
@@ -363,6 +365,11 @@ namespace MaxyGames.UNode.Editors {
 			//Update edges.
 			RemoveEdges();
 			InitializeEdgeViews(null).MoveNext();
+		}
+
+		//Called after success repaint graph view
+		private void OnAfterRepaint() {
+			m_Data.needRefreshDimStatus = true;
 		}
 		#endregion
 
@@ -463,6 +470,7 @@ namespace MaxyGames.UNode.Editors {
 			nodeViewsPerNode.Remove(view.nodeObject);
 			nodeViews.Remove(view);
 			RemoveElement(view);
+			m_Data.needRefreshDimStatus = true;
 		}
 
 		public void RemoveEdges() {

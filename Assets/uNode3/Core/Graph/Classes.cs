@@ -465,7 +465,7 @@ namespace MaxyGames.UNode {
 		}
 	}
 
-	public abstract class NodeContainer : URoot<NodeObject> {
+	public abstract class NodeContainer : URoot<NodeObject>, INodeContainerWithEntry {
 		private VariableContainer _variableContainer;
 		public VariableContainer variableContainer {
 			get {
@@ -482,6 +482,8 @@ namespace MaxyGames.UNode {
 		public virtual bool AllowCoroutine() {
 			return false;
 		}
+
+		public abstract IEnumerable<NodeObject> GetEntryNodes();
 	}
 
 	public abstract class NodeContainerWithEntry : NodeContainer, IElementWithEntry {
@@ -503,6 +505,14 @@ namespace MaxyGames.UNode {
 		}
 
 		public virtual void RegisterEntry(BaseEntryNode node) { }
+
+		public override IEnumerable<NodeObject> GetEntryNodes() {
+			var entry = Entry;
+			if(entry == null) {
+				return Enumerable.Empty<NodeObject>();
+			}
+			return new NodeObject[] { Entry };
+		}
 	}
 
 	public sealed class VariableContainer : URoot<Variable>, ISerializationCallbackReceiver {
@@ -618,6 +628,36 @@ namespace MaxyGames.UNode {
 			}
 			else {
 				return "None";
+			}
+		}
+
+		public override IEnumerable<NodeObject> GetEntryNodes() {
+			var container = graphContainer;
+			if(container is IMacroGraph) {
+				var macroGraph = container as IMacroGraph;
+				foreach(var node in macroGraph.InputFlows) {
+					yield return node;
+				}
+				foreach(var node in macroGraph.OutputFlows) {
+					yield return node;
+				}
+				foreach(var node in macroGraph.InputValues) {
+					yield return node;
+				}
+				foreach(var node in macroGraph.OutputValues) {
+					yield return node;
+				}
+				yield break;
+			}
+			else if(container is IStateGraph) {
+				foreach(var node in this.GetNodesInChildren<BaseEventNode>()) {
+					yield return node;
+				}
+			}
+			else if(container is ICustomMainGraph) {
+				foreach(var node in this.GetNodesInChildren<BaseEntryNode>()) {
+					yield return node;
+				}
 			}
 		}
 	}

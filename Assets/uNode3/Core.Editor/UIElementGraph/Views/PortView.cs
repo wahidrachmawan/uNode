@@ -1059,25 +1059,22 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public HashSet<UNodeView> GetEdgeOwners() {
-			HashSet<UNodeView> nodes = new HashSet<UNodeView>();
+		public IEnumerable<UNodeView> GetEdgeOwners() {
 			foreach(var e in edges) {
 				if(!e.isValid)
 					continue;
 				var sender = e.GetSenderPort()?.owner;
 				if(sender != null) {
-					nodes.Add(sender);
+					yield return sender;
 				}
 				var receiver = e.GetReceiverPort()?.owner;
 				if(receiver != null) {
-					nodes.Add(receiver);
+					yield return receiver;
 				}
 			}
-			return nodes;
 		}
 
-		public HashSet<UNodeView> GetConnectedNodes() {
-			HashSet<UNodeView> nodes = new HashSet<UNodeView>();
+		public IEnumerable<UNodeView> GetConnectedNodes() {
 			if(edges.Count > 0) {
 				foreach(var e in edges) {
 					if(!e.isValid)
@@ -1086,19 +1083,18 @@ namespace MaxyGames.UNode.Editors {
 						var targetPort = e.output as PortView;
 						var targetView = targetPort.owner;
 						if(targetView != null) {
-							nodes.Add(targetView);
+							yield return targetView;
 						}
 					}
 					else {
 						var targetPort = e.input as PortView;
 						var targetView = targetPort.owner;
 						if(targetView != null) {
-							nodes.Add(targetView);
+							yield return targetView;
 						}
 					}
 				}
 			}
-			return nodes;
 		}
 
 		public HashSet<PortView> GetConnectedPorts() {

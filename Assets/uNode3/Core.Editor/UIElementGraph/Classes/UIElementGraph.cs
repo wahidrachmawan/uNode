@@ -1714,11 +1714,23 @@ namespace MaxyGames.UNode.Editors {
 					uNodePreference.SavePreference();
 				});
 				statusContainerView.Add(carryStatus);
+				#endregion
+
+				#region Dimmed unused nodes
+				var dimStatus = new ToolbarToggle() {
+					name = "status-dim",
+					text = "Dim",
+				};
+				dimStatus.SetValueWithoutNotify(uNodePreference.preferenceData.dimUnusedNodes);
+				dimStatus.RegisterValueChangedCallback(evt => {
+					SetDimUnusedNodes(evt.newValue);
+				});
+				statusContainerView.Add(dimStatus);
+				#endregion
 
 				statusContainerView.Add(new ToolbarSpacer() {
 					flex = true,
 				});
-				#endregion
 
 				#region Zoom
 				zoomStatus = new ToolbarMenu() {
@@ -2017,6 +2029,11 @@ namespace MaxyGames.UNode.Editors {
 
 		public override void MarkRepaint(IEnumerable<NodeObject> nodes) {
 			graphView?.MarkRepaint(nodes);
+		}
+
+		public override void SetDimUnusedNodes(bool dim) {
+			base.SetDimUnusedNodes(dim);
+			graphView?.MarkRepaint();
 		}
 	}
 

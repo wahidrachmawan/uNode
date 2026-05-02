@@ -68,6 +68,7 @@ namespace MaxyGames.UNode.Editors {
 				inEditorDocumentation = true,
 				inspectorIntegration = true,
 				autoBackupOnSave = true,
+				dimUnusedNodes = true,
 				forceReloadGraph;
 
 			[Tooltip("Auto convert port mode.")]

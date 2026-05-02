@@ -236,6 +236,12 @@ namespace MaxyGames.UNode {
 		public override RuntimeLocalValue GetOrCreateLocalDataValue(NodeObject owner) => graphRunner.GetOrCreateLocalDataValue(owner);
 		#endregion
 
+		/// <summary>
+		/// Create a delegate flow, that's not disposed automatically used for work with delegates.
+		/// </summary>
+		/// <returns></returns>
+		public abstract Flow CreateDelegateFlow();
+
 		public abstract void Next(FlowPort port);
 
 
@@ -378,6 +384,7 @@ namespace MaxyGames.UNode {
 
 		private Dictionary<RuntimeGraphID, object> localDatas = new Dictionary<RuntimeGraphID, object>();
 		private Dictionary<(RuntimeGraphID, object), object> localDatas2 = new Dictionary<(RuntimeGraphID, object), object>();
+		private Dictionary<RuntimeGraphID, RuntimeLocalValue> elementDatas = new Dictionary<RuntimeGraphID, RuntimeLocalValue>();
 
 		public override void SetLocalData(UGraphElement owner, object value) {
 			localDatas[owner.runtimeIDAsRef] = value;
@@ -410,8 +417,6 @@ namespace MaxyGames.UNode {
 			}
 			return data;
 		}
-
-		private Dictionary<RuntimeGraphID, RuntimeLocalValue> elementDatas = new Dictionary<RuntimeGraphID, RuntimeLocalValue>();
 
 		public override RuntimeLocalValue GetOrCreateLocalDataValue(NodeObject owner) {
 			ref var id = ref owner.runtimeIDAsRef;
@@ -446,6 +451,8 @@ namespace MaxyGames.UNode {
 		internal string DebugDisplay => GraphException.GetMessage(node, instance.target);
 
 		public bool IsCoroutine => port != null ? port.IsCoroutine() : false;
+
+		public override Flow CreateDelegateFlow() => this;
 
 		public void Run() {
 			if(hasCalled && !IsFinished())
@@ -884,6 +891,8 @@ namespace MaxyGames.UNode {
 
 		private Queue<FlowPort> nextFlows = new Queue<FlowPort>(4);
 
+		public override Flow CreateDelegateFlow() => runner.NewCoroutine();
+
 		public override void Next(FlowPort port) {
 			nextFlows.Enqueue(port);
 		}
@@ -1206,6 +1215,8 @@ FINISH:
 			this.runner = runner;
 			this.instance = runner.instance;
 		}
+
+		public override Flow CreateDelegateFlow() => new RegularFlow(port, runner);
 
 		public override void Next(FlowPort port) {
 			nextFlows.Enqueue(port);

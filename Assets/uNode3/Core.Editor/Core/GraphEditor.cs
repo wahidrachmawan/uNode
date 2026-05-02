@@ -139,6 +139,13 @@ namespace MaxyGames.UNode.Editors {
 
 		public virtual void OnSelectionChanged() { }
 
+		public virtual void SetDimUnusedNodes(bool dim) {
+			if(uNodePreference.preferenceData.dimUnusedNodes != dim) {
+				uNodePreference.preferenceData.dimUnusedNodes = dim;
+				uNodePreference.SavePreference();
+			}
+		}
+
 		public void Compile() {
 			Compile(true);
 		}

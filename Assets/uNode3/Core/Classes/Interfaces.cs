@@ -490,6 +490,10 @@ namespace MaxyGames.UNode {
 		IEnumerable<Nodes.MacroPortNode> OutputValues { get; }
 	}
 
+	public interface INodeContainerWithEntry {
+		IEnumerable<NodeObject> GetEntryNodes();
+	}
+
 	/// <summary>
 	/// An interface for SuperNode / Group Node
 	/// </summary>
@@ -510,9 +514,16 @@ namespace MaxyGames.UNode {
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes;
 	}
 
-	public interface IElementWithEntry {
+	public interface IElementWithEntry : INodeContainerWithEntry {
 		public BaseEntryNode Entry { get; }
 		public void RegisterEntry(BaseEntryNode node) { }
+		IEnumerable<NodeObject> INodeContainerWithEntry.GetEntryNodes() {
+			var entry = Entry;
+			if(entry == null) {
+				Enumerable.Empty<NodeObject>();
+			}
+			return new NodeObject[] { Entry };
+		}
 	}
 
 	public interface ISuperNodeWithEntry : ISuperNode, IElementWithEntry {

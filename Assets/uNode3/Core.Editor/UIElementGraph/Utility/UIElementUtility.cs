@@ -579,14 +579,14 @@ namespace MaxyGames.UNode.Editors {
 			public static HashSet<UNodeView> FindConnectedFlowNodes(UNodeView source, bool includeValueInput = false, bool includeValueOutput = false) {
 				var inputs = source.outputPorts.
 					Where((p) => p.connected && p.isFlow && !p.IsProxy()).
-					SelectMany(p => p.GetConnectedNodes()).ToList();
+					SelectMany(p => p.GetConnectedNodes().Distinct());
 				if(source is INodeBlock) {
 					INodeBlock block = source as INodeBlock;
 					var inputBlock = block.blockViews.SelectMany(b => b.outputPorts).Where((p) =>
 							p.connected &&
 							p.isFlow && !p.IsProxy()).
 						SelectMany(p => p.GetConnectedNodes()).Distinct();
-					inputs.AddRange(inputBlock);
+					inputs = inputs.Concat(inputBlock);
 				}
 
 				HashSet<UNodeView> connected = new HashSet<UNodeView>();
@@ -618,7 +618,7 @@ namespace MaxyGames.UNode.Editors {
 				if(includeFlowInput) {
 					var nodes = source.inputPorts.
 						Where((p) => p.connected && p.isFlow && !p.IsProxy()).
-						SelectMany(p => p.GetConnectedNodes()).ToHashSet();
+						SelectMany(p => p.GetConnectedNodes());
 					if(source is INodeBlock) {
 						INodeBlock block = source as INodeBlock;
 						var inputBlock = block.blockViews.SelectMany(b => b.inputPorts).Where((p) =>
@@ -626,7 +626,7 @@ namespace MaxyGames.UNode.Editors {
 								p.isFlow &&
 								!p.IsProxy()).
 							SelectMany(p => p.GetConnectedNodes()).Distinct();
-						nodes.AddRange(inputBlock);
+						nodes = nodes.Concat(inputBlock);
 					}
 					foreach(var n in nodes) {
 						FindConnectedNodes(n, includeFlowInput, includeFlowOutput, includeValueInput, includeValueOutput, connectedNodes);
@@ -635,7 +635,7 @@ namespace MaxyGames.UNode.Editors {
 				if(includeFlowOutput) {
 					var nodes = source.outputPorts.
 						Where((p) => p.connected && p.isFlow && !p.IsProxy()).
-						SelectMany(p => p.GetConnectedNodes()).ToHashSet();
+						SelectMany(p => p.GetConnectedNodes());
 					if(source is INodeBlock) {
 						INodeBlock block = source as INodeBlock;
 						var inputBlock = block.blockViews.SelectMany(b => b.outputPorts).Where((p) =>
@@ -643,7 +643,7 @@ namespace MaxyGames.UNode.Editors {
 								p.isFlow &&
 								!p.IsProxy()).
 							SelectMany(p => p.GetConnectedNodes()).Distinct();
-						nodes.AddRange(inputBlock);
+						nodes = nodes.Concat(inputBlock);
 					}
 					foreach(var n in nodes) {
 						FindConnectedNodes(n, includeFlowInput, includeFlowOutput, includeValueInput, includeValueOutput, connectedNodes);
@@ -652,7 +652,7 @@ namespace MaxyGames.UNode.Editors {
 				if(includeValueInput) {
 					var nodes = source.inputPorts.
 						Where((p) => p.connected && p.isValue && !p.IsProxy()).
-						SelectMany(p => p.GetConnectedNodes()).ToHashSet();
+						SelectMany(p => p.GetConnectedNodes());
 					if(source is INodeBlock) {
 						INodeBlock block = source as INodeBlock;
 						var inputBlock = block.blockViews.SelectMany(b => b.inputPorts).Where((p) =>
@@ -660,7 +660,7 @@ namespace MaxyGames.UNode.Editors {
 								p.isValue &&
 								!p.IsProxy()).
 							SelectMany(p => p.GetConnectedNodes()).Distinct();
-						nodes.AddRange(inputBlock);
+						nodes = nodes.Concat(inputBlock);
 					}
 					foreach(var n in nodes) {
 						FindConnectedNodes(n, includeFlowInput, includeFlowOutput, includeValueInput, includeValueOutput, connectedNodes);
@@ -669,7 +669,7 @@ namespace MaxyGames.UNode.Editors {
 				if(includeValueOutput) {
 					var nodes = source.outputPorts.
 						Where((p) => p.connected && p.isValue && !p.IsProxy()).
-						SelectMany(p => p.GetConnectedNodes()).ToHashSet();
+						SelectMany(p => p.GetConnectedNodes());
 					if(source is INodeBlock) {
 						INodeBlock block = source as INodeBlock;
 						var inputBlock = block.blockViews.SelectMany(b => b.outputPorts).Where((p) =>
@@ -677,7 +677,7 @@ namespace MaxyGames.UNode.Editors {
 								p.isValue &&
 								!p.IsProxy()).
 							SelectMany(p => p.GetConnectedNodes()).Distinct();
-						nodes.AddRange(inputBlock);
+						nodes = nodes.Concat(inputBlock);
 					}
 					foreach(var n in nodes) {
 						FindConnectedNodes(n, includeFlowInput, includeFlowOutput, includeValueInput, includeValueOutput, connectedNodes);
@@ -953,7 +953,7 @@ namespace MaxyGames.UNode.Editors {
 				if(includeFlows) {//Flows
 					var nodes = node.outputPorts.
 						Where((p) => p.connected && p.isFlow && !p.IsProxy()).
-						SelectMany(p => p.GetConnectedNodes()).ToList();
+						SelectMany(p => p.GetConnectedNodes().Distinct());
 					foreach(var n in nodes) {
 						if(n == null || !buildTrees.Add(n))
 							continue;
@@ -964,8 +964,8 @@ namespace MaxyGames.UNode.Editors {
 				if(includeInputs) {//Inputs
 					var nodes = node.inputPorts.
 						Where((p) => p.connected && p.isValue && !p.IsProxy()).
-						SelectMany(p => p.GetConnectedNodes()).
-						Where(n => !flowNodes.Contains(n)).ToList();
+						SelectMany(p => p.GetConnectedNodes().Distinct()).
+						Where(n => !flowNodes.Contains(n));
 					foreach(var n in nodes) {
 						if(n == null || !buildTrees.Add(n))
 							continue;
@@ -977,7 +977,7 @@ namespace MaxyGames.UNode.Editors {
 					var nodes = node.outputPorts.
 						Where((p) => p.connected && p.isValue && !p.IsProxy()).
 						SelectMany(p => p.GetConnectedNodes()).
-						Where(n => !flowNodes.Contains(n)).ToList();
+						Where(n => !flowNodes.Contains(n));
 					foreach(var n in nodes) {
 						if(n == null || !buildTrees.Add(n))
 							continue;

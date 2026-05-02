@@ -85,6 +85,7 @@ namespace MaxyGames.UNode.Nodes {
 
 		private void OnRegisters(Flow flow) {
 			if(target.isAssigned) {
+				flow = flow.CreateDelegateFlow();
 				object val = target.GetValue(flow);
 				if(val == null) {
 					val = new MemberData.Event(target.DefaultValue.CreateRuntimeEvent(), flow.instance);

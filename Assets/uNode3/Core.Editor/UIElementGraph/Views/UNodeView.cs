@@ -30,6 +30,7 @@ namespace MaxyGames.UNode.Editors {
 		public const string ussClassBorderHasInputValue = "hasInputValue";
 		public const string ussClassBorderHasOutputValue = "hasOutputValue";
 		public const string ussClassEntryNode = "entry-node";
+		public const string ussClassDimmedNode = "dimmed-node";
 
 		public const string ussClassAutoHideControl = "autohide";
 

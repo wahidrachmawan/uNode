@@ -248,6 +248,7 @@ namespace MaxyGames.UNode.Editors {
 			if(e.input == null || e.output == null)
 				return;
 			AddElement(e);
+			m_Data.needRefreshDimStatus = true;
 
 			e.input.Connect(e);
 			e.output.Connect(e);
