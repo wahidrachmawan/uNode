@@ -127,47 +127,59 @@ namespace MaxyGames.UNode {
 								RegisterError(owner, name.Add(" is ") + "missing variable reference: " + reference.name + " with id: " + reference.id, autoFix);
 								return true;
 							}
-							else if(reference.graph != owner.graph) {
-								void autoFix() {
-									var reference = rawReference.reference as BaseGraphReference;
-									if(reference.ReferenceValue is Variable @ref) {
-										if(@ref.IsLocalVariable) {
-											var container = owner.GetObjectInParent<NodeContainer>();
-											if(container != null && container is ILocalVariableSystem) {
-												if(container.variableContainer.GetVariable(@ref.name) == null) {
+							else {
+								bool valid = reference.graph == owner.graph;
+								if(reference.ReferenceValue is Variable var) {
+									if(var.IsLocalVariable) {
+										var ownerContainer = owner.GetObjectInParent<ILocalVariableSystem>();
+										var container = var.GetObjectInParent<ILocalVariableSystem>();
+										if(container != null && container != ownerContainer) {
+											valid = false;
+										}
+									}
+								}
+								if(valid == false) {
+									void autoFix() {
+										var reference = rawReference.reference as BaseGraphReference;
+										if(reference.ReferenceValue is Variable @ref) {
+											if(@ref.IsLocalVariable) {
+												var container = owner.GetObjectInParent<NodeContainer>();
+												if(container != null && container is ILocalVariableSystem) {
+													if(container.variableContainer.GetVariable(@ref.name) == null) {
+														var newVal = new Variable() {
+															name = @ref.name,
+															serializedValue = new(@ref.serializedValue.value),
+															type = @ref.type,
+															resetOnEnter = true,
+														};
+														container.variableContainer.AddChild(newVal);
+														rawReference.reference = BaseReference.FromValue(newVal);
+													}
+													else {
+														rawReference.reference = BaseReference.FromValue(container.variableContainer.GetVariable(reference.name));
+													}
+													return;
+												}
+											}
+											if(owner.graph.CanAddVariable()) {
+												if(owner.graphContainer.GetVariable(@ref.name) == null) {
 													var newVal = new Variable() {
 														name = @ref.name,
 														serializedValue = new(@ref.serializedValue.value),
 														type = @ref.type,
-														resetOnEnter = true,
 													};
-													container.variableContainer.AddChild(newVal);
+													owner.graph.variableContainer.AddChild(newVal);
 													rawReference.reference = BaseReference.FromValue(newVal);
 												}
 												else {
-													rawReference.reference = BaseReference.FromValue(container.variableContainer.GetVariable(reference.name));
+													rawReference.reference = BaseReference.FromValue(owner.graphContainer.GetVariable(reference.name));
 												}
-												return;
-											}
-										}
-										if(owner.graph.CanAddVariable()) {
-											if(owner.graphContainer.GetVariable(@ref.name) == null) {
-												var newVal = new Variable() {
-													name = @ref.name,
-													serializedValue = new(@ref.serializedValue.value),
-													type = @ref.type,
-												};
-												owner.graph.variableContainer.AddChild(newVal);
-												rawReference.reference = BaseReference.FromValue(newVal);
-											}
-											else {
-												rawReference.reference = BaseReference.FromValue(owner.graphContainer.GetVariable(reference.name));
 											}
 										}
 									}
+									RegisterError(owner, name.Add(" is ") + "invalid variable reference: " + reference.name + ", please re-assign it", autoFix);
+									return true;
 								}
-								RegisterError(owner, name.Add(" is ") + "invalid variable reference: " + reference.name + ", please re-assign it", autoFix);
-								return true;
 							}
 						}
 					}

@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 		string oldRichText;
 		bool hideInstance = false;
 		bool showInstance;
+		Image iconElement;
 
 		public MemberControl(ControlConfig config, bool autoLayout = false) : base(config, autoLayout) {
 			Init();
@@ -134,6 +135,30 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			if(control != null) {
 				control.RemoveFromHierarchy();
 				Insert(0, control);
+
+				bool showIcon = false;
+				if(config.filter != null) {
+					if(member.targetType == MemberData.TargetType.Values && targetType != null) {
+						var filterType = config.filter.GetActualType();
+						if(filterType != targetType && member.Get(null) != null) {
+							showIcon = true;
+						}
+					}
+				}
+				if(showIcon) {
+					if(iconElement == null) {
+						iconElement = new Image() { name = "member-icon" };
+						Insert(0, iconElement);
+					}
+					iconElement.RemoveFromHierarchy();
+					Insert(0, iconElement);
+					iconElement.image = uNodeEditorUtility.GetTypeIcon(targetType);
+				}
+				else {
+					if(iconElement != null && iconElement.parent != null) {
+						iconElement.RemoveFromHierarchy();
+					}
+				}
 			}
 		}
 

@@ -58,7 +58,6 @@ namespace MaxyGames.UNode.Editors {
 			[Tooltip("If true, when moving node the input value of the node will be always be carry")]
 			public bool autoCarryInputValue = true;
 			public bool carryNodes = false;
-			//public bool isDim = true;
 
 			public DisplayKind displayKind;
 			[Tooltip("The preferred graph layout for new created graph")]
@@ -82,7 +81,6 @@ namespace MaxyGames.UNode.Editors {
 			[Tooltip("Auto add missing namespace when adding node to the graph.")]
 			public bool autoAddNamespace;
 			public float debugTransitionSpeed = 0.5f;
-
 
 			[SerializeField]
 			private int m_maxReloadMilis;

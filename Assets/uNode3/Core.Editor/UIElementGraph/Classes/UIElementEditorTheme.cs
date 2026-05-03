@@ -36,8 +36,7 @@ namespace MaxyGames.UNode.Editors {
 		[HideInInspector]
 		public Rect minimapPosition = new Rect(0, 0, 200, 180);
 		
-		[Header("Debug")]
-		public Color breakpointColor = Color.red;
+		[Header("Debug Hierarchy Color")]
 		public Color nodeSuccessColor = Color.green;
 		public Color nodeFailureColor = Color.red;
 		public Color nodeRunningColor = Color.blue;

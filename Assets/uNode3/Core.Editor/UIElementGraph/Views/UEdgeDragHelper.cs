@@ -547,15 +547,29 @@ namespace MaxyGames.UNode.Editors {
 
 			if(endPort != null) {
 				if(endPort.direction == Direction.Output) {
-					if(edgeCandidate.output is PortView port) {
-						port.ResetPortValue();
-					}
+					//if(endPort.isValue) {
+					//	if(edgeCandidate.output is PortView port) {
+					//		port.ResetPortValue();
+					//	}
+					//}
+					//else {
+					//	if(edgeCandidate.input is PortView port) {
+					//		port.ResetPortValue();
+					//	}
+					//}
 					edgeCandidate.output = endPort;
 				}
 				else {
-					if(edgeCandidate.input is PortView port) {
-						port.ResetPortValue();
-					}
+					//if(endPort.isValue) {
+					//	if(edgeCandidate.input is PortView port) {
+					//		port.ResetPortValue();
+					//	}
+					//}
+					//else {
+					//	if(edgeCandidate.output is PortView port) {
+					//		port.ResetPortValue();
+					//	}
+					//}
 					edgeCandidate.input = endPort;
 				}
 				m_Listener.OnDrop(m_GraphView, edgeCandidate);

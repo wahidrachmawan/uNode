@@ -652,24 +652,54 @@ namespace MaxyGames.UNode {
 		string GetSummary();
 	}
 
+	//public struct NodeDefinitionData {
+	//	public NodeObject nodeObject;
+
+	//	public readonly Nodes.HLNode node => nodeObject.node as Nodes.HLNode;
+	//	public ValueOutput GetValueOutput(string id) => nodeObject.ValueOutputs.FirstOrDefault(p => p.id == id);
+	//	public ValueInput GetValueInput(string id) => nodeObject.ValueInputs.FirstOrDefault(p => p.id == id);
+	//	public FlowInput GetFlowInput(string id) => nodeObject.FlowInputs.FirstOrDefault(p => p.id == id);
+	//	public FlowOutput GetFlowOutput(string id) => nodeObject.FlowOutputs.FirstOrDefault(p => p.id == id);
+	//}
+
+	public interface IHighLevelNode {
+		/// <summary>
+		/// Called in editor when creating node
+		/// </summary>
+		/// <returns></returns>
+		Node CreateNode();
+	}
+
+	public interface IHighLevelNode<T> : IHighLevelNode where T : Node, IHighLevelNodeDefinition {
+		Node IHighLevelNode.CreateNode() {
+			var result = ReflectionUtils.CreateInstance(typeof(T)) as T;
+			result.OnCreate(this);
+			return result;
+		}
+
+		//void OnGeneratorInitialize(in NodeDefinitionData data);
+	}
+
 	/// <summary>
 	/// An interface for implementing flow node that has one input and output
 	/// </summary>
-	public interface IFlowNode {
+	public interface IFlowNode : IHighLevelNode<Nodes.HLNode> {
 		void Execute(object graph);
 	}
 
-	internal interface IHighLevelNode {
+	public interface IHighLevelNodeDefinition {
 		/// <summary>
 		/// Return the node type
 		/// </summary>
 		Type NodeType { get; }
+
+		void OnCreate(IHighLevelNode instance);
 	}
 
 	/// <summary>
 	/// An interface for implementing data node
 	/// </summary>
-	public interface IDataNode {
+	public interface IDataNode : IHighLevelNode<Nodes.HLNode> {
 		object GetValue(object graph);
 		Type ReturnType();
 	}
@@ -725,7 +755,7 @@ namespace MaxyGames.UNode {
 	/// =>return true; will finish the node with success state.
 	/// =>return false; will finish the node with failure state.
 	/// </summary>
-	public interface IStateNode {
+	public interface IStateNode : IHighLevelNode<Nodes.HLNode> {
 		bool Execute(object graph);
 	}
 
@@ -737,14 +767,14 @@ namespace MaxyGames.UNode {
 	/// =>yield return false; and => yield return "Failure"; will finish the coroutine with failure state and execute On Failure flow.
 	/// When the Execute function is finished without above command the node will finish with success state.
 	/// </summary>
-	public interface IStateCoroutineNode {
+	public interface IStateCoroutineNode : IHighLevelNode<Nodes.HLNode> {
 		IEnumerable Execute(object graph);
 	}
 
 	/// <summary>
 	/// An interface for implementing Coroutine node
 	/// </summary>
-	public interface ICoroutineNode {
+	public interface ICoroutineNode : IHighLevelNode<Nodes.HLNode> {
 		IEnumerable Execute(object graph);
 	}
 
@@ -761,7 +791,7 @@ namespace MaxyGames.UNode {
 	/// <summary>
 	/// Implement this interface for make node for instanced members.
 	/// </summary>
-	public interface IInstanceNode { 
+	public interface IInstanceNode : IHighLevelNode<Nodes.HLNode> { 
 		
 	}
 
@@ -769,7 +799,7 @@ namespace MaxyGames.UNode {
 	/// Implement this interface to make node for static members, the members must use static keyword.
 	/// Use <see cref="IInstanceNode"/> instead if the node required having to store a value and use later.
 	/// </summary>
-	public interface IStaticNode {
+	public interface IStaticNode : IHighLevelNode<Nodes.HLNode> {
 
 	}
 

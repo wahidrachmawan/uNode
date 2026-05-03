@@ -2372,8 +2372,12 @@ namespace MaxyGames.UNode.Editors {
 					CopySelectedNodes();
 					graphEditor.Repaint();
 					var clickedPos = GetMousePosition(graphEditor.topMousePos);
-					graphEditor.PasteNode(clickedPos);
+					var pastedNodes = graphEditor.PasteNode(clickedPos);
 					graphEditor.Refresh();
+					ClearSelection();
+					graphData.ClearSelection();
+					graphData.AddToSelection(pastedNodes);
+					graphEditor.SelectionChanged();
 				}
 				return true;
 			}

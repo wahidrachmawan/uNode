@@ -106,6 +106,12 @@ BoundsField > VisualElement {
     flex-basis: auto;
 }
 
+#member-icon {
+    width: 16px;
+    height: 16px;
+    align-self: center;
+}
+
 /* .PopupButton {
     -unity-text-align: middle-left;
     height: 16px;

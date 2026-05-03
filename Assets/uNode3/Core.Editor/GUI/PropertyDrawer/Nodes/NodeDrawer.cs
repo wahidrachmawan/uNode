@@ -31,7 +31,7 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUI.BeginDisabledGroup(true);
 			if(node.node != null) {
 				var nodeType = node.node.GetType();
-				if(node.node is IHighLevelNode hlNode && hlNode.NodeType != null) {
+				if(node.node is IHighLevelNodeDefinition hlNode && hlNode.NodeType != null) {
 					nodeType = hlNode.NodeType;
 				}
 				var monoScript = uNodeEditorUtility.GetMonoScript(nodeType);

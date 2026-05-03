@@ -441,9 +441,9 @@ namespace MaxyGames.UNode.Editors {
 					if(type.IsCastableTo(typeof(Node))) {
 						node.node = ReflectionUtils.CreateInstance(type) as Node;
 					}
-					else {
-						var nod = new Nodes.HLNode();
-						nod.type = type;
+					else if(type.IsCastableTo(typeof(IHighLevelNode))) {
+						var hlNode = ReflectionUtils.CreateInstance(type) as IHighLevelNode;
+						var nod = hlNode.CreateNode();
 						node.node = nod;
 					}
 				}

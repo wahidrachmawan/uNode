@@ -1036,7 +1036,7 @@ namespace MaxyGames.UNode.Editors {
 						if(nodeObject.node.GetType() == type) {
 							references.Add(element);
 						}
-						else if(nodeObject.node is Nodes.HLNode hlNode && hlNode.type == type) {
+						else if(nodeObject.node is IHighLevelNodeDefinition hlNode && hlNode.NodeType == type) {
 							references.Add(element);
 						}
 					}

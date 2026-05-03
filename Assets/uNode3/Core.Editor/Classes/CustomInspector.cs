@@ -465,8 +465,8 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="component"></param>
 		public static void ShowInspectorMenu(GenericMenu menu, NodeObject node) {
 			MonoScript ms = uNodeEditorUtility.GetMonoScript(node?.node);
-			if(node?.node is Nodes.HLNode hlNode) {
-				ms = uNodeEditorUtility.GetMonoScript(hlNode.type);
+			if(node?.node is IHighLevelNodeDefinition hlNode) {
+				ms = uNodeEditorUtility.GetMonoScript(hlNode.NodeType);
 			}
 			if(ms != null) {
 				menu.AddItem(new GUIContent("Find Script"), false, delegate () {

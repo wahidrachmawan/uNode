@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Nodes {
-	public class HLNode : Node, IHighLevelNode {
+	public class HLNode : Node, IHighLevelNodeDefinition {
 		[HideInInspector]
 		public SerializedType type = typeof(object);
 
@@ -46,9 +46,8 @@ namespace MaxyGames.UNode.Nodes {
 		public List<PortData> ports = new List<PortData>();
 
 		private object m_instance;
-		private bool hasRegister;
 
-		Type IHighLevelNode.NodeType => type;
+		Type IHighLevelNodeDefinition.NodeType => type;
 
 		[System.Runtime.Serialization.OnDeserialized]
 		private void OnDeserialized() {
@@ -764,7 +763,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
-		private void OnExecute(Flow flow) {
+		public void OnExecute(Flow flow) {
 			InitField(flow);
 			var instance = flow.GetElementData(this);
 			if(instance is IFlowNode) {
@@ -842,6 +841,11 @@ namespace MaxyGames.UNode.Nodes {
 				}
 			}
 			return base.GetNodeIcon();
+		}
+
+		void IHighLevelNodeDefinition.OnCreate(IHighLevelNode instance) {
+			type = instance.GetType();
+			m_instance = instance;
 		}
 	}
 }
