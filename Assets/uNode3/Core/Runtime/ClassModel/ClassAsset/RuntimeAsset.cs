@@ -64,6 +64,7 @@ namespace MaxyGames.UNode {
 	#endregion
 
 	public abstract class RuntimeAsset : BaseRuntimeAsset {
+		[NonSerialized]
 		private string m_uniqueIdentifier;
 		public override string uniqueIdentifier {
 			get {

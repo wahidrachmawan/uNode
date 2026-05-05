@@ -80,6 +80,16 @@ namespace MaxyGames.UNode {
 			return inst;
 		}
 
+		/// <summary>
+		/// Get the pooled context for easier free value using IDisposable
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public PooledContext<T> GetContext(out T value) {
+			value = Allocate();
+			return new PooledContext<T>(value, _onFree);
+		}
+
 		private T AllocateSlow() {
 			Element[] items = _items;
 			for(int i = 0; i < items.Length; i++) {
@@ -120,8 +130,25 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	//TODO: using ref struct for C# 8.0+ to avoid boxing in using statement
+	public readonly struct PooledContext<T> : IDisposable {
+		public readonly T value;
+		private readonly Action<T> dispose;
+
+		public PooledContext(T value, Action<T> dispose) {
+			this.value = value;
+			this.dispose = dispose;
+		}
+
+		public void Dispose() {
+			dispose?.Invoke(value);
+		}
+	}
+
 	public static class StaticListPool {
 		public static List<object> Allocate() => StaticListPool<object>.Allocate();
+		public static PooledContext<List<object>> Get(out List<object> value) => StaticListPool<object>.Get(out value);
+		public static PooledContext<List<T>> Get<T>(out List<T> value) => StaticListPool<T>.Get(out value);
 		public static List<T> Allocate<T>() => StaticListPool<T>.Allocate();
 		public static void Free<T>(List<T> obj) => StaticListPool<T>.Free(obj);
 	}
@@ -132,6 +159,7 @@ namespace MaxyGames.UNode {
 
 	public static class StaticObjectPool {
 		public static T Allocate<T>() where T : class, IObjectPool, new() => StaticObjectPool<T>.Allocate();
+		public static PooledContext<T> Get<T>(out T value) where T : class, IObjectPool, new() => StaticObjectPool<T>.Get(out value);
 		public static void Free<T>(T obj) where T : class, IObjectPool, new() => StaticObjectPool<T>.Free(obj);
 	}
 
@@ -140,6 +168,10 @@ namespace MaxyGames.UNode {
 
 		public static T Allocate() {
 			return pool.Allocate();
+		}
+
+		public static PooledContext<T> Get(out T value) {
+			return pool.GetContext(out value);
 		}
 
 		public static void Free(T obj) {
@@ -162,6 +194,10 @@ namespace MaxyGames.UNode {
 			return pool.Allocate();
 		}
 
+		public static PooledContext<List<T>> Get(out List<T> value) {
+			return pool.GetContext(out value);
+		}
+
 		public static void Free(List<T> obj) {
 			pool.Free(obj);
 		}
@@ -178,6 +214,8 @@ namespace MaxyGames.UNode {
 	public static class StaticHashPool {
 		public static HashSet<object> Allocate() => StaticHashPool<object>.Allocate();
 		public static HashSet<T> Allocate<T>() => StaticHashPool<T>.Allocate();
+		public static PooledContext<HashSet<object>> Get(out HashSet<object> value) => StaticHashPool<object>.Get(out value);
+		public static PooledContext<HashSet<T>> Get<T>(out HashSet<T> value) => StaticHashPool<T>.Get(out value);
 		public static void Free<T>(HashSet<T> obj) => StaticHashPool<T>.Free(obj);
 	}
 
@@ -186,6 +224,10 @@ namespace MaxyGames.UNode {
 
 		public static HashSet<T> Allocate() {
 			return pool.Allocate();
+		}
+
+		public static PooledContext<HashSet<T>> Get(out HashSet<T> value) {
+			return pool.GetContext(out value);
 		}
 
 		public static void Free(HashSet<T> obj) {

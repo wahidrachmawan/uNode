@@ -24,7 +24,7 @@ namespace MaxyGames.CompilerBuilder {
 }";
 		public const string RunnerExecutablePath = "Library/uNodeRoslynCompiler/Runner.dll";
 		public const string RunnerDirectoryPath = "Library/uNodeRoslynCompiler";
-		//private static readonly bool useExistingDll = true;
+		static string RunnerInProjectPath => AssetDatabase.GUIDToAssetPath("1bf56dea8541bb44389a93fd8de8d808");
 
 		static RoslynCodeCompiler() {
 			EditorApplication.quitting -= CloseCodeCompiler;
@@ -69,18 +69,6 @@ namespace MaxyGames.CompilerBuilder {
 				Debug.LogError("CodeCompiler assembly not found");
 				return;
 			}
-			//if(useExistingDll) {
-			//	var dllLocation = Path.GetFullPath(codeCompilerAssembly.outputPath);
-			//	var pdbLocation = Path.ChangeExtension(dllLocation, ".dll");
-			//	if(File.Exists(dllLocation)) {
-			//		File.Copy(dllLocation, outputPath);
-			//		if(File.Exists(pdbLocation)) {
-			//			File.Copy(pdbLocation, Path.ChangeExtension(outputPath, ".pdb"));
-			//		}
-			//	}
-			//}
-			//else {
-			//}
 			var references = codeCompilerAssembly.allReferences;
 			var sourceTrees = CodeCompiler.CodeCompiler.GetSyntaxTreesFromFiles(codeCompilerAssembly.sourceFiles, out _, codeCompilerAssembly.defines);
 
@@ -97,10 +85,17 @@ namespace MaxyGames.CompilerBuilder {
 				foreach(var d in result.Diagnostics)
 					Debug.LogError(d.ToString());
 			}
+
 			CreateConfigFile(outputPath);
 			CreateCompilerOptionFile(outputPath);
 
 #if UNODE_DEV
+			var assetPath = RunnerInProjectPath;
+			if(File.Exists(assetPath) && File.Exists(outputPath)) {
+				//Update the main runner in project for ease
+				File.Copy(outputPath, assetPath, true);
+			}
+
 			Debug.Log("Runner built successfully on: " + outputPath);
 #endif
 		}
@@ -312,7 +307,7 @@ namespace MaxyGames.CompilerBuilder {
 		static string FindDotnetExecutable() {
 			if(dotnetPath == null) {
 				dotnetPath = string.Empty;
-				if(IsCommandWorking("dotnet")) {
+				if(IsDotNetAvailable() || IsCommandWorking("dotnet")) {
 					dotnetPath = "dotnet";
 					return dotnetPath;
 				}
@@ -350,6 +345,19 @@ namespace MaxyGames.CompilerBuilder {
 				}
 			}
 			return dotnetPath;
+		}
+
+		static bool IsDotNetAvailable() {
+			string dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
+			string path = Environment.GetEnvironmentVariable("PATH");
+
+			bool hasDotnetRoot = !string.IsNullOrEmpty(dotnetRoot) &&
+								 System.IO.Directory.Exists(dotnetRoot);
+
+			bool hasDotnetInPath = !string.IsNullOrEmpty(path) &&
+								   path.Split(';').Any(p => p.Contains("dotnet"));
+
+			return hasDotnetRoot || hasDotnetInPath;
 		}
 
 		static bool IsCommandWorking(string path) {
@@ -409,7 +417,16 @@ namespace MaxyGames.CompilerBuilder {
 #if UNODE_DEV
 				Debug.Log("Building compiler runner...");
 #endif
-				Build(RunnerExecutablePath);
+				var path = RunnerInProjectPath;
+				if(string.IsNullOrEmpty(path) == false && File.Exists(path)) {
+					File.Copy(path, Path.Combine(Path.GetDirectoryName(RunnerExecutablePath), "Runner.dll"), true);
+					CreateConfigFile(RunnerExecutablePath);
+					CreateCompilerOptionFile(RunnerExecutablePath);
+					Debug.Log(path);
+				}
+				else {
+					Build(RunnerExecutablePath);
+				}
 				SessionState.SetBool("uNode_RoslynCodeCompilerInitialized", true);
 
 				//var codeCompilerName = typeof(MaxyGames.CodeCompiler.CodeCompiler).Assembly.GetName().Name;

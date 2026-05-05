@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MaxyGames.UNode {
 	/// <summary>
@@ -27,8 +28,217 @@ namespace MaxyGames.UNode {
 			}
 
 			public static void SetVariable(object instance, string name, object value) {
-				var field = instance.GetType().GetFieldCached(name);
-				if(field == null) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				accessor.SetVariable(instance, name, value);
+			}
+
+			public static void SetVariable(object instance, string name, object value, char @operator) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				accessor.SetVariable(instance, name, value, @operator);
+			}
+
+			public static object GetVariable(object instance, string name) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				return accessor.GetVariable(instance, name);
+			}
+
+			public static object GetProperty(object instance, string name) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				return accessor.GetProperty(instance, name);
+			}
+
+			public static void SetProperty(object instance, string name, object value) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				accessor.SetProperty(instance, name, value);
+			}
+
+			public static void SetProperty(object instance, string name, object value, char @operator) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				accessor.SetProperty(instance, name, value, @operator);
+			}
+
+			public static object InvokeFunction(object instance, string name, object[] values) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				return accessor.InvokeFunction(instance, name, values);
+			}
+
+			public static object InvokeFunction(object instance, string name, Type[] parameters, object[] values) {
+				var accessor = ObjectAccessor.GetInstance(instance.GetType());
+				return accessor.InvokeFunction(instance, name, parameters, values);
+			}
+
+			public static object InvokeFunctionByID(object obj, string graphID, int functionID, object[] values) {
+				if(values != null) {
+					for(int i = 0; i < values.Length; i++) {
+						values[i] = uNodeHelper.GetActualRuntimeValue(values[i]);
+					}
+				}
+				var graph = GetGraphByID(graphID);
+				var func = graph.GetGraphElement(functionID) as Function;
+				if(func == null) {
+					throw new Exception($"Function with id:{functionID} not found from graph {graph}." +
+						"\nIt may because it was removed or wrong given ID.");
+				}
+				if(obj is IInstancedGraph instanced && instanced.Instance != null) {
+					return func.Invoke(instanced.Instance, values);
+				} else if(obj is IRuntimeClassContainer container) {
+					return InvokeFunction(container.RuntimeClass, func.name, func.ParameterTypes, values);
+				}
+				return InvokeFunction(obj, func.name, func.ParameterTypes, values);
+			}
+		}
+
+		internal sealed class ObjectAccessor {
+			readonly Dictionary<string, FieldInfo> fields = new();
+			readonly Dictionary<int, FieldInfo> fieldsID = new();
+			readonly Dictionary<string, PropertyInfo> properties = new();
+			readonly Dictionary<int, PropertyInfo> propertiesID = new();
+			readonly Dictionary<string, EventInfo> events = new();
+			readonly Dictionary<int, EventInfo> eventsID = new();
+			readonly Dictionary<MethodSignature, MethodInfo> methods = new();
+			readonly Dictionary<int, MethodInfo> methodsID = new();
+
+			static Dictionary<Type, ObjectAccessor> instances = new();
+
+			public static ObjectAccessor GetInstance(Type type) {
+				if(!instances.TryGetValue(type, out var result)) {
+					result = new ObjectAccessor(type);
+					instances[type] = result;
+				}
+				return result;
+			}
+
+			struct MethodSignature : IEquatable<MethodSignature> {
+				#region Fields
+				private string methodName;
+				private Type[] parameterTypes;
+				private int cachedHash;
+				#endregion
+
+				#region Constructors
+				public MethodSignature(string name, params Type[] parameters) {
+					methodName = name;
+					parameterTypes = parameters ?? new Type[0];
+					cachedHash = 0;
+					cachedHash = ComputeHash();
+				}
+
+				public MethodSignature(MethodInfo method) {
+					if(method == null) {
+						methodName = "";
+						parameterTypes = new Type[0];
+						cachedHash = 0;
+						cachedHash = ComputeHash();
+						return;
+					}
+
+					methodName = method.Name;
+
+					ParameterInfo[] parameters = method.GetParameters();
+					parameterTypes = new Type[parameters.Length];
+					for(int i = 0; i < parameters.Length; i++) {
+						parameterTypes[i] = parameters[i].ParameterType;
+					}
+
+					cachedHash = 0;
+					cachedHash = ComputeHash();
+				}
+				#endregion
+
+				private int ComputeHash() {
+					unchecked {
+						// Use GetHashCode for maximum speed
+						int hash = methodName?.GetHashCode() ?? 0;
+						hash = hash * 31 + (parameterTypes?.Length ?? 0).GetHashCode();
+
+						for(int i = 0; i < (parameterTypes?.Length ?? 0); i++) {
+							if(parameterTypes[i] != null) {
+								// Combine type name and namespace for uniqueness
+								hash = hash * 31 + (parameterTypes[i].Name?.GetHashCode() ?? 0);
+								hash = hash * 31 + (parameterTypes[i].Namespace?.GetHashCode() ?? 0);
+							}
+						}
+
+						return hash;
+					}
+				}
+
+				public bool Equals(MethodSignature other) {
+					// Quick check using hash first
+					if(cachedHash != other.cachedHash)
+						return false;
+
+					// Full equality check
+					if(methodName != other.methodName)
+						return false;
+
+					int thisParamCount = parameterTypes?.Length ?? 0;
+					int otherParamCount = other.parameterTypes?.Length ?? 0;
+
+					if(thisParamCount != otherParamCount)
+						return false;
+
+					for(int i = 0; i < thisParamCount; i++) {
+						if(parameterTypes[i] != other.parameterTypes[i])
+							return false;
+					}
+
+					return true;
+				}
+
+				public override bool Equals(object obj) {
+					return obj is MethodSignature other && Equals(other);
+				}
+
+				public override int GetHashCode() {
+					return cachedHash;
+				}
+
+				public static bool operator ==(MethodSignature left, MethodSignature right) {
+					return left.Equals(right);
+				}
+
+				public static bool operator !=(MethodSignature left, MethodSignature right) {
+					return !left.Equals(right);
+				}
+
+				public override string ToString() {
+					string paramString = parameterTypes != null
+						? string.Join(", ", Array.ConvertAll(parameterTypes, t => t?.Name ?? "null"))
+						: "";
+					return $"{methodName}({paramString}) [Hash: {cachedHash}]";
+				}
+			}
+
+			public ObjectAccessor(Type type) {
+				const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
+
+				var members = type.GetMembers(flags);
+
+				foreach(var member in members) {
+					if(member is FieldInfo field) {
+						fields[member.Name] = field;
+						fieldsID[Animator.StringToHash(member.Name)] = field;
+					}
+					else if(member is PropertyInfo property) {
+						properties[member.Name] = property;
+						propertiesID[Animator.StringToHash(member.Name)] = property;
+					}
+					else if(member is MethodInfo method) {
+						var signature = $"{method.Name}{string.Join(',', method.GetParameters().Select(p => p.ParameterType.FullName))}";
+						methods[new MethodSignature(method)] = method;
+						methodsID[Animator.StringToHash(signature)] = method;
+					}
+					else if(member is EventInfo eventInfo) {
+						events[member.Name] = eventInfo;
+						eventsID[Animator.StringToHash(member.Name)] = eventInfo;
+					}
+				}
+			}
+
+			#region ByName
+			public void SetVariable(object instance, string name, object value) {
+				if(fields.TryGetValue(name, out var field) == false) {
 					throw new Exception($"Variable with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
@@ -41,9 +251,21 @@ namespace MaxyGames.UNode {
 				}
 			}
 
-			public static void SetVariable(object instance, string name, object value, char @operator) {
-				var field = instance.GetType().GetFieldCached(name);
-				if(field == null) {
+			public void SetVariable(object instance, string name, object value, char @operator) {
+				if(fields.TryGetValue(name, out var field) == false) {
+					if(@operator == '+' || @operator == '-') {
+						if(events.TryGetValue(name, out var eventInfo)) {
+							switch(@operator) {
+								case '+':
+									eventInfo.AddEventHandler(instance, value as Delegate);
+									break;
+								case '-':
+									eventInfo.RemoveEventHandler(instance, value as Delegate);
+									break;
+							}
+							return;
+						}
+					}
 					throw new Exception($"Variable with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
@@ -66,28 +288,24 @@ namespace MaxyGames.UNode {
 				}
 			}
 
-			public static object GetVariable(object instance, string name) {
-				var field = instance.GetType().GetFieldCached(name);
-				if(field == null) {
+			public object GetVariable(object instance, string name) {
+				if(fields.TryGetValue(name, out var field) == false) {
 					throw new Exception($"Variable with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
 				return field.GetValueOptimized(instance);
 			}
 
-			public static object GetProperty(object instance, string name) {
-				var property = instance.GetType().GetPropertyCached(name);
-				if(property == null) {
+			public object GetProperty(object instance, string name) {
+				if(properties.TryGetValue(name, out var property) == false) {
 					throw new Exception($"Property with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
 				return property.GetValueOptimized(instance);
 			}
 
-
-			public static void SetProperty(object instance, string name, object value) {
-				var property = instance.GetType().GetPropertyCached(name);
-				if(property == null) {
+			public void SetProperty(object instance, string name, object value) {
+				if(properties.TryGetValue(name, out var property) == false) {
 					throw new Exception($"Property with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
@@ -100,9 +318,8 @@ namespace MaxyGames.UNode {
 				}
 			}
 
-			public static void SetProperty(object instance, string name, object value, char @operator) {
-				var property = instance.GetType().GetPropertyCached(name);
-				if(property == null) {
+			public void SetProperty(object instance, string name, object value, char @operator) {
+				if(properties.TryGetValue(name, out var property) == false) {
 					throw new Exception($"Property with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
@@ -125,7 +342,7 @@ namespace MaxyGames.UNode {
 				}
 			}
 
-			public static object InvokeFunction(object instance, string name, object[] values) {
+			public object InvokeFunction(object instance, string name, object[] values) {
 				Type[] types = new Type[values != null ? values.Length : 0];
 				if(values != null) {
 					for(int i = 0; i < types.Length; i++) {
@@ -135,8 +352,7 @@ namespace MaxyGames.UNode {
 						values[i] = uNodeHelper.GetActualRuntimeValue(values[i]);
 					}
 				}
-				var func = instance.GetType().GetMethod(name, types);
-				if(func == null) {
+				if(methods.TryGetValue(new MethodSignature(name, types), out var func) == false) {
 					throw new Exception($"Function with name:{name} not found from type {instance.GetType().FullName}." +
 						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
@@ -148,10 +364,8 @@ namespace MaxyGames.UNode {
 				}
 			}
 
-			public static object InvokeFunction(object instance, string name, Type[] parameters, object[] values) {
-				//TODO: cache getmethod for performance
-				var func = instance.GetType().GetMethod(name, parameters);
-				if(func == null) {
+			public object InvokeFunction(object instance, string name, Type[] parameters, object[] values) {
+				if(methods.TryGetValue(new MethodSignature(name, parameters), out var func) == false) {
 					if(parameters == null) {
 						parameters = Type.EmptyTypes;
 					}
@@ -192,26 +406,206 @@ namespace MaxyGames.UNode {
 					throw new Exception($"Error on invoking function: '{name}'\nErrors:{ex.ToString()}", ex);
 				}
 			}
+			#endregion
+			#region ByID
+			public void SetVariable(object instance, int id, object value) {
+				if(fieldsID.TryGetValue(id, out var field) == false) {
+					throw new Exception($"Variable with id:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
+				}
+				value = uNodeHelper.GetActualRuntimeValue(value);
+				try {
+					field.SetValueOptimized(instance, value);
+				}
+				catch(Exception ex) {
+					throw new Exception($"Error on performing set variable: '{id}'\nName:{id}\nType:{field.FieldType.FullName}\nValue:{value?.GetType().FullName}\nErrors:{ex.ToString()}", ex);
+				}
+			}
 
-			public static object InvokeFunctionByID(object obj, string graphID, int functionID, object[] values) {
+			public void SetVariable(object instance, int id, object value, char @operator) {
+				if(fieldsID.TryGetValue(id, out var field) == false) {
+					if(@operator == '+' || @operator == '-') {
+						if(eventsID.TryGetValue(id, out var eventInfo)) {
+							switch(@operator) {
+								case '+':
+									eventInfo.AddEventHandler(instance, value as Delegate);
+									break;
+								case '-':
+									eventInfo.RemoveEventHandler(instance, value as Delegate);
+									break;
+							}
+							return;
+						}
+					}
+					throw new Exception($"Variable with id:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
+				}
+				value = uNodeHelper.GetActualRuntimeValue(value);
+				switch(@operator) {
+					case '+':
+					case '-':
+					case '/':
+					case '*':
+					case '%':
+						var val = field.GetValueOptimized(instance);
+						value = uNodeHelper.ArithmeticOperator(val, value, @operator, field.FieldType, value?.GetType());
+						break;
+				}
+				try {
+					field.SetValueOptimized(instance, value);
+				}
+				catch(Exception ex) {
+					throw new Exception($"Error on performing set variable: '{id}'\nName:{id}\nType:{field.FieldType.FullName}\nValue:{value?.GetType().FullName}\nErrors:{ex.ToString()}", ex);
+				}
+			}
+
+			public object GetVariable(object instance, int id) {
+				if(fieldsID.TryGetValue(id, out var field) == false) {
+					throw new Exception($"Variable with id:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
+				}
+				return field.GetValueOptimized(instance);
+			}
+
+			public object GetProperty(object instance, int id) {
+				if(propertiesID.TryGetValue(id, out var property) == false) {
+					throw new Exception($"Property with id:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
+				}
+				return property.GetValueOptimized(instance);
+			}
+
+			public void SetProperty(object instance, int id, object value) {
+				if(propertiesID.TryGetValue(id, out var property) == false) {
+					throw new Exception($"Property with id:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
+				}
+				value = uNodeHelper.GetActualRuntimeValue(value);
+				try {
+					property.SetValueOptimized(instance, value);
+				}
+				catch(Exception ex) {
+					throw new Exception($"Error on performing set property: '{id}'\nName:{id}\nType:{property.PropertyType.FullName}\nValue:{value?.GetType().FullName}\nErrors:{ex.ToString()}", ex);
+				}
+			}
+
+			public void SetProperty(object instance, int id, object value, char @operator) {
+				if(propertiesID.TryGetValue(id, out var property) == false) {
+					throw new Exception($"Property with name:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
+				}
+				switch(@operator) {
+					case '+':
+					case '-':
+					case '/':
+					case '*':
+					case '%':
+						var val = property.GetValueOptimized(instance);
+						value = uNodeHelper.ArithmeticOperator(val, value, @operator, property.PropertyType, value?.GetType());
+						break;
+				}
+				value = uNodeHelper.GetActualRuntimeValue(value);
+				try {
+					property.SetValueOptimized(instance, value);
+				}
+				catch(Exception ex) {
+					throw new Exception($"Error on performing set property: '{id}'\nName:{id}\nType:{property.PropertyType.FullName}\nValue:{value?.GetType().FullName}\nErrors:{ex.ToString()}", ex);
+				}
+			}
+
+			public object InvokeFunction(object instance, int id, object[] values) {
+				Type[] types = new Type[values != null ? values.Length : 0];
 				if(values != null) {
+					for(int i = 0; i < types.Length; i++) {
+						types[i] = values[i] != null ? values[i].GetType() : typeof(object);
+					}
 					for(int i = 0; i < values.Length; i++) {
 						values[i] = uNodeHelper.GetActualRuntimeValue(values[i]);
 					}
 				}
-				var graph = GetGraphByID(graphID);
-				var func = graph.GetGraphElement(functionID) as Function;
-				if(func == null) {
-					throw new Exception($"Function with id:{functionID} not found from graph {graph}." +
-						"\nIt may because it was removed or wrong given ID.");
+				if(methodsID.TryGetValue(id, out var func) == false) {
+					throw new Exception($"Function with id:{id} not found from type {instance.GetType().FullName}." +
+						"\nIt may because of outdated generated script, try to generate the script again.");
 				}
-				if(obj is IInstancedGraph instanced && instanced.Instance != null) {
-					return func.Invoke(instanced.Instance, values);
-				} else if(obj is IRuntimeClassContainer container) {
-					return InvokeFunction(container.RuntimeClass, func.name, func.ParameterTypes, values);
+				try {
+					return func.InvokeOptimized(instance, values);
 				}
-				return InvokeFunction(obj, func.name, func.ParameterTypes, values);
+				catch(Exception ex) {
+					throw new Exception($"Error on invoking function: '{id}'\nErrors:{ex.ToString()}", ex);
+				}
 			}
+			#endregion
+		}
+
+		internal static class ObjectAccessor<T> {
+			static ObjectAccessor m_instance;
+
+			static ObjectAccessor() {
+				m_instance = ObjectAccessor.GetInstance(typeof(T));
+			}
+
+			#region ByName
+			public static void SetVariable(object instance, string name, object value) {
+				m_instance.SetVariable(instance, name, value);
+			}
+
+			public static void SetVariable(object instance, string name, object value, char @operator) {
+				m_instance.SetVariable(instance, name, value, @operator);
+			}
+
+			public static object GetVariable(object instance, string name) {
+				return m_instance.GetVariable(instance, name);
+			}
+
+			public static object GetProperty(object instance, string name) {
+				return m_instance.GetProperty(instance, name);
+			}
+
+			public static void SetProperty(object instance, string name, object value) {
+				m_instance.SetProperty(instance, name, value);
+			}
+
+			public static void SetProperty(object instance, string name, object value, char @operator) {
+				m_instance.SetProperty(instance, name, value, @operator);
+			}
+
+			public static object InvokeFunction(object instance, string name, object[] values) {
+				return m_instance.InvokeFunction(instance, name, values);
+			}
+
+			public static object InvokeFunction(object instance, string name, Type[] parameters, object[] values) {
+				return m_instance.InvokeFunction(instance, name, parameters, values);
+			}
+			#endregion
+			#region ByID
+			public static void SetVariable(object instance, int id, object value) {
+				m_instance.SetVariable(instance, id, value);
+			}
+
+			public static void SetVariable(object instance, int id, object value, char @operator) {
+				m_instance.SetVariable(instance, id, value);
+			}
+
+			public static object GetVariable(object instance, int id) {
+				return m_instance.GetVariable(instance, id);
+			}
+
+			public static object GetProperty(object instance, int id) {
+				return m_instance.GetProperty(instance, id);
+			}
+
+			public static void SetProperty(object instance, int id, object value) {
+				m_instance.SetProperty(instance, id, value);
+			}
+
+			public static void SetProperty(object instance, int id, object value, char @operator) {
+				m_instance.SetProperty(instance, id, value, @operator);
+			}
+
+			public static object InvokeFunction(object instance, int id, object[] values) {
+				return m_instance.InvokeFunction(instance, id, values);
+			}
+			#endregion
 		}
 
 		/// <summary>

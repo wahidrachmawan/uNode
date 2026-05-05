@@ -3360,6 +3360,22 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
+		/// Create variable declaration code for tuple values
+		/// </summary>
+		/// <param name="names"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		/// <exception cref="Exception"></exception>
+		public static string DeclareVariableTuple(IEnumerable<string> names, string value) {
+			if(names == null || names.All(n => string.IsNullOrEmpty(n)))
+				return null;
+			if(string.IsNullOrEmpty(value)) {
+				throw new Exception("Tuple value cannot be null");
+			}
+			return DeclareVariable(string.Join(", ", names.Select(n => string.IsNullOrEmpty(n) ? "_" : n)).Wrap(), value);
+		}
+
+		/// <summary>
 		/// Create variable declaration code.
 		/// </summary>
 		/// <param name="port"></param>

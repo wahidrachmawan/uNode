@@ -94,7 +94,11 @@ namespace MaxyGames.UNode.Editors {
 				titleTransparent = title;
 			}
 			UpdateUI();
-			//base.OnCustomStyleResolved(style);
+			bool selected = this.selected;
+			base.OnCustomStyleResolved(style);
+			if(selected != this.selected) {
+				this.selected = selected;
+			}
 		}
 
 		//public override bool HitTest(Vector2 localPoint) {

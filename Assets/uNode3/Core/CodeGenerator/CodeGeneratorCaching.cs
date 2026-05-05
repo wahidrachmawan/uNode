@@ -84,7 +84,7 @@ namespace MaxyGames {
 
 		/// <summary>
 		/// Get the variable name from ValueOutput.
-		/// The variable need to be registered first.
+		/// The variable need to be registered first using <see cref="RegisterVariable"/>.
 		/// </summary>
 		/// <param name="reference"></param>
 		/// <returns></returns>
