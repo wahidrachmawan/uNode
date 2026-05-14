@@ -44,6 +44,51 @@ namespace MaxyGames {
 			}
 			return result;
 		}
+
+		/// <summary>
+		/// Get correct c# names
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public static string CorrectName(string name) {
+			return uNodeUtility.AutoCorrectName(name);
+		}
+
+		public static string Default() {
+			return "default";
+		}
+
+		public static string Default(string type) {
+			return $"default({type})";
+		}
+
+		public static string Default(Type type) {
+			return $"default({Type(type)})";
+		}
+
+		public static string Goto(string label) {
+			return $"goto {label};";
+		}
+
+		public static string GotoCase(string label) {
+			return $"goto case {label};";
+		}
+
+		public static string Ref(string str) {
+			return $"ref " + str;
+		}
+
+		public static string Out(string str) {
+			return $"out " + str;
+		}
+
+		public static string OutVar(string str) {
+			return $"out var " + str;
+		}
+
+		public static string While(string condition, string contents) {
+			return Condition("while", condition, contents);
+		}
 		#endregion
 
 		#region Keyword
@@ -170,11 +215,10 @@ namespace MaxyGames {
 			return data;
 		}
 
-		public static string Switch(string value, IList<(string caseValue, string content)> cases, string @default = null) {
+		public static string Switch(string value, IEnumerable<(string caseValue, string content)> cases, string @default = null) {
 			string data = "switch(" + value + ") {";
 			string swithContents = null;
-			for(int i = 0; i < cases.Count; i++) {
-				var pair = cases[i];
+			foreach(var pair in cases) {
 				swithContents += "\ncase " + pair.caseValue + ": {";
 				if(!string.IsNullOrEmpty(pair.content)) {
 					swithContents += ("\n" + pair.content).AddTabAfterNewLine(1);
@@ -190,17 +234,16 @@ namespace MaxyGames {
 			return data;
 		}
 
-		public static string Switch(string value, IList<KeyValuePair<string[], string>> cases, string @default = null) {
+		public static string Switch(string value, IEnumerable<(string[] caseValue, string content)> cases, string @default = null) {
 			string data = "switch(" + value + ") {";
 			string swithContents = null;
-			for(int i = 0; i < cases.Count; i++) {
-				var pair = cases[i];
-				for(int x = 0; x < pair.Key.Length; x++) {
-					swithContents += "\ncase " + pair.Key[x] + ":";
+			foreach(var pair in cases) {
+				for(int x = 0; x < pair.caseValue.Length; x++) {
+					swithContents += "\ncase " + pair.caseValue[x] + ":";
 				}
 				swithContents += " {";
-				if(!string.IsNullOrEmpty(pair.Value)) {
-					swithContents += ("\n" + pair.Value).AddTabAfterNewLine(1);
+				if(!string.IsNullOrEmpty(pair.content)) {
+					swithContents += ("\n" + pair.content).AddTabAfterNewLine(1);
 				}
 				swithContents += "\n}\nbreak;";
 			}
@@ -215,20 +258,8 @@ namespace MaxyGames {
 		#endregion
 
 		#region For Statement
-		/// <summary>
-		/// Generate a new for statement code.
-		/// </summary>
-		/// <param name="variableName"></param>
-		/// <param name="condition"></param>
-		/// <param name="firstValue"></param>
-		/// <param name="setVariable"></param>
-		/// <param name="setType"></param>
-		/// <param name="contents"></param>
-		/// <returns></returns>
-		public static string For(string variableName, string condition, object firstValue, object setVariable, SetType setType, string contents) {
-			string data = "for(" +
-				Type(typeof(int)) + " " + variableName + " = " + Value(firstValue) + ";" +
-				condition + ";" + Set(variableName, setVariable, setType) + ") {";
+		public static string ForIncrement(string variableName, string initValue, string count, string contents) {
+			string data = $"for({Type(typeof(int))} {variableName} = {initValue};{variableName} {uNodeUtility.GetDisplayName(ComparisonType.LessThan)} {count}; {IncrementValue(variableName)}) {{";
 			if(!string.IsNullOrEmpty(contents)) {
 				data += ("\n" + contents).AddTabAfterNewLine(1) + "\n";
 			}
@@ -540,8 +571,19 @@ namespace MaxyGames {
 		/// <param name="type"></param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<string> initializers) {
-			return New(Type(type), parameters, initializers);
+		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<string> initializers, bool prettyPrint = true) {
+			return New(Type(type), parameters, initializers, prettyPrint);
+		}
+
+		/// <summary>
+		/// Generate a new object creation code.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="parameters"></param>
+		/// <param name="initializers"></param>
+		/// <returns></returns>
+		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<(string name, string value)> initializers, bool prettyPrint = true) {
+			return New(Type(type), parameters, initializers == null ? null : initializers.Select(item => SetValue(item.name, item.value)), prettyPrint);
 		}
 
 		/// <summary>
@@ -550,13 +592,13 @@ namespace MaxyGames {
 		/// <param name="type"></param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public static string New(string type, IEnumerable<string> parameters, IEnumerable<string> initializers) {
+		public static string New(string type, IEnumerable<string> parameters, IEnumerable<string> initializers, bool prettyPrint = true) {
 			string paramName = parameters != null ? string.Join(", ", parameters.Where(item => !string.IsNullOrEmpty(item))) : null;
 			string initName = null;
 			if(initializers != null) {
-				if(initializers.Any(item => item != null && item.Contains('\n'))) {
+				if(prettyPrint || initializers.Any(item => item != null && item.Contains('\n'))) {
 					initName = string.Join(", \n", initializers.Where(item => !string.IsNullOrEmpty(item)));
-					initName = initName.AddLineInFirst().AddLineInEnd().AddTabAfterNewLine();
+					initName = initName.AddLineInFirst().AddLineInEnd().AddTabAfterNewLine().AddLineInEnd();
 				}
 				else {
 					initName = string.Join(", ", initializers.Where(item => !string.IsNullOrEmpty(item)));
@@ -611,7 +653,7 @@ namespace MaxyGames {
 			return new AData(type, parameters, initializers).GenerateCode();
 		}
 		public static string Attribute(AttributeData attributeData) {
-			return TryParseAttributeData(attributeData).GenerateCode();
+			return AttributeData(attributeData).GenerateCode();
 		}
 		#endregion
 
@@ -1532,6 +1574,44 @@ namespace MaxyGames {
 			return left + " && " + right;
 		}
 
+		public static string AndSet(string left, string right) {
+			return left + " &= " + right + ";";
+		}
+
+		public static string AndSetValue(string left, string right) {
+			return left + " &= " + right;
+		}
+
+		public static string Bitwise(string left, string right, BitwiseType bitwise) {
+			switch(bitwise) {
+				case BitwiseType.And: {
+					return $"{left} & {right}";
+				}
+				case BitwiseType.ExclusiveOr: {
+					return $"{left} ^ {right}";
+				}
+				case BitwiseType.Or: {
+					return $"{left} | {right}";
+				}
+			}
+			throw new NotImplementedException();
+		}
+
+		public static string Bitwise(IEnumerable<string> strings, BitwiseType bitwise) {
+			switch(bitwise) {
+				case BitwiseType.And: {
+					return string.Join(" & ", strings);
+				}
+				case BitwiseType.ExclusiveOr: {
+					return string.Join(" ^ ", strings);
+				}
+				case BitwiseType.Or: {
+					return string.Join(" | ", strings);
+				}
+			}
+			throw new NotImplementedException();
+		}
+
 		/// <summary>
 		/// Generate Convert code.
 		/// </summary>
@@ -1929,6 +2009,15 @@ namespace MaxyGames {
 			if(string.IsNullOrEmpty(value))
 				return "return null;";
 			return "return " + value + ";";
+		}
+
+		/// <summary>
+		/// Generate return value code, eg: `return null`.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static string ReturnValue(object value) {
+			return Return(Value(value));
 		}
 		#endregion
 

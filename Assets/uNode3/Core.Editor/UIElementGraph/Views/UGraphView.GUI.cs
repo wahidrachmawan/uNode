@@ -276,16 +276,17 @@ namespace MaxyGames.UNode.Editors {
 					//	return;
 					//}
 				}
-				if(e.isFlow) {
-					foreach(var edge in outPort.GetValidEdges()) {
-						edge.Disconnect();
-					}
-				}
-				else {
-					foreach(var edge in inPort.GetValidEdges()) {
-						edge.Disconnect();
-					}
-				}
+
+				//if(e.isFlow) {
+				//	foreach(var edge in outPort.GetValidEdges()) {
+				//		edge.Disconnect();
+				//	}
+				//}
+				//else {
+				//	foreach(var edge in inPort.GetValidEdges()) {
+				//		edge.Disconnect();
+				//	}
+				//}
 				var processor = GraphProcessor;
 				foreach(var p in processor) {
 					if(p.Connect(this, inPort, outPort)) {
@@ -363,11 +364,12 @@ namespace MaxyGames.UNode.Editors {
 			if(serialize) {
 				var inPort = e.input as PortView;
 				var outPort = e.output as PortView;
-				if(inPort.isValue) {
-					inPort.ResetPortValue();
-				} else if(outPort.isFlow) {
-					outPort.ResetPortValue();
-				}
+				e.Disconnect();
+				//if(inPort.isValue) {
+				//	inPort.ResetPortValue();
+				//} else if(outPort.isFlow) {
+				//	outPort.ResetPortValue();
+				//}
 				//Code below will ensure that the port are up to date
 				MarkRepaint(inPort.GetEdgeOwners());
 				MarkRepaint(outPort.GetEdgeOwners());

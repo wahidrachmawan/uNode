@@ -92,7 +92,7 @@ namespace MaxyGames.UNode.Nodes {
 					Static = optionUseStatic,
 				};
 				method.code = $"return {expression};";
-				classData.RegisterFunction(method.GenerateCode());
+				classData.RegisterFunction(method);
 			});
 		}
 

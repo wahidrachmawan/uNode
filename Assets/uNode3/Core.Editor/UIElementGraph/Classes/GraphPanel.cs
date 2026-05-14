@@ -1393,7 +1393,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 
 			//Functions
-			if(graphData.graph != null && (graphData.graph is IGraphWithFunctions || graphData.graph is IMacroGraph || graphData.graph is ICustomMainGraph)) {
+			if(graphData.graph != null && graphData.graph is IGraphWithFunctions) {
 				functionContainer.parent.SetDisplay(true);
 				if(showFunctions) {
 					if(graphData.graph is IMacroGraph) {

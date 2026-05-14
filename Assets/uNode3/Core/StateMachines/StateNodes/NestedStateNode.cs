@@ -157,5 +157,7 @@ namespace MaxyGames.UNode.Nodes {
 		public bool AllowCoroutine() {
 			return false;
 		}
+
+		void IElementWithEntry.RegisterEntry(BaseEntryNode node) { }
 	}
 }

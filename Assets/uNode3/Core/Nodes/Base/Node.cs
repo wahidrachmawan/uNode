@@ -377,6 +377,14 @@ namespace MaxyGames.UNode {
 			return port;
 		}
 
+		protected FlowInput PrimaryFlowInput(string id) {
+			if(nodeObject.primaryFlowInput != null)
+				throw Exception_MultiplePrimaryFlowInput;
+			var result = FlowInput(id, static flow => { }).SetName("");
+			nodeObject.primaryFlowInput = result;
+			return result;
+		}
+
 		protected FlowInput PrimaryFlowInput(string id, Action<Flow> action) {
 			if(nodeObject.primaryFlowInput != null)
 				throw Exception_MultiplePrimaryFlowInput;
@@ -509,6 +517,10 @@ namespace MaxyGames.UNode {
 
 			public static ValueInput ValueInput<T>(Node node, string id, T @default) {
 				return node.ValueInput<T>(id, @default);
+			}
+
+			public static FlowInput PrimaryFlowInput(Node node, string id) {
+				return node.PrimaryFlowInput(id);
 			}
 
 			public static FlowInput PrimaryFlowInput(Node node, string id, Action<Flow> action) {

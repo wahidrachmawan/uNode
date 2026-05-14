@@ -48,6 +48,9 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public bool isValue => !portData.isFlow;
 
+		public bool IsInput => portData.IsInput;
+		public bool IsOutput => portData.IsOutput;
+
 		private VisualElement optionalElement;
 
 		#region Initialization
@@ -158,7 +161,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 		#endregion
 
-		public override bool connected => base.connected || portData.portValue.hasValidConnections;
+		public override bool connected => base.connected || portData.IsConnected;
 
 		void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
 

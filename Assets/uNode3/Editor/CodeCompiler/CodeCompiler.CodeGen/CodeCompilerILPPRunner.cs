@@ -20,7 +20,7 @@ namespace MaxyGames.CodeCompiler {
 				//Console.WriteLine("Checking assembly: " + name);
 				if(name.StartsWith("Unity.") && name.EndsWith("CodeGen")) {
 					foreach(var type in assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && (typeof(ILPostProcessor).IsAssignableFrom(t)))) {
-						ilpp.Add((ILPostProcessor)Activator.CreateInstance(type));
+						ilpp.Add(((ILPostProcessor)Activator.CreateInstance(type)).GetInstance());
 					}
 				}
 			}

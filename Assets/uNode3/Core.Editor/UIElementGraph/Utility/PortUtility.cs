@@ -27,7 +27,7 @@ namespace MaxyGames.UNode.Editors {
 		public static PortView GetPort(ValueInput port, UGraphView graphView) {
 			if(port.node != null && graphView.nodeViewsPerNode.TryGetValue(port.node, out var nodeView)) {
 				foreach(var p in nodeView.inputPorts) {
-					if(p.portData.portValue == port) {
+					if(p.portData.IsValidReference(port)) {
 						return p;
 					}
 				}
@@ -38,7 +38,7 @@ namespace MaxyGames.UNode.Editors {
 		public static PortView GetPort(ValueOutput port, UGraphView graphView) {
 			if(port.node != null && graphView.nodeViewsPerNode.TryGetValue(port.node, out var nodeView)) {
 				foreach(var p in nodeView.outputPorts) {
-					if(p.portData.portValue == port) {
+					if(p.portData.IsValidReference(port)) {
 						return p;
 					}
 				}
@@ -49,7 +49,7 @@ namespace MaxyGames.UNode.Editors {
 		public static PortView GetPort(FlowInput port, UGraphView graphView) {
 			if(port.node != null && graphView.nodeViewsPerNode.TryGetValue(port.node, out var nodeView)) {
 				foreach(var p in nodeView.inputPorts) {
-					if(p.portData.portValue == port) {
+					if(p.portData.IsValidReference(port)) {
 						return p;
 					}
 				}
@@ -60,7 +60,7 @@ namespace MaxyGames.UNode.Editors {
 		public static PortView GetPort(FlowOutput port, UGraphView graphView) {
 			if(port.node != null && graphView.nodeViewsPerNode.TryGetValue(port.node, out var nodeView)) {
 				foreach(var p in nodeView.outputPorts) {
-					if(p.portData.portValue == port) {
+					if(p.portData.IsValidReference(port)) {
 						return p;
 					}
 				}

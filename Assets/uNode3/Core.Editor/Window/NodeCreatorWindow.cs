@@ -417,7 +417,7 @@ namespace MaxyGames.UNode.Editors {
 					};
 				}
 				variable.attributes = new CG.AData[] { att };
-				classBuilder.RegisterVariable(variable.GenerateCode());
+				classBuilder.RegisterVariable(variable);
 			}
 			foreach(var data in valueOutputs) {
 				if(instanceNode && data.useProperty) {
@@ -433,7 +433,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					prop.attributes = new List<CG.AData>() { att };
 					prop.getContents = CG.Throw(CG.New(typeof(NotImplementedException)));
-					classBuilder.RegisterProperty(prop.GenerateCode());
+					classBuilder.RegisterProperty(prop);
 				}
 				else {
 					CG.MData method = new CG.MData(data.name, data.type.type);
@@ -458,7 +458,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					method.attributes = new List<CG.AData>() { att };
 					method.code = CG.Flow(parameters.Count > 0 ? CG.Comment("Tips: remove any parameter if not used.") : null, CG.Comment("Insert code here"), CG.Throw(CG.New(typeof(NotImplementedException))));
-					classBuilder.RegisterFunction(method.GenerateCode());
+					classBuilder.RegisterFunction(method);
 				}
 			}
 
@@ -492,7 +492,7 @@ namespace MaxyGames.UNode.Editors {
 							return CG.Flow(CG.Attribute(typeof(PortDescriptionAttribute), new string[] { CG.Value(p.description) }), p.name + ",");
 						}
 					}));
-					enums.variables = CG.Flow(strs);
+					enums.additionalContents = CG.Flow(strs);
 					classBuilder.RegisterNestedType(enums.GenerateCode());
 				}
 				else {
@@ -507,7 +507,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				variable.attributes = new CG.AData[] { att };
-				classBuilder.RegisterVariable(variable.GenerateCode());
+				classBuilder.RegisterVariable(variable);
 			}
 
 			foreach(var data in flowInputs) {
@@ -553,7 +553,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 
 				method.code = CG.Flow(parameters.Count > 0 ? CG.Comment("Tips: remove any parameter if not used.") : null, CG.Comment("Insert code here"), CG.Throw(CG.New(typeof(NotImplementedException))));
-				classBuilder.RegisterFunction(method.GenerateCode());
+				classBuilder.RegisterFunction(method);
 			}
 
 			generatedData.RegisterClass(this, classBuilder);

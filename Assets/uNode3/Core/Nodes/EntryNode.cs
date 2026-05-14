@@ -4,14 +4,21 @@ using System.Collections;
 using System.Collections.Generic;
 
 namespace MaxyGames.UNode.Nodes {
-	public class NestedEntryNode : BaseEntryNode {
-		public FlowOutput output;
-
-		[NonSerialized, HideInInspector]
+	public class EntryNode : BaseEntryNode {
+		[NonSerialized]
 		public ISuperNodeWithEntry container;
+		[NonSerialized]
+		public string title = "Entry";
+		[NonSerialized]
+		public Type nodeIcon = typeof(TypeIcons.FlowIcon);
+
+		[System.Runtime.Serialization.OnDeserialized]
+		void OnDeserialized() {
+			title = "Entry";
+			nodeIcon = typeof(TypeIcons.FlowIcon);
+		}
 
 		protected override void OnRegister() {
-			output = PrimaryFlowOutput(nameof(output));
 			container = nodeObject.GetNodeInParent<ISuperNodeWithEntry>();
 			if(container != null && container.Entry == this) {
 				container.RegisterEntry(this);
@@ -25,12 +32,7 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
-		public override string GetTitle() {
-			return "Entry";
-		}
-
-		public override Type GetNodeIcon() {
-			return typeof(TypeIcons.FlowIcon);
-		}
+		public override string GetTitle() => title;
+		public override Type GetNodeIcon() => nodeIcon;
 	}
 }

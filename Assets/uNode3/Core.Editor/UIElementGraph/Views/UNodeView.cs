@@ -99,7 +99,7 @@ namespace MaxyGames.UNode.Editors {
 		/// Is the node a block node?
 		/// </summary>
 		public bool isBlock => ownerBlock != null;
-		public Orientation flowLayout => owner.graphLayout == GraphLayout.Vertical && !isBlock ? Orientation.Vertical : Orientation.Horizontal;
+		public virtual Orientation flowLayout => owner.graphLayout == GraphLayout.Vertical && !isBlock ? Orientation.Vertical : Orientation.Horizontal;
 
 		public override bool expanded {
 			get {
@@ -374,6 +374,15 @@ namespace MaxyGames.UNode.Editors {
 				return primaryOutputValue = AddOutputValuePort(new ValueOutputData(port));
 			}
 			return null;
+		}
+
+		protected PortView AddPort(PortData portData, Direction direction) {
+			if(portData.isFlow) {
+				return AddPort(portData, direction, flowLayout);
+			}
+			else {
+				return AddPort(portData, direction, Orientation.Horizontal);
+			}
 		}
 
 		protected PortView AddPort(PortData portData, Direction direction, Orientation orientation) {

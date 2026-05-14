@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.UIElements;
 
 namespace MaxyGames.UNode.Editors {
@@ -29,6 +30,9 @@ namespace MaxyGames.UNode.Editors {
 		public virtual object defaultValue => null;
 		public abstract Type portType { get; }
 		public abstract bool isFlow { get; }
+		public abstract bool IsInput { get; }
+		public bool IsOutput => IsInput == false;
+		public virtual bool IsConnected => portValue.hasValidConnections;
 
 		public abstract void ConnectTo(UPort port);
 
@@ -51,6 +55,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 			return filter;
 		}
+
+		public virtual bool IsValidReference(UPort port) => port != null && port == portValue;
 	}
 
 	public abstract class PortData<T> : PortData where T : UPort {
@@ -83,6 +89,8 @@ namespace MaxyGames.UNode.Editors {
 
 		public override object defaultValue => port.DefaultValue;
 
+		public override bool IsInput => true;
+
 		public override void ConnectTo(UPort port) {
 			if(port is ValueOutput p) {
 				ValueConnection.CreateAndConnect(this.port, p);
@@ -111,6 +119,8 @@ namespace MaxyGames.UNode.Editors {
 		public override Type portType => port.type ?? typeof(object);
 		public override bool isFlow => false;
 
+		public override bool IsInput => false;
+
 		public override void ConnectTo(UPort port) {
 			if(port is ValueInput p) {
 				ValueConnection.CreateAndConnect(p, this.port);
@@ -128,6 +138,8 @@ namespace MaxyGames.UNode.Editors {
 		public override bool isFlow => true;
 		public override string tooltip => "Flow";
 
+		public override bool IsInput => true;
+
 		public override void ConnectTo(UPort port) {
 			if(port is FlowOutput p) {
 				FlowConnection.CreateAndConnect(this.port, p);
@@ -137,12 +149,62 @@ namespace MaxyGames.UNode.Editors {
 		}
 	}
 
+	public class MultiFlowOutputData : PortData<MultiFlowOutput> {
+		public MultiFlowOutputData(MultiFlowOutput port) : base(port) { }
+
+		public override Type portType => typeof(void);
+		public override bool isFlow => true;
+
+		public override bool IsInput => false;
+
+		public override bool IsValidReference(UPort port) {
+			if(port is FlowOutput) {
+				return this.port.GetFlows().Any(p => p == port);
+			}
+			return base.IsValidReference(port);
+		}
+
+		public override void ConnectTo(UPort port) {
+			if(port is FlowInput) {
+				this.port.ConnectTo(port);
+			}
+			else {
+				throw new ArgumentException("Invalid port type", nameof(port));
+			}
+		}
+	}
+
+	public class MultiFlowOutput : FlowPort, IMultiConnectionPort {
+		[NonSerialized]
+		private Func<IEnumerable<FlowOutput>> getFlows;
+		[NonSerialized]
+		private Func<FlowInput, Connection> newConnection;
+
+		public MultiFlowOutput(NodeObject node, Func<IEnumerable<FlowOutput>> getFlows, Func<FlowInput, Connection> newConnection) : base(node) {
+			this.getFlows = getFlows;
+			this.newConnection = newConnection;
+		}
+
+		public IEnumerable<FlowOutput> GetFlows() => getFlows();
+
+		public Connection ConnectTo(UPort other) {
+			if(other is not FlowInput) throw null;
+			var existingPort = getFlows().FirstOrDefault(p => p.GetTargetFlow() == other);
+			if(existingPort != null) {
+				existingPort.ClearConnections();
+			}
+			return newConnection(other as FlowInput);
+		}
+	}
+
 	public class FlowOutputData : PortData<FlowOutput> {
 		public FlowOutputData(FlowOutput port) : base(port) { }
 
 		public override Type portType => typeof(void);
 		public override bool isFlow => true;
 		public override string tooltip => "Flow";
+
+		public override bool IsInput => false;
 
 		public override void ConnectTo(UPort port) {
 			if(port is FlowInput p) {

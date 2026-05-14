@@ -124,9 +124,9 @@ namespace MaxyGames {
 					}
 				}
 				else if(leftType != typeof(Delegate)) {
-					//For delegate
+					//For delegate this will make a code ex: new Action(MyFunction);
 					if(rightType == null || rightType != leftType) {
-						if(set != "null") {
+						if(set != "null" && set.Contains('(')) {
 							set = New(leftType, set);
 						}
 					}
@@ -186,7 +186,9 @@ namespace MaxyGames {
 					result = string.Join(".", strs);
 					//TODO: add support for debugging set value
 					//if(debugScript && setting.debugValueNode && firstVal is ValueInput) {
-					//	return Debug(firstVal as ValueInput, result, true).AddSemicolon().AddLineInFirst();
+					//	if(Utility.IsEvent(firstVal as ValueInput) == false) {
+					//		return Debug(firstVal as ValueInput, result, true).AddSemicolon().AddLineInFirst();
+					//	}
 					//}
 					return result.AddSemicolon();
 				}
@@ -326,12 +328,15 @@ namespace MaxyGames {
 		/// <param name="code"></param>
 		/// <param name="onlyOnContainSpace"></param>
 		/// <returns></returns>
-		public static string WrapBraces(string code, bool onlyOnContainSpace = false) {
+		public static string WrapBraces(string code, bool onlyOnContainSpace = false, bool isStatement = false) {
 			if(string.IsNullOrEmpty(code)) {
 				return code;
 			}
 			if(onlyOnContainSpace && !code.Contains(' ')) {
 				return code;
+			}
+			if(isStatement) {
+				return "{\n" + code.AddTabAfterNewLine() + "\n}";
 			}
 			return "{ " + code + " }";
 		}

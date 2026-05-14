@@ -8,22 +8,6 @@ using UnityEditor.UIElements;
 using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
-	//public abstract class EdgeDragHelper {
-	//	public abstract Edge edgeCandidate { get; set; }
-	//	public abstract Port draggedPort { get; set; }
-	//	public abstract bool HandleMouseDown(MouseDownEvent evt);
-	//	public abstract void HandleMouseMove(MouseMoveEvent evt);
-	//	public abstract void HandleMouseUp(MouseUpEvent evt);
-	//	public abstract void Reset(bool didConnect = false);
-
-	//	internal const int k_PanAreaWidth = 100;
-	//	internal const int k_PanSpeed = 4;
-	//	internal const int k_PanInterval = 10;
-	//	internal const float k_MinSpeedFactor = 0.5f;
-	//	internal const float k_MaxSpeedFactor = 2.5f;
-	//	internal const float k_MaxPanSpeed = k_MaxSpeedFactor * k_PanSpeed;
-	//}
-
 	public class UEdgeDragHelper<TEdge> : EdgeDragHelper<TEdge> where TEdge : Edge, new() {
 		protected new List<PortView> m_CompatiblePorts;
 		protected new UGraphView m_GraphView;

@@ -141,10 +141,10 @@ namespace MaxyGames {
 		public static string GeneratePort(FlowInput port) {
 			if(port == null || !port.isValid)
 				return null;
-			if(!isInUngrouped && generatorData.generatedData.ContainsKey(port)) {
-				return generatorData.generatedData[port];
+			if(!isInUngrouped && generatorData.generatedPortDatas.ContainsKey(port)) {
+				return generatorData.generatedPortDatas[port];
 			}
-			if(generationState.state == State.Classes) {
+			if(generationState.state == State.Initialization) {
 				throw new Exception("Forbidden to generate port code because it's still in Initialization");
 			}
 			string data;
@@ -192,7 +192,7 @@ namespace MaxyGames {
 				throw;
 			}
 			if(!isInUngrouped)
-				generatorData.generatedData.Add(port, data);
+				generatorData.generatedPortDatas.Add(port, data);
 			return data;
 		}
 
@@ -202,7 +202,7 @@ namespace MaxyGames {
 			}
 			if(!port.isValid)
 				return null;
-			if(generationState.state == State.Classes) {
+			if(generationState.state == State.Initialization) {
 				// If we are in classes generation state, we cannot generate port code.
 				throw new Exception("Forbidden to generate port code because it's still in Initialization");
 			}

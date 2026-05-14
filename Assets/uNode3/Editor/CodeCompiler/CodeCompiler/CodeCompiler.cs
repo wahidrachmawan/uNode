@@ -73,8 +73,11 @@ namespace MaxyGames.CodeCompiler {
 						try {
 							await HandleClientAsync(pipeServer);
 						}
+						catch(Exception ex) {
+							Console.WriteLine("Error: " + ex.ToString());
+						}
 						finally {
-							pipeServer.Dispose(); 
+							pipeServer.Dispose();
 						}
 					});
 					//_clientTask.Add(clientTask);
@@ -201,7 +204,7 @@ namespace MaxyGames.CodeCompiler {
 						}
 						else {
 							if(data.version != null && version != null) {
-								if(data.version > version && data.version < closestVersion) {
+								if(data.version > version && data.version >= closestVersion) {
 									referenceData = data;
 									closestVersion = data.version;
 									//Console.WriteLine($"Closest version: {data.fullname} ({data.version})");
@@ -218,15 +221,14 @@ namespace MaxyGames.CodeCompiler {
 			if(referenceData != null) {
 				//if(assemblyName.StartsWith("Microsoft.CodeAnalysis")) {
 				//	Console.WriteLine();
-				//	Console.WriteLine($"Loading assembly: {path}");
 				//	Console.WriteLine($"Requested assembly: {resolveArgs.Name}");
 				//	Console.WriteLine($"Requesting assembly2: {resolveArgs.RequestingAssembly}");
-				//	Console.WriteLine($"Found assembly: {fullname}");
-				//	Console.WriteLine($"Assembly name: {assemblyName}");
+				//	Console.WriteLine($"Assembly name: {referenceData.fullname}, version: {referenceData.version}");
 				//	Console.WriteLine();
 				//}
 				return referenceData.assembly;
 			}
+			Console.WriteLine($"() => Failed to find assembly: {resolveArgs.Name}, Requested by: {resolveArgs.RequestingAssembly}");
 			return null;
 		}
 	}
@@ -239,6 +241,9 @@ namespace MaxyGames.CodeCompiler {
 			CodeCompilerResult result = null;
 			try {
 				result = Compile(option);
+			}
+			catch(Exception ex) {
+				Console.WriteLine("Error: " + ex.ToString());
 			}
 			finally {
 				if(string.IsNullOrEmpty(option.OutputResultPath) == false) {
@@ -260,7 +265,7 @@ namespace MaxyGames.CodeCompiler {
 				new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: option.ScriptCompilerOptions.OptimizationLevel)
 			);
 			if(useSourceGenerator) {
-				List<IIncrementalGenerator> iGenerators = new List<IIncrementalGenerator>();
+				List<ISourceGenerator> generators = new List<ISourceGenerator>();
 				List<Assembly> assemblies = new List<Assembly>();
 				foreach(var path in option.ScriptCompilerOptions.RoslynAnalyzerDllPaths) {
 					AssemblyReferences.AddReference(path);
@@ -270,16 +275,24 @@ namespace MaxyGames.CodeCompiler {
 						continue;
 					assemblies.Add(Assembly.Load(File.ReadAllBytes(path)));
 				}
-				static void AppendSourceGenerators(Assembly assembly, ref List<IIncrementalGenerator> incrementalGenerators) {
+				static void AppendSourceGenerators(Assembly assembly, ref List<ISourceGenerator> sGenerators) {
 					try {
 						foreach(var type in assembly.GetTypes()) {
+
 							if(type.IsAbstract || type.IsInterface)
 								continue;
+							//if(type.FullName == "Unity.Entities.SourceGen.SystemGenerator.SystemGenerator") {
+							//	Console.WriteLine("Source Generators t: " + type.AssemblyQualifiedName);
+							//	Console.WriteLine("t: " + typeof(ISourceGenerator).AssemblyQualifiedName);
+							//	Console.WriteLine("t1: " + type.GetInterface("ISourceGenerator").AssemblyQualifiedName);
+
+							//	Console.WriteLine(typeof(ISourceGenerator) == type.GetInterface("ISourceGenerator"));
+							//}
 							if(typeof(ISourceGenerator).IsAssignableFrom(type)) {
-								incrementalGenerators.Add((Activator.CreateInstance(type) as ISourceGenerator).AsIncrementalGenerator());
+								sGenerators.Add(Activator.CreateInstance(type) as ISourceGenerator);
 							}
 							else if(typeof(IIncrementalGenerator).IsAssignableFrom(type)) {
-								incrementalGenerators.Add(Activator.CreateInstance(type) as IIncrementalGenerator);
+								sGenerators.Add((Activator.CreateInstance(type) as IIncrementalGenerator).AsSourceGenerator());
 							}
 						}
 					}
@@ -301,9 +314,14 @@ namespace MaxyGames.CodeCompiler {
 					}
 				}
 				foreach(var ass in assemblies) {
-					AppendSourceGenerators(ass, ref iGenerators);
+					AppendSourceGenerators(ass, ref generators);
 				}
-				CSharpGeneratorDriver.Create(iGenerators.ToArray()).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out _);
+				Console.WriteLine("Source Generators count: " + generators.Count);
+
+				CSharpGeneratorDriver.Create(generators.ToArray()).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out var diagnostics);
+				foreach(var diag in diagnostics) {
+					Console.WriteLine("Diag: " + diag.GetMessage());
+				}
 				compilation = compilationUpdated as CSharpCompilation;
 			}
 			using(var assemblyStream = new MemoryStream())
@@ -380,10 +398,21 @@ namespace MaxyGames.CodeCompiler {
 			}
 		}
 
+		public static class CachedData {
+			public static Dictionary<string, (SyntaxTree tree, EmbeddedText embeddedText, DateTime lastWriteTime)> references = new();
+		}
+
 		public static List<SyntaxTree> GetSyntaxTreesFromFiles(IEnumerable<string> paths, out List<EmbeddedText> embeddedTexts, IEnumerable<string> preprocessorSymbols = null) {
 			var result = new List<SyntaxTree>();
 			embeddedTexts = new List<EmbeddedText>();
 			foreach(var path in paths) {
+				if(CachedData.references.TryGetValue(path, out var value)) {
+					if(File.GetLastWriteTime(path) == value.lastWriteTime) {
+						result.Add(value.tree);
+						embeddedTexts.Add(value.embeddedText);
+						continue;
+					}
+				}
 				var script = File.ReadAllText(path);
 				var buffer = Encoding.UTF8.GetBytes(script);
 				var sourceText = SourceText.From(buffer, buffer.Length, Encoding.UTF8, canBeEmbedded: true);
@@ -391,8 +420,11 @@ namespace MaxyGames.CodeCompiler {
 						sourceText,
 						options: new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols),
 						path: path);
+				var embeddedText = EmbeddedText.FromSource(path, sourceText);
 				result.Add(tree);
-				embeddedTexts.Add(EmbeddedText.FromSource(path, sourceText));
+				embeddedTexts.Add(embeddedText);
+
+				CachedData.references[path] = (tree, embeddedText, File.GetLastWriteTime(path));
 			}
 			return result;
 		}

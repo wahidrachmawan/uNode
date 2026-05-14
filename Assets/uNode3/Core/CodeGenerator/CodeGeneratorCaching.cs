@@ -46,18 +46,29 @@ namespace MaxyGames {
 		/// <param name="variable"></param>
 		/// <returns></returns>
 		public static string GetVariableName(Variable variable) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, variable)) {
+					if(generatorData.GetVariableNameCallack != null) {
+						var str = generatorData.GetVariableNameCallack(vdata);
+						if(str != null) {
+							return str;
+						}
+					}
 					return vdata.name;
 				}
 			}
 			string name = GenerateNewName(variable.name);
-			generatorData.AddVariable(new VData(name, variable.type, isInstance: false, autoCorrection: false) { 
-				name = name, 
+			var data = generatorData.AddVariable(new VData(name, variable.type, isInstance: false) { 
 				reference = variable, 
 				modifier = variable.modifier, 
 				defaultValue = variable.defaultValue 
 			});
+			if(generatorData.GetVariableNameCallack != null) {
+				var rezult = generatorData.GetVariableNameCallack(data);
+				if(rezult != null) {
+					return rezult;
+				}
+			}
 			return name;
 		}
 
@@ -67,19 +78,43 @@ namespace MaxyGames {
 		/// <param name="variable"></param>
 		/// <returns></returns>
 		public static string GetVariableName(VariableData variable) {
-			foreach (VData vdata in generatorData.GetVariables()) {
+			foreach (VData vdata in generatorData.variables) {
 				if (object.ReferenceEquals(vdata.reference, variable)) {
+					if(generatorData.GetVariableNameCallack != null) {
+						var rezult = generatorData.GetVariableNameCallack(vdata);
+						if(rezult != null) {
+							return rezult;
+						}
+					}
 					return vdata.name;
 				}
 			}
 			var name = GenerateNewName(variable.name);
-			generatorData.AddVariable(new VData(name, variable.type, isInstance: false, autoCorrection: false) { 
-				name = name, 
+			var data = generatorData.AddVariable(new VData(name, variable.type, isInstance: false) { 
 				reference = variable, 
 				modifier = variable.modifier,
 				defaultValue = variable.value,
 			});
+			if(generatorData.GetVariableNameCallack != null) {
+				var rezult = generatorData.GetVariableNameCallack(data);
+				if(rezult != null) {
+					return rezult;
+				}
+			}
 			return name;
+		}
+
+		/// <summary>
+		/// Get the variable name from variable.
+		/// </summary>
+		/// <param name="variable"></param>
+		/// <returns></returns>
+		public static string GetVariableName(VData variable) {
+			var rezult = generatorData.GetVariableNameCallack?.Invoke(variable);
+			if(rezult != null) {
+				return rezult;
+			}
+			return variable.name;
 		}
 
 		/// <summary>
@@ -89,8 +124,12 @@ namespace MaxyGames {
 		/// <param name="reference"></param>
 		/// <returns></returns>
 		public static string GetVariableName(ValueOutput reference) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, reference)) {
+					var rezult = generatorData.GetVariableNameCallack?.Invoke(vdata);
+					if(rezult != null) {
+						return rezult;
+					}
 					return vdata.name;
 				}
 			}
@@ -103,7 +142,7 @@ namespace MaxyGames {
 		/// <param name="reference"></param>
 		/// <returns></returns>
 		public static bool HasRegisteredVariable(ValueOutput reference) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, reference)) {
 					return true;
 				}

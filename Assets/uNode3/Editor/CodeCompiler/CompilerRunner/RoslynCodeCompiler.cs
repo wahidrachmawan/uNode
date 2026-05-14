@@ -97,6 +97,9 @@ namespace MaxyGames.CompilerBuilder {
 			}
 
 			Debug.Log("Runner built successfully on: " + outputPath);
+			EditorApplication.delayCall += static () => {
+				AssetDatabase.Refresh();
+			};
 #endif
 		}
 
@@ -159,27 +162,41 @@ namespace MaxyGames.CompilerBuilder {
 			}
 		}
 
+		private static string[] m_RoslynPaths;
+		private static string[] RoslynPaths {
+			get {
+				if(m_RoslynPaths == null) {
+					m_RoslynPaths = new string[2];
+					//Find Microsoft.CodeAnalysis.dll in Unity Editor folder and add it to references, since it's not loaded in the current AppDomain
+					var editorPath = EditorApplication.applicationContentsPath;
+					var roslynPath = Path.Combine(editorPath, "DotNetSdkRoslyn");
+					string dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.dll");
+					if(File.Exists(dllPath)) {
+						m_RoslynPaths[0] = Path.GetFullPath(dllPath);
+					}
+					dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.CSharp.dll");
+					if(File.Exists(dllPath)) {
+						m_RoslynPaths[1] = Path.GetFullPath(dllPath);
+					}
+				}
+				return m_RoslynPaths;
+			}
+		}
+
 		private static void CreateConfigFile(string outputPath) {
 			HashSet<string> allReferences = new HashSet<string>();
 
-			var dir = Path.GetDirectoryName(typeof(CSharpCompilation).Assembly.Location);
-			Directory.EnumerateFiles(dir, "*.dll").ToList().ForEach(path => {
-				try {
-					allReferences.Add(path);
-				}
-				catch { }
-			});
+			//var dir = Path.GetDirectoryName(typeof(CSharpCompilation).Assembly.Location);
+			//Directory.EnumerateFiles(dir, "*.dll").ToList().ForEach(path => {
+			//	try {
+			//		allReferences.Add(path);
+			//	}
+			//	catch { }
+			//});
 
 			{//Find Microsoft.CodeAnalysis.dll in Unity Editor folder and add it to references, since it's not loaded in the current AppDomain
-				var editorPath = EditorApplication.applicationContentsPath;
-				var roslynPath = Path.Combine(editorPath, "DotNetSdkRoslyn");
-				string dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.dll");
-				if(File.Exists(dllPath)) {
-					allReferences.Add(Path.GetFullPath(dllPath));
-				}
-				dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.CSharp.dll");
-				if(File.Exists(dllPath)) {
-					allReferences.Add(Path.GetFullPath(dllPath));
+				foreach(var path in RoslynPaths) {
+					allReferences.Add(path);
 				}
 			}
 
@@ -191,6 +208,9 @@ namespace MaxyGames.CompilerBuilder {
 					if(!string.IsNullOrEmpty(location) && File.Exists(location)) {
 						if(location.EndsWith("Unity.CodeCompiler.CodeGen.dll")) {
 							File.Copy(location, Path.Combine(Path.GetDirectoryName(outputPath), "Unity.CodeCompiler.CodeGen.dll"), true);
+							continue;
+						}
+						if(location.Contains("Microsoft.CodeAnalysis")) {
 							continue;
 						}
 						allReferences.Add(location);
@@ -282,20 +302,23 @@ namespace MaxyGames.CompilerBuilder {
 			var stopwatch = new System.Diagnostics.Stopwatch();
 			stopwatch.Start();
 #endif
+			try {
+				if(string.IsNullOrEmpty(option.OutputResultPath) == false && File.Exists(option.OutputResultPath)) {
+					// Ensure old result file is deleted before compilation to prevent reading stale results
+					File.Delete(option.OutputResultPath);
+				}
+				using var pipeClient = new System.IO.Pipes.NamedPipeClientStream(".", CodeCompiler.CodeCompiler.PipeName, System.IO.Pipes.PipeDirection.InOut);
+				pipeClient.Connect(5000);
 
-			if(string.IsNullOrEmpty(option.OutputResultPath) == false && File.Exists(option.OutputResultPath)) {
-				// Ensure old result file is deleted before compilation to prevent reading stale results
-				File.Delete(option.OutputResultPath);
+				await PipeHelper.SendStringAsync(pipeClient, CodeCompiler.CodeCompiler.Serialize(option));
+
+				var resultString = await PipeHelper.ReceiveStringAsync(pipeClient);
+				var result = CodeCompiler.CodeCompiler.Deserialize<CodeCompiler.CodeCompilerResult>(resultString);
+				onComplete?.Invoke(result);
 			}
-			using var pipeClient = new System.IO.Pipes.NamedPipeClientStream(".", CodeCompiler.CodeCompiler.PipeName, System.IO.Pipes.PipeDirection.InOut);
-			pipeClient.Connect(1000);
-
-			await PipeHelper.SendStringAsync(pipeClient, CodeCompiler.CodeCompiler.Serialize(option));
-
-			var resultString = await PipeHelper.ReceiveStringAsync(pipeClient);
-			var result = CodeCompiler.CodeCompiler.Deserialize<CodeCompiler.CodeCompilerResult>(resultString);
-			onComplete?.Invoke(result);
-
+			catch(Exception ex) {
+				Debug.LogException(ex);
+			}
 #if UNODE_DEV
 			Debug.Log("Elapsed time: " + stopwatch.ElapsedMilliseconds + " ms");
 #endif
@@ -312,9 +335,10 @@ namespace MaxyGames.CompilerBuilder {
 					return dotnetPath;
 				}
 				string[] knowDotnetPaths;
+				string unityDotnet;
 				if(Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
 					knowDotnetPaths = new string[] {
-						EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet",
+						unityDotnet = EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet",
 						"/usr/local/share/dotnet/dotnet",
 						"/usr/local/bin/dotnet",
 						"/opt/homebrew/bin/dotnet",
@@ -322,7 +346,7 @@ namespace MaxyGames.CompilerBuilder {
 				}
 				else if(Application.platform == RuntimePlatform.LinuxEditor || Application.platform == RuntimePlatform.LinuxPlayer) {
 					knowDotnetPaths = new string[] {
-						EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet",
+						unityDotnet = EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet",
 						"/usr/local/share/dotnet/dotnet",
 						"/usr/bin/dotnet",
 						"/usr/local/bin/dotnet",
@@ -330,7 +354,7 @@ namespace MaxyGames.CompilerBuilder {
 				}
 				else {
 					knowDotnetPaths = new string[] {
-						EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet.exe",
+						unityDotnet = EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet.exe",
 						@"C:\Program Files\dotnet\dotnet.exe",
 						@"C:\Program Files (x86)\dotnet\dotnet.exe",
 					};
@@ -343,8 +367,49 @@ namespace MaxyGames.CompilerBuilder {
 						}
 					}
 				}
+				if(string.IsNullOrEmpty(dotnetPath)) {
+					bool isNet6Installed = DotNetRuntimeDirectoryChecker.IsNet60RuntimeInstalled();
+					if(isNet6Installed == false) {
+						const string dotNet60DownloadUrl = "https://dotnet.microsoft.com/en-us/download/dotnet/6.0";
+						string errorMessage = $"❌ .NET 6.0 Runtime is NOT installed!\n\n" +
+									"uNode Compiler requires .NET 6.0 Runtime to run.\n\n" +
+									$"Please download and install it from:\n{dotNet60DownloadUrl}";
+						Debug.LogError(errorMessage);
+						Debug.Log($"📥 Please Install .NET 6.0 Runtime, here's the link to download: {dotNet60DownloadUrl}");
+					}
+					else {
+						dotnetPath = unityDotnet;
+					}
+				}
 			}
 			return dotnetPath;
+		}
+
+		public static class DotNetRuntimeDirectoryChecker {
+			private static string GetDotnetSharedPath() {
+				if(Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
+					return "/usr/local/share/dotnet/shared";
+				}
+				else if(Application.platform == RuntimePlatform.LinuxEditor || Application.platform == RuntimePlatform.LinuxPlayer) {
+					return "/usr/share/dotnet/shared";
+				}
+				else {
+					return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "dotnet", "shared");
+				}
+			}
+
+			/// <summary>
+			/// Checks if Microsoft.NETCore.App version 6.0.x is installed by checking the directory structure.
+			/// </summary>
+			public static bool IsNet60RuntimeInstalled() {
+				string sharedPath = GetDotnetSharedPath();
+				string runtimePath = Path.Combine(sharedPath, "Microsoft.NETCore.App");
+
+				if(!Directory.Exists(runtimePath))
+					return false;
+
+				return Directory.GetDirectories(runtimePath).Any(dir => Path.GetFileName(dir).StartsWith("6."));
+			}
 		}
 
 		static bool IsDotNetAvailable() {

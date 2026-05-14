@@ -132,7 +132,7 @@ namespace MaxyGames.UNode.Nodes {
 						break;
 					}
 				}
-				classData.RegisterFunction(method.GenerateCode());
+				classData.RegisterFunction(method);
 			});
 		}
 

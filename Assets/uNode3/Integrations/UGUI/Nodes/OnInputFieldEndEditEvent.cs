@@ -49,7 +49,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override void GenerateEventCode() {
-			var mData = CG.GetOrRegisterFunction("Start", typeof(void));
+			var mData = GenerateMethodData("Start");
 			var contents = GenerateRunFlows();
 			if(!string.IsNullOrEmpty(contents)) {
 				string parameter;

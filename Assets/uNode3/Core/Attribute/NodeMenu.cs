@@ -16,6 +16,8 @@ namespace MaxyGames.UNode {
 		public const string ECSGraphAndJob = nameof(ECSGraph) + OR + "ECS_Job";
 		public const string FlowGraph = nameof(FlowGraph);
 
+		public const string BTGraph = nameof(BTGraph);
+
 		public const string OR = ",";
 
 		public const string State = nameof(State);

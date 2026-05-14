@@ -1086,7 +1086,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static bool LoadRuntimeAssembly() {
 			var pdbPath = Path.ChangeExtension(tempAssemblyPath, ".pdb");
-			if(File.Exists(tempAssemblyPath)) {
+			if(File.Exists(tempAssemblyPath) && File.Exists(pdbPath)) {
 				var rawAssembly = File.ReadAllBytes(tempAssemblyPath);
 				Assembly assembly;
 				if(pdbPath != null) {

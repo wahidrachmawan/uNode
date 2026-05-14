@@ -56,6 +56,8 @@ namespace MaxyGames.UNode {
 
 		public delegate object EventCallback(object[] arg);
 
+		public static TargetType TargetTypeAll => (TargetType)(-1);
+
 		public enum TargetType {
 			//No target
 			None = 0,

@@ -58,10 +58,8 @@ namespace MaxyGames {
 
 		public enum State {
 			None,
-			Function,
-			Classes,
-			Constructor,
-			Property,
+			Initialization,
+			Generating,
 		}
 
 		public enum ContextState {
@@ -75,7 +73,7 @@ namespace MaxyGames {
 
 			public string typeName => generatorData.typeName;
 
-			public State m_state = State.Classes;
+			public State m_state = State.Initialization;
 			public State state {
 				get => m_state;
 				internal set {
@@ -85,6 +83,10 @@ namespace MaxyGames {
 					context = null;
 				}
 			}
+			
+			//internal object currentEntry => allEntries.Count > 0 ? allEntries[allEntries.Count - 1] : null;
+			//internal List<object> allEntries = new List<object>();
+
 			private object m_context;
 			public object context {
 				get => m_context;
@@ -139,6 +141,10 @@ namespace MaxyGames {
 			/// Note: this is filled after successful generating the class ( use post generation for use ).
 			/// </summary>
 			public ClassData classData { get; internal set; }
+			/// <summary>
+			/// Note: this is filled after successful generating the class ( use post generation for use ).
+			/// </summary>
+			public GeneratedData generatedData { get; internal set; }
 
 			/// <summary>
 			/// The type name of currently generating code.
@@ -187,7 +193,7 @@ namespace MaxyGames {
 
 			internal List<BlockStack> blockStacks = new List<BlockStack>();
 
-			private List<VData> variables = new List<VData>(16);
+			public List<VData> variables = new List<VData>(16);
 			public List<PData> properties = new List<PData>(16);
 			public List<CData> constructors = new List<CData>();
 			public List<MData> methodData = new List<MData>(16);
@@ -198,6 +204,8 @@ namespace MaxyGames {
 			public HashSet<FlowInput> stateNodes = new HashSet<FlowInput>();
 			public HashSet<FlowOutput> lambdaFlows = new HashSet<FlowOutput>();
 			public HashSet<NodeObject> connectedNodes = new HashSet<NodeObject>();
+
+			public Func<VData, string> GetVariableNameCallack;
 
 			public List<Exception> errors = new List<Exception>();
 
@@ -223,11 +231,10 @@ namespace MaxyGames {
 				{ typeof(object), "object" },
 			};
 			internal Dictionary<string, string> typesMap2 = new();
-			public Dictionary<NodeObject, HashSet<NodeObject>> FlowConnectedTo = new Dictionary<NodeObject, HashSet<NodeObject>>();
-			public Dictionary<UPort, string> generatedData = new Dictionary<UPort, string>(32);
-			public Dictionary<NodeObject, string> eventCoroutineData = new Dictionary<NodeObject, string>();
-			public Dictionary<object, string> eventIDMap = new Dictionary<object, string>();
-			public Dictionary<NodeObject, string> methodName = new Dictionary<NodeObject, string>();
+			internal Dictionary<UPort, string> generatedPortDatas = new Dictionary<UPort, string>(32);
+			internal Dictionary<NodeObject, string> eventCoroutineData = new Dictionary<NodeObject, string>();
+			internal Dictionary<object, string> eventIDMap = new Dictionary<object, string>();
+			internal Dictionary<NodeObject, string> methodName = new Dictionary<NodeObject, string>();
 
 			internal Dictionary<NodeObject, bool> stackOverflowMap = new Dictionary<NodeObject, bool>();
 			internal Dictionary<object, CoroutineData> coroutineEvent = new Dictionary<object, CoroutineData>();
@@ -242,13 +249,13 @@ namespace MaxyGames {
 			internal Dictionary<UGraphElement, HashSet<NodeObject>> nodesMap = new Dictionary<UGraphElement, HashSet<NodeObject>>();
 
 			public Dictionary<object, object> userObjectMap = new Dictionary<object, object>();
-			public Dictionary<object, Dictionary<string, string>> variableNamesMap = new Dictionary<object, Dictionary<string, string>>();
+			internal Dictionary<object, Dictionary<string, string>> variableNamesMap = new Dictionary<object, Dictionary<string, string>>();
 
 			internal Dictionary<string, Dictionary<Type, Dictionary<string, string>>> customUIDMethods = new Dictionary<string, Dictionary<Type, Dictionary<string, string>>>();
 
-			public Dictionary<UnityEngine.Object, string> unityVariableMap = new Dictionary<UnityEngine.Object, string>();
+			internal Dictionary<UnityEngine.Object, string> unityVariableMap = new Dictionary<UnityEngine.Object, string>();
 
-			public Dictionary<string, int> VarNames = new Dictionary<string, int>();
+			internal Dictionary<string, int> VarNames = new Dictionary<string, int>();
 			private Dictionary<string, int> generatedNames = new Dictionary<string, int>();
 			private Dictionary<string, int> generatedMethodNames = new Dictionary<string, int>();
 
@@ -256,10 +263,10 @@ namespace MaxyGames {
 			public Action<GData> postManipulator;
 			public List<(Action, int)> postInitialization = new();
 			public List<(Action, int)> setupActions = new();
-			public Dictionary<NodeObject, Action> initActionForNodes = new Dictionary<NodeObject, Action>();
-			public Dictionary<object, HashSet<int>> initializedUserObject = new Dictionary<object, HashSet<int>>();
+			internal Dictionary<NodeObject, Action> initActionForNodes = new Dictionary<NodeObject, Action>();
+			internal Dictionary<object, HashSet<int>> initializedUserObject = new Dictionary<object, HashSet<int>>();
 
-			public Dictionary<object, Dictionary<string, Variable>> variableAliases = new Dictionary<object, Dictionary<string, Variable>>();
+			internal Dictionary<object, Dictionary<string, Variable>> variableAliases = new Dictionary<object, Dictionary<string, Variable>>();
 
 			private int generatedMethodCount;
 
@@ -277,8 +284,9 @@ namespace MaxyGames {
 				return AddMethod("M_" + uid, type, parameters);
 			}
 
-			public void AddVariable(VData variable) {
+			public VData AddVariable(VData variable) {
 				variables.Add(variable);
+				return variable;
 			}
 
 			public void AddVariableAlias(string name, Variable variable, object owner) {
@@ -303,10 +311,6 @@ namespace MaxyGames {
 
 			public void AddEventCoroutineData(NodeObject comp, string contents) {
 				eventCoroutineData[comp] = contents;
-			}
-
-			public List<VData> GetVariables() {
-				return variables;
 			}
 
 			public string GenerateName(string startName = "variable") {
@@ -949,6 +953,8 @@ namespace MaxyGames {
 		public class ClassData {
 			public string name;
 			public string keyword = "class ";
+			//The owner of the class, only for information.
+			public object owner;
 
 			public string summary;
 			public ClassModifier modifier;
@@ -957,12 +963,13 @@ namespace MaxyGames {
 			public List<GPData> genericParameters = new List<GPData>();
 			public List<AData> attributes = new List<AData>();
 
-			public string variables;
-			public string properties;
-			public string functions;
-			public string constructors;
-			public string nestedTypes;
+			public List<VData> variables = new();
+			public List<PData> properties = new();
+			public List<MData> functions = new();
+			public List<CData> constructors = new();
+			public List<ClassData> nestedTypes = new();
 			public string additionalContents;
+			private string nestedTypesString;
 
 			#region Constructors
 			public ClassData() { }
@@ -971,16 +978,22 @@ namespace MaxyGames {
 				Setup(target, graphSystem);
 			}
 
-			public ClassData(string name, Type inheritFrom = null, ClassModifier modifier = null) {
+			public ClassData(string name, Type inheritFrom = null, ClassModifier modifier = null, object owner = null) {
 				this.name = name;
-				this.inheritFrom = inheritFrom;
+				if(inheritFrom?.IsInterface == true) {
+					implementedInterfaces.Add(inheritFrom);
+				}
+				else {
+					this.inheritFrom = inheritFrom;
+				}
+				this.owner = owner;
 				if(modifier != null) {
 					this.modifier = modifier;
 				}
 			}
 			#endregion
 
-			public string GenerateCode(object owner = null) {
+			public string GenerateCode() {
 				var builder = new StringBuilder();
 				builder.Append(Summary(summary).AddLineInEnd());
 				builder.Append(GenerateClassAttributes().AddLineInEnd());
@@ -1046,99 +1059,162 @@ namespace MaxyGames {
 				builder.Append(" {");
 
 				var builder2 = new StringBuilder();
-				if(!string.IsNullOrEmpty(variables)) {
-					builder2.AppendLine();
-					builder2.Append(variables);
-					builder2.AppendLine();
-				}
-				if(!string.IsNullOrEmpty(properties)) {
-					builder2.AppendLine();
-					builder2.Append(properties);
-					builder2.AppendLine();
-				}
-				if(!string.IsNullOrEmpty(constructors)) {
-					builder2.AppendLine();
-					builder2.Append(constructors);
-					builder2.AppendLine();
-				}
-				if(!string.IsNullOrEmpty(functions)) {
-					builder2.AppendLine();
-					builder2.Append(functions);
-					builder2.AppendLine();
-				}
-				if(!string.IsNullOrEmpty(nestedTypes)) {
-					builder2.AppendLine();
-					builder2.Append(nestedTypes);
-					builder2.AppendLine();
-				}
-				if(!string.IsNullOrEmpty(additionalContents)) {
-					builder2.AppendLine();
-					builder2.Append(additionalContents);
-					builder2.AppendLine();
-				}
-				if(owner == null) {
-					builder.Append(builder2.ToString().AddTabAfterNewLine(1, false));
-				}
-				else {
-					builder.Append(CG.WrapWithInformation(builder2.ToString().AddTabAfterNewLine(1, false), owner));
-				}
+				ThreadingUtil.Queue(() => {
+					if(variables.Count > 0) {
+						string result = null;
+						foreach(VData vdata in variables) {
+							if(!vdata.isInstance)
+								continue;
+							try {
+								generationState.isStatic = vdata.IsStatic;
+								string str = WrapWithInformation(vdata.GenerateCode(), vdata.reference).AddFirst("\n", !string.IsNullOrEmpty(result));
+								result += str;
+							}
+							catch(Exception ex) {
+								if(setting != null && setting.isAsync) {
+									generatorData.errors.Add(new Exception("Error on generating variable:" + vdata.name + "\nFrom graph:" + graph, ex));
+									generatorData.errors.Add(ex);
+									//In case async return error commentaries.
+									result = "/*Error from variable: " + vdata.name + " */";
+									return;
+								}
+								UnityEngine.Debug.LogError("Error on generating variable:" + vdata.name + "\nFrom graph:" + graph + "\nException: " + ex.ToString(), graph as UnityEngine.Object);
+								throw;
+							}
+						}
+
+						if(string.IsNullOrWhiteSpace(result) == false) {
+							builder2.AppendLine();
+							builder2.Append(result);
+							builder2.AppendLine();
+						}
+					}
+					if(properties.Count > 0) {
+						string result = null;
+						foreach(var prop in properties) {
+							if(prop == null || !prop.obj)
+								continue;
+							ThreadingUtil.Queue(() => {
+								generationState.context = prop;
+								generationState.isStatic = prop.modifier != null && prop.modifier.Static;
+								string str = prop.GenerateCode().AddFirst("\n", result != null);
+								if(includeGraphInformation && prop.obj != null) {
+									str = WrapWithInformation(str, prop.obj);
+								}
+								result += str;
+							});
+						}
+
+						if(string.IsNullOrWhiteSpace(result) == false) {
+							builder2.AppendLine();
+							builder2.Append(result);
+							builder2.AppendLine();
+						}
+					}
+					if(constructors.Count > 0) {
+						string result = null;
+						for(int i = 0; i < generatorData.constructors.Count; i++) {
+							var ctor = generatorData.constructors[i];
+							if(ctor == null || !ctor.obj)
+								continue;
+							generationState.context = ctor;
+							string str = ctor.GenerateCode().AddFirst("\n\n", result != null);
+							if(includeGraphInformation && ctor.obj != null) {
+								str = WrapWithInformation(str, ctor.obj);
+							}
+							result += str;
+						}
+						if(string.IsNullOrWhiteSpace(result) == false) {
+							builder2.AppendLine();
+							builder2.Append(result);
+							builder2.AppendLine();
+						}
+					}
+					if(functions.Count > 0) {
+						builder2.AppendLine();
+						builder2.Append(string.Join("\n\n", functions.Select(data => data.GenerateCode())));
+						builder2.AppendLine();
+					}
+					if(nestedTypes.Count > 0) {
+						builder2.AppendLine();
+						builder2.Append(string.Join("\n\n", nestedTypes.Select(data => data.GenerateCode())));
+						builder2.AppendLine();
+					}
+					if(!string.IsNullOrEmpty(nestedTypesString)) {
+						builder2.AppendLine();
+						builder2.Append(nestedTypesString);
+						builder2.AppendLine();
+					}
+					if(!string.IsNullOrEmpty(additionalContents)) {
+						builder2.AppendLine();
+						builder2.Append(additionalContents);
+						builder2.AppendLine();
+					}
+					if(owner == null) {
+						builder.Append(builder2.ToString().AddTabAfterNewLine(1, false));
+					}
+					else {
+						builder.Append(CG.WrapWithInformation(builder2.ToString().AddTabAfterNewLine(1, false), owner));
+					}
+				});
+				ThreadingUtil.WaitQueue();
 
 				builder.Append("}");
 				return builder.ToString();
 			}
 
 			#region Utilities
-			public void RegisterAttribute(Type type, params string[] parameters) {
-				attributes.Add(new AData(type, parameters));
+			public AData RegisterAttribute(Type type, params string[] parameters) {
+				var result = new AData(type, parameters);
+				attributes.Add(result);
+				return result;
 			}
 
-			public void RegisterVariable(string contents) {
-				if(string.IsNullOrEmpty(variables)) {
-					variables = contents;
-				}
-				else {
-					variables += contents.AddFirst("\n");
-				}
+			public VData RegisterVariable(string name, Type type, string defaultValue = null, FieldModifier modifier = null, IEnumerable<AData> attributes = null) {
+				var result = new VData(name, type, defaultValue) {
+					modifier = modifier,
+					attributes = attributes
+				};
+				variables.Add(result);
+				return result;
 			}
 
-			public void RegisterProperty(string contents) {
-				if(string.IsNullOrEmpty(properties)) {
-					properties = contents;
-				}
-				else {
-					properties += contents.AddFirst("\n\n");
-				}
+			public VData RegisterVariable(VData data) {
+				variables.Add(data);
+				return data;
 			}
 
-			public void RegisterFunction(string contents) {
-				if(string.IsNullOrEmpty(functions)) {
-					functions = contents;
-				}
-				else {
-					functions += contents.AddFirst("\n\n");
-				}
+			public PData RegisterProperty(PData data) {
+				properties.Add(data);
+				return data;
 			}
 
-			public void RegisterConstructor(string contents) {
-				if(string.IsNullOrEmpty(constructors)) {
-					constructors = contents;
-				}
-				else {
-					constructors += contents.AddFirst("\n\n");
-				}
+			public MData RegisterFunction(MData data) {
+				functions.Add(data);
+				return data;
+			}
+
+			public CData RegisterConstructor(CData data) {
+				constructors.Add(data);
+				return data;
+			}
+
+			public ClassData RegisterNestedType(ClassData data) {
+				nestedTypes.Add(data);
+				return data;
 			}
 
 			public void RegisterNestedType(string contents) {
-				if(string.IsNullOrEmpty(nestedTypes)) {
-					nestedTypes = contents;
+				if(string.IsNullOrEmpty(nestedTypesString)) {
+					nestedTypesString = contents;
 				}
 				else {
-					nestedTypes += contents.AddFirst("\n\n");
+					nestedTypesString += contents.AddFirst("\n\n");
 				}
 			}
 
 			public void RegisterAdditionalContent(string contents) {
-				if(string.IsNullOrEmpty(nestedTypes)) {
+				if(string.IsNullOrEmpty(nestedTypesString)) {
 					additionalContents = contents;
 				}
 				else {
@@ -1146,38 +1222,52 @@ namespace MaxyGames {
 				}
 			}
 
-			public void SetTypeToClass() {
+			public ClassData SetTypeToClass() {
 				keyword = "class ";
+				return this;
 			}
 
-			public void SetTypeToStruct() {
+			public ClassData SetTypeToStruct() {
 				keyword = "struct ";
+				return this;
 			}
 
-			public void SetTypeToInterface() {
+			public ClassData SetTypeToInterface() {
 				keyword = "interface ";
+				return this;
 			}
 
-			public void SetTypeToEnum() {
+			public ClassData SetTypeToEnum() {
 				keyword = "enum ";
+				return this;
 			}
 
-			public void SetToPartial() {
+			public ClassData SetToPartial() {
 				if(modifier == null)
 					modifier = new ClassModifier();
 				modifier.Partial = true;
+				return this;
 			}
 
-			public void SetToPublic() {
+			public ClassData SetToPublic() {
 				if(modifier == null)
 					modifier = new ClassModifier();
 				modifier.Public = true;
+				return this;
 			}
 
-			public void SetToPrivate() {
+			public ClassData SetToPrivate() {
 				if(modifier == null)
 					modifier = new ClassModifier();
 				modifier.Private = true;
+				return this;
+			}
+
+			public ClassData SetToStatic() {
+				if(modifier == null)
+					modifier = new ClassModifier();
+				modifier.Static = true;
+				return this;
 			}
 			#endregion
 
@@ -1185,12 +1275,13 @@ namespace MaxyGames {
 			private void Setup(object target, GraphSystemAttribute graphSystem = null) {
 				if(target is IGraph graph) {
 					summary = graph.GraphData.comment;
+					owner = target;
 				}
 				if(target is IAttributeSystem) {
 					foreach(var attribute in (target as IAttributeSystem).Attributes) {
 						if(attribute == null)
 							continue;
-						AData aData = TryParseAttributeData(attribute);
+						AData aData = AttributeData(attribute);
 						if(aData != null) {
 							attributes.Add(aData);
 						}
@@ -1270,7 +1361,7 @@ namespace MaxyGames {
 			/// <summary>
 			/// The name of variable
 			/// </summary>
-			public string name;
+			public readonly string name;
 			/// <summary>
 			/// The summary of variable.
 			/// </summary>
@@ -1315,9 +1406,9 @@ namespace MaxyGames {
 			/// <summary>
 			/// The variable attributes.
 			/// </summary>
-			public IList<AData> attributes;
+			public IEnumerable<AData> attributes;
 
-			public void SetToInstanceVariable() {
+			public VData SetToInstanceVariable() {
 				isInstance = true;
 				if(CG.generationState.isStatic) {
 					if(modifier == null) {
@@ -1327,15 +1418,43 @@ namespace MaxyGames {
 					}
 					modifier.Static = true;
 				}
+				return this;
 			}
-			public void SetToLocalVariable() => isInstance = false;
+			public VData SetToLocalVariable() {
+				isInstance = false;
+				return this;
+			}
+
+			public VData SetToPublic() {
+				if(modifier == null)
+					modifier = FieldModifier.PublicModifier;
+				else
+					modifier.Public = true;
+				return this;
+			}
+
+			public VData SetToPrivate() {
+				if(modifier != null)
+					modifier = FieldModifier.PrivateModifier;
+				else
+					modifier.Public = true;
+				return this;
+			}
+
+			public VData SetToStatic() {
+				if(modifier != null)
+					modifier = new() { Static = true };
+				else
+					modifier.Static = true;
+				return this;
+			}
 
 			#region Constructor
 			public VData(
 				string name,
 				Type type,
 				bool isInstance = true,
-				bool autoCorrection = true) {
+				bool autoCorrection = false) {
 
 				if(autoCorrection) {
 					this.name = GenerateNewName(name);
@@ -1345,6 +1464,26 @@ namespace MaxyGames {
 				}
 				this.type = type;
 				this.isInstance = isInstance;
+			}
+
+			public VData(
+				string name,
+				Type type,
+				string defaultValue,
+				bool isInstance = true,
+				bool autoCorrection = false) {
+
+				if(autoCorrection) {
+					this.name = GenerateNewName(name);
+				}
+				else {
+					this.name = name;
+				}
+				this.type = type;
+				this.isInstance = isInstance;
+				if(string.IsNullOrEmpty(defaultValue) == false) {
+					this.defaultValue = CG.WrapString(defaultValue);
+				}
 			}
 			#endregion
 
@@ -1402,7 +1541,7 @@ namespace MaxyGames {
 				if(ReflectionUtils.IsNativeType(type) == false) {
 					if(type is IFakeType) {
 						//If it is a fake type and not native type
-						vType = Type((type as IFakeType).GetNativeType());
+						vType = Type((type as IFakeType).GetNativeType()) ?? vType;
 					}
 					//Check if the graph is inherited from UnityEngine.Object, true for Class Component & Class Asset
 					//and will not generate default value because it is initialized at runtime by uNode so no need to init value again
@@ -1468,6 +1607,24 @@ namespace MaxyGames {
 			public Constructor obj;
 			public ConstructorModifier modifier;
 
+			private string m_contents;
+			public string contents {
+				get {
+					if(m_contents == null && obj != null && setting.generateIdentifierOnly == false) {
+						m_contents = GeneratePort(obj.Entry.nodeObject.primaryFlowOutput) ?? string.Empty;
+					}
+					return m_contents;
+				}
+				set {
+					m_contents = value;
+				}
+			}
+
+			public void SetToComplete() {
+				//Make sure the contents is cached properly
+				if(contents != null) { }
+			}
+
 			public CData(Constructor constructor) {
 				this.obj = constructor;
 				this.summary = constructor.comment;
@@ -1484,7 +1641,7 @@ namespace MaxyGames {
 					code = Throw(Null);
 				}
 				else {
-					code = GeneratePort(obj.Entry.nodeObject.primaryFlowOutput);
+					code = contents;
 				}
 				string parameters = null;
 				if(obj.parameters != null && obj.parameters.Count > 0) {
@@ -1619,7 +1776,7 @@ namespace MaxyGames {
 			public ICollection<AData> attributes {
 				get {
 					if(m_attributes == null && obj != null) {
-						m_attributes = obj.attributes.Select(v => TryParseAttributeData(v)).ToArray();
+						m_attributes = obj.attributes.Select(v => AttributeData(v)).ToArray();
 					}
 					return m_attributes;
 				}
@@ -1632,7 +1789,7 @@ namespace MaxyGames {
 			public ICollection<AData> fieldAttributes {
 				get {
 					if(m_fieldAttributes == null && obj != null) {
-						m_fieldAttributes = obj.fieldAttributes.Select(v => TryParseAttributeData(v)).ToArray();
+						m_fieldAttributes = obj.fieldAttributes.Select(v => AttributeData(v)).ToArray();
 					}
 					return m_fieldAttributes;
 				}
@@ -1646,7 +1803,7 @@ namespace MaxyGames {
 				get {
 					if(m_getterAttributes == null) {
 						if(obj != null) {
-							m_getterAttributes = obj.getterAttributes.Select(v => TryParseAttributeData(v)).ToArray();
+							m_getterAttributes = obj.getterAttributes.Select(v => AttributeData(v)).ToArray();
 						}
 						else {
 							m_getterAttributes = Array.Empty<AData>();
@@ -1664,7 +1821,7 @@ namespace MaxyGames {
 				get {
 					if(m_setterAttributes == null) {
 						if(obj != null) {
-							m_setterAttributes = obj.setterAttributes.Select(v => TryParseAttributeData(v)).ToArray();
+							m_setterAttributes = obj.setterAttributes.Select(v => AttributeData(v)).ToArray();
 						}
 						else {
 							m_setterAttributes = Array.Empty<AData>();
@@ -1688,10 +1845,16 @@ namespace MaxyGames {
 				modifier = property.modifier;
 				getterModifier = property.getterModifier;
 				setterModifier = property.setterModifier;
-				attributes = property.attributes?.Select(a => TryParseAttributeData(a)).ToArray();
+				attributes = property.attributes?.Select(a => AttributeData(a)).ToArray();
 				//fieldAttributes = property.fieldAttributes?.Select(p => TryParseAttributeData(p)).ToArray();
 				//getterAttributes = property.getterAttributes?.Select(a => TryParseAttributeData(a)).ToArray();
 				//setterAttributes = property.setterAttributes?.Select(a => TryParseAttributeData(a)).ToArray();
+			}
+
+			public void SetToComplete() {
+				//don't remove this, this is for make sure the get and set contents is cached.
+				if(setContents != null) { }
+				if(getContents != null) { }
 			}
 
 			public string GenerateCode() {
@@ -2212,16 +2375,24 @@ namespace MaxyGames {
 			/// skipped.</remarks>
 			public void BuildScript() {
 				scriptBuilder = new StringBuilder();
-				foreach(var (owner, builder) in classes) {
-					var classResult = builder.GenerateCode(owner);
+				foreach(var (_, builder) in classes) {
+					var classResult = builder.GenerateCode();
 					if(!string.IsNullOrEmpty(classResult)) {
 						scriptBuilder.Append(classResult.AddLineInEnd());
 					}
 				}
 			}
 
+			private int classIndex;
+			public void RegisterClass(ClassData builder) {
+				RegisterClass(++classIndex, builder);
+			}
+
 			public void RegisterClass(object owner, ClassData builder) {
 				classes[owner] = builder;
+				if(builder.owner == null) {
+					builder.owner = owner;
+				}
 
 				//As the new class is registered, invalidate the builder
 				scriptBuilder = null;

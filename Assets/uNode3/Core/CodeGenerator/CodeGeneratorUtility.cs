@@ -112,7 +112,7 @@ namespace MaxyGames {
 		/// </summary>
 		/// <param name="node"></param>
 		public static void RegisterAsRegularNode(FlowInput node) {
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if(!generatorData.regularNodes.Contains(node)) {
 				generatorData.regularNodes.Add(node);
@@ -121,7 +121,7 @@ namespace MaxyGames {
 		}
 
 		public static void RegisterAsLambdaFlow(FlowOutput flow) {
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if(!generatorData.lambdaFlows.Contains(flow)) {
 				generatorData.lambdaFlows.Add(flow);
@@ -136,7 +136,7 @@ namespace MaxyGames {
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="ArgumentNullException"></exception>
 		public static void RegisterPort(ValueOutput port, Func<string> generator) {
-			if (generationState.state != State.Classes)
+			if (generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if (port is null) {
 				//Skip when port is null.
@@ -156,7 +156,7 @@ namespace MaxyGames {
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="ArgumentNullException"></exception>
 		public static void RegisterPort(ValueInput port, Func<string> generator) {
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if(port is null) {
 				//Skip when port is null.
@@ -176,7 +176,7 @@ namespace MaxyGames {
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="ArgumentNullException"></exception>
 		public static void RegisterPort(FlowInput port, Func<string> generator) {
-			if (generationState.state != State.Classes)
+			if (generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if (port is null) {
 				//Skip when port is null.
@@ -193,7 +193,7 @@ namespace MaxyGames {
 		/// </summary>
 		/// <param name="flow"></param>
 		public static void RegisterAsStateFlow(FlowInput flow) {
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if(flow == null)
 				return;
@@ -208,7 +208,7 @@ namespace MaxyGames {
 		public static void RegisterAsStateFlow(IEnumerable<FlowInput> flows) {
 			if(flows == null)
 				return;
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			foreach(var flow in flows) {
 				RegisterAsStateFlow(flow);
@@ -220,7 +220,7 @@ namespace MaxyGames {
 		/// </summary>
 		/// <param name="flow"></param>
 		public static void RegisterAsStateFlow(FlowOutput flow) {
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if(flow == null || !flow.isAssigned)
 				return;
@@ -232,7 +232,7 @@ namespace MaxyGames {
 		/// </summary>
 		/// <param name="flows"></param>
 		public static void RegisterAsStateFlow(IEnumerable<FlowOutput> flows) {
-			if(generationState.state != State.Classes)
+			if(generationState.state != State.Initialization)
 				throw new InvalidOperationException("The Register action must be performed on Initialization / " + nameof(NodeObject.OnGeneratorInitialize));
 			if(flows == null)
 				return;
@@ -476,7 +476,7 @@ namespace MaxyGames {
 		/// <param name="reference"></param>
 		/// <returns></returns>
 		public static bool IsInstanceVariable(object reference) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, reference)) {
 					return vdata.isInstance;
 				}
@@ -491,7 +491,7 @@ namespace MaxyGames {
 		/// <param name="reference"></param>
 		/// <returns></returns>
 		public static bool IsLocalVariable(object reference) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(vdata.reference == reference) {
 					return !vdata.isInstance;
 				}

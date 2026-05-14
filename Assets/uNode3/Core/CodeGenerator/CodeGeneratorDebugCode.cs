@@ -28,6 +28,8 @@ namespace MaxyGames {
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		public static string WrapWithInformation(string input, object obj) {
+			if(includeGraphInformation == false) return input;
+
 			if(!string.IsNullOrWhiteSpace(input)) {
 				int firstIndex = 0;
 				int lastIndex = input.Length;
@@ -149,7 +151,7 @@ namespace MaxyGames {
 					Value(isSet));
 			}
 			var type = port.ValueType ?? port.type;
-			if(port.CanSetValue() || type.IsByRef) {
+			if(!isSet && (port.CanSetValue() || type.IsByRef)) {
 				//Check when variable is struct and it is not readonly.
 				if((port.IsVariable && type.IsValueType || type.IsByRef && type.ElementType().IsValueType) && !type.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), false)) {
 					var ports = StaticHashPool<UPort>.Allocate();

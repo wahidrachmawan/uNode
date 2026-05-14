@@ -53,7 +53,7 @@ namespace MaxyGames.UNode.Nodes {
 		}
 
 		public override void GenerateEventCode() {
-			var mData = CG.GetOrRegisterFunction(UEventID.Update, typeof(void));
+			var mData = GenerateMethodData(UEventID.Update);
 			var contents = GenerateRunFlows();
 			if(!string.IsNullOrEmpty(contents)) {
 				string code;

@@ -139,7 +139,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 				bool showIcon = false;
 				if(config.filter != null) {
 					if(member.targetType == MemberData.TargetType.Values && targetType != null) {
-						var filterType = config.filter.GetActualType();
+						var filterType = config.filter.Types.Count == 0 ? config.type : config.filter.GetActualType();
 						if(filterType != targetType && member.Get(null) != null) {
 							showIcon = true;
 						}

@@ -209,7 +209,7 @@ namespace MaxyGames.UNode.Editors {
 			public static bool? hasDefaultAssembly;
 			public static UnityEditor.Compilation.Assembly assemblyCSharp;
 
-			public static IIncrementalGenerator[] incrementalGenerators;
+			public static ISourceGenerator[] sourceGenerators;
 
 			static int _index;
 			internal static string randomAssemblyName => Path.GetRandomFileName() + (++_index).ToString();
@@ -276,17 +276,17 @@ namespace MaxyGames.UNode.Editors {
 			return result;
 		}
 
-		private static void AppendSourceGenerators(Assembly assembly, ref List<IIncrementalGenerator> incrementalGenerators) {
+		private static void AppendSourceGenerators(Assembly assembly, ref List<ISourceGenerator> incrementalGenerators) {
 			try {
 				foreach(var type in assembly.GetTypes()) {
 					if(typeof(ISourceGenerator).IsAssignableFrom(type)) {
 						if(ReflectionUtils.CanCreateInstance(type)) {
-							incrementalGenerators.Add((ReflectionUtils.CreateInstance(type) as ISourceGenerator).AsIncrementalGenerator());
+							incrementalGenerators.Add(ReflectionUtils.CreateInstance(type) as ISourceGenerator);
 						}
 					}
 					else if(typeof(IIncrementalGenerator).IsAssignableFrom(type)) {
 						if(ReflectionUtils.CanCreateInstance(type)) {
-							incrementalGenerators.Add(ReflectionUtils.CreateInstance(type) as IIncrementalGenerator);
+							incrementalGenerators.Add((ReflectionUtils.CreateInstance(type) as IIncrementalGenerator).AsSourceGenerator());
 						}
 					}
 				}
@@ -301,7 +301,7 @@ namespace MaxyGames.UNode.Editors {
 #endif
 		}
 
-		private static void GetRoslynGenerators(out IIncrementalGenerator[] incrementalGenerators) {
+		private static void GetRoslynGenerators(out ISourceGenerator[] incrementalGenerators) {
 			//if(SourceGenData.sourceGenerators != null) {
 			//	sourceGenerators = SourceGenData.sourceGenerators;
 			//	incrementalGenerators = SourceGenData.incrementalGenerators;
@@ -310,7 +310,7 @@ namespace MaxyGames.UNode.Editors {
 				var assembly = AssemblyCSharp;
 				var paths = assembly.compilerOptions.RoslynAnalyzerDllPaths.ToHashSet();
 
-				List<IIncrementalGenerator> iGenerators = new List<IIncrementalGenerator>();
+				List<ISourceGenerator> iGenerators = new List<ISourceGenerator>();
 				List<Assembly> assemblies = new List<Assembly>();
 				foreach(var path in paths) {
 					if(path.EndsWith("CodeFixes.dll", StringComparison.Ordinal))
@@ -321,10 +321,10 @@ namespace MaxyGames.UNode.Editors {
 					AppendSourceGenerators(ass, ref iGenerators);
 					ReflectionUtils.RegisterPrivateLoadedAssembly(ass);
 				}
-				CachedData.incrementalGenerators = incrementalGenerators = iGenerators.ToArray();
+				CachedData.sourceGenerators = incrementalGenerators = iGenerators.ToArray();
 			}
 			else {
-				incrementalGenerators = Array.Empty<IIncrementalGenerator>();
+				incrementalGenerators = Array.Empty<ISourceGenerator>();
 			}
 		}
 

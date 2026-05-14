@@ -510,24 +510,34 @@ namespace MaxyGames.UNode {
 		/// Are coroutine is supported inside this node?
 		/// </summary>
 		/// <returns></returns>
-		bool AllowCoroutine();
+		bool AllowCoroutine() => false;
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes;
 	}
 
 	public interface IElementWithEntry : INodeContainerWithEntry {
 		public BaseEntryNode Entry { get; }
-		public void RegisterEntry(BaseEntryNode node) { }
+		public void RegisterEntry(BaseEntryNode node);
 		IEnumerable<NodeObject> INodeContainerWithEntry.GetEntryNodes() {
 			var entry = Entry;
 			if(entry == null) {
 				Enumerable.Empty<NodeObject>();
 			}
-			return new NodeObject[] { Entry };
+			return new NodeObject[] { entry };
 		}
+		public Type ReturnType() => typeof(void);
 	}
 
 	public interface ISuperNodeWithEntry : ISuperNode, IElementWithEntry {
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Append(Entry);
+		IEnumerable<NodeObject> ISuperNode.NestedFlowNodes {
+			get {
+				var entry = Entry;
+				if(entry == null) {
+					Enumerable.Empty<NodeObject>();
+				}
+				return new NodeObject[] { entry };
+			}
+		}
 	}
 
 	public interface INodeWithConnection {

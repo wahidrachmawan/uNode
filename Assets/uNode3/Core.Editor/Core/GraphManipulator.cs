@@ -1816,26 +1816,30 @@ namespace MaxyGames.UNode.Editors {
 			yield break;
 		}
 
+		public const int DEFAULT_ORDER = -1000;
+
 		public override IEnumerable<ContextMenuItem> ContextMenuForGraphCanvas(Vector2 mousePosition) {
 			if(graphEditor.canvasData.ShowAddNodeContextMenu) {
 				yield return new ContextMenuItem("Add Node", evt => {
 					graphEditor.ShowNodeMenu(mousePosition);
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 
-				yield return new ContextMenuItem("Add Node (Set)", evt => {
-					graphEditor.ShowNodeMenu(mousePosition, new FilterAttribute() { SetMember = true, VoidType = false }, (node) => {
-						node.EnsureRegistered();
-						NodeEditorUtility.AddNewNode(graphData, new Vector2(node.nodeObject.position.x, node.position.y), delegate (Nodes.NodeSetValue n) {
-							n.EnsureRegistered();
-							n.target.ConnectTo(node.nodeObject.primaryValueOutput);
-							n.value.AssignToDefault(MemberData.Default(n.target.type));
+				if(graphData.scopes.Contains(NodeScope.FlowGraph)) {
+					yield return new ContextMenuItem("Add Node (Set)", evt => {
+						graphEditor.ShowNodeMenu(mousePosition, new FilterAttribute() { SetMember = true, VoidType = false }, (node) => {
+							node.EnsureRegistered();
+							NodeEditorUtility.AddNewNode(graphData, new Vector2(node.nodeObject.position.x, node.position.y), delegate (Nodes.NodeSetValue n) {
+								n.EnsureRegistered();
+								n.target.ConnectTo(node.nodeObject.primaryValueOutput);
+								n.value.AssignToDefault(MemberData.Default(n.target.type));
+							});
+							node.nodeObject.SetPosition(new Vector2(node.position.x - 150, node.position.y - 100));
 						});
-						node.nodeObject.SetPosition(new Vector2(node.position.x - 150, node.position.y - 100));
-					});
-				}, int.MinValue);
-				yield return new ContextMenuItem("Add Node (Favorites)", evt => {
-					graphEditor.ShowFavoriteMenu(mousePosition);
-				}, int.MinValue);
+					}, DEFAULT_ORDER);
+					yield return new ContextMenuItem("Add Node (Favorites)", evt => {
+						graphEditor.ShowFavoriteMenu(mousePosition);
+					}, DEFAULT_ORDER);
+				}
 			}
 
 			if(graphEditor.canvasData.SupportMacro) {
@@ -1854,21 +1858,21 @@ namespace MaxyGames.UNode.Editors {
 							tooltip: new GUIContent(m.GraphData.comment)));
 					}
 					ItemSelector.ShowWindow(null, null, null, customItems).ChangePosition(graphEditor.GetMenuPosition()).displayDefaultItem = false;
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 			}
 
 
 			#region Event & State
 			if(graphData.currentCanvas is MainGraphContainer) {
 				if(graphData.graph is IStateGraph state && state.CanCreateStateGraph) {
-					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
+					yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
 					yield return new ContextMenuItem("Add State", evt => {
 						//EditorUtility.DisplayDialog("", "This state is obsolete, please use new state machine instead.", "OK");
 						NodeEditorUtility.AddNewNode<Nodes.StateNode>(graphData,
 							"State",
 							mousePosition);
 						graphEditor.Refresh();
-					}, int.MinValue);
+					}, DEFAULT_ORDER);
 					//Add events
 					var eventMenus = NodeEditorUtility.FindEventMenu();
 					foreach(var menu in eventMenus) {
@@ -1876,12 +1880,12 @@ namespace MaxyGames.UNode.Editors {
 							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
-							}, int.MinValue);
+							}, DEFAULT_ORDER);
 						}
 					}
 				}
 				else if(graphData.graph is ICustomMainGraph mainGraph) {
-					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
+					yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
 
 					var scopes = mainGraph.MainGraphScope.Split(',');
 
@@ -1892,7 +1896,7 @@ namespace MaxyGames.UNode.Editors {
 							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
-							}, int.MinValue);
+							}, DEFAULT_ORDER);
 						}
 					}
 				}
@@ -1900,7 +1904,7 @@ namespace MaxyGames.UNode.Editors {
 			else if(graphData.currentCanvas is NodeObject superNode) {
 
 				if(superNode.node is INodeWithEventHandler) {
-					yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
+					yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
 
 					#region Add Event
 					var eventMenus = NodeEditorUtility.FindEventMenu();
@@ -1932,7 +1936,7 @@ namespace MaxyGames.UNode.Editors {
 							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
 								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
 								graphEditor.Refresh();
-							}, int.MinValue);
+							}, DEFAULT_ORDER);
 						}
 					}
 					#endregion
@@ -1943,7 +1947,7 @@ namespace MaxyGames.UNode.Editors {
 							"Trigger",
 							mousePosition);
 						graphEditor.Refresh();
-					}, int.MinValue);
+					}, DEFAULT_ORDER);
 				}
 			}
 			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
@@ -1952,27 +1956,27 @@ namespace MaxyGames.UNode.Editors {
 						"State",
 						mousePosition);
 					graphEditor.Refresh();
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 				yield return new ContextMenuItem("Add Any State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.AnyStateNode>(graphData,
 						"AnyState",
 						mousePosition);
 					graphEditor.Refresh();
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 				yield return new ContextMenuItem("Add Nested State", evt => {
 					NodeEditorUtility.AddNewNode<Nodes.NestedStateNode>(graphData,
 						"NestedState",
 						mousePosition);
 					graphEditor.Refresh();
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 			}
 			#endregion
 
 			#region Add Region
-			yield return ContextMenuItem.CreateSeparator(order: int.MinValue);
+			yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
 			yield return new ContextMenuItem("Add Region", (e) => {
 				graphEditor.SelectionAddRegion(mousePosition);
-			}, int.MinValue);
+			}, DEFAULT_ORDER);
 			#endregion
 
 			#region Add Notes
@@ -1984,7 +1988,7 @@ namespace MaxyGames.UNode.Editors {
 					node.position = rect;
 				});
 				graphEditor.Refresh();
-			}, int.MinValue);
+			}, DEFAULT_ORDER);
 			#endregion
 
 			#region Add Await
@@ -1997,7 +2001,7 @@ namespace MaxyGames.UNode.Editors {
 							node.position = rect;
 						});
 						graphEditor.Refresh();
-					}, int.MinValue);
+					}, DEFAULT_ORDER);
 				}
 			}
 			#endregion
@@ -2015,7 +2019,7 @@ namespace MaxyGames.UNode.Editors {
 						node.position = rect;
 					});
 					graphEditor.Refresh();
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 				yield return new ContextMenuItem("Jump Statement/Add Break", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);
@@ -2027,7 +2031,7 @@ namespace MaxyGames.UNode.Editors {
 						node.position = rect;
 					});
 					graphEditor.Refresh();
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 				yield return new ContextMenuItem("Jump Statement/Add Continue", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);
@@ -2039,7 +2043,7 @@ namespace MaxyGames.UNode.Editors {
 						node.position = rect;
 					});
 					graphEditor.Refresh();
-				}, int.MinValue);
+				}, DEFAULT_ORDER);
 			}
 			#endregion
 

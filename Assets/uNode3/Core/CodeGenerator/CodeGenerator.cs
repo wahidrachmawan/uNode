@@ -93,13 +93,10 @@ namespace MaxyGames {
 						if(classes is ITypeWithScriptData typeWithScriptData) {
 							typeWithScriptData.ScriptData.unityObjects.Clear();
 						}
-						generationState.state = State.Classes;
+						generationState.state = State.Initialization;
 
 						//class name.
 						string className = null;
-						int fieldCount = 0;
-						int propCount = 0;
-						int ctorCount = 0;
 						ThreadingUtil.Do(() => {
 							className = graph.GetFullGraphName().Split('.').LastOrDefault();
 #if UNITY_6000_4_OR_NEWER
@@ -116,16 +113,13 @@ namespace MaxyGames {
 							//update progress bar
 							setting.updateProgress?.Invoke(Mathf.Clamp(progress, 0, 0.9f), "initializing class:" + className);
 							//Initialize code gen for classes
-							Initialize(out fieldCount, out propCount, out ctorCount);
+							Initialize();
 						});
-						if(fieldCount == 0)
-							fieldCount = 1;
-						if(propCount == 0)
-							propCount = 1;
-						if(ctorCount == 0)
-							ctorCount = 1;
 						int nodeCount = generatorData.allNode.Count != 0 ? generatorData.allNode.Count / generatorData.allNode.Count : 1;
-						float childFill = ((nodeCount + fieldCount + propCount + ctorCount) / 4F / (classCount)) / 4;
+						float childFill = ((nodeCount) / 4F / (classCount)) / 4;
+
+						generationState.state = State.Generating;
+
 						//Generate functions
 						GenerateFunctions((prog, text) => {
 							float p = progress + (prog * (childFill));
@@ -133,42 +127,30 @@ namespace MaxyGames {
 								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
 						});
 						progress += childFill;
-						//Generate properties
-						string properties = GenerateProperties((prog, text) => {
-							float p = progress + (prog * (childFill));
-							if(setting.updateProgress != null)
-								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
-						});
-						progress += childFill;
-						//Generate constructors
-						string constructors = GenerateConstructors((prog, text) => {
-							float p = progress + (prog * (childFill));
-							if(setting.updateProgress != null)
-								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
-						});
-						progress += childFill;
-						//Generate variables
-						string variables = GenerateVariables((prog, text) => {
-							float p = progress + (prog * (childFill));
-							if(setting.updateProgress != null)
-								setting.updateProgress(Mathf.Clamp(p, 0, 0.9f), text);
-						});
-						progress += childFill;
 
-						generationState.state = State.Classes;
+
+						foreach(var data in generatorData.properties) {
+							data.SetToComplete();
+						}
+						foreach(var data in generatorData.constructors) {
+							data.SetToComplete();
+						}
+
+						generationState.state = State.Initialization;
 
 						var classBuilder = new ClassData(classes, graphSystem) {
 							name = className,
-							variables = variables,
-							properties = properties,
-							constructors = constructors,
+							variables = generatorData.variables,
+							properties = generatorData.properties,
+							constructors = generatorData.constructors,
 						};
 						generatedData.RegisterClass(classes, classBuilder);
 						generatorData.classData = classBuilder;
+						generatorData.generatedData = generatedData;
 
 						#region Get / Set Optimizations
 						if(setting.runtimeOptimization && (classes is IIndependentGraph)) {
-							var variableDatas = generatorData.GetVariables().Where(v => v.isInstance && (v.modifier == null || !v.modifier.isPrivate));
+							var variableDatas = generatorData.variables.Where(v => v.isInstance && (v.modifier == null || !v.modifier.isPrivate));
 							{//Set Variables
 								List<(string, string)> list = new List<(string, string)>();
 								foreach(var var in variableDatas) {
@@ -268,7 +250,7 @@ namespace MaxyGames {
 						}
 						#endregion
 
-						generationState.state = State.Function;
+						generationState.state = State.Generating;
 						//Generating Event Functions ex: State Machine, Coroutine nodes, etc.
 						M_GenerateEventFunction();
 
@@ -279,28 +261,24 @@ namespace MaxyGames {
 							}
 						});
 
-						var functionData = new StringBuilder();
-						var additionalVariables = new StringBuilder();
+						var functionData = new List<MData>();
+						var additionalVariables = new List<VData>();
 
 						#region Events for State Graphs
 						if(generatorData.coroutineEvent.Count > 0) {
 							generationState.isStatic = false;
-							generationState.state = State.Function;
+							generationState.state = State.Generating;
 
 							var pairs = generatorData.coroutineEvent.ToList();
 							for(int i = 0; i < pairs.Count; i++) {
 								var pair = pairs[i];
 								if(!string.IsNullOrEmpty(pair.Value.variableName) && pair.Key != null) {
 									ThreadingUtil.Queue((() => {
-										additionalVariables.Append(
-											CG.WrapWithInformation(
-												DeclareVariable(
-													typeof(Runtime.EventCoroutine),
-													pair.Value.variableName,
-													New(typeof(Runtime.EventCoroutine)),
-													modifier: FieldModifier.PrivateModifier),
-												pair.Key).AddLineInFirst()
-										);
+										additionalVariables.Add(new VData(pair.Value.variableName, typeof(Runtime.EventCoroutine), New(typeof(Runtime.EventCoroutine))) { 
+											modifier = FieldModifier.PrivateModifier,
+											reference = pair.Key,
+										});
+
 										string onStopAction = pair.Value.onStop;
 										string invokeCode = pair.Value.customExecution == null ?
 											KEY_coroutineEventCode.CGInvoke(null, generatorData.GetEventID(pair.Key)) :
@@ -369,20 +347,16 @@ namespace MaxyGames {
 							var data = d;
 							ThreadingUtil.Queue(() => {
 								generationState.isStatic = data.modifier != null && data.modifier.Static;
-								if(functionData.Length > 0) {
-									functionData.AppendLine();
-									functionData.AppendLine();
-								}
-								functionData.Append(data.GenerateCode());
+								functionData.Add(data);
 							});
 						}
 						ThreadingUtil.WaitQueue();
 
-						if(additionalVariables.Length > 0) {
-							classBuilder.variables += additionalVariables.ToString();
+						if(additionalVariables.Count > 0) {
+							classBuilder.variables.AddRange(additionalVariables);
 						}
-						if(functionData.Length > 0) {
-							classBuilder.functions += functionData.ToString();
+						if(functionData.Count > 0) {
+							classBuilder.functions.AddRange(functionData);
 						}
 						//generate Nested Type
 						if(classes is IGraphWithNestedTypes) {
@@ -427,7 +401,7 @@ namespace MaxyGames {
 						var classBuilder = new ClassData(classes, graphSystem) {
 							name = enumData.ScriptName,
 							modifier = modifier,
-							variables = EL,
+							additionalContents = EL,
 						};
 						classBuilder.SetTypeToEnum();
 						generatedData.RegisterClass(classes, classBuilder);
@@ -529,7 +503,7 @@ namespace MaxyGames {
 			if(generatorData.allNode.Count > 0) {
 				count = generatorData.allNode.Count / generatorData.allNode.Count;
 			}
-			generationState.state = State.Function;
+			generationState.state = State.Generating;
 
 			#region Generate Nodes
 			generationState.isStatic = false;
@@ -596,7 +570,7 @@ namespace MaxyGames {
 						List<AData> attribute = new List<AData>();
 						if(function.attributes != null && function.attributes.Count > 0) {
 							foreach(var a in function.attributes) {
-								attribute.Add(TryParseAttributeData(a));
+								attribute.Add(AttributeData(a));
 							}
 						}
 						MData mData = generatorData.GetMethodData(
@@ -786,100 +760,6 @@ namespace MaxyGames {
 					}
 				}
 			}
-		}
-
-		private static string GenerateVariables(Action<float, string> updateProgress = null) {
-			if(generatorData.GetVariables().Count == 0)
-				return null;
-			float progress = 0;
-			float count = generatorData.GetVariables().Count / generatorData.GetVariables().Count;
-			string result = null;
-			generationState.state = State.Classes;
-			foreach(VData vdata in generatorData.GetVariables()) {
-				if(!vdata.isInstance)
-					continue;
-				ThreadingUtil.Queue(() => {
-					try {
-						generationState.isStatic = vdata.IsStatic;
-						string str = vdata.GenerateCode().AddFirst("\n", !string.IsNullOrEmpty(result));
-						if(includeGraphInformation && vdata.reference is Variable) {
-							str = WrapWithInformation(str, vdata.reference);
-						}
-						result += str;
-						progress += count;
-						if(updateProgress != null)
-							updateProgress(progress / generatorData.GetVariables().Count, "generating variable");
-					}
-					catch(Exception ex) {
-						if(setting != null && setting.isAsync) {
-							generatorData.errors.Add(new Exception("Error on generating variable:" + vdata.name + "\nFrom graph:" + graph, ex));
-							generatorData.errors.Add(ex);
-							//In case async return error commentaries.
-							result = "/*Error from variable: " + vdata.name + " */";
-							return;
-						}
-						UnityEngine.Debug.LogError("Error on generating variable:" + vdata.name + "\nFrom graph:" + graph + "\nException: " + ex.ToString(), graph as UnityEngine.Object);
-						throw;
-					}
-				});
-			}
-			ThreadingUtil.WaitQueue();
-			return result;
-		}
-
-		private static string GenerateProperties(Action<float, string> updateProgress = null) {
-			if(generatorData.properties.Count == 0)
-				return null;
-			float progress = 0;
-			float count = generatorData.properties.Count / generatorData.properties.Count;
-			string result = null;
-			generationState.state = State.Property;
-			foreach(var prop in generatorData.properties) {
-				if(prop == null || !prop.obj)
-					continue;
-				ThreadingUtil.Queue(() => {
-					generationState.context = prop;
-					generationState.isStatic = prop.modifier != null && prop.modifier.Static;
-					string str = prop.GenerateCode().AddFirst("\n", result != null);
-					if(includeGraphInformation && prop.obj != null) {
-						str = WrapWithInformation(str, prop.obj);
-					}
-					result += str;
-					progress += count;
-					if(updateProgress != null)
-						updateProgress(progress / generatorData.properties.Count, "generating property");
-				});
-			}
-			ThreadingUtil.WaitQueue();
-			return result;
-		}
-
-		private static string GenerateConstructors(Action<float, string> updateProgress = null) {
-			if(generatorData.constructors.Count == 0)
-				return null;
-			float progress = 0;
-			float count = generatorData.constructors.Count / generatorData.constructors.Count;
-			string result = null;
-			generationState.isStatic = false;
-			generationState.state = State.Constructor;
-			for(int i = 0; i < generatorData.constructors.Count; i++) {
-				var ctor = generatorData.constructors[i];
-				if(ctor == null || !ctor.obj)
-					continue;
-				generationState.context = ctor;
-				ThreadingUtil.Queue(() => {
-					string str = ctor.GenerateCode().AddFirst("\n\n", result != null);
-					if(includeGraphInformation && ctor.obj != null) {
-						str = WrapWithInformation(str, ctor.obj);
-					}
-					result += str;
-					progress += count;
-					if(updateProgress != null)
-						updateProgress(progress / generatorData.constructors.Count, "generating constructor");
-				});
-			}
-			ThreadingUtil.WaitQueue();
-			return result;
 		}
 		#endregion
 
@@ -1496,6 +1376,52 @@ namespace MaxyGames {
 			return DoParseType(graph.FullGraphName);
 		}
 
+		class NamedType : RuntimeType {
+			string name;
+			string @namespace;
+			Type baseType;
+
+			public NamedType(string name, string @namespace = null, Type baseType = null) {
+				this.name = name;
+				this.@namespace = @namespace;
+				this.baseType = baseType;
+			}
+			public override string Namespace => @namespace;
+			public override Type BaseType => baseType ?? typeof(object);
+			public override string Name => name;
+
+			public override FieldInfo GetField(string name, BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			public override FieldInfo[] GetFields(BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			public override MethodInfo[] GetMethods(BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			public override PropertyInfo[] GetProperties(BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			protected override TypeAttributes GetAttributeFlagsImpl() {
+				throw new NotImplementedException();
+			}
+		}
+
+		/// <summary>
+		/// Create a new Type from name.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="namespace"></param>
+		/// <param name="baseType"></param>
+		/// <returns></returns>
+		public static Type TypeFromName(string name, string @namespace = null, Type baseType = null) {
+			return new NamedType(name, @namespace, baseType);
+		}
+
 		/// <summary>
 		/// Function to get correct code for type
 		/// </summary>
@@ -1526,7 +1452,7 @@ namespace MaxyGames {
 				type = type.GetElementType();
 				return Type(type);
 			}
-			if(type is RuntimeType && ReflectionUtils.IsNativeType(type) == false) {
+			if(type is RuntimeType && ReflectionUtils.IsNativeType(type) == false && type is not NamedType) {
 				var runtimeType = type as RuntimeType;
 				if(!generatePureScript) {
 					if(runtimeType is RuntimeGraphType graphType) {
@@ -2550,7 +2476,7 @@ namespace MaxyGames {
 					return "this";
 				}
 				if(o != null) {
-					if(generationState.isStatic || generationState.state == State.Classes) {
+					if(generationState.isStatic || generationState.state == State.Initialization) {
 						return "null";
 					}
 					if(graph is IClassGraph classGraph) {
@@ -3023,12 +2949,21 @@ namespace MaxyGames {
 			return null;
 		}
 
+
+		public static AData AttributeData(Type type, params string[] parameters) {
+			return new AData(type, parameters);
+		}
+
+		public static AData AttributeData(Type type, IEnumerable<string> parameters = null, Dictionary<string, string> initializers = null) {
+			return new AData(type, parameters, initializers);
+		}
+
 		/// <summary>
 		/// Function for Convert AttributeData to AData
 		/// </summary>
 		/// <param name="attribute"></param>
 		/// <returns></returns>
-		private static AData TryParseAttributeData(AttributeData attribute) {
+		public static AData AttributeData(AttributeData attribute) {
 			if(attribute != null && attribute.attributeType != null) {
 				AData data = new AData();
 				if(attribute.constructor != null && attribute.type != null) {
@@ -3069,7 +3004,7 @@ namespace MaxyGames {
 			if(reference is Node) {
 				reference = (reference as Node).nodeObject;
 			}
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, reference)) {
 					return vdata;
 				}
@@ -3127,7 +3062,7 @@ namespace MaxyGames {
 		}
 
 		public static string RegisterVariable(VariableData variable, bool isInstance = true, bool autoCorrection = true) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, variable)) {
 					if(isInstance)
 						vdata.isInstance = true;
@@ -3154,10 +3089,10 @@ namespace MaxyGames {
 		/// <param name="name"></param>
 		/// <param name="type"></param>
 		/// <param name="value"></param>
-		/// <returns></returns>
+		/// <returns>The name of the variable</returns>
 		public static string RegisterLocalVariable(string name, Type type, object value = null, object reference = null) {
 			if(reference != null) {
-				foreach(VData vdata in generatorData.GetVariables()) {
+				foreach(VData vdata in generatorData.variables) {
 					if(reference == vdata.reference) {
 						vdata.isInstance = false;
 						return name;
@@ -3188,7 +3123,7 @@ namespace MaxyGames {
 				reference = (reference as Node).nodeObject;
 			}
 			if(reference != null) {
-				foreach(VData vdata in generatorData.GetVariables()) {
+				foreach(VData vdata in generatorData.variables) {
 					if(reference == vdata.reference) {
 						vdata.isInstance = true;
 						if(generationState.isStatic) {
@@ -3212,7 +3147,7 @@ namespace MaxyGames {
 		}
 
 		private static VData M_RegisterVariable(object reference, Variable variable, bool isInstance = true, bool autoCorrection = true) {
-			foreach(VData vdata in generatorData.GetVariables()) {
+			foreach(VData vdata in generatorData.variables) {
 				if(object.ReferenceEquals(vdata.reference, reference)) {
 					if(isInstance)
 						vdata.isInstance = true;

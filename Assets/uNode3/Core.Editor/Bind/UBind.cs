@@ -435,13 +435,17 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			set {
+				var owner = parent.value;
 				switch(mode) {
 					case Mode.Field:
-						field.SetValueOptimized(parent.value, value);
+						field.SetValueOptimized(owner, value);
 						break;
 					case Mode.Property:
-						property.SetValueOptimized(parent.value, value);
+						property.SetValueOptimized(owner, value);
 						break;
+				}
+				if(owner is ValueType) {
+					parent.value = owner;
 				}
 			}
 		}

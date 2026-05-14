@@ -5,6 +5,10 @@ using UnityEngine;
 using System.Collections;
 
 namespace MaxyGames.UNode {
+	public interface IMultiConnectionPort {
+		Connection ConnectTo(UPort other);
+	}
+
 	[Serializable]
 	public abstract class Connection : IDisposable {
 		public bool isProxy;
@@ -46,6 +50,12 @@ namespace MaxyGames.UNode {
 				return new ValueConnection(input as ValueInput, output as ValueOutput);
 			} else if(input is FlowInput && output is FlowOutput) {
 				return new FlowConnection(input as FlowInput, output as FlowOutput);
+			}
+			if(input is IMultiConnectionPort multi) {
+				return multi.ConnectTo(output);
+			}
+			else if(output is IMultiConnectionPort multi1) {
+				return multi1.ConnectTo(input);
 			}
 			throw new InvalidOperationException($"Cannot connect input: {input.GetType()} to output: {output.GetType()}");
 		}

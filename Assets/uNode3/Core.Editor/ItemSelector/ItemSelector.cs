@@ -106,6 +106,19 @@ namespace MaxyGames.UNode.Editors {
 			return this;
 		}
 
+		/// <summary>
+		/// This action will append the default expanded items
+		/// </summary>
+		/// <param name="categories"></param>
+		public void SetDefaultExpandedItems(params string[] categories) {
+			if(m_defaultExpandedItems == null) {
+				m_defaultExpandedItems = categories;
+			}
+			else {
+				m_defaultExpandedItems = m_defaultExpandedItems.Concat(categories);
+			}
+		}
+
 		#region PrivateFields
 		private FilterAttribute filter {
 			get => editorData.filter;

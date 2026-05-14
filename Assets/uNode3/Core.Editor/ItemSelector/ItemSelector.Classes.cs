@@ -306,11 +306,13 @@ namespace MaxyGames.UNode.Editors {
 			public static PersistenceData Instance {
 				get {
 					if(m_instance == null) {
-						m_instance = uNodeEditorUtility.LoadEditorData<PersistenceData>(key);
-						if(m_instance == null) {
-							m_instance = new PersistenceData();
-							Save();
-						}
+						uNodeThreadUtility.RunOnMainThread(static () => {
+							m_instance = uNodeEditorUtility.LoadEditorData<PersistenceData>(key);
+							if(m_instance == null) {
+								m_instance = new PersistenceData();
+								Save();
+							}
+						});
 					}
 					else if(uNodeEditorUtility.IsEditorDataExist(key) == false) {
 						m_instance = new PersistenceData();

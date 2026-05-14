@@ -78,6 +78,11 @@ namespace MaxyGames.UNode.Nodes {
 								if(parent is BaseFunction func) {
 									return func.ReturnType() ?? typeof(void);
 								}
+								else if(parent is NodeObject nod) {
+									if(nod.node is IElementWithEntry elementWithEntry) {
+										return elementWithEntry.ReturnType() ?? typeof(void);
+									}
+								}
 							}
 							else if(node is NodeLambda || node is NodeAnonymousFunction) {
 								var result = node.nodeObject.ReturnType();

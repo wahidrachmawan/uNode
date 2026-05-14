@@ -317,6 +317,10 @@ Note: Auto Generate on Buld will always using Unity method.")]
 							"UnityEngine.TestTools",
 							"UnityEngine.Windows*",
 							"UnityEngine.U2D",
+							"UnityEngine.Assemblies",
+							"UnityEngine.LightTransport",
+							"UnityEngine.LightTransport.PostProcessing",
+							"UnityEngine.Shaders",
 						};
 					}
 					#endregion

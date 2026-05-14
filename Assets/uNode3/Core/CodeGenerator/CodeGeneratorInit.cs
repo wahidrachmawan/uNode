@@ -10,10 +10,7 @@ using UnityEngine;
 namespace MaxyGames {
 	public static partial class CG {
 		private static List<string> InitData = new List<string>();
-		private static void Initialize(out int fieldCount, out int propCount, out int ctorCount) {
-			fieldCount = 0;
-			propCount = 0;
-			ctorCount = 0;
+		private static void Initialize() {
 			if(graph != null) {
 				List<IGeneratorPrePostInitializer> initializersList = new List<IGeneratorPrePostInitializer>();
 				if(graph is IGeneratorPrePostInitializer) {
@@ -99,27 +96,22 @@ namespace MaxyGames {
 				}
 				if(graph is IGraphWithVariables) {
 					foreach(var var in graph.GetVariables()) {
-						fieldCount++;
 						List<AData> attribute = new List<AData>();
 						if(var.attributes != null && var.attributes.Count > 0) {
 							foreach(var a in var.attributes) {
-								attribute.Add(TryParseAttributeData(a));
+								attribute.Add(AttributeData(a));
 							}
 						}
 						generatorData.AddVariable(new VData(var.name, var.type, autoCorrection: true) { modifier = var.modifier, attributes = attribute, reference = var, defaultValue = var.defaultValue });
 					}
 				}
 				if(graph is IGraphWithProperties) {
-					//generationState.state = State.Property;
 					foreach(var var in graph.GetProperties()) {
-						propCount++;
 						generatorData.properties.Add(new PData(var));
 					}
 				}
 				if(graph is IGraphWithConstructors) {
-					//generationState.state = State.Constructor;
 					foreach(var var in graph.GetConstructors()) {
-						ctorCount++;
 						generatorData.constructors.Add(new CData(var) { modifier = var.modifier });
 					}
 				}
