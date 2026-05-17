@@ -2430,7 +2430,7 @@ namespace MaxyGames.UNode.Editors {
 				label,
 				fieldValue, typeof(T),
 				(val) => {
-					onChange((T)val);
+					onChange(val.ConvertTo<T>());
 				},
 				settings
 			);

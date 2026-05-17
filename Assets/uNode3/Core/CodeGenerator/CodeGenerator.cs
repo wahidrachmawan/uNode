@@ -1377,14 +1377,16 @@ namespace MaxyGames {
 		}
 
 		class NamedType : RuntimeType {
-			string name;
-			string @namespace;
-			Type baseType;
+			readonly string name;
+			readonly string @namespace;
+			readonly Type baseType;
+			readonly Type[] interfaces;
 
-			public NamedType(string name, string @namespace = null, Type baseType = null) {
+			public NamedType(string name, string @namespace = null, Type baseType = null, Type[] interfaces = null) {
 				this.name = name;
 				this.@namespace = @namespace;
 				this.baseType = baseType;
+				this.interfaces = interfaces;
 			}
 			public override string Namespace => @namespace;
 			public override Type BaseType => baseType ?? typeof(object);
@@ -1409,6 +1411,19 @@ namespace MaxyGames {
 			protected override TypeAttributes GetAttributeFlagsImpl() {
 				throw new NotImplementedException();
 			}
+
+			public override Type GetInterface(string name, bool ignoreCase) {
+				foreach(var t in interfaces) {
+					if(string.Equals(t.Name, name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)) {
+						return t;
+					}
+				}
+				return null;
+			}
+
+			public override Type[] GetInterfaces() {
+				return interfaces;
+			}
 		}
 
 		/// <summary>
@@ -1418,8 +1433,8 @@ namespace MaxyGames {
 		/// <param name="namespace"></param>
 		/// <param name="baseType"></param>
 		/// <returns></returns>
-		public static Type TypeFromName(string name, string @namespace = null, Type baseType = null) {
-			return new NamedType(name, @namespace, baseType);
+		public static Type TypeFromName(string name, string @namespace = null, Type baseType = null, Type[] interfaces = null) {
+			return new NamedType(name, @namespace, baseType, interfaces);
 		}
 
 		/// <summary>

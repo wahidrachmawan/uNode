@@ -1,34 +1,16 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	public abstract class GraphEditor {
-		public class CanvasData {
-			public readonly HashSet<string> features = new();
-
-			public bool SupportSurroundWith => features.Contains(nameof(GraphManipulator.Feature.SurroundWith));
-			public bool SupportMacro => features.Contains(nameof(GraphManipulator.Feature.Macro));
-			public bool SupportPlaceFit => features.Contains(nameof(GraphManipulator.Feature.PlaceFit));
-			public bool ShowAddNodeContextMenu => features.Contains(nameof(GraphManipulator.Feature.ShowAddNodeContextMenu));
-
-			public bool IsFeatureSupported(string feature) => feature.Contains(feature);
-
-			public void Reset() {
-				features.Clear();
-			}
-		}
-
-
 		#region Variables
 		public uNodeEditor window;
-		public CanvasData canvasData = new();
+		public GraphCanvasData canvasData = new();
 
-		public Vector2 topMousePos;
+		public Vector2 mousePositionInScreen;
 		#endregion
 
 		#region Static
@@ -292,7 +274,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public Vector2 GetMenuPosition() {
-			return window.GetMousePositionForMenu(topMousePos);
+			return window.GetMousePositionForMenu(mousePositionInScreen);
 		}
 
 		public Vector2 GetMenuPosition(Vector2 position) {
@@ -438,6 +420,7 @@ namespace MaxyGames.UNode.Editors {
 			if(nodeFilter == NodeFilter.None || nodeFilter.HasFlags(NodeFilter.FlowInput | NodeFilter.FlowOutput)) {
 				filter.VoidType = true;
 			}
+			canvasData.addNodeFilter.ApplyManipulator(filter);
 			ItemSelector w = ItemSelector.ShowWindow(
 				graphData.currentCanvas,
 				filter,
@@ -480,8 +463,10 @@ namespace MaxyGames.UNode.Editors {
 			w.displayCustomVariable = false;
 			w.customItemDefaultExpandState = false;
 			w.defaultExpandedItems = expandedCategory;
-			if(filter.SetMember)
+			if(filter.SetMember) {
+				canvasData.addNodeFilter.ApplyManipulator(w);
 				return w;//Return on set member is true.
+			}
 			List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
 			if(additionalItems != null) {
 				customItems.AddRange(additionalItems);
@@ -599,6 +584,8 @@ namespace MaxyGames.UNode.Editors {
 			}
 			ItemSelector.SortCustomItems(customItems);
 			w.customItems = customItems;
+
+			canvasData.addNodeFilter.ApplyManipulator(w);
 			return w;
 		}
 		#endregion
@@ -665,8 +652,8 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			foreach(var manipulator in manipulators) {
-				if(manipulator.IsValid(nameof(manipulator.ManipulateCanvasFeatures))) {
-					manipulator.ManipulateCanvasFeatures(data.features);
+				if(manipulator.IsValid(nameof(manipulator.ManipulateCanvasData))) {
+					manipulator.ManipulateCanvasData(data);
 				}
 			}
 		}
@@ -678,13 +665,13 @@ namespace MaxyGames.UNode.Editors {
 		public virtual void DrawCanvas(uNodeEditor window) {
 			this.window = window;
 			openedGraph = this;
-			topMousePos = Event.current.mousePosition;
+			mousePositionInScreen = Event.current.mousePosition;
 		}
 
 		public virtual void DrawMainTab(uNodeEditor window) {
 			this.window = window;
 			openedGraph = this;
-			topMousePos = Event.current.mousePosition;
+			mousePositionInScreen = Event.current.mousePosition;
 		}
 		#endregion
 
@@ -702,7 +689,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <returns></returns>
 		public Vector2 GetMousePosition() {
-			return topMousePos;
+			return mousePositionInScreen;
 		}
 
 		/// <summary>

@@ -908,7 +908,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
-			GraphUtility.CopyPaste.Copy(nodes.ToArray());
+			if(nodes.Count > 0) {
+				GraphUtility.CopyPaste.Copy(nodes.ToArray());
+			}
 		}
 
 		public void AddToSelection(IEnumerable<ISelectable> selectables) {
@@ -1100,7 +1102,7 @@ namespace MaxyGames.UNode.Editors {
 			//else 
 			if(evt is IMouseEvent) {
 				GetMousePosition(evt as IMouseEvent, out var position);
-				graphEditor.topMousePos = position;
+				graphEditor.mousePositionInScreen = position;
 			}
 			if(evt is ContextualMenuPopulateEvent && graphDragger.isActive) {
 				evt.StopImmediatePropagation();
@@ -1125,7 +1127,7 @@ namespace MaxyGames.UNode.Editors {
 		public override void BuildContextualMenu(ContextualMenuPopulateEvent evt) {
 			var screenRect = graphEditor.window.GetMousePositionForMenu(evt.mousePosition);
 			var clickedPos = GetMousePosition(evt, out var position);
-			graphEditor.topMousePos = position;
+			graphEditor.mousePositionInScreen = position;
 
 			if(evt.target is RegionNodeView) {
 				evt.target = this;
@@ -2274,7 +2276,7 @@ namespace MaxyGames.UNode.Editors {
 		public bool HandleShortcut(GraphShortcutType type) {
 			var screenMousePosition = Event.current.mousePosition;
 			screenMousePosition.y -= 20;
-			graphEditor.topMousePos = screenMousePosition;
+			graphEditor.mousePositionInScreen = screenMousePosition;
 
 			Vector2 mousePosition = graphEditor.window.rootVisualElement.ChangeCoordinatesTo(
 							contentViewContainer,
@@ -2342,7 +2344,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(graphData.CanAddNode) {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
-					var clickedPos = GetMousePosition(graphEditor.topMousePos);
+					var clickedPos = GetMousePosition(graphEditor.mousePositionInScreen);
 					var pastedNodes = graphEditor.PasteNode(clickedPos, true);
 					ClearSelection();
 					graphData.ClearSelection();
@@ -2357,7 +2359,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 				if(graphData.CanAddNode) {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Paste nodes");
-					var clickedPos = GetMousePosition(graphEditor.topMousePos);
+					var clickedPos = GetMousePosition(graphEditor.mousePositionInScreen);
 					var pastedNodes = graphEditor.PasteNode(clickedPos, false);
 					ClearSelection();
 					graphData.ClearSelection();
@@ -2371,7 +2373,7 @@ namespace MaxyGames.UNode.Editors {
 					uNodeEditorUtility.RegisterUndo(graphData.owner, "Duplicate nodes");
 					CopySelectedNodes();
 					graphEditor.Repaint();
-					var clickedPos = GetMousePosition(graphEditor.topMousePos);
+					var clickedPos = GetMousePosition(graphEditor.mousePositionInScreen);
 					var pastedNodes = graphEditor.PasteNode(clickedPos);
 					graphEditor.Refresh();
 					ClearSelection();

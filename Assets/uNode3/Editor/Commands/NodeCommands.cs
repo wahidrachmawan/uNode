@@ -235,6 +235,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 		}
 
 		public override bool IsValidNode(Node source) {
+			if(graphEditor.canvasData.SupportSurroundWith == false) return false;
 			return graphData.selectedNodes.Count() > 1 && graphData.selectedNodes.Any(n => n.FlowInputs.Any(p => p.hasValidConnections));
 		}
 	}

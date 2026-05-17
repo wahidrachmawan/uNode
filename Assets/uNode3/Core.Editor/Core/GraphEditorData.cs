@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace MaxyGames.UNode.Editors {
@@ -153,11 +153,25 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		void UpdateScopes(UGraphElement canvas) {
-			if(m_scopes == null) {
-				m_scopes = new();
+		[System.NonSerialized]
+		private GraphScopeData m_scopeData;
+		internal GraphScopeData scopeData {
+			get {
+				if(m_scopeData == null) {
+					UpdateScopes(currentCanvas);
+				}
+				return m_scopeData;
 			}
-			m_scopes.Clear();
+		}
+
+		void UpdateScopes(UGraphElement canvas) {
+			if(m_scopeData == null) {
+				m_scopeData = new();
+			}
+			else {
+				scopeData.Reset();
+			}
+			var m_scopes = scopeData.scopes;
 			if(canvas is NodeObject) {
 				if((canvas as NodeObject).node is ISuperNode superNode) {
 					NodeScope.ApplyScopes(superNode.SupportedScope, m_scopes, null, out _);
@@ -203,19 +217,10 @@ namespace MaxyGames.UNode.Editors {
 			if(canvas is NodeContainerWithEntry containerWithEntry && containerWithEntry.Entry != null) { }
 		}
 
-		[System.NonSerialized]
-		private HashSet<string> m_scopes;
 		/// <summary>
 		/// The scope of the graph
 		/// </summary>
-		public HashSet<string> scopes {
-			get {
-				if(m_scopes == null) {
-					UpdateScopes(currentCanvas);
-				}
-				return m_scopes;
-			}
-		}
+		public HashSet<string> scopes => scopeData.scopes;
 
 		/// <summary>
 		/// Determines whether the specified scope is present in the set of allowed scopes.
@@ -541,9 +546,10 @@ namespace MaxyGames.UNode.Editors {
 			if(!focusCanvas) {
 				return graphCanvas;
 			}
-			if(obj is NodeContainer) {
-				if(obj is NodeContainerWithEntry containerWithEntry && containerWithEntry.Entry != null) {
-					graphCanvas.position = new Vector2(containerWithEntry.Entry.position.x - 200, containerWithEntry.Entry.position.y - 200);
+			if(obj is IElementWithEntry containerWithEntry) {
+				var entry = containerWithEntry.Entry;
+				if(entry != null) {
+					graphCanvas.position = new Vector2(entry.position.x - 200, entry.position.y - 200);
 				}
 			}
 			else if(obj is NodeObject nodeObject) {
@@ -558,6 +564,12 @@ namespace MaxyGames.UNode.Editors {
 				}
 				else {
 					graphCanvas.position = new Vector2(nodeObject.position.x - 200, nodeObject.position.y - 200);
+				}
+			}
+			else if(obj is MainGraphContainer && graph is IElementWithEntry elementWithEntry) {
+				var entry = elementWithEntry.Entry;
+				if(entry != null) {
+					graphCanvas.position = new Vector2(entry.position.x - 200, entry.position.y - 200);
 				}
 			}
 			if(graphCanvas.position == Vector2.zero) {
@@ -746,6 +758,14 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public HashSet<string> GetUsingNamespaces() {
 			return graph.GetUsingNamespaces();
+		}
+	}
+
+	internal class GraphScopeData {
+		internal HashSet<string> scopes = new();
+
+		internal void Reset() {
+			scopes.Clear();
 		}
 	}
 }

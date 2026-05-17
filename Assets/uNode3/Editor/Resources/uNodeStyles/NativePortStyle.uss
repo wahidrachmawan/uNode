@@ -165,6 +165,11 @@
     margin-left: 0px;
 }
 
+.port-byref > #connector > .optional-port {
+    border-radius: 0 0 0 0;
+    rotate: 90deg;
+}
+
 .optional-port {
     position: absolute;
     opacity: 0.5;

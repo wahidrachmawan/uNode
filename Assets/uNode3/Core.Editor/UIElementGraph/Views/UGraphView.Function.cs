@@ -394,8 +394,6 @@ namespace MaxyGames.UNode.Editors {
 					RemoveNodeViews(false);
 				}
 			}
-			//Ensure we get the up to date datas
-			graphData.Refresh();
 			//Remove all edges
 			RemoveEdges();
 			if(_fullReload) {

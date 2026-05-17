@@ -136,10 +136,11 @@ namespace MaxyGames.UNode.Editors {
 		public virtual bool HandleCommand(string command) => false;
 
 		/// <summary>
-		/// Finalize manipulate all canvas features
+		/// Finalize manipulate all canvas features.
+		/// This usually called when canvas is changed.
 		/// </summary>
 		/// <param name="features"></param>
-		public virtual void ManipulateCanvasFeatures(HashSet<string> features) { }
+		public virtual void ManipulateCanvasData(GraphCanvasData canvasData) { }
 
 		/// <summary>
 		/// Get the current canvas features
@@ -234,6 +235,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
+			list.Sort();
 			var result = list.ToArray();
 			pool.Free(list);
 			return result;
@@ -1885,8 +1887,6 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				else if(graphData.graph is ICustomMainGraph mainGraph) {
-					yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
-
 					var scopes = mainGraph.MainGraphScope.Split(',');
 
 					//Add events
@@ -2173,7 +2173,7 @@ namespace MaxyGames.UNode.Editors {
 									MethodInfo method = objs[1] as MethodInfo;
 									if(member != m) {
 										if(method.IsGenericMethodDefinition) {
-											TypeBuilderWindow.Show(graphEditor.topMousePos, graphData.currentCanvas, new FilterAttribute() { UnityReference = false }, delegate (MemberData[] types) {
+											TypeBuilderWindow.Show(graphEditor.mousePositionInScreen, graphData.currentCanvas, new FilterAttribute() { UnityReference = false }, delegate (MemberData[] types) {
 												uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
 												method = ReflectionUtils.MakeGenericMethod(method, types.Select(i => i.Get<Type>(null)).ToArray());
 												MemberData d = new MemberData(method);
@@ -2962,8 +2962,9 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public override void ManipulateCanvasFeatures(HashSet<string> features) {
+		public override void ManipulateCanvasData(GraphCanvasData canvasData) {
 			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
+				var features = canvasData.features;
 				features.Remove(nameof(Feature.Macro));
 				features.Remove(nameof(Feature.PlaceFit));
 				features.Remove(nameof(Feature.SurroundWith));

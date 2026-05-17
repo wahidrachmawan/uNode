@@ -1967,7 +1967,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 
-			if(graphView.layout.Contains(topMousePos)) {
+			if(graphView.layout.Contains(mousePositionInScreen)) {
 				graphView.IMGUIEvent(Event.current);
 			}
 			_debugData = GetDebugData();

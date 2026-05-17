@@ -183,30 +183,47 @@ namespace MaxyGames {
 		/// <param name="owner"></param>
 		/// <returns></returns>
 		public static string GenerateName(string name, object owner) {
+			return GenerateName(name, owner, out _);
+		}
+
+		/// <summary>
+		/// Generate new unique variable name ( auto correct wrong names )
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="owner"></param>
+		/// <param name="isNew"></param>
+		/// <returns></returns>
+		public static string GenerateName(string name, object owner, out bool isNew) {
 			if(owner != null) {
 				Dictionary<string, string> map;
 				if(generatorData.variableNamesMap.TryGetValue(owner, out map)) {
 					string result;
 					if(map.TryGetValue(name, out result)) {
-						return result;
-					} else {
-						result = GenerateNewName(name);
-						map.Add(name, result);
+						isNew = false;
 						return result;
 					}
-				} else {
+					else {
+						result = GenerateNewName(name);
+						map.Add(name, result);
+						isNew = true;
+						return result;
+					}
+				}
+				else {
 					map = new Dictionary<string, string>();
 					generatorData.variableNamesMap[owner] = map;
 					string result = GenerateNewName(name);
 					map.Add(name, result);
+					isNew = true;
 					return result;
 				}
 			}
+			isNew = true;
 			return GenerateNewName(name);
 		}
 		#endregion
 
-        #region UserObject
+		#region UserObject
 		/// <summary>
 		/// Register new user object data.
 		/// </summary>

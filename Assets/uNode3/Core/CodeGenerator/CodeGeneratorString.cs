@@ -46,11 +46,11 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
-		/// Get correct c# names
+		/// Get correct c# variable names
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public static string CorrectName(string name) {
+		public static string VariableName(string name) {
 			return uNodeUtility.AutoCorrectName(name);
 		}
 
@@ -82,12 +82,24 @@ namespace MaxyGames {
 			return $"out " + str;
 		}
 
+		public static string KeywordIn(string str) {
+			return $"in " + str;
+		}
+
 		public static string OutVar(string str) {
 			return $"out var " + str;
 		}
 
 		public static string While(string condition, string contents) {
 			return Condition("while", condition, contents);
+		}
+
+		public static string LeftShift(string left, string right) {
+			return $"({left} << {right})";
+		}
+
+		public static string RightShift(string left, string right) {
+			return $"({left} >> {right})";
 		}
 		#endregion
 
@@ -1574,6 +1586,16 @@ namespace MaxyGames {
 			return left + " && " + right;
 		}
 
+		public static string BitwiseAnd(string left, string right) {
+			return $"({left} & {right})";
+		}
+		public static string BitwiseOr(string left, string right) {
+			return $"({left} | {right})";
+		}
+		public static string BitwiseExclusiveOr(string left, string right) {
+			return $"({left} ^ {right})";
+		}
+
 		public static string AndSet(string left, string right) {
 			return left + " &= " + right + ";";
 		}
@@ -1585,13 +1607,13 @@ namespace MaxyGames {
 		public static string Bitwise(string left, string right, BitwiseType bitwise) {
 			switch(bitwise) {
 				case BitwiseType.And: {
-					return $"{left} & {right}";
+					return $"({left} & {right})";
 				}
 				case BitwiseType.ExclusiveOr: {
-					return $"{left} ^ {right}";
+					return $"({left} ^ {right})";
 				}
 				case BitwiseType.Or: {
-					return $"{left} | {right}";
+					return $"({left} | {right})";
 				}
 			}
 			throw new NotImplementedException();
@@ -2001,7 +2023,7 @@ namespace MaxyGames {
 
 		#region Return
 		/// <summary>
-		/// Generate return value code, eg: `return null`.
+		/// Generate return value code, eg: `return null;` with semicolon
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>
@@ -2012,7 +2034,7 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
-		/// Generate return value code, eg: `return null`.
+		/// Generate return value code, eg: `return null`
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>

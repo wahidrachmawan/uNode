@@ -527,6 +527,25 @@ namespace MaxyGames.UNode {
 		public Type ReturnType() => typeof(void);
 	}
 
+	public interface IElementWithEntry<T> : IElementWithEntry where T : BaseEntryNode, new() {
+		BaseEntryNode IElementWithEntry.Entry {
+			get {
+				if(this is IGraph graph) {
+					var entry = graph.GraphData.mainGraphContainer.GetNodeInChildren<T>();
+					if(entry == null) {
+						entry = new T();
+						var node = new NodeObject(entry);
+						graph.GraphData.mainGraphContainer.AddChild(node);
+					}
+					return entry;
+				}
+				return null;
+			}
+		}
+
+		void IElementWithEntry.RegisterEntry(BaseEntryNode node) { }
+	}
+
 	public interface ISuperNodeWithEntry : ISuperNode, IElementWithEntry {
 		IEnumerable<NodeObject> INodeWithConnection.Connections => NestedFlowNodes.Append(Entry);
 		IEnumerable<NodeObject> ISuperNode.NestedFlowNodes {
