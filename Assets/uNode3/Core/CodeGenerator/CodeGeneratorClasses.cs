@@ -1449,6 +1449,15 @@ namespace MaxyGames {
 				return this;
 			}
 
+			public void RegisterAttribute(AData data) {
+				if(attributes == null) {
+					attributes = new[] { data };
+				}
+				else {
+					attributes = attributes.Append(data);
+				}
+			}
+
 			#region Constructor
 			public VData(
 				string name,

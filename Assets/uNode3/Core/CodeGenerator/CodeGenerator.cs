@@ -3220,7 +3220,8 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
-		/// Register post initialization action.
+		/// Register post initialization action. 
+		/// This will be called after node, connection, port, etc is completely initialized.
 		/// </summary>
 		/// <param name="action"></param>
 		/// <param name="order"></param>
