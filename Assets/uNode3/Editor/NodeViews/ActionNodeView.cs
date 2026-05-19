@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Editors {
 			base.OnReloadView();
 			Nodes.NodeAction node = nodeObject.node as Nodes.NodeAction;
 			InitializeBlocks(node.data.container, BlockType.Action);
+			EnableInClassList(ussClassHideTitle, node.hideTitle);
 		}
 	}
 }

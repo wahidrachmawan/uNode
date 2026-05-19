@@ -500,40 +500,25 @@ NodeRerouteView .port {
 
 /* block node */
 
-#node-blocks.compact > #node-border {
-    background-color:rgba(29,29,29,0.8);
-	margin-top: 2px;
-	margin-left: 2px;
-	margin-right: 2px;
-	margin-bottom: 2px;
-}
-
-#node-blocks.compact > #node-border > #block-container
-{
-	margin-bottom: 5px;
-}
-
-#node-blocks.compact > #node-border > #title
-{
-    background-color:rgba(0,0,0,0);
-	border-radius:2px;
-	margin-left: 3px;
-	padding-right: 22px;
-	height: 25px;
-    justify-content:flex-start;
-    flex-direction:row;
-}
-
-#node-blocks.compact > #node-border > #title > #title-icon
-{
-    position:Absolute;
-	visibility: hidden;
+#node-blocks > #node-border {
+	background-color: #00000000;
+	border-bottom-width: 2px;
+	border-top-width: 2px;
+	border-left-width: 0px;
+	border-right-width: 0px;
 }
 
 #node-blocks > #node-border > #title
 {
-    background-color:rgba(0,0,0,0);
-	border-radius:2px;
+	border-bottom-width: 1px;
+	border-top-width: 1px;
+	border-color: #3b3b3b;
+	margin-left: 4px;
+	margin-right: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+	border-radius:6px;
+    background-color: #181818;
 	height: 25px;
     justify-content:center;
     align-items:center;
@@ -557,6 +542,30 @@ NodeRerouteView .port {
 	height: 20px;
 }
 
+/* Block selection border */
+#node-blocks > #selection-border {
+	/* border-color: #00000000; */
+	border-left-width: 0px;
+	border-right-width: 0px;
+}
+
+/* :hover#node-blocks > #node-border {
+	border-top-color: #2692c9;
+	border-bottom-color: #2692c9;
+}
+
+:selected#node-blocks > #node-border {
+	margin-bottom: 1px;
+	margin-top: 1px;
+	padding-bottom: 4px;
+	padding-bottom: 4px;
+	border-bottom-width: 3px;
+	border-top-width: 3px;
+	border-top-color: #44C0FF;
+	border-bottom-color: #44C0FF;
+} */
+/* -- Block selection border */
+
 #node-blocks > #node-border > #contents > #divider
 {
     background-color:rgba(0,0,0,0);
@@ -576,26 +585,65 @@ NodeRerouteView .port {
     padding-bottom : 0;
 }
 
+#node-blocks.compact > #node-border {
+	margin-top: 2px;
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-bottom: 2px;
+}
+
+#node-blocks.compact > #node-border > #block-container
+{
+	margin-bottom: 5px;
+}
+
+#node-blocks.compact > #node-border > #title
+{
+	background-color: #181818;
+	border-radius:2px;
+	margin-top: 2px;
+	margin-left: 3px;
+	border-top-left-radius: 8px;
+	padding-right: 22px;
+	height: 25px;
+    justify-content:flex-start;
+    flex-direction:row;
+}
+
+#node-blocks.compact > #node-border > #title > #title-icon
+{
+    position:Absolute;
+	visibility: hidden;
+}
+
 #block-container > #hint
 {
     border-left-width: 1px;
     border-right-width: 1px;
     border-bottom-width: 1px;
     border-top-width: 1px;
-    border-color: #393939;
-    color: #393939;
+    border-color: #3F3F3F;
+    color: #999999;
+	background-color: #1D1E20;
     height: 24px;
     -unity-text-align: middle-center;
     border-radius:8px;
 	margin: 2px;
 }
 
-
 #node-blocks.transition > #node-border > #block-container > #hint
 {
     border-color: #127600;
     background-color: #074400;
     color: #a2a2a2;
+}
+
+.hide-node-title > #node-border > #title {
+	visibility: hidden;
+	display: none;
+	width: 0px;
+	height: 0px;
+	position: absolute;
 }
 
 .dragdisplay

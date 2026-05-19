@@ -17,12 +17,6 @@
 		Roslyn,
 	}
 
-	public enum TypeDataKind : byte {
-		Type,
-		uNodeType,
-		uNodeGenericType,
-	}
-
 	public enum SerializedTypeKind {
 		None,
 		Native,

@@ -27,3 +27,8 @@
 .flow-horizontal > #connector > #cap {
 	border-color: rgb(65, 199, 8);
 }
+
+
+PortInputView > #container {
+    background-color: rgba(189, 189, 189, 0.8);
+}

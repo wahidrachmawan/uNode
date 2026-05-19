@@ -8,6 +8,7 @@ using System.Collections.Generic;
 namespace MaxyGames.UNode.Nodes {
 	[NodeMenu("Flow", "Action", order = -1, icon = typeof(TypeIcons.ActionIcon), hasFlowInput = true, hasFlowOutput = true)]
 	public class NodeAction : FlowNode, IStackedNode {
+		public bool hideTitle = true;
 		[HideInInspector]
 		public BlockData data = new BlockData();
 

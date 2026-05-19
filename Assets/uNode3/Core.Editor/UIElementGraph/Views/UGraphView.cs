@@ -146,6 +146,11 @@ namespace MaxyGames.UNode.Editors {
 										FindConnections(other);
 									}
 								}
+								if(view is BlockNodeView block) {
+									foreach(var v in block.blockViews) {
+										FindConnections(v);
+									}
+								}
 							}
 						}
 						foreach(var entry in graphData.GetEntryNodes()) {
@@ -1422,6 +1427,10 @@ namespace MaxyGames.UNode.Editors {
 						}
 						else {
 							evt.menu.AppendAction("References/Find Node Usages", (e) => {
+								if(node is IHighLevelNodeDefinition highLevelNode) {
+									GraphUtility.ShowNodeUsages(highLevelNode.NodeType);
+									return;
+								}
 								GraphUtility.ShowNodeUsages(node.GetType());
 							}, DropdownMenuAction.AlwaysEnabled);
 							if(node is LinkedMacroNode) {

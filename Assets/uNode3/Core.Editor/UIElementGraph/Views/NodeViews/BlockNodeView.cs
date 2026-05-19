@@ -859,6 +859,8 @@ namespace MaxyGames.UNode.Editors {
 	}
 
 	public abstract class BlockNodeView : BaseNodeView, IDropTarget, INodeBlock {
+		public const string ussClassHideTitle = "hide-node-title";
+
 		public BlockType blockType { get; protected set; }
 		public BlockContainer blocks { get; protected set; }
 		public List<UNodeView> blockViews => m_blockViews;
