@@ -115,6 +115,7 @@ namespace MaxyGames {
 							//Initialize code gen for classes
 							Initialize();
 						});
+
 						int nodeCount = generatorData.allNode.Count != 0 ? generatorData.allNode.Count / generatorData.allNode.Count : 1;
 						float childFill = ((nodeCount) / 4F / (classCount)) / 4;
 

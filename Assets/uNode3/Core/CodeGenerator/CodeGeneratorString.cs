@@ -90,6 +90,10 @@ namespace MaxyGames {
 			return $"out var " + str;
 		}
 
+		public static string Not(string str) {
+			return $"!({str})";
+		}
+
 		public static string While(string condition, string contents) {
 			return Condition("while", condition, contents);
 		}

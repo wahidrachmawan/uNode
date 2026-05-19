@@ -189,15 +189,18 @@ namespace MaxyGames {
 				//UnityEngine.Debug.Log(watch.ElapsedMilliseconds);
 			}
 
+			//Stacks
 			internal BlockStack currentBlock => blockStacks.Count > 0 ? blockStacks[blockStacks.Count - 1] : null;
 
 			internal List<BlockStack> blockStacks = new List<BlockStack>();
 
+			//Datas
 			public List<VData> variables = new List<VData>(16);
 			public List<PData> properties = new List<PData>(16);
 			public List<CData> constructors = new List<CData>();
 			public List<MData> methodData = new List<MData>(16);
 
+			//Maps
 			public List<BaseGraphEvent> eventNodes = new List<BaseGraphEvent>();
 			public List<NodeObject> allNode = new List<NodeObject>();
 			public HashSet<FlowInput> regularNodes = new HashSet<FlowInput>();
@@ -205,10 +208,11 @@ namespace MaxyGames {
 			public HashSet<FlowOutput> lambdaFlows = new HashSet<FlowOutput>();
 			public HashSet<NodeObject> connectedNodes = new HashSet<NodeObject>();
 
-			public Func<VData, string> GetVariableNameCallack;
 
+			//Errors
 			public List<Exception> errors = new List<Exception>();
 
+			//
 			public HashSet<NodeObject> registeredFlowNodes = new HashSet<NodeObject>();
 
 			public Dictionary<UPort, Func<string>> generatorForPorts = new Dictionary<UPort, Func<string>>();
@@ -259,6 +263,8 @@ namespace MaxyGames {
 			private Dictionary<string, int> generatedNames = new Dictionary<string, int>();
 			private Dictionary<string, int> generatedMethodNames = new Dictionary<string, int>();
 
+			//Callback
+			public Func<VData, string> GetVariableNameCallack;
 			public Action<ClassData> postGeneration;
 			public Action<GData> postManipulator;
 			public List<(Action, int)> postInitialization = new();
