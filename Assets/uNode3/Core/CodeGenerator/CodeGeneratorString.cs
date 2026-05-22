@@ -587,7 +587,7 @@ namespace MaxyGames {
 		/// <param name="type"></param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<string> initializers, bool prettyPrint = true) {
+		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<string> initializers, bool? prettyPrint = null) {
 			return New(Type(type), parameters, initializers, prettyPrint);
 		}
 
@@ -598,7 +598,7 @@ namespace MaxyGames {
 		/// <param name="parameters"></param>
 		/// <param name="initializers"></param>
 		/// <returns></returns>
-		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<(string name, string value)> initializers, bool prettyPrint = true) {
+		public static string New(Type type, IEnumerable<string> parameters, IEnumerable<(string name, string value)> initializers, bool? prettyPrint = null) {
 			return New(Type(type), parameters, initializers == null ? null : initializers.Select(item => SetValue(item.name, item.value)), prettyPrint);
 		}
 
@@ -608,11 +608,11 @@ namespace MaxyGames {
 		/// <param name="type"></param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
-		public static string New(string type, IEnumerable<string> parameters, IEnumerable<string> initializers, bool prettyPrint = true) {
+		public static string New(string type, IEnumerable<string> parameters, IEnumerable<string> initializers, bool? prettyPrint = null) {
 			string paramName = parameters != null ? string.Join(", ", parameters.Where(item => !string.IsNullOrEmpty(item))) : null;
 			string initName = null;
 			if(initializers != null) {
-				if(prettyPrint || initializers.Any(item => item != null && item.Contains('\n'))) {
+				if(prettyPrint == true || prettyPrint == null && initializers.Sum(s => s.Length) >= 150 || initializers.Any(item => item != null && item.Contains('\n'))) {
 					initName = string.Join(", \n", initializers.Where(item => !string.IsNullOrEmpty(item)));
 					initName = initName.AddLineInFirst().AddLineInEnd().AddTabAfterNewLine().AddLineInEnd();
 				}

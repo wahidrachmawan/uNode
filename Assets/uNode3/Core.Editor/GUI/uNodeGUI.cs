@@ -1340,14 +1340,9 @@ namespace MaxyGames.UNode.Editors {
 		private static void DoDrawLinkedVariables(IList<VariableData> instanceVariables, IGraph linked, bool publicOnly = true, Object unityObject = null) {
 			if(instanceVariables == null || linked == null)
 				return;
-			//if(linked is IReflectionType reflectionType) {
-			//	var type = reflectionType.ReflectionType;
-			//	var linkedVariable = type.GetRuntimeFields().Where(f => f is RuntimeField<VariableRef>).Select(f => (f as RuntimeField<VariableRef>).target.reference);
-			//	DoDrawLinkedVariables(instanceVariables, linkedVariable, publicOnly, unityObject);
-			//}
-			//else {
-			DoDrawLinkedVariables(instanceVariables, linked.GetAllVariables().ToArray(), publicOnly, unityObject);
-			//}
+			var variables = StaticListPool.Allocate(linked.GetAllVariables());
+			DoDrawLinkedVariables(instanceVariables, variables, publicOnly, unityObject);
+			StaticListPool.Free(variables);
 		}
 		#endregion
 

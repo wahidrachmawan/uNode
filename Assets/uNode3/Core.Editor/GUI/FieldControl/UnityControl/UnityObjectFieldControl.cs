@@ -20,7 +20,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					flag = true;
 				}
 			}
-			else if(settings.unityObject is IGraph graph && !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+			else if(settings.unityObject is IGraph graph && (ReflectionUtils.IsNativeType(graph.GetGraphType()) || !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object)))) {
 				flag = false;
 				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
 					flag = true;
@@ -53,7 +53,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					flag = true;
 				}
 			}
-			else if(settings.unityObject is IGraph graph && !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object))) {
+			else if(settings.unityObject is IGraph graph && (ReflectionUtils.IsNativeType(graph.GetGraphType()) || !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object)))) {
 				flag = false;
 				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
 					flag = true;

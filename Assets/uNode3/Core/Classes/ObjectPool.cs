@@ -147,6 +147,13 @@ namespace MaxyGames.UNode {
 
 	public static class StaticListPool {
 		public static List<object> Allocate() => StaticListPool<object>.Allocate();
+		public static List<T> Allocate<T>(IEnumerable<T> values) {
+			var result = StaticListPool<T>.Allocate();
+			if(values != null) {
+				result.AddRange(values);
+			}
+			return result;
+		}
 		public static PooledContext<List<object>> Get(out List<object> value) => StaticListPool<object>.Get(out value);
 		public static PooledContext<List<T>> Get<T>(out List<T> value) => StaticListPool<T>.Get(out value);
 		public static List<T> Allocate<T>() => StaticListPool<T>.Allocate();
@@ -214,6 +221,13 @@ namespace MaxyGames.UNode {
 	public static class StaticHashPool {
 		public static HashSet<object> Allocate() => StaticHashPool<object>.Allocate();
 		public static HashSet<T> Allocate<T>() => StaticHashPool<T>.Allocate();
+		public static HashSet<T> Allocate<T>(IEnumerable<T> values) {
+			var result = StaticHashPool<T>.Allocate();
+			if(values != null) {
+				result.AddRange(values);
+			}
+			return result;
+		}
 		public static PooledContext<HashSet<object>> Get(out HashSet<object> value) => StaticHashPool<object>.Get(out value);
 		public static PooledContext<HashSet<T>> Get<T>(out HashSet<T> value) => StaticHashPool<T>.Get(out value);
 		public static void Free<T>(HashSet<T> obj) => StaticHashPool<T>.Free(obj);

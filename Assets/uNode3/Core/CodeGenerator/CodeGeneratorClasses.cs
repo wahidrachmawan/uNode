@@ -40,7 +40,7 @@ namespace MaxyGames {
 							}
 							_namespaceTypes[ns].Add(typeList[x]);
 						}
-						catch (Exception ex) { 
+						catch(Exception ex) {
 							UnityEngine.Debug.LogException(ex);
 						}
 					}
@@ -83,7 +83,7 @@ namespace MaxyGames {
 					context = null;
 				}
 			}
-			
+
 			//internal object currentEntry => allEntries.Count > 0 ? allEntries[allEntries.Count - 1] : null;
 			//internal List<object> allEntries = new List<object>();
 
@@ -1068,7 +1068,8 @@ namespace MaxyGames {
 				ThreadingUtil.Queue(() => {
 					if(variables.Count > 0) {
 						string result = null;
-						foreach(VData vdata in variables) {
+						for(int i = 0; i < variables.Count; i++) {
+							var vdata = variables[i];
 							if(!vdata.isInstance)
 								continue;
 							try {
@@ -1100,15 +1101,13 @@ namespace MaxyGames {
 						foreach(var prop in properties) {
 							if(prop == null || !prop.obj)
 								continue;
-							ThreadingUtil.Queue(() => {
-								generationState.context = prop;
-								generationState.isStatic = prop.modifier != null && prop.modifier.Static;
-								string str = prop.GenerateCode().AddFirst("\n", result != null);
-								if(includeGraphInformation && prop.obj != null) {
-									str = WrapWithInformation(str, prop.obj);
-								}
-								result += str;
-							});
+							generationState.context = prop;
+							generationState.isStatic = prop.modifier != null && prop.modifier.Static;
+							string str = prop.GenerateCode().AddFirst("\n", result != null);
+							if(includeGraphInformation && prop.obj != null) {
+								str = WrapWithInformation(str, prop.obj);
+							}
+							result += str;
 						}
 
 						if(string.IsNullOrWhiteSpace(result) == false) {
@@ -1378,6 +1377,7 @@ namespace MaxyGames {
 			public object reference;
 
 			private Type _type;
+			private bool isTypeSetted;
 			/// <summary>
 			/// The variable type.
 			/// </summary>
@@ -1395,6 +1395,7 @@ namespace MaxyGames {
 				}
 				set {
 					_type = value;
+					isTypeSetted = true;
 				}
 			}
 			/// <summary>
@@ -1477,7 +1478,7 @@ namespace MaxyGames {
 				else {
 					this.name = name;
 				}
-				this.type = type;
+				_type = type;
 				this.isInstance = isInstance;
 			}
 
@@ -1494,7 +1495,7 @@ namespace MaxyGames {
 				else {
 					this.name = name;
 				}
-				this.type = type;
+				_type = type;
 				this.isInstance = isInstance;
 				if(string.IsNullOrEmpty(defaultValue) == false) {
 					this.defaultValue = CG.WrapString(defaultValue);
@@ -1546,14 +1547,20 @@ namespace MaxyGames {
 				}
 				bool isGeneric = false;
 				string vType;
-				if(reference is Variable) {
+				if(isTypeSetted == false && reference is Variable) {
 					vType = Type((reference as Variable).type);
 					isGeneric = (reference as Variable).IsOpenGeneric;
 				}
 				else {
 					vType = Type(type);
 				}
-				if(ReflectionUtils.IsNativeType(type) == false) {
+				var defaultValue = this.defaultValue;
+				if(ReflectionUtils.IsNativeType(type)) {
+					if(defaultValue is UnityEngine.Object) {
+						defaultValue = null;
+					}
+				}
+				else {
 					if(type is IFakeType) {
 						//If it is a fake type and not native type
 						vType = Type((type as IFakeType).GetNativeType()) ?? vType;
@@ -1577,6 +1584,10 @@ namespace MaxyGames {
 					}
 				}
 				else {
+					if(defaultValue is UnityEngine.Object) {
+						Value(defaultValue);
+						defaultValue = null;
+					}
 					if(modifier?.Const == true || !ReflectionUtils.IsNullOrDefault(defaultValue) && !(graph is IClassGraph classGraph && classGraph.InheritType == typeof(ValueType))) {
 						if(defaultValue is IGraph obj && obj != graph) {
 							result += (m + vType + " " + name + " = " + Value(defaultValue) + ";").AddFirst("\n", !string.IsNullOrEmpty(result));
@@ -1599,6 +1610,11 @@ namespace MaxyGames {
 				get {
 					return modifier != null && modifier.Static;
 				}
+			}
+
+			internal void SetToComplete() {
+				//don't remove this
+				GenerateCode();
 			}
 
 			public override string ToString() {
@@ -1635,9 +1651,11 @@ namespace MaxyGames {
 				}
 			}
 
-			public void SetToComplete() {
-				//Make sure the contents is cached properly
-				if(contents != null) { }
+			internal void SetToComplete() {
+				if(obj != null && !setting.generateIdentifierOnly) {
+					//Make sure the contents is cached properly
+					if(contents != null) { }
+				}
 			}
 
 			public CData(Constructor constructor) {
@@ -1724,7 +1742,7 @@ namespace MaxyGames {
 							string lv = M_GenerateLocalVariable(obj.getRoot.LocalVariables);
 							str += lv.AddLineInFirst();
 						}
-						return str + GeneratePort(obj.getRoot.Entry.nodeObject.primaryFlowOutput);
+						return m_getContents = str + GeneratePort(obj.getRoot.Entry.nodeObject.primaryFlowOutput);
 					}
 					return m_getContents;
 				}
@@ -1745,7 +1763,7 @@ namespace MaxyGames {
 							string lv = M_GenerateLocalVariable(obj.setRoot.LocalVariables);
 							str += lv.AddLineInFirst();
 						}
-						return str + GeneratePort(obj.setRoot.Entry.nodeObject.primaryFlowOutput);
+						return m_setContents = str + GeneratePort(obj.setRoot.Entry.nodeObject.primaryFlowOutput);
 					}
 					return m_setContents;
 				}
@@ -1866,10 +1884,16 @@ namespace MaxyGames {
 				//setterAttributes = property.setterAttributes?.Select(a => TryParseAttributeData(a)).ToArray();
 			}
 
-			public void SetToComplete() {
+			internal void SetToComplete() {
 				//don't remove this, this is for make sure the get and set contents is cached.
-				if(setContents != null) { }
-				if(getContents != null) { }
+				if(obj != null && !setting.generateIdentifierOnly) {
+					if(obj.setRoot != null) {
+						if(setContents != null) { }
+					}
+					if(obj.getRoot != null) {
+						if(getContents != null) { }
+					}
+				}
 			}
 
 			public string GenerateCode() {
@@ -1895,6 +1919,9 @@ namespace MaxyGames {
 				string m = null;
 				if(modifier != null) {
 					m = modifier.GenerateCode();
+				}
+				if(setting.generateIdentifierOnly) {
+					autoProperty = true;
 				}
 				string p = null;
 				if(autoProperty) {
@@ -2121,7 +2148,7 @@ namespace MaxyGames {
 				if(modifier != null)
 					result += modifier.GenerateCode();
 				if(isExtern) {
-					result += "extern "; 
+					result += "extern ";
 				}
 				result += DeclareType(type) + " " + name;
 				if(genericParameters != null && genericParameters.Count > 0) {
@@ -2390,12 +2417,21 @@ namespace MaxyGames {
 			/// skipped.</remarks>
 			public void BuildScript() {
 				scriptBuilder = new StringBuilder();
-				foreach(var (_, builder) in classes) {
+				var old = CG.graph;
+				foreach(var (owner, builder) in classes) {
+					IGraph graph = owner as IGraph;
+					if(graph == null) {
+						graph = builder.owner as IGraph;
+					}
+					if(graph != null) {
+						CG.graph = graph;
+					}
 					var classResult = builder.GenerateCode();
 					if(!string.IsNullOrEmpty(classResult)) {
 						scriptBuilder.Append(classResult.AddLineInEnd());
 					}
 				}
+				CG.graph = old;
 			}
 
 			private int classIndex;

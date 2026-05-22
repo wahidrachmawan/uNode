@@ -501,7 +501,7 @@ NodeRerouteView .port {
 /* block node */
 
 #node-blocks > #node-border {
-	background-color: #000000;
+	background-color: rgba(0,0,0,0);
 	border-bottom-width: 2px;
 	border-top-width: 2px;
 	border-left-width: 0px;

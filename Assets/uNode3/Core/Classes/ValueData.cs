@@ -149,8 +149,6 @@ namespace MaxyGames.UNode {
 		[System.NonSerialized]
 		public FieldModifier modifier;
 
-		public bool resetOnEnter = true;
-
 		public System.Type type {
 			get {
 				if(serializedValue != null) {

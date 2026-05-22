@@ -338,7 +338,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 				Undo.SetCurrentGroupName("To value node");
 				Undo.RegisterFullObjectHierarchyUndo(unityObject, "To value node");
 			}
-			NodeEditorUtility.AddNewNode<MultipurposeNode>(graph.graphData, null, null, new Vector2(source.position.x - 100, source.position.y), (node) => {
+			NodeEditorUtility.AddNewNode<MultipurposeNode>(graph.graphData, null, null, new Vector2(mousePositionOnCanvas.x - 100, mousePositionOnCanvas.y), (node) => {
 				var type = data.GetActualPortType();
 				node.target = MemberData.CreateFromValue(ReflectionUtils.CreateInstance(type), type);
 				node.Register();

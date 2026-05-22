@@ -129,7 +129,11 @@ namespace MaxyGames {
 						});
 						progress += childFill;
 
-
+						for(int i = 0; i < generatorData.variables.Count; i++) {
+							if(generatorData.variables[i].isInstance) {
+								generatorData.variables[i].SetToComplete();
+							}
+						}
 						foreach(var data in generatorData.properties) {
 							data.SetToComplete();
 						}
@@ -141,7 +145,7 @@ namespace MaxyGames {
 
 						var classBuilder = new ClassData(classes, graphSystem) {
 							name = className,
-							variables = generatorData.variables,
+							variables = generatorData.variables.Where(v => v.isInstance).ToList(),
 							properties = generatorData.properties,
 							constructors = generatorData.constructors,
 						};
@@ -2492,7 +2496,7 @@ namespace MaxyGames {
 					return "this";
 				}
 				if(o != null) {
-					if(generationState.isStatic || generationState.state == State.Initialization) {
+					if(generationState.isStatic || generationState.state == State.Initialization || ReflectionUtils.IsNativeType(graph.GetGraphType())) {
 						return "null";
 					}
 					if(graph is IClassGraph classGraph) {

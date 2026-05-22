@@ -218,9 +218,6 @@ namespace MaxyGames.UNode.Editors {
 		public static UnityEditor.Compilation.Assembly AssemblyCSharp {
 			get {
 				if(CachedData.assemblyCSharp == null && CachedData.hasDefaultAssembly == null) {
-					if(uNodeThreadUtility.frame > 100) {
-						CachedData.hasDefaultAssembly = false;
-					}
 					uNodeThreadUtility.RunOnMainThread(() => {
 						var assemblies = CompilationPipeline.GetAssemblies();
 						for(int i = 0; i < assemblies.Length; i++) {
@@ -229,6 +226,9 @@ namespace MaxyGames.UNode.Editors {
 								CachedData.assemblyCSharp = assembly;
 								CachedData.hasDefaultAssembly = true;
 							}
+						}
+						if(CachedData.hasDefaultAssembly == null) {
+							CachedData.hasDefaultAssembly = false;
 						}
 					});
 				}
