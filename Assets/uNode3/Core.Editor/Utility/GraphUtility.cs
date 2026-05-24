@@ -134,15 +134,17 @@ namespace MaxyGames.UNode.Editors {
 				}
 
 				bool ValidateReference(UGraphElement graphElement, out UGraphElement validElement) {
-					if(elementsMap.TryGetValue(graphElement.id, out var tElement) && tElement.GetType() == graphElement.GetType()) {
-						validElement = tElement;
-						return true;
-					}
-					else {
-						var matchedElement = parent.GetObjectInChildren<UGraphElement>(e => e.id == graphElement.id);
-						if(matchedElement != null && matchedElement.GetType() == graphElement.GetType()) {
-							validElement = matchedElement;
+					if(graphElement != null) {
+						if(elementsMap.TryGetValue(graphElement.id, out var tElement) && tElement != null && tElement.GetType() == graphElement.GetType()) {
+							validElement = tElement;
 							return true;
+						}
+						else {
+							var matchedElement = parent.GetObjectInChildren<UGraphElement>(e => e.id == graphElement.id);
+							if(matchedElement != null && matchedElement.GetType() == graphElement.GetType()) {
+								validElement = matchedElement;
+								return true;
+							}
 						}
 					}
 					validElement = null;

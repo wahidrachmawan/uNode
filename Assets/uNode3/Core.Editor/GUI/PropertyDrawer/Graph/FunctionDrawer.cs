@@ -8,14 +8,14 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class FunctionDrawer : UGraphElementDrawer<Function> {
-		protected override void DrawHeader(DrawerOption option) {
+		protected override void DrawHeader(ref DrawerOption option) {
 			var value = option.value as Function;
 			EditorGUI.BeginDisabledGroup(value.parent is Property);
-			DrawNicelyHeader(option, value.ReturnType());
+			DrawNicelyHeader(ref option, value.ReturnType());
 			EditorGUI.EndDisabledGroup();
 		}
 
-		protected override void DoDraw(DrawerOption option) {
+		protected override void DoDraw(ref DrawerOption option) {
 			var value = option.value as Function;
 			bool isFromProperty = value.parent is Property;
 			if(isFromProperty == false) {

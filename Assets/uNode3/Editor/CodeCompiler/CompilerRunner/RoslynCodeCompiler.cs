@@ -484,11 +484,14 @@ namespace MaxyGames.CompilerBuilder {
 #endif
 				var path = RunnerInProjectPath;
 				if(string.IsNullOrEmpty(path) == false && File.Exists(path)) {
-					Directory.CreateDirectory(Path.GetDirectoryName(RunnerExecutablePath));
-					File.Copy(path, Path.Combine(Path.GetDirectoryName(RunnerExecutablePath), "Runner.dll"), true);
-					CreateConfigFile(RunnerExecutablePath);
-					CreateCompilerOptionFile(RunnerExecutablePath);
-					Debug.Log(path);
+					try {
+						Directory.CreateDirectory(Path.GetDirectoryName(RunnerExecutablePath));
+						File.Copy(path, Path.Combine(Path.GetDirectoryName(RunnerExecutablePath), "Runner.dll"), true);
+						CreateConfigFile(RunnerExecutablePath);
+						CreateCompilerOptionFile(RunnerExecutablePath);
+						Debug.Log(path);
+					}
+					catch { }
 				}
 				else {
 					Build(RunnerExecutablePath);

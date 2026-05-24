@@ -69,8 +69,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}
 		}
 
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption opt) {
+			var option = opt;
+			var node = GetNode(ref option);
 
 			EditorGUI.BeginChangeCheck();
 			EditorGUILayout.LabelField("Expression:");
@@ -168,9 +169,9 @@ public static {returnType} {methodName}({string.Join(", ", parameters)}) {{
 			uNodeGUI.DrawHeader("Advanced");
 			UInspector.Draw(option.property[nameof(node.optionUseStatic)], label: new GUIContent("Static Function"));
 
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 			if(node.displayError == false && node.IsCompiled == false && node.nodeObject.graphContainer is not IScriptGraphType) {
 				EditorGUILayout.HelpBox("Expression is not compiled.\nCompile is required only on running with reflection mode.", MessageType.Warning);
 			}

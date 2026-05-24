@@ -46,7 +46,15 @@ namespace MaxyGames.UNode.Editors {
 				if(cachedFilter == null) {
 					Type t = portType;
 					if(t != null) {
-						cachedFilter = new FilterAttribute(t);
+						if(t.IsByRef) {
+							t = t.GetElementType();
+							cachedFilter = new FilterAttribute(t) {
+								SetMember = true
+							};
+						}
+						else {
+							cachedFilter = new FilterAttribute(t);
+						}
 					} else {
 						cachedFilter = new FilterAttribute(typeof(object));
 					}

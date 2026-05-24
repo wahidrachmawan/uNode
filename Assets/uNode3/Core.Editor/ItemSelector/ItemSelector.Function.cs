@@ -229,7 +229,7 @@ namespace MaxyGames.UNode.Editors {
 
 								if(displayGeneralType) {
 									var categTree = new SelectorCategoryTreeView("General", "", uNodeEditorUtility.GetUIDFromString("[GENERAL]"));
-									var items = TreeFunction.GetGeneralTrees();
+									var items = TreeFunction.GetGeneralTrees(editorData.GetGeneralTypes());
 									items.ForEach(tree => {
 										if(hideUnselectedItem && !M_CanSelectType(tree.type, filter))
 											return;
@@ -754,7 +754,7 @@ namespace MaxyGames.UNode.Editors {
 			return tree.displayName;
 		}
 
-		static bool ResolveGenericItem(MemberInfo member, Action<MemberInfo> onResolved, FilterAttribute filter, object targetObject, EditorWindow window) {
+		static bool ResolveGenericItem(MemberInfo member, Action<MemberInfo> onResolved, FilterAttribute filter, object targetObject, ItemSelector window) {
 			if(member == null)
 				return false;
 			MethodInfo method = member as MethodInfo;
@@ -850,6 +850,7 @@ namespace MaxyGames.UNode.Editors {
 						newPos.x += newPos.width - 20;
 					}
 					w = ShowAsNew(targetObject, typeItems[0].filter, action).ChangePosition(newPos);
+					w.SetGeneralTypes(window.editorData.generalTypes);
 					return true;
 				}
 				TypeBuilderWindow.Show(Rect.zero, targetObject, F, delegate (MemberData[] types) {

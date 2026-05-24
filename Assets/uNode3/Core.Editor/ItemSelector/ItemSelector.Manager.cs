@@ -94,7 +94,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public Data editorData { get; } = new Data();
 			public FilterAttribute filter => editorData.filter;
-			public EditorWindow window => editorData.window;
+			public ItemSelector window => editorData.window;
 
 			public Manager(TViewState state) : base(state) {
 				showAlternatingRowBackgrounds = true;

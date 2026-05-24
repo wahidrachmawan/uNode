@@ -45,7 +45,7 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 		}
 
-		protected virtual void DrawInputs(DrawerOption option) {
+		protected virtual void DrawInputs(ref DrawerOption option) {
 			var node = GetValue<Node>(option.property);
 			if(node.nodeObject.FlowInputs.Count == 0 && node.nodeObject.ValueInputs.Count == 0)
 				return;
@@ -76,7 +76,7 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUILayout.EndVertical();
 		}
 
-		protected virtual void DrawOutputs(DrawerOption option) {
+		protected virtual void DrawOutputs(ref DrawerOption option) {
 			var node = GetValue<Node>(option.property);
 			if(node.nodeObject.FlowOutputs.Count == 0 && node.nodeObject.ValueOutputs.Count == 0)
 				return;
@@ -111,7 +111,7 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUILayout.EndVertical();
 		}
 
-		protected virtual void DrawErrors(DrawerOption option) {
+		protected virtual void DrawErrors(ref DrawerOption option) {
 			var node = GetValue<Node>(option.property);
 			var desc = node.GetType().GetCustomAttribute<DescriptionAttribute>();
 			if(desc != null) {
@@ -121,16 +121,16 @@ namespace MaxyGames.UNode.Editors {
 			GraphUtility.ErrorChecker.DrawErrorMessages(node.nodeObject);
 		}
 
-		public override void DrawLayouted(DrawerOption option) {
-			DrawChilds(option);
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+		public override void DrawLayouted(ref DrawerOption option) {
+			DrawChilds(ref option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 	}
 
 	public abstract class NodeDrawer<T> : NodeDrawer where T : Node {
-		public T GetNode(DrawerOption option) {
+		public T GetNode(ref DrawerOption option) {
 			return GetValue<T>(option.property);
 		}
 

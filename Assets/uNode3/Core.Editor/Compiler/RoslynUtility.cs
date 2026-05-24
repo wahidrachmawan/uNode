@@ -16,6 +16,14 @@ using Assembly = System.Reflection.Assembly;
 using System.Threading;
 
 namespace MaxyGames.UNode.Editors {
+	/// <summary>
+	/// Represents the result of a compilation, containing the compiled assembly and debug symbol bytes, compilation
+	/// diagnostics, and utility methods to load the assembly, log diagnostics, and produce combined error text.
+	/// </summary>
+	/// <remarks>isSuccess is true when rawAssembly contains data. LoadAssembly caches and returns a
+	/// System.Reflection.Assembly loaded from rawAssembly and rawPdb when available. LogErrors writes diagnostics to the
+	/// Unity console using warning or error logging. GetErrorMessage returns concatenated non-warning error messages or an
+	/// empty string when there are none. Public members may be null and should be checked before use.</remarks>
 	public class CompileResult {
 		public byte[] rawAssembly;
 		public byte[] rawPdb;

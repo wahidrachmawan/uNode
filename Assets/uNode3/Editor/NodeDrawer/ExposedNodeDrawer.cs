@@ -8,16 +8,16 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class ExposedNodeDrawer : NodeDrawer<Nodes.ExposedNode> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption option) {
+			var node = GetNode(ref option);
 
 			if(node.value.type != null) {
 				DrawGUI(node);
 			}
 
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 
 		void DrawGUI(Nodes.ExposedNode node) {

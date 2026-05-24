@@ -8,8 +8,9 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class SwitchDrawer : NodeDrawer<Nodes.NodeSwitch> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption opt) {
+			var option = opt;
+			var node = GetNode(ref option);
 			uNodeGUI.DrawCustomList(node.datas, "List Cases",
 				drawElement: (position, index, value) => {
 					uNodeGUIUtility.EditValue(position, new GUIContent("Element " + index), value.value.Get(null), node.target.ValueType, val => {
@@ -45,9 +46,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				UInspector.Draw(option.property[nameof(node.useVerticalLayout)]);
 			}
 			
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 	}
 }

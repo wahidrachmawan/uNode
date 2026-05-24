@@ -313,10 +313,10 @@ namespace MaxyGames.UNode.Editors {
 	using System.Linq;
 
 	public class EventOnInputSystemButtonEditor : NodeDrawer<EventOnInputSystemButton> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption option) {
+			var node = GetNode(ref option);
 
-			DrawChilds(option);
+			DrawChilds(ref option);
 			
 			var rect = EditorGUI.PrefixLabel(uNodeGUIUtility.GetRect(), new GUIContent("Action"));
 			var inputAsset = uNodeEditorUtility.LoadAssetByGuid<InputActionAsset>(node.data.assetGuid);
@@ -371,9 +371,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 	}
 }

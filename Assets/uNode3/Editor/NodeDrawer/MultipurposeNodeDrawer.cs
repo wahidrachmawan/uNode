@@ -9,14 +9,14 @@ using System.Xml;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class MultipurposeNodeDrawer : NodeDrawer<MultipurposeNode> {
-		public override void DrawLayouted(DrawerOption option) {
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+		public override void DrawLayouted(ref DrawerOption option) {
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 
-		protected override void DrawInputs(DrawerOption option) {
-			DrawInputs(option, GetNode(option));
+		protected override void DrawInputs(ref DrawerOption option) {
+			DrawInputs(option, GetNode(ref option));
 		}
 
 		protected void DrawInputs(DrawerOption option, MultipurposeNode node, bool showAddButton = true, FilterAttribute filter = null, Action customChangeAction = null) {

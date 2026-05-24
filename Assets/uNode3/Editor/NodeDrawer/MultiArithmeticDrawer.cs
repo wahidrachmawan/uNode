@@ -8,8 +8,9 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class MultiArithmeticDrawer : NodeDrawer<Nodes.MultiArithmeticNode> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption opt) {
+			var option = opt;
+			var node = GetNode(ref option);
 
 			UInspector.Draw(option.property[nameof(node.operatorKind)]);
 
@@ -112,9 +113,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						).displayDefaultItem = false;
 				}
 			}
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 
 		private static List<ItemSelector.CustomItem> GetCustomItemForPrimitives(Nodes.MultiArithmeticNode source, Type type) {

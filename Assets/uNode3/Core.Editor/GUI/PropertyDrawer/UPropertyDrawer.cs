@@ -38,6 +38,10 @@ namespace MaxyGames.UNode.Editors {
 				onChanged?.Invoke(value);
 			}
 		}
+		public void SetValue(object value) {
+			property.value = value;
+			onChanged?.Invoke(value);
+		}
 		public Attribute[] attributes => property.GetCustomAttributes();
 		public UnityEngine.Object unityObject => property.root.value as UnityEngine.Object;
 		public void RegisterUndo(string name = "") => property.RegisterUndo(name);
@@ -65,16 +69,16 @@ namespace MaxyGames.UNode.Editors {
 
 		public abstract bool IsValid(Type type, bool layouted);
 
-		public virtual void Draw(Rect position, DrawerOption option) {
+		public virtual void Draw(Rect position, ref DrawerOption option) {
 
 		}
 
-		public virtual void DrawLayouted(DrawerOption option) {
-			DrawDecorators(option);
-			Draw(uNodeGUIUtility.GetRect(), option);
+		public virtual void DrawLayouted(ref DrawerOption option) {
+			DrawDecorators(ref option);
+			Draw(uNodeGUIUtility.GetRect(), ref option);
 		}
 
-		protected void DrawDecorators(DrawerOption option) {
+		protected void DrawDecorators(ref DrawerOption option) {
 			FieldDecorator.DrawDecorators(option.attributes);
 		}
 
@@ -87,7 +91,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawChilds(DrawerOption option) {
+		public static void DrawChilds(ref DrawerOption option) {
 			var fields = EditorReflectionUtility.GetFields(option.property.valueType, option.GetFlags());
 			for(int i = 0; i < fields.Length; i++) {
 				if(fields[i].IsDefined(typeof(HideInInspector), true) || 
@@ -323,7 +327,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		class UnsupportedDrawer : UPropertyDrawer {
-			public override void Draw(Rect position, DrawerOption option) {
+			public override void Draw(Rect position, ref DrawerOption option) {
 				position = EditorGUI.PrefixLabel(position, option.property.label);
 				EditorGUI.SelectableLabel(position, option.property.label.text);
 			}

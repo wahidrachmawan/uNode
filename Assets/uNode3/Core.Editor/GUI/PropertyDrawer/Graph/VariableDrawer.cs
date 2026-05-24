@@ -4,17 +4,32 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
+	public abstract class CustomVariableDrawer {
+		public virtual int order => 0;
+		public abstract bool DoDraw(ref DrawerOption option, Variable variable);
+	}
+
 	class VariableDrawer : UGraphElementDrawer<Variable> {
-		protected override void DrawHeader(DrawerOption option) {
+		protected override void DrawHeader(ref DrawerOption option) {
 			var value = option.value as Variable;
-			DrawNicelyHeader(option, value.type);
+			DrawNicelyHeader(ref option, value.type);
 		}
 
-		protected override void DoDraw(DrawerOption option) {
+		static readonly Lazy<List<CustomVariableDrawer>> customVariableDrawers = new(() => {
+			var result = EditorReflectionUtility.GetListOfType<CustomVariableDrawer>();
+			result.Sort((x, y) => CompareUtility.Compare(x.order, y.order));
+			return result;
+		});
+
+		protected override void DoDraw(ref DrawerOption option) {
 			var value = option.value as Variable;
+			foreach(var drawer in customVariableDrawers.Value) {
+				if(drawer.DoDraw(ref option, value)) {
+					return;
+				}
+			}
 			var container = value.graphContainer;
 			if(container.GetGraphInheritType() != typeof(ValueType) || value.modifier.Const) {
 				UInspector.Draw(new DrawerOption() {

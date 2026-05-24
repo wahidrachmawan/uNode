@@ -494,7 +494,6 @@ namespace MaxyGames.UNode.Editors {
 					typeof(Vector3),
 					typeof(Transform),
 					typeof(GameObject),
-					//typeof(IRuntimeClass),
 					typeof(List<>),
 					typeof(Dictionary<,>),
 				};
@@ -502,16 +501,14 @@ namespace MaxyGames.UNode.Editors {
 			if(filter == null) {
 				filter = FilterAttribute.DefaultTypeFilter;
 			}
-			var customItems = ItemSelector.MakeCustomTypeItems(generalTypes, "General");
 			var window = ItemSelector.ShowType(
 				graphData.graph,
 				filter,
 				(m) => {
 					onClick(m.startType);
-				},
-				customItems).ChangePosition(position);
+				}).ChangePosition(position);
 			window.displayNoneOption = false;
-			window.displayGeneralType = false;
+			window.SetGeneralTypes(generalTypes);
 		}
 	}
 
@@ -2178,6 +2175,7 @@ namespace MaxyGames.UNode.Editors {
 												method = ReflectionUtils.MakeGenericMethod(method, types.Select(i => i.Get<Type>(null)).ToArray());
 												MemberData d = new MemberData(method);
 												nod.target.CopyFrom(d);
+												nod.Register();
 												uNodeGUIUtility.GUIChanged(nod, UIChangeType.Average);
 											}, new TypeItem[method.GetGenericArguments().Length]);
 										}
@@ -2185,6 +2183,7 @@ namespace MaxyGames.UNode.Editors {
 											uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
 											MemberData d = new MemberData(method);
 											nod.target.CopyFrom(d);
+											nod.Register();
 											uNodeGUIUtility.GUIChanged(nod, UIChangeType.Important);
 										}
 									}
@@ -2215,6 +2214,7 @@ namespace MaxyGames.UNode.Editors {
 											uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
 											MemberData d = new MemberData(ctor);
 											nod.target.CopyFrom(d);
+											nod.Register();
 											uNodeGUIUtility.GUIChanged(nod, UIChangeType.Important);
 										}
 									}, (e) => {
@@ -2239,6 +2239,7 @@ namespace MaxyGames.UNode.Editors {
 									uNodeEditorUtility.RegisterUndo(nod.GetUnityObject());
 									MemberData d = MemberData.CreateFromValue(method);
 									nod.target.CopyFrom(d);
+									nod.Register();
 									uNodeGUIUtility.GUIChanged(nod, UIChangeType.Important);
 								}, (e) => {
 									if(currMethod == m) {

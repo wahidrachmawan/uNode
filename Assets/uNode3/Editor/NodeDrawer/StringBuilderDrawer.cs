@@ -8,8 +8,9 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class StringBuilderDrawer : NodeDrawer<Nodes.StringBuilderNode> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption opt) {
+			var option = opt;
+			var node = GetNode(ref option);
 
 			UInspector.Draw(option.property[nameof(node.useStringBuilder)]);
 
@@ -40,9 +41,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 				});
 			
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 	}
 }

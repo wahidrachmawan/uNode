@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class EnumPropertyDrawer : UPropertyDrawer {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property, option.type) as Enum;
 			if(option.type.IsDefinedAttribute(typeof(FlagsAttribute))) {

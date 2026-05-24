@@ -19,11 +19,11 @@ namespace MaxyGames.UNode.Editors {
 		public static void Draw(DrawerOption option) {
 			if(option.property == null) return;
 			if(option.property.isRoot) {
-				UPropertyDrawer.DrawChilds(option);
+				UPropertyDrawer.DrawChilds(ref option);
 			} else {
 				var drawer = UPropertyDrawer.FindDrawer(option.type, true);
 				if(drawer != null) {
-					drawer.DrawLayouted(option);
+					drawer.DrawLayouted(ref option);
 				} else {
 
 				}
@@ -33,11 +33,11 @@ namespace MaxyGames.UNode.Editors {
 		public static void Draw(DrawerOption option, Type type) {
 			if(option.property == null) return;
 			if(option.property.isRoot) {
-				UPropertyDrawer.DrawChilds(option);
+				UPropertyDrawer.DrawChilds(ref option);
 			} else {
 				var drawer = UPropertyDrawer.FindDrawer(type, true);
 				if(drawer != null) {
-					drawer.DrawLayouted(option);
+					drawer.DrawLayouted(ref option);
 				} else {
 
 				}
@@ -66,16 +66,17 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void DrawChilds(DrawerOption option) {
-			UPropertyDrawer.DrawChilds(option);
+			UPropertyDrawer.DrawChilds(ref option);
 		}
 
 		public static void DrawChilds(UBind property, bool nullable = false, bool acceptUnityObject = true, BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy) {
-			UPropertyDrawer.DrawChilds(new DrawerOption() {
+			var option = new DrawerOption() {
 				property = property,
 				nullable = nullable,
 				acceptUnityObject = acceptUnityObject,
 				flags = flags,
-			});
+			};
+			UPropertyDrawer.DrawChilds(ref option);
 		}
 	}
 }

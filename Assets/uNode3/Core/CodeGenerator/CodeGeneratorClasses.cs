@@ -977,6 +977,16 @@ namespace MaxyGames {
 			public string additionalContents;
 			private string nestedTypesString;
 
+			private Type _type;
+			public Type Type {
+				get {
+					if(_type == null) {
+						_type = new NamedType2(this);
+					}
+					return _type;
+				}
+			}
+
 			#region Constructors
 			public ClassData() { }
 
@@ -2344,6 +2354,82 @@ namespace MaxyGames {
 				codeList.Clear();
 			}
 			#endregion
+		}
+
+		private class NamedType2 : NamedType {
+			readonly ClassData classData;
+
+			public NamedType2(ClassData classData) {
+				this.classData = classData;
+			}
+			public override string Namespace => "";
+			public override Type BaseType => classData.inheritFrom ?? typeof(object);
+			public override string Name => classData.name;
+
+			public override Type GetInterface(string name, bool ignoreCase) {
+				foreach(var t in classData.implementedInterfaces) {
+					if(string.Equals(t.Name, name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)) {
+						return t;
+					}
+				}
+				return null;
+			}
+
+			public override Type[] GetInterfaces() {
+				return classData.implementedInterfaces.ToArray();
+			}
+		}
+
+		private abstract class NamedType : RuntimeType {
+			public override FieldInfo GetField(string name, BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			public override FieldInfo[] GetFields(BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			public override MethodInfo[] GetMethods(BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			public override PropertyInfo[] GetProperties(BindingFlags bindingAttr) {
+				throw new NotImplementedException();
+			}
+
+			protected override TypeAttributes GetAttributeFlagsImpl() {
+				throw new NotImplementedException();
+			}
+		}
+
+		private class NamedType1 : NamedType {
+			readonly string name;
+			readonly string @namespace;
+			readonly Type baseType;
+			readonly Type[] interfaces;
+
+			public NamedType1(string name, string @namespace = null, Type baseType = null, Type[] interfaces = null) {
+				this.name = name;
+				this.@namespace = @namespace;
+				this.baseType = baseType;
+				this.interfaces = interfaces;
+			}
+			public override string Namespace => @namespace;
+			public override Type BaseType => baseType ?? typeof(object);
+			public override string Name => name;
+
+			public override Type GetInterface(string name, bool ignoreCase) {
+				foreach(var t in interfaces) {
+					if(string.Equals(t.Name, name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)) {
+						return t;
+					}
+				}
+				return null;
+			}
+
+			public override Type[] GetInterfaces() {
+				return interfaces;
+			}
 		}
 
 		public class GeneratedData {

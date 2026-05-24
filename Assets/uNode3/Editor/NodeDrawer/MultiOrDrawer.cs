@@ -8,8 +8,9 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class MultiOrDrawer : NodeDrawer<Nodes.MultiORNode> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption opt) {
+			var option = opt;
+			var node = GetNode(ref option);
 
 			uNodeGUI.DrawCustomList(node.inputs, "Inputs",
 				drawElement: (position, index, value) => {
@@ -38,9 +39,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 				});
 			
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 	}
 }

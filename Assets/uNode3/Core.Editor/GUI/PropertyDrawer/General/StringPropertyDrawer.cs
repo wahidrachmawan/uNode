@@ -8,7 +8,8 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class StringPropertyDrawer : UPropertyDrawer<string> {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption opt) {
+			var option = opt;
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property, option.nullable);
 			if(fieldValue != null) {
@@ -72,8 +73,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}
 		}
 
-		public override void DrawLayouted(DrawerOption option) {
-			DrawDecorators(option);
+		public override void DrawLayouted(ref DrawerOption opt) {
+			var option = opt;
+			DrawDecorators(ref option);
 			var attributes = option.attributes;
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property, option.nullable);

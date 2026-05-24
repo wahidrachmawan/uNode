@@ -119,6 +119,10 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		public void SetGeneralTypes(IEnumerable<Type> types) {
+			editorData.generalTypes = types;
+		}
+
 		#region PrivateFields
 		private FilterAttribute filter {
 			get => editorData.filter;
@@ -781,22 +785,6 @@ namespace MaxyGames.UNode.Editors {
 				hasNextItems = true,
 				memberType = type,
 			};
-		}
-
-		static List<Type> GetGeneralTypes() {
-			List<Type> type = new List<Type>();
-			type.Add(typeof(string));
-			type.Add(typeof(float));
-			type.Add(typeof(bool));
-			type.Add(typeof(int));
-			//type.Add(typeof(Enum));
-			type.Add(typeof(Color));
-			type.Add(typeof(Vector2));
-			type.Add(typeof(Vector3));
-			type.Add(typeof(Transform));
-			type.Add(typeof(GameObject));
-			//type.Add(typeof(uNodeRuntime));
-			return type;
 		}
 		#endregion
 	}

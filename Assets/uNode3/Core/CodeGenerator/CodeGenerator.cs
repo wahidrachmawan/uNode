@@ -927,6 +927,7 @@ namespace MaxyGames {
 								var p = parameters[accessIndex];
 								if(p.input != null) {
 									string pData = null;
+									bool isRef = false;
 									if(paramInfo[index].ParameterType.IsByRef) {
 										if(paramInfo[index].IsOut) {
 											pData += "out ";
@@ -936,23 +937,24 @@ namespace MaxyGames {
 										}
 										else {
 											pData += "ref ";
+											isRef = true;
 										}
 									}
 									if(pData != null) {
 										if(debugScript && setting.debugValueNode) {
 											setting.debugScript = false;
-											pData += Value(p);
+											pData += Value(p, setVariable: isRef);
 											setting.debugScript = true;
 										}
 										else {
-											pData += Value(p);
+											pData += Value(p, setVariable: isRef);
 										}
 										if(pData == "out null") {//For fix error if the argument value is null on out parameter.
 											pData = $"out {Type(paramInfo[index].ParameterType.GetElementType())} _";
 										}
 									}
 									else {
-										pData += Value(p);
+										pData += Value(p, setVariable: isRef);
 									}
 									parameterDatas[index] = pData;
 								}
@@ -1336,11 +1338,11 @@ namespace MaxyGames {
 				}
 				if(debugScript && setting.debugValueNode) {
 					setting.debugScript = false;
-					result += Value(parameter);
+					result += Value(parameter, setVariable: parameter.refKind == RefKind.Ref);
 					setting.debugScript = true;
 				}
 				else {
-					result += Value(parameter);
+					result += Value(parameter, setVariable: parameter.refKind == RefKind.Ref);
 				}
 				return result;
 			}
@@ -1381,56 +1383,6 @@ namespace MaxyGames {
 			return DoParseType(graph.FullGraphName);
 		}
 
-		class NamedType : RuntimeType {
-			readonly string name;
-			readonly string @namespace;
-			readonly Type baseType;
-			readonly Type[] interfaces;
-
-			public NamedType(string name, string @namespace = null, Type baseType = null, Type[] interfaces = null) {
-				this.name = name;
-				this.@namespace = @namespace;
-				this.baseType = baseType;
-				this.interfaces = interfaces;
-			}
-			public override string Namespace => @namespace;
-			public override Type BaseType => baseType ?? typeof(object);
-			public override string Name => name;
-
-			public override FieldInfo GetField(string name, BindingFlags bindingAttr) {
-				throw new NotImplementedException();
-			}
-
-			public override FieldInfo[] GetFields(BindingFlags bindingAttr) {
-				throw new NotImplementedException();
-			}
-
-			public override MethodInfo[] GetMethods(BindingFlags bindingAttr) {
-				throw new NotImplementedException();
-			}
-
-			public override PropertyInfo[] GetProperties(BindingFlags bindingAttr) {
-				throw new NotImplementedException();
-			}
-
-			protected override TypeAttributes GetAttributeFlagsImpl() {
-				throw new NotImplementedException();
-			}
-
-			public override Type GetInterface(string name, bool ignoreCase) {
-				foreach(var t in interfaces) {
-					if(string.Equals(t.Name, name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal)) {
-						return t;
-					}
-				}
-				return null;
-			}
-
-			public override Type[] GetInterfaces() {
-				return interfaces;
-			}
-		}
-
 		/// <summary>
 		/// Create a new Type from name.
 		/// </summary>
@@ -1439,7 +1391,7 @@ namespace MaxyGames {
 		/// <param name="baseType"></param>
 		/// <returns></returns>
 		public static Type TypeFromName(string name, string @namespace = null, Type baseType = null, Type[] interfaces = null) {
-			return new NamedType(name, @namespace, baseType, interfaces);
+			return new NamedType1(name, @namespace, baseType, interfaces);
 		}
 
 		/// <summary>

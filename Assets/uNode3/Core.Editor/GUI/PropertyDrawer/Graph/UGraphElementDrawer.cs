@@ -8,7 +8,7 @@ namespace MaxyGames.UNode.Editors {
 			return type == typeof(UGraphElement) || type.IsSubclassOf(typeof(UGraphElement));
 		}
 
-		protected virtual void DrawHeader(DrawerOption option) {
+		protected virtual void DrawHeader(ref DrawerOption option) {
 			//UInspector.Draw(new DrawerOption() {
 			//	property = option.property[nameof(UGraphElement.name)],
 			//	nullable = false,
@@ -17,10 +17,10 @@ namespace MaxyGames.UNode.Editors {
 			//	property = option.property[nameof(UGraphElement.comment)],
 			//	nullable = false,
 			//});
-			DrawNicelyHeader(option, option.type);
+			DrawNicelyHeader(ref option, option.type);
 		}
 
-		protected void DrawNicelyHeader(DrawerOption option, Type type) {
+		protected void DrawNicelyHeader(ref DrawerOption option, Type type) {
 			var value = option.value as UGraphElement;
 			EditorGUILayout.BeginHorizontal();
 			GUI.DrawTexture(uNodeGUIUtility.GetRect(GUILayout.Width(32), GUILayout.Height(32)), uNodeEditorUtility.GetTypeIcon(type));
@@ -70,23 +70,23 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
 		}
 
-		public override void DrawLayouted(DrawerOption option) {
+		public override void DrawLayouted(ref DrawerOption option) {
 			if(option.property is UBindGraphElement) {
-				DrawDecorators(option);
-				DrawHeader(option);
-				DoDraw(option);
-				DrawErrors(option);
+				DrawDecorators(ref option);
+				DrawHeader(ref option);
+				DoDraw(ref option);
+				DrawErrors(ref option);
 			}
 			else {
-				base.DrawLayouted(option);
+				base.DrawLayouted(ref option);
 			}
 		}
 
-		protected virtual void DoDraw(DrawerOption option) {
-			DrawChilds(option);
+		protected virtual void DoDraw(ref DrawerOption option) {
+			DrawChilds(ref option);
 		}
 
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			if(option.property is UBindGraphElement) {
 				EditorGUI.BeginDisabledGroup(true);
 				EditorGUI.DropdownButton(position, new GUIContent(option.label.text, uNodeEditorUtility.GetTypeIcon(option.type)), FocusType.Keyboard, EditorStyles.objectField);
@@ -101,14 +101,14 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		protected virtual void DrawErrors(DrawerOption option) {
+		protected virtual void DrawErrors(ref DrawerOption option) {
 			var value = option.value as UGraphElement;
 			GraphUtility.ErrorChecker.DrawErrorMessages(value);
 		}
 	}
 
 	public abstract class UGraphElementDrawer<T> : UGraphElementDrawer where T : UGraphElement {
-		public T GetValue(DrawerOption option) {
+		public T GetValue(ref DrawerOption option) {
 			return GetValue<T>(option.property);
 		}
 
@@ -127,13 +127,14 @@ namespace MaxyGames.UNode.Editors.Drawer {
 	class NodeObjectDrawer : UGraphElementDrawer<NodeObject> {
 		public override int order => 1000;
 
-		protected override void DoDraw(DrawerOption option) {
+		protected override void DoDraw(ref DrawerOption option) {
 			var node = GetValue<NodeObject>(option.property);
 			if(node.node == null) {
 				EditorGUILayout.HelpBox("Missing node type: " + node.serializedData.serializedType, MessageType.Error);
 				if(GUILayout.Button("Change Node Type")) {
+					var bind = option.property;
 					var win = ItemSelector.ShowType(option.unityObject, new FilterAttribute(typeof(Node)) { DisplayAbstractType = false }, member => {
-						option.property.RegisterUndo();
+						bind.RegisterUndo();
 						node.serializedData.type = member.startType;
 						(node as ISerializationCallbackReceiver).OnAfterDeserialize();
 						uNodeGUIUtility.GUIChangedMajor(node);

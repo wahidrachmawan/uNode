@@ -340,12 +340,13 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public class Data : IDisposable {
-			public EditorWindow window;
+			public ItemSelector window;
 			public Rect windowRect;
 			public Action<MemberData> selectCallback;
 
 			public FilterAttribute filter;
 			public HashSet<string> usingNamespaces;
+			internal IEnumerable<Type> generalTypes;
 
 			public SearchField searchField;
 			public string searchString {
@@ -512,6 +513,25 @@ namespace MaxyGames.UNode.Editors {
 			public Func<ItemRowGUIArgs, bool> OnRowRepaint;
 			internal bool RowRepaintGUI(ItemRowGUIArgs args) {
 				return OnRowRepaint?.Invoke(args) == true;
+			}
+
+			public IEnumerable<Type> GetGeneralTypes() {
+				if(generalTypes != null) {
+					return generalTypes;
+				}
+				List<Type> type = new List<Type> {
+					typeof(string),
+					typeof(float),
+					typeof(bool),
+					typeof(int),
+					//type.Add(typeof(Enum));
+					typeof(Color),
+					typeof(Vector2),
+					typeof(Vector3),
+					typeof(Transform),
+					typeof(GameObject)
+				};
+				return type;
 			}
 		}
 
@@ -1153,24 +1173,23 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static class TreeFunction {
-			public static List<TypeTreeView> GetGeneralTrees() {
+			public static List<TypeTreeView> GetGeneralTrees(IEnumerable<Type> types) {
 				var result = new List<TypeTreeView>();
-				List<Type> types = GetGeneralTypes();
-				types.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 				foreach(Type type in types) {
 					result.Add(new TypeTreeView(type, type.GetHashCode(), -1));
 				}
+				result.Sort((x, y) => string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase));
 				return result;
 			}
 
 			public static List<TypeTreeView> GetRuntimeItems() {
 				var result = new List<TypeTreeView>();
-				List<Type> types = new List<Type>(EditorReflectionUtility.GetRuntimeTypes());
 				EditorReflectionUtility.UpdateRuntimeTypes();
-				types.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+				var types = EditorReflectionUtility.GetRuntimeTypes();
 				foreach(Type type in types) {
 					result.Add(new TypeTreeView(type, type.GetHashCode(), -1));
 				}
+				result.Sort((x, y) => string.Compare(x.displayName, y.displayName, StringComparison.OrdinalIgnoreCase));
 				return result;
 			}
 

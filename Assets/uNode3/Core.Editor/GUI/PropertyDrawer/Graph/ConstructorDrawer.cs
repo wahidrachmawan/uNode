@@ -8,14 +8,14 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class ConstructorDrawer : UGraphElementDrawer<Constructor> {
-		protected override void DrawHeader(DrawerOption option) {
+		protected override void DrawHeader(ref DrawerOption option) {
 			var value = option.value as Constructor;
-			DrawNicelyHeader(option, value.ReturnType());
+			DrawNicelyHeader(ref option, value.ReturnType());
 		}
 
-		protected override void DoDraw(DrawerOption option) {
+		protected override void DoDraw(ref DrawerOption option) {
 			//var value = option.value as Constructor;
-			base.DoDraw(option);
+			base.DoDraw(ref option);
 			UInspector.Draw(option.property[nameof(Constructor.parameters)]);
 			//VariableEditorUtility.DrawAttribute(value.attributes, option.unityObject, (a) => {
 			//	value.attributes = a.ToArray();

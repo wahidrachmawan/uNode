@@ -8,12 +8,12 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class PropertyObjectDrawer : UGraphElementDrawer<Property> {
-		protected override void DrawHeader(DrawerOption option) {
+		protected override void DrawHeader(ref DrawerOption option) {
 			var value = option.value as Property;
-			DrawNicelyHeader(option, value.ReturnType());
+			DrawNicelyHeader(ref option, value.ReturnType());
 		}
 
-		protected override void DoDraw(DrawerOption option) {
+		protected override void DoDraw(ref DrawerOption option) {
 			var value = option.value as Property;
 			bool isInterface = option.unityObject is IScriptInterface or GraphInterface;
 

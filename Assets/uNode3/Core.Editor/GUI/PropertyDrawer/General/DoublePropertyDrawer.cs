@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class DoublePropertyDrawer : UPropertyDrawer<double> {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
 			fieldValue = EditorGUI.DelayedDoubleField(position, option.label, fieldValue);

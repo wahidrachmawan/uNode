@@ -10,7 +10,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 	class AnimationCurvePropertyDrawer : UPropertyDrawer<AnimationCurve> {
 		static AnimationCurve buffer { get => uNodeEditorUtility.CopiedValue<AnimationCurve>.value; set => uNodeEditorUtility.CopiedValue<AnimationCurve>.value = value; }
 
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property, option.nullable);
 			if(fieldValue != null) {
@@ -18,6 +18,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					position.width -= 16;
 				fieldValue = EditorGUI.CurveField(position, option.label, fieldValue);
 				if(Event.current.type == EventType.MouseDown && Event.current.button == 1 && position.Contains(Event.current.mousePosition)) {
+					var opt = option;
 					GenericMenu context = new GenericMenu();
 
 					context.AddItem(new GUIContent("Copy"), false, () => { buffer = SerializerUtility.Duplicate(fieldValue); });
@@ -27,7 +28,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						fieldValue = new AnimationCurve(buffer.keys);
 						fieldValue.preWrapMode = buffer.preWrapMode;
 						fieldValue.postWrapMode = buffer.postWrapMode;
-						option.value = fieldValue;
+						opt.value = fieldValue;
 					});
 
 					context.ShowAsContext();
@@ -42,9 +43,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					}
 				}
 			} else {
+				var opt = option;
 				uNodeGUIUtility.DrawNullValue(position, option.label, option.type, delegate (object o) {
 					fieldValue = o as AnimationCurve;
-					option.value = fieldValue;
+					opt.value = fieldValue;
 				});
 			}
 			if(EditorGUI.EndChangeCheck()) {

@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class ColorPropertyDrawer : UPropertyDrawer<Color> {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
 			var att = ReflectionUtils.GetAttribute<ColorUsageAttribute>(option.property.GetCustomAttributes());

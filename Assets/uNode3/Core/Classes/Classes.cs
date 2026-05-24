@@ -1280,11 +1280,22 @@ namespace MaxyGames.UNode {
 		public bool IsOptional => hasDefaultValue == true;
 		public bool IsOut => refKind == RefKind.Out;
 
+		[SerializeField]
+		private SerializedValue serializedDefaultValue;
 		/// <summary>
 		/// This is the default value of the parameter
 		/// </summary>
-		[SerializeReference]
-		public object defaultValue;
+		public object defaultValue {
+			get => serializedDefaultValue?.value;
+			set {
+				if(value == null) {
+					serializedDefaultValue = null;
+				}
+				else {
+					serializedDefaultValue = new(value);
+				}
+			}
+		}
 
 		public Type Type {
 			get {

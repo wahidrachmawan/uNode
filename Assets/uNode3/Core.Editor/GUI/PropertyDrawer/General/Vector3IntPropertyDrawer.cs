@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class Vector3IntPropertyDrawer : UPropertyDrawer<Vector3Int> {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
 			fieldValue = EditorGUI.Vector3IntField(position, option.label, fieldValue);
@@ -18,7 +18,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			}
 		}
 
-		public override void DrawLayouted(DrawerOption option) {
+		public override void DrawLayouted(ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
 			fieldValue = EditorGUILayout.Vector3IntField(option.label, fieldValue);

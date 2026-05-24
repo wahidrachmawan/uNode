@@ -14,9 +14,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			return true;
 		}
 
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
+			var opt = option;
 			uNodeGUIUtility.EditValue(position, option.label, option.value, option.property.valueType, val => {
-				option.value = val;
+				opt.value = val;
 			}, new() {
 				acceptUnityObject = option.acceptUnityObject,
 				attributes = option.attributes,
@@ -25,15 +26,16 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			});
 		}
 
-		public override void DrawLayouted(DrawerOption option) {
+		public override void DrawLayouted(ref DrawerOption option) {
 			object value = GetValue(option.property, option.property.type, option.nullable);
-			
+			var opt = option;
+
 			if(option.property.type != typeof(object)) {
 				var control = FieldControl.FindControl(option.type, true);
 				if(control != null) {
 					control.DrawLayouted(value, option.label, option.type, (val) => {
-						uNodeEditorUtility.RegisterUndo(option.unityObject, "");
-						option.value = val;
+						uNodeEditorUtility.RegisterUndo(opt.unityObject, "");
+						opt.value = val;
 					}, new uNodeUtility.EditValueSettings() {
 						attributes = option.attributes,
 						unityObject = option.unityObject,
@@ -52,7 +54,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			if(type.IsGenericType || type.IsInterface) {
 				uNodeGUIUtility.EditValueLayouted(option.label, value, type,
 					onChange: (val) => {
-						option.value = value;
+						opt.value = value;
 					}, new uNodeUtility.EditValueSettings() { unityObject = option.unityObject });
 			} else {
 				if(value == null && !option.nullable) {
@@ -66,7 +68,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						var drawer = UPropertyDrawer.FindDrawer(type, true);
 						if(drawer != this) {
 							EditorGUI.EndChangeCheck();
-							drawer.DrawLayouted(option);
+							drawer.DrawLayouted(ref option);
 							return;
 						}
 					}
@@ -76,17 +78,17 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						option.isExpanded = EditorGUI.Foldout(new Rect(foldoutRect.x, foldoutRect.y, 100, foldoutRect.height), option.isExpanded, option.label, true);
 						if(option.isExpanded) {
 							EditorGUI.indentLevel++;
-							DrawChilds(option);
+							DrawChilds(ref option);
 							EditorGUI.indentLevel--;
 						}
 					}
 					else {
-						DrawChilds(option);
+						DrawChilds(ref option);
 					}
 					EditorGUI.EndChangeCheck();
 				} else {
 					uNodeGUIUtility.DrawNullValue(option.label, option.type, (obj) => {
-						option.value = obj;
+						opt.value = obj;
 					});
 				}
 				return;

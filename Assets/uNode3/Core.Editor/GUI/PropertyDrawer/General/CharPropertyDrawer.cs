@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	public class CharPropertyDrawer : UPropertyDrawer<char> {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
 			var newValue = EditorGUI.TextField(position, option.label, fieldValue.ToString());

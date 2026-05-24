@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class DecimalPropertyDrawer : UPropertyDrawer<decimal> {
-		public override void Draw(Rect position, DrawerOption option) {
+		public override void Draw(Rect position, ref DrawerOption option) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(option.property);
 			fieldValue = (decimal)EditorGUI.DoubleField(position, option.label, (double)fieldValue);

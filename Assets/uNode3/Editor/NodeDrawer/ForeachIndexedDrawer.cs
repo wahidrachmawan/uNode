@@ -8,8 +8,8 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
     public class ForeachIndexedDrawer : NodeDrawer<Nodes.ForeachIndexed> {
-		public override void DrawLayouted(DrawerOption option) {
-			var node = GetNode(option);
+		public override void DrawLayouted(ref DrawerOption option) {
+			var node = GetNode(ref option);
 			bool canDeconstruct = node.CanDeconstruct();
 			if(canDeconstruct) {
 				UInspector.Draw(option.property[nameof(node.deconstructValue)]);
@@ -35,9 +35,9 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				}
 			}
 			
-			DrawInputs(option);
-			DrawOutputs(option);
-			DrawErrors(option);
+			DrawInputs(ref option);
+			DrawOutputs(ref option);
+			DrawErrors(ref option);
 		}
 	}
 }

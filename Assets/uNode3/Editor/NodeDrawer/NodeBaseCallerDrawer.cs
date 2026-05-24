@@ -17,8 +17,8 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			ValidNextMemberTypes = MemberTypes.Constructor,
 		};
 
-		protected override void DrawInputs(DrawerOption option) {
-			var node = GetNode(option);
+		protected override void DrawInputs(ref DrawerOption option) {
+			var node = GetNode(ref option);
 			if(GUILayout.Button(new GUIContent("base"), EditorStyles.popup)) {
 				GUI.changed = false;
 				ChangeMember(node);
