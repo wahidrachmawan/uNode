@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace MaxyGames.UNode.Editors.Control {
 	class PropertyModifierFieldControl : FieldControl<PropertyModifier> {
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var fieldValue = value as PropertyModifier;

@@ -29,7 +29,7 @@ namespace MaxyGames.UNode.Editors {
 			var name = uNodeGUI.TextInput(value.name, "(Title)", false);
 			if(!string.IsNullOrEmpty(name) && name != value.name) {
 				option.RegisterUndo();
-				if(value is Variable || value is Property || value is Function || value is IEventGraphCanvas) {
+				if(value is Variable || value is Property || value is Function || value is INodeContainer) {
 					value.name = GraphUtility.GetUniqueName(name, value.graph, element => {
 						if(element == value) {
 							return true;

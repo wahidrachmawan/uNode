@@ -61,7 +61,7 @@ namespace MaxyGames.UNode.Editors {
 				if(nativeType != null && nativeType != type) {
 					EditValueLayouted(label, value, nativeType, (val) => {
 						onChange(val);
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						acceptUnityObject = acceptUnityObject,
 						unityObject = unityObject,
 						nullable = true,
@@ -77,7 +77,7 @@ namespace MaxyGames.UNode.Editors {
 				if(nativeType != null) {
 					EditValueLayouted(label, value, nativeType, (val) => {
 						onChange(val);
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						acceptUnityObject = acceptUnityObject,
 						unityObject = unityObject,
 						nullable = true,
@@ -127,7 +127,7 @@ namespace MaxyGames.UNode.Editors {
 									if(onChange != null)
 										onChange(list);
 									GUIChanged(unityObject);
-								}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
+								}, new EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
 							}
 							EditorGUI.indentLevel--;
 						}
@@ -175,7 +175,7 @@ namespace MaxyGames.UNode.Editors {
 										if(onChange != null)
 											onChange(list);
 										GUIChanged(unityObject);
-									}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
+									}, new EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
 								}
 								EditorGUI.indentLevel--;
 							}
@@ -211,10 +211,10 @@ namespace MaxyGames.UNode.Editors {
 										object[] o = val as object[];
 										EditValueLayouted(new GUIContent("Key"), o[0], keyType, delegate (object v) {
 											o[0] = v;
-										}, new uNodeUtility.EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
+										}, new EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 										EditValueLayouted(new GUIContent("Value"), o[1], valType, delegate (object v) {
 											o[1] = v;
-										}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
+										}, new EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
 										if(GUILayout.Button(new GUIContent("Add"))) {
 											if(!map.Contains(o[0])) {
 												uNodeEditorUtility.RegisterUndo(unityObject, "" + "Add Dictonary Value");
@@ -332,7 +332,7 @@ namespace MaxyGames.UNode.Editors {
 													}
 													GUIChanged(unityObject);
 												}
-											}, new uNodeUtility.EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
+											}, new EditValueSettings() { nullable = false, acceptUnityObject = acceptUnityObject, unityObject = unityObject });
 											EditValueLayouted(new GUIContent("Value"), values[i], valType, delegate (object val) {
 												uNodeEditorUtility.RegisterUndo(unityObject, "");
 												values[index] = val;
@@ -345,7 +345,7 @@ namespace MaxyGames.UNode.Editors {
 													onChange(value);
 												}
 												GUIChanged(unityObject);
-											}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
+											}, new EditValueSettings() { acceptUnityObject = acceptUnityObject, unityObject = unityObject, nullable = true });
 											EditorGUI.indentLevel--;
 										}
 										EditorGUI.indentLevel--;
@@ -450,7 +450,7 @@ namespace MaxyGames.UNode.Editors {
 				if(nativeType != null && nativeType is not INativeMember) {
 					EditValue(position, label, value, nativeType, (val) => {
 						onChange(val);
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						acceptUnityObject = acceptUnityObject,
 						nullable = true,
 					});
@@ -473,7 +473,7 @@ namespace MaxyGames.UNode.Editors {
 								ActionPopupWindow.GetLast().variable = val;
 								if(onChange != null)
 									onChange(val);
-							}, new uNodeUtility.EditValueSettings() { acceptUnityObject = acceptUnityObject, nullable = true });
+							}, new EditValueSettings() { acceptUnityObject = acceptUnityObject, nullable = true });
 						},
 						onGUIBottom: delegate (ref object obj) {
 							if(GUILayout.Button("Close")) {
@@ -710,7 +710,7 @@ namespace MaxyGames.UNode.Editors {
 					if(onChange != null) {
 						onChange(member);
 					}
-				}, new uNodeUtility.EditValueSettings() {
+				}, new EditValueSettings() {
 					acceptUnityObject = true,
 					nullable = true,
 					unityObject = unityObject,
@@ -848,7 +848,7 @@ namespace MaxyGames.UNode.Editors {
 							if(onChange != null) {
 								onChange(member);
 							}
-						}, new uNodeUtility.EditValueSettings() {
+						}, new EditValueSettings() {
 							acceptUnityObject = true,
 							nullable = filter.IsValidTarget(MemberData.TargetType.Null),
 							unityObject = unityObject,
@@ -928,7 +928,7 @@ namespace MaxyGames.UNode.Editors {
 							onChange(member);
 						}
 						uNodeGUIUtility.GUIChanged(unityObject);
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						acceptUnityObject = true,
 						unityObject = unityObject,
 						nullable = filter.IsValidTarget(MemberData.TargetType.Null)
@@ -1381,12 +1381,12 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void ShowFields(object obj, UnityEngine.Object unityObject = null, BindingFlags flags = BindingFlags.Public | BindingFlags.Instance,
-			uNodeUtility.EditValueSettings setting = null) {
+			EditValueSettings setting = null) {
 			FieldInfo[] fieldInfo = EditorReflectionUtility.GetFields(obj.GetType(), flags);
 			ShowFields(fieldInfo, obj, unityObject);
 		}
 
-		public static void ShowFields(FieldInfo[] fields, object targetField, UnityEngine.Object unityObject = null, uNodeUtility.EditValueSettings setting = null) {
+		public static void ShowFields(FieldInfo[] fields, object targetField, UnityEngine.Object unityObject = null, EditValueSettings setting = null) {
 			foreach(FieldInfo field in fields) {
 				if(IsHide(field, targetField) || field.IsInitOnly) {
 					continue;
@@ -1397,7 +1397,7 @@ namespace MaxyGames.UNode.Editors {
 						uNodeEditorUtility.RegisterUndo(unityObject, "");
 						field.SetValueOptimized(targetField, val);
 						GUIChanged(unityObject);
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						attributes = field.GetCustomAttributes(true),
 						unityObject = unityObject
 					});
@@ -1934,9 +1934,9 @@ namespace MaxyGames.UNode.Editors {
 			object targetField,
 			UnityEngine.Object unityObject,
 			ObjectTypeAttribute objectType = null,
-			uNodeUtility.EditValueSettings settings = null) {
+			EditValueSettings settings = null) {
 			if(settings == null) {
-				settings = new uNodeUtility.EditValueSettings();
+				settings = new EditValueSettings();
 			}
 			settings.parentValue = targetField;
 			settings.unityObject = unityObject;
@@ -1948,7 +1948,7 @@ namespace MaxyGames.UNode.Editors {
 			FieldInfo field,
 			object targetField,
 			ObjectTypeAttribute objectType = null,
-			uNodeUtility.EditValueSettings settings = null) {
+			EditValueSettings settings = null) {
 			Type type = field.FieldType;
 			object fieldValue = field.GetValueOptimized(targetField);
 			if(label == null) {
@@ -1960,7 +1960,7 @@ namespace MaxyGames.UNode.Editors {
 				label = new GUIContent(fieldName, ToolTip);
 			}
 			if(settings == null) {
-				settings = new uNodeUtility.EditValueSettings();
+				settings = new EditValueSettings();
 			}
 			EditorGUI.BeginChangeCheck();
 			if(type.IsGenericType ||
@@ -1979,7 +1979,7 @@ namespace MaxyGames.UNode.Editors {
 					oldValue = val;
 					field.SetValueOptimized(targetField, oldValue);
 					GUIChanged(settings.unityObject);
-				}, new uNodeUtility.EditValueSettings(settings) { parentValue = targetField });
+				}, new EditValueSettings(settings) { parentValue = targetField });
 				if(EditorGUI.EndChangeCheck()) {
 					uNodeEditorUtility.RegisterUndo(settings.unityObject, field.Name);
 					field.SetValueOptimized(targetField, oldValue);
@@ -2043,7 +2043,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void ShowField(string fieldName, object parentField, UnityEngine.Object unityObject = null,
-			uNodeUtility.EditValueSettings setting = null) {
+			EditValueSettings setting = null) {
 			if(object.ReferenceEquals(parentField, null))
 				return;
 			FieldInfo field = parentField.GetType().GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic);
@@ -2070,7 +2070,7 @@ namespace MaxyGames.UNode.Editors {
 			if(field == null) {
 				throw new System.Exception("The field name : " + fieldName + " does't exists");
 			}
-			ShowField(label, field, parentField, null, new uNodeUtility.EditValueSettings() {
+			ShowField(label, field, parentField, null, new EditValueSettings() {
 				parentValue = parentField,
 				unityObject = unityObject,
 				attributes = attributes,
@@ -2078,7 +2078,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void ShowField(string fieldName, object parentField, BindingFlags flags, UnityEngine.Object unityObject = null,
-			uNodeUtility.EditValueSettings setting = null) {
+			EditValueSettings setting = null) {
 			if(object.ReferenceEquals(parentField, null))
 				return;
 			FieldInfo field = parentField.GetType().GetField(fieldName, flags);
@@ -2090,7 +2090,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static void ShowField(FieldInfo field, object targetField,
 			UnityEngine.Object unityObject = null,
-			uNodeUtility.EditValueSettings setting = null) {
+			EditValueSettings setting = null) {
 			ShowField(null, field, targetField, unityObject, null, setting);
 		}
 		#endregion
@@ -2107,7 +2107,7 @@ namespace MaxyGames.UNode.Editors {
 			GUIContent label,
 			T fieldValue,
 			Action<T> onChange,
-			uNodeUtility.EditValueSettings settings = null) {
+			EditValueSettings settings = null) {
 			EditValue(position, label, fieldValue, typeof(T), (obj) => onChange?.Invoke((T)obj), settings);
 		}
 
@@ -2118,7 +2118,7 @@ namespace MaxyGames.UNode.Editors {
 			Action<object> onChange,
 			UnityEngine.Object unityObject,
 			object[] fieldAttribute = null) {
-			EditValue(position, label, fieldValue, type, onChange, new uNodeUtility.EditValueSettings() {
+			EditValue(position, label, fieldValue, type, onChange, new EditValueSettings() {
 				attributes = fieldAttribute,
 				unityObject = unityObject,
 			});
@@ -2129,9 +2129,9 @@ namespace MaxyGames.UNode.Editors {
 			object fieldValue,
 			Type type,
 			Action<object> onChange = null,
-			uNodeUtility.EditValueSettings settings = null) {
+			EditValueSettings settings = null) {
 			if(settings == null) {
-				settings = new uNodeUtility.EditValueSettings();
+				settings = new EditValueSettings();
 			}
 			var unityObject = settings.unityObject;
 			var fieldAttribute = settings.attributes;
@@ -2397,7 +2397,7 @@ namespace MaxyGames.UNode.Editors {
 			}, unityObject, field.GetCustomAttributes(true));
 		}
 
-		public static void EditValueLayouted(string fieldName, object owner, Action<object> onChange = null, uNodeUtility.EditValueSettings settings = null) {
+		public static void EditValueLayouted(string fieldName, object owner, Action<object> onChange = null, EditValueSettings settings = null) {
 			var field = GetField(owner, fieldName);
 			if(field == null) {
 				throw new Exception($"Cannot find field with name:{fieldName} on type: {owner.GetType().FullName}");
@@ -2408,7 +2408,7 @@ namespace MaxyGames.UNode.Editors {
 			EditValueLayouted(field, owner, onChange, settings);
 		}
 
-		public static void EditValueLayouted(FieldInfo field, object owner, Action<object> onChange = null, uNodeUtility.EditValueSettings settings = null) {
+		public static void EditValueLayouted(FieldInfo field, object owner, Action<object> onChange = null, EditValueSettings settings = null) {
 			EditValueLayouted(new GUIContent(ObjectNames.NicifyVariableName(field.Name)), field.GetValueOptimized(owner), field.FieldType, (val) => {
 				if(onChange != null) {
 					onChange(val);
@@ -2416,7 +2416,7 @@ namespace MaxyGames.UNode.Editors {
 				else {
 					field.SetValueOptimized(owner, val);
 				}
-			}, settings ?? new uNodeUtility.EditValueSettings() {
+			}, settings ?? new EditValueSettings() {
 				attributes = field.GetCustomAttributes(true)
 			});
 		}
@@ -2424,7 +2424,7 @@ namespace MaxyGames.UNode.Editors {
 		public static void EditValueLayouted<T>(GUIContent label,
 			T fieldValue,
 			Action<T> onChange,
-			uNodeUtility.EditValueSettings settings = null) {
+			EditValueSettings settings = null) {
 
 			EditValueLayouted(
 				label,
@@ -2440,9 +2440,9 @@ namespace MaxyGames.UNode.Editors {
 			object fieldValue,
 			Type type,
 			Action<object> onChange = null,
-			uNodeUtility.EditValueSettings settings = null) {
+			EditValueSettings settings = null) {
 			if(settings == null) {
-				settings = new uNodeUtility.EditValueSettings();
+				settings = new EditValueSettings();
 			}
 			var control = FieldControl.FindControl(type, true);
 			if(control != null) {
@@ -2486,7 +2486,7 @@ namespace MaxyGames.UNode.Editors {
 								onChange(fieldValue);
 							}
 							GUIChanged(unityObject);
-						}, new uNodeUtility.EditValueSettings(settings) {
+						}, new EditValueSettings(settings) {
 							attributes = fieldInfo[index].GetCustomAttributes(true)
 						});
 					}
@@ -2740,7 +2740,7 @@ namespace MaxyGames.UNode.Editors {
 								object[] o = val as object[];
 								EditValueLayouted(new GUIContent("Key"), o[0], keyType, delegate (object v) {
 									o[0] = v;
-								}, new uNodeUtility.EditValueSettings(settings) { nullable = false });
+								}, new EditValueSettings(settings) { nullable = false });
 								EditValueLayouted(new GUIContent("Value"), o[1], valType, delegate (object v) {
 									o[1] = v;
 								}, settings);
@@ -2869,7 +2869,7 @@ namespace MaxyGames.UNode.Editors {
 											}
 											GUIChanged(unityObject);
 										}
-									}, new uNodeUtility.EditValueSettings(settings) { nullable = false });
+									}, new EditValueSettings(settings) { nullable = false });
 									EditValueLayouted(new GUIContent("Value"), values[index], valType, delegate (object val) {
 										uNodeEditorUtility.RegisterUndo(unityObject, "");
 										values[index] = val;
@@ -2940,7 +2940,7 @@ namespace MaxyGames.UNode.Editors {
 								object[] o = val as object[];
 								EditValueLayouted(new GUIContent("Value"), o[0], keyType, delegate (object v) {
 									o[0] = v;
-								}, new uNodeUtility.EditValueSettings(settings) { nullable = false });
+								}, new EditValueSettings(settings) { nullable = false });
 								if(GUILayout.Button(new GUIContent("Add"))) {
 									if(!map.Contains(o[0])) {
 										uNodeEditorUtility.RegisterUndo(unityObject, "" + "Add Value");
@@ -2982,7 +2982,7 @@ namespace MaxyGames.UNode.Editors {
 										}
 										GUIChanged(unityObject);
 									}
-								}, new uNodeUtility.EditValueSettings(settings) { nullable = false });
+								}, new EditValueSettings(settings) { nullable = false });
 								EditorGUI.indentLevel--;
 								if(Event.current.button == 1 && rect.Contains(Event.current.mousePosition)) {
 									GenericMenu menu = new GenericMenu();
@@ -3262,7 +3262,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					EditValueLayouted(label, serializedValue.value, type, (val) => {
 						serializedValue.ChangeValue(val);
-					}, settings: new uNodeUtility.EditValueSettings() {
+					}, settings: new EditValueSettings() {
 						unityObject = unityObject,
 						attributes = attributes,
 						drawDecorator = false,

@@ -36,7 +36,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					control.DrawLayouted(value, option.label, option.type, (val) => {
 						uNodeEditorUtility.RegisterUndo(opt.unityObject, "");
 						opt.value = val;
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						attributes = option.attributes,
 						unityObject = option.unityObject,
 						nullable = option.nullable,
@@ -55,7 +55,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				uNodeGUIUtility.EditValueLayouted(option.label, value, type,
 					onChange: (val) => {
 						opt.value = value;
-					}, new uNodeUtility.EditValueSettings() { unityObject = option.unityObject });
+					}, new EditValueSettings() { unityObject = option.unityObject });
 			} else {
 				if(value == null && !option.nullable) {
 					if(ReflectionUtils.CanCreateInstance(option.type)) {
@@ -156,7 +156,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 								uNodeGUIUtility.EditValue(position, new GUIContent("Element " + index), element, elementType, obj => {
 									list[index] = obj;
 									option.value = list;
-								}, new uNodeUtility.EditValueSettings() {
+								}, new EditValueSettings() {
 									parentValue = list,
 									acceptUnityObject = option.acceptUnityObject,
 									attributes = option.attributes,

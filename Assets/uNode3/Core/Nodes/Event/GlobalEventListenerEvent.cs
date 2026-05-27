@@ -8,6 +8,7 @@ namespace MaxyGames.UNode.Nodes {
 	[Description("Event will be called every time when the target global event is triggered.")]
 	[StateEvent]
 	public class GlobalEventListenerEvent : BaseComponentEvent {
+		[AllowAssetReference]
         public UGlobalEvent target;
 
 		public class Data {

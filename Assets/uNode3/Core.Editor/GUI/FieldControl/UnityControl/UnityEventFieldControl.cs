@@ -151,7 +151,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return layouted && type.IsSubclassOf(typeof(UnityEventBase));
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			if(ValidateValue(ref value, type)) {
 				onChanged(value);

@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace MaxyGames.UNode.Editors.Control {
 	class Vector2IntFieldControl : FieldControl<Vector2Int> {
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var oldValue = (Vector2Int)value;
@@ -19,7 +19,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			}
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			DrawDecorators(settings);
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);

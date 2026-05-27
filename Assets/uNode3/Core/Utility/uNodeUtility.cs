@@ -244,73 +244,6 @@ namespace MaxyGames.UNode {
 
 		#region Others
 		/// <summary>
-		/// Class setting for edit value
-		/// </summary>
-		public class EditValueSettings {
-			/// <summary>
-			/// The parent object.
-			/// </summary>
-			public object parentValue;
-			/// <summary>
-			/// Allow UnityReference to be edited.
-			/// </summary>
-			public bool acceptUnityObject = true;
-			/// <summary>
-			/// Allow reference/class object to be null.
-			/// </summary>
-			public bool nullable = false;
-			public UnityEngine.Object unityObject;
-			public object[] attributes;
-
-			public string Tooltip {
-				get {
-					if(attributes != null) {
-						for(int i = 0; i < attributes.Length; i++) {
-							if(attributes[i] is TooltipAttribute tooltip) {
-								return tooltip.tooltip;
-							}
-						}
-					}
-					return string.Empty;
-				}
-			}
-
-			public bool HasAttribute<T>() where T : Attribute {
-				if(attributes != null) {
-					for(int i = 0; i < attributes.Length; i++) {
-						if(attributes[i] is T) {
-							return true;
-						}
-					}
-				}
-				return false;
-			}
-
-			public bool drawDecorator = true;
-
-			public EditValueSettings() { }
-
-			public EditValueSettings(object parentInstance) {
-				this.parentValue = parentInstance;
-			}
-
-			public EditValueSettings(bool acceptUnityObject, bool nullable, object parentInstance = null) {
-				this.acceptUnityObject = acceptUnityObject;
-				this.nullable = nullable;
-				this.parentValue = parentInstance;
-			}
-
-			public EditValueSettings(EditValueSettings other) {
-				this.parentValue = other.parentValue;
-				this.nullable = other.nullable;
-				this.acceptUnityObject = other.acceptUnityObject;
-				this.attributes = other.attributes;
-				this.unityObject = other.unityObject;
-				this.drawDecorator = other.drawDecorator;
-			}
-		}
-
-		/// <summary>
 		/// Validate that variable name is valid
 		/// </summary>
 		/// <param name="Name">The name to validate</param>
@@ -1891,6 +1824,73 @@ namespace MaxyGames.UNode {
 		internal static List<Object> temporaryObjects = new List<Object>();
 
 		public static bool IsInMainThread => System.Threading.Thread.CurrentThread == mainThread;
+	}
+
+	/// <summary>
+	/// Class setting for edit value
+	/// </summary>
+	public class EditValueSettings {
+		/// <summary>
+		/// The parent object.
+		/// </summary>
+		public object parentValue;
+		/// <summary>
+		/// Allow UnityReference to be edited.
+		/// </summary>
+		public bool acceptUnityObject = true;
+		/// <summary>
+		/// Allow reference/class object to be null.
+		/// </summary>
+		public bool nullable = false;
+		public UnityEngine.Object unityObject;
+		public object[] attributes;
+
+		public string Tooltip {
+			get {
+				if(attributes != null) {
+					for(int i = 0; i < attributes.Length; i++) {
+						if(attributes[i] is TooltipAttribute tooltip) {
+							return tooltip.tooltip;
+						}
+					}
+				}
+				return string.Empty;
+			}
+		}
+
+		public bool HasAttribute<T>() where T : Attribute {
+			if(attributes != null) {
+				for(int i = 0; i < attributes.Length; i++) {
+					if(attributes[i] is T) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public bool drawDecorator = true;
+
+		public EditValueSettings() { }
+
+		public EditValueSettings(object parentInstance) {
+			this.parentValue = parentInstance;
+		}
+
+		public EditValueSettings(bool acceptUnityObject, bool nullable, object parentInstance = null) {
+			this.acceptUnityObject = acceptUnityObject;
+			this.nullable = nullable;
+			this.parentValue = parentInstance;
+		}
+
+		public EditValueSettings(EditValueSettings other) {
+			this.parentValue = other.parentValue;
+			this.nullable = other.nullable;
+			this.acceptUnityObject = other.acceptUnityObject;
+			this.attributes = other.attributes;
+			this.unityObject = other.unityObject;
+			this.drawDecorator = other.drawDecorator;
+		}
 	}
 
 	[Serializable]

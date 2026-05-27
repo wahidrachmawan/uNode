@@ -1836,4 +1836,45 @@ namespace MaxyGames.UNode {
 	public class EnumModifier : AccessModifier {
 
 	}
+
+	public static class GraphAnalyzerUtility {
+		public static bool HasReturn(NodeObject entry) {
+			bool hasReturn = false;
+			var nodes = CG.Nodes.FindAllConnections(entry, includeFlowOutput: true);
+			foreach(var node in nodes) {
+				if(node.node is Nodes.NodeReturn) {
+					hasReturn = true;
+					break;
+				}
+			}
+			return hasReturn;
+		}
+
+		public static bool HasAsyncReturn(NodeObject entry) {
+			bool hasReturn = false;
+			var nodes = CG.Nodes.FindAllConnections(entry, includeFlowOutput: true);
+			foreach(var node in nodes) {
+				if(node.node is Nodes.AwaitNode) {
+					hasReturn = true;
+					break;
+				}
+			}
+			return hasReturn;
+		}
+
+		public static bool HasYieldReturn(NodeObject entry) {
+			bool hasReturn = false;
+			var nodes = CG.Nodes.FindAllConnections(entry, includeFlowOutput: true);
+			foreach(var node in nodes) {
+				foreach(var port in node.FlowInputs) {
+					if(port.IsCoroutine()) {
+						hasReturn = true;
+						break;
+					}
+				}
+				if(hasReturn) break;
+			}
+			return hasReturn;
+		}
+	}
 }

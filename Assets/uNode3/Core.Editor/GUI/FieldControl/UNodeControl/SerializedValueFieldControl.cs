@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			return base.IsValidControl(type, layouted) && layouted;
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(value, false);
 			if(fieldValue != null) {

@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return type.IsCastableTo(typeof(UGraphElement)) || type.IsCastableTo(typeof(Node)) || type.IsCastableTo(typeof(UPort));
 		}
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			position.height = Mathf.Min(18f, position.height);
 			position = EditorGUI.PrefixLabel(position, label);
 			uNodeGUI.DrawReference(position, value, type);
@@ -23,7 +23,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return type == typeof(UGraphElementRef);
 		}
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			position = EditorGUI.PrefixLabel(position, label);
 			uNodeGUI.DrawReference(position, value, type);
 		}

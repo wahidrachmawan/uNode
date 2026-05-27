@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MaxyGames.UNode {
 	[EventGraph("StateMachine")]
-	public class StateGraphContainer : NodeContainerWithEntry, IEventGraphCanvas, IIcon, IGeneratorPrePostInitializer {
+	public class StateGraphContainer : NodeContainerWithEntry, IIcon, IGeneratorPrePostInitializer {
 		public enum UpdateType {
 			Update,
 			FixedUpdate,
@@ -14,9 +14,9 @@ namespace MaxyGames.UNode {
 		}
 		public UpdateType updateType = UpdateType.Update;
 
-		public string Title => name;
-
 		public const string Scope = "StateMachine";
+
+		public override string SupportedScope => Scope;
 
 		public override BaseEntryNode Entry {
 			get {
@@ -31,8 +31,6 @@ namespace MaxyGames.UNode {
 				return entryObject.node as BaseEntryNode;
 			}
 		}
-
-		string IEventGraphCanvas.Scope => Scope;
 
 		public Type GetIcon() {
 			return typeof(TypeIcons.StateIcon);

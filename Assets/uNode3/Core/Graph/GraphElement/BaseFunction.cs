@@ -6,7 +6,7 @@ using System.Collections;
 using MaxyGames.UNode.Nodes;
 
 namespace MaxyGames.UNode {
-	public abstract class BaseFunction : NodeContainerWithEntry, IParameterSystem, ILocalVariableSystem, IGeneratorPrePostInitializer {
+	public abstract class BaseFunction : NodeContainerWithEntry, IParameterSystem, ILocalVariableSystem, IGeneratorPrePostInitializer, IElementWithEntry {
 		[HideInInspector]
 		public List<ParameterData> parameters = new List<ParameterData>();
 
@@ -31,6 +31,12 @@ namespace MaxyGames.UNode {
 		public IList<ParameterData> Parameters {
 			get {
 				return parameters;
+			}
+		}
+
+		public override string SupportedScope {
+			get {
+				return NodeScope.Function + NodeScope.OR + NodeScope.FlowGraph;
 			}
 		}
 

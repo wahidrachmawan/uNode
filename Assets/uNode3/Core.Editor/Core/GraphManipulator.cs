@@ -2004,7 +2004,7 @@ namespace MaxyGames.UNode.Editors {
 			#endregion
 
 			#region Return & Jump
-			if(graphData.selectedRoot is BaseFunction) {
+			if(graphData.scopes.Contains(NodeScope.FlowGraph)) {
 				yield return new ContextMenuItem("Jump Statement/Add Return", (e) => {
 					var selectedNodes = graphData.selectedNodes.ToArray();
 					Rect rect = selectedNodes.Length > 0 ? NodeEditorUtility.GetNodeRect(selectedNodes) : new Rect(mousePosition.x, mousePosition.y, 200, 130);

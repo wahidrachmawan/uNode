@@ -612,7 +612,7 @@ namespace MaxyGames {
 			string paramName = parameters != null ? string.Join(", ", parameters.Where(item => !string.IsNullOrEmpty(item))) : null;
 			string initName = null;
 			if(initializers != null) {
-				if(prettyPrint == true || prettyPrint == null && initializers.Sum(s => s.Length) >= 150 || initializers.Any(item => item != null && item.Contains('\n'))) {
+				if(prettyPrint == true || prettyPrint == null && initializers.Sum(s => s != null ? s.Length : 0) >= 150 || initializers.Any(item => item != null && item.Contains('\n'))) {
 					initName = string.Join(", \n", initializers.Where(item => !string.IsNullOrEmpty(item)));
 					initName = initName.AddLineInFirst().AddLineInEnd().AddTabAfterNewLine().AddLineInEnd();
 				}

@@ -46,6 +46,8 @@ namespace MaxyGames.UNode.Nodes {
 			}
 		}
 
+		public string Title => name;
+
 		public IEnumerable<StateTransition> GetTransitions() {
 			return transitions.GetFlowNodes<StateTransition>();
 		}

@@ -315,11 +315,17 @@ namespace MaxyGames.UNode {
 				if(init.isComplexInitializer) {
 					for(int x = 0; x < init.elementInitializers.Length; x++) {
 						var element = init.elementInitializers[x];
-						element.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id + "#" + x, element.type.type).SetName(element.name + " " + i);
+						element.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id + "#" + x, element.type.type, out var isNew).SetName(element.name + " " + i);
+						if(isNew && ReflectionUtils.CanCreateInstance(element.type)) {
+							element.port.AssignToDefault(ReflectionUtils.CreateInstance(element.type));
+						}
 					}
 				}
 				else {
-					init.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id, init.type.type).SetName(init.name);
+					init.port = Node.Utilities.ValueInput(node, pathID + "-init." + init.id, init.type.type, out var isNew).SetName(init.name);
+					if(isNew && ReflectionUtils.CanCreateInstance(init.type)) {
+						init.port.AssignToDefault(ReflectionUtils.CreateInstance(init.type));
+					}
 				}
 			}
 		}

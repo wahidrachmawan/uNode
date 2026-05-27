@@ -20,11 +20,13 @@ namespace MaxyGames.UNode.Editors {
 			if(option.property == null) return;
 			if(option.property.isRoot) {
 				UPropertyDrawer.DrawChilds(ref option);
-			} else {
+			}
+			else {
 				var drawer = UPropertyDrawer.FindDrawer(option.type, true);
 				if(drawer != null) {
 					drawer.DrawLayouted(ref option);
-				} else {
+				}
+				else {
 
 				}
 			}
@@ -34,11 +36,13 @@ namespace MaxyGames.UNode.Editors {
 			if(option.property == null) return;
 			if(option.property.isRoot) {
 				UPropertyDrawer.DrawChilds(ref option);
-			} else {
+			}
+			else {
 				var drawer = UPropertyDrawer.FindDrawer(type, true);
 				if(drawer != null) {
 					drawer.DrawLayouted(ref option);
-				} else {
+				}
+				else {
 
 				}
 			}
@@ -54,7 +58,8 @@ namespace MaxyGames.UNode.Editors {
 					label = label,
 					flags = flags,
 				});
-			} else {
+			}
+			else {
 				Draw(new DrawerOption() {
 					property = property,
 					nullable = nullable,
@@ -63,6 +68,21 @@ namespace MaxyGames.UNode.Editors {
 					flags = flags,
 				}, type);
 			}
+		}
+
+		public static void EditValueLayouted(GUIContent label,
+			object fieldValue,
+			Type type,
+			Action<object> onChange = null,
+			EditValueSettings settings = null) {
+			uNodeGUIUtility.EditValueLayouted(label, fieldValue, type, onChange, settings);
+		}
+
+		public static void EditValueLayouted<T>(GUIContent label,
+			T fieldValue,
+			Action<T> onChange = null,
+			EditValueSettings settings = null) {
+			uNodeGUIUtility.EditValueLayouted(label, fieldValue, onChange, settings);
 		}
 
 		public static void DrawChilds(DrawerOption option) {

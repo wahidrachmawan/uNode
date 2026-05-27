@@ -10,7 +10,7 @@ namespace MaxyGames.UNode.Editors.Control {
 	class AnimationCurveFieldControl : FieldControl<AnimationCurve> {
 		static AnimationCurve buffer { get => uNodeEditorUtility.CopiedValue<AnimationCurve>.value; set => uNodeEditorUtility.CopiedValue<AnimationCurve>.value = value; }
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value, settings != null ? settings.nullable : false);
 			var fieldValue = value as AnimationCurve;

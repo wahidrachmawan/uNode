@@ -123,7 +123,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 						val = obj;
 						config.OnValueChanged(obj);
 						config.owner.MarkRepaint();
-					}, new uNodeUtility.EditValueSettings() {
+					}, new EditValueSettings() {
 						attributes = new object[] { config.filter },
 						unityObject = config.owner.targetNode.GetUnityObject()
 					});

@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace MaxyGames.UNode.Editors.Control {
 	class FunctionModifierFieldControl : FieldControl<FunctionModifier> {
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var fieldValue = value as FunctionModifier;
@@ -203,7 +203,7 @@ namespace MaxyGames.UNode.Editors.Control {
 	}
 
 	class ConstructorModifierFieldControl : FieldControl<ConstructorModifier> {
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var fieldValue = value as ConstructorModifier;

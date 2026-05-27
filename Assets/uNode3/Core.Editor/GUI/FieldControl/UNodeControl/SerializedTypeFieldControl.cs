@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace MaxyGames.UNode.Editors.Drawer {
 	class SerializedTypeFieldControl : FieldControl<SerializedType> {
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			var attributes = settings.attributes;
 			EditorGUI.BeginChangeCheck();
 			var fieldValue = GetValue(value, false);

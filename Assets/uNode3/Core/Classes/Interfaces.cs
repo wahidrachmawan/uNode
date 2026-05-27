@@ -404,12 +404,6 @@ namespace MaxyGames.UNode {
 		HashSet<string> SupportedEventGraphs { get; }
 	}
 
-	public interface IEventGraphCanvas {
-		string Title { get; }
-		string Scope => NodeScope.FlowGraph;
-		bool AllowCoroutine => false;
-	}
-
 	/// <summary>
 	/// An interface to implement Macro Graph
 	/// </summary>
@@ -490,7 +484,15 @@ namespace MaxyGames.UNode {
 		IEnumerable<Nodes.MacroPortNode> OutputValues { get; }
 	}
 
-	public interface INodeContainerWithEntry {
+	public interface INodeContainer {
+		string Title { get; }
+		/// <summary>
+		/// The supported scope, multiple scope is supported separated by `,` or `|`.
+		/// </summary>
+		string SupportedScope => NodeScope.FlowGraph;
+	}
+
+	public interface INodeContainerWithEntry : INodeContainer {
 		IEnumerable<NodeObject> GetEntryNodes();
 	}
 

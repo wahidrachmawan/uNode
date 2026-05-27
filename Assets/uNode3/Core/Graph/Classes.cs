@@ -479,6 +479,10 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public virtual string Title => name;
+
+		public virtual string SupportedScope => NodeScope.FlowGraph;
+
 		public virtual bool AllowCoroutine() {
 			return false;
 		}
@@ -503,6 +507,8 @@ namespace MaxyGames.UNode {
 				return entryObject.node as BaseEntryNode;
 			}
 		}
+
+		public NodeObject EntryNode => Entry?.nodeObject;
 
 		public virtual void RegisterEntry(BaseEntryNode node) { }
 
@@ -600,6 +606,24 @@ namespace MaxyGames.UNode {
 	public sealed class EventGraphContainer : URoot<NodeContainer> { }
 
 	public sealed class MainGraphContainer : NodeContainer, IPrettyName, IIcon {
+		public override string SupportedScope {
+			get {
+				if(graph is IStateGraph) {
+					return NodeScope.StateGraph + NodeScope.OR + 
+						NodeScope.FlowGraph + NodeScope.OR + 
+						NodeScope.Coroutine;
+				}
+				else if(graph is ICustomMainGraph mainGraph) {
+					var scopes = mainGraph.MainGraphScope;
+					if(mainGraph.AllowCoroutine) {
+						scopes = scopes + NodeScope.OR + NodeScope.Coroutine;
+					}
+					return scopes;
+				}
+				return string.Empty;
+			}
+		}
+
 		public override bool AllowCoroutine() {
 			var container = graphContainer;
 			if(container is IMacroGraph || container is IStateGraph) {
@@ -1260,5 +1284,18 @@ namespace MaxyGames.UNode {
 				this.value = value;
 			}
 		}
+	}
+
+	public readonly struct NodeObjectRef<T> where T : Node {
+		[NonSerialized]
+		public readonly NodeObject nodeObject;
+
+		public T Value => nodeObject.node as T;
+
+		public NodeObjectRef(T Value) {
+			this.nodeObject = Value?.nodeObject;
+		}
+
+		public bool IsValid => nodeObject != null && nodeObject.node is T;
 	}
 }

@@ -98,6 +98,12 @@ namespace MaxyGames.UNode.Editors {
 							graphView.contentViewContainer.ChangeCoordinatesTo(graphView, input.isHidden ? input.hidingRect : input.layout), 
 							graphView.contentViewContainer.ChangeCoordinatesTo(graphView, output.isHidden ? output.hidingRect : output.layout)
 						);
+						if(float.IsNaN(edgeRect.x)) {
+							edgeRect = RectUtils.Encompass(
+								graphView.contentViewContainer.ChangeCoordinatesTo(graphView, input.isHidden ? input.hidingRect : input.nodeObject.position),
+								graphView.contentViewContainer.ChangeCoordinatesTo(graphView, output.isHidden ? output.hidingRect : output.nodeObject.position)
+							);
+						}
 					} else {
 						edgeRect = edgeControl.ChangeCoordinatesTo(graphView, edgeControl.GetRect());
 					}

@@ -78,12 +78,12 @@ namespace MaxyGames.UNode.Editors {
 						EditorGUI.indentLevel--;
 					}
 					else {
-						uNodeGUIUtility.EditValueLayouted(new GUIContent(ObjectNames.NicifyVariableName(field.Name)), val, field.FieldType, null, new uNodeUtility.EditValueSettings() { nullable = true });
+						uNodeGUIUtility.EditValueLayouted(new GUIContent(ObjectNames.NicifyVariableName(field.Name)), val, field.FieldType, null, new EditValueSettings() { nullable = true });
 					}
 				}
 			}
 			else {
-				uNodeGUIUtility.EditValueLayouted(new GUIContent("value"), target, type, null, new uNodeUtility.EditValueSettings() { nullable = true });
+				uNodeGUIUtility.EditValueLayouted(new GUIContent("value"), target, type, null, new EditValueSettings() { nullable = true });
 			}
 			EditorGUI.BeginDisabledGroup(false);
 		}

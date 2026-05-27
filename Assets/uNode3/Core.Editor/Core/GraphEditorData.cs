@@ -183,26 +183,9 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				var root = selectedRoot;
 				if(root != null) {
-					if(root is MainGraphContainer) {
-						if(graph is IStateGraph) {
-							m_scopes.Add(NodeScope.StateGraph);
-							m_scopes.Add(NodeScope.FlowGraph);
-							m_scopes.Add(NodeScope.Coroutine);
-						}
-						else if(graph is ICustomMainGraph mainGraph) {
-							NodeScope.ApplyScopes(mainGraph.MainGraphScope, m_scopes, null, out _);
-							if(mainGraph.AllowCoroutine) {
-								m_scopes.Add(NodeScope.Coroutine);
-							}
-						}
-					}
-					else if(root is IEventGraphCanvas) {
-						var canvass = root as IEventGraphCanvas;
-						NodeScope.ApplyScopes(canvass.Scope, m_scopes, null, out _);
-					}
-					if(root is BaseFunction) {
-						m_scopes.Add(NodeScope.Function);
-						m_scopes.Add(NodeScope.FlowGraph);
+					if(root is INodeContainer) {
+						var container = root as INodeContainer;
+						NodeScope.ApplyScopes(container.SupportedScope, m_scopes, null, out _);
 					}
 					if(root.AllowCoroutine()) {
 						m_scopes.Add(NodeScope.Coroutine);

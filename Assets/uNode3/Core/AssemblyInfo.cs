@@ -22,4 +22,6 @@ using UnityEngine;
 [assembly: MakeSerializable(typeof(StateGraphContainer))]
 [assembly: MakeSerializable(typeof(TransitionContainer))]
 [assembly: MakeSerializable(typeof(BlockContainer))]
+[assembly: MakeSerializable(typeof(NodeContainer))]
+[assembly: MakeSerializable(typeof(NodeContainerWithEntry))]
 #endif

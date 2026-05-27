@@ -1286,7 +1286,7 @@ namespace MaxyGames.UNode.Editors {
 				graph.EnableBreadcrumb(true);
 				pathbar.Add(graph);
 				var root = window.selectedTab.selectedGraphData.selectedRoot;
-				var function = new ClickableElement(root is NodeContainerWithEntry ? root.name : $"[{graphData.MainGraphTitle}]") {
+				var function = new ClickableElement(root is MainGraphContainer ? $"[{graphData.MainGraphTitle}]" : root.Title) {
 					name = "path-element"
 				};
 				function.AddToClassList("path-function");

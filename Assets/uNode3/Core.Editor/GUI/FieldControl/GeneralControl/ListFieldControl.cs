@@ -45,7 +45,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return false;
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			if(ValidateValue(ref value, type, settings.nullable)) {
 				onChanged(value);
 			}
@@ -96,7 +96,7 @@ namespace MaxyGames.UNode.Editors.Control {
 							uNodeGUIUtility.EditValue(position, new GUIContent("Element " + index), element, elementType, obj => {
 								list[index] = obj;
 								onChanged(list);
-							}, new uNodeUtility.EditValueSettings(settings) { parentValue = list });
+							}, new EditValueSettings(settings) { parentValue = list });
 						}
 						catch(ExitGUIException) {
 							Event.current?.Use();

@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return layouted && base.IsValidControl(type, layouted);
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value, false);
 			var fieldValue = value as ParameterValueData;
@@ -25,7 +25,7 @@ namespace MaxyGames.UNode.Editors.Control {
 				uNodeGUIUtility.EditValueLayouted(label, fieldValue.value, t, delegate (object val) {
 					fieldValue.value = val;
 					onChanged(fieldValue);
-				}, new uNodeUtility.EditValueSettings() { nullable = true, unityObject = settings.unityObject });
+				}, new EditValueSettings() { nullable = true, unityObject = settings.unityObject });
 			}
 			if(EditorGUI.EndChangeCheck()) {
 				onChanged(value);

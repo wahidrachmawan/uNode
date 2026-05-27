@@ -75,8 +75,8 @@ namespace MaxyGames.UNode.Nodes {
 						else {
 							if(node is BaseEntryNode) {
 								var parent = (node as BaseEntryNode).nodeObject.parent;
-								if(parent is BaseFunction func) {
-									return func.ReturnType() ?? typeof(void);
+								if(parent is IElementWithEntry entry) {
+									return entry.ReturnType() ?? typeof(void);
 								}
 								else if(parent is NodeObject nod) {
 									if(nod.node is IElementWithEntry elementWithEntry) {

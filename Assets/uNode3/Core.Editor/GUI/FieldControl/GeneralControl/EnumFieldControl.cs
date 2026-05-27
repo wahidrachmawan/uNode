@@ -15,7 +15,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return false;
 		}
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			if(value == null) {
 				value = ReflectionUtils.CreateInstance(type) as Enum;

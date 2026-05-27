@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace MaxyGames.UNode.Editors.Control {
 	class ParameterListFieldControl : FieldControl<List<ParameterData>> {
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var fieldValue = value as List<ParameterData>;

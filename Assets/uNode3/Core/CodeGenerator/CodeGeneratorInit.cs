@@ -144,6 +144,14 @@ namespace MaxyGames {
 			if(element is NodeObject node) {
 				InitConnect(node);
 			}
+			if(element is INodeContainerWithEntry nodeContainer) {
+				var entries = nodeContainer.GetEntryNodes();
+				if(entries != null) {
+					foreach(var entry in entries) {
+						RegisterDependency(entry);
+					}
+				}
+			}
 		}
 
 		/// <summary>

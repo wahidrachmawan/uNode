@@ -10,7 +10,7 @@ namespace MaxyGames.UNode.Editors.Control {
 	class RectFieldControl : FieldControl<Rect> {
 		private static GUIContent[] contents = new GUIContent[] { new GUIContent("X"), new GUIContent("Y"), new GUIContent("W"), new GUIContent("H") };
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value);
 			var oldValue = (Rect)value;
@@ -21,7 +21,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			}
 		}
 
-		public override float GetControlHeight(GUIContent label, object value, Type type, uNodeUtility.EditValueSettings settings) {
+		public override float GetControlHeight(GUIContent label, object value, Type type, EditValueSettings settings) {
 			return base.GetControlHeight(label, value, type, settings) * 2;
 		}
 	}

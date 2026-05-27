@@ -15,15 +15,15 @@ namespace MaxyGames.UNode.Editors {
 		
 		public abstract bool IsValidControl(Type type, bool layouted);
 
-		public virtual void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public virtual void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 
 		}
 
-		public virtual float GetControlHeight(GUIContent label, object value, Type type, uNodeUtility.EditValueSettings settings) {
+		public virtual float GetControlHeight(GUIContent label, object value, Type type, EditValueSettings settings) {
 			return 20f;
 		}
 		
-		public virtual void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public virtual void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			DrawDecorators(settings);
 			if(string.IsNullOrEmpty(label.tooltip)) {
 				label.tooltip = settings?.Tooltip;
@@ -31,7 +31,7 @@ namespace MaxyGames.UNode.Editors {
 			Draw(uNodeGUIUtility.GetRect(EditorGUIUtility.labelWidth, GetControlHeight(label, value, type, settings)), label, value, type, onChanged, settings);
 		}
 
-		protected void DrawDecorators(uNodeUtility.EditValueSettings settings) {
+		protected void DrawDecorators(EditValueSettings settings) {
 			if(settings.drawDecorator)
 				FieldDecorator.DrawDecorators(settings.attributes);
 		}
@@ -207,7 +207,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return false;
 		}
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			position = EditorGUI.PrefixLabel(position, label);
 			EditorGUI.SelectableLabel(position, label.text);
 		}

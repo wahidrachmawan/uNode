@@ -8,7 +8,7 @@ using UnityEditor;
 
 namespace MaxyGames.UNode.Editors.Control {
 	class StringFieldControl : FieldControl<string> {
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			var attributes = settings.attributes;
 			EditorGUI.BeginChangeCheck();
 			ValidateValue(ref value, settings != null ? settings.nullable : false);
@@ -109,7 +109,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			}
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			DrawDecorators(settings);
 			var attributes = settings.attributes;
 			EditorGUI.BeginChangeCheck();

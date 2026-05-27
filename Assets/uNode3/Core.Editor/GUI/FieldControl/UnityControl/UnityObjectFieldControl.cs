@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			return type == typeof(UnityEngine.Object) || type.IsSubclassOf(typeof(UnityEngine.Object)) && type is not RuntimeType;
 		}
 
-		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 			bool flag = true;
 			if(settings.acceptUnityObject == false) {
 				flag = false;
@@ -45,7 +45,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			}
 		}
 
-		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+		public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 			bool flag = true;
 			if(settings.acceptUnityObject == false) {
 				flag = false;
@@ -85,7 +85,7 @@ namespace MaxyGames.UNode.Editors.Control {
 				return type.IsInterface;
 			}
 
-			public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+			public override void Draw(Rect position, GUIContent label, object value, Type type, Action<object> onChanged, EditValueSettings settings) {
 				bool flag = true;
 				if(settings.acceptUnityObject == false) {
 					flag = false;
@@ -116,7 +116,7 @@ namespace MaxyGames.UNode.Editors.Control {
 				}
 			}
 
-			public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, uNodeUtility.EditValueSettings settings) {
+			public override void DrawLayouted(object value, GUIContent label, Type type, Action<object> onChanged, EditValueSettings settings) {
 				bool flag = true;
 				if(settings.acceptUnityObject == false) {
 					flag = false;
