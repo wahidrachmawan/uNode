@@ -326,6 +326,15 @@ namespace MaxyGames {
 		/// Wrap a string value with brackets "{ <paramref name="code"/> }"
 		/// </summary>
 		/// <param name="code"></param>
+		/// <returns></returns>
+		public static string WrapBracesStatement(string code) {
+			return WrapBraces(code, isStatement: true);
+		}
+
+		/// <summary>
+		/// Wrap a string value with brackets "{ <paramref name="code"/> }"
+		/// </summary>
+		/// <param name="code"></param>
 		/// <param name="onlyOnContainSpace"></param>
 		/// <returns></returns>
 		public static string WrapBraces(string code, bool onlyOnContainSpace = false, bool isStatement = false) {

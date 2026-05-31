@@ -105,22 +105,22 @@ namespace MaxyGames.UNode.Editors {
 					break;
 				case MemberData.TargetType.uNodeVariable:
 					evt.menu.AppendAction($"{startMenuName}Find All References: {memberData.startName} (Variable)", (e) => {
-						GraphUtility.ShowVariableUsages(memberData.startItem.reference.ReferenceValue as Variable);
+						GraphEditorUtility.ShowVariableUsages(memberData.startItem.reference.ReferenceValue as Variable);
 					}, DropdownMenuAction.AlwaysEnabled);
 					break;
 				case MemberData.TargetType.uNodeProperty:
 					evt.menu.AppendAction($"{startMenuName}Find All References: {memberData.startName} (Property)", (e) => {
-						GraphUtility.ShowPropertyUsages(memberData.startItem.reference.ReferenceValue as Property);
+						GraphEditorUtility.ShowPropertyUsages(memberData.startItem.reference.ReferenceValue as Property);
 					}, DropdownMenuAction.AlwaysEnabled);
 					break;
 				case MemberData.TargetType.uNodeFunction:
 					evt.menu.AppendAction($"{startMenuName}Find All References: {memberData.startName} (Function)", (e) => {
-						GraphUtility.ShowFunctionUsages(memberData.startItem.reference.ReferenceValue as Function);
+						GraphEditorUtility.ShowFunctionUsages(memberData.startItem.reference.ReferenceValue as Function);
 					}, DropdownMenuAction.AlwaysEnabled);
 					break;
 				case MemberData.TargetType.uNodeLocalVariable:
 					evt.menu.AppendAction($"{startMenuName}Find All References: {memberData.startName} (Local Variable)", (e) => {
-						GraphUtility.ShowLocalVariableUsages(memberData.startItem.reference.ReferenceValue as Variable);
+						GraphEditorUtility.ShowLocalVariableUsages(memberData.startItem.reference.ReferenceValue as Variable);
 					}, DropdownMenuAction.AlwaysEnabled);
 					break;
 					//TODO: fix me
@@ -154,16 +154,16 @@ namespace MaxyGames.UNode.Editors {
 				uNodeEditorUtility.FindInBrowser(info);
 			}, DropdownMenuAction.AlwaysEnabled);
 			evt.menu.AppendAction($"{startMenuName}Find All References: {info.Name} ({info.MemberType})", (e) => {
-				GraphUtility.ShowMemberUsages(info);
+				GraphEditorUtility.ShowMemberUsages(info);
 			}, DropdownMenuAction.AlwaysEnabled);
 			if(info is IRuntimeMember) {
 				evt.menu.AppendAction($"{startMenuName}Go To Definition: {info.Name} ({info.MemberType})", (e) => {
-					GraphUtility.GoToDefinition(info);
+					GraphEditorUtility.GoToDefinition(info);
 				}, DropdownMenuAction.AlwaysEnabled);
 			}
 			else {
 				evt.menu.AppendAction($"{startMenuName}Go To Definition: {info.Name} ({info.MemberType})", (e) => {
-					GraphUtility.GoToDefinition(info);
+					GraphEditorUtility.GoToDefinition(info);
 				}, DropdownMenuAction.AlwaysEnabled);
 				
 			}

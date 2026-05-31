@@ -561,6 +561,25 @@ namespace MaxyGames.UNode {
 		}
 	}
 
+	public interface ISuperNodeWithEntry<TEntry> : ISuperNodeWithEntry
+		where TEntry : BaseEntryNode, new() {
+		string INodeContainer.Title => (this as Node).name;
+		BaseEntryNode IElementWithEntry.Entry {
+			get {
+				if(this is Node n) {
+					var entry = n.nodeObject.GetNodeInChildren<TEntry>();
+					if(entry == null) {
+						entry = new TEntry();
+						var node = new NodeObject(entry);
+						n.nodeObject.AddChild(node);
+					}
+					return entry;
+				}
+				return null;
+			}
+		}
+	}
+
 	public interface INodeWithConnection {
 		IEnumerable<NodeObject> Connections { get; }
 	}

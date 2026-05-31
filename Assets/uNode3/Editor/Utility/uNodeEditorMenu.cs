@@ -58,7 +58,7 @@ namespace MaxyGames.UNode.Editors {
 
 		[MenuItem("Tools/uNode/Update Graph Database", false, 2)]
 		private static void UpdateDatabase() {
-			GraphUtility.UpdateDatabase();
+			GraphEditorUtility.UpdateDatabase();
 		}
 
 #if UNODE_COMPILE_ON_PLAY

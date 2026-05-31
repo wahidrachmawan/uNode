@@ -42,7 +42,7 @@ namespace MaxyGames.UNode.Editors {
 		[InitializeOnLoad]
 		class GraphAssetSaver : AssetModificationProcessor {
 			static GraphAssetSaver() {
-				GraphUtility.SaveCallback += static (obj) => {
+				GraphEditorUtility.SaveCallback += static (obj) => {
 					if(obj is ScriptGraph scriptGraph && EditorUtility.IsPersistent(scriptGraph)) {
 						var path = AssetDatabase.GetAssetPath(scriptGraph);
 						if(string.IsNullOrEmpty(path) == false && path.EndsWith(".unodescript")) {

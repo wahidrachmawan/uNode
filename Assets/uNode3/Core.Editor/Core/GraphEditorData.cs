@@ -131,7 +131,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <summary>
 		/// Get the graph system
 		/// </summary>
-		public GraphSystemAttribute graphSystem => GraphUtility.GetGraphSystem(_owner);
+		public GraphSystemAttribute graphSystem => GraphEditorUtility.GetGraphSystem(_owner);
 
 		/// <summary>
 		/// The current scope of graph editing.

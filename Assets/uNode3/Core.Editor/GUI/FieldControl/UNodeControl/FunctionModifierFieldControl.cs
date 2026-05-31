@@ -49,7 +49,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					bool flag = false;
 					bool isScriptGraph = false;
 					if(settings.unityObject != null) {
-						GraphSystemAttribute graphSystem = GraphUtility.GetGraphSystem(settings.unityObject);
+						GraphSystemAttribute graphSystem = GraphEditorUtility.GetGraphSystem(settings.unityObject);
 						if(graphSystem != null) {
 							flag = graphSystem.supportModifier;
 							isScriptGraph = graphSystem.isScriptGraph || settings.unityObject is IScriptGraphType;
@@ -234,7 +234,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					bool flag = false;
 					bool isScriptGraph = false;
 					if(settings.unityObject != null) {
-						GraphSystemAttribute graphSystem = GraphUtility.GetGraphSystem(settings.unityObject);
+						GraphSystemAttribute graphSystem = GraphEditorUtility.GetGraphSystem(settings.unityObject);
 						if(graphSystem != null) {
 							flag = graphSystem.supportModifier;
 							isScriptGraph = graphSystem.isScriptGraph || settings.unityObject is IScriptGraphType;

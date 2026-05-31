@@ -201,7 +201,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 						lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node)).ClearConnections();
 					}
 				});
-				NodeEditorUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
+				GraphUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
 				graphEditor.ReloadView(true);
 			}, graphEditor.graphData, mousePosition);
 		}

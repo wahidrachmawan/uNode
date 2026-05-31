@@ -43,8 +43,8 @@ namespace MaxyGames.UNode.Editors.Commands {
 				MacroGraph macro = ScriptableObject.CreateInstance<MacroGraph>();
 
 				var oldNodes = node.nodeObject.GetObjectsInChildren().ToArray();
-				GraphUtility.CopyPaste.Copy(oldNodes);
-				var nodes = GraphUtility.CopyPaste.Paste(macro.GraphData.mainGraphContainer);
+				GraphEditorUtility.CopyPaste.Copy(oldNodes);
+				var nodes = GraphEditorUtility.CopyPaste.Paste(macro.GraphData.mainGraphContainer);
 				var mapID = new Dictionary<string, string>();
 				for(int i = 0; i < nodes.Length; i++) {
 					var oldID = oldNodes[i].id;
@@ -174,7 +174,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 						lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node)).ClearConnections();
 					}
 				});
-				NodeEditorUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
+				GraphUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
 				graphEditor.ReloadView(true);
 			}, graphEditor.graphData, mousePosition);
 		}
@@ -229,7 +229,7 @@ namespace MaxyGames.UNode.Editors.Commands {
 						lastUnit.FlowOutputs.First(output => output.hasValidConnections && !graphEditor.graphData.selectedNodes.Contains(output.connections[0].input.node)).ClearConnections();
 					}
 				});
-				NodeEditorUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
+				GraphUtility.PlaceFit.PlaceFitNodes(command.SurroundUnit);
 				graphEditor.ReloadView(true);
 			}, graphEditor.graphData, mousePosition);
 		}

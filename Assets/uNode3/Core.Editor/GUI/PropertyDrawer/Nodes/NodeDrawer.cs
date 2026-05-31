@@ -118,7 +118,7 @@ namespace MaxyGames.UNode.Editors {
 				EditorGUILayout.HelpBox(desc.description, MessageType.Info);
 			}
 
-			GraphUtility.ErrorChecker.DrawErrorMessages(node.nodeObject);
+			GraphEditorUtility.ErrorChecker.DrawErrorMessages(node.nodeObject);
 		}
 
 		public override void DrawLayouted(ref DrawerOption option) {

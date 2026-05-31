@@ -21,7 +21,7 @@ namespace MaxyGames.UNode.Editors {
 
 		protected void DrawFindReferences() {
 			if(GUILayout.Button("Find All References")) {
-				GraphUtility.ShowUnityReferenceUsages(target);
+				GraphEditorUtility.ShowUnityReferenceUsages(target);
 			}
 		}
 

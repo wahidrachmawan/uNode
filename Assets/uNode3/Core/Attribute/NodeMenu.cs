@@ -17,12 +17,17 @@ namespace MaxyGames.UNode {
 		public const string FlowGraph = nameof(FlowGraph);
 
 		public const string BTGraph = nameof(BTGraph);
+		public const string BTFlow = nameof(BTFlow);
 
 		public const string OR = ",";
 
 		public const string State = nameof(State);
 
 		public const string Function = nameof(Function);
+
+		public static string Scope(params string[] scopes) {
+			return string.Join(',', scopes);
+		}
 
 		public static void ApplyScopes(string scope, ICollection<string> includedScopes, ICollection<string> excludedScopes, out bool hasAllScope) {
 			hasAllScope = false;

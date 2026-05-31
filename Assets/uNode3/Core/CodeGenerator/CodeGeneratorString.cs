@@ -67,11 +67,18 @@ namespace MaxyGames {
 		}
 
 		public static string Goto(string label) {
+			if(string.IsNullOrEmpty(label)) return null;
 			return $"goto {label};";
 		}
 
 		public static string GotoCase(string label) {
+			if(string.IsNullOrEmpty(label)) return null;
 			return $"goto case {label};";
+		}
+
+		public static string GotoLabel(string label) {
+			if(string.IsNullOrEmpty(label)) return null;
+			return $"{label}:";
 		}
 
 		public static string Ref(string str) {
@@ -105,6 +112,26 @@ namespace MaxyGames {
 		public static string RightShift(string left, string right) {
 			return $"({left} >> {right})";
 		}
+
+		public static string HexaValue(int value) {
+			return $"0x{value:X}";
+		}
+
+		public static string HexaValue(uint value) {
+			return $"0x{value:X}U";
+		}
+
+		public static string HexaValue(float value) {
+			return $"0x{value:X}F";
+		}
+
+		public static string HexaValue(long value) {
+			return $"0x{value:X}L";
+		}
+
+		public static string HexaValue(ulong value) {
+			return $"0x{value:X}UL";
+		}
 		#endregion
 
 		#region Keyword
@@ -133,24 +160,6 @@ namespace MaxyGames {
 		#endregion
 
 		#region If Statement
-		/// <summary>
-		/// Generate a new if statement code.
-		/// </summary>
-		/// <param name="conditions"></param>
-		/// <param name="contents"></param>
-		/// <param name="isAnd"></param>
-		/// <returns></returns>
-		public static string If(string[] conditions, string contents, bool isAnd = true) {
-			string condition = null;
-			for(int i = 0; i < conditions.Length; i++) {
-				if(i > 0) {
-					condition += isAnd ? " && " : " || ";
-				}
-				condition += conditions[i];
-			}
-			return Condition("if", condition, contents);
-		}
-
 		/// <summary>
 		/// Generate a new if statement code.
 		/// </summary>
@@ -185,6 +194,45 @@ namespace MaxyGames {
 		/// </summary>
 		/// <param name="conditions"></param>
 		/// <param name="contents"></param>
+		/// <param name="isAnd"></param>
+		/// <returns></returns>
+		public static string If(string[] conditions, string contents, bool isAnd = true) {
+			string condition = null;
+			for(int i = 0; i < conditions.Length; i++) {
+				if(i > 0) {
+					condition += isAnd ? " && " : " || ";
+				}
+				condition += conditions[i];
+			}
+			return Condition("if", condition, contents);
+		}
+
+		/// <summary>
+		/// Generate a new if statement code.
+		/// </summary>
+		public static string If((string condition, string contents)[] values, string elseContents = null) {
+			if(values.Length == 0) throw new InvalidOperationException();
+			StringBuilder builder = new();
+			for(int i = 0; i < values.Length; i++) {
+				if(string.IsNullOrEmpty(values[i].condition)) continue;
+				if(builder.Length == 0) {
+					builder.Append(If(values[i].condition, values[i].contents));
+				}
+				else {
+					builder.AppendLine($" else " + If(values[i].condition, values[i].contents));
+				}
+			}
+			if(!string.IsNullOrEmpty(elseContents)) {
+				return builder.ToString() + "\n else {" + elseContents.AddLineInFirst().AddTabAfterNewLine(1) + "\n}";
+			}
+			return builder.ToString();
+		}
+
+		/// <summary>
+		/// Generate a new if statement code.
+		/// </summary>
+		/// <param name="conditions"></param>
+		/// <param name="contents"></param>
 		/// <param name="elseContents"></param>
 		/// <param name="isAnd"></param>
 		/// <returns></returns>
@@ -205,6 +253,12 @@ namespace MaxyGames {
 				return data;
 			}
 			return Condition("if", condition, contents);
+		}
+		#endregion
+
+		#region Select
+		public static string Select(string condition, string onTrue, string onFalse) {
+			return $"({condition} ? ({onTrue}) : ({onFalse}))";
 		}
 		#endregion
 
@@ -1590,6 +1644,10 @@ namespace MaxyGames {
 			return left + " && " + right;
 		}
 
+		public static string And(IEnumerable<string> strings) {
+			return string.Join(" && ", strings.Where(s => string.IsNullOrEmpty(s) == false));
+		}
+
 		public static string BitwiseAnd(string left, string right) {
 			return $"({left} & {right})";
 		}
@@ -1763,7 +1821,7 @@ namespace MaxyGames {
 			if(string.IsNullOrEmpty(value) == false) {
 				if(value[0] == '-') {
 					//In case it is negative number
-					return "((" + type + ")(" + value + "))";
+					return "(" + type + ")(" + value + ")";
 				}
 				else if(value[0] == '[') {
 					//In case it is indexer
@@ -1771,7 +1829,7 @@ namespace MaxyGames {
 					return DoGenerateInvokeCode(value.CGAccess(nameof(Extensions.ToRuntimeInstance)), new string[0], new string[] { type });
 				}
 			}
-			return "((" + type + ")" + value + ")";
+			return "(" + type + ")(" + value + ")";
 		}
 
 		/// <summary>
@@ -1962,6 +2020,10 @@ namespace MaxyGames {
 		/// <returns></returns>
 		public static string Or(string left, string right) {
 			return left + " || " + right;
+		}
+
+		public static string Or(IEnumerable<string> strings) {
+			return string.Join(" || ", strings.Where(s => string.IsNullOrEmpty(s) == false));
 		}
 
 		public static string Operator(string left, string right, BitwiseType operatorType) {

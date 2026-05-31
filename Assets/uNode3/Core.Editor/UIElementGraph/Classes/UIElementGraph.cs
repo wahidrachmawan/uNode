@@ -641,9 +641,9 @@ namespace MaxyGames.UNode.Editors {
 
 			saveButton = new ToolbarButton(() => {
 				if(tabData.owner is ScriptableObject) {
-					GraphUtility.SaveGraph(tabData.owner);
+					GraphEditorUtility.SaveGraph(tabData.owner);
 				}
-				GraphUtility.SaveAllGraph();
+				GraphEditorUtility.SaveAllGraph();
 			}) {
 				text = "Save",
 				tooltip = "Write all unsaved graph assets to disk.",
@@ -757,19 +757,19 @@ namespace MaxyGames.UNode.Editors {
 							uNodeEditor.ClearCache();
 						});
 						menu.AddItem(new GUIContent("Check All Graph Errors"), false, () => {
-							GraphUtility.ErrorChecker.CheckGraphErrors();
+							GraphEditorUtility.ErrorChecker.CheckGraphErrors();
 						});
 						menu.AddItem(new GUIContent("Change All C# Type to Graph Type"), false, () => {
 							//Update the database first
-							GraphUtility.UpdateDatabase();
+							GraphEditorUtility.UpdateDatabase();
 
 							if(EditorUtility.DisplayDialog("", "This action will change all c# reference type to graph type, please backup your project before doing it.\nAre you sure you want to continue?", "Yes", "Cancel") == false) {
 								return;
 							}
 							//Find all graphs
-							var graphAssets = GraphUtility.FindAllGraphIncludingNestedGraphs().ToArray();
+							var graphAssets = GraphEditorUtility.FindAllGraphIncludingNestedGraphs().ToArray();
 							//Create backup before processing
-							GraphUtility.CreateBackup(graphAssets.Where(obj => AssetDatabase.IsMainAsset(obj)).Select(obj => AssetDatabase.GetAssetPath(obj)));
+							GraphEditorUtility.CreateBackup(graphAssets.Where(obj => AssetDatabase.IsMainAsset(obj)).Select(obj => AssetDatabase.GetAssetPath(obj)));
 
 							HashSet<(Type type, UGraphElement element)> changedTypes = new();
 							int totalChanged = 0;
@@ -888,7 +888,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 						menu.AddSeparator("");
 						menu.AddItem(new GUIContent("Show All Breakpoints"), false, () => {
-							GraphUtility.ShowNodeUsages(node => {
+							GraphEditorUtility.ShowNodeUsages(node => {
 								return GraphDebug.Breakpoint.HasBreakpoint(node);
 							});
 						});
@@ -897,7 +897,7 @@ namespace MaxyGames.UNode.Editors {
 						});
 						menu.AddSeparator("");
 						menu.AddItem(new GUIContent("Find Script Graph (Debug Enabled)"), false, () => {
-							GraphUtility.ShowGraphUsages(obj => {
+							GraphEditorUtility.ShowGraphUsages(obj => {
 								if(obj is IScriptGraph graph) {
 									var data = graph.ScriptData;
 									if(data != null) {

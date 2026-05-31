@@ -242,7 +242,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static List<CustomItem> MakeCustomItemsForMacros(UGraphElement canvas, Vector2 position, NodeFilter nodeFilter, Type type, Action<Node> onAddNode = null, string category = "Macros") {
 			var customItems = new List<CustomItem>();
-			var macros = GraphUtility.FindGraphs<MacroGraph>();
+			var macros = GraphEditorUtility.FindGraphs<MacroGraph>();
 			foreach(var macro in macros) {
 				var m = macro;
 				try {
@@ -413,7 +413,7 @@ namespace MaxyGames.UNode.Editors {
 			foreach (var type in types) {
 				IEnumerable<Object> objects;
 				if (type.IsCastableTo(typeof(IGraph))) {
-					objects = GraphUtility.FindGraphs(type);
+					objects = GraphEditorUtility.FindGraphs(type);
 				}
 				else if(type.IsCastableTo(typeof(Component))) {
 					objects = uNodeEditorUtility.FindComponentInPrefabs(type);

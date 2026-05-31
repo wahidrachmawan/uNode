@@ -697,7 +697,7 @@ namespace MaxyGames.UNode.Editors {
 			if(!this.IsVisible())
 				return;
 			#region Errors
-			var errors = GraphUtility.ErrorChecker.GetErrorMessages(nodeObject, InfoType.Error);
+			var errors = GraphEditorUtility.ErrorChecker.GetErrorMessages(nodeObject, InfoType.Error);
 			if(errors != null && errors.Any()) {
 				System.Text.StringBuilder sb = new System.Text.StringBuilder();
 				foreach(var error in errors) {

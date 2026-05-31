@@ -55,7 +55,7 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public static void BuildRuntimeTypes() {
 			_runtimeTypes = Array.Empty<RuntimeType>();
-			var assets = GraphUtility.FindAllGraphAssets();
+			var assets = GraphEditorUtility.FindAllGraphAssets();
 			var types = new List<RuntimeType>();
 			foreach(var asset in assets) {
 				if(asset == null)

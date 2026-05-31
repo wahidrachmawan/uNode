@@ -757,8 +757,8 @@ namespace MaxyGames.UNode.Editors {
 		/// <param name="position"></param>
 		/// <param name="removeOtherConnections"></param>
 		public NodeObject[] PasteNode(Vector2 position, bool removeOtherConnections = false) {
-			if(graphData.currentCanvas != null && GraphUtility.CopyPaste.IsCopiedNodes) {
-				var nodes = GraphUtility.CopyPaste.Paste(graphData.currentCanvas, removeOtherConnections: removeOtherConnections).Select(n => n as NodeObject).ToArray();
+			if(graphData.currentCanvas != null && GraphEditorUtility.CopyPaste.IsCopiedNodes) {
+				var nodes = GraphEditorUtility.CopyPaste.Paste(graphData.currentCanvas, removeOtherConnections: removeOtherConnections).Select(n => n as NodeObject).ToArray();
 
 				Vector2 center = Vector2.zero;
 				foreach(var node in nodes) {
@@ -812,7 +812,7 @@ namespace MaxyGames.UNode.Editors {
 		public virtual void HandleShortcut(GraphShortcutType type) {
 			switch(type) {
 				case GraphShortcutType.Save: {
-					GraphUtility.SaveAllGraph();
+					GraphEditorUtility.SaveAllGraph();
 					break;
 				}
 				case GraphShortcutType.AddNode: {

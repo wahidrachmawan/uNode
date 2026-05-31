@@ -522,7 +522,7 @@ namespace MaxyGames.UNode.Editors {
 		protected override void OnGUI() {
 			DebugGUI(false);
 			if(Event.current.type == EventType.Repaint) {
-				var errors = GraphUtility.ErrorChecker.GetErrorMessages(nodeObject);
+				var errors = GraphEditorUtility.ErrorChecker.GetErrorMessages(nodeObject);
 				if(errors.Any()) {
 					//System.Text.StringBuilder sb = new System.Text.StringBuilder();
 					//for(int i = 0; i < errors.Count; i++) {

@@ -1124,10 +1124,13 @@ namespace MaxyGames.UNode {
 				return true;
 			if(type.IsByRef || type.IsByRefLike)
 				return false;
-			if(type.IsValueType)
-				return true;
+			if(type.IsGenericType && type.IsConstructedGenericType == false) {
+				return false;
+			}
 			if(type.IsInterface || type.IsAbstract || type.ContainsGenericParameters)
 				return false;
+			if(type.IsValueType)
+				return true;
 			if(typeof(UnityEngine.Object).IsAssignableFrom(type)) {
 				return false;
 			}

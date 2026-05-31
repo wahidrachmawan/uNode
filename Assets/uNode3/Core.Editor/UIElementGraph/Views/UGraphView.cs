@@ -757,7 +757,7 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region Callbacks
-		protected override bool canPaste => GraphUtility.CopyPaste.IsCopiedNodes;
+		protected override bool canPaste => GraphEditorUtility.CopyPaste.IsCopiedNodes;
 
 		public override EventPropagation DeleteSelection() {
 			uNodeEditorUtility.RegisterUndo(graphData.owner, "Delete selected elements");
@@ -871,7 +871,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(nodes.Count > 0) {
-				GraphUtility.CopyPaste.Copy(nodes.ToArray());
+				GraphEditorUtility.CopyPaste.Copy(nodes.ToArray());
 				DeleteSelection();
 			}
 		}
@@ -914,7 +914,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(nodes.Count > 0) {
-				GraphUtility.CopyPaste.Copy(nodes.ToArray());
+				GraphEditorUtility.CopyPaste.Copy(nodes.ToArray());
 			}
 		}
 
@@ -1285,7 +1285,7 @@ namespace MaxyGames.UNode.Editors {
 					evt.menu.AppendAction("Copy", null, DropdownMenuAction.AlwaysDisabled);
 				}
 
-				if(GraphUtility.CopyPaste.IsCopiedNodes) {
+				if(GraphEditorUtility.CopyPaste.IsCopiedNodes) {
 					evt.menu.AppendAction("Paste", (e) => {
 						var pastedNodes = graphEditor.PasteNode(clickedPos, true);
 						ClearSelection();
@@ -1428,16 +1428,16 @@ namespace MaxyGames.UNode.Editors {
 						else {
 							evt.menu.AppendAction("References/Find Node Usages", (e) => {
 								if(node is IHighLevelNodeDefinition highLevelNode) {
-									GraphUtility.ShowNodeUsages(highLevelNode.NodeType);
+									GraphEditorUtility.ShowNodeUsages(highLevelNode.NodeType);
 									return;
 								}
-								GraphUtility.ShowNodeUsages(node.GetType());
+								GraphEditorUtility.ShowNodeUsages(node.GetType());
 							}, DropdownMenuAction.AlwaysEnabled);
 							if(node is LinkedMacroNode) {
 								var macro = (node as LinkedMacroNode).macroAsset;
 								if(macro != null) {
 									evt.menu.AppendAction("References/Find Macro Usages", (e) => {
-										GraphUtility.ShowNodeUsages(n => {
+										GraphEditorUtility.ShowNodeUsages(n => {
 											if(n is LinkedMacroNode linked) {
 												return linked.macroAsset == macro;
 											}

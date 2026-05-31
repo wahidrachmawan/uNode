@@ -47,7 +47,7 @@ namespace MaxyGames.UNode.Editors {
 			protected override IList<TViewItem> BuildRows(TViewItem root) {
 				var rows = GetRows() ?? new List<TViewItem>();
 				rows.Clear();
-				var assets = GraphUtility.FindAllGraphAssets();
+				var assets = GraphEditorUtility.FindAllGraphAssets();
 				var graphDic = new Dictionary<string, List<(string, UnityEngine.Object)>>();
 				void DoAddTree(UnityEngine.Object asset) {
 					if(asset is IScriptGraph scriptGraph) {
@@ -757,7 +757,7 @@ namespace MaxyGames.UNode.Editors {
 			var obj = EditorUtility.InstanceIDToObject(graphID);
 #endif
 			if(obj == null) {
-				foreach(var g in GraphUtility.FindAllGraphAssets()) {
+				foreach(var g in GraphEditorUtility.FindAllGraphAssets()) {
 					if(g is IGraph && uNodeUtility.GetObjectID(g) == graphID) {
 						obj = g;
 					}
@@ -808,10 +808,10 @@ namespace MaxyGames.UNode.Editors {
 			if(window == null)
 				return;
 			if(window.selectedTab != null && window.selectedTab.owner != null) {
-				GraphUtility.SaveGraph(window.selectedTab.owner);
+				GraphEditorUtility.SaveGraph(window.selectedTab.owner);
 			}
 			//else if(Application.isPlaying && window.graphData.graph is uNodeRuntime runtime && runtime.originalGraph != null) {
-			//	GraphUtility.SaveRuntimeGraph(runtime);
+			//	GraphEditorUtility.SaveRuntimeGraph(runtime);
 			//}
 		}
 
@@ -1236,7 +1236,7 @@ namespace MaxyGames.UNode.Editors {
 #if UseProfiler
 			Profiler.BeginSample("Check Errors");
 #endif
-			var analizer = GraphUtility.ErrorChecker.defaultAnalizer;
+			var analizer = GraphEditorUtility.ErrorChecker.defaultAnalizer;
 
 			analizer.ClearErrors(graphData.graph);
 			analizer.CheckErrors(graphData.graph);
@@ -1249,7 +1249,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		internal int ErrorsCount() {
-			var analizer = GraphUtility.ErrorChecker.defaultAnalizer;
+			var analizer = GraphEditorUtility.ErrorChecker.defaultAnalizer;
 			if(analizer.graphErrors != null) {
 				int count = 0;
 				foreach(var pair in analizer.graphErrors) {
@@ -1858,7 +1858,7 @@ namespace MaxyGames.UNode.Editors {
 					sw.Write(generatedScript);
 					sw.Close();
 				}
-				GraphUtility.UpdateDatabase(new[] { script });
+				GraphEditorUtility.UpdateDatabase(new[] { script });
 				//if(generatorSettings.convertLineEnding) {
 				//	generatedScript = ConvertLineEnding(generatedScript,
 				//		Application.platform != RuntimePlatform.WindowsEditor);

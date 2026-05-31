@@ -2547,7 +2547,17 @@ namespace MaxyGames {
 					return StringHelper.StringLiteralCode(obj.ToString());
 				}
 				else if(obj is float) {
-					return obj.ToString().Replace(',', '.') + "F";
+					var val = (float)obj;
+					if(float.IsNaN(val)) {
+						return CG.Access(typeof(float), nameof(float.NaN));
+					}
+					if(float.IsPositiveInfinity(val)) {
+						return CG.Access(typeof(float), nameof(float.PositiveInfinity));
+					}
+					if(float.IsNegativeInfinity(val)) {
+						return CG.Access(typeof(float), nameof(float.NegativeInfinity));
+					}
+					return val.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + "F";
 				}
 				else if(obj is int) {
 					return obj.ToString();
@@ -3265,6 +3275,22 @@ namespace MaxyGames {
 				return KeywordVar + " " + name + ";";
 			}
 			return KeywordVar + " " + name + " = " + value + ";";
+		}
+
+		/// <summary>
+		/// Create constant value declaration code.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static string DeclareVariableConstant(string name, Type type, string value) {
+			if(string.IsNullOrEmpty(name)) {
+				return null;
+			}
+			if(string.IsNullOrEmpty(value)) {
+				return "const " + CG.Type(type) + " " + name + ";";
+			}
+			return "const " + CG.Type(type) + " " + name + " = " + value + ";";
 		}
 
 		/// <summary>

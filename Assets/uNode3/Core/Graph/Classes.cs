@@ -66,6 +66,8 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public string typeName => serializedType?.typeName;
+
 		private object _value;
 		public object value {
 			get {
@@ -608,12 +610,12 @@ namespace MaxyGames.UNode {
 	public sealed class MainGraphContainer : NodeContainer, IPrettyName, IIcon {
 		public override string SupportedScope {
 			get {
-				if(graph is IStateGraph) {
+				if(graphContainer is IStateGraph) {
 					return NodeScope.StateGraph + NodeScope.OR + 
 						NodeScope.FlowGraph + NodeScope.OR + 
 						NodeScope.Coroutine;
 				}
-				else if(graph is ICustomMainGraph mainGraph) {
+				else if(graphContainer is ICustomMainGraph mainGraph) {
 					var scopes = mainGraph.MainGraphScope;
 					if(mainGraph.AllowCoroutine) {
 						scopes = scopes + NodeScope.OR + NodeScope.Coroutine;

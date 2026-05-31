@@ -122,6 +122,15 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 							}
 						}
 					}
+					var type = element.type;
+					if(type == null) {
+						analyzer.RegisterError(element, $"Null or missing type: {element.serializedValue.typeName}");
+						break;
+					}
+					if(type.IsGenericType && type.IsConstructedGenericType == false) {
+						analyzer.RegisterError(element, $"Type is open generic type, please assign the generic parameter type");
+						break;
+					}
 				}
 			}
 			if(inheritType != null && graph is IGraphWithFunctions) {
@@ -211,33 +220,42 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 					}
 				}
 			}
-			if(inheritType != null && graph is IGraphWithProperties) {
+			if(graph is IGraphWithProperties) {
 				var properties = graph.GetProperties();
-				foreach(var property in properties) {
+				foreach(var element in properties) {
 					try {
-						if(property.modifier.Override) {
-							var member = inheritType.GetProperty(property.name, MemberData.flags);
+						if(inheritType != null && element.modifier.Override) {
+							var member = inheritType.GetProperty(element.name, MemberData.flags);
 							if(member == null) {
-								analyzer.RegisterError(property, $@"Property: {property.name} has no suitable property found to override.");
+								analyzer.RegisterError(element, $@"Property: {element.name} has no suitable property found to override.");
 							}
 							else {
 								//TODO: check for property error because of override
 							}
 						}
-						if(property.attributes != null) {
-							foreach(var att in property.attributes) {
+						if(element.attributes != null) {
+							foreach(var att in element.attributes) {
 								var usage = ReflectionUtils.GetAttributeUsage(att.type);
 								if(usage != null && usage.AllowMultiple == false) {
-									if(property.attributes.Count(a => a.type == att.type) > 1) {
-										analyzer.RegisterError(property, $"Duplicate '{att.type}' attribute");
+									if(element.attributes.Count(a => a.type == att.type) > 1) {
+										analyzer.RegisterError(element, $"Duplicate '{att.type}' attribute");
 										break;
 									}
 								}
 							}
 						}
+						var type = element.ReturnType();
+						if(type == null) {
+							analyzer.RegisterError(element, $"Null or missing type: {element.type.typeName}");
+							break;
+						}
+						if(type.IsGenericType && type.IsConstructedGenericType == false) {
+							analyzer.RegisterError(element, $"Type is open generic type, please assign the generic parameter type");
+							break;
+						}
 					}
 					catch(Exception ex) {
-						analyzer.RegisterError(property, ex.ToString());
+						analyzer.RegisterError(element, ex.ToString());
 					}
 				}
 			}

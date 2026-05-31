@@ -406,6 +406,7 @@ namespace MaxyGames.UNode.Editors {
 
 			public bool displayDefaultItem = true;
 			public bool closeOnSelect = true;
+			public bool allowOpenGeneric = false;
 
 			/// <summary>
 			/// The custom icon for can select callback
@@ -1470,7 +1471,7 @@ namespace MaxyGames.UNode.Editors {
 						}
 					}
 				}
-				Graph targetGraph = GraphUtility.GetGraphData(targetObject);
+				Graph targetGraph = GraphEditorUtility.GetGraphData(targetObject);
 				if(targetGraph != null && targetGraph != graph) {
 					var itemData = new List<GraphItem>();
 					if(filter.IsValidTarget(MemberData.TargetType.uNodeVariable)) {

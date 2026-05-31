@@ -21,7 +21,7 @@ using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
 #endif
 
 namespace MaxyGames.UNode.Editors {
-	public static class GraphUtility {
+	public static class GraphEditorUtility {
 		#region Copy & Paste
 		public static class CopyPaste {
 			class CopiedData {
@@ -506,7 +506,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 				if(checkProjectGraphs) {
-					var graphAssets = GraphUtility.FindAllGraphAssets();
+					var graphAssets = GraphEditorUtility.FindAllGraphAssets();
 					foreach(var asset in graphAssets) {
 						if(asset != null && (asset is IGraph || asset is IScriptGraph)) {
 							allGraphs.Add(asset);
@@ -712,7 +712,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static List<object> SearchReferences(Func<UGraphElement, bool> searchValidation) {
 			List<object> references = new List<object>();
-			var assets = GraphUtility.FindAllGraphAssets();
+			var assets = GraphEditorUtility.FindAllGraphAssets();
 
 			void Validate(IGraph graph) {
 				var graphData = graph.GraphData;
@@ -756,7 +756,7 @@ namespace MaxyGames.UNode.Editors {
 		/// <returns></returns>
 		public static List<object> FindReferences(MemberInfo memberInfo) {
 			List<object> references = new List<object>();
-			var assets = GraphUtility.FindAllGraphAssets();
+			var assets = GraphEditorUtility.FindAllGraphAssets();
 
 			void Validate(IGraph graph) {
 				var graphData = graph.GraphData;
@@ -826,7 +826,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static List<object> FindReferences(UnityEngine.Object value) {
 			List<object> references = new List<object>();
-			var assets = GraphUtility.FindAllGraphAssets();
+			var assets = GraphEditorUtility.FindAllGraphAssets();
 
 			void Validate(IGraph graph) {
 				var graphData = graph.GraphData;
@@ -999,7 +999,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static List<object> FindNodeUsages(Func<Node, bool> validation) {
 			var references = new List<object>();
-			var assets = GraphUtility.FindAllGraphAssets();
+			var assets = GraphEditorUtility.FindAllGraphAssets();
 
 			void Validate(IGraph graph) {
 				var graphData = graph.GraphData;
@@ -1029,7 +1029,7 @@ namespace MaxyGames.UNode.Editors {
 
 		public static List<object> FindNodeUsages(Type type) {
 			var references = new List<object>();
-			var assets = GraphUtility.FindAllGraphAssets();
+			var assets = GraphEditorUtility.FindAllGraphAssets();
 
 			void Validate(IGraph graph) {
 				var graphData = graph.GraphData;
@@ -1123,7 +1123,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 					list.Add(graph.GetGraphType());
 
-					var assets = GraphUtility.FindAllGraphAssets();
+					var assets = GraphEditorUtility.FindAllGraphAssets();
 					foreach(var asset in assets) {
 						if(asset is IScriptGraph scriptGraph) {
 							foreach(var scriptType in scriptGraph.TypeList) {
@@ -2053,7 +2053,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(db != null) {
-				UpdateDatabase(GraphUtility.FindAllGraphAssets());
+				UpdateDatabase(GraphEditorUtility.FindAllGraphAssets());
 
 				var graphEvents = uNodeEditorUtility.FindAssetsByType<UGlobalEvent>();
 				db.globalEventDatabases.Clear();

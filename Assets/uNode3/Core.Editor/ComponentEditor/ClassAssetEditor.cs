@@ -89,7 +89,7 @@ namespace MaxyGames.UNode.Editors {
 								EditorGUILayout.HelpBox("Run using Native C# but script is outdated.\n[Click To Recompile]", MessageType.Warning);
 								EditorGUILayout.EndVertical();
 								if(Event.current.clickCount == 1 && Event.current.button == 0 && boxRect.Contains(Event.current.mousePosition)) {
-									GraphUtility.SaveAllGraph();
+									GraphEditorUtility.SaveAllGraph();
 									GenerationUtility.GenerateCSharpScript();
 									Event.current.Use();
 								}

@@ -360,7 +360,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 								NodeEditorUtility.GetPort<ValueInput>(nodeObject),
 								(node) => {
 									port.ConnectTo(NodeEditorUtility.GetPort<ValueOutput>(node));
-									NodeEditorUtility.PlaceFit.PlaceFitNodes(node);
+									GraphUtility.PlaceFit.PlaceFitNodes(node);
 									positionInCanvas.x -= 200;
 								}, graphEditor.graphData.currentCanvas, new FilterAttribute(rightType));
 							ExecuteStackedAction(n);
@@ -369,7 +369,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 					}
 					port.ConnectTo(n.nodeObject.primaryValueOutput);
 				}
-				NodeEditorUtility.PlaceFit.PlaceFitNodes(n);
+				GraphUtility.PlaceFit.PlaceFitNodes(n);
 				ExecuteStackedAction(n);
 			}, NodeFilter.ValueInput, stackCreateNode: false, additionalItems: customItems, expandedCategory: new[] { "@", "Data", "Compare", "Math" },
 				processMember: member => {

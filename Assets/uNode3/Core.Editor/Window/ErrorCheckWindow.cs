@@ -36,7 +36,7 @@ namespace MaxyGames.UNode.Editors {
 				return;
 			if(onlySelectedGraph) {
 				var selectedGraph = uNodeEditor.window?.graphData.graph;
-				if(selectedGraph != null && GraphUtility.ErrorChecker.defaultAnalizer.graphErrors.TryGetValue(selectedGraph, out var map)) {
+				if(selectedGraph != null && GraphEditorUtility.ErrorChecker.defaultAnalizer.graphErrors.TryGetValue(selectedGraph, out var map)) {
 					foreach(var pair in map) {
 						var data = pair.Value;
 						if(data.HasError(InfoType.Error)) {
@@ -51,7 +51,7 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			} else {
-				foreach(var (key, map) in GraphUtility.ErrorChecker.defaultAnalizer.graphErrors) {
+				foreach(var (key, map) in GraphEditorUtility.ErrorChecker.defaultAnalizer.graphErrors) {
 					foreach(var pair in map) {
 						var data = pair.Value;
 						if(data.HasError(InfoType.Error)) {

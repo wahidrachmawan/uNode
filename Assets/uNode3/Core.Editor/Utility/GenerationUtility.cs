@@ -304,7 +304,7 @@ namespace MaxyGames.UNode.Editors {
 						scriptData.Update();
 
 					}
-					GraphUtility.UpdateDatabase(new[] { script });
+					GraphEditorUtility.UpdateDatabase(new[] { script });
 				}
 				if(saveInTemporaryFolder) {
 					EditorUtility.DisplayProgressBar("Compiling Scripts", "", 1);
@@ -644,7 +644,7 @@ namespace MaxyGames.UNode.Editors {
 								skippedCount++;
 							}
 						}
-						GraphUtility.UpdateDatabase(new[] { script });
+						GraphEditorUtility.UpdateDatabase(new[] { script });
 					}
 					uNodeDatabase.ClearCache();
 					//foreach(var file in dirInfo.EnumerateFiles()) {
@@ -819,7 +819,7 @@ namespace MaxyGames.UNode.Editors {
 						scriptData.generatedScript = generatedScript;
 						scriptData.Update();
 					}
-					GraphUtility.UpdateDatabase(new[] { script });
+					GraphEditorUtility.UpdateDatabase(new[] { script });
 				}
 				if(compileScripts) {
 					EditorUtility.DisplayProgressBar("Compiling Scripts", "", 1);
@@ -846,7 +846,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void GenerateNativeGraphsInProject(bool enableLogging = true) {
-			GenerateNativeGraphs(GraphUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph).Select(g => g as IScriptGraph), enableLogging);
+			GenerateNativeGraphs(GraphEditorUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph).Select(g => g as IScriptGraph), enableLogging);
 		}
 
 		public static void GenerateNativeGraphs(IEnumerable<IScriptGraph> graphs, bool enableLogging = true) {
@@ -949,7 +949,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void CompileNativeGraphInProject() {
-			CompileNativeGraph(GraphUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph));
+			CompileNativeGraph(GraphEditorUtility.FindAllGraphAssets().Where(obj => obj is IScriptGraph));
 		}
 
 		public static void CompileNativeGraph(IEnumerable<Object> graphs) {
@@ -1134,7 +1134,7 @@ namespace MaxyGames.UNode.Editors {
 						sw.Write(ConvertLineEnding(generatedScript, false));
 						sw.Close();
 					}
-					GraphUtility.UpdateDatabase(new[] { script });
+					GraphEditorUtility.UpdateDatabase(new[] { script });
 					paths.Add(path);
 				}
 				ReflectionUtils.RegisterRuntimeAssembly(CompileFromFile(paths.ToArray()));
@@ -1173,7 +1173,7 @@ namespace MaxyGames.UNode.Editors {
 						sw.Write(ConvertLineEnding(generatedScript, false));
 						sw.Close();
 					}
-					GraphUtility.UpdateDatabase(new[] { script });
+					GraphEditorUtility.UpdateDatabase(new[] { script });
 					paths.Add(path);
 					var ns = script.Namespace;
 					foreach(var pair in script.classNames) {
@@ -1207,12 +1207,12 @@ namespace MaxyGames.UNode.Editors {
 			string label = "Generating C# Scripts", 
 			bool clearProgressOnFinish = true) {
 			try {
-				var objects = GraphUtility.FindGraphs<GraphAsset>().ToArray();
+				var objects = GraphEditorUtility.FindGraphs<GraphAsset>().ToArray();
 				int count = 0;
 				var scripts = objects.Select(g => {
 					count++;
 					if (g is GraphAsset graphAsset) {
-						var graphSystem = GraphUtility.GetGraphSystem(graphAsset);
+						var graphSystem = GraphEditorUtility.GetGraphSystem(graphAsset);
 						if (!graphSystem.allowAutoCompile) {
 							return null;
 						}
@@ -1329,7 +1329,7 @@ namespace MaxyGames.UNode.Editors {
 				List<UnityEngine.Object> objects = new List<UnityEngine.Object>();
 				uNodeThreadUtility.QueueAndWait(() => {
 					//Find graphs in main thread.
-					objects.AddRange(GraphUtility.FindGraphs<GraphAsset>());
+					objects.AddRange(GraphEditorUtility.FindGraphs<GraphAsset>());
 				});
 				int count = 0;
 				List<CG.GeneratedData> scripts = new List<CG.GeneratedData>();
@@ -1367,7 +1367,7 @@ namespace MaxyGames.UNode.Editors {
 								graphAsset = null;
 							};
 						});
-						if(graphAsset == null || !GraphUtility.GetGraphSystem(graphAsset).allowAutoCompile) {
+						if(graphAsset == null || !GraphEditorUtility.GetGraphSystem(graphAsset).allowAutoCompile) {
 							continue;
 						}
 						scripts.Add(GenerateCSharpAsync(graphAsset, (progress, text) => {

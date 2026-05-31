@@ -656,7 +656,7 @@ namespace MaxyGames.UNode.Editors {
 						GUIUtility.ExitGUI();
 					}
 
-					if(ResolveGenericItem(type, (mInfo) => {
+					if(!editorData.allowOpenGeneric && ResolveGenericItem(type, (mInfo) => {
 						DoAddNestedTree(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
@@ -675,7 +675,7 @@ namespace MaxyGames.UNode.Editors {
 						GUIUtility.ExitGUI();
 					}
 
-					if(ResolveGenericItem(item.member, (mInfo) => {
+					if(!editorData.allowOpenGeneric && ResolveGenericItem(item.member, (mInfo) => {
 						DoAddNestedTree(new MemberTreeView(mInfo, item.id, item.depth) { instance = item.instance });
 						SelectDeepTrees();
 						GUIUtility.ExitGUI();
@@ -710,7 +710,7 @@ namespace MaxyGames.UNode.Editors {
 									GUIUtility.ExitGUI();
 								}
 
-								if(ResolveGenericItem(member, (mInfo) => {
+								if(!editorData.allowOpenGeneric && ResolveGenericItem(member, (mInfo) => {
 									if(member is Type) {
 										DoAddNestedTree(new TypeTreeView(mInfo as Type, tree.id, tree.depth));
 									}

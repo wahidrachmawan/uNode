@@ -65,7 +65,7 @@ namespace MaxyGames.UNode.Editors {
 			else if(node.target.IsTargetingReflection) {
 				var members = node.target.GetMembers(false);
 				if(members != null && members.Length > 0) {
-					GraphUtility.GoToDefinition(members[members.Length - 1]);
+					GraphEditorUtility.GoToDefinition(members[members.Length - 1]);
 				}
 			}
 		}

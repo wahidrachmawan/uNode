@@ -403,7 +403,7 @@ namespace MaxyGames.UNode.Editors {
 				DrawUnitObject(graph as UnityEngine.Object);
 			}
 
-			GraphUtility.ErrorChecker.DrawErrorMessages(graphData);
+			GraphEditorUtility.ErrorChecker.DrawErrorMessages(graphData);
 		}
 
 		private static void DrawNodeEditorWithHeader(GraphEditorData editorData, NodeObject node) {

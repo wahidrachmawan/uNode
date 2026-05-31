@@ -228,7 +228,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		private static void CreateFullBackup() {
-			GraphUtility.CreateFullBackup();
+			GraphEditorUtility.CreateFullBackup();
 		}
 
 		[InitializeOnEnterPlayMode]
@@ -248,7 +248,7 @@ namespace MaxyGames.UNode.Editors {
 			switch(state) {
 				case PlayModeStateChange.ExitingEditMode: {
 					//Make sure we save all temporary graph on exit play mode or edit mode.
-					GraphUtility.SaveAllGraph();
+					GraphEditorUtility.SaveAllGraph();
 					//GenerationUtility.SaveData();
 					//if(uNodeEditor.window != null) {
 					//	uNodeEditor.window.SaveEditorData();
@@ -1288,8 +1288,8 @@ namespace MaxyGames.UNode.Editors {
 				aOTSupportScanner.GetType().GetField("allowRegisteringScannedTypes", MemberData.flags).SetValueOptimized(aOTSupportScanner, true);
 				var graphTypes = ScanAOTOnGraphs();
 				//OnPreprocessBuild();
-				GraphUtility.UpdateDatabase();
-				GraphUtility.SaveAllGraph();
+				GraphEditorUtility.UpdateDatabase();
+				GraphEditorUtility.SaveAllGraph();
 				if(compileGraphs) {
 					if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild) {
 						GenerationUtility.CompileProjectGraphs(true);
@@ -1349,7 +1349,7 @@ namespace MaxyGames.UNode.Editors {
 			HashSet<Type> serializedTypes = new HashSet<Type>();
 			List<UnityEngine.Object> objects = new List<UnityEngine.Object>();
 
-			objects.AddRange(GraphUtility.FindAllGraphAssets());
+			objects.AddRange(GraphEditorUtility.FindAllGraphAssets());
 			Action<object> analyzer = (param) => {
 				EditorReflectionUtility.AnalizeSerializedObject(param, (fieldObj) => {
 					if(fieldObj is ISerializationCallbackReceiver serialization) {
@@ -1401,7 +1401,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeUtility.trimmedObjects = new HashSet<Object>();
 #endif
 			hasRunPreBuild = true;
-			GraphUtility.UpdateDatabase();
+			GraphEditorUtility.UpdateDatabase();
 #if UNODE_TRIM_ON_BUILD && UNODE_TRIM_AGGRESSIVE && UNODE_PRO
 			{
 				var db = uNodeUtility.GetDatabase();
@@ -1417,12 +1417,12 @@ namespace MaxyGames.UNode.Editors {
 			}
 #endif
 			try {
-				GraphUtility.CreateBackup(GraphUtility.FindAllGraphAssets().Select(item => AssetDatabase.GetAssetPath(item)), "GraphBeforeBuild");
+				GraphEditorUtility.CreateBackup(GraphEditorUtility.FindAllGraphAssets().Select(item => AssetDatabase.GetAssetPath(item)), "GraphBeforeBuild");
 			}
 			catch(Exception ex) {
 				Debug.LogException(ex);
 			}
-			GraphUtility.SaveAllGraph();
+			GraphEditorUtility.SaveAllGraph();
 			if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild) {
 				GenerationUtility.CompileProjectGraphs();
 				while(uNodeThreadUtility.IsNeedUpdate()) {

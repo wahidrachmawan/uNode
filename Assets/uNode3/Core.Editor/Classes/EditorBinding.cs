@@ -48,7 +48,7 @@ namespace MaxyGames.UNode.Editors {
 
 		[InitializeOnLoadMethod]
 		internal static void OnInitialize() {
-			GraphUtility.Initialize();
+			GraphEditorUtility.Initialize();
 			EditorSceneManager.newSceneCreated += OnNewSceneCreated;
 			EditorSceneManager.sceneClosing += OnSceneClosing;
 			EditorSceneManager.sceneSaving += OnSceneSaving;

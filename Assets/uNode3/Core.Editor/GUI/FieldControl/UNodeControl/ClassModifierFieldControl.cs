@@ -33,7 +33,7 @@ namespace MaxyGames.UNode.Editors.Control {
 					});
 					bool flag = false;
 					if(settings.unityObject != null) {
-						GraphSystemAttribute graphSystem = GraphUtility.GetGraphSystem(settings.unityObject);
+						GraphSystemAttribute graphSystem = GraphEditorUtility.GetGraphSystem(settings.unityObject);
 						if(graphSystem != null) {
 							flag = graphSystem.supportModifier;
 							flag &= graphSystem.isScriptGraph || settings.unityObject is IScriptGraphType;

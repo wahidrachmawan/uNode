@@ -483,7 +483,7 @@ namespace MaxyGames.UNode.Editors {
 			uNodeGUIUtility.GUIChanged(graph, UIChangeType.Important);
 		}
 
-		protected void ShowTypeMenu(Vector2 position, Action<Type> onClick, Type[] generalTypes = null, FilterAttribute filter = null) {
+		protected void ShowTypeMenu(Vector2 position, Action<Type> onClick, Type[] generalTypes = null, FilterAttribute filter = null, bool allowOpenGeneric = true) {
 			if(generalTypes == null) {
 				generalTypes = new Type[] {
 					typeof(string),
@@ -508,6 +508,7 @@ namespace MaxyGames.UNode.Editors {
 					onClick(m.startType);
 				}).ChangePosition(position);
 			window.displayNoneOption = false;
+			window.editorData.allowOpenGeneric = allowOpenGeneric;
 			window.SetGeneralTypes(generalTypes);
 		}
 	}
@@ -843,7 +844,7 @@ namespace MaxyGames.UNode.Editors {
 				uNodeThreadUtility.Queue(() => {
 					CustomInspector.Inspect(mousePosition, new GraphEditorData(graphData, variable), true);
 				});
-			});
+			}, allowOpenGeneric: true);
 			return true;
 		}
 
@@ -1798,10 +1799,10 @@ namespace MaxyGames.UNode.Editors {
 			if(graph != null) {
 				if(graph is IClassGraph) {
 					yield return new DropdownMenuAction("Show Inheritors", evt => {
-						GraphUtility.ShowGraphInheritanceHeirarchy(graph);
+						GraphEditorUtility.ShowGraphInheritanceHeirarchy(graph);
 					}, DropdownMenuAction.AlwaysEnabled);
 				}
-				var converters = GraphUtility.FindGraphConverters();
+				var converters = GraphEditorUtility.FindGraphConverters();
 				var current = graph;
 				for(int x = 0; x < converters.Count; x++) {
 					var converter = converters[x];
@@ -1843,7 +1844,7 @@ namespace MaxyGames.UNode.Editors {
 
 			if(graphEditor.canvasData.SupportMacro) {
 				yield return new ContextMenuItem("Add Linked Macro", evt => {
-					var macros = GraphUtility.FindGraphs<MacroGraph>();
+					var macros = GraphEditorUtility.FindGraphs<MacroGraph>();
 					List<ItemSelector.CustomItem> customItems = new List<ItemSelector.CustomItem>();
 					foreach(var macro in macros) {
 						var m = macro;

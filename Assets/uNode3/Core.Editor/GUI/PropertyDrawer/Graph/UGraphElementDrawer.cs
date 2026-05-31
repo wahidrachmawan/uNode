@@ -30,13 +30,13 @@ namespace MaxyGames.UNode.Editors {
 			if(!string.IsNullOrEmpty(name) && name != value.name) {
 				option.RegisterUndo();
 				if(value is Variable || value is Property || value is Function || value is INodeContainer) {
-					value.name = GraphUtility.GetUniqueName(name, value.graph, element => {
+					value.name = GraphEditorUtility.GetUniqueName(name, value.graph, element => {
 						if(element == value) {
 							return true;
 						}
 						if(value is Function) {
 							if(element is Function other) {
-								return GraphUtility.AreSameSignature(value as Function, other) == false;
+								return GraphEditorUtility.AreSameSignature(value as Function, other) == false;
 							}
 						}
 						return false;
@@ -103,7 +103,7 @@ namespace MaxyGames.UNode.Editors {
 
 		protected virtual void DrawErrors(ref DrawerOption option) {
 			var value = option.value as UGraphElement;
-			GraphUtility.ErrorChecker.DrawErrorMessages(value);
+			GraphEditorUtility.ErrorChecker.DrawErrorMessages(value);
 		}
 	}
 

@@ -279,6 +279,28 @@ namespace MaxyGames {
 		}
 
 		/// <summary>
+		/// Tries to retrieve the user object of type T associated with the specified owner.
+		/// </summary>
+		/// <typeparam name="T">The type of the user object to retrieve.</typeparam>
+		/// <param name="owner">The owner object that may contain an associated user object.</param>
+		/// <param name="value">When the method returns, contains the retrieved user object of type T if found; otherwise, the default value for
+		/// T.</param>
+		/// <returns>true if a user object of type T was found; otherwise, false.</returns>
+		public static bool TryGetUserObject<T>(object owner, out T value) {
+			if(generatorData.userObjectMap.TryGetValue(owner, out var result)) {
+				try {
+					value = (T)result;
+					return true;
+				}
+				catch(InvalidCastException) {
+					throw new Exception($"Cannot cast {result.GetType()} to {typeof(T)}");
+				}
+			}
+			value = default;
+			return false;
+		}
+
+		/// <summary>
 		/// Get user object data.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
