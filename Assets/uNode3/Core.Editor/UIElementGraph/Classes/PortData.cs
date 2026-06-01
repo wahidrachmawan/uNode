@@ -203,6 +203,16 @@ namespace MaxyGames.UNode.Editors {
 			}
 			return newConnection(other as FlowInput);
 		}
+
+		public override IEnumerable<Connection> Connections {
+			get {
+				foreach(var port in GetFlows()) {
+					foreach(var con in port.Connections) {
+						yield return con;
+					}
+				}
+			}
+		}
 	}
 
 	public class FlowOutputData : PortData<FlowOutput> {

@@ -448,15 +448,10 @@ namespace MaxyGames.UNode.Editors {
 		public bool isValid => (parent != null || isHidding) && !isGhostEdge && this.IsVisible();
 
 		public virtual void Disconnect() {
-			PortView port;
-			if(Input?.isValue == true) {
-				port = Input;
-			}
-			else {
-				port = Output;
-			}
 			connection?.Disconnect();
-			port?.ResetPortValue();
+			if(Input?.isValue == true) {
+				Input.ResetPortValue();
+			}
 		}
 
 		#region Overrides

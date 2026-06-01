@@ -1314,13 +1314,13 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		public void ResetPortValue() {
 			var portValue = GetPortValue();
-			if(portValue is FlowInput || portValue is FlowOutput || portValue is ValueOutput) {
-				portValue.ClearConnections();
-			}
-			else if(portValue is ValueInput) {
+			if(portValue is ValueInput) {
 				var port = portValue as ValueInput;
 				Type valType = port.ValueType ?? GetPortType();
 				(portValue as ValueInput).AssignToDefault(MemberData.Default(valType));
+			}
+			else {
+				portValue.ClearConnections();
 			}
 		}
 

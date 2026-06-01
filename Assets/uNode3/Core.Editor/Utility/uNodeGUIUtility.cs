@@ -3230,16 +3230,16 @@ namespace MaxyGames.UNode.Editors {
 			return GUIUtility.GUIToScreenPoint(new Vector2(position.x, position.y));
 		}
 
-		public static void EditVariableValue(VariableData variable, UnityEngine.Object unityObject, bool drawDecorator = true) {
+		public static void EditVariableValue(VariableData variable, UnityEngine.Object unityObject, bool drawDecorator = true, bool nullable = true) {
 			var attributes = variable.GetAttributes();
 			if(drawDecorator) {
 				FieldDecorator.DrawDecorators(attributes);
 			}
 			string varName = ObjectNames.NicifyVariableName(variable.name);
-			EditSerializedValue(variable.serializedValue, new GUIContent(varName), variable.type, unityObject, attributes);
+			EditSerializedValue(variable.serializedValue, new GUIContent(varName), variable.type, unityObject, attributes, nullable);
 		}
 
-		public static void EditSerializedValue(SerializedValue serializedValue, GUIContent label, Type type = null, UnityEngine.Object unityObject = null, object[] attributes = null) {
+		public static void EditSerializedValue(SerializedValue serializedValue, GUIContent label, Type type = null, UnityEngine.Object unityObject = null, object[] attributes = null, bool nullable = true) {
 			if(type == null) {
 				type = serializedValue.type;
 				if(type == null) {
@@ -3266,7 +3266,7 @@ namespace MaxyGames.UNode.Editors {
 						unityObject = unityObject,
 						attributes = attributes,
 						drawDecorator = false,
-						nullable = true,
+						nullable = nullable,
 					});
 				}
 			}

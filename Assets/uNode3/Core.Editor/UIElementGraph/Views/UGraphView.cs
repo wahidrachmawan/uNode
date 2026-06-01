@@ -2090,12 +2090,7 @@ namespace MaxyGames.UNode.Editors {
 									var inPort = edge.input as PortView;
 									var outPort = edge.output as PortView;
 									if(inPort != null && outPort != null) {
-										if(inPort.isValue) {
-											inPort.ResetPortValue();
-										}
-										else if(outPort.isFlow) {
-											outPort.ResetPortValue();
-										}
+										inPort.ResetPortValue();
 										inPort.owner.MarkRepaint();
 										outPort.owner.MarkRepaint();
 									}

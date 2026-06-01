@@ -297,11 +297,11 @@ namespace MaxyGames.CompilerBuilder {
 		}
 
 		private static async void SendDataAsync(CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete) {
-#if UNODE_DEV
-			Debug.Log("Sending compilation request to runner...");
-			var stopwatch = new System.Diagnostics.Stopwatch();
-			stopwatch.Start();
-#endif
+//#if UNODE_DEV
+//			Debug.Log("Sending compilation request to runner...");
+//			var stopwatch = new System.Diagnostics.Stopwatch();
+//			stopwatch.Start();
+//#endif
 			try {
 				if(string.IsNullOrEmpty(option.OutputResultPath) == false && File.Exists(option.OutputResultPath)) {
 					// Ensure old result file is deleted before compilation to prevent reading stale results
@@ -319,9 +319,9 @@ namespace MaxyGames.CompilerBuilder {
 			catch(Exception ex) {
 				Debug.LogException(ex);
 			}
-#if UNODE_DEV
-			Debug.Log("Elapsed time: " + stopwatch.ElapsedMilliseconds + " ms");
-#endif
+//#if UNODE_DEV
+//			Debug.Log("Elapsed time: " + stopwatch.ElapsedMilliseconds + " ms");
+//#endif
 		}
 		#endregion
 
