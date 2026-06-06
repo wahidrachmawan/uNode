@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			var value = option.value as Property;
 			bool isInterface = option.unityObject is IScriptInterface or GraphInterface;
 
-			uNodeGUIUtility.DrawTypeDrawer(value.ReturnType(), new GUIContent("Type"), type => {
+			uNodeGUIUtility.EditType(value.ReturnType(), new GUIContent("Type"), type => {
 				value.type = type;
 				uNodeGUIUtility.GUIChangedMajor(value);
 			}, targetObject: option.unityObject);

@@ -102,7 +102,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					});
 					position.y += EditorGUIUtility.singleLineHeight;
 					position = EditorGUI.PrefixLabel(position, new GUIContent("Type"));
-					uNodeGUIUtility.DrawTypeDrawer(position, node.inputs[index].type, GUIContent.none, (type) => {
+					uNodeGUIUtility.EditType(position, node.inputs[index].type, GUIContent.none, (type) => {
 						uNodeEditorUtility.RegisterUndo(node);
 						node.inputs[index].type = type;
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);

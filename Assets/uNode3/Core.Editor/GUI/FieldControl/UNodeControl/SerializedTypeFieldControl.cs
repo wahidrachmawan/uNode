@@ -29,7 +29,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						}
 					}
 				}
-				uNodeGUIUtility.DrawTypeDrawer(position, fieldValue, label, (type) => {
+				uNodeGUIUtility.EditType(position, fieldValue, label, (type) => {
 					fieldValue = new SerializedType(type);
 					onChanged?.Invoke(fieldValue);
 				}, filter, settings.unityObject);

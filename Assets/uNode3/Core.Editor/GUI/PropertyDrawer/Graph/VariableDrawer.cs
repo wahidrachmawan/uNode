@@ -39,7 +39,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					flags = option.flags,
 				});
 			}
-			uNodeGUIUtility.DrawTypeDrawer(value.type, new GUIContent("Type"), type => {
+			uNodeGUIUtility.EditType(value.type, new GUIContent("Type"), type => {
 				value.type = type;
 				uNodeGUIUtility.GUIChangedMajor(value);
 			}, targetObject: option.unityObject);

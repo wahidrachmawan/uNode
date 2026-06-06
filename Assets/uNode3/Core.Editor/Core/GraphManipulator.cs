@@ -653,7 +653,7 @@ namespace MaxyGames.UNode.Editors {
 		public override bool CreateNewVariable(Vector2 mousePosition, Action postAction) {
 			ShowTypeMenu(mousePosition, type => {
 				uNodeEditorUtility.RegisterUndo(graph);
-				NodeEditorUtility.AddNewVariable(graphData.graphData.variableContainer, "newVariable", type, variable => {
+				NodeEditorUtility.AddNewVariable(graphData.graphData.variableContainer, "m_" + type.Name.ToCamelCase(), type, variable => {
 					if(graph is IClassModifier classModifier) {
 						if(classModifier.GetModifier().ReadOnly) {
 							variable.modifier.ReadOnly = true;
@@ -674,7 +674,7 @@ namespace MaxyGames.UNode.Editors {
 			menu.AddItem(new GUIContent("Add new"), false, () => {
 				ShowTypeMenu(mousePosition, type => {
 					uNodeEditorUtility.RegisterUndo(graph);
-					NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, "newProperty", type, p => {
+					NodeEditorUtility.AddNewProperty(graphData.graphData.propertyContainer, "m_" + type.Name.ToCamelCase(), type, p => {
 						if(uNodePreference.preferenceData.newPropertyAccessor == uNodePreference.DefaultAccessor.Private) {
 							p.modifier.SetPrivate();
 						}
@@ -812,7 +812,7 @@ namespace MaxyGames.UNode.Editors {
 					GenericMenu menu = new GenericMenu();
 					foreach(var type in EditorReflectionUtility.GetDefinedTypes<EventGraphAttribute>()) {
 						var att = type.GetCustomAttribute<EventGraphAttribute>();
-						if(supportedEventGraph.Contains(att.name)) {
+						if(supportedEventGraph.Contains(att.scope)) {
 							menu.AddItem(new GUIContent("Add new: " + att.name), false, () => {
 								var value = ReflectionUtils.CreateInstance(type);
 								if(value is NodeContainer container) {

@@ -44,7 +44,7 @@ namespace MaxyGames.UNode.Editors {
 				}
 			}
 			if(popupIndex == 0) {
-				uNodeGUIUtility.DrawTypeDrawer(uNodeGUIUtility.GetRect(), asset.inheritType, new GUIContent("Inherit From"), (type) => {
+				uNodeGUIUtility.EditType(uNodeGUIUtility.GetRect(), asset.inheritType, new GUIContent("Inherit From"), (type) => {
 					asset.inheritType = type;
 				}, inheritFilter, asset);
 			}

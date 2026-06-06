@@ -37,7 +37,7 @@ namespace MaxyGames.UNode.Editors.Control {
 							pos.y += summaryHeight;
 						}
 
-						uNodeGUIUtility.DrawTypeDrawer(
+						uNodeGUIUtility.EditType(
 							new Rect(pos.x, pos.y, pos.width, EditorGUIUtility.singleLineHeight),
 							parameter.type,
 							new GUIContent("Type"),

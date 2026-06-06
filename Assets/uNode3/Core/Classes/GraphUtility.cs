@@ -378,5 +378,18 @@ namespace MaxyGames.UNode {
 			return list;
 		}
 		#endregion
+
+		#region Others
+		public static bool IsParentOf(UGraphElement parent, UGraphElement child) {
+			var current = child.parent;
+			while(current != null) {
+				if(parent == current) {
+					return true;
+				}
+				current = current.parent;
+			}
+			return false;
+		}
+		#endregion
 	}
 }

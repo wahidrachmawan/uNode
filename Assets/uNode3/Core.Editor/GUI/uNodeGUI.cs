@@ -433,7 +433,7 @@ namespace MaxyGames.UNode.Editors {
 				typeFilter = FilterAttribute.DefaultTypeFilter;
 			DrawCustomList(types, header,
 				drawElement: (position, index, value) => {
-					uNodeGUIUtility.DrawTypeDrawer(
+					uNodeGUIUtility.EditType(
 						position,
 						value,
 						new GUIContent("Element " + index),

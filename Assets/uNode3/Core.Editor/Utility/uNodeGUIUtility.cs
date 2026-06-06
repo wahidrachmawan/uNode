@@ -1546,7 +1546,7 @@ namespace MaxyGames.UNode.Editors {
 			return false;
 		}
 
-		public static void DrawTypeDrawer(Rect position, SerializedType type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
+		public static void EditType(Rect position, SerializedType type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
 			if(filter == null) {
 				filter = FilterAttribute.DefaultTypeFilter;
 			}
@@ -1588,7 +1588,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawTypeDrawer(Rect position, Type type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
+		public static void EditType(Rect position, Type type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
 			if(filter == null) {
 				filter = new FilterAttribute(typeof(object)) { OnlyGetType = true, UnityReference = false };
 			}
@@ -1629,7 +1629,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawTypeDrawer(SerializedType type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
+		public static void EditType(SerializedType type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
 			var position = GetRect();
 			if(filter == null) {
 				filter = new FilterAttribute(typeof(object)) { OnlyGetType = true, UnityReference = false };
@@ -1676,7 +1676,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawTypeDrawer(Type type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
+		public static void EditType(Type type, GUIContent label, Action<Type> onClick, FilterAttribute filter = null, object targetObject = null) {
 			var position = GetRect();
 			if(filter == null) {
 				filter = FilterAttribute.DefaultTypeFilter;
@@ -1734,7 +1734,7 @@ namespace MaxyGames.UNode.Editors {
 					EditorGUILayout.PrefixLabel(rawGenericArguments[index].Name);
 					var rect = uNodeGUIUtility.GetRect();
 					rect.width -= 20;
-					if(EditorGUI.DropdownButton(rect, new GUIContent(arg.PrettyName(), arg.FullName), FocusType.Keyboard)) {
+					if(EditorGUI.DropdownButton(rect, new GUIContent(arg.PrettyName(), uNodeEditorUtility.GetTypeIcon(arg), arg.FullName), FocusType.Keyboard)) {
 						var filter = new FilterAttribute();
 						filter.ToFilterGenericConstraints(rawGenericArguments[index], genericArguments);
 						if(Event.current.shift || Event.current.control) {
@@ -2167,7 +2167,7 @@ namespace MaxyGames.UNode.Editors {
 				if(oldValue is string) {
 					t = TypeSerializer.Deserialize(oldValue as string, false);
 				}
-				DrawTypeDrawer(position, t, label, type => {
+				EditType(position, t, label, type => {
 					uNodeEditorUtility.RegisterUndo(unityObject, "");
 					oldValue = type;
 					fieldValue = oldValue;
@@ -2518,7 +2518,7 @@ namespace MaxyGames.UNode.Editors {
 					t = TypeSerializer.Deserialize(oldValue as string, false);
 				}
 				Rect rect = GetRect();
-				DrawTypeDrawer(rect, t, label, type => {
+				EditType(rect, t, label, type => {
 					uNodeEditorUtility.RegisterUndo(unityObject, "");
 					oldValue = type;
 					fieldValue = oldValue;

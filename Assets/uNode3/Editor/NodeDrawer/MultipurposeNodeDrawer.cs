@@ -318,7 +318,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 							var index = x;
 							var arg = genericArguments[index];
 
-							uNodeGUIUtility.DrawTypeDrawer(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
+							uNodeGUIUtility.EditType(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
 								genericArguments[index] = type;
 								var changedType = ReflectionUtils.MakeGenericType(typeRaw, genericArguments);
 
@@ -485,7 +485,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 											var index = x;
 											var arg = genericArguments[index];
 
-											uNodeGUIUtility.DrawTypeDrawer(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
+											uNodeGUIUtility.EditType(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
 												genericArguments[index] = type;
 												var changedType = ReflectionUtils.MakeGenericType(typeRaw, genericArguments);
 
@@ -662,7 +662,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				var index = x;
 				var arg = genericArguments[index];
 
-				uNodeGUIUtility.DrawTypeDrawer(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
+				uNodeGUIUtility.EditType(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
 					genericArguments[index] = type;
 					var changedMethod = ReflectionUtils.MakeGenericMethod(methodDefinition, genericArguments);
 

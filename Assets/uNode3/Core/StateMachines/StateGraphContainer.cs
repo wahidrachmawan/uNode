@@ -105,11 +105,18 @@ namespace MaxyGames.UNode {
 
 	[AttributeUsage(AttributeTargets.Class)]
 	public class EventGraphAttribute : Attribute {
+		public string scope;
 		public string name;
 		public string createName;
 
 		public EventGraphAttribute(string name) {
 			this.name = name;
+			this.scope = name;
+		}
+
+		public EventGraphAttribute(string scope, string name) {
+			this.name = name;
+			this.scope = scope;
 		}
 	}
 

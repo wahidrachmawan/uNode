@@ -1454,9 +1454,9 @@ namespace MaxyGames.UNode.Editors {
 					}
 					EditorUtility.SetDirty(asset);
 				}
-				GraphUtility.SaveAllGraph();
+				GraphEditorUtility.SaveAllGraph();
 #if UNODE_TRIM_AGGRESSIVE
-				GraphUtility.UpdateDatabase();
+				GraphEditorUtility.UpdateDatabase();
 #endif
 			});
 #endif

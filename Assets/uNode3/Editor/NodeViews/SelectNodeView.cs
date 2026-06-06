@@ -61,10 +61,12 @@ namespace MaxyGames.UNode.Editors {
 			}) { text = "-" });
 			control.Add(new Button(() => {
 				RegisterUndo();
-				node.datas.Add(new Nodes.SelectNode.Data() {
+				var data = new Nodes.SelectNode.Data() {
 					value = MemberData.Default(node.target.ValueType)
-				});
+				};
+				node.datas.Add(data);
 				node.Register();
+				data.port.AssignToDefault(MemberData.CreateValueFromType(data.port.type));
 				MarkRepaint();
 			}) { text = "+" });
 			AddControl(Direction.Input, control);

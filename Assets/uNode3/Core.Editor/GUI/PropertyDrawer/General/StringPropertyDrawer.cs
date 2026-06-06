@@ -25,7 +25,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						filter.OnlyGetType = true;
 						filter.UnityReference = false;
 					}
-					uNodeGUIUtility.DrawTypeDrawer(position, TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
+					uNodeGUIUtility.EditType(position, TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
 						if(t != null) {
 							fieldValue = t.FullName;
 						} else {
@@ -37,7 +37,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					filter.ArrayManipulator = false;
 					filter.OnlyGetType = true;
 					filter.UnityReference = false;
-					uNodeGUIUtility.DrawTypeDrawer(position, TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
+					uNodeGUIUtility.EditType(position, TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
 						if(t != null) {
 							fieldValue = t.FullName;
 						} else {
@@ -94,7 +94,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						filter.OnlyGetType = true;
 						filter.UnityReference = false;
 					}
-					uNodeGUIUtility.DrawTypeDrawer(TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
+					uNodeGUIUtility.EditType(TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
 						if(t != null) {
 							fieldValue = t.FullName;
 						} else {
@@ -106,7 +106,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					filter.ArrayManipulator = false;
 					filter.OnlyGetType = true;
 					filter.UnityReference = false;
-					uNodeGUIUtility.DrawTypeDrawer(TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
+					uNodeGUIUtility.EditType(TypeSerializer.Deserialize(fieldValue, false), option.label, delegate (Type t) {
 						if(t != null) {
 							fieldValue = t.FullName;
 						} else {

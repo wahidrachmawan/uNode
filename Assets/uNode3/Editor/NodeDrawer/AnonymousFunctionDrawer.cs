@@ -27,7 +27,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 					}
 					position.y += position.height;
-					uNodeGUIUtility.DrawTypeDrawer(position, value.type, new GUIContent("Type"), type => {
+					uNodeGUIUtility.EditType(position, value.type, new GUIContent("Type"), type => {
 						option.RegisterUndo();
 						value.type = type;
 						node.Register();

@@ -21,7 +21,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			if(fieldInfo.GetCustomAttributes(typeof(TooltipAttribute), false).Length > 0) {
 				label.tooltip = ((TooltipAttribute)fieldInfo.GetCustomAttributes(typeof(TooltipAttribute), false)[0]).tooltip;
 			}
-			uNodeGUIUtility.DrawTypeDrawer(position, variable, label, (t) => {
+			uNodeGUIUtility.EditType(position, variable, label, (t) => {
 				variable.type = t;
 				property.boxedValue = variable;
 				property.serializedObject.ApplyModifiedProperties();

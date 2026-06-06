@@ -2202,6 +2202,7 @@ namespace MaxyGames.UNode.Editors {
 										nod.inputA.ConnectTo(node.nodeObject.primaryValueOutput);
 										nod.inputB.AssignToDefault(MemberData.CreateFromValue(null, nod.inputType));
 									});
+									uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 								});
 								menu.AddItem(new GUIContent("Is Not Equal"), false, () => {
 									NodeEditorUtility.AddNewNode<Nodes.ComparisonNode>(blockView.blocks, Vector2.zero, nod => {
@@ -2210,18 +2211,20 @@ namespace MaxyGames.UNode.Editors {
 										nod.inputA.ConnectTo(node.nodeObject.primaryValueOutput);
 										nod.inputB.AssignToDefault(MemberData.CreateFromValue(null, nod.inputType));
 									});
+									uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 								});
 								menu.AddSeparator("");
-								menu.AddItem(new GUIContent("Is Value True"), false, () => {
-									NodeEditorUtility.AddNewNode<Nodes.ComparisonNode>(blockView.blocks, Vector2.zero, nod => {
+								if(nodeType.IsCastableTo(typeof(bool))) {
+									menu.AddItem(new GUIContent("Is Value True"), false, () => {
 										node.nodeObject.SetParent(blockView.blocks);
+										uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 									});
-								});
+								}
 								menu.AddItem(new GUIContent("Is Type Equal"), false, () => {
 									NodeEditorUtility.AddNewNode<Nodes.ISNode>(blockView.blocks, Vector2.zero, nod => {
 										nod.target.ConnectTo(node.nodeObject.primaryValueOutput);
-									}
-									);
+									});
+									uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 								});
 								menu.AddSeparator("");
 								if(uNodeEditorUtility.IsNumericType(nodeType)) {
@@ -2232,6 +2235,7 @@ namespace MaxyGames.UNode.Editors {
 											nod.inputA.ConnectTo(node.nodeObject.primaryValueOutput);
 											nod.inputB.AssignToDefault(MemberData.CreateFromValue(null, nod.inputType));
 										});
+										uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 									});
 									menu.AddItem(new GUIContent("Is Greater Than Or Equal"), false, () => {
 										NodeEditorUtility.AddNewNode<Nodes.ComparisonNode>(blockView.blocks, Vector2.zero, nod => {
@@ -2240,6 +2244,7 @@ namespace MaxyGames.UNode.Editors {
 											nod.inputA.ConnectTo(node.nodeObject.primaryValueOutput);
 											nod.inputB.AssignToDefault(MemberData.CreateFromValue(null, nod.inputType));
 										});
+										uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 									});
 									menu.AddItem(new GUIContent("Is Less Than"), false, () => {
 										NodeEditorUtility.AddNewNode<Nodes.ComparisonNode>(blockView.blocks, Vector2.zero, nod => {
@@ -2248,6 +2253,7 @@ namespace MaxyGames.UNode.Editors {
 											nod.inputA.ConnectTo(node.nodeObject.primaryValueOutput);
 											nod.inputB.AssignToDefault(MemberData.CreateFromValue(null, nod.inputType));
 										});
+										uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 									});
 									menu.AddItem(new GUIContent("Is Less Than Or Equal"), false, () => {
 										NodeEditorUtility.AddNewNode<Nodes.ComparisonNode>(blockView.blocks, Vector2.zero, nod => {
@@ -2256,6 +2262,7 @@ namespace MaxyGames.UNode.Editors {
 											nod.inputA.ConnectTo(node.nodeObject.primaryValueOutput);
 											nod.inputB.AssignToDefault(MemberData.CreateFromValue(null, nod.inputType));
 										});
+										uNodeGUIUtility.GUIChanged(blockView.nodeView.targetNode, UIChangeType.Important);
 									});
 								}
 								menu.ShowAsContext();

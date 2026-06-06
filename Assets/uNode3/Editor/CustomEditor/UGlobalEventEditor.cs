@@ -105,7 +105,7 @@ namespace MaxyGames.UNode.Editors {
 					if(name != parameter.name) {
 						parameter.name = name;
 					}
-					uNodeGUIUtility.DrawTypeDrawer(
+					uNodeGUIUtility.EditType(
 						new Rect(pos.x, pos.y + EditorGUIUtility.singleLineHeight, pos.width, EditorGUIUtility.singleLineHeight),
 						parameter.type,
 						new GUIContent("Type"),

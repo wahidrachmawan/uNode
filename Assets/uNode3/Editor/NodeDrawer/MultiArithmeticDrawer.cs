@@ -17,7 +17,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			uNodeGUI.DrawCustomList(node.inputs, "Inputs",
 				drawElement: (position, index, value) => {
 					position = EditorGUI.PrefixLabel(position, new GUIContent("Type"));
-					uNodeGUIUtility.DrawTypeDrawer(position, node.inputs[index].type, GUIContent.none, (type) => {
+					uNodeGUIUtility.EditType(position, node.inputs[index].type, GUIContent.none, (type) => {
 						node.inputs[index].type = type;
 						uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 					}, targetObject: option.unityObject);

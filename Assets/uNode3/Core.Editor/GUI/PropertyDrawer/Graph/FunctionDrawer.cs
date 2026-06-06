@@ -22,7 +22,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 				UInspector.Draw(option.property[nameof(Function.modifier)]);
 			}
 			EditorGUI.BeginDisabledGroup(isFromProperty);
-			uNodeGUIUtility.DrawTypeDrawer(value.ReturnType(), new GUIContent("Return Type"), type => {
+			uNodeGUIUtility.EditType(value.ReturnType(), new GUIContent("Return Type"), type => {
 				if(type == null)
 					type = typeof(void);
 				value.returnType = type;

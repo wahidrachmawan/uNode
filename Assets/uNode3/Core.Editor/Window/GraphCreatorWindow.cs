@@ -593,7 +593,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		protected void DrawInheritFrom(string label = "Inherit From") {
-			uNodeGUIUtility.DrawTypeDrawer(uNodeGUIUtility.GetRect(), graphInheritFrom, new GUIContent(label), (type) => {
+			uNodeGUIUtility.EditType(uNodeGUIUtility.GetRect(), graphInheritFrom, new GUIContent(label), (type) => {
 				graphInheritFrom = type;
 			}, graphInheritFilter);
 		}

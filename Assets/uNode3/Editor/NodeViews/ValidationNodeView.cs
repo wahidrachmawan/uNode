@@ -13,6 +13,7 @@ namespace MaxyGames.UNode.Editors {
 			base.OnReloadView();
 			Nodes.NodeValidation node = targetNode as Nodes.NodeValidation;
 			InitializeBlocks(node.data.container, BlockType.Condition);
+			EnableInClassList(ussClassHideTitle, node.hideTitle);
 		}
 	}
 }

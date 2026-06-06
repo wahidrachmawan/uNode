@@ -8,6 +8,7 @@ namespace MaxyGames.UNode.Nodes {
 	public class NodeValidation : FlowNode, IStackedNode {
 		[HideInInspector]
 		public BlockData data = new BlockData();
+		public bool hideTitle = true;
 
 		public FlowOutput onTrue { get; set; }
 		public FlowOutput onFalse { get; set; }

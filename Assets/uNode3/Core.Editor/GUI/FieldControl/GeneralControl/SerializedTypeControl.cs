@@ -12,7 +12,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			var attributes = settings.attributes;
 			ValidateValue(ref value, settings != null ? settings.nullable : false);
 			var fieldValue = value as SerializedType;
-			uNodeGUIUtility.DrawTypeDrawer(position, fieldValue, label, (type) => {
+			uNodeGUIUtility.EditType(position, fieldValue, label, (type) => {
 				onChanged(new SerializedType(type));
 			}, ReflectionUtils.GetAttribute<FilterAttribute>(attributes), settings.unityObject);
 		}
