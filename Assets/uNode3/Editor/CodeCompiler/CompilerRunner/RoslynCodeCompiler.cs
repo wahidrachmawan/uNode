@@ -14,11 +14,11 @@ namespace MaxyGames.CompilerBuilder {
 	public static class RoslynCodeCompiler {
 		const string RuntimeConfig = @"{
 	""runtimeOptions"": {
-		""tfm"": ""net6.0"",
+		""tfm"": ""net8.0"",
 		""rollForward"": ""LatestMinor"",
 		""framework"": {
 			""name"": ""Microsoft.NETCore.App"",
-			""version"": ""6.0.0""
+			""version"": ""8.0.0""
 		}
 	}
 }";
@@ -162,41 +162,70 @@ namespace MaxyGames.CompilerBuilder {
 			}
 		}
 
-		private static string[] m_RoslynPaths;
-		private static string[] RoslynPaths {
-			get {
-				if(m_RoslynPaths == null) {
-					m_RoslynPaths = new string[2];
-					//Find Microsoft.CodeAnalysis.dll in Unity Editor folder and add it to references, since it's not loaded in the current AppDomain
-					var editorPath = EditorApplication.applicationContentsPath;
-					var roslynPath = Path.Combine(editorPath, "DotNetSdkRoslyn");
-					string dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.dll");
-					if(File.Exists(dllPath)) {
-						m_RoslynPaths[0] = Path.GetFullPath(dllPath);
-					}
-					dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.CSharp.dll");
-					if(File.Exists(dllPath)) {
-						m_RoslynPaths[1] = Path.GetFullPath(dllPath);
-					}
-				}
-				return m_RoslynPaths;
-			}
-		}
+		//private static string[] m_RoslynPaths;
+		//private static string[] RoslynPaths {
+		//	get {
+		//		if(m_RoslynPaths == null) {
+		//			//Find Microsoft.CodeAnalysis.dll in Unity Editor folder and add it to references, since it's not loaded in the current AppDomain
+		//			var editorPath = EditorApplication.applicationContentsPath;
+		//			var roslynPath = Path.Combine(editorPath, "DotNetSdkRoslyn");
+		//			if(Directory.Exists(roslynPath) == false) {
+		//				var dir = Path.Combine(editorPath, "Tools", "BuildPipeline", "Unity.Analyzers.Common");
+		//				if(Directory.Exists(dir)) {
+		//					return Directory.EnumerateFiles(dir, "*.dll").ToArray();
+		//				}
+		//				else {
+		//					dir = Path.Combine(editorPath, "DotNetSdk", "sdk");
+		//					if(Directory.Exists(dir)) {
+		//						roslynPath = Path.Combine(dir, Directory.GetDirectories(dir)[0], "Roslyn", "bincore");
+		//						//Debug.Log(path);
+		//					}
+		//				}
+		//			}
+		//			if(Directory.Exists(roslynPath)) {
+		//				m_RoslynPaths = new string[2];
+		//				string dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.dll");
+		//				if(File.Exists(dllPath)) {
+		//					m_RoslynPaths[0] = Path.GetFullPath(dllPath);
+		//				}
+		//				dllPath = Path.Combine(roslynPath, "Microsoft.CodeAnalysis.CSharp.dll");
+		//				if(File.Exists(dllPath)) {
+		//					m_RoslynPaths[1] = Path.GetFullPath(dllPath);
+		//				}
+		//			}
+		//			else {
+		//				m_RoslynPaths = new string[0];
+		//			}
+		//		}
+		//		return m_RoslynPaths;
+		//	}
+		//}
 
 		private static void CreateConfigFile(string outputPath) {
 			HashSet<string> allReferences = new HashSet<string>();
 
-			//var dir = Path.GetDirectoryName(typeof(CSharpCompilation).Assembly.Location);
-			//Directory.EnumerateFiles(dir, "*.dll").ToList().ForEach(path => {
-			//	try {
-			//		allReferences.Add(path);
-			//	}
-			//	catch { }
-			//});
-
 			{//Find Microsoft.CodeAnalysis.dll in Unity Editor folder and add it to references, since it's not loaded in the current AppDomain
-				foreach(var path in RoslynPaths) {
-					allReferences.Add(path);
+			 //foreach(var path in RoslynPaths) {
+			 //	allReferences.Add(path);
+			 //}
+
+				var dir = Path.GetDirectoryName(typeof(CSharpCompilation).Assembly.Location);
+				Directory.EnumerateFiles(dir, "*.dll").ToList().ForEach(path => {
+					try {
+						allReferences.Add(path);
+					}
+					catch { }
+				});
+				{//Microsoft.CodeAnalysis.Workspace.dll
+					var path = AssetDatabase.GUIDToAssetPath("fe4054e038f87e242b212a1a322ba7ed");
+					if(File.Exists(path)) {
+						Directory.EnumerateFiles(Path.GetDirectoryName(path), "*.dll").ToList().ForEach(path => {
+							try {
+								allReferences.Add(path);
+							}
+							catch { }
+						});
+					}
 				}
 			}
 
@@ -297,11 +326,11 @@ namespace MaxyGames.CompilerBuilder {
 		}
 
 		private static async void SendDataAsync(CodeCompiler.CodeCompilerOption option, Action<CodeCompiler.CodeCompilerResult> onComplete) {
-//#if UNODE_DEV
-//			Debug.Log("Sending compilation request to runner...");
-//			var stopwatch = new System.Diagnostics.Stopwatch();
-//			stopwatch.Start();
-//#endif
+			//#if UNODE_DEV
+			//			Debug.Log("Sending compilation request to runner...");
+			//			var stopwatch = new System.Diagnostics.Stopwatch();
+			//			stopwatch.Start();
+			//#endif
 			try {
 				if(string.IsNullOrEmpty(option.OutputResultPath) == false && File.Exists(option.OutputResultPath)) {
 					// Ensure old result file is deleted before compilation to prevent reading stale results
@@ -319,9 +348,9 @@ namespace MaxyGames.CompilerBuilder {
 			catch(Exception ex) {
 				Debug.LogException(ex);
 			}
-//#if UNODE_DEV
-//			Debug.Log("Elapsed time: " + stopwatch.ElapsedMilliseconds + " ms");
-//#endif
+			//#if UNODE_DEV
+			//			Debug.Log("Elapsed time: " + stopwatch.ElapsedMilliseconds + " ms");
+			//#endif
 		}
 		#endregion
 
@@ -330,10 +359,6 @@ namespace MaxyGames.CompilerBuilder {
 		static string FindDotnetExecutable() {
 			if(dotnetPath == null) {
 				dotnetPath = string.Empty;
-				if(IsDotNetAvailable() || IsCommandWorking("dotnet")) {
-					dotnetPath = "dotnet";
-					return dotnetPath;
-				}
 				string[] knowDotnetPaths;
 				string unityDotnet;
 				if(Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer) {
@@ -356,14 +381,15 @@ namespace MaxyGames.CompilerBuilder {
 					knowDotnetPaths = new string[] {
 						unityDotnet = EditorApplication.applicationContentsPath + "/NetCoreRuntime/dotnet.exe",
 						@"C:\Program Files\dotnet\dotnet.exe",
-						@"C:\Program Files (x86)\dotnet\dotnet.exe",
+						//@"C:\Program Files (x86)\dotnet\dotnet.exe",
 					};
 				}
 				foreach(var path in knowDotnetPaths) {
 					if(File.Exists(path)) {
-						if(IsCommandWorking(path)) {
+						//if(IsCommandWorking(path)) 
+						{
 							dotnetPath = path;
-							return dotnetPath;
+							return path;
 						}
 					}
 				}
@@ -379,6 +405,12 @@ namespace MaxyGames.CompilerBuilder {
 					}
 					else {
 						dotnetPath = unityDotnet;
+					}
+				}
+				if(string.IsNullOrEmpty(dotnetPath)) {
+					if(IsDotNetAvailable() || IsCommandWorking("dotnet")) {
+						dotnetPath = "dotnet";
+						return dotnetPath;
 					}
 				}
 			}

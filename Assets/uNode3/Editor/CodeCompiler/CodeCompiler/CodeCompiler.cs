@@ -74,7 +74,9 @@ namespace MaxyGames.CodeCompiler {
 							await HandleClientAsync(pipeServer);
 						}
 						catch(Exception ex) {
+							Console.WriteLine();
 							Console.WriteLine("Error: " + ex.ToString());
+							Console.WriteLine();
 						}
 						finally {
 							pipeServer.Dispose();
@@ -90,7 +92,9 @@ namespace MaxyGames.CodeCompiler {
 		private static async Task HandleClientAsync(NamedPipeServerStream pipeServer) {
 			var data = await PipeHelper.ReceiveStringAsync(pipeServer);
 			var option = CodeCompiler.GetOption(data);
-			Console.WriteLine("Compiling: " + option.AssemblyName);
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine("### => Compiling: " + option.AssemblyName);
 
 			var result = CodeCompiler.Run(option);
 
@@ -112,6 +116,8 @@ namespace MaxyGames.CodeCompiler {
 			public string path;
 			public string fullname;
 
+			public bool isInitialized => _lastWriteTime != default;
+
 			private DateTime _lastWriteTime;
 			private Assembly _assembly;
 			public Assembly assembly {
@@ -127,9 +133,13 @@ namespace MaxyGames.CodeCompiler {
 							}
 							_lastWriteTime = lastWriteTime;
 							_assembly = Assembly.Load(File.ReadAllBytes(path));
+
+							if(_assembly != null) {
+								Console.WriteLine("__ => Resolved assembly: " + _assembly.FullName);
+							}
 						}
 						catch(Exception ex) {
-							Console.WriteLine($"Failed to load assembly: {path}");
+							Console.WriteLine($"__ => Failed to load assembly: {path} with name: {fullname}");
 							Console.WriteLine(ex);
 							return null;
 						}
@@ -186,8 +196,6 @@ namespace MaxyGames.CodeCompiler {
 			var version = assembly.Version;
 			var assemblyName = assembly.Name;
 
-			//Console.WriteLine($"Resolving assembly: {resolveArgs.Name}, Requested by: {resolveArgs.RequestingAssembly}");
-
 			ReferenceData referenceData = null;
 			var closestVersion = version;
 
@@ -219,6 +227,10 @@ namespace MaxyGames.CodeCompiler {
 				}
 			}
 			if(referenceData != null) {
+				if(referenceData.isInitialized == false) {
+					Console.WriteLine();
+					Console.WriteLine($"~~~ Resolving assembly: {resolveArgs.Name}");
+				}
 				//if(assemblyName.StartsWith("Microsoft.CodeAnalysis")) {
 				//	Console.WriteLine();
 				//	Console.WriteLine($"Requested assembly: {resolveArgs.Name}");
@@ -243,7 +255,9 @@ namespace MaxyGames.CodeCompiler {
 				result = Compile(option);
 			}
 			catch(Exception ex) {
+				Console.WriteLine();
 				Console.WriteLine("Error: " + ex.ToString());
+				Console.WriteLine();
 			}
 			finally {
 				if(string.IsNullOrEmpty(option.OutputResultPath) == false) {
@@ -309,11 +323,16 @@ namespace MaxyGames.CodeCompiler {
 						Console.WriteLine("--------------------------");
 					}
 					catch(Exception ex) {
+						Console.WriteLine();
 						Console.WriteLine("Error: " + assembly.ToString());
 						Console.WriteLine(ex);
+						Console.WriteLine();
 					}
 				}
+				//Console.WriteLine("####### Apending Source Generators");
 				foreach(var ass in assemblies) {
+					//Console.WriteLine();
+					//Console.WriteLine(ass.FullName);
 					AppendSourceGenerators(ass, ref generators);
 				}
 				Console.WriteLine("Source Generators count: " + generators.Count);
@@ -384,6 +403,7 @@ namespace MaxyGames.CodeCompiler {
 							result.ILPPApplied = true;
 						}
 						catch(Exception ex) {
+							Console.WriteLine();
 							Console.WriteLine($"Error on running ILPP: {option.OutputPath}");
 							Console.WriteLine(ex);
 						}
