@@ -37,6 +37,9 @@ namespace MaxyGames.UNode.Nodes {
 			else {
 				result = CG.Nameof(member.target);
 			}
+			if(output.GetConnectedPorts().All(port => port.GetNode() is NodeSetValue)) {
+				return result;
+			}
 			return CG.New(ReturnType(), result);
 		}
 		#endregion

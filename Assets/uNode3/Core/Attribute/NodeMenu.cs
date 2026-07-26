@@ -12,12 +12,15 @@ namespace MaxyGames.UNode {
 
 		public const string Macro = nameof(Macro);
 		public const string StateGraph = nameof(StateGraph);
-		public const string ECSGraph = nameof(ECSGraph);
-		public const string ECSGraphAndJob = nameof(ECSGraph) + OR + "ECS_Job";
 		public const string FlowGraph = nameof(FlowGraph);
 
 		public const string BTGraph = nameof(BTGraph);
-		public const string BTFlow = nameof(BTFlow);
+
+		public const string ECSBehavior = nameof(ECSBehavior);
+		public const string ECSState = nameof(ECSState);
+		public const string ECSStateGraph = nameof(ECSStateGraph);
+		public const string ECSGraph = nameof(ECSGraph);
+		public const string ECSGraphAndJob = nameof(ECSGraph) + OR + "ECS_Job";
 
 		public const string OR = ",";
 

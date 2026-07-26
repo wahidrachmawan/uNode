@@ -79,6 +79,7 @@ namespace MaxyGames.UNode.Editors {
 			public const string Macro = nameof(Macro);
 			public const string PlaceFit = nameof(PlaceFit);
 			public const string ShowAddNodeContextMenu = nameof(ShowAddNodeContextMenu);
+			public const string CarryNodes = nameof(CarryNodes);
 		}
 
 		private uNodeEditor.TabData m_tabData;
@@ -275,6 +276,15 @@ namespace MaxyGames.UNode.Editors {
 					}
 				}
 			}
+			list.Sort((x, y) => {
+				if(x.order < y.order) {
+					return -1;
+				}
+				if(x.order > y.order) {
+					return 1;
+				}
+				return 0;
+			});
 			var result = list.ToArray();
 			pool.Free(list);
 			return result;
@@ -1901,7 +1911,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			else if(graphData.currentCanvas is NodeObject superNode) {
 
-				if(superNode.node is INodeWithEventHandler) {
+				if(superNode.node is INodeWithEventHandler handler) {
 					yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
 
 					#region Add Event
@@ -1931,10 +1941,12 @@ namespace MaxyGames.UNode.Editors {
 									continue;
 								}
 							}
-							yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
-								NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
-								graphEditor.Refresh();
-							}, DEFAULT_ORDER);
+							if(menu.IsValidScope(handler.EventScope) || graphData.IsValidScope(menu.scope)) {
+								yield return new ContextMenuItem("Add Event/" + (string.IsNullOrEmpty(menu.category) ? menu.name : menu.category + "/" + menu.name), (e) => {
+									NodeEditorUtility.AddNewNode<Node>(graphData, menu.nodeName, menu.type, mousePosition);
+									graphEditor.Refresh();
+								}, DEFAULT_ORDER);
+							}
 						}
 					}
 					#endregion
@@ -2951,7 +2963,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override bool HandleCommand(string command) {
-			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
+			if(graphData.scopes.Contains(StateGraphContainer.Scope) || graphData.IsValidScope(NodeScope.ECSStateGraph)) {
 				switch(command) {
 					case nameof(Command.OpenCommand):
 						//Skip
@@ -2965,10 +2977,11 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public override void ManipulateCanvasData(GraphCanvasData canvasData) {
-			if(graphData.scopes.Contains(StateGraphContainer.Scope)) {
+			if(graphData.scopes.Contains(StateGraphContainer.Scope) || graphData.IsValidScope(NodeScope.ECSStateGraph)) {
 				var features = canvasData.features;
 				features.Remove(nameof(Feature.Macro));
 				features.Remove(nameof(Feature.PlaceFit));
+				features.Remove(nameof(Feature.CarryNodes));
 				features.Remove(nameof(Feature.SurroundWith));
 				features.Remove(nameof(Feature.ShowAddNodeContextMenu));
 			}

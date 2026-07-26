@@ -146,7 +146,7 @@ namespace MaxyGames.CompilerBuilder {
 				System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
 					FileName = FindDotnetExecutable(),
 					Arguments = $"\"{runnerPath}\"",
-#if UNODE_DEV
+#if true || UNODE_DEV
 					UseShellExecute = true,
 					CreateNoWindow = false,
 #else

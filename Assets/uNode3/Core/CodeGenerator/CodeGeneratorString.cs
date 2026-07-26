@@ -1173,31 +1173,32 @@ namespace MaxyGames {
 
 		#region Invoke Code
 
-		private static string DoGenerateInvokeCode(string functionName, string[] paramObject, Type[] genericType = null) {
+		private static string DoGenerateInvokeCode(string functionName, IEnumerable<string> paramObject, IEnumerable<Type> genericType = null) {
 			string paramName = null;
 			if(paramObject != null) {
-				for(int i = 0; i < paramObject.Length; i++) {
-					if(string.IsNullOrEmpty(paramObject[i]))
+				foreach(var p in paramObject) { 
+					if(string.IsNullOrEmpty(p))
 						continue;
-					if(i != 0) {
+					if(paramName != null) {
 						paramName += ", ";
 					}
-					paramName += paramObject[i];
+					paramName += p;
 				}
 			}
 			string genericData = null;
-			if(genericType != null && genericType.Length > 0) {
-				genericData += "<";
-				for(int i = 0; i < genericType.Length; i++) {
-					if(i > 0) {
+			if(genericType != null && genericType.Any()) {
+				foreach(var p in genericType) { 
+					if(genericData != null) {
 						genericData += ", ";
 					}
-					var gType = Type(genericType[i]);
+					var gType = Type(p);
 					if(string.IsNullOrEmpty(gType))
-						throw new Exception("Null or Empty generic type at index: " + i + " " + genericType[i]);
+						throw new Exception("Null or Empty generic type: " + p);
 					genericData += gType;
 				}
-				genericData += ">";
+				if(string.IsNullOrEmpty(genericData) == false) {
+					genericData = "<" + genericData + ">";
+				}
 			}
 			if(string.IsNullOrEmpty(paramName)) {
 				return functionName + genericData + "()";

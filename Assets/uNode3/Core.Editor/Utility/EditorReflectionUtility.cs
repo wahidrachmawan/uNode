@@ -1201,7 +1201,10 @@ namespace MaxyGames.UNode.Editors {
 				BindingFlags flag = BindingFlags.Public | BindingFlags.Instance;
 				if(type.IsValueType && type.IsPrimitive == false && type != typeof(void)) {
 					//flag |= BindingFlags.Static | BindingFlags.NonPublic;
-					Items.Add(GetReflectionItems(ReflectionUtils.GetDefaultConstructor(type), filter, validation, memberValidation));
+					var item = GetReflectionItems(ReflectionUtils.GetDefaultConstructor(type), filter, validation, memberValidation);
+					if(item != null) {
+						Items.Add(item);
+					}
 				}
 				ConstructorInfo[] ctor = type.GetConstructors(flag);
 				for(int i = ctor.Length - 1; i >= 0; i--) {

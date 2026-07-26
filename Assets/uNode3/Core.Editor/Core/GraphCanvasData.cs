@@ -28,6 +28,7 @@ namespace MaxyGames.UNode.Editors {
 		public bool SupportSurroundWith => features.Contains(nameof(GraphManipulator.Feature.SurroundWith));
 		public bool SupportMacro => features.Contains(nameof(GraphManipulator.Feature.Macro));
 		public bool SupportPlaceFit => features.Contains(nameof(GraphManipulator.Feature.PlaceFit));
+		public bool SupportCarryNodes => features.Contains(nameof(GraphManipulator.Feature.CarryNodes));
 		public bool ShowAddNodeContextMenu => features.Contains(nameof(GraphManipulator.Feature.ShowAddNodeContextMenu));
 
 		public bool IsFeatureSupported(string feature) => feature.Contains(feature);

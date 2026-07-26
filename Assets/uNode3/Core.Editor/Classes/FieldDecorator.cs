@@ -55,7 +55,7 @@ namespace MaxyGames.UNode.Editors {
 		/// Draw the field decorators
 		/// </summary>
 		/// <param name="attributes"></param>
-		public static void DrawDecorators(object[] attributes) {
+		public static void DrawDecorators(IEnumerable<object> attributes) {
 			if(attributes == null) return;
 			foreach(var att in attributes) {
 				if(att == null || !(att is PropertyAttribute)) continue;

@@ -638,6 +638,7 @@ namespace MaxyGames.UNode.Editors {
 
 			data.features.Add(nameof(GraphManipulator.Feature.Macro));
 			data.features.Add(nameof(GraphManipulator.Feature.PlaceFit));
+			data.features.Add(nameof(GraphManipulator.Feature.CarryNodes));
 			data.features.Add(nameof(GraphManipulator.Feature.SurroundWith));
 			data.features.Add(nameof(GraphManipulator.Feature.ShowAddNodeContextMenu));
 

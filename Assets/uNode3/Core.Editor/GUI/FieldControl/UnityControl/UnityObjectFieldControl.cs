@@ -55,7 +55,7 @@ namespace MaxyGames.UNode.Editors.Control {
 			}
 			else if(settings.unityObject is IGraph graph && (ReflectionUtils.IsNativeType(graph.GetGraphType()) || !graph.GetGraphType().IsCastableTo(typeof(UnityEngine.Object)))) {
 				flag = false;
-				if(settings.HasAttribute<AllowAssetReferenceAttribute>()) {
+				if(uNodeEditorUtility.IsSceneObject(settings.unityObject) || settings.HasAttribute<AllowAssetReferenceAttribute>()) {
 					flag = true;
 				}
 			}

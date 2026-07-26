@@ -438,7 +438,6 @@ Note: Auto Generate on Buld will always using Unity method.")]
 				#endregion
 
 				preferenceData.displayKind = (DisplayKind)EditorGUILayout.EnumPopup(new GUIContent("Display Kind"), preferenceData.displayKind);
-				//preferenceData.isDim = EditorGUILayout.Toggle(new GUIContent("Dim Node"), preferenceData.isDim);
 
 				bool showGrid = EditorGUILayout.Toggle(new GUIContent("Show Grid"), preferenceData.showGrid);
 				if(showGrid != preferenceData.showGrid) {

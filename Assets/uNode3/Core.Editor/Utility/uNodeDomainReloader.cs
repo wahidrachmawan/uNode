@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	static class uNodeDomainReloader {
-		[MenuItem("Tools/uNode/Advanced/Reload Scripts", false, 10003)]
+		[MenuItem("Tools/uNode/Advanced/Reload Scripts", false, 1000010)]
 		private static void RecompileScripts() {
 			//EditorUtility.UnloadUnusedAssetsImmediate();
 			var activeTex = Resources.FindObjectsOfTypeAll<Texture2D>();

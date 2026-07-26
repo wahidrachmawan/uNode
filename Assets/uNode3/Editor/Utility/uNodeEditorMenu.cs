@@ -77,14 +77,25 @@ namespace MaxyGames.UNode.Editors {
 #endif
 		}
 
-
-
-#if UNODE_DEBUG
+#if UNODE_DEV
 		[MenuItem("Tools/uNode/Advanced/Developer Mode: Enabled", false, 10002)]
 #else
 		[MenuItem("Tools/uNode/Advanced/Developer Mode: Disabled", false, 10002)]
 #endif
 		private static void AdvancedDeveloperMode() {
+#if UNODE_DEV
+			uNodeEditorUtility.RemoveDefineSymbols(new string[] { "UNODE_DEV" });
+#else
+			uNodeEditorUtility.AddDefineSymbols(new string[] { "UNODE_DEV" });
+#endif
+		}
+
+#if UNODE_DEBUG
+		[MenuItem("Tools/uNode/Advanced/Developer Debug Mode: Enabled", false, 10003)]
+#else
+		[MenuItem("Tools/uNode/Advanced/Developer Debug Mode: Disabled", false, 10003)]
+#endif
+		private static void AdvancedDebugMode() {
 #if UNODE_DEBUG
 			uNodeEditorUtility.RemoveDefineSymbols(new string[] { "UNODE_DEBUG" });
 #else
@@ -93,9 +104,9 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 #if UNODE_TRIM_ON_BUILD
-		[MenuItem("Tools/uNode/Advanced/Trim Graph On Build: Enabled", false, 10002)]
+		[MenuItem("Tools/uNode/Advanced/Trim Graph On Build: Enabled", false, 10005)]
 #else
-		[MenuItem("Tools/uNode/Advanced/Trim Graph On Build: Disabled", false, 10002)]
+		[MenuItem("Tools/uNode/Advanced/Trim Graph On Build: Disabled", false, 10005)]
 #endif
 		private static void AdvancedTrimOnBuild() {
 			if(uNodeEditorUtility.DisplayRequiredProVersion()) {
@@ -110,9 +121,9 @@ namespace MaxyGames.UNode.Editors {
 
 #if UNODE_TRIM_ON_BUILD
 #if UNODE_TRIM_AGGRESSIVE
-		[MenuItem("Tools/uNode/Advanced/Trim Mode: Aggressive", false, 10002)]
+		[MenuItem("Tools/uNode/Advanced/Trim Mode: Aggressive", false, 10005)]
 #else
-		[MenuItem("Tools/uNode/Advanced/Trim Mode: Safe", false, 10002)]
+		[MenuItem("Tools/uNode/Advanced/Trim Mode: Safe", false, 10005)]
 #endif
 		private static void AdvancedTrimAggressive() {
 			if(uNodeEditorUtility.DisplayRequiredProVersion()) {

@@ -1006,7 +1006,10 @@ namespace MaxyGames.UNode.Editors {
 
 			var references = DragAndDrop.objectReferences;
 			if(references?.Length == 1) {
-				return HandleDrag(references[0]);
+				if(uNodeEditorUtility.IsPersistent(references[0])) {
+					return HandleDrag(references[0]);
+				}
+				else return DragAndDropVisualMode.Rejected;
 			}
 			return DragAndDropVisualMode.None;
 		}

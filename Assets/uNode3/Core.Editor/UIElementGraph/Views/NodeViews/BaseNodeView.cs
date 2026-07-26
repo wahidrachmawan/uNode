@@ -418,6 +418,9 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <returns></returns>
 		public override IEnumerable<UNodeView> GetCarryNodes() {
+			if(graphEditor.canvasData.SupportPlaceFit == false) {
+				return null;
+			}
 			var preference = uNodePreference.GetPreference();
 			bool carry;
 			if(owner.currentEvent != null) {

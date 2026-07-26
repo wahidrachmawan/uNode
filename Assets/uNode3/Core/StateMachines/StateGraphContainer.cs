@@ -32,6 +32,15 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public override IEnumerable<NodeObject> GetEntryNodes() {
+			if(Entry != null) {
+				yield return Entry;
+			}
+			foreach(var node in this.GetNodesInChildren<Nodes.AnyStateNode>()) {
+				yield return node;
+			}
+		}
+
 		public Type GetIcon() {
 			return typeof(TypeIcons.StateIcon);
 		}

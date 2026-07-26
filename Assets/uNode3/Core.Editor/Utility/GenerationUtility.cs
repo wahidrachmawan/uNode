@@ -37,6 +37,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
+		[Serializable]
 		public class CachedScriptData {
 			public string path;
 			public int lastCompiledID;

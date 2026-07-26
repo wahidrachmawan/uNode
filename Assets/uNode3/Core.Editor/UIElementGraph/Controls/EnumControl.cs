@@ -14,7 +14,7 @@ namespace MaxyGames.UNode.Editors.UIControl {
 			if(actualType is INativeMember) {
 				actualType = (actualType as INativeMember).GetNativeMember() as Type ?? config.type;
 			}
-			if(actualType.IsDefinedAttribute(typeof(FlagsAttribute))) {
+			if(actualType.IsDefinedAttribute(typeof(FlagsAttribute)) && config.value?.GetType()?.IsDefinedAttribute<FlagsAttribute>() == true) {
 				EnumFlagsField field = new EnumFlagsField(config.value as Enum ?? ReflectionUtils.CreateInstance(actualType) as Enum);
 				field.RegisterValueChangedCallback((e) => {
 					config.OnValueChanged(e.newValue);

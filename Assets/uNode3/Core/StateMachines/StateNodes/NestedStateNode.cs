@@ -25,7 +25,16 @@ namespace MaxyGames.UNode.Nodes {
 			return state.IsActive;
 		}
 
-		public IEnumerable<NodeObject> NestedFlowNodes => new NodeObject[] { Entry };
+		public IEnumerable<NodeObject> NestedFlowNodes {
+			get {
+				if(entry != null) {
+					yield return entry;
+				}
+				foreach(var node in this.nodeObject.GetNodesInChildren<Nodes.AnyStateNode>()) {
+					yield return node;
+				}
+			}
+		}
 
 		string ISuperNode.SupportedScope => StateGraphContainer.Scope;
 

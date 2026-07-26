@@ -718,6 +718,16 @@ namespace MaxyGames.UNode.Editors {
 						yield return entry;
 					}
 				}
+				if(nodeObject.node is ISuperNode superNode1) {
+					foreach(var c in superNode1.NestedFlowNodes) {
+						yield return c;
+					}
+				}
+			}
+			if(canvas is ISuperNode superNode) {
+				foreach(var c in superNode.NestedFlowNodes) {
+					yield return c;
+				}
 			}
 			yield break;
 		}

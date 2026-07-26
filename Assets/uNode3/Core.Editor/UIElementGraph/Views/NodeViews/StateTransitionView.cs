@@ -10,8 +10,6 @@ using UnityEditor.Experimental.GraphView;
 
 namespace MaxyGames.UNode.Editors {
 	public class StateTransitionView : UNodeView {
-		public Nodes.StateTransition transition;
-
 		public PortView inputPort;
 		public PortView outputPort;
 
@@ -19,7 +17,6 @@ namespace MaxyGames.UNode.Editors {
 
 		public override void Initialize(UGraphView owner, NodeObject node) {
 			nodeObject = node;
-			this.transition = node.node as Nodes.StateTransition;
 			this.AddStyleSheet("uNodeStyles/NativeNodeStyle");
 			this.AddStyleSheet(UIElementUtility.Theme.nodeStyle);
 			Initialize(owner);
@@ -59,23 +56,23 @@ namespace MaxyGames.UNode.Editors {
 			// }
 			base.SetPosition(newPos);
 
-			transition.position = newPos;
+			nodeObject.position = newPos;
 		}
 
 		public override void Teleport(Rect position) {
 			base.SetPosition(position);
-			transition.position = position;
+			nodeObject.position = position;
 		}
 
 		public void UpdatePosition() {
-			Teleport(transition.position);
+			Teleport(nodeObject.position);
 		}
 
 		public override void ReloadView() {
 			base.ReloadView();
 
 			try {
-				title = transition.GetTitle();
+				title = nodeObject.GetTitle();
 				//if(titleIcon != null)
 				//	titleIcon.image = uNodeEditorUtility.GetTypeIcon(nodeObject.GetNodeIcon());
 			}
@@ -87,11 +84,11 @@ namespace MaxyGames.UNode.Editors {
 			UpdatePosition();
 
 			{
-				inputPort = AddInputFlowPort(new FlowInputData(transition.enter));
+				inputPort = AddInputFlowPort(new FlowInputData(nodeObject.FlowInputs.First()));
 				inputPort.SetEdgeConnector<TransitionEdgeView>();
 				inputPort.pickingMode = PickingMode.Ignore;
 				inputPort.SetEnabled(false);
-				outputPort = AddOutputFlowPort(new FlowOutputData(transition.exit));
+				outputPort = AddOutputFlowPort(new FlowOutputData(nodeObject.FlowOutputs.First()));
 				outputPort.SetEdgeConnector<TransitionEdgeView>();
 				outputPort.pickingMode = PickingMode.Ignore;
 				//outputPort.SetEnabled(false);

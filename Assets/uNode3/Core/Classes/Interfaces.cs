@@ -107,7 +107,8 @@ namespace MaxyGames.UNode {
 	/// Implement in node to handle childs event nodes
 	/// </summary>
 	public interface INodeWithEventHandler {
-		bool CanTrigger(GraphInstance instance);
+		string EventScope => NodeScope.StateGraph;
+		bool CanTrigger(GraphInstance instance) => throw new NotImplementedException();
 		string GenerateTriggerCode(string contents) => contents;
 	}
 
