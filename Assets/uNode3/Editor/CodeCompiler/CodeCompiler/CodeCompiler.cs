@@ -337,7 +337,8 @@ namespace MaxyGames.CodeCompiler {
 				}
 				Console.WriteLine("Source Generators count: " + generators.Count);
 
-				CSharpGeneratorDriver.Create(generators.ToArray()).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out var diagnostics);
+				var parseOptions = new CSharpParseOptions(preprocessorSymbols: option.Defines);
+				CSharpGeneratorDriver.Create(generators, parseOptions: parseOptions).RunGeneratorsAndUpdateCompilation(compilation, out var compilationUpdated, out var diagnostics);
 				foreach(var diag in diagnostics) {
 					Console.WriteLine("Diag: " + diag.GetMessage());
 				}
@@ -373,6 +374,16 @@ namespace MaxyGames.CodeCompiler {
 						line = span.Span.Start.Line + 1;
 						column = span.Span.Start.Character + 1;
 						fileName = d.Location.SourceTree?.FilePath;
+						if(d.Severity == DiagnosticSeverity.Error) {
+							if(fileName != null && fileName.EndsWith(".g.cs")) {
+								string directory = Path.Combine(Path.GetDirectoryName(option.OutputPath), "SourceGen");
+								if(!Directory.Exists(directory)) {
+									Directory.CreateDirectory(directory);
+								}
+								fileName = Path.Combine(directory, Path.GetFileName(fileName));
+								File.WriteAllText(fileName, d.Location.SourceTree.GetText().ToString());
+							}
+						}
 						if(d.Location.IsInSource) {
 							errorMessage += " | source script: " + d.Location.SourceTree.ToString().Substring(d.Location.SourceSpan.Start, d.Location.SourceSpan.Length);
 						}
@@ -425,6 +436,7 @@ namespace MaxyGames.CodeCompiler {
 		public static List<SyntaxTree> GetSyntaxTreesFromFiles(IEnumerable<string> paths, out List<EmbeddedText> embeddedTexts, IEnumerable<string> preprocessorSymbols = null) {
 			var result = new List<SyntaxTree>();
 			embeddedTexts = new List<EmbeddedText>();
+			var parseOptions = new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols);
 			foreach(var path in paths) {
 				if(CachedData.references.TryGetValue(path, out var value)) {
 					if(File.GetLastWriteTime(path) == value.lastWriteTime) {
@@ -438,7 +450,7 @@ namespace MaxyGames.CodeCompiler {
 				var sourceText = SourceText.From(buffer, buffer.Length, Encoding.UTF8, canBeEmbedded: true);
 				var tree = CSharpSyntaxTree.ParseText(
 						sourceText,
-						options: new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols),
+						options: parseOptions,
 						path: path);
 				var embeddedText = EmbeddedText.FromSource(path, sourceText);
 				result.Add(tree);
