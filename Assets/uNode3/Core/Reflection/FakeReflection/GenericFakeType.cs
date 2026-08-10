@@ -215,7 +215,12 @@ namespace MaxyGames.UNode {
 						var property = member as PropertyInfo;
 						var mType = property.PropertyType;
 						if(mType.IsGenericParameter) {
-							property = target.GetProperty(property.Name, flags);
+							try {
+								property = target.GetProperty(property.Name, flags);
+							}
+							catch (AmbiguousMatchException) {
+								property = target.GetProperty(property.Name, flags, null, null, new Type[] { property.GetMethod.GetParameters()[0].ParameterType }, null);
+							}
 							if(property == null) {
 								break;
 							}

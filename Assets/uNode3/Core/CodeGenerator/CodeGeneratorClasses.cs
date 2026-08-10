@@ -958,7 +958,7 @@ namespace MaxyGames {
 		/// </summary>
 		public class ClassData {
 			public string name;
-			public string keyword = "class ";
+			private string keyword = "class ";
 			//The owner of the class, only for information.
 			public object owner;
 
@@ -1084,6 +1084,9 @@ namespace MaxyGames {
 								continue;
 							try {
 								generationState.isStatic = vdata.IsStatic;
+								if(IsStruct) {
+									vdata.defaultValue = null;
+								}
 								string str = WrapWithInformation(vdata.GenerateCode(), vdata.reference).AddFirst("\n", !string.IsNullOrEmpty(result));
 								result += str;
 							}
@@ -1237,23 +1240,33 @@ namespace MaxyGames {
 				}
 			}
 
+			private const string KEYWORD_CLASS = "class ";
+			private const string KEYWORD_STRUCT = "struct ";
+			private const string KEYWORD_ENUM = "enum ";
+			private const string KEYWORD_INTERFACE = "interface ";
+
+			public bool IsClass => keyword == KEYWORD_CLASS;
+			public bool IsStruct => keyword == KEYWORD_STRUCT;
+			public bool IsEnum => keyword == KEYWORD_ENUM;
+			public bool IsInterface => keyword == KEYWORD_INTERFACE;
+
 			public ClassData SetTypeToClass() {
-				keyword = "class ";
+				keyword = KEYWORD_CLASS;
 				return this;
 			}
 
 			public ClassData SetTypeToStruct() {
-				keyword = "struct ";
+				keyword = KEYWORD_STRUCT;
 				return this;
 			}
 
 			public ClassData SetTypeToInterface() {
-				keyword = "interface ";
+				keyword = KEYWORD_INTERFACE;
 				return this;
 			}
 
 			public ClassData SetTypeToEnum() {
-				keyword = "enum ";
+				keyword = KEYWORD_ENUM;
 				return this;
 			}
 

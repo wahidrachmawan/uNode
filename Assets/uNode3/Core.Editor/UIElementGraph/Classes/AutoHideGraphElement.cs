@@ -162,17 +162,16 @@ namespace MaxyGames.UNode.Editors {
 		/// </summary>
 		/// <param name="graphView"></param>
 		public static void ResetVisibility(UGraphView graphView) {
-			graphView.edgeViews.ForEach(edge => {
-				if(edge.isProxy)
-					return;//skip if the edge is proxy because it is hide by default
-				if(edge.parent == null) {
-					graphView.AddElement(edge);
-				}
-			});
-			//Auto hide nodes
 			graphView.nodeViews.ForEach((node) => {
 				if(node.parent == null) {
 					graphView.AddElement(node);
+				}
+			});
+			graphView.edgeViews.ForEach(edge => {
+				if(edge.isProxy)
+					return;//skip if the edge is proxy because it is hide by default
+				if(edge.parent == null && edge.isHidding) {
+					graphView.AddElement(edge);
 				}
 			});
 		}

@@ -317,6 +317,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						for(int x = 0; x < genericArguments.Length; x++) {
 							var index = x;
 							var arg = genericArguments[index];
+							FilterAttribute fil = new FilterAttribute() {
+								OnlyGetType = true,
+							};
+							fil.ToFilterGenericConstraints(rawGenericArguments[x], genericArguments);
 
 							uNodeGUIUtility.EditType(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
 								genericArguments[index] = type;
@@ -374,7 +378,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 									//RefreshInitializers(member);
 									uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
 								}
-							}, targetObject: node.GetUnityObject());
+							}, filter: fil, targetObject: node.GetUnityObject());
 						}
 					}
 				}
@@ -484,6 +488,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 										for(int x = 0; x < genericArguments.Length; x++) {
 											var index = x;
 											var arg = genericArguments[index];
+											FilterAttribute fil = new FilterAttribute() {
+												OnlyGetType = true,
+											};
+											fil.ToFilterGenericConstraints(rawGenericArguments[x], genericArguments);
 
 											uNodeGUIUtility.EditType(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
 												genericArguments[index] = type;
@@ -511,7 +519,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 														}
 													}
 												}
-											}, targetObject: node.GetUnityObject());
+											}, filter: fil, targetObject: node.GetUnityObject());
 										}
 									}
 								}
@@ -661,6 +669,10 @@ namespace MaxyGames.UNode.Editors.Drawer {
 			for(int x = 0; x < genericArguments.Length; x++) {
 				var index = x;
 				var arg = genericArguments[index];
+				FilterAttribute fil = new FilterAttribute() {
+					OnlyGetType = true,
+				};
+				fil.ToFilterGenericConstraints(rawGenericArguments[x], genericArguments);
 
 				uNodeGUIUtility.EditType(genericArguments[index], new GUIContent(rawGenericArguments[index].Name), type => {
 					genericArguments[index] = type;
@@ -684,7 +696,7 @@ namespace MaxyGames.UNode.Editors.Drawer {
 					target.target = MemberData.CreateFromMembers(infos);
 					node.Register();
 					uNodeGUIUtility.GUIChanged(node, UIChangeType.Average);
-				}, targetObject: node.GetUnityObject());
+				}, filter: fil, targetObject: node.GetUnityObject());
 			}
 		}
 

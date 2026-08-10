@@ -61,7 +61,15 @@ namespace MaxyGames.UNode.Nodes {
 			return true;
 		}
 
-		public override string GetTitle() => "Variable: " + name;
+		public override string GetTitle() {
+			if(byRef) {
+				return "Ref: " + name;
+			}
+			else if(constant) {
+				return "Const: " + name;
+			}
+			return "Variable: " + name;
+		}
 
 		public override string GetRichName() {
 			return $"{uNodeUtility.WrapTextWithKeywordColor("var")} {name} = {target.GetRichName()}";

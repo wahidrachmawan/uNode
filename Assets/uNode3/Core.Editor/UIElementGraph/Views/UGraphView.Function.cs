@@ -472,7 +472,7 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public void RemoveEdges() {
-			foreach(var edge in edgeViews)
+			foreach(var edge in edges)
 				RemoveElement(edge);
 			edgeViews.Clear();
 		}

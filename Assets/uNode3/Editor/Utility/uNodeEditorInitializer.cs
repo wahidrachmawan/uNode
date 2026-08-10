@@ -1009,7 +1009,9 @@ namespace MaxyGames.UNode.Editors {
 				if(uNodeEditorUtility.IsPersistent(references[0])) {
 					return HandleDrag(references[0]);
 				}
-				else return DragAndDropVisualMode.Rejected;
+				else if(references[0] is IGraph) {
+					return DragAndDropVisualMode.Rejected;
+				}
 			}
 			return DragAndDropVisualMode.None;
 		}
@@ -1474,10 +1476,11 @@ namespace MaxyGames.UNode.Editors {
 
 	static class uNodeAssetHandler {
 		[OnOpenAsset(int.MinValue)]
-		public static bool OpenEditor(int instanceID, int line) {
 #if UNITY_6000_4_OR_NEWER
-			Object obj = EditorUtility.EntityIdToObject(EntityId.FromULong((ulong)instanceID));
+		public static bool OpenEditor(EntityId entityID, int line) {
+			Object obj = EditorUtility.EntityIdToObject(entityID);
 #else
+		public static bool OpenEditor(int instanceID, int line) {
 			Object obj = EditorUtility.InstanceIDToObject(instanceID);
 #endif
 			//if(obj is GameObject) {
