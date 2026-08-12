@@ -34,6 +34,34 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		/// <summary>
+		/// inserts value into list using a custom binary-like search based on IComparable<T> results (preserves ordering)
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="list"></param>
+		/// <param name="value"></param>
+		public static void AddItemSorted<T>(this List<T> list, T value) where T : IComparable<T> {
+			int index = list.FindLastIndex(item => value.CompareTo(item) == 0);
+			if(index < 0) {
+				index = list.FindIndex(item => value.CompareTo(item) > 0);
+				if(index > 0) {
+					index--;
+				}
+			}
+			else {
+				index++;
+			}
+			if(index >= 0 && list.Count > index) {
+				list.Insert(index, value);
+			}
+			else if(index == -1 && list.Count > 0) {
+				list.Insert(0, value);
+			}
+			else {
+				list.Add(value);
+			}
+		}
+
+		/// <summary>
 		/// Convert rect into Screen rect
 		/// </summary>
 		/// <param name="rect"></param>

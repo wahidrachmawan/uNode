@@ -2,6 +2,9 @@
 
 ## v3.2.11
 - Added ability to dim unused nodes
+- Improved Code Generation
+- Improved Editor
+- Fixed error on newer unity version
 - Fixed some bugs
 
 ## v3.2.10

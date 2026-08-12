@@ -213,25 +213,7 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
@@ -253,38 +235,20 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
 			}
-			list.Sort((x, y) => {
-				if(x.order < y.order) {
-					return -1;
-				}
-				if(x.order > y.order) {
-					return 1;
-				}
-				return 0;
-			});
+			//list.Sort((x, y) => {
+			//	if(x.order < y.order) {
+			//		return -1;
+			//	}
+			//	if(x.order > y.order) {
+			//		return 1;
+			//	}
+			//	return 0;
+			//});
 			var result = list.ToArray();
 			pool.Free(list);
 			return result;
@@ -301,25 +265,7 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
@@ -340,25 +286,7 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
@@ -379,25 +307,7 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
@@ -418,25 +328,7 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
@@ -457,25 +349,7 @@ namespace MaxyGames.UNode.Editors {
 					if(menuItems != null) {
 						foreach(var menu in menuItems) {
 							if(menu == null) continue;
-							int index = list.FindLastIndex(item => menu.CompareTo(item) == 0);
-							if(index < 0) {
-								index = list.FindIndex(item => menu.CompareTo(item) > 0);
-								if(index > 0) {
-									index--;
-								}
-							}
-							else {
-								index++;
-							}
-							if(index >= 0 && list.Count > index) {
-								list.Insert(index, menu);
-							}
-							else if(index == -1 && list.Count > 0) {
-								list.Insert(0, menu);
-							}
-							else {
-								list.Add(menu);
-							}
+							list.AddItemSorted(menu);
 						}
 					}
 				}
@@ -1876,13 +1750,15 @@ namespace MaxyGames.UNode.Editors {
 			if(graphData.currentCanvas is MainGraphContainer) {
 				if(graphData.graph is IStateGraph state && state.CanCreateStateGraph) {
 					yield return ContextMenuItem.CreateSeparator(order: DEFAULT_ORDER);
-					yield return new ContextMenuItem("Add State", evt => {
-						//EditorUtility.DisplayDialog("", "This state is obsolete, please use new state machine instead.", "OK");
-						NodeEditorUtility.AddNewNode<Nodes.StateNode>(graphData,
-							"State",
-							mousePosition);
-						graphEditor.Refresh();
-					}, DEFAULT_ORDER);
+
+					//yield return new ContextMenuItem("Add State", evt => {
+					//	//EditorUtility.DisplayDialog("", "This state is obsolete, please use new state machine instead.", "OK");
+					//	NodeEditorUtility.AddNewNode<Nodes.StateNode>(graphData,
+					//		"State",
+					//		mousePosition);
+					//	graphEditor.Refresh();
+					//}, DEFAULT_ORDER);
+
 					//Add events
 					var eventMenus = NodeEditorUtility.FindEventMenu();
 					foreach(var menu in eventMenus) {
