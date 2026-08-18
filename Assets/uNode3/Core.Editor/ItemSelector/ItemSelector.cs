@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace MaxyGames.UNode.Editors {
 	public partial class ItemSelector {
-		private static readonly string[] defaultUsingNamespace = new[] { "UnityEngine" };
+		private static HashSet<string> defaultUsingNamespace => EditorReflectionUtility.GetNamespaces();
 
 		public const string CategoryInherited = "Inherit Members";
 

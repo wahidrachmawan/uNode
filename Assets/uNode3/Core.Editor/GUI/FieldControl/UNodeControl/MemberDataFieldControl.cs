@@ -54,14 +54,14 @@ namespace MaxyGames.UNode.Editors.Drawer {
 						}
 					}
 				}
-				uNodeGUIUtility.RenderVariable(position, fieldValue, label, filter, settings.unityObject, (m) => {
+				uNodeGUIUtility.EditMember(position, fieldValue, label, filter, settings.unityObject, (m) => {
 					fieldValue = m;
 					onChanged?.Invoke(fieldValue);
 				});
 				if(fieldValue.targetType == MemberData.TargetType.Values && fieldValue.type != null &&
 					(fieldValue.type.IsArray || fieldValue.type.IsCastableTo(typeof(IList)))) {
 					EditorGUI.indentLevel++;
-					uNodeGUIUtility.DrawMemberValues(new GUIContent("Values"), fieldValue, fieldValue.type, filter, null, (m) => {
+					uNodeGUIUtility.EditMemberValues(new GUIContent("Values"), fieldValue, fieldValue.type, filter, null, (m) => {
 						fieldValue = m;
 						onChanged?.Invoke(fieldValue);
 					});

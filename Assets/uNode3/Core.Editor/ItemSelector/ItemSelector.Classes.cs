@@ -601,14 +601,14 @@ namespace MaxyGames.UNode.Editors {
 						data.usingNamespaces = (targetObject as UGraphElement).graphContainer.GetUsingNamespaces();
 					}
 					else {
-						data.usingNamespaces = defaultUsingNamespace.ToHashSet();
+						data.usingNamespaces = defaultUsingNamespace;
 					}
 				}
 			}
 
 			void SetupProgress(Action<float> onProgress) {
 				if(data.usingNamespaces == null) {
-					data.usingNamespaces = defaultUsingNamespace.ToHashSet();
+					SetupNamespaces(null);
 				}
 				typeList = GetNamespaceTypes(data.usingNamespaces, (p) => {
 					progress = p;

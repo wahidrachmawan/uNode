@@ -609,23 +609,7 @@ namespace MaxyGames.UNode.Editors {
 		#endregion
 
 		#region MemberData
-		public static void DrawMember(Rect position, MemberData member, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
-			if(filter == null) {
-				filter = new FilterAttribute();
-			}
-			Type t = filter.Types.Count == 1 && (member.type == null || !member.type.IsCastableTo(filter.Types[0])) ? filter.Types[0] : member.type;
-			if(!filter.OnlyGetType &&
-				filter.IsValidTarget(MemberData.TargetType.Values) &&
-				!filter.SetMember &&
-				(member.targetType == MemberData.TargetType.Values || t != null && member.targetType != MemberData.TargetType.Type)) {
-				DrawMemberValues(position, member, t, filter, unityObject, onChange);
-			}
-			else {
-				DrawMemberReference(position, member, filter, unityObject, onChange);
-			}
-		}
-
-		public static void RenderVariable(Rect position, MemberData member, GUIContent label, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
+		public static void EditMember(Rect position, MemberData member, GUIContent label, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
 			if(member == null)
 				return;
 			if(filter == null) {
@@ -643,7 +627,7 @@ namespace MaxyGames.UNode.Editors {
 					MemberData.TargetType.uNodeGenericParameter)) {
 				Rect rect = position;
 				if(member.isTargeted) {
-					DrawInstanceValue(ref rect, GUIContent.none, member, unityObject, onChange);
+					DrawMemberInstanceValue(ref rect, GUIContent.none, member, unityObject, onChange);
 				}
 				DrawMember(rect, member, filter, unityObject, onChange);
 			}
@@ -654,7 +638,23 @@ namespace MaxyGames.UNode.Editors {
 			EditorGUI.indentLevel = oldIndent;
 		}
 
-		private static void DrawInstanceValue(ref Rect position, GUIContent label, MemberData member, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
+		private static void DrawMember(Rect position, MemberData member, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
+			if(filter == null) {
+				filter = new FilterAttribute();
+			}
+			Type t = filter.Types.Count == 1 && (member.type == null || !member.type.IsCastableTo(filter.Types[0])) ? filter.Types[0] : member.type;
+			if(!filter.OnlyGetType &&
+				filter.IsValidTarget(MemberData.TargetType.Values) &&
+				!filter.SetMember &&
+				(member.targetType == MemberData.TargetType.Values || t != null && member.targetType != MemberData.TargetType.Type)) {
+				EditMemberValues(position, member, t, filter, unityObject, onChange);
+			}
+			else {
+				EditMemberReference(position, member, filter, unityObject, onChange);
+			}
+		}
+
+		private static void DrawMemberInstanceValue(ref Rect position, GUIContent label, MemberData member, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
 			object target = member.instance;
 			if(target != null) {
 				if(target is MemberData) {
@@ -797,7 +797,7 @@ namespace MaxyGames.UNode.Editors {
 				GUI.backgroundColor = Color.white;
 		}
 
-		public static void DrawMemberValues(Rect position, MemberData member, Type type, FilterAttribute filter,
+		public static void EditMemberValues(Rect position, MemberData member, Type type, FilterAttribute filter,
 			UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
 			Type t = type;
 			if(t == null) {
@@ -811,7 +811,7 @@ namespace MaxyGames.UNode.Editors {
 				if(flag)
 					position.width -= 16;
 				if(type != null && member.targetType != MemberData.TargetType.Values) {
-					DrawMemberReference(position, member, filter, unityObject, onChange);
+					EditMemberReference(position, member, filter, unityObject, onChange);
 					if(filter.ValidTargetType == MemberData.TargetType.Values && !filter.InvalidTargetType.HasFlags(MemberData.TargetType.Values) && filter.IsValueTypes()) {
 						member.targetType = MemberData.TargetType.Values;
 						member.type = t;
@@ -890,7 +890,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawMemberValues(GUIContent label, MemberData member, Type type, FilterAttribute filter,
+		public static void EditMemberValues(GUIContent label, MemberData member, Type type, FilterAttribute filter,
 			UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
 			Type t = type;
 			if(t == null) {
@@ -940,11 +940,11 @@ namespace MaxyGames.UNode.Editors {
 			}
 		}
 
-		public static void DrawMemberReference(Rect position, MemberData variable, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
-			DrawVariableReference(position, new GUIContent(variable.DisplayName(), variable.Tooltip), variable, filter, unityObject, onChange);
+		public static void EditMemberReference(Rect position, MemberData value, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
+			EditMemberReference(position, new GUIContent(value.DisplayName(), value.Tooltip), value, filter, unityObject, onChange);
 		}
 
-		public static void DrawVariableReference(Rect position, GUIContent label, MemberData variable, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
+		public static void EditMemberReference(Rect position, GUIContent label, MemberData value, FilterAttribute filter = null, UnityEngine.Object unityObject = null, Action<MemberData> onChange = null) {
 			if(filter == null) {
 				filter = new FilterAttribute();
 			}
@@ -957,12 +957,12 @@ namespace MaxyGames.UNode.Editors {
 					if(filter.OnlyGetType && filter.CanManipulateArray()) {
 						TypeBuilderWindow.Show(position, unityObject, filter, delegate (MemberData[] types) {
 							uNodeEditorUtility.RegisterUndo(unityObject);
-							variable.CopyFrom(types[0]);
+							value.CopyFrom(types[0]);
 							if(onChange != null) {
 								onChange(types[0]);
 							}
 							uNodeGUIUtility.GUIChanged(unityObject);
-						}, new TypeItem[1] { variable });
+						}, new TypeItem[1] { value });
 					}
 					else {
 						ItemSelector.ShowWindow(unityObject, filter, (m) => {
@@ -974,15 +974,15 @@ namespace MaxyGames.UNode.Editors {
 						}).ChangePosition(position.ToScreenRect());
 					}
 				}
-				else if(Event.current.button == 1 && (variable.targetType == MemberData.TargetType.Method || variable.targetType == MemberData.TargetType.Constructor)) {
+				else if(Event.current.button == 1 && (value.targetType == MemberData.TargetType.Method || value.targetType == MemberData.TargetType.Constructor)) {
 					if(filter.ValidMemberType.HasFlags(MemberTypes.Constructor | MemberTypes.Method)) {
 						var mPos = Event.current.mousePosition;
-						var members = variable.GetMembers(false);
+						var members = value.GetMembers(false);
 						if(members != null && members.Length == 1) {
 							var member = members[members.Length - 1];
-							if(variable.targetType == MemberData.TargetType.Method) {
+							if(value.targetType == MemberData.TargetType.Method) {
 								BindingFlags flag = BindingFlags.Public;
-								if(variable.isStatic) {
+								if(value.isStatic) {
 									flag |= BindingFlags.Static;
 								}
 								else {
@@ -1021,11 +1021,11 @@ namespace MaxyGames.UNode.Editors {
 												mem.instance = null;
 											}
 										}
-									}, new object[] { variable, m, unityObject });
+									}, new object[] { value, m, unityObject });
 								}
 								menu.ShowAsContext();
 							}
-							else if(variable.targetType == MemberData.TargetType.Constructor) {
+							else if(value.targetType == MemberData.TargetType.Constructor) {
 								GenericMenu menu = new GenericMenu();
 								BindingFlags flag = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
 								var ctors = member.ReflectedType.GetConstructors(flag);
@@ -1040,7 +1040,7 @@ namespace MaxyGames.UNode.Editors {
 											mem.CopyFrom(d);
 											mem.instance = null;
 										}
-									}, new object[] { variable, m, unityObject });
+									}, new object[] { value, m, unityObject });
 								}
 							}
 						}
@@ -1578,6 +1578,15 @@ namespace MaxyGames.UNode.Editors {
 					}).ChangePosition(position.ToScreenRect());
 				}
 			}
+			if(position.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 1 && Event.current.clickCount == 1) {
+				Type t = type;
+				if(t != null) {
+					var ms = uNodeEditorUtility.GetMonoScript(t);
+					if(ms != null) {
+						EditorGUIUtility.PingObject(ms);
+					}
+				}
+			}
 			position.x += position.width;
 			position.width = 20;
 			if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
@@ -1619,6 +1628,15 @@ namespace MaxyGames.UNode.Editors {
 					}).ChangePosition(position.ToScreenRect());
 				}
 			}
+			if(position.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 1 && Event.current.clickCount == 1) {
+				Type t = type;
+				if(t != null) {
+					var ms = uNodeEditorUtility.GetMonoScript(t);
+					if(ms != null) {
+						EditorGUIUtility.PingObject(ms);
+					}
+				}
+			}
 			position.x += position.width;
 			position.width = 20;
 			if(EditorGUI.DropdownButton(position, GUIContent.none, FocusType.Keyboard) && Event.current.button == 0) {
@@ -1645,6 +1663,7 @@ namespace MaxyGames.UNode.Editors {
 			else {
 				buttonLabel.text = type.prettyName;
 				buttonLabel.tooltip = type.typeName;
+				buttonLabel.image = uNodeEditorUtility.GetTypeIcon(type);
 			}
 			position = EditorGUI.PrefixLabel(position, label);
 			position.width -= 20;
@@ -1659,6 +1678,15 @@ namespace MaxyGames.UNode.Editors {
 					ItemSelector.ShowWindow(targetObject, filter, delegate (MemberData member) {
 						onClick(member.startType);
 					}).ChangePosition(position.ToScreenRect());
+				}
+			}
+			if(position.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 1 && Event.current.clickCount == 1) {
+				Type t = type;
+				if(t != null) {
+					var ms = uNodeEditorUtility.GetMonoScript(t);
+					if(ms != null) {
+						EditorGUIUtility.PingObject(ms);
+					}
 				}
 			}
 			position.x += position.width;
@@ -1706,6 +1734,15 @@ namespace MaxyGames.UNode.Editors {
 					ItemSelector.ShowWindow(targetObject, filter, delegate (MemberData member) {
 						onClick(member.startType);
 					}).ChangePosition(position.ToScreenRect());
+				}
+			}
+			if(position.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 1 && Event.current.clickCount == 1) {
+				Type t = type;
+				if(t != null) {
+					var ms = uNodeEditorUtility.GetMonoScript(t);
+					if(ms != null) {
+						EditorGUIUtility.PingObject(ms);
+					}
 				}
 			}
 			position.x += position.width;
