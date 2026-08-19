@@ -699,6 +699,15 @@ namespace MaxyGames.UNode.Editors {
 				return changed;
 			}
 
+			public static bool AnalizeObjectIncludingNode(object obj, Func<object, bool> validation, Action<object> doAction = null) {
+				return AnalizeObject(obj, obj => {
+					if(obj is NodeObject node && node.node != null) {
+						AnalizeObject(node.node, validation, doAction);
+					}
+					return validation(obj);
+				}, doAction);
+			}
+
 			private static bool IsValidField(FieldInfo field) {
 				if(field.IsPublic) {
 					return !field.IsNotSerialized;

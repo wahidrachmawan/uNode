@@ -819,6 +819,18 @@ namespace MaxyGames.UNode {
 			}
 		}
 
+		public bool isMissing {
+			get {
+				switch(kind) {
+					case SerializedTypeKind.Native:
+						return type == null;
+					case SerializedTypeKind.Runtime:
+						return type == null || type is MissingType;
+				}
+				return false;
+			}
+		}
+
 		public bool isAssigned => type != null;
 		public bool isOpenGeneric => type != null && type.IsGenericTypeDefinition;
 

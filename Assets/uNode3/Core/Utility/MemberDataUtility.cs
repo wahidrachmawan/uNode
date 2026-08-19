@@ -550,7 +550,13 @@ namespace MaxyGames.UNode {
 								}
 								return reference.name + str;
 							}
-							return reference.name;
+							if(reference.name != null) {
+								return reference.name;
+							}
+							if(reference is NativeTypeRef typeRef) {
+								return typeRef.typeName;
+							}
+							return null;
 						}
 					}
 					else {

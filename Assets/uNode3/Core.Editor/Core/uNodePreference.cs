@@ -965,10 +965,13 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 			result = GetTypeSettings().GetIcon(type);
 			if(result == null) {
 				if(type.IsDefinedAttribute(typeof(ICustomIcon))) {
-					var att = type.GetCustomAttributes(typeof(ICustomIcon), true)[0] as ICustomIcon;
-					result = att.GetIcon();
-					if(result == null) {
-						result = GetDefaultIcon(type);
+					var atts = type.GetCustomAttributes(typeof(ICustomIcon), true);
+					if(atts.Length > 0) {
+						var att = atts[0] as ICustomIcon;
+						result = att.GetIcon();
+						if(result == null) {
+							result = GetDefaultIcon(type);
+						}
 					}
 				}
 				else {

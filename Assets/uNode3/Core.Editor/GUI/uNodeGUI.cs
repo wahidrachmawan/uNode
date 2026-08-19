@@ -438,6 +438,7 @@ namespace MaxyGames.UNode.Editors {
 						value,
 						new GUIContent("Element " + index),
 						(type) => {
+							uNodeEditorUtility.RegisterUndo(unityObject);
 							types[index] = type;
 						},
 						typeFilter,

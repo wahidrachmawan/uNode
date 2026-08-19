@@ -1562,6 +1562,9 @@ namespace MaxyGames.UNode.Editors {
 				buttonLabel.text = type.prettyName;
 				buttonLabel.tooltip = type.typeName;
 				buttonLabel.image = uNodeEditorUtility.GetTypeIcon(type.type);
+				if(type.type == null && type.isFilled) {
+					buttonLabel.text = $"Missing: {type.typeName}";
+				}
 			}
 			position = EditorGUI.PrefixLabel(position, label);
 			position.width -= 20;
@@ -1664,6 +1667,9 @@ namespace MaxyGames.UNode.Editors {
 				buttonLabel.text = type.prettyName;
 				buttonLabel.tooltip = type.typeName;
 				buttonLabel.image = uNodeEditorUtility.GetTypeIcon(type);
+				if(type.type == null && type.isFilled) {
+					buttonLabel.text = $"Missing: {type.typeName}";
+				}
 			}
 			position = EditorGUI.PrefixLabel(position, label);
 			position.width -= 20;

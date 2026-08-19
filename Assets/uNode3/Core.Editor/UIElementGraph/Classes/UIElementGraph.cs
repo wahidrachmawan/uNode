@@ -750,14 +750,14 @@ namespace MaxyGames.UNode.Editors {
 						});
 #endif
 						menu.AddSeparator("");
-						//menu.AddItem(new GUIContent("Fix missing members"), false, () => {
-						//	RefactorWindow.Refactor(editorData.graph);
-						//});
 						menu.AddItem(new GUIContent("Refresh All Graphs"), false, () => {
 							uNodeEditor.ClearCache();
 						});
 						menu.AddItem(new GUIContent("Check All Graph Errors"), false, () => {
 							GraphEditorUtility.ErrorChecker.CheckGraphErrors();
+						});
+						menu.AddItem(new GUIContent("Check Missing Types"), false, () => {
+							AssetMissingTypeFixer.Open();
 						});
 						menu.AddItem(new GUIContent("Change All C# Type to Graph Type"), false, () => {
 							//Update the database first
@@ -819,7 +819,7 @@ namespace MaxyGames.UNode.Editors {
 
 								bool changed = false;
 								UGraphElement uElement = null;
-								EditorReflectionUtility.AnalizeSerializedObject(asset, val => {
+								GraphEditorUtility.Analizer.AnalizeObject(asset, val => {
 									if(val is UGraphElement) {
 										uElement = val as UGraphElement;
 									}
