@@ -59,8 +59,26 @@
 	flex-direction: row-reverse;
 }
 
+#graph-panel.panel-left {
+	flex-direction: row-reverse;
+}
+
+#graph-panel.panel-right {
+	flex-direction: row;
+}
+
 #graph-panel > GraphPanel {
 	margin-right: 2px;
+}
+
+#graph-panel.panel-left > GraphPanel {
+	margin-right: 2px;
+	margin-left: 0px;
+}
+
+#graph-panel.panel-right > GraphPanel {
+	margin-left: 2px;
+	margin-right: 0px;
 }
 
 #status-bar {

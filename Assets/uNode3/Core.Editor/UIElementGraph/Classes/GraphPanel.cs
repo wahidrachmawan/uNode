@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
@@ -56,6 +56,23 @@ namespace MaxyGames.UNode.Editors {
 				scroll.StretchToParentSize();
 				Add(scroll);
 				InitializeView();
+				this.AddManipulator(new ContextualMenuManipulator(evt => {
+					evt.menu.AppendSeparator("");
+					if(uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Left) {
+						evt.menu.AppendAction("Move Panel to Right", act => {
+							uNodeEditor.SavedData.graphPanelPosition = PanelPosition.Right;
+							uNodeEditor.SaveOptions();
+							graphEditor.UpdateGraphPanelPosition();
+						});
+					}
+					else {
+						evt.menu.AppendAction("Move Panel to Left", act => {
+							uNodeEditor.SavedData.graphPanelPosition = PanelPosition.Left;
+							uNodeEditor.SaveOptions();
+							graphEditor.UpdateGraphPanelPosition();
+						});
+					}
+				}));
 				uNodeEditor.onChanged += ReloadView;
 				uNodeEditor.onSelectionChanged += OnSelectionChanged;
 				ReloadView();

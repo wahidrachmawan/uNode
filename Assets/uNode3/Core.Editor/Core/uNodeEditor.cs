@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +19,11 @@ using TViewState = UnityEditor.IMGUI.Controls.TreeViewState;
 #endif
 
 namespace MaxyGames.UNode.Editors {
+	public enum PanelPosition {
+		Left,
+		Right,
+	}
+
 	public partial class uNodeEditor : EditorWindow {
 		#region Const
 		internal const string MESSAGE_PATCH_WARNING = "Patching should be done in 'Compatibility' generation mode or there will be visible/invisible errors, please use 'Compatibility' mode when trying to make live changes to compiled code.";
@@ -348,6 +353,10 @@ namespace MaxyGames.UNode.Editors {
 			/// Are the right panel is visible?
 			/// </summary>
 			public bool rightVisibility = false;
+			/// <summary>
+			/// The position of the graph panel (left or right).
+			/// </summary>
+			public PanelPosition graphPanelPosition = PanelPosition.Left;
 
 			#region Panel
 			[SerializeField]

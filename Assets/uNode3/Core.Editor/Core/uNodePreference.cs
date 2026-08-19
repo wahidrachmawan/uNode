@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -475,6 +475,14 @@ Recommended value is between 10-100."), preferenceData.maxReloadMilis);
 					uNodeGUIUtility.ShowField(nameof(preferenceData.disableRightClickMove), preferenceData);
 				}
 				uNodeGUIUtility.ShowField(nameof(preferenceData.autoCarryInputValue), preferenceData);
+				var graphPanelPos = (PanelPosition)EditorGUILayout.EnumPopup(new GUIContent("Graph Panel Position", "The position of the graph panel (Left or Right)"), uNodeEditor.SavedData.graphPanelPosition);
+				if(graphPanelPos != uNodeEditor.SavedData.graphPanelPosition) {
+					uNodeEditor.SavedData.graphPanelPosition = graphPanelPos;
+					uNodeEditor.SaveOptions();
+					if(uNodeEditor.window != null && uNodeEditor.window.graphEditor is UIElementGraph uGraph) {
+						uGraph.UpdateGraphPanelPosition();
+					}
+				}
 			}
 			else if(selectedMenu == 1) {
 				preferenceData.inspectorIntegration = EditorGUILayout.Toggle(new GUIContent("Inspector Integration", "If true, graph inspector can be displayed on Unity Inspector"), preferenceData.inspectorIntegration);

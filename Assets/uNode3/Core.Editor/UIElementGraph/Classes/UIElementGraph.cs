@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -316,6 +316,7 @@ namespace MaxyGames.UNode.Editors {
 		private GraphPanel graphPanel;
 
 		private ToolbarMenu zoomStatus;
+		private ToolbarButton leftVisibilityBtn;
 		private ToolbarButton errorStatus;
 		private Label errorLabel;
 		private Image errorImage;
@@ -432,15 +433,17 @@ namespace MaxyGames.UNode.Editors {
 			toolbar.AddStyleSheet("uNodeStyles/NativeGraphStyle");
 			toolbarView = toolbar;
 			window.rootVisualElement.Add(toolbar);
-			var leftVisibilityBtn = new ToolbarButton() {
-				text = uNodeEditor.SavedData.leftVisibility ? "<<" : ">>",
-				tooltip = "Show or hide sidebar ( left panel )",
-			};
-			leftVisibilityBtn.clickable = new Clickable(() => {
+			leftVisibilityBtn = new ToolbarButton(() => {
 				uNodeEditor.SavedData.leftVisibility = !uNodeEditor.SavedData.leftVisibility;
-				leftVisibilityBtn.text = uNodeEditor.SavedData.leftVisibility ? "<<" : ">>";
-			});
+				uNodeEditor.SaveOptions();
+				UpdateSidePanelButton();
+				UpdateGraphPanelPosition();
+			}) {
+				tooltip = "Show or hide sidebar",
+			};
 			toolbar.Add(leftVisibilityBtn);
+
+			UpdateSidePanelButton();
 
 			#region Debug
 			debugButton = new ToolbarButton() {
@@ -749,6 +752,17 @@ namespace MaxyGames.UNode.Editors {
 							uNodeEditorUtility.ProBinding.CallbackShowCSharpPreview?.Invoke();
 						});
 #endif
+						menu.AddSeparator("");
+						menu.AddItem(new GUIContent("Graph Panel/Left Side"), uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Left, () => {
+							uNodeEditor.SavedData.graphPanelPosition = PanelPosition.Left;
+							uNodeEditor.SaveOptions();
+							UpdateGraphPanelPosition();
+						});
+						menu.AddItem(new GUIContent("Graph Panel/Right Side"), uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Right, () => {
+							uNodeEditor.SavedData.graphPanelPosition = PanelPosition.Right;
+							uNodeEditor.SaveOptions();
+							UpdateGraphPanelPosition();
+						});
 						menu.AddSeparator("");
 						menu.AddItem(new GUIContent("Refresh All Graphs"), false, () => {
 							uNodeEditor.ClearCache();
@@ -1547,7 +1561,12 @@ namespace MaxyGames.UNode.Editors {
 						name = "graph-splitter-left",
 					};
 					splitterLeft.AddManipulator(new SquareResizer(graphPanelView, (e, diff) => {
-						e.style.width = e.layout.width + diff.x;
+						if(uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Right) {
+							e.style.width = e.layout.width - diff.x;
+						}
+						else {
+							e.style.width = e.layout.width + diff.x;
+						}
 						uNodeEditor.SavedData.leftPanelWidth = e.style.width.value.value;
 					}));
 					dragAnchor.Add(splitterLeft);
@@ -1924,8 +1943,23 @@ namespace MaxyGames.UNode.Editors {
 				zoomStatus.text = "Zoom : " + zoomScale.ToString("F2");
 				if(graphPanelView != null) {
 					if(uNodeEditor.SavedData.leftVisibility) {
-						if(graphPanelView.parent == null) {
-							rootContainer.Insert(0, graphPanelView);
+						if(uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Right) {
+							if(graphPanelView.parent != rootContainer || rootContainer.IndexOf(graphPanelView) != rootContainer.childCount - 1) {
+								graphPanelView.RemoveFromHierarchy();
+								rootContainer.Add(graphPanelView);
+								graphPanelView.RemoveFromClassList("panel-left");
+								graphPanelView.AddToClassList("panel-right");
+								graphPanelView.style.flexDirection = FlexDirection.Row;
+							}
+						}
+						else {
+							if(graphPanelView.parent != rootContainer || rootContainer.IndexOf(graphPanelView) != 0) {
+								graphPanelView.RemoveFromHierarchy();
+								rootContainer.Insert(0, graphPanelView);
+								graphPanelView.RemoveFromClassList("panel-right");
+								graphPanelView.AddToClassList("panel-left");
+								graphPanelView.style.flexDirection = FlexDirection.RowReverse;
+							}
 						}
 						graphPanelView.style.width = uNodeEditor.SavedData.leftPanelWidth;
 					}
@@ -1973,6 +2007,51 @@ namespace MaxyGames.UNode.Editors {
 			_debugData = GetDebugData();
 			if(Event.current.type == EventType.Repaint && uNodeThreadUtility.frame % 2 == 0) {
 				debugButton.text = GetDebugName();
+			}
+		}
+
+		public void UpdateSidePanelButton() {
+			if(leftVisibilityBtn != null) {
+				if(uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Right) {
+					leftVisibilityBtn.text = uNodeEditor.SavedData.leftVisibility ? ">>" : "<<";
+					leftVisibilityBtn.tooltip = "Show or hide sidebar (right panel)\nRight click to change panel position";
+				}
+				else {
+					leftVisibilityBtn.text = uNodeEditor.SavedData.leftVisibility ? "<<" : ">>";
+					leftVisibilityBtn.tooltip = "Show or hide sidebar (left panel)\nRight click to change panel position";
+				}
+			}
+		}
+
+		public void UpdateGraphPanelPosition() {
+			UpdateSidePanelButton();
+			if(graphPanelView != null && rootContainer != null) {
+				if(uNodeEditor.SavedData.leftVisibility) {
+					if(uNodeEditor.SavedData.graphPanelPosition == PanelPosition.Right) {
+						graphPanelView.RemoveFromClassList("panel-left");
+						graphPanelView.AddToClassList("panel-right");
+						graphPanelView.style.flexDirection = FlexDirection.Row;
+						if(graphPanelView.parent != rootContainer || rootContainer.IndexOf(graphPanelView) != rootContainer.childCount - 1) {
+							graphPanelView.RemoveFromHierarchy();
+							rootContainer.Add(graphPanelView);
+						}
+					}
+					else {
+						graphPanelView.RemoveFromClassList("panel-right");
+						graphPanelView.AddToClassList("panel-left");
+						graphPanelView.style.flexDirection = FlexDirection.RowReverse;
+						if(graphPanelView.parent != rootContainer || rootContainer.IndexOf(graphPanelView) != 0) {
+							graphPanelView.RemoveFromHierarchy();
+							rootContainer.Insert(0, graphPanelView);
+						}
+					}
+					graphPanelView.style.width = uNodeEditor.SavedData.leftPanelWidth;
+				}
+				else {
+					if(graphPanelView.parent != null) {
+						graphPanelView.RemoveFromHierarchy();
+					}
+				}
 			}
 		}
 

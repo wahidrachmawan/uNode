@@ -766,6 +766,8 @@ namespace MaxyGames.UNode.Editors {
 
 		private EventPropagation DeleteSelection(List<ISelectable> selection) {
 			MarkUIChange();
+			m_Data.needRefreshDimStatus = true;
+
 			var processor = GraphProcessor;
 			var list = new List<ISelectable>();
 			list.AddRange(selection.Distinct());
