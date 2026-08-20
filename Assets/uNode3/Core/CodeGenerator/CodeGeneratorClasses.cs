@@ -2127,6 +2127,20 @@ namespace MaxyGames {
 
 			private List<(int priority, string code)> codeList = new List<(int, string)>();
 
+			/// <summary>
+			/// True when this method has any generated body content.
+			/// A `partial` method without one is a declaration to be implemented in the other half.
+			/// </summary>
+			private bool HasBody() {
+				if(!string.IsNullOrEmpty(code))
+					return true;
+				foreach(var pair in codeList) {
+					if(!string.IsNullOrEmpty(pair.code))
+						return true;
+				}
+				return false;
+			}
+
 			public string GenerateCode() {
 				string result = null;
 				bool isExtension = false;
@@ -2170,7 +2184,8 @@ namespace MaxyGames {
 				}
 				if(modifier != null)
 					result += modifier.GenerateCode();
-				if(isExtern) {
+				if(isExtern && (modifier == null || !modifier.Extern)) {
+					//The modifier already emitted `extern`, don't duplicate it.
 					result += "extern ";
 				}
 				result += DeclareType(type) + " " + name;
@@ -2218,7 +2233,7 @@ namespace MaxyGames {
 						}
 					}
 				}
-				if(isExtern || modifier != null && modifier.Abstract) {
+				if(isExtern || modifier != null && (modifier.Abstract || modifier.Partial && !HasBody())) {
 					result += ");";
 					if(owner != null && includeGraphInformation) {
 						result = WrapWithInformation(result, owner);

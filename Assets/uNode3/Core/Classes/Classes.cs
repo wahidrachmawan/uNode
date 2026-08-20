@@ -1654,36 +1654,39 @@ namespace MaxyGames.UNode {
 		}
 
 		public override string GenerateCode() {
+			//Modifiers are emitted independently, in the order C# conventionally writes them.
+			//They are not mutually exclusive: `public sealed override async` and
+			//`public static extern unsafe` are all valid combinations.
 			string data = base.GenerateCode();
+			if(New) {
+				data += "new ";
+			}
 			if(Static) {
 				data += "static ";
-				if(Extern) {
-					data += " extern ";
-				}
 			}
-			else if(Unsafe) {
-				data += "unsave ";
-			}
-			else if(Virtual) {
-				data += "virtual ";
-			}
-			else if(Abstract) {
+			if(Abstract) {
 				data += "abstract ";
 			}
-			else if(Override) {
+			if(Virtual) {
+				data += "virtual ";
+			}
+			if(Override) {
 				data += "override ";
 			}
-			else if(Async) {
+			if(Sealed) {
+				data += "sealed ";
+			}
+			if(Extern) {
+				data += "extern ";
+			}
+			if(Unsafe) {
+				data += "unsafe ";
+			}
+			if(Async) {
 				data += "async ";
 			}
-			else if(Partial && string.IsNullOrEmpty(data)) {
+			if(Partial) {
 				data += "partial ";
-			}
-			if(Sealed) {
-				data = data.Insert(0, "sealed ");
-			}
-			else if(New) {
-				data = data.Insert(0, "new ");
 			}
 			return data;
 		}

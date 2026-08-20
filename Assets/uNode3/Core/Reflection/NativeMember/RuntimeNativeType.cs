@@ -192,7 +192,61 @@ namespace MaxyGames.UNode {
 				}
 				fields = members;
 			}
+			AppendExternalFields();
 		}
+
+		#region Partial
+		//Once a `partial` graph is generated to C#, the other half members are real members of the
+		//compiled class. uNode builds this type from graph elements alone, so they would otherwise
+		//be missing even though the assembly has them. The real MemberInfo is used, which means they
+		//read and invoke normally rather than being declaration-only.
+		private void AppendExternalFields() {
+			var native = GetNativeType();
+			if(native == null)
+				return;
+			foreach(var info in PartialGraphMembers.Get(target)) {
+				if(info.kind != PartialMemberKind.Field)
+					continue;
+				if(fields.Exists(m => m.Name == info.name))
+					continue;
+				var real = native.GetField(info.name, MemberData.flags);
+				if(real != null)
+					fields.Add(real);
+			}
+		}
+
+		private void AppendExternalProperties() {
+			var native = GetNativeType();
+			if(native == null)
+				return;
+			foreach(var info in PartialGraphMembers.Get(target)) {
+				if(info.kind != PartialMemberKind.Property)
+					continue;
+				if(properties.Exists(m => m.Name == info.name))
+					continue;
+				var real = native.GetProperty(info.name, MemberData.flags);
+				if(real != null)
+					properties.Add(real);
+			}
+		}
+
+		private void AppendExternalMethods() {
+			var native = GetNativeType();
+			if(native == null)
+				return;
+			foreach(var info in PartialGraphMembers.Get(target)) {
+				if(info.kind != PartialMemberKind.Method)
+					continue;
+				var parameterTypes = info.ParameterTypes();
+				var real = native.GetMethod(info.name, MemberData.flags, null, parameterTypes, null);
+				if(real == null)
+					continue;
+				if(methods.Exists(m => m.Name == info.name && m.GetParameters().Length == parameterTypes.Length))
+					continue;
+				methods.Add(real);
+			}
+		}
+		#endregion
 
 		List<PropertyInfo> properties;
 		Dictionary<int, RuntimeNativeProperty> m_runtimeProperties = new Dictionary<int, RuntimeNativeProperty>();
@@ -227,6 +281,7 @@ namespace MaxyGames.UNode {
 				}
 				properties = members;
 			}
+			AppendExternalProperties();
 		}
 
 		List<MethodInfo> methods;
@@ -262,6 +317,7 @@ namespace MaxyGames.UNode {
 				}
 				methods = members;
 			}
+			AppendExternalMethods();
 		}
 		#endregion
 

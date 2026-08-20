@@ -128,6 +128,7 @@ namespace MaxyGames.UNode {
 				}
 				fields = members;
 			}
+			AppendExternalFields();
 		}
 
 		List<PropertyInfo> properties;
@@ -163,6 +164,7 @@ namespace MaxyGames.UNode {
 				}
 				properties = members;
 			}
+			AppendExternalProperties();
 		}
 
 		List<MethodInfo> methods;
@@ -198,6 +200,64 @@ namespace MaxyGames.UNode {
 				}
 				methods = members;
 			}
+			AppendExternalMethods();
+		}
+		#endregion
+
+		#region Partial
+		/// <summary>
+		/// The members declared in the hand-written half of this graph, when it is `partial`.
+		/// Empty for every non-partial graph, and in builds.
+		/// </summary>
+		public IList<PartialMemberInfo> GetExternalMembers() {
+			return PartialGraphMembers.Get(target);
+		}
+
+		private void AppendExternalFields() {
+			foreach(var info in GetExternalMembers()) {
+				if(info.kind != PartialMemberKind.Field)
+					continue;
+				//A member authored in the graph always wins, so we never shadow it.
+				if(fields.Exists(m => m.Name == info.name))
+					continue;
+				fields.Add(new RuntimeGraphExternalField(this, info));
+			}
+		}
+
+		private void AppendExternalProperties() {
+			foreach(var info in GetExternalMembers()) {
+				if(info.kind != PartialMemberKind.Property)
+					continue;
+				if(properties.Exists(m => m.Name == info.name))
+					continue;
+				properties.Add(new RuntimeGraphExternalProperty(this, info));
+			}
+		}
+
+		private void AppendExternalMethods() {
+			foreach(var info in GetExternalMembers()) {
+				if(info.kind != PartialMemberKind.Method)
+					continue;
+				var parameterTypes = info.ParameterTypes();
+				//Methods are matched on the full signature so overloads are kept.
+				if(methods.Exists(m => m.Name == info.name && SameParameters(m, parameterTypes)))
+					continue;
+				methods.Add(new RuntimeGraphExternalMethod(this, info));
+			}
+		}
+
+		private static bool SameParameters(MethodInfo method, Type[] parameterTypes) {
+			var parameters = method.GetParameters();
+			if(parameters.Length != parameterTypes.Length)
+				return false;
+			for(int i = 0; i < parameters.Length; i++) {
+				var type = parameters[i].ParameterType;
+				if(type.IsByRef)
+					type = type.GetElementType();
+				if(type != parameterTypes[i])
+					return false;
+			}
+			return true;
 		}
 		#endregion
 

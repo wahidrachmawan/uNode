@@ -1684,6 +1684,34 @@ namespace MaxyGames.UNode.Editors {
 						FilterAttribute fil = new FilterAttribute(filter);
 						fil.NestedType = false;
 						fil.NonPublic = true;
+						//Both halves of a `partial` graph compile into one class, so the other half
+						//members - private ones included - are reachable from in here. They are not on
+						//the inherited type browsed below, so they are pulled from the graph own type.
+						//Matching on the scanned names covers both shapes that type can take: a
+						//RuntimeGraphType while the graph is interpreted, and the real compiled type
+						//once it has been generated to C#.
+						if(targetValue is GraphAsset partialAsset && targetValue is IReflectionType reflectionType) {
+							var otherHalf = PartialGraphMembers.Get(partialAsset);
+							if(otherHalf.Count > 0) {
+								var names = new HashSet<string>();
+								foreach(var member in otherHalf) {
+									names.Add(member.name);
+								}
+								var otherHalfItems = CreateItemsFromType(
+									reflectionType.ReflectionType,
+									//Private is on because the other half is the same class: its private
+									//members are legally reachable from here, unlike a base type private.
+									new FilterAttribute(fil) { Static = false, NonPublic = true, Private = true },
+									false,
+									(Func<MemberInfo, float>)(m => names.Contains(m.Name) ? 1f : -1f));
+								if(otherHalfItems != null) {
+									otherHalfItems.ForEach(tree => {
+										tree.instance = targetValue;
+										categoryTree.AddChild(tree);
+									});
+								}
+							}
+						}
 						var items = CreateItemsFromType(rootType, new FilterAttribute(fil) { Static = false }, false);
 						if(items != null) {
 							//if(fil != null && !fil.SetMember) {

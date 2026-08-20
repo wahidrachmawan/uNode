@@ -161,6 +161,22 @@ namespace MaxyGames.UNode.Editors.Control {
 									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
 								}
 							});
+							menu.AddSeparator("");
+							menu.AddItem(new GUIContent("Partial"), fieldValue.Partial, () => {
+								uNodeEditorUtility.RegisterUndo(settings.unityObject, "");
+								fieldValue.Partial = !fieldValue.Partial;
+								if(fieldValue.Partial) {
+									//`partial` cannot be combined with any of these.
+									fieldValue.Abstract = false;
+									fieldValue.Virtual = false;
+									fieldValue.Override = false;
+									fieldValue.New = false;
+								}
+								onChanged(fieldValue);
+								if(settings.unityObject is IGraph) {
+									EditorReflectionUtility.UpdateRuntimeType(settings.unityObject as IGraph);
+								}
+							});
 						}
 						else if(settings.unityObject is IClassGraph && !isProperty) {
 							menu.AddSeparator("");
