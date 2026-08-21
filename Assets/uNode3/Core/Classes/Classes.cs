@@ -1654,9 +1654,6 @@ namespace MaxyGames.UNode {
 		}
 
 		public override string GenerateCode() {
-			//Modifiers are emitted independently, in the order C# conventionally writes them.
-			//They are not mutually exclusive: `public sealed override async` and
-			//`public static extern unsafe` are all valid combinations.
 			string data = base.GenerateCode();
 			if(New) {
 				data += "new ";

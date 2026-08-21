@@ -11,7 +11,7 @@ namespace MaxyGames.UNode.Editors.Analyzer {
 	/// </summary>
 	class PartialGraphAnalyzer : GraphAnalyzer {
 		public override bool IsValidAnalyzerForGraph(Type graphType) {
-			return typeof(GraphAsset).IsAssignableFrom(graphType);
+			return graphType.HasImplementInterface(typeof(IScriptGraphType));
 		}
 
 		public override void CheckGraphErrors(ErrorAnalyzer analyzer, IGraph graph) {

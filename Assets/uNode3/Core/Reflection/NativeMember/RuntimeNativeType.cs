@@ -201,6 +201,9 @@ namespace MaxyGames.UNode {
 		//be missing even though the assembly has them. The real MemberInfo is used, which means they
 		//read and invoke normally rather than being declaration-only.
 		private void AppendExternalFields() {
+			if(target is not IScriptGraphType || target is not IClassModifier mod || mod.GetModifier()?.Partial == false) {
+				return;
+			}
 			var native = GetNativeType();
 			if(native == null)
 				return;
@@ -216,6 +219,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private void AppendExternalProperties() {
+			if(target is not IScriptGraphType || target is not IClassModifier mod || mod.GetModifier()?.Partial == false) {
+				return;
+			}
 			var native = GetNativeType();
 			if(native == null)
 				return;
@@ -231,6 +237,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private void AppendExternalMethods() {
+			if(target is not IScriptGraphType || target is not IClassModifier mod || mod.GetModifier()?.Partial == false) {
+				return;
+			}
 			var native = GetNativeType();
 			if(native == null)
 				return;

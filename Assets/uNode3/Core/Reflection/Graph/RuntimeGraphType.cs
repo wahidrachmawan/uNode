@@ -214,6 +214,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private void AppendExternalFields() {
+			if(target is not IScriptGraphType || target is not IClassModifier mod || mod.GetModifier()?.Partial == false) {
+				return;
+			}
 			foreach(var info in GetExternalMembers()) {
 				if(info.kind != PartialMemberKind.Field)
 					continue;
@@ -225,6 +228,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private void AppendExternalProperties() {
+			if(target is not IScriptGraphType || target is not IClassModifier mod || mod.GetModifier()?.Partial == false) {
+				return;
+			}
 			foreach(var info in GetExternalMembers()) {
 				if(info.kind != PartialMemberKind.Property)
 					continue;
@@ -235,6 +241,9 @@ namespace MaxyGames.UNode {
 		}
 
 		private void AppendExternalMethods() {
+			if(target is not IScriptGraphType || target is not IClassModifier mod || mod.GetModifier()?.Partial == false) {
+				return;
+			}
 			foreach(var info in GetExternalMembers()) {
 				if(info.kind != PartialMemberKind.Method)
 					continue;

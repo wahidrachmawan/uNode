@@ -1677,7 +1677,6 @@ namespace MaxyGames.UNode.Editors {
 						return null;
 				}
 				var categoryTree = new SelectorCategoryTreeView(category, "", uNodeEditorUtility.GetUIDFromString("[CATEG]" + category), bonusScore);
-				//var instance = new MemberData(targetValue, MemberData.TargetType.Self);
 				if(targetValue is IGraph) {
 					if(targetValue is IClassGraph) {
 						Type rootType = (targetValue as IClassGraph).InheritType;
@@ -1714,13 +1713,6 @@ namespace MaxyGames.UNode.Editors {
 						}
 						var items = CreateItemsFromType(rootType, new FilterAttribute(fil) { Static = false }, false);
 						if(items != null) {
-							//if(fil != null && !fil.SetMember) {
-							//	if(fil.IsValidType(targetType) && fil.IsValidTarget(MemberData.TargetType.Self | MemberData.TargetType.ValuePort)) {
-							//		categoryTree.AddChild(new SelectorMemberTreeView(instance, "this", uNodeEditorUtility.GetUIDFromString("this" + instance.GetHashCode())));
-							//	}
-							//}
-							//RemoveIncorrectGeneralItem(TargetType);
-							//items.RemoveAll(i => i.memberInfo != null && i.memberInfo.MemberType == MemberTypes.Constructor);
 							items.ForEach(tree => {
 								tree.instance = targetValue;
 								categoryTree.AddChild(tree);

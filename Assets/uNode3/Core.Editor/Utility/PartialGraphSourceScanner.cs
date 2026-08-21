@@ -161,16 +161,16 @@ namespace MaxyGames.UNode.Editors {
 			if(normalized.Length == 0)
 				return false;
 
-			//The manual-compile convention: `Foo.asset` generates `Foo.cs` next to it.
-			var assetPath = AssetDatabase.GetAssetPath(graph);
-			if(!string.IsNullOrEmpty(assetPath)) {
-				var beside = NormalizePath(Path.ChangeExtension(assetPath, ".cs"));
-				if(string.Equals(normalized, beside, StringComparison.OrdinalIgnoreCase))
-					return true;
-			}
-
-			//And uNode records where it last generated this graph, wherever that was.
 			try {
+				//The manual-compile convention: `Foo.asset` generates `Foo.cs` next to it.
+				var assetPath = AssetDatabase.GetAssetPath(graph);
+				if(!string.IsNullOrEmpty(assetPath)) {
+					var beside = NormalizePath(Path.ChangeExtension(assetPath, ".cs"));
+					if(string.Equals(normalized, beside, StringComparison.OrdinalIgnoreCase))
+						return true;
+				}
+
+				//And uNode records where it last generated this graph, wherever that was.
 				var data = GenerationUtility.GetGraphData(graph);
 				if(data != null && !string.IsNullOrEmpty(data.path)) {
 					if(string.Equals(normalized, NormalizePath(data.path), StringComparison.OrdinalIgnoreCase))
