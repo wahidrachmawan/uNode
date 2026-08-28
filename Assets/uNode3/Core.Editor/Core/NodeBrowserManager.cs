@@ -57,9 +57,6 @@ namespace MaxyGames.UNode.Editors {
 			/// <summary>The targeted type. Used for Type kind.</summary>
 			public SerializedType targetType;
 
-			/// <summary>The node menu name. Used for Node kind.</summary>
-			public string nodeMenuName;
-
 			/// <summary>
 			/// Member/type names list. Meaning flips with memberMode:
 			/// hidden members/types in IncludeAll, visible ones in ExcludeAll.
@@ -73,11 +70,30 @@ namespace MaxyGames.UNode.Editors {
 			/// True for rows generated at runtime (namespace types / type members /
 			/// deep search results). Never serialized.
 			/// </summary>
+			[NonSerialized]
 			public bool isVirtual;
 
 			/// <summary>Embedded children. Only meaningful for Folder/Namespace entries.</summary>
 			[SerializeReference]
 			public List<BrowserEntry> children = new List<BrowserEntry>();
+
+			[NonSerialized]
+			private (Type, NodeMenu) m_nodeMenu;
+			public NodeMenu nodeMenu {
+				get {
+					if(kind == NodeBrowserEntryKind.Node) {
+						Type type = targetType;
+						if(m_nodeMenu.Item1 == type) {
+							return m_nodeMenu.Item2;
+						}
+						if(type != null && type.IsDefined(typeof(NodeMenu), true)) {
+							m_nodeMenu = (type, type.GetCustomAttribute<NodeMenu>(true));
+							return m_nodeMenu.Item2;
+						}
+					}
+					return null;
+				}
+			}
 
 			/// <summary>
 			/// Runtime-only reflected member for virtual Member entries.
@@ -93,6 +109,27 @@ namespace MaxyGames.UNode.Editors {
 			/// <summary>Runtime back-reference for virtual rows: the favorited owner.</summary>
 			[System.NonSerialized]
 			public BrowserEntry ownerEntry;
+
+			[NonSerialized]
+			private List<BrowserEntry> m_cachedChilds;
+
+			public List<BrowserEntry> GetConstructedChildrens() {
+				if(kind == NodeBrowserEntryKind.Namespace) {
+					if(m_cachedChilds == null) {
+						return m_cachedChilds = NodeBrowserManager.GetVirtualNamespaceChildren(this);
+					}
+					return m_cachedChilds;
+				}
+				else if(kind == NodeBrowserEntryKind.Folder) {
+					return children;
+				}
+				else {
+					if(m_cachedChilds == null) {
+						return m_cachedChilds = NodeBrowserManager.GenerateMembersForTypeEntry(this);
+					}
+					return m_cachedChilds;
+				}
+			}
 
 			/// <summary>
 			/// The resolved System.Type of this entry (declaring type for members).
@@ -271,15 +308,6 @@ namespace MaxyGames.UNode.Editors {
 					foreach(var e in Flatten(child))
 						yield return e;
 				}
-			}
-		}
-
-		/// <summary>Depth-first iteration over all persisted entries of all categories.</summary>
-		public static IEnumerable<NodeBrowserDataAsset.BrowserEntry> FlattenAll() {
-			EnsureInitialized();
-			foreach(var cat in asset.categories) {
-				foreach(var e in Flatten(cat))
-					yield return e;
 			}
 		}
 
@@ -498,14 +526,11 @@ namespace MaxyGames.UNode.Editors {
 
 		#region Reflection Cache
 		static readonly object s_CacheLock = new object();
-		// Namespace string  reflected types (unfiltered).
 		static readonly Dictionary<string, Type[]> s_NsTypesCache = new Dictionary<string, Type[]>();
-		// Type  reflected members (unfiltered).
 		static readonly Dictionary<Type, MemberInfo[]> s_MembersCache = new Dictionary<Type, MemberInfo[]>();
 
 		/// <summary>
-		/// Reflected types of a namespace (unfiltered, cached). Safe cross-thread;
-		/// returned arrays are immutable snapshots.
+		/// Reflected types of a namespace. 
 		/// </summary>
 		public static Type[] GetNamespaceTypesRaw(string @namespace) {
 			if(string.IsNullOrEmpty(@namespace))
@@ -515,7 +540,7 @@ namespace MaxyGames.UNode.Editors {
 					return cached;
 			}
 			var list = new List<Type>();
-			foreach(var asm in AppDomain.CurrentDomain.GetAssemblies()) {
+			foreach(var asm in EditorReflectionUtility.GetAssemblies()) {
 				Type[] types;
 				try { types = asm.GetTypes(); }
 				catch { continue; }
@@ -613,6 +638,34 @@ namespace MaxyGames.UNode.Editors {
 			return entry.rawMember;
 		}
 
+		/// <summary>Generates visible member entries for any type entry
+		/// Returns an empty list on failure.</summary>
+		public static List<NodeBrowserDataAsset.BrowserEntry> GenerateMembersForTypeEntry(
+			NodeBrowserDataAsset.BrowserEntry entry) {
+			var result = new List<NodeBrowserDataAsset.BrowserEntry>();
+			Type t = null;
+			try { t = entry.targetType?.type; } catch { }
+			if(t == null || t.IsEnum)
+				return result;
+			string declName = t.FullName ?? t.Name;
+			foreach(var m in NodeBrowserManager.GetMembersRaw(t)) {
+				if(m is EventInfo) continue;
+				if(m is ConstructorInfo ctor && ctor.GetParameters().Length > 6) continue;
+				if(NodeBrowserManager.IsAccessorMethod(m)) continue;
+				result.Add(new NodeBrowserDataAsset.BrowserEntry {
+					id = "[member]:" + declName + "::" + m.Name + "::" + m.MetadataToken,
+					kind = NodeBrowserEntryKind.Member,
+					rawMember = m,
+					isVirtual = true,
+					displayName = m.Name,
+					ownerEntry = entry,
+					parentEntry = entry,
+				});
+			}
+			result.Sort((a, b) => string.Compare(a.displayName, b.displayName, StringComparison.OrdinalIgnoreCase));
+			return result;
+		}
+
 		/// <summary>
 		/// Read-only: generate virtual type entries for the given namespace favorite.
 		/// When ignoreVisibility is false the namespace's memberMode + excludedMembers
@@ -637,39 +690,6 @@ namespace MaxyGames.UNode.Editors {
 				});
 			}
 			result.Sort((a, b) => string.Compare(a.targetType.type.FullName, b.targetType.type.FullName, StringComparison.OrdinalIgnoreCase));
-			return result;
-		}
-
-		/// <summary>
-		/// Read-only: generate virtual member entries for the given type favorite.
-		/// Visibility is driven by memberMode + excludedMembers. Never persisted.
-		/// </summary>
-		public static List<NodeBrowserDataAsset.BrowserEntry> GetVirtualTypeMembers(NodeBrowserDataAsset.BrowserEntry typeEntry) {
-			var result = new List<NodeBrowserDataAsset.BrowserEntry>();
-			if(typeEntry == null || typeEntry.kind != NodeBrowserEntryKind.Type || typeEntry.isVirtual)
-				return result;
-			Type type = null;
-			try { type = typeEntry.resolvedType; } catch { }
-			if(type == null || type.IsEnum)
-				return result;
-			string declName = type.FullName ?? type.Name;
-			foreach(var m in GetMembersRaw(type)) {
-				if(m is EventInfo) continue;
-				if(m is ConstructorInfo ctor && ctor.GetParameters().Length > 6) continue;
-				if(IsAccessorMethod(m)) continue;
-				if(!IsMemberVisibleIn(typeEntry, m))
-					continue;
-				result.Add(new NodeBrowserDataAsset.BrowserEntry {
-					id = "[member]:" + declName + "::" + m.Name + "::" + m.MetadataToken,
-					kind = NodeBrowserEntryKind.Member,
-					rawMember = m,
-					isVirtual = true,
-					displayName = m.Name,
-					ownerEntry = typeEntry,
-					parentEntry = typeEntry,
-				});
-			}
-			result.Sort((a, b) => string.Compare(a.memberName, b.memberName, StringComparison.OrdinalIgnoreCase));
 			return result;
 		}
 		#endregion
