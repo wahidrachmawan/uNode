@@ -222,7 +222,7 @@ namespace MaxyGames.UNode.Editors {
 					return;
 				}
 				if(graphAsset is IReflectionType) {
-					DragHandleType(ReflectionUtils.GetRuntimeType(graphAsset), position, menuPosition);
+					DragHandleMember(ReflectionUtils.GetRuntimeType(graphAsset), position, menuPosition);
 					return;
 				}
 			}
@@ -386,7 +386,12 @@ namespace MaxyGames.UNode.Editors {
 			DragAndDrop.SetGenericData("uNode", null);
 		}
 
-		private void DragHandleType(Type type, Vector2 position, Vector2 menuPosition) {
+		private void DragHandleMember(Type type, Vector2 position, Vector2 menuPositionn) {
+			if(type is not RuntimeType && type.IsNotPublic) {
+				if(!EditorUtility.DisplayDialog("Type is Private", "The type you're drop is private, it may give error on compile to script.\n\nDo you want to continue?", "Continue", "Cancel")) {
+					return;
+				}
+			}
 			FilterAttribute filter = new FilterAttribute();
 			filter.MaxMethodParam = int.MaxValue;
 			filter.VoidType = true;
@@ -403,23 +408,9 @@ namespace MaxyGames.UNode.Editors {
 						n.Register();
 					});
 					graphEditor.Refresh();
-				}, customItems).ChangePosition(menuPosition);
+				}, customItems).ChangePosition(menuPositionn);
 				w.displayDefaultItem = false;
 			}
-			DragAndDrop.SetGenericData("uNode", null);
-		}
-
-		private void DragHandleMember(Type member, Vector2 position) {
-			if(member.IsNotPublic) {
-				if(!EditorUtility.DisplayDialog("Type is Private", "The type you're drop is private, it may give error on compile to script.\n\nDo you want to continue?", "Continue", "Cancel")) {
-					return;
-				}
-			}
-			NodeEditorUtility.AddNewNode(graphData, member.Name, null, position, delegate (MultipurposeNode n) {
-				n.target = new MemberData(member);
-				n.Register();
-				graphEditor.Refresh();
-			});
 			DragAndDrop.SetGenericData("uNode", null);
 		}
 
@@ -666,7 +657,7 @@ namespace MaxyGames.UNode.Editors {
 						#region MemberInfo
 						if(generic is MemberInfo) {
 							if(generic is Type) {
-								DragHandleMember(generic as Type, mPos);
+								DragHandleMember(generic as Type, mPos, topMPos);
 							}
 							else if(generic is FieldInfo) {
 								DragHandleMember(generic as FieldInfo, mPos);

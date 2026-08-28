@@ -20,10 +20,10 @@ namespace MaxyGames.UNode.Editors.UI {
 /// - otherwise  resolve the slot via the callback and persist the move
 ///   through NodeBrowserManager, then let the window rebuild the tree.
 /// </summary>
-internal class FavoritesReorderController : TreeViewCustomDragAndDropController {
+internal class NodeBrowserReorderController : TreeViewCustomDragAndDropController {
 	readonly Action<NodeBrowserDataAsset.BrowserEntry, int, bool> onDrop;
 
-	public FavoritesReorderController(BaseTreeView view, Action<NodeBrowserDataAsset.BrowserEntry, int, bool> onDrop) : base(view, null) {
+	public NodeBrowserReorderController(BaseTreeView view, Action<NodeBrowserDataAsset.BrowserEntry, int, bool> onDrop) : base(view, null) {
 		this.onDrop = onDrop;
 	}
 

@@ -133,11 +133,11 @@ namespace MaxyGames.UNode.Editors {
 
 			/// <summary>
 			/// The resolved System.Type of this entry (declaring type for members).
-			/// Returns null for Folder/Namespace and virtual entries.
+			/// Returns null for Folder/Namespace.
 			/// </summary>
 			public Type resolvedType {
 				get {
-					if(isVirtual) return null;
+					//if(isVirtual) return null;
 					if(targetType != null && targetType.isAssigned)
 						return targetType.type;
 					if(rawMember != null)
