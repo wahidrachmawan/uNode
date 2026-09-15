@@ -1020,6 +1020,9 @@ namespace MaxyGames.UNode.Editors {
 			if(Selection.activeObject is GraphAsset) {
 				Selection.activeObject = null;
 			}
+#if UNODE_TRIM_ON_BUILD && UNODE_PRO
+			RestoreTrimmedGraphs();
+#endif
 			GenerationUtility.SaveData();
 		}
 
@@ -1038,7 +1041,38 @@ namespace MaxyGames.UNode.Editors {
 		//}
 
 		private static void OnUnityQuitting() {
+#if UNODE_TRIM_ON_BUILD && UNODE_PRO
+			RestoreTrimmedGraphs();
+#endif
 			GenerationUtility.SaveData();
+		}
+
+		/// <summary>
+		/// Restore any graph that was trimmed for a build back to its full state.
+		/// Must run synchronously because OnPostprocessBuild previously deferred this
+		/// via <see cref="uNodeThreadUtility.Queue"/>, which can be dropped when Unity quits
+		/// or reloads before the next editor update, leaving empty trimmed graphs on disk.
+		/// </summary>
+		private static void RestoreTrimmedGraphs() {
+#if UNODE_TRIM_ON_BUILD && UNODE_PRO
+			if(uNodeUtility.trimmedObjects == null || uNodeUtility.trimmedObjects.Count == 0)
+				return;
+			try {
+				foreach(var asset in uNodeUtility.trimmedObjects) {
+					if(asset == null)
+						continue;
+					if(asset is GraphAsset graphAsset) {
+						graphAsset.serializedGraph.SerializeGraph();
+					}
+					EditorUtility.SetDirty(asset);
+				}
+			}
+			catch(Exception ex) {
+				Debug.LogException(ex);
+			}
+			GraphEditorUtility.SaveAllGraph();
+			uNodeUtility.trimmedObjects.Clear();
+#endif
 		}
 
 		static int refreshTime;
@@ -1449,21 +1483,23 @@ namespace MaxyGames.UNode.Editors {
 			//}
 			hasRunPreBuild = false;
 #if UNODE_TRIM_ON_BUILD && UNODE_PRO
-			uNodeThreadUtility.Queue(() => {
-				//Debug.Log(uNodeUtility.trimmedObjects.Count);
-				foreach(var asset in uNodeUtility.trimmedObjects) {
-					//Debug.Log("Presist object:" + UnityEditor.AssetDatabase.GetAssetPath(asset));
-					if(asset is GraphAsset) {
-						var graph = asset as GraphAsset;
-						graph.serializedGraph.SerializeGraph();
-					}
-					EditorUtility.SetDirty(asset);
-				}
-				GraphEditorUtility.SaveAllGraph();
+			Action restore = () => {
+				RestoreTrimmedGraphs();
 #if UNODE_TRIM_AGGRESSIVE
 				GraphEditorUtility.UpdateDatabase();
 #endif
-			});
+			};
+			// isBuildingPlayer is still true during OnPostprocessBuild callbacks, and
+			// saving while it is true would re-trim the graphs in OnBeforeSerialize.
+			// Restore synchronously only after the build fully returned; otherwise
+			// defer to the next editor update (original behavior), which runs after
+			// the build flag has cleared.
+			if(BuildPipeline.isBuildingPlayer) {
+				uNodeThreadUtility.Queue(restore);
+			}
+			else {
+				restore();
+			}
 #endif
 			if(uNodePreference.preferenceData.generatorData.autoGenerateOnBuild && 
 				uNodePreference.preferenceData.generatorData.compilationMethod == CompilationMethod.Roslyn &&
