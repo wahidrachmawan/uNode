@@ -935,12 +935,12 @@ namespace MaxyGames.UNode.Editors {
 
 			TreeSearcher GetSearcher(string searchString, SearchKind searchKind, SearchFilter searchFilter) {
 				TreeSearcher searcher = null;
-				for(int i = 0; i < searchString.Length; i++) {
-					if(char.IsUpper(searchString[i])) {
-						searcher = new CapitalTreeSearcher(searchString);
-						break;
-					}
-				}
+				//for(int i = 0; i < searchString.Length; i++) {
+				//	if(char.IsUpper(searchString[i])) {
+				//		searcher = new CapitalTreeSearcher(searchString);
+				//		break;
+				//	}
+				//}
 				return searcher ?? new DefaultTreeSearcher();
 			}
 

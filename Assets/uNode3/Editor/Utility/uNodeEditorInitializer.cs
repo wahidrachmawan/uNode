@@ -1065,6 +1065,7 @@ namespace MaxyGames.UNode.Editors {
 						graphAsset.serializedGraph.SerializeGraph();
 					}
 					EditorUtility.SetDirty(asset);
+					AssetDatabase.SaveAssetIfDirty(asset);
 				}
 			}
 			catch(Exception ex) {
@@ -1072,6 +1073,7 @@ namespace MaxyGames.UNode.Editors {
 			}
 			GraphEditorUtility.SaveAllGraph();
 			uNodeUtility.trimmedObjects.Clear();
+			Debug.Log($"Complete restoring [{uNodeUtility.trimmedObjects.Count}] Trimmed Graphs.");
 #endif
 		}
 
@@ -1437,6 +1439,9 @@ namespace MaxyGames.UNode.Editors {
 			if(hasRunPreBuild)
 				return;
 #if UNODE_TRIM_ON_BUILD
+			if(uNodeUtility.trimmedObjects?.Count > 0) {
+				RestoreTrimmedGraphs();
+			}
 			uNodeUtility.trimmedObjects = new HashSet<Object>();
 #endif
 			hasRunPreBuild = true;
@@ -1475,12 +1480,6 @@ namespace MaxyGames.UNode.Editors {
 		}
 
 		public static void OnPostprocessBuild() {
-			//if(isEditorOpen) {
-			//	uNodeThreadUtility.ExecuteAfter(5, () => {
-			//		uNodeEditor.ShowWindow();
-			//	});
-			//	isEditorOpen = false;
-			//}
 			hasRunPreBuild = false;
 #if UNODE_TRIM_ON_BUILD && UNODE_PRO
 			Action restore = () => {

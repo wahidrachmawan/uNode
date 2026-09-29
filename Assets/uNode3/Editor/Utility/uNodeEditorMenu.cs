@@ -21,8 +21,10 @@ namespace MaxyGames.UNode.Editors {
 			public int callbackOrder => int.MinValue;
 
 			public void OnPreprocessBuild(BuildReport report) {
+				uNodeEditorInitializer.OnPreprocessBuild();
+
 				{//Create linker
-					//#if ENABLE_IL2CPP || UNITY_WEBGL || ENABLE_WINMD_SUPPORT || UNITY_WSA || UNITY_IOS || UNITY_TVOS || UNITY_ANDROID
+				 //#if ENABLE_IL2CPP || UNITY_WEBGL || ENABLE_WINMD_SUPPORT || UNITY_WSA || UNITY_IOS || UNITY_TVOS || UNITY_ANDROID
 					const string link = @"<linker>
        <assembly fullname=""MaxyGames.OdinSerializer"" preserve=""all""/>
 </linker>";
@@ -34,8 +36,6 @@ namespace MaxyGames.UNode.Editors {
 					AssetDatabase.Refresh();
 					//#endif
 				}
-
-				uNodeEditorInitializer.OnPreprocessBuild();
 			}
 
 			public void OnPostprocessBuild(BuildReport report) {
